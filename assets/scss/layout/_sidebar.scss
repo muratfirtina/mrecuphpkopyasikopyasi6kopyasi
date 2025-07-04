@@ -1,0 +1,28 @@
+// Mr ECU - Sidebar Layout
+
+.sidebar {
+  width: $sidebar-width;
+  background-color: $gray-100;
+  border-right: 1px solid $border-color;
+  
+  @media (max-width: 768px) {
+    position: fixed;
+    left: -$sidebar-width;
+    top: $header-height;
+    height: calc(100vh - #{$header-height});
+    z-index: $zindex-fixed;
+    transition: left 0.3s ease;
+    
+    &.show {
+      left: 0;
+    }
+  }
+}
+
+.sidebar-toggle {
+  display: none;
+  
+  @media (max-width: 768px) {
+    display: inline-block;
+  }
+}

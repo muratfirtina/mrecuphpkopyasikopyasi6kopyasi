@@ -1,0 +1,67 @@
+// Mr ECU - Print Styles
+
+@media print {
+  // Hide elements that shouldn't be printed
+  .navbar,
+  .sidebar,
+  .btn,
+  .no-print,
+  .modal,
+  .dropdown-menu,
+  .pagination {
+    display: none !important;
+  }
+  
+  // Reset container padding
+  .container,
+  .container-fluid {
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+  }
+  
+  // Card styles for print
+  .card {
+    border: 1px solid #ddd !important;
+    break-inside: avoid;
+    box-shadow: none !important;
+    margin-bottom: 1rem;
+  }
+  
+  // Table styles for print
+  .table {
+    font-size: 0.875rem;
+    
+    th, td {
+      padding: 0.5rem !important;
+      border: 1px solid #ddd !important;
+    }
+  }
+  
+  // Typography adjustments
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    color: #000 !important;
+  }
+  
+  // Page breaks
+  .page-break {
+    page-break-before: always;
+  }
+  
+  .no-page-break {
+    page-break-inside: avoid;
+  }
+  
+  // Link handling
+  a {
+    text-decoration: underline !important;
+    color: #000 !important;
+  }
+  
+  // Background colors
+  * {
+    background: white !important;
+    color: black !important;
+  }
+}

@@ -1,0 +1,159 @@
+// Mr ECU - SCSS Variables
+// Tüm custom değişkenler burada tanımlanır
+
+// Colors
+$primary: #007bff;
+$secondary: #6c757d;
+$success: #28a745;
+$info: #17a2b8;
+$warning: #ffc107;
+$danger: #dc3545;
+$light: #f8f9fa;
+$dark: #343a40;
+
+// Brand Colors
+$brand-primary: #007bff;
+$brand-secondary: #0056b3;
+$brand-accent: #17a2b8;
+
+// Gray Colors
+$gray-100: #f8f9fa;
+$gray-200: #e9ecef;
+$gray-300: #dee2e6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #6c757d;
+$gray-700: #495057;
+$gray-800: #343a40;
+$gray-900: #212529;
+
+// Typography
+$font-family-sans-serif: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+$font-family-monospace: 'Courier New', Courier, monospace;
+
+$font-size-base: 1rem;
+$font-size-sm: 0.875rem;
+$font-size-lg: 1.125rem;
+
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+$line-height-base: 1.6;
+$line-height-sm: 1.4;
+$line-height-lg: 1.8;
+
+// Spacing
+$spacer: 1rem;
+$spacers: (
+  0: 0,
+  1: $spacer * 0.25,
+  2: $spacer * 0.5,
+  3: $spacer,
+  4: $spacer * 1.5,
+  5: $spacer * 3,
+  6: $spacer * 4,
+  7: $spacer * 5
+);
+
+// Border
+$border-width: 1px;
+$border-color: $gray-300;
+$border-radius: 0.375rem;
+$border-radius-sm: 0.25rem;
+$border-radius-lg: 0.5rem;
+
+// Shadows
+$box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+$box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+$box-shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+
+// Transitions
+$transition-base: all 0.15s ease-in-out;
+$transition-fade: opacity 0.15s linear;
+$transition-collapse: height 0.35s ease;
+
+// Z-index
+$zindex-dropdown: 1000;
+$zindex-sticky: 1020;
+$zindex-fixed: 1030;
+$zindex-modal-backdrop: 1040;
+$zindex-modal: 1050;
+$zindex-popover: 1060;
+$zindex-tooltip: 1070;
+
+// Breakpoints
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px
+);
+
+// Container sizes
+$container-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1140px,
+  xxl: 1320px
+);
+
+// Custom Variables
+$sidebar-width: 250px;
+$sidebar-width-collapsed: 80px;
+$header-height: 60px;
+$footer-height: 50px;
+
+// Status Colors
+$status-pending: $warning;
+$status-processing: $info;
+$status-completed: $success;
+$status-rejected: $danger;
+
+// File Upload
+$upload-border-color: #ced4da;
+$upload-border-color-hover: $primary;
+$upload-bg-color: $gray-100;
+$upload-bg-color-hover: rgba($primary, 0.05);
+
+// Dashboard
+$dashboard-card-bg: white;
+$dashboard-card-border: $border-color;
+$dashboard-card-shadow: $box-shadow-sm;
+
+// Dark Mode Variables
+$dark-bg: #121212;
+$dark-surface: #1e1e1e;
+$dark-primary: #bb86fc;
+$dark-secondary: #03dac6;
+$dark-text: #ffffff;
+$dark-text-secondary: rgba(255, 255, 255, 0.7);
+
+// Animation Durations
+$animation-duration-fast: 0.15s;
+$animation-duration-normal: 0.3s;
+$animation-duration-slow: 0.5s;
+
+// Custom Properties for CSS Variables
+:root {
+  --primary-color: #{$primary};
+  --secondary-color: #{$secondary};
+  --success-color: #{$success};
+  --danger-color: #{$danger};
+  --warning-color: #{$warning};
+  --info-color: #{$info};
+  --light-color: #{$light};
+  --dark-color: #{$dark};
+  
+  --border-radius: #{$border-radius};
+  --box-shadow: #{$box-shadow};
+  --transition: #{$transition-base};
+  
+  --sidebar-width: #{$sidebar-width};
+  --header-height: #{$header-height};
+}

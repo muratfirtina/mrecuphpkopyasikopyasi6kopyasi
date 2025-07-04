@@ -1,0 +1,21 @@
+// Mr ECU - Table Components
+
+.table {
+  margin-bottom: 0;
+  
+  th {
+    border-top: none;
+    font-weight: $font-weight-semibold;
+    color: $gray-700;
+    background-color: $gray-100;
+  }
+  
+  &.table-hover tbody tr:hover {
+    background-color: rgba($primary, 0.05);
+  }
+}
+
+.table-responsive {
+  border-radius: $border-radius;
+  box-shadow: $box-shadow-sm;
+}

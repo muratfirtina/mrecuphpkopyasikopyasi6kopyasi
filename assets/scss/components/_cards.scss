@@ -1,0 +1,225 @@
+// Mr ECU - Card Components
+
+.card {
+  transition: $transition-base;
+  border: none;
+  box-shadow: $box-shadow-sm;
+  border-radius: $border-radius;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $box-shadow;
+  }
+  
+  .card-header {
+    background-color: transparent;
+    border-bottom: 1px solid $border-color;
+    padding: 1rem 1.5rem;
+    
+    h1, h2, h3, h4, h5, h6 {
+      margin-bottom: 0;
+    }
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  .card-footer {
+    background-color: transparent;
+    border-top: 1px solid $border-color;
+    padding: 1rem 1.5rem;
+  }
+}
+
+// Dashboard cards
+.dashboard-card {
+  background: $dashboard-card-bg;
+  border-radius: $border-radius;
+  padding: 1.5rem;
+  box-shadow: $dashboard-card-shadow;
+  border-left: 4px solid transparent;
+  transition: $transition-base;
+  
+  &.primary {
+    border-left-color: $primary;
+  }
+  
+  &.success {
+    border-left-color: $success;
+  }
+  
+  &.warning {
+    border-left-color: $warning;
+  }
+  
+  &.danger {
+    border-left-color: $danger;
+  }
+  
+  &.info {
+    border-left-color: $info;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $box-shadow;
+  }
+}
+
+// Stat cards
+.stat-card {
+  text-align: center;
+  padding: 2rem 1rem;
+  
+  .stat-number {
+    font-size: 3rem;
+    font-weight: $font-weight-bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-label {
+    color: $gray-600;
+    font-size: $font-size-sm;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+// File cards
+.file-card {
+  .file-icon {
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $border-radius;
+    margin-bottom: 1rem;
+    
+    &.file-bin,
+    &.file-hex {
+      background-color: rgba($primary, 0.1);
+      color: $primary;
+    }
+    
+    &.file-ecu {
+      background-color: rgba($success, 0.1);
+      color: $success;
+    }
+    
+    &.file-zip,
+    &.file-rar {
+      background-color: rgba($warning, 0.1);
+      color: $warning;
+    }
+  }
+  
+  .file-info {
+    .file-name {
+      font-weight: $font-weight-medium;
+      margin-bottom: 0.25rem;
+    }
+    
+    .file-meta {
+      font-size: $font-size-sm;
+      color: $gray-600;
+    }
+  }
+}
+
+// Credit card
+.credit-card {
+  background: linear-gradient(135deg, $success 0%, darken($success, 10%) 100%);
+  color: white;
+  border: none;
+  
+  .credit-amount {
+    font-size: 2.5rem;
+    font-weight: $font-weight-bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .credit-label {
+    opacity: 0.9;
+    font-size: $font-size-sm;
+  }
+}
+
+// Timeline card
+.timeline-card {
+  position: relative;
+  margin-left: 2rem;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 1rem;
+    width: 1rem;
+    height: 1rem;
+    background-color: $primary;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: $box-shadow;
+  }
+  
+  &.completed::before {
+    background-color: $success;
+  }
+  
+  &.pending::before {
+    background-color: $warning;
+  }
+  
+  &.rejected::before {
+    background-color: $danger;
+  }
+}
+
+// Card animations
+.card-fade-in {
+  animation: cardFadeIn 0.5s ease-in;
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Card loading state
+.card-loading {
+  position: relative;
+  overflow: hidden;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}

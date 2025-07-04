@@ -1,0 +1,18 @@
+// Mr ECU - Footer Layout
+
+.footer {
+  background-color: $dark;
+  color: white;
+  padding: 2rem 0;
+  margin-top: auto;
+  
+  a {
+    color: white;
+    text-decoration: none;
+    transition: $transition-base;
+    
+    &:hover {
+      color: $primary;
+    }
+  }
+}

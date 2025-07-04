@@ -1,0 +1,14 @@
+// Mr ECU - Dashboard Page Styles
+
+.dashboard {
+  .hero-section {
+    background: linear-gradient(135deg, $primary 0%, darken($primary, 20%) 100%);
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .stats-row {
+    margin-bottom: 2rem;
+  }
+}

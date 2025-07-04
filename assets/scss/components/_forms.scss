@@ -1,0 +1,54 @@
+// Mr ECU - Form Components
+// Form styling and enhancements
+
+.form-control,
+.form-select {
+  border-radius: $border-radius;
+  border: 1px solid $border-color;
+  transition: $transition-base;
+  
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
+  }
+}
+
+.form-label {
+  font-weight: $font-weight-medium;
+  margin-bottom: 0.5rem;
+}
+
+// File upload styling
+.file-upload-area {
+  border: 2px dashed $upload-border-color;
+  border-radius: $border-radius;
+  padding: 3rem;
+  text-align: center;
+  background-color: $upload-bg-color;
+  transition: $transition-base;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: $upload-border-color-hover;
+    background-color: $upload-bg-color-hover;
+  }
+  
+  &.dragover {
+    border-color: $primary;
+    background-color: rgba($primary, 0.1);
+  }
+}
+
+// Input groups
+.input-group-text {
+  border-color: $border-color;
+  background-color: $gray-100;
+}
+
+// Custom switches
+.form-switch .form-check-input {
+  &:checked {
+    background-color: $primary;
+    border-color: $primary;
+  }
+}

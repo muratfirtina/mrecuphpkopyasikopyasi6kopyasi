@@ -1,0 +1,4 @@
+﻿new_id,user_id,amount,type,description,created_at
+0551c5b0-5475-4570-88c6-a87e4e143876,user1-legacy-id,100,deposit,"İlk yükleme","2024-01-15 10:35:00"
+f0ea301a-0f9f-4497-a505-1a18dc20d5c4,user1-legacy-id,25,withdraw,"Dosya işleme ücreti","2024-01-16 11:30:00"
+a31226ab-7cc4-4de7-b273-ff1141ae8915,user2-legacy-id,250,deposit,"Kredi yüklemesi","2024-02-10 14:25:00"

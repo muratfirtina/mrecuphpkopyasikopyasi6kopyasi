@@ -1,0 +1,100 @@
+// Mr ECU - Helper Utilities
+
+// Text utilities
+.text-truncate-2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.text-truncate-3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+// Border utilities
+.border-left-primary {
+  border-left: 4px solid $primary !important;
+}
+
+.border-left-success {
+  border-left: 4px solid $success !important;
+}
+
+.border-left-warning {
+  border-left: 4px solid $warning !important;
+}
+
+.border-left-danger {
+  border-left: 4px solid $danger !important;
+}
+
+// Shadow utilities
+.shadow-hover {
+  transition: box-shadow $animation-duration-normal ease;
+  
+  &:hover {
+    box-shadow: $box-shadow-lg;
+  }
+}
+
+// Status utilities
+.status-pending {
+  background-color: $status-pending;
+  color: $dark;
+}
+
+.status-processing {
+  background-color: $status-processing;
+}
+
+.status-completed {
+  background-color: $status-completed;
+}
+
+.status-rejected {
+  background-color: $status-rejected;
+}
+
+// Loading utilities
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  
+  &.show {
+    display: flex;
+  }
+}
+
+// Responsive utilities
+.mobile-only {
+  @media (min-width: 768px) {
+    display: none !important;
+  }
+}
+
+.desktop-only {
+  @media (max-width: 767px) {
+    display: none !important;
+  }
+}
+
+// Spacing helpers
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 1rem; }
+.gap-4 { gap: 1.5rem; }
+.gap-5 { gap: 3rem; }

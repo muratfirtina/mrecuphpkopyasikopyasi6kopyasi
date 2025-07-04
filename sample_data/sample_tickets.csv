@@ -1,0 +1,3 @@
+﻿new_id,legacy_ticket_id,title,user_id,file_id,status,status_text,ticket_code,created_date,updated_date
+b2568cc9-a9e2-400f-82da-de4255ad400b,ticket1-legacy-id,"Dosya problemi",user1-legacy-id,file1-legacy-id,2,Resolved,TK-2024-001,"2024-01-17 10:00:00","2024-01-17 16:30:00"
+847ee26d-2cd4-47e4-8596-c185c2873dcd,ticket2-legacy-id,"Revizyon talebi",user2-legacy-id,file2-legacy-id,1,"In Progress",TK-2024-002,"2024-02-12 14:00:00","2024-02-12 14:00:00"

@@ -1,0 +1,353 @@
+<?php
+/**
+ * Mr ECU - Global Configuration
+ * Genel sistem ayarları ve güvenlik entegrasyonu
+ */
+
+// Site ayarları
+define('SITE_NAME', 'Mr ECU');
+define('SITE_URL', 'http://localhost:8888/mrecuphp/');
+define('SITE_EMAIL', 'info@mrecu.com');
+
+// Dosya yükleme ayarları
+define('UPLOAD_DIR', __DIR__ . '/../uploads/');
+define('MAX_FILE_SIZE', 50 * 1024 * 1024); // 50MB
+define('ALLOWED_EXTENSIONS', ['bin', 'hex', 'ecu', 'ori', 'mod', 'zip', 'rar']);
+
+// Email ayarları (SMTP)
+define('SMTP_HOST', 'smtp.gmail.com');
+define('SMTP_PORT', 587);
+define('SMTP_USERNAME', 'your-email@gmail.com');
+define('SMTP_PASSWORD', 'your-app-password');
+define('SMTP_ENCRYPTION', 'tls');
+
+// Güvenlik ayarları
+define('SECURE_SALT', 'mr_ecu_2025_secure_salt_key_' . hash('sha256', __DIR__));
+define('SESSION_TIMEOUT', 3600); // 1 saat
+define('SECURITY_ENABLED', true); // Güvenlik sistemini aktif et
+define('CSP_STRICT_MODE', false); // Geliştirme için false, production'da true
+
+// Rate limiting ayarları
+define('MAX_LOGIN_ATTEMPTS', 5);
+define('LOGIN_BLOCK_DURATION', 900); // 15 dakika
+define('MAX_REQUESTS_PER_MINUTE', 60);
+define('MAX_FILE_UPLOADS_PER_HOUR', 10);
+
+// Kredi sistemi ayarları
+define('DEFAULT_CREDITS', 0);
+define('FILE_DOWNLOAD_COST', 1); // Dosya indirme maliyeti
+
+// Hata raporlama
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Session güvenlik ayarları (session başlamadan önce)
+if (session_status() == PHP_SESSION_NONE) {
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) ? 1 : 0);
+    ini_set('session.use_strict_mode', 1);
+    ini_set('session.cookie_samesite', 'Strict');
+    ini_set('session.gc_maxlifetime', SESSION_TIMEOUT);
+    
+    // Session başlat
+    session_start();
+}
+
+// Timezone ayarla
+date_default_timezone_set('Europe/Istanbul');
+
+// Güvenlik sınıflarını dahil et
+require_once __DIR__ . '/../security/SecurityManager.php';
+require_once __DIR__ . '/../security/SecureDatabase.php';
+require_once __DIR__ . '/../security/SecurityHeaders.php';
+
+// Autoload fonksiyonu
+spl_autoload_register(function ($class_name) {
+    $file = __DIR__ . '/../includes/' . $class_name . '.php';
+    if (file_exists($file)) {
+        require_once $file;
+    }
+});
+
+// Global güvenlik nesneleri
+$security = null;
+$secureDb = null;
+
+// Güvenlik sistemini başlat
+if (SECURITY_ENABLED) {
+    try {
+        // Database bağlantısı
+        require_once __DIR__ . '/database.php';
+        
+        // SecurityManager başlat
+        $security = new SecurityManager($pdo);
+        
+        // Secure Database wrapper
+        $secureDb = new SecureDatabase($pdo, $security);
+        
+        // Güvenlik başlıkları (sadece HTML sayfalar için)
+        if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+            !strpos($_SERVER['REQUEST_URI'], '.php') === false) {
+            SecurityHeaders::setAllHeaders(CSP_STRICT_MODE);
+        }
+        
+    } catch (Exception $e) {
+        error_log('Security system initialization failed: ' . $e->getMessage());
+        // Güvenlik sistemi başlatılamazsa normal database kullan
+        require_once __DIR__ . '/database.php';
+    }
+} else {
+    // Güvenlik sistemi devre dışı - normal database
+    require_once __DIR__ . '/database.php';
+}
+
+// Helper fonksiyonları - Güvenlik entegrasyonu ile
+function sanitize($data, $type = 'general') {
+    global $security;
+    
+    if ($security && SECURITY_ENABLED) {
+        return $security->sanitizeInput($data, $type);
+    }
+    
+    // Fallback güvenlik temizleme
+    if (is_array($data)) {
+        return array_map('sanitize', $data);
+    }
+    
+    return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+}
+
+function redirect($url) {
+    // URL güvenlik kontrolü
+    global $security;
+    
+    if ($security && SECURITY_ENABLED) {
+        // Güvenli redirect kontrolü
+        $parsedUrl = parse_url($url);
+        if (isset($parsedUrl['host']) && $parsedUrl['host'] !== parse_url(SITE_URL, PHP_URL_HOST)) {
+            $security->logSecurityEvent('unsafe_redirect_attempt', $url, $security->getClientIp());
+            $url = SITE_URL; // Güvenli URL'e yönlendir
+        }
+    }
+    
+    header("Location: " . $url);
+    exit();
+}
+
+function isLoggedIn() {
+    return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+}
+
+function isAdmin() {
+    // Role tabanlı kontrol (öncelik)
+    if (isset($_SESSION['role'])) {
+        $result = $_SESSION['role'] === 'admin';
+        error_log("isAdmin() Debug - Role based: {$_SESSION['role']}, Result: " . ($result ? 'true' : 'false'));
+        return $result;
+    }
+    
+    // Fallback: is_admin tabanlı kontrol
+    $hasSession = isset($_SESSION['is_admin']);
+    $adminValue = $hasSession ? $_SESSION['is_admin'] : null;
+    $result = $hasSession && ((int)$_SESSION['is_admin'] === 1);
+    
+    // Debug logging
+    error_log("isAdmin() Debug (Fallback) - Has session: " . ($hasSession ? 'yes' : 'no') . 
+              ", Admin value: " . ($adminValue !== null ? $adminValue : 'null') . 
+              ", Type: " . gettype($adminValue) . 
+              ", Result: " . ($result ? 'true' : 'false'));
+    
+    return $result;
+}
+
+function formatDate($date) {
+    return date('d.m.Y H:i', strtotime($date));
+}
+
+function generateToken() {
+    return bin2hex(random_bytes(32));
+}
+
+// UUID v4 oluşturma fonksiyonu
+function generateUUID() {
+    $data = random_bytes(16);
+    $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // Set version to 0100
+    $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // Set bits 6-7 to 10
+    return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+}
+
+// UUID doğrulama fonksiyonu
+function isValidUUID($uuid) {
+    return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $uuid);
+}
+
+function generateCsrfToken() {
+    global $security;
+    
+    if ($security && SECURITY_ENABLED) {
+        return $security->generateCsrfToken();
+    }
+    
+    // Fallback CSRF token
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = generateToken();
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function validateCsrfToken($token) {
+    global $security;
+    
+    if ($security && SECURITY_ENABLED) {
+        return $security->validateCsrfToken($token);
+    }
+    
+    // Fallback CSRF validation
+    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+}
+
+function checkRateLimit($action, $identifier = null, $limit = 10, $window = 300) {
+    global $security;
+    
+    if ($security && SECURITY_ENABLED) {
+        return $security->checkRateLimit($action, $identifier, $limit, $window);
+    }
+    
+    return true; // Güvenlik devre dışıysa geç
+}
+
+function logSecurityEvent($eventType, $details) {
+    global $security;
+    
+    if ($security && SECURITY_ENABLED) {
+        $security->logSecurityEvent($eventType, $details, $security->getClientIp());
+    }
+}
+
+function validateFileUpload($file, $allowedTypes = null, $maxSize = null) {
+    global $security;
+    
+    if ($security && SECURITY_ENABLED) {
+        return $security->validateFileUpload($file, $allowedTypes ?: ALLOWED_EXTENSIONS, $maxSize ?: MAX_FILE_SIZE);
+    }
+    
+    // Fallback file validation
+    $errors = [];
+    
+    if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+        $errors[] = 'Geçersiz dosya yükleme.';
+    }
+    
+    $maxSize = $maxSize ?: MAX_FILE_SIZE;
+    if ($file['size'] > $maxSize) {
+        $errors[] = 'Dosya boyutu çok büyük.';
+    }
+    
+    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $allowedTypes = $allowedTypes ?: ALLOWED_EXTENSIONS;
+    
+    if (!in_array($extension, $allowedTypes)) {
+        $errors[] = 'Desteklenmeyen dosya formatı.';
+    }
+    
+    return [
+        'valid' => empty($errors),
+        'errors' => $errors,
+        'safe_name' => preg_replace('/[^a-zA-Z0-9._-]/', '_', $file['name'])
+    ];
+}
+
+function sendEmail($to, $subject, $message, $isHTML = true) {
+    // Email adreslerini sanitize et
+    $to = sanitize($to, 'email');
+    $subject = sanitize($subject);
+    
+    if (empty($to) || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+    
+    // Email gönderme fonksiyonu - PHPMailer ile genişletilebilir
+    $headers = "From: " . SITE_EMAIL . "\r\n";
+    if ($isHTML) {
+        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+    }
+    
+    return mail($to, $subject, $message, $headers);
+}
+
+function checkBruteForce($identifier) {
+    global $security;
+    
+    if ($security && SECURITY_ENABLED) {
+        return $security->checkBruteForce($identifier, MAX_LOGIN_ATTEMPTS, LOGIN_BLOCK_DURATION);
+    }
+    
+    return true; // Güvenlik devre dışıysa geç
+}
+
+function recordBruteForceAttempt($identifier) {
+    global $security;
+    
+    if ($security && SECURITY_ENABLED) {
+        $security->recordBruteForceAttempt($identifier);
+    }
+}
+
+function executeSecureQuery($query, $params = []) {
+    global $security, $secureDb;
+    
+    if ($secureDb && SECURITY_ENABLED) {
+        return $security->executeSafeQuery($query, $params);
+    }
+    
+    // Fallback normal PDO
+    global $pdo;
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($params);
+    return $stmt;
+}
+
+// CSRF token'ı otomatik oluştur
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = generateCsrfToken();
+}
+
+// Global error handler
+if (SECURITY_ENABLED) {
+    set_error_handler(function($severity, $message, $file, $line) {
+        if (error_reporting() & $severity) {
+            logSecurityEvent('php_error', [
+                'message' => $message,
+                'file' => $file,
+                'line' => $line,
+                'severity' => $severity
+            ]);
+        }
+        return false; // Normal error handling devam etsin
+    });
+    
+    set_exception_handler(function($exception) {
+        logSecurityEvent('php_exception', [
+            'message' => $exception->getMessage(),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
+            'trace' => $exception->getTraceAsString()
+        ]);
+    });
+}
+
+// Security headers meta tag helper'ı ekle
+function renderSecurityMeta() {
+    $nonce = SecurityHeaders::getNonce();
+    echo '<meta name="csrf-token" content="' . ($_SESSION['csrf_token'] ?? '') . '">' . "\n";
+    echo '<meta http-equiv="X-UA-Compatible" content="IE=edge">' . "\n";
+    echo '<meta name="robots" content="noindex, nofollow">' . "\n";
+    return $nonce;
+}
+
+// Security script tag helper'ı
+function includeSecurityScript() {
+    $nonce = SecurityHeaders::getNonce();
+    echo '<script nonce="' . $nonce . '" src="' . SITE_URL . 'security/security-guard.js"></script>' . "\n";
+}
+?>

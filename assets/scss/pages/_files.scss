@@ -1,0 +1,45 @@
+// Mr ECU - Files Page Styles
+
+.files-page {
+  .file-filters {
+    margin-bottom: 1.5rem;
+  }
+  
+  .file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: 1rem;
+      top: 0;
+      height: 100%;
+      width: 2px;
+      background-color: $border-color;
+    }
+    
+    .timeline-item {
+      position: relative;
+      margin-bottom: 2rem;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        left: -1.5rem;
+        top: 0.5rem;
+        width: 1rem;
+        height: 1rem;
+        background-color: $primary;
+        border-radius: 50%;
+        border: 2px solid white;
+      }
+    }
+  }
+}

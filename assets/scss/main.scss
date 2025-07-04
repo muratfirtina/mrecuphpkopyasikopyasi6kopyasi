@@ -1,0 +1,43 @@
+// Mr ECU - Main SCSS File
+// Bootstrap ve custom stillerin ana dosyası
+
+// Variables (önce variables import edilmeli)
+@import 'variables';
+
+// Bootstrap (node_modules yolu)
+@import 'bootstrap/scss/bootstrap';
+
+// FontAwesome (node_modules yolu)
+@import '@fortawesome/fontawesome-free/scss/fontawesome';
+@import '@fortawesome/fontawesome-free/scss/solid';
+@import '@fortawesome/fontawesome-free/scss/regular';
+@import '@fortawesome/fontawesome-free/scss/brands';
+
+// Custom Components
+@import 'components/buttons';
+@import 'components/cards';
+@import 'components/forms';
+@import 'components/tables';
+@import 'components/navigation';
+@import 'components/modals';
+
+// Layout
+@import 'layout/header';
+@import 'layout/sidebar';
+@import 'layout/footer';
+
+// Pages
+@import 'pages/dashboard';
+@import 'pages/upload';
+@import 'pages/files';
+@import 'pages/auth';
+
+// Utilities
+@import 'utilities/animations';
+@import 'utilities/helpers';
+
+// Dark Mode
+@import 'themes/dark';
+
+// Print Styles
+@import 'utilities/print';

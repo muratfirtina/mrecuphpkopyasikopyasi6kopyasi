@@ -1,0 +1,15 @@
+# Mr ECU - Minimal Apache Configuration for MAMP
+
+# Prevent directory browsing
+Options -Indexes
+
+# Hide sensitive files
+<FilesMatch "\.(ini|log|conf)$">
+    Require all denied
+</FilesMatch>
+
+# Basic security
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+</IfModule>

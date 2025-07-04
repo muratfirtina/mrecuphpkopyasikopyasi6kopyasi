@@ -1,0 +1,46 @@
+// Mr ECU - Navigation Components
+
+.navbar {
+  box-shadow: $box-shadow-sm;
+  
+  .navbar-brand {
+    font-weight: $font-weight-bold;
+    font-size: 1.5rem;
+  }
+  
+  .navbar-nav .nav-link {
+    font-weight: $font-weight-medium;
+    transition: $transition-base;
+    
+    &:hover {
+      color: $primary !important;
+    }
+  }
+}
+
+// Sidebar navigation
+.sidebar {
+  background-color: $gray-100;
+  min-height: calc(100vh - #{$header-height});
+  border-right: 1px solid $border-color;
+  
+  .nav-link {
+    color: $gray-700;
+    font-weight: $font-weight-medium;
+    padding: 0.75rem 1rem;
+    border-radius: $border-radius;
+    margin-bottom: 0.25rem;
+    transition: $transition-base;
+    
+    &:hover,
+    &.active {
+      background-color: $primary;
+      color: white;
+    }
+    
+    i {
+      width: 1.5rem;
+      margin-right: 0.5rem;
+    }
+  }
+}

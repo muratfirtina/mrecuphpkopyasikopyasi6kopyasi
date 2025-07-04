@@ -1,0 +1,11 @@
+// Mr ECU - Header Layout
+
+.header {
+  height: $header-height;
+  background-color: white;
+  border-bottom: 1px solid $border-color;
+  box-shadow: $box-shadow-sm;
+  position: sticky;
+  top: 0;
+  z-index: $zindex-sticky;
+}

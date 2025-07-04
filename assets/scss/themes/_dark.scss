@@ -1,0 +1,182 @@
+// Mr ECU - Dark Theme
+
+.dark-mode {
+  background-color: $dark-bg;
+  color: $dark-text;
+  
+  // Cards
+  .card {
+    background-color: $dark-surface;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .dashboard-card {
+    background-color: $dark-surface;
+    color: $dark-text;
+  }
+  
+  // Navigation
+  .navbar {
+    background-color: $dark-surface !important;
+    border-color: rgba(255, 255, 255, 0.1);
+    
+    .navbar-brand,
+    .nav-link {
+      color: $dark-text !important;
+    }
+  }
+  
+  .sidebar {
+    background-color: $dark-surface;
+    border-color: rgba(255, 255, 255, 0.1);
+    
+    .nav-link {
+      color: $dark-text-secondary;
+      
+      &:hover,
+      &.active {
+        background-color: $dark-primary;
+        color: $dark-bg;
+      }
+    }
+  }
+  
+  // Forms
+  .form-control,
+  .form-select {
+    background-color: $dark-surface;
+    border-color: rgba(255, 255, 255, 0.2);
+    color: $dark-text;
+    
+    &:focus {
+      background-color: $dark-surface;
+      border-color: $dark-primary;
+      color: $dark-text;
+    }
+    
+    &::placeholder {
+      color: $dark-text-secondary;
+    }
+  }
+  
+  .input-group-text {
+    background-color: $dark-surface;
+    border-color: rgba(255, 255, 255, 0.2);
+    color: $dark-text-secondary;
+  }
+  
+  // Tables
+  .table {
+    color: $dark-text;
+    
+    th {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: $dark-text;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    td {
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    &.table-hover tbody tr:hover {
+      background-color: rgba($dark-primary, 0.1);
+    }
+  }
+  
+  // Modals
+  .modal-content {
+    background-color: $dark-surface;
+    color: $dark-text;
+  }
+  
+  .modal-header,
+  .modal-footer {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  // Alerts
+  .alert {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  // Dropdowns
+  .dropdown-menu {
+    background-color: $dark-surface;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .dropdown-item {
+    color: $dark-text;
+    
+    &:hover,
+    &:focus {
+      background-color: rgba($dark-primary, 0.1);
+      color: $dark-text;
+    }
+  }
+  
+  // Text colors
+  .text-muted {
+    color: $dark-text-secondary !important;
+  }
+  
+  // Borders
+  .border,
+  .border-top,
+  .border-bottom,
+  .border-left,
+  .border-right {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  // File upload area
+  .file-upload-area {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: $dark-text-secondary;
+    
+    &:hover {
+      background-color: rgba($dark-primary, 0.1);
+      border-color: $dark-primary;
+    }
+  }
+}
+
+// Dark mode toggle button
+.dark-mode-toggle {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  z-index: $zindex-fixed;
+  background-color: $dark;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: $box-shadow-lg;
+  transition: $transition-base;
+  
+  &:hover {
+    background-color: darken($dark, 10%);
+    transform: scale(1.1);
+  }
+  
+  .dark-mode & {
+    background-color: $dark-primary;
+    color: $dark-bg;
+  }
+}
+
+// Media queries for dark mode preference
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #{$dark-bg};
+    --text-color: #{$dark-text};
+    --card-bg: #{$dark-surface};
+  }
+}

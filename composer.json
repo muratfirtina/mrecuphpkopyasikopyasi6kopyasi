@@ -1,0 +1,35 @@
+{
+    "name": "mrecu/ecu-management-system",
+    "description": "ECU File Management System for automotive professionals",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mr ECU Team",
+            "email": "info@mrecu.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "phpmailer/phpmailer": "^6.8",
+        "stripe/stripe-php": "^10.0",
+        "iyzico/iyzipay-php": "^2.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "MrEcu\\": "includes/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "php -r \"copy('config/install.php', 'install.php');\""
+        ]
+    }
+}
