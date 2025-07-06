@@ -36,28 +36,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($token)) {
 }
 
 $pageTitle = 'Şifre Sıfırla';
+$pageDescription = 'Yeni şifre belirleyin - Güvenli bir şifre seçin ve hesabınıza tekrar erişim sağlayın.';
+$pageKeywords = 'şifre sıfırlama, yeni şifre, parola güncelleme';
+
+// Header include
+include 'includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle . ' - ' . SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+
+    <!-- Page Content -->
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
                 <div class="text-center mt-5 mb-4">
-                    <a href="index.php" class="text-decoration-none">
-                        <h1 class="h3 mb-3 fw-normal">
-                            <i class="fas fa-microchip text-primary"></i>
-                            <?php echo SITE_NAME; ?>
-                        </h1>
-                    </a>
+                    <h1 class="h3 mb-3 fw-normal">
+                        <i class="fas fa-lock text-primary me-2"></i>
+                        Şifre Sıfırlama
+                    </h1>
                     <p class="text-muted">Yeni şifre belirleyin</p>
                 </div>
                 
@@ -89,7 +83,7 @@ $pageTitle = 'Şifre Sıfırla';
                         <?php elseif (!empty($token) && empty($error)): ?>
                         
                         <div class="text-center mb-4">
-                            <i class="fas fa-lock text-primary" style="font-size: 3rem;"></i>
+                            <i class="fas fa-key text-primary" style="font-size: 3rem;"></i>
                             <h5 class="mt-3">Yeni Şifre Belirleyin</h5>
                             <p class="text-muted">Güvenli bir şifre seçin ve tekrar girin.</p>
                         </div>
@@ -151,8 +145,9 @@ $pageTitle = 'Şifre Sıfırla';
                     </p>
                     
                     <p class="text-muted">
-                        <a href="index.php" class="text-decoration-none">
-                            <i class="fas fa-arrow-left me-1"></i>Ana Sayfaya Dön
+                        Hesabınız yok mu? 
+                        <a href="register.php" class="text-decoration-none">
+                            <i class="fas fa-user-plus me-1"></i>Kayıt Ol
                         </a>
                     </p>
                 </div>
@@ -160,103 +155,102 @@ $pageTitle = 'Şifre Sıfırla';
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<?php
+$pageJS = "
+    // Şifre görünürlük toggle
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirm_password');
+        const icon = this.querySelector('i');
+        
+        if (password.type === 'password') {
+            password.type = 'text';
+            confirmPassword.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            password.type = 'password';
+            confirmPassword.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
     
-    <!-- Custom JS -->
-    <script>
-        // Şifre görünürlük toggle
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const password = document.getElementById('password');
-            const confirmPassword = document.getElementById('confirm_password');
-            const icon = this.querySelector('i');
-            
-            if (password.type === 'password') {
-                password.type = 'text';
-                confirmPassword.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                password.type = 'password';
-                confirmPassword.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        });
+    // Şifre güçlülük kontrolü
+    document.getElementById('password').addEventListener('input', function() {
+        const password = this.value;
+        const strengthBar = document.getElementById('passwordStrength');
+        const strengthText = document.getElementById('passwordHelp');
         
-        // Şifre güçlülük kontrolü
-        document.getElementById('password').addEventListener('input', function() {
-            const password = this.value;
-            const strengthBar = document.getElementById('passwordStrength');
-            const strengthText = document.getElementById('passwordHelp');
-            
-            let strength = 0;
-            let text = 'Çok Zayıf';
-            let color = 'bg-danger';
-            
-            if (password.length >= 6) strength += 1;
-            if (password.match(/[a-z]+/)) strength += 1;
-            if (password.match(/[A-Z]+/)) strength += 1;
-            if (password.match(/[0-9]+/)) strength += 1;
-            if (password.match(/[^a-zA-Z0-9]+/)) strength += 1;
-            
-            switch (strength) {
-                case 0:
-                case 1:
-                    text = 'Çok Zayıf';
-                    color = 'bg-danger';
-                    break;
-                case 2:
-                    text = 'Zayıf';
-                    color = 'bg-warning';
-                    break;
-                case 3:
-                    text = 'Orta';
-                    color = 'bg-info';
-                    break;
-                case 4:
-                    text = 'Güçlü';
-                    color = 'bg-success';
-                    break;
-                case 5:
-                    text = 'Çok Güçlü';
-                    color = 'bg-success';
-                    break;
-            }
-            
-            strengthBar.className = `progress-bar ${color}`;
-            strengthBar.style.width = `${(strength / 5) * 100}%`;
-            strengthText.textContent = `Şifre gücü: ${text}`;
-        });
+        let strength = 0;
+        let text = 'Çok Zayıf';
+        let color = 'bg-danger';
         
-        // Şifre eşleştirme kontrolü
-        document.getElementById('confirm_password').addEventListener('input', function() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = this.value;
-            
-            if (password !== confirmPassword) {
-                this.setCustomValidity('Şifreler eşleşmiyor');
-            } else {
-                this.setCustomValidity('');
-            }
-        });
+        if (password.length >= 6) strength += 1;
+        if (password.match(/[a-z]+/)) strength += 1;
+        if (password.match(/[A-Z]+/)) strength += 1;
+        if (password.match(/[0-9]+/)) strength += 1;
+        if (password.match(/[^a-zA-Z0-9]+/)) strength += 1;
         
-        // Form validation
-        (function() {
-            'use strict';
-            window.addEventListener('load', function() {
-                const forms = document.getElementsByClassName('needs-validation');
-                Array.prototype.filter.call(forms, function(form) {
-                    form.addEventListener('submit', function(event) {
-                        if (form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            }, false);
-        })();
-    </script>
-</body>
-</html>
+        switch (strength) {
+            case 0:
+            case 1:
+                text = 'Çok Zayıf';
+                color = 'bg-danger';
+                break;
+            case 2:
+                text = 'Zayıf';
+                color = 'bg-warning';
+                break;
+            case 3:
+                text = 'Orta';
+                color = 'bg-info';
+                break;
+            case 4:
+                text = 'Güçlü';
+                color = 'bg-success';
+                break;
+            case 5:
+                text = 'Çok Güçlü';
+                color = 'bg-success';
+                break;
+        }
+        
+        strengthBar.className = 'progress-bar ' + color;
+        strengthBar.style.width = (strength / 5) * 100 + '%';
+        strengthText.textContent = 'Şifre gücü: ' + text;
+    });
+    
+    // Şifre eşleştirme kontrolü
+    document.getElementById('confirm_password').addEventListener('input', function() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+        
+        if (password !== confirmPassword) {
+            this.setCustomValidity('Şifreler eşleşmiyor');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+    
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            const forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+";
+
+// Footer include
+include 'includes/footer.php';
+?>

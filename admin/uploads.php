@@ -1,16 +1,12 @@
 <?php
 /**
- * Mr ECU - Admin Dosya Yönetimi (GUID System)
+ * Mr ECU - Admin Dosya Yönetimi
  */
 
 require_once '../config/config.php';
 require_once '../config/database.php';
 
-// Admin kontrolü
-if (!isLoggedIn() || !isAdmin()) {
-    redirect('../login.php');
-}
-
+// Admin kontrolü otomatik yapılır
 $fileManager = new FileManager($pdo);
 $user = new User($pdo);
 $error = '';
@@ -22,14 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $status = sanitize($_POST['status']);
     $adminNotes = sanitize($_POST['admin_notes']);
     
-    // GUID format kontrolü
     if (!isValidUUID($uploadId)) {
         $error = 'Geçersiz dosya ID formatı.';
     } else {
         if ($fileManager->updateUploadStatus($uploadId, $status, $adminNotes)) {
-            $success = 'Dosya durumu güncellendi.';
-            
-            // Log kaydı
+            $success = 'Dosya durumu başarıyla güncellendi.';
             $user->logAction($_SESSION['user_id'], 'status_update', "Dosya #{$uploadId} durumu {$status} olarak güncellendi");
         } else {
             $error = 'Durum güncellenirken hata oluştu.';
@@ -40,685 +33,908 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
 // Yanıt dosyası yükleme
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['response_file'])) {
     $uploadId = sanitize($_POST['upload_id']);
-    $creditsCharged = (float)$_POST['credits_charged'];
+    $creditsCharged = floatval($_POST['credits_charged']);
     $responseNotes = sanitize($_POST['response_notes']);
     
-    // GUID format kontrolü
     if (!isValidUUID($uploadId)) {
         $error = 'Geçersiz dosya ID formatı.';
     } elseif ($creditsCharged < 0) {
         $error = 'Kredi miktarı negatif olamaz.';
     } else {
-        $result = $fileManager->uploadResponseFile($uploadId, $_SESSION['user_id'], $_FILES['response_file'], $creditsCharged, $responseNotes);
+        $result = $fileManager->uploadResponseFile($uploadId, $_FILES['response_file'], $creditsCharged, $responseNotes);
         
         if ($result['success']) {
             $success = $result['message'];
+            $user->logAction($_SESSION['user_id'], 'response_upload', "Yanıt dosyası yüklendi: {$uploadId}");
         } else {
             $error = $result['message'];
         }
     }
 }
 
-// Sayfalama parametreleri
-$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-$limit = 50;
-$status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
-
-// Tarih filtresi parametreleri
-$dateFrom = isset($_GET['date_from']) ? sanitize($_GET['date_from']) : '';
-$dateTo = isset($_GET['date_to']) ? sanitize($_GET['date_to']) : '';
-
-// Tarih validasyonu
-if ($dateFrom && !DateTime::createFromFormat('Y-m-d', $dateFrom)) {
-    $dateFrom = '';
-}
-if ($dateTo && !DateTime::createFromFormat('Y-m-d', $dateTo)) {
-    $dateTo = '';
-}
-
-// Dosyaları getir (tarih filtresi ile)
-$uploads = $fileManager->getAllUploads($page, $limit, $status, $dateFrom, $dateTo);
-
-// Tek dosya detayı görüntüleme
-$selectedUpload = null;
-$responses = [];
-if (isset($_GET['id'])) {
-    $uploadId = sanitize($_GET['id']);
+// Toplu işlemler
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_action'])) {
+    $action = sanitize($_POST['bulk_action']);
+    $selectedUploads = $_POST['selected_uploads'] ?? [];
     
-    // GUID format kontrolü
-    if (isValidUUID($uploadId)) {
-        $selectedUpload = $fileManager->getUploadById($uploadId);
-        
-        if ($selectedUpload) {
-            $responses = $fileManager->getResponsesByUploadId($uploadId);
-        }
+    if (empty($selectedUploads)) {
+        $error = 'Lütfen işlem yapmak için dosya seçin.';
     } else {
-        $error = 'Geçersiz dosya ID formatı.';
+        $affectedFiles = 0;
+        $errors = [];
+        
+        foreach ($selectedUploads as $uploadId) {
+            if (!isValidUUID($uploadId)) continue;
+            
+            try {
+                switch ($action) {
+                    case 'approve':
+                        if ($fileManager->updateUploadStatus($uploadId, 'processing', 'Toplu onaylama')) {
+                            $affectedFiles++;
+                        }
+                        break;
+                    case 'reject':
+                        if ($fileManager->updateUploadStatus($uploadId, 'rejected', 'Toplu reddetme')) {
+                            $affectedFiles++;
+                        }
+                        break;
+                    case 'delete':
+                        if ($fileManager->deleteUpload($uploadId)) {
+                            $affectedFiles++;
+                        }
+                        break;
+                }
+            } catch(Exception $e) {
+                $errors[] = "Dosya $uploadId: " . $e->getMessage();
+            }
+        }
+        
+        if ($affectedFiles > 0) {
+            $success = "$affectedFiles dosya başarıyla güncellendi.";
+            if (!empty($errors)) {
+                $success .= " Bazı dosyalarda hata oluştu.";
+            }
+        } else {
+            $error = "Hiçbir dosya güncellenemedi.";
+        }
     }
 }
 
-$pageTitle = 'Dosya Yönetimi';
-?>
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle . ' - ' . SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="../assets/css/style.css" rel="stylesheet">
-</head>
-<body>
-    <?php include '_header.php'; ?>
+// Filtreleme ve arama parametreleri
+$search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
+$status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
+$brand = isset($_GET['brand']) ? sanitize($_GET['brand']) : '';
+$dateFrom = isset($_GET['date_from']) ? sanitize($_GET['date_from']) : '';
+$dateTo = isset($_GET['date_to']) ? sanitize($_GET['date_to']) : '';
+$sortBy = isset($_GET['sort']) ? sanitize($_GET['sort']) : 'upload_date';
+$sortOrder = isset($_GET['order']) && $_GET['order'] === 'asc' ? 'ASC' : 'DESC';
+
+// Sayfalama
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$limit = 25;
+$offset = ($page - 1) * $limit;
+
+// Dosyaları getir
+try {
+    $whereClause = "WHERE 1=1"; // Tüm dosyaları göster
+    $params = [];
     
-    <div class="container-fluid">
-        <div class="row">
-            <?php include '_sidebar.php'; ?>
-            
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="fas fa-folder me-2"></i>Dosya Yönetimi
-                        <small class="text-muted">(GUID System)</small>
-                    </h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
-                                <i class="fas fa-sync-alt me-1"></i>Yenile
-                            </button>
-                        </div>
-                    </div>
+    if ($search) {
+        $whereClause .= " AND (u.original_name LIKE ? OR users.username LIKE ? OR users.email LIKE ?)";
+        $searchParam = "%$search%";
+        $params = array_merge($params, [$searchParam, $searchParam, $searchParam]);
+    }
+    
+    if ($status) {
+        $whereClause .= " AND u.status = ?";
+        $params[] = $status;
+    }
+    
+    if ($brand) {
+        $whereClause .= " AND b.id = ?";
+        $params[] = $brand;
+    }
+    
+    if ($dateFrom) {
+        $whereClause .= " AND DATE(u.upload_date) >= ?";
+        $params[] = $dateFrom;
+    }
+    
+    if ($dateTo) {
+        $whereClause .= " AND DATE(u.upload_date) <= ?";
+        $params[] = $dateTo;
+    }
+    
+    // Toplam dosya sayısı
+    $countQuery = "
+        SELECT COUNT(*) 
+        FROM file_uploads u
+        LEFT JOIN users ON u.user_id = users.id
+        LEFT JOIN brands b ON u.brand_id = b.id
+        $whereClause
+    ";
+    $stmt = $pdo->prepare($countQuery);
+    $stmt->execute($params);
+    $totalUploads = $stmt->fetchColumn();
+    
+    // Dosyaları getir
+    $query = "
+        SELECT u.*, 
+               users.username, users.email, users.first_name, users.last_name,
+               b.name as brand_name,
+               m.name as model_name
+        FROM file_uploads u
+        LEFT JOIN users ON u.user_id = users.id
+        LEFT JOIN brands b ON u.brand_id = b.id
+        LEFT JOIN models m ON u.model_id = m.id
+        $whereClause 
+        ORDER BY u.$sortBy $sortOrder 
+        LIMIT $limit OFFSET $offset
+    ";
+    
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($params);
+    $uploads = $stmt->fetchAll();
+    
+    $totalPages = ceil($totalUploads / $limit);
+} catch(PDOException $e) {
+    $uploads = [];
+    $totalUploads = 0;
+    $totalPages = 0;
+}
+
+// İstatistikler
+try {
+    $stmt = $pdo->query("
+        SELECT 
+            COUNT(*) as total_uploads,
+            SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_count,
+            SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing_count,
+            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_count,
+            SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected_count,
+            SUM(CASE WHEN upload_date >= DATE_SUB(NOW(), INTERVAL 24 HOUR) THEN 1 ELSE 0 END) as today_uploads,
+            AVG(file_size) as avg_file_size
+        FROM file_uploads
+    ");
+    $stats = $stmt->fetch();
+} catch(PDOException $e) {
+    $stats = ['total_uploads' => 0, 'pending_count' => 0, 'processing_count' => 0, 'completed_count' => 0, 'rejected_count' => 0, 'today_uploads' => 0, 'avg_file_size' => 0];
+}
+
+// Markalar listesi (filtre için)
+try {
+    $stmt = $pdo->query("SELECT id, name FROM brands WHERE is_active = 1 ORDER BY name");
+    $brands = $stmt->fetchAll();
+} catch(PDOException $e) {
+    $brands = [];
+}
+
+// Sayfa bilgileri
+$pageTitle = 'Dosya Yüklemeleri';
+$pageDescription = 'Kullanıcı dosya yüklemelerini yönetin ve işleyin.';
+$pageIcon = 'fas fa-upload';
+
+// Sidebar için istatistikler
+$totalUsers = 0; // Bu değer başka bir yerden gelecek
+$totalUploads = $stats['total_uploads'];
+
+// Hızlı eylemler
+$quickActions = [
+    [
+        'text' => 'Bekleyen Dosyalar',
+        'url' => 'uploads.php?status=pending',
+        'icon' => 'fas fa-clock',
+        'class' => 'warning'
+    ],
+    [
+        'text' => 'Excel Export',
+        'url' => 'export-uploads.php',
+        'icon' => 'fas fa-file-excel',
+        'class' => 'success'
+    ],
+    [
+        'text' => 'İstatistikler',
+        'url' => 'reports.php?type=uploads',
+        'icon' => 'fas fa-chart-line',
+        'class' => 'info'
+    ]
+];
+
+// Header ve Sidebar include
+include '../includes/admin_header.php';
+include '../includes/admin_sidebar.php';
+?>
+
+<!-- Hata/Başarı Mesajları -->
+<?php if ($error): ?>
+    <div class="alert alert-admin alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <?php echo $error; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
+<?php if ($success): ?>
+    <div class="alert alert-admin alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <?php echo $success; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
+<!-- İstatistik Kartları -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-primary"><?php echo number_format($stats['total_uploads']); ?></div>
+                    <div class="stat-label">Toplam Dosya</div>
+                    <small class="text-success">+<?php echo $stats['today_uploads']; ?> bugün</small>
                 </div>
-
-                <?php if ($error): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-triangle me-2"></i><?php echo $error; ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <?php endif; ?>
-                
-                <?php if ($success): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle me-2"></i><?php echo $success; ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <?php endif; ?>
-
-                <?php if ($selectedUpload): ?>
-                    <!-- Dosya Detayı Modal -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">
-                                        <i class="fas fa-file-alt me-2"></i>Dosya Detayları
-                                        <br><small class="text-muted">ID: <?php echo htmlspecialchars($selectedUpload['id']); ?></small>
-                                    </h5>
-                                    <a href="uploads.php" class="btn btn-sm btn-outline-secondary">
-                                        <i class="fas fa-times me-1"></i>Kapat
-                                    </a>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <!-- Sol Kolon - Dosya ve Kullanıcı Bilgileri -->
-                                        <div class="col-md-6">
-                                            <h6 class="text-muted">Kullanıcı Bilgileri</h6>
-                                            <table class="table table-borderless table-sm">
-                                                <tr>
-                                                    <td><strong>Kullanıcı ID:</strong></td>
-                                                    <td><code class="text-muted small"><?php echo $selectedUpload['user_id']; ?></code></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Kullanıcı:</strong></td>
-                                                    <td><?php echo htmlspecialchars($selectedUpload['username']); ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Email:</strong></td>
-                                                    <td><?php echo htmlspecialchars($selectedUpload['email']); ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Telefon:</strong></td>
-                                                    <td><?php echo htmlspecialchars($selectedUpload['phone'] ?: '-'); ?></td>
-                                                </tr>
-                                            </table>
-                                            
-                                            <h6 class="text-muted mt-4">Dosya Bilgileri</h6>
-                                            <table class="table table-borderless table-sm">
-                                                <tr>
-                                                    <td><strong>Dosya Adı:</strong></td>
-                                                    <td><?php echo htmlspecialchars($selectedUpload['original_name']); ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Boyut:</strong></td>
-                                                    <td><?php echo number_format($selectedUpload['file_size'] / 1024, 2); ?> KB</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Tip:</strong></td>
-                                                    <td><?php echo htmlspecialchars($selectedUpload['file_type']); ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Yükleme Tarihi:</strong></td>
-                                                    <td><?php echo formatDate($selectedUpload['upload_date']); ?></td>
-                                                </tr>
-                                            </table>
-                                        </div>
-                                        
-                                        <!-- Sağ Kolon - Araç Bilgileri -->
-                                        <div class="col-md-6">
-                                            <h6 class="text-muted">Araç Bilgileri</h6>
-                                            <table class="table table-borderless table-sm">
-                                                <tr>
-                                                    <td><strong>Marka ID:</strong></td>
-                                                    <td><code class="text-muted small"><?php echo $selectedUpload['brand_id']; ?></code></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Model ID:</strong></td>
-                                                    <td><code class="text-muted small"><?php echo $selectedUpload['model_id']; ?></code></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Marka/Model:</strong></td>
-                                                    <td><?php echo htmlspecialchars($selectedUpload['brand_name'] . ' ' . $selectedUpload['model_name']); ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Model Yılı:</strong></td>
-                                                    <td><?php echo $selectedUpload['year']; ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>ECU Tipi:</strong></td>
-                                                    <td><?php echo htmlspecialchars($selectedUpload['ecu_type'] ?: '-'); ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Motor Kodu:</strong></td>
-                                                    <td><?php echo htmlspecialchars($selectedUpload['engine_code'] ?: '-'); ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Şanzıman:</strong></td>
-                                                    <td><?php echo $selectedUpload['gearbox_type']; ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Yakıt:</strong></td>
-                                                    <td><?php echo $selectedUpload['fuel_type']; ?></td>
-                                                </tr>
-                                                <?php if ($selectedUpload['hp_power']): ?>
-                                                <tr>
-                                                    <td><strong>Güç:</strong></td>
-                                                    <td><?php echo $selectedUpload['hp_power']; ?> HP</td>
-                                                </tr>
-                                                <?php endif; ?>
-                                                <?php if ($selectedUpload['nm_torque']): ?>
-                                                <tr>
-                                                    <td><strong>Tork:</strong></td>
-                                                    <td><?php echo $selectedUpload['nm_torque']; ?> Nm</td>
-                                                </tr>
-                                                <?php endif; ?>
-                                            </table>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Notlar -->
-                                    <?php if ($selectedUpload['upload_notes']): ?>
-                                        <div class="row mt-3">
-                                            <div class="col-12">
-                                                <h6 class="text-muted">Kullanıcı Notları</h6>
-                                                <div class="alert alert-light">
-                                                    <?php echo nl2br(htmlspecialchars($selectedUpload['upload_notes'])); ?>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
-                                    
-                                    <!-- Admin İşlemleri -->
-                                    <div class="row mt-4">
-                                        <div class="col-md-6">
-                                            <!-- Durum Güncelleme -->
-                                            <div class="card border-primary">
-                                                <div class="card-header bg-primary text-white">
-                                                    <h6 class="mb-0">Durum Güncelle</h6>
-                                                </div>
-                                                <div class="card-body">
-                                                    <form method="POST">
-                                                        <input type="hidden" name="upload_id" value="<?php echo htmlspecialchars($selectedUpload['id']); ?>">
-                                                        
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Mevcut Durum</label>
-                                                            <div>
-                                                                <?php
-                                                                $statusClass = 'secondary';
-                                                                $statusText = $selectedUpload['status'];
-                                                                
-                                                                switch ($selectedUpload['status']) {
-                                                                    case 'pending':
-                                                                        $statusClass = 'warning';
-                                                                        $statusText = 'Bekliyor';
-                                                                        break;
-                                                                    case 'processing':
-                                                                        $statusClass = 'info';
-                                                                        $statusText = 'İşleniyor';
-                                                                        break;
-                                                                    case 'completed':
-                                                                        $statusClass = 'success';
-                                                                        $statusText = 'Tamamlandı';
-                                                                        break;
-                                                                    case 'rejected':
-                                                                        $statusClass = 'danger';
-                                                                        $statusText = 'Reddedildi';
-                                                                        break;
-                                                                }
-                                                                ?>
-                                                                <span class="badge bg-<?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        <div class="mb-3">
-                                                            <label for="status" class="form-label">Yeni Durum</label>
-                                                            <select class="form-select" name="status" required>
-                                                                <option value="pending" <?php echo $selectedUpload['status'] === 'pending' ? 'selected' : ''; ?>>Bekliyor</option>
-                                                                <option value="processing" <?php echo $selectedUpload['status'] === 'processing' ? 'selected' : ''; ?>>İşleniyor</option>
-                                                                <option value="completed" <?php echo $selectedUpload['status'] === 'completed' ? 'selected' : ''; ?>>Tamamlandı</option>
-                                                                <option value="rejected" <?php echo $selectedUpload['status'] === 'rejected' ? 'selected' : ''; ?>>Reddedildi</option>
-                                                            </select>
-                                                        </div>
-                                                        
-                                                        <div class="mb-3">
-                                                            <label for="admin_notes" class="form-label">Admin Notları</label>
-                                                            <textarea class="form-control" name="admin_notes" rows="3"><?php echo htmlspecialchars($selectedUpload['admin_notes'] ?? ''); ?></textarea>
-                                                        </div>
-                                                        
-                                                        <button type="submit" name="update_status" class="btn btn-primary">
-                                                            <i class="fas fa-save me-1"></i>Güncelle
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-6">
-                                            <!-- Yanıt Dosyası Yükle -->
-                                            <div class="card border-success">
-                                                <div class="card-header bg-success text-white">
-                                                    <h6 class="mb-0">Yanıt Dosyası Yükle</h6>
-                                                </div>
-                                                <div class="card-body">
-                                                    <form method="POST" enctype="multipart/form-data">
-                                                        <input type="hidden" name="upload_id" value="<?php echo htmlspecialchars($selectedUpload['id']); ?>">
-                                                        
-                                                        <div class="mb-3">
-                                                            <label for="response_file" class="form-label">Dosya</label>
-                                                            <input type="file" class="form-control" name="response_file" required
-                                                                   accept=".bin,.hex,.ecu,.ori,.mod,.zip,.rar">
-                                                        </div>
-                                                        
-                                                        <div class="mb-3">
-                                                            <label for="credits_charged" class="form-label">Kredi Ücreti</label>
-                                                            <input type="number" step="0.01" min="0" class="form-control" 
-                                                                   name="credits_charged" value="<?php echo FILE_DOWNLOAD_COST; ?>" required>
-                                                        </div>
-                                                        
-                                                        <div class="mb-3">
-                                                            <label for="response_notes" class="form-label">Notlar</label>
-                                                            <textarea class="form-control" name="response_notes" rows="3" 
-                                                                      placeholder="Dosya hakkında bilgi..."></textarea>
-                                                        </div>
-                                                        
-                                                        <button type="submit" class="btn btn-success">
-                                                            <i class="fas fa-upload me-1"></i>Yükle
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Yanıt Dosyaları -->
-                                    <?php if (!empty($responses)): ?>
-                                        <div class="row mt-4">
-                                            <div class="col-12">
-                                                <h6 class="text-muted">Yanıt Dosyaları</h6>
-                                                <div class="table-responsive">
-                                                    <table class="table table-sm">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>ID</th>
-                                                                <th>Dosya</th>
-                                                                <th>Boyut</th>
-                                                                <th>Kredi</th>
-                                                                <th>Admin</th>
-                                                                <th>Tarih</th>
-                                                                <th>İndirildi</th>
-                                                                <th>İşlem</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <?php foreach ($responses as $response): ?>
-                                                                <tr>
-                                                                    <td><code class="small"><?php echo substr($response['id'], 0, 8); ?>...</code></td>
-                                                                    <td>
-                                                                        <i class="fas fa-file text-success me-2"></i>
-                                                                        <?php echo htmlspecialchars($response['original_name']); ?>
-                                                                    </td>
-                                                                    <td><?php echo number_format($response['file_size'] / 1024, 2); ?> KB</td>
-                                                                    <td>
-                                                                        <span class="badge bg-warning"><?php echo $response['credits_charged']; ?></span>
-                                                                    </td>
-                                                                    <td><?php echo htmlspecialchars($response['admin_username']); ?></td>
-                                                                    <td><?php echo formatDate($response['upload_date']); ?></td>
-                                                                    <td>
-                                                                        <?php if ($response['downloaded']): ?>
-                                                                            <span class="badge bg-success">Evet</span>
-                                                                            <br><small><?php echo formatDate($response['download_date']); ?></small>
-                                                                        <?php else: ?>
-                                                                            <span class="badge bg-secondary">Hayır</span>
-                                                                        <?php endif; ?>
-                                                                    </td>
-                                                                    <td>
-                                                                        <a href="download.php?id=<?php echo urlencode($response['id']); ?>&type=admin" 
-                                                                           class="btn btn-sm btn-outline-primary" title="İndir">
-                                                                            <i class="fas fa-download"></i>
-                                                                        </a>
-                                                                    </td>
-                                                                </tr>
-                                                            <?php endforeach; ?>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
-                                    
-                                    <!-- Orijinal Dosya İndirme -->
-                                    <div class="row mt-4">
-                                        <div class="col-12">
-                                            <h6 class="text-muted">Orijinal Dosya</h6>
-                                            <div class="d-flex gap-2">
-                                                <a href="download.php?id=<?php echo urlencode($selectedUpload['id']); ?>&type=original" 
-                                                   class="btn btn-outline-secondary">
-                                                    <i class="fas fa-download me-1"></i>Orijinal Dosyayı İndir
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <!-- Filtreler -->
-                <div class="row mb-3">
-                    <div class="col-md-8">
-                        <div class="btn-group" role="group">
-                            <a href="uploads.php" class="btn btn-outline-secondary <?php echo empty($status) ? 'active' : ''; ?>">
-                                Tümü
-                            </a>
-                            <a href="uploads.php?status=pending" class="btn btn-outline-warning <?php echo $status === 'pending' ? 'active' : ''; ?>">
-                                Bekleyen
-                            </a>
-                            <a href="uploads.php?status=processing" class="btn btn-outline-info <?php echo $status === 'processing' ? 'active' : ''; ?>">
-                                İşleniyor
-                            </a>
-                            <a href="uploads.php?status=completed" class="btn btn-outline-success <?php echo $status === 'completed' ? 'active' : ''; ?>">
-                                Tamamlanan
-                            </a>
-                            <a href="uploads.php?status=rejected" class="btn btn-outline-danger <?php echo $status === 'rejected' ? 'active' : ''; ?>">
-                                Reddedilen
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-md-4 text-end">
-                        <small class="text-muted">Toplam: <?php echo count($uploads); ?> dosya</small>
-                    </div>
+                <div class="bg-primary bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-file text-primary fa-lg"></i>
                 </div>
-
-                <!-- Tarih Filtresi -->
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-calendar-alt me-2"></i>Tarih Filtresi
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <form method="GET" class="row g-3">
-                                    <?php if ($status): ?>
-                                        <input type="hidden" name="status" value="<?php echo htmlspecialchars($status); ?>">
-                                    <?php endif; ?>
-                                    <div class="col-md-3">
-                                        <label for="date_from" class="form-label">Başlangıç Tarihi</label>
-                                        <input type="date" class="form-control" id="date_from" name="date_from" value="<?php echo htmlspecialchars($dateFrom); ?>">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label for="date_to" class="form-label">Bitiş Tarihi</label>
-                                        <input type="date" class="form-control" id="date_to" name="date_to" value="<?php echo htmlspecialchars($dateTo); ?>">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">&nbsp;</label>
-                                        <div class="d-grid">
-                                            <button type="submit" class="btn btn-primary">
-                                                <i class="fas fa-filter me-1"></i>Filtrele
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">&nbsp;</label>
-                                        <div class="d-grid">
-                                            <a href="uploads.php<?php echo $status ? '?status=' . urlencode($status) : ''; ?>" class="btn btn-outline-secondary">
-                                                <i class="fas fa-times me-1"></i>Temizle
-                                            </a>
-                                        </div>
-                                    </div>
-                                </form>
-                                <?php if ($dateFrom || $dateTo): ?>
-                                    <div class="mt-2">
-                                        <small class="text-muted">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Aktif filtre: 
-                                            <?php if ($dateFrom && $dateTo): ?>
-                                                <?php echo date('d.m.Y', strtotime($dateFrom)); ?> - <?php echo date('d.m.Y', strtotime($dateTo)); ?>
-                                            <?php elseif ($dateFrom): ?>
-                                                <?php echo date('d.m.Y', strtotime($dateFrom)); ?> tarihinden itibaren
-                                            <?php elseif ($dateTo): ?>
-                                                <?php echo date('d.m.Y', strtotime($dateTo)); ?> tarihine kadar
-                                            <?php endif; ?>
-                                        </small>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Dosya Listesi -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-list me-2"></i>Dosya Listesi
-                            <?php if ($status): ?>
-                                - <?php echo ucfirst($status); ?>
-                            <?php endif; ?>
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <?php if (empty($uploads)): ?>
-                            <div class="text-center py-5">
-                                <i class="fas fa-folder-open text-muted" style="font-size: 4rem;"></i>
-                                <h4 class="mt-3 text-muted">Dosya bulunamadı</h4>
-                                <p class="text-muted">
-                                    <?php if ($status): ?>
-                                        Bu durumda dosya bulunmuyor.
-                                    <?php else: ?>
-                                        Henüz dosya yüklenmemiş.
-                                    <?php endif; ?>
-                                </p>
-                            </div>
-                        <?php else: ?>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Kullanıcı</th>
-                                            <th>Dosya</th>
-                                            <th>Araç</th>
-                                            <th>Durum</th>
-                                            <th>Tarih</th>
-                                            <th>İşlem</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($uploads as $upload): ?>
-                                            <tr>
-                                                <td>
-                                                    <code class="small"><?php echo substr($upload['id'], 0, 8); ?>...</code>
-                                                    <br><small class="text-muted">GUID</small>
-                                                </td>
-                                                <td>
-                                                    <strong><?php echo htmlspecialchars($upload['username']); ?></strong>
-                                                    <br>
-                                                    <small class="text-muted"><?php echo htmlspecialchars($upload['email']); ?></small>
-                                                </td>
-                                                <td>
-                                                    <i class="fas fa-file me-2"></i>
-                                                    <strong><?php echo htmlspecialchars($upload['original_name']); ?></strong>
-                                                    <br>
-                                                    <small class="text-muted"><?php echo number_format($upload['file_size'] / 1024, 2); ?> KB</small>
-                                                </td>
-                                                <td>
-                                                    <strong><?php echo htmlspecialchars($upload['brand_name'] . ' ' . $upload['model_name']); ?></strong>
-                                                    <br>
-                                                    <small class="text-muted"><?php echo $upload['year']; ?> • <?php echo $upload['fuel_type']; ?></small>
-                                                </td>
-                                                <td>
-                                                    <?php
-                                                    $statusClass = 'secondary';
-                                                    $statusText = $upload['status'];
-                                                    $statusIcon = 'fas fa-circle';
-                                                    
-                                                    switch ($upload['status']) {
-                                                        case 'pending':
-                                                            $statusClass = 'warning';
-                                                            $statusText = 'Bekliyor';
-                                                            $statusIcon = 'fas fa-clock';
-                                                            break;
-                                                        case 'processing':
-                                                            $statusClass = 'info';
-                                                            $statusText = 'İşleniyor';
-                                                            $statusIcon = 'fas fa-spinner';
-                                                            break;
-                                                        case 'completed':
-                                                            $statusClass = 'success';
-                                                            $statusText = 'Tamamlandı';
-                                                            $statusIcon = 'fas fa-check-circle';
-                                                            break;
-                                                        case 'rejected':
-                                                            $statusClass = 'danger';
-                                                            $statusText = 'Reddedildi';
-                                                            $statusIcon = 'fas fa-times-circle';
-                                                            break;
-                                                    }
-                                                    ?>
-                                                    <span class="badge bg-<?php echo $statusClass; ?>">
-                                                        <i class="<?php echo $statusIcon; ?> me-1"></i><?php echo $statusText; ?>
-                                                    </span>
-                                                    <?php if ($upload['response_count'] > 0): ?>
-                                                        <br><small class="text-success">
-                                                            <i class="fas fa-reply me-1"></i><?php echo $upload['response_count']; ?> yanıt
-                                                        </small>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <?php echo formatDate($upload['upload_date']); ?>
-                                                    <?php if ($upload['processed_date']): ?>
-                                                        <br><small class="text-muted">
-                                                            İşlendi: <?php echo formatDate($upload['processed_date']); ?>
-                                                        </small>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group btn-group-sm">
-                                                        <a href="uploads.php?id=<?php echo urlencode($upload['id']); ?>" class="btn btn-outline-primary" title="Detaylar">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                        <a href="download.php?id=<?php echo urlencode($upload['id']); ?>&type=original" class="btn btn-outline-secondary" title="İndir">
-                                                            <i class="fas fa-download"></i>
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <!-- Sayfalama -->
-                            <?php if (count($uploads) >= $limit): ?>
-                                <nav aria-label="Sayfa navigasyonu">
-                                    <ul class="pagination justify-content-center">
-                                        <?php
-                                        $paginationParams = [];
-                                        if ($status) $paginationParams[] = 'status=' . urlencode($status);
-                                        if ($dateFrom) $paginationParams[] = 'date_from=' . urlencode($dateFrom);
-                                        if ($dateTo) $paginationParams[] = 'date_to=' . urlencode($dateTo);
-                                        $paginationQuery = !empty($paginationParams) ? '&' . implode('&', $paginationParams) : '';
-                                        ?>
-                                        <?php if ($page > 1): ?>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $paginationQuery; ?>">Önceki</a>
-                                            </li>
-                                        <?php endif; ?>
-                                        
-                                        <li class="page-item active">
-                                            <span class="page-link"><?php echo $page; ?></span>
-                                        </li>
-                                        
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $paginationQuery; ?>">Sonraki</a>
-                                        </li>
-                                    </ul>
-                                </nav>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </main>
+            </div>
         </div>
     </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Custom JS -->
-    <script>
-        // Auto refresh for pending status
-        if (window.location.search.includes('status=pending')) {
-            setTimeout(function() {
-                location.reload();
-            }, 60000); // 1 dakika
-        }
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-warning"><?php echo number_format($stats['pending_count']); ?></div>
+                    <div class="stat-label">Bekleyen</div>
+                    <small class="text-muted">İşlem bekliyor</small>
+                </div>
+                <div class="bg-warning bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-clock text-warning fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-info"><?php echo number_format($stats['processing_count']); ?></div>
+                    <div class="stat-label">İşleniyor</div>
+                    <small class="text-muted">Aktif işlemde</small>
+                </div>
+                <div class="bg-info bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-cogs text-info fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-success"><?php echo number_format($stats['completed_count']); ?></div>
+                    <div class="stat-label">Tamamlanan</div>
+                    <small class="text-danger"><?php echo number_format($stats['rejected_count']); ?> reddedilen</small>
+                </div>
+                <div class="bg-success bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-check-circle text-success fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtre ve Arama -->
+<div class="card admin-card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label for="search" class="form-label">
+                    <i class="fas fa-search me-1"></i>Arama
+                </label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="<?php echo htmlspecialchars($search); ?>" 
+                       placeholder="Dosya adı, kullanıcı adı...">
+            </div>
+            
+            <div class="col-md-2">
+                <label for="status" class="form-label">
+                    <i class="fas fa-filter me-1"></i>Durum
+                </label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">Tüm Durumlar</option>
+                    <option value="pending" <?php echo $status === 'pending' ? 'selected' : ''; ?>>Bekleyen</option>
+                    <option value="processing" <?php echo $status === 'processing' ? 'selected' : ''; ?>>İşleniyor</option>
+                    <option value="completed" <?php echo $status === 'completed' ? 'selected' : ''; ?>>Tamamlanan</option>
+                    <option value="rejected" <?php echo $status === 'rejected' ? 'selected' : ''; ?>>Reddedilen</option>
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label for="brand" class="form-label">
+                    <i class="fas fa-car me-1"></i>Marka
+                </label>
+                <select class="form-select" id="brand" name="brand">
+                    <option value="">Tüm Markalar</option>
+                    <?php foreach ($brands as $brandOption): ?>
+                        <option value="<?php echo $brandOption['id']; ?>" 
+                                <?php echo $brand === $brandOption['id'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($brandOption['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label for="date_from" class="form-label">
+                    <i class="fas fa-calendar me-1"></i>Başlangıç
+                </label>
+                <input type="date" class="form-control" id="date_from" name="date_from" 
+                       value="<?php echo htmlspecialchars($dateFrom); ?>">
+            </div>
+            
+            <div class="col-md-2">
+                <label for="date_to" class="form-label">
+                    <i class="fas fa-calendar me-1"></i>Bitiş
+                </label>
+                <input type="date" class="form-control" id="date_to" name="date_to" 
+                       value="<?php echo htmlspecialchars($dateTo); ?>">
+            </div>
+            
+            <div class="col-md-1">
+                <div class="d-flex flex-column gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <a href="uploads.php" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-undo"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Dosya Listesi -->
+<div class="card admin-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-file-upload me-2"></i>
+            Dosya Yüklemeleri (<?php echo $totalUploads; ?> dosya)
+        </h5>
         
-        // GUID validation for forms
-        function validateGUID(input) {
-            const guidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-            return guidPattern.test(input);
-        }
-        
-        // Form validation
-        document.addEventListener('DOMContentLoaded', function() {
-            const forms = document.querySelectorAll('form');
-            forms.forEach(function(form) {
-                form.addEventListener('submit', function(e) {
-                    const uploadIdInputs = form.querySelectorAll('input[name="upload_id"]');
-                    uploadIdInputs.forEach(function(input) {
-                        if (input.value && !validateGUID(input.value)) {
-                            e.preventDefault();
-                            alert('Geçersiz GUID formatı: ' + input.value);
-                            return false;
-                        }
-                    });
-                });
-            });
+        <?php if (!empty($uploads)): ?>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-cog me-1"></i>Toplu İşlemler
+                </button>
+                <ul class="dropdown-menu">
+                    <li><h6 class="dropdown-header">Seçili dosyalar için:</h6></li>
+                    <li><a class="dropdown-item" href="#" onclick="bulkAction('approve')">
+                        <i class="fas fa-check me-2 text-success"></i>Onayla & İşle
+                    </a></li>
+                    <li><a class="dropdown-item" href="#" onclick="bulkAction('reject')">
+                        <i class="fas fa-times me-2 text-danger"></i>Reddet
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" onclick="bulkAction('delete')">
+                        <i class="fas fa-trash me-2 text-danger"></i>Sil
+                    </a></li>
+                </ul>
+            </div>
+        <?php endif; ?>
+    </div>
+    
+    <div class="card-body p-0">
+        <?php if (empty($uploads)): ?>
+            <div class="text-center py-5">
+                <i class="fas fa-file-upload fa-3x text-muted mb-3"></i>
+                <h6 class="text-muted">
+                    <?php if ($search || $status || $brand || $dateFrom || $dateTo): ?>
+                        Filtreye uygun dosya bulunamadı
+                    <?php else: ?>
+                        Henüz dosya yüklenmemiş
+                    <?php endif; ?>
+                </h6>
+            </div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-admin table-hover mb-0" id="uploadsTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 30px;">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="selectAll" onchange="toggleAllUploads(this)">
+                                </div>
+                            </th>
+                            <th>Dosya Bilgileri</th>
+                            <th>Kullanıcı</th>
+                            <th>Araç Bilgileri</th>
+                            <th>Durum</th>
+                            <th>Tarih</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($uploads as $upload): ?>
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input upload-checkbox" 
+                                               value="<?php echo $upload['id']; ?>">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="file-icon me-3">
+                                            <i class="fas fa-file-alt fa-2x text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1 text-truncate" style="max-width: 200px;" 
+                                                title="<?php echo htmlspecialchars($upload['original_name']); ?>">
+                                                <?php echo htmlspecialchars($upload['original_name']); ?>
+                                            </h6>
+                                            <small class="text-muted">
+                                                <?php echo formatFileSize($upload['file_size'] ?? 0); ?>
+                                                <?php if (!empty($upload['service_type'])): ?>
+                                                    • <?php echo ucfirst(str_replace('_', ' ', $upload['service_type'])); ?>
+                                                <?php endif; ?>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <?php echo htmlspecialchars($upload['first_name'] . ' ' . $upload['last_name']); ?>
+                                        </h6>
+                                        <small class="text-muted">
+                                            @<?php echo htmlspecialchars($upload['username']); ?>
+                                        </small><br>
+                                        <small class="text-muted">
+                                            <?php echo htmlspecialchars($upload['email']); ?>
+                                        </small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong><?php echo htmlspecialchars($upload['brand_name'] ?? 'Bilinmiyor'); ?></strong><br>
+                                        <small class="text-muted"><?php echo htmlspecialchars($upload['model_name'] ?? 'Model belirtilmemiş'); ?></small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <?php
+                                    $statusClass = [
+                                        'pending' => 'warning',
+                                        'processing' => 'info',
+                                        'completed' => 'success',
+                                        'rejected' => 'danger'
+                                    ];
+                                    $statusText = [
+                                        'pending' => 'Bekliyor',
+                                        'processing' => 'İşleniyor',
+                                        'completed' => 'Tamamlandı',
+                                        'rejected' => 'Reddedildi'
+                                    ];
+                                    $statusIcon = [
+                                        'pending' => 'clock',
+                                        'processing' => 'cogs',
+                                        'completed' => 'check-circle',
+                                        'rejected' => 'times-circle'
+                                    ];
+                                    ?>
+                                    <span class="badge bg-<?php echo $statusClass[$upload['status']] ?? 'secondary'; ?> d-flex align-items-center" style="width: fit-content;">
+                                        <i class="fas fa-<?php echo $statusIcon[$upload['status']] ?? 'question'; ?> me-1"></i>
+                                        <?php echo $statusText[$upload['status']] ?? 'Bilinmiyor'; ?>
+                                    </span>
+                                    
+                                    <?php if (!empty($upload['admin_notes'])): ?>
+                                        <div class="mt-1">
+                                            <small class="text-muted" title="<?php echo htmlspecialchars($upload['admin_notes']); ?>">
+                                                <i class="fas fa-comment fa-sm"></i> Admin notu
+                                            </small>
+                                        </div>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong><?php echo date('d.m.Y', strtotime($upload['upload_date'])); ?></strong><br>
+                                        <small class="text-muted"><?php echo date('H:i', strtotime($upload['upload_date'])); ?></small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group-vertical btn-group-sm" style="width: 140px;">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                onclick="viewFileDetails('<?php echo $upload['id']; ?>')">
+                                            <i class="fas fa-eye me-1"></i>Detay
+                                        </button>
+                                        
+                                        <?php if ($upload['status'] === 'pending'): ?>
+                                            <button type="button" class="btn btn-outline-success btn-sm" 
+                                                    onclick="processFile('<?php echo $upload['id']; ?>')">
+                                                <i class="fas fa-play me-1"></i>İşle
+                                            </button>
+                                        <?php elseif ($upload['status'] === 'processing'): ?>
+                                            <button type="button" class="btn btn-outline-warning btn-sm" 
+                                                    onclick="uploadResponse('<?php echo $upload['id']; ?>')">
+                                                <i class="fas fa-upload me-1"></i>Yanıt Yükle
+                                            </button>
+                                        <?php endif; ?>
+                                        
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                                onclick="updateStatus('<?php echo $upload['id']; ?>')">
+                                            <i class="fas fa-edit me-1"></i>Durum Güncelle
+                                        </button>
+                                        
+                                        <?php if (!empty($upload['original_file_path']) && file_exists('../' . $upload['original_file_path'])): ?>
+                                            <a href="download-original.php?id=<?php echo $upload['id']; ?>" 
+                                               class="btn btn-outline-info btn-sm">
+                                                <i class="fas fa-download me-1"></i>İndir
+                                            </a>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <?php if ($totalPages > 1): ?>
+                <div class="card-footer">
+                    <nav aria-label="Dosya sayfalama">
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            <!-- Önceki sayfa -->
+                            <?php if ($page > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $brand ? '&brand=' . $brand : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                            
+                            <!-- Sayfa numaraları -->
+                            <?php 
+                            $start = max(1, $page - 2);
+                            $end = min($totalPages, $page + 2);
+                            ?>
+                            
+                            <?php for ($i = $start; $i <= $end; $i++): ?>
+                                <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                                    <a class="page-link" href="?page=<?php echo $i; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $brand ? '&brand=' . $brand : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
+                                        <?php echo $i; ?>
+                                    </a>
+                                </li>
+                            <?php endfor; ?>
+                            
+                            <!-- Sonraki sayfa -->
+                            <?php if ($page < $totalPages): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $brand ? '&brand=' . $brand : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+                    
+                    <div class="text-center mt-2">
+                        <small class="text-muted">
+                            Sayfa <?php echo $page; ?> / <?php echo $totalPages; ?> 
+                            (Toplam <?php echo $totalUploads; ?> dosya)
+                        </small>
+                    </div>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- Dosya Detay Modal -->
+<div class="modal fade" id="fileDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-alt me-2"></i>Dosya Detayları
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="fileDetailContent">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Durum Güncelleme Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Durum Güncelle
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="updateStatusForm">
+                <div class="modal-body">
+                    <input type="hidden" name="update_status" value="1">
+                    <input type="hidden" name="upload_id" id="status_upload_id">
+                    
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Yeni Durum <span class="text-danger">*</span></label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="pending">Bekleyen</option>
+                            <option value="processing">İşleniyor</option>
+                            <option value="completed">Tamamlandı</option>
+                            <option value="rejected">Reddedildi</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="admin_notes" class="form-label">Admin Notları</label>
+                        <textarea class="form-control" id="admin_notes" name="admin_notes" 
+                                  rows="4" placeholder="Durum değişikliği hakkında notlar..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Güncelle
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Yanıt Dosyası Yükleme Modal -->
+<div class="modal fade" id="uploadResponseModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-upload me-2"></i>Yanıt Dosyası Yükle
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" enctype="multipart/form-data" id="uploadResponseForm">
+                <div class="modal-body">
+                    <input type="hidden" name="upload_id" id="response_upload_id">
+                    
+                    <div class="mb-3">
+                        <label for="response_file" class="form-label">İşlenmiş Dosya <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="response_file" name="response_file" 
+                               accept=".bin,.hex,.a2l,.kp,.ori,.mod,.ecu,.tun" required>
+                        <div class="form-text">Desteklenen formatlar: .bin, .hex, .a2l, .kp, .ori, .mod, .ecu, .tun</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="credits_charged" class="form-label">Kesilen Kredi (TL) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="credits_charged" name="credits_charged" 
+                               min="0" step="0.01" value="5.00" required>
+                        <div class="form-text">Bu işlem için kullanıcıdan kesilecek kredi miktarı</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="response_notes" class="form-label">İşlem Notları</label>
+                        <textarea class="form-control" id="response_notes" name="response_notes" 
+                                  rows="4" placeholder="İşlem hakkında notlar ve açıklamalar..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-2"></i>Tamamla & Yükle
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toplu İşlemler için Hidden Form -->
+<form method="POST" id="bulkActionForm" style="display: none;">
+    <input type="hidden" name="bulk_action" id="bulk_action_type">
+    <div id="bulk_selected_uploads"></div>
+</form>
+
+<?php
+// Sayfa özel JavaScript
+$pageJS = "
+// Toggle all checkboxes
+function toggleAllUploads(source) {
+    const checkboxes = document.querySelectorAll('.upload-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = source.checked;
+    });
+}
+
+// View file details
+function viewFileDetails(uploadId) {
+    const modal = new bootstrap.Modal(document.getElementById('fileDetailModal'));
+    const content = document.getElementById('fileDetailContent');
+    
+    content.innerHTML = `
+        <div class=\"text-center py-5\">
+            <div class=\"spinner-border text-primary\" role=\"status\">
+                <span class=\"visually-hidden\">Yükleniyor...</span>
+            </div>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // AJAX call to get file details
+    fetch('ajax/get-upload-details.php?id=' + uploadId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                content.innerHTML = data.html;
+            } else {
+                content.innerHTML = `
+                    <div class=\"alert alert-danger\">
+                        <i class=\"fas fa-exclamation-triangle me-2\"></i>
+                        Dosya detayları yüklenirken hata oluştu.
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            content.innerHTML = `
+                <div class=\"alert alert-danger\">
+                    <i class=\"fas fa-exclamation-triangle me-2\"></i>
+                    Bağlantı hatası oluştu.
+                </div>
+            `;
         });
-    </script>
-</body>
-</html>
+}
+
+// Process file (approve and start processing)
+function processFile(uploadId) {
+    if (confirmAdminAction('Bu dosyayı işleme almak istediğinizden emin misiniz?')) {
+        updateFileStatus(uploadId, 'processing', 'Dosya işleme alındı');
+    }
+}
+
+// Update status modal
+function updateStatus(uploadId) {
+    document.getElementById('status_upload_id').value = uploadId;
+    document.getElementById('status').value = '';
+    document.getElementById('admin_notes').value = '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
+    modal.show();
+}
+
+// Upload response modal
+function uploadResponse(uploadId) {
+    document.getElementById('response_upload_id').value = uploadId;
+    document.getElementById('response_file').value = '';
+    document.getElementById('credits_charged').value = '5.00';
+    document.getElementById('response_notes').value = '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('uploadResponseModal'));
+    modal.show();
+}
+
+// Update file status via AJAX
+function updateFileStatus(uploadId, status, notes = '') {
+    const formData = new FormData();
+    formData.append('update_status', '1');
+    formData.append('upload_id', uploadId);
+    formData.append('status', status);
+    formData.append('admin_notes', notes);
+    
+    fetch('uploads.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        // Reload page to see changes
+        location.reload();
+    })
+    .catch(error => {
+        showAdminNotification('Güncelleme sırasında hata oluştu!', 'danger');
+    });
+}
+
+// Bulk actions
+function bulkAction(action) {
+    const checkboxes = document.querySelectorAll('.upload-checkbox:checked');
+    if (checkboxes.length === 0) {
+        showAdminNotification('Lütfen işlem yapmak için dosya seçin!', 'warning');
+        return;
+    }
+    
+    const uploadIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    let confirmMessage = '';
+    switch (action) {
+        case 'approve':
+            confirmMessage = 'Seçili dosyaları onaylayıp işleme almak istediğinizden emin misiniz?';
+            break;
+        case 'reject':
+            confirmMessage = 'Seçili dosyaları reddetmek istediğinizden emin misiniz?';
+            break;
+        case 'delete':
+            confirmMessage = 'Seçili dosyaları silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!';
+            break;
+    }
+    
+    if (confirmAdminAction(confirmMessage)) {
+        document.getElementById('bulk_action_type').value = action;
+        
+        const selectedUploadsDiv = document.getElementById('bulk_selected_uploads');
+        selectedUploadsDiv.innerHTML = '';
+        
+        uploadIds.forEach(uploadId => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'selected_uploads[]';
+            input.value = uploadId;
+            selectedUploadsDiv.appendChild(input);
+        });
+        
+        document.getElementById('bulkActionForm').submit();
+    }
+}
+
+// File size formatter
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Auto-refresh for pending/processing files
+const pendingProcessingFiles = document.querySelectorAll('tr:has(.badge.bg-warning), tr:has(.badge.bg-info)');
+if (pendingProcessingFiles.length > 0) {
+    setTimeout(() => {
+        if (!document.hidden) {
+            location.reload();
+        }
+    }, 60000); // 1 dakika sonra yenile
+}
+
+// Form validation
+document.getElementById('updateStatusForm').addEventListener('submit', function(e) {
+    const status = document.getElementById('status').value;
+    if (!status) {
+        e.preventDefault();
+        showAdminNotification('Lütfen yeni durumu seçin!', 'error');
+        return false;
+    }
+});
+
+document.getElementById('uploadResponseForm').addEventListener('submit', function(e) {
+    const file = document.getElementById('response_file').files[0];
+    const credits = parseFloat(document.getElementById('credits_charged').value);
+    
+    if (!file) {
+        e.preventDefault();
+        showAdminNotification('Lütfen yanıt dosyasını seçin!', 'error');
+        return false;
+    }
+    
+    if (credits < 0) {
+        e.preventDefault();
+        showAdminNotification('Kredi miktarı negatif olamaz!', 'error');
+        return false;
+    }
+});
+";
+
+// Footer include
+include '../includes/admin_footer.php';
+?>

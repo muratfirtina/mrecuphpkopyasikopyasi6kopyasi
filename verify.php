@@ -23,29 +23,23 @@ if (empty($token)) {
 }
 
 $pageTitle = 'Email Doğrulama';
+$pageDescription = 'Email doğrulama sayfası - Hesabınızı aktifleştirin ve sisteme giriş yapmaya başlayın.';
+$pageKeywords = 'email doğrulama, hesap aktivasyonu, email aktivasyonu';
+
+// Header include
+include 'includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle . ' - ' . SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+
+    <!-- Page Content -->
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
                 <div class="text-center mt-5 mb-4">
-                    <a href="index.php" class="text-decoration-none">
-                        <h1 class="h3 mb-3 fw-normal">
-                            <i class="fas fa-microchip text-primary"></i>
-                            <?php echo SITE_NAME; ?>
-                        </h1>
-                    </a>
-                    <p class="text-muted">Email Doğrulama</p>
+                    <h1 class="h3 mb-3 fw-normal">
+                        <i class="fas fa-envelope-check text-primary me-2"></i>
+                        Email Doğrulama
+                    </h1>
+                    <p class="text-muted">Hesabınızı aktifleştirin</p>
                 </div>
                 
                 <div class="card shadow">
@@ -55,12 +49,24 @@ $pageTitle = 'Email Doğrulama';
                                 <i class="fas fa-times-circle text-danger" style="font-size: 4rem;"></i>
                                 <h4 class="mt-3 text-danger">Doğrulama Başarısız</h4>
                                 <p class="text-muted"><?php echo $error; ?></p>
+                                
+                                <div class="alert alert-info mt-4" role="alert">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Yardım:</strong><br>
+                                    • Doğrulama linkinin süresi dolmuş olabilir<br>
+                                    • Link yanlış veya eksik kopyalanmış olabilir<br>
+                                    • Tekrar kayıt olup yeni doğrulama linki alabilirsiniz
+                                </div>
+                                
                                 <div class="d-grid gap-2 mt-4">
                                     <a href="login.php" class="btn btn-primary">
                                         <i class="fas fa-sign-in-alt me-1"></i>Giriş Yap
                                     </a>
                                     <a href="register.php" class="btn btn-outline-secondary">
                                         <i class="fas fa-user-plus me-1"></i>Yeni Hesap Oluştur
+                                    </a>
+                                    <a href="forgot-password.php" class="btn btn-outline-info">
+                                        <i class="fas fa-key me-1"></i>Şifremi Unuttum
                                     </a>
                                 </div>
                             </div>
@@ -69,11 +75,21 @@ $pageTitle = 'Email Doğrulama';
                         <?php if ($success): ?>
                             <div class="mb-4">
                                 <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
-                                <h4 class="mt-3 text-success">Doğrulama Başarılı</h4>
+                                <h4 class="mt-3 text-success">Doğrulama Başarılı! 🎉</h4>
                                 <p class="text-muted"><?php echo $success; ?></p>
+                                
+                                <div class="alert alert-success mt-4" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <strong>Tebrikler!</strong><br>
+                                    Hesabınız aktifleştirildi. Artık tüm özelliklerimizden yararlanabilirsiniz.
+                                </div>
+                                
                                 <div class="d-grid gap-2 mt-4">
                                     <a href="login.php" class="btn btn-success btn-lg">
                                         <i class="fas fa-sign-in-alt me-1"></i>Giriş Yap
+                                    </a>
+                                    <a href="index.php#services" class="btn btn-outline-primary">
+                                        <i class="fas fa-cogs me-1"></i>Hizmetlerimizi İncele
                                     </a>
                                 </div>
                             </div>
@@ -87,12 +103,41 @@ $pageTitle = 'Email Doğrulama';
                             <i class="fas fa-arrow-left me-1"></i>Ana Sayfaya Dön
                         </a>
                     </p>
+                    
+                    <p class="text-muted">
+                        Sorun mu yaşıyorsunuz? 
+                        <a href="contact.php" class="text-decoration-none">
+                            <i class="fas fa-life-ring me-1"></i>Destek Alın
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<?php
+$pageJS = "
+    // Auto-redirect after successful verification
+    " . ($success ? "
+    setTimeout(function() {
+        window.location.href = 'login.php';
+    }, 10000); // 10 saniye sonra otomatik yönlendirme
+    " : "") . "
+    
+    // Copy email verification help
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyButtons = document.querySelectorAll('[data-copy]');
+        copyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const text = this.getAttribute('data-copy');
+                navigator.clipboard.writeText(text).then(function() {
+                    // Feedback göster
+                });
+            });
+        });
+    });
+";
+
+// Footer include
+include 'includes/footer.php';
+?>

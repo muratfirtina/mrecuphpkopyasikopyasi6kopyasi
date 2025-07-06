@@ -1,6 +1,6 @@
 <?php
 /**
- * Mr ECU - Admin Sistem Logları (Düzeltilmiş)
+ * Mr ECU - Admin Sistem Logları
  */
 
 require_once '../config/config.php';
@@ -11,17 +11,19 @@ if (!isLoggedIn() || !isAdmin()) {
     redirect('../login.php');
 }
 
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $limit = 50;
+$offset = ($page - 1) * $limit;
 $filter = sanitize($_GET['filter'] ?? 'all');
+$search = sanitize($_GET['search'] ?? '');
 
 try {
-    // Önce security_logs tablosu var mı kontrol et
+    // security_logs tablosu var mı kontrol et
     $table_check = $pdo->query("SHOW TABLES LIKE 'security_logs'");
     $security_table_exists = $table_check->fetch() ? true : false;
     
     if (!$security_table_exists) {
-        // security_logs tablosu yoksa oluştur ve örnek veri ekle
+        // security_logs tablosu yoksa oluştur
         $create_table = "
             CREATE TABLE IF NOT EXISTS security_logs (
                 id int(11) NOT NULL AUTO_INCREMENT,
@@ -41,257 +43,403 @@ try {
         
         // Örnek log verileri ekle
         $sample_logs = [
-            ['page_access', '192.168.1.100', 1, '{"page":"users.php","method":"GET"}', 'Mozilla/5.0'],
-            ['failed_login', '192.168.1.101', null, '{"username":"admin","attempts":3}', 'Chrome/91.0'],
+            ['page_access', '192.168.1.100', 1, '{"page":"admin/index.php","method":"GET"}', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'],
+            ['login_success', '192.168.1.100', 1, '{"username":"admin"}', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'],
+            ['failed_login', '192.168.1.101', null, '{"username":"test","attempts":3}', 'Chrome/91.0'],
             ['file_upload', '192.168.1.100', 1, '{"filename":"test.ecu","size":1024}', 'Mozilla/5.0'],
-            ['sql_injection_attempt', '10.0.0.50', null, '{"query":"SELECT * FROM users WHERE id=1 OR 1=1","blocked":true}', 'BadBot/1.0'],
-            ['brute_force_detected', '203.0.113.1', null, '{"attempts":15,"timeframe":"5min","blocked":true}', 'Mozilla/5.0']
+            ['sql_injection_attempt', '10.0.0.50', null, '{"query":"blocked","severity":"high"}', 'BadBot/1.0']
         ];
         
-        $insert_stmt = $pdo->prepare("INSERT INTO security_logs (event_type, ip_address, user_id, details, user_agent) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO security_logs (event_type, ip_address, user_id, details, user_agent) VALUES (?, ?, ?, ?, ?)");
         foreach ($sample_logs as $log) {
-            $insert_stmt->execute($log);
+            $stmt->execute($log);
         }
     }
     
-    // Log kayıtlarını al
-    $where_clause = "";
+    // Filtreleme koşulları
+    $whereClause = "WHERE 1=1";
     $params = [];
     
     if ($filter !== 'all') {
-        $where_clause = "WHERE event_type LIKE ?";
-        $params[] = "%$filter%";
+        $whereClause .= " AND event_type = ?";
+        $params[] = $filter;
     }
     
-    $offset = ($page - 1) * $limit;
+    if ($search) {
+        $whereClause .= " AND (event_type LIKE ? OR ip_address LIKE ? OR details LIKE ?)";
+        $searchParam = "%$search%";
+        $params = array_merge($params, [$searchParam, $searchParam, $searchParam]);
+    }
     
-    // Güvenlik logları ile sistem loglarını birleştir
-    $logs_query = "
-        SELECT 
-            'security' as source, 
-            CASE 
-                WHEN event_type IN ('sql_injection_attempt', 'xss_attempt', 'malicious_file_upload') THEN 'critical'
-                WHEN event_type IN ('brute_force_detected', 'csrf_token_invalid', 'rate_limit_exceeded') THEN 'warning'
-                ELSE 'info'
-            END as level,
-            created_at, 
-            CONCAT('Security: ', event_type) as message,
-            details,
-            ip_address,
-            user_agent,
-            id
-        FROM security_logs 
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-        $where_clause
-        ORDER BY created_at DESC
-        LIMIT $limit OFFSET $offset
+    // Toplam log sayısı
+    $countQuery = "SELECT COUNT(*) FROM security_logs $whereClause";
+    $stmt = $pdo->prepare($countQuery);
+    $stmt->execute($params);
+    $totalLogs = $stmt->fetchColumn();
+    
+    // Logları getir
+    $query = "
+        SELECT sl.*, u.username 
+        FROM security_logs sl
+        LEFT JOIN users u ON sl.user_id = u.id
+        $whereClause 
+        ORDER BY sl.created_at DESC 
+        LIMIT ? OFFSET ?
     ";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute(array_merge($params, [$limit, $offset]));
+    $logs = $stmt->fetchAll();
     
-    $logs_stmt = $pdo->prepare($logs_query);
-    $logs_stmt->execute($params);
-    $logs = $logs_stmt->fetchAll();
+    $totalPages = ceil($totalLogs / $limit);
     
-    // Toplam kayıt sayısı
-    $count_query = "SELECT COUNT(*) as total FROM security_logs WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) $where_clause";
-    $count_stmt = $pdo->prepare($count_query);
-    $count_stmt->execute($params);
-    $count_result = $count_stmt->fetch();
-    $total_records = $count_result ? $count_result['total'] : 0;
-    $total_pages = ceil($total_records / $limit);
+    // Event türleri
+    $eventTypesQuery = "SELECT DISTINCT event_type, COUNT(*) as count FROM security_logs GROUP BY event_type ORDER BY count DESC";
+    $stmt = $pdo->query($eventTypesQuery);
+    $eventTypes = $stmt->fetchAll();
     
-} catch (Exception $e) {
-    error_log('Logs page error: ' . $e->getMessage());
+} catch(PDOException $e) {
     $logs = [];
-    $total_records = 0;
-    $total_pages = 1;
+    $totalLogs = 0;
+    $totalPages = 0;
+    $eventTypes = [];
 }
 
 $pageTitle = 'Sistem Logları';
+$pageDescription = 'Sistem güvenlik loglarını görüntüleyin';
+$pageIcon = 'fas fa-list';
+
+// Header ve Sidebar include
+include '../includes/admin_header.php';
+include '../includes/admin_sidebar.php';
 ?>
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle . ' - ' . SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="../assets/css/style.css" rel="stylesheet">
-    <style>
-        .log-critical { background: #fff5f5; border-left: 4px solid #dc3545; }
-        .log-warning { background: #fffbf0; border-left: 4px solid #ffc107; }
-        .log-info { background: #f0f9ff; border-left: 4px solid #17a2b8; }
-        .log-source { font-size: 0.8em; font-weight: bold; text-transform: uppercase; }
-    </style>
-</head>
-<body>
-    <?php include '_header.php'; ?>
-    
-    <div class="container-fluid">
-        <div class="row">
-            <?php include '_sidebar.php'; ?>
-            
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="fas fa-history me-2"></i><?php echo $pageTitle; ?>
-                    </h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
-                                <i class="fas fa-sync-alt me-1"></i>Yenile
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Filtre -->
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <select class="form-select" onchange="filterLogs(this.value)">
-                            <option value="all" <?php echo $filter === 'all' ? 'selected' : ''; ?>>Tüm Loglar</option>
-                            <option value="critical" <?php echo $filter === 'critical' ? 'selected' : ''; ?>>Kritik Olaylar</option>
-                            <option value="warning" <?php echo $filter === 'warning' ? 'selected' : ''; ?>>Uyarılar</option>
-                            <option value="injection" <?php echo $filter === 'injection' ? 'selected' : ''; ?>>SQL Injection</option>
-                            <option value="xss" <?php echo $filter === 'xss' ? 'selected' : ''; ?>>XSS Saldırıları</option>
-                            <option value="brute_force" <?php echo $filter === 'brute_force' ? 'selected' : ''; ?>>Brute Force</option>
-                        </select>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>Son 30 günlük loglar gösteriliyor.</strong> 
-                            Toplam <?php echo number_format($total_records); ?> kayıt bulundu.
-                        </div>
-                    </div>
+<!-- Log İstatistikleri -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-primary"><?php echo $totalLogs; ?></div>
+                    <div class="stat-label">Toplam Log</div>
+                    <small class="text-muted">Tüm kayıtlar</small>
                 </div>
-
-                <!-- Log Listesi -->
-                <div class="card">
-                    <div class="card-body">
-                        <?php if (empty($logs)): ?>
-                            <div class="text-center py-5">
-                                <i class="fas fa-file-alt text-muted" style="font-size: 3rem;"></i>
-                                <p class="text-muted mt-3">Henüz log kaydı bulunmuyor.</p>
-                                <p class="text-muted">Güvenlik olayları otomatik olarak burada görünecektir.</p>
-                            </div>
-                        <?php else: ?>
-                            <div class="log-container">
-                                <?php foreach ($logs as $log): ?>
-                                    <div class="log-entry log-<?php echo $log['level']; ?> p-3 mb-2 rounded">
-                                        <div class="row align-items-center">
-                                            <div class="col-md-2">
-                                                <span class="log-source badge bg-<?php 
-                                                echo $log['source'] === 'security' ? 'danger' : 'primary'; 
-                                                ?>">
-                                                    <?php echo strtoupper($log['source']); ?>
-                                                </span>
-                                                <br>
-                                                <small class="text-muted">
-                                                    <?php echo formatDate($log['created_at']); ?>
-                                                </small>
-                                            </div>
-                                            <div class="col-md-1">
-                                                <span class="badge bg-<?php 
-                                                switch($log['level']) {
-                                                    case 'critical': echo 'danger'; break;
-                                                    case 'warning': echo 'warning'; break;
-                                                    default: echo 'info'; break;
-                                                }
-                                                ?>">
-                                                    <?php echo strtoupper($log['level']); ?>
-                                                </span>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <strong><?php echo htmlspecialchars($log['message']); ?></strong>
-                                                <?php if (!empty($log['ip_address'])): ?>
-                                                    <br>
-                                                    <small class="text-muted">
-                                                        <i class="fas fa-globe me-1"></i>IP: <?php echo htmlspecialchars($log['ip_address']); ?>
-                                                    </small>
-                                                <?php endif; ?>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <?php if (!empty($log['details'])): ?>
-                                                    <div class="json-details" id="details-<?php echo $log['id']; ?>">
-                                                        <?php 
-                                                        $details = json_decode($log['details'], true);
-                                                        if (is_array($details)) {
-                                                            echo htmlspecialchars(json_encode($details, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-                                                        } else {
-                                                            echo htmlspecialchars($log['details']);
-                                                        }
-                                                        ?>
-                                                    </div>
-                                                <?php else: ?>
-                                                    <small class="text-muted">Detay yok</small>
-                                                <?php endif; ?>
-                                            </div>
-                                            <div class="col-md-1 text-end">
-                                                <?php if (!empty($log['details'])): ?>
-                                                    <button class="btn btn-sm btn-outline-primary expand-btn" 
-                                                            onclick="toggleLogDetails(<?php echo $log['id']; ?>)">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                <?php endif; ?>
-                                                <?php if ($log['level'] === 'critical'): ?>
-                                                    <br>
-                                                    <span class="badge bg-danger mt-1">
-                                                        <i class="fas fa-exclamation-triangle"></i>
-                                                    </span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-
-                            <!-- Pagination -->
-                            <?php if ($total_pages > 1): ?>
-                                <nav aria-label="Log pagination" class="mt-4">
-                                    <ul class="pagination justify-content-center">
-                                        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                                            <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                                <a class="page-link" href="?page=<?php echo $i; ?>&filter=<?php echo urlencode($filter); ?>">
-                                                    <?php echo $i; ?>
-                                                </a>
-                                            </li>
-                                        <?php endfor; ?>
-                                    </ul>
-                                </nav>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
+                <div class="bg-primary bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-list text-primary fa-lg"></i>
                 </div>
-            </main>
+            </div>
         </div>
     </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <?php
+                    $todayLogs = 0;
+                    try {
+                        $stmt = $pdo->query("SELECT COUNT(*) FROM security_logs WHERE DATE(created_at) = CURDATE()");
+                        $todayLogs = $stmt->fetchColumn();
+                    } catch(Exception $e) {}
+                    ?>
+                    <div class="stat-number text-success"><?php echo $todayLogs; ?></div>
+                    <div class="stat-label">Bugünkü Loglar</div>
+                    <small class="text-muted">Son 24 saat</small>
+                </div>
+                <div class="bg-success bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-calendar-day text-success fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <?php
+                    $errorLogs = 0;
+                    try {
+                        $stmt = $pdo->query("SELECT COUNT(*) FROM security_logs WHERE event_type LIKE '%error%' OR event_type LIKE '%failed%'");
+                        $errorLogs = $stmt->fetchColumn();
+                    } catch(Exception $e) {}
+                    ?>
+                    <div class="stat-number text-danger"><?php echo $errorLogs; ?></div>
+                    <div class="stat-label">Hata Logları</div>
+                    <small class="text-muted">Başarısız işlemler</small>
+                </div>
+                <div class="bg-danger bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-exclamation-triangle text-danger fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-info"><?php echo count($eventTypes); ?></div>
+                    <div class="stat-label">Event Türü</div>
+                    <small class="text-muted">Farklı olay türleri</small>
+                </div>
+                <div class="bg-info bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-tags text-info fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function filterLogs(level) {
-            window.location.href = '?filter=' + encodeURIComponent(level);
-        }
-        
-        function toggleLogDetails(logId) {
-            const detailsDiv = document.getElementById('details-' + logId);
-            const button = detailsDiv.parentElement.nextElementSibling.querySelector('button');
+<!-- Filtreleme -->
+<div class="card admin-card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label for="filter" class="form-label">
+                    <i class="fas fa-filter me-1"></i>Event Türü
+                </label>
+                <select class="form-select" id="filter" name="filter">
+                    <option value="all">Tüm Eventler</option>
+                    <?php foreach ($eventTypes as $type): ?>
+                        <option value="<?php echo htmlspecialchars($type['event_type']); ?>" 
+                                <?php echo $filter === $type['event_type'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($type['event_type']); ?> (<?php echo $type['count']; ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
             
-            if (detailsDiv.classList.contains('expanded')) {
-                detailsDiv.classList.remove('expanded');
-                button.innerHTML = '<i class="fas fa-eye"></i>';
-                button.title = 'Detayları Göster';
-            } else {
-                detailsDiv.classList.add('expanded');
-                button.innerHTML = '<i class="fas fa-eye-slash"></i>';
-                button.title = 'Detayları Gizle';
-            }
-        }
+            <div class="col-md-6">
+                <label for="search" class="form-label">
+                    <i class="fas fa-search me-1"></i>Arama
+                </label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="<?php echo htmlspecialchars($search); ?>" 
+                       placeholder="IP adresi, event türü veya detay ara...">
+            </div>
+            
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-1"></i>Filtrele
+                </button>
+            </div>
+            
+            <div class="col-md-1">
+                <a href="logs.php" class="btn btn-outline-secondary w-100">
+                    <i class="fas fa-undo"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
 
-        // Auto refresh every 30 seconds
-        setInterval(function() {
-            console.log('Logs sayfası kontrol edildi: ' + new Date().toLocaleTimeString());
-        }, 30000);
-    </script>
-</body>
-</html>
+<!-- Log Listesi -->
+<div class="card admin-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-list me-2"></i>
+            Güvenlik Logları (<?php echo $totalLogs; ?> kayıt)
+        </h5>
+        
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-download me-1"></i>Dışa Aktar
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="exportLogs('csv')">
+                    <i class="fas fa-file-csv me-2"></i>CSV Olarak
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportLogs('txt')">
+                    <i class="fas fa-file-alt me-2"></i>TXT Olarak
+                </a></li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="card-body p-0">
+        <?php if (empty($logs)): ?>
+            <div class="text-center py-5">
+                <i class="fas fa-list fa-3x text-muted mb-3"></i>
+                <h6 class="text-muted">
+                    <?php if ($search || $filter !== 'all'): ?>
+                        Filtreye uygun log bulunamadı
+                    <?php else: ?>
+                        Henüz log kaydı yok
+                    <?php endif; ?>
+                </h6>
+            </div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-admin table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Tarih/Saat</th>
+                            <th>Event Türü</th>
+                            <th>IP Adresi</th>
+                            <th>Kullanıcı</th>
+                            <th>Detaylar</th>
+                            <th>User Agent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($logs as $log): ?>
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong><?php echo date('d.m.Y', strtotime($log['created_at'])); ?></strong><br>
+                                        <small class="text-muted"><?php echo date('H:i:s', strtotime($log['created_at'])); ?></small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <?php
+                                    $badgeClass = 'secondary';
+                                    if (strpos($log['event_type'], 'failed') !== false || strpos($log['event_type'], 'error') !== false) {
+                                        $badgeClass = 'danger';
+                                    } elseif (strpos($log['event_type'], 'success') !== false || strpos($log['event_type'], 'login') !== false) {
+                                        $badgeClass = 'success';
+                                    } elseif (strpos($log['event_type'], 'warning') !== false || strpos($log['event_type'], 'attempt') !== false) {
+                                        $badgeClass = 'warning';
+                                    } elseif (strpos($log['event_type'], 'access') !== false) {
+                                        $badgeClass = 'info';
+                                    }
+                                    ?>
+                                    <span class="badge bg-<?php echo $badgeClass; ?>">
+                                        <?php echo htmlspecialchars($log['event_type']); ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <code><?php echo htmlspecialchars($log['ip_address']); ?></code>
+                                </td>
+                                <td>
+                                    <?php if ($log['username']): ?>
+                                        <strong><?php echo htmlspecialchars($log['username']); ?></strong>
+                                    <?php else: ?>
+                                        <span class="text-muted">Anonim</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($log['details']): ?>
+                                        <?php 
+                                        $details = json_decode($log['details'], true);
+                                        if ($details): ?>
+                                            <button type="button" class="btn btn-outline-info btn-sm" 
+                                                    onclick="showDetails('<?php echo htmlspecialchars(json_encode($details)); ?>')">
+                                                <i class="fas fa-eye me-1"></i>Detay
+                                            </button>
+                                        <?php else: ?>
+                                            <small class="text-muted"><?php echo mb_substr(htmlspecialchars($log['details']), 0, 50); ?>...</small>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <small class="text-muted" title="<?php echo htmlspecialchars($log['user_agent']); ?>">
+                                        <?php echo mb_substr(htmlspecialchars($log['user_agent']), 0, 30); ?>...
+                                    </small>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <?php if ($totalPages > 1): ?>
+                <div class="card-footer">
+                    <nav aria-label="Log sayfalama">
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            <?php if ($page > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $filter !== 'all' ? '&filter=' . $filter : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                            
+                            <?php 
+                            $start = max(1, $page - 2);
+                            $end = min($totalPages, $page + 2);
+                            ?>
+                            
+                            <?php for ($i = $start; $i <= $end; $i++): ?>
+                                <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                                    <a class="page-link" href="?page=<?php echo $i; ?><?php echo $filter !== 'all' ? '&filter=' . $filter : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
+                                        <?php echo $i; ?>
+                                    </a>
+                                </li>
+                            <?php endfor; ?>
+                            
+                            <?php if ($page < $totalPages): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $filter !== 'all' ? '&filter=' . $filter : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+                    
+                    <div class="text-center mt-2">
+                        <small class="text-muted">
+                            Sayfa <?php echo $page; ?> / <?php echo $totalPages; ?> 
+                            (Toplam <?php echo $totalLogs; ?> kayıt)
+                        </small>
+                    </div>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- Detay Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-info-circle me-2"></i>Log Detayları
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="detailContent" class="bg-light p-3 rounded"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php
+$pageJS = "
+function showDetails(details) {
+    try {
+        const detailObj = JSON.parse(details);
+        document.getElementById('detailContent').textContent = JSON.stringify(detailObj, null, 2);
+    } catch(e) {
+        document.getElementById('detailContent').textContent = details;
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+    modal.show();
+}
+
+function exportLogs(format) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', format);
+    window.open('export-logs.php?' + params.toString(), '_blank');
+}
+
+// Auto-refresh every 30 seconds
+setInterval(function() {
+    if (!document.hidden) {
+        window.location.reload();
+    }
+}, 30000);
+";
+
+// Footer include
+include '../includes/admin_footer.php';
+?>

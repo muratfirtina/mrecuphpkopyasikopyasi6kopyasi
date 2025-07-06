@@ -6,11 +6,12 @@
 
 // Site ayarları
 define('SITE_NAME', 'Mr ECU');
-define('SITE_URL', 'http://localhost:8888/mrecuphp/');
+define('SITE_URL', 'http://localhost:8888/mrecuphpkopyasikopyasi6kopyasi/');
 define('SITE_EMAIL', 'info@mrecu.com');
 
 // Dosya yükleme ayarları
 define('UPLOAD_DIR', __DIR__ . '/../uploads/');
+define('UPLOAD_PATH', __DIR__ . '/../uploads/'); // FileManager için
 define('MAX_FILE_SIZE', 50 * 1024 * 1024); // 50MB
 define('ALLOWED_EXTENSIONS', ['bin', 'hex', 'ecu', 'ori', 'mod', 'zip', 'rar']);
 
@@ -56,10 +57,16 @@ if (session_status() == PHP_SESSION_NONE) {
 // Timezone ayarla
 date_default_timezone_set('Europe/Istanbul');
 
-// Güvenlik sınıflarını dahil et
-require_once __DIR__ . '/../security/SecurityManager.php';
-require_once __DIR__ . '/../security/SecureDatabase.php';
-require_once __DIR__ . '/../security/SecurityHeaders.php';
+// Güvenlik sınıflarını dahil et (eğer mevcutsa)
+if (file_exists(__DIR__ . '/../security/SecurityManager.php')) {
+    require_once __DIR__ . '/../security/SecurityManager.php';
+}
+if (file_exists(__DIR__ . '/../security/SecureDatabase.php')) {
+    require_once __DIR__ . '/../security/SecureDatabase.php';
+}
+if (file_exists(__DIR__ . '/../security/SecurityHeaders.php')) {
+    require_once __DIR__ . '/../security/SecurityHeaders.php';
+}
 
 // Autoload fonksiyonu
 spl_autoload_register(function ($class_name) {
@@ -73,8 +80,8 @@ spl_autoload_register(function ($class_name) {
 $security = null;
 $secureDb = null;
 
-// Güvenlik sistemini başlat
-if (SECURITY_ENABLED) {
+// Güvenlik sistemini başlat (sadece dosyalar mevcutsa)
+if (SECURITY_ENABLED && class_exists('SecurityManager')) {
     try {
         // Database bağlantısı
         require_once __DIR__ . '/database.php';
@@ -83,10 +90,13 @@ if (SECURITY_ENABLED) {
         $security = new SecurityManager($pdo);
         
         // Secure Database wrapper
-        $secureDb = new SecureDatabase($pdo, $security);
+        if (class_exists('SecureDatabase')) {
+            $secureDb = new SecureDatabase($pdo, $security);
+        }
         
         // Güvenlik başlıkları (sadece HTML sayfalar için)
-        if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+        if (class_exists('SecurityHeaders') && 
+            !isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 
             !strpos($_SERVER['REQUEST_URI'], '.php') === false) {
             SecurityHeaders::setAllHeaders(CSP_STRICT_MODE);
         }
@@ -162,6 +172,21 @@ function isAdmin() {
 
 function formatDate($date) {
     return date('d.m.Y H:i', strtotime($date));
+}
+
+function formatFileSize($bytes) {
+    if ($bytes <= 0) {
+        return '0 B';
+    }
+    
+    $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    $bytes = max($bytes, 0);
+    $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+    $pow = min($pow, count($units) - 1);
+    
+    $bytes /= (1 << (10 * $pow));
+    
+    return round($bytes, 2) . ' ' . $units[$pow];
 }
 
 function generateToken() {
@@ -338,7 +363,7 @@ if (SECURITY_ENABLED) {
 
 // Security headers meta tag helper'ı ekle
 function renderSecurityMeta() {
-    $nonce = SecurityHeaders::getNonce();
+    $nonce = class_exists('SecurityHeaders') ? SecurityHeaders::getNonce() : '';
     echo '<meta name="csrf-token" content="' . ($_SESSION['csrf_token'] ?? '') . '">' . "\n";
     echo '<meta http-equiv="X-UA-Compatible" content="IE=edge">' . "\n";
     echo '<meta name="robots" content="noindex, nofollow">' . "\n";
@@ -347,7 +372,9 @@ function renderSecurityMeta() {
 
 // Security script tag helper'ı
 function includeSecurityScript() {
-    $nonce = SecurityHeaders::getNonce();
-    echo '<script nonce="' . $nonce . '" src="' . SITE_URL . 'security/security-guard.js"></script>' . "\n";
+    $nonce = class_exists('SecurityHeaders') ? SecurityHeaders::getNonce() : '';
+    if (file_exists(__DIR__ . '/../security/security-guard.js')) {
+        echo '<script nonce="' . $nonce . '" src="' . SITE_URL . 'security/security-guard.js"></script>' . "\n";
+    }
 }
 ?>

@@ -6,11 +6,7 @@
 require_once '../config/config.php';
 require_once '../config/database.php';
 
-// Admin kontrolü
-if (!isLoggedIn() || !isAdmin()) {
-    redirect('../login.php');
-}
-
+// Admin kontrolü otomatik yapılır
 $user = new User($pdo);
 $fileManager = new FileManager($pdo);
 
@@ -53,371 +49,469 @@ try {
     $featuredProducts = 0;
 }
 
-$pageTitle = 'Admin Panel';
-?>
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle . ' - ' . SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="../assets/css/style.css" rel="stylesheet">
-</head>
-<body>
-    <?php include '_header.php'; ?>
+// Günlük istatistikler
+try {
+    $today = date('Y-m-d');
+    $stmt = $pdo->prepare("SELECT COUNT(*) as today_uploads FROM uploads WHERE DATE(upload_date) = ?");
+    $stmt->execute([$today]);
+    $todayUploads = $stmt->fetch()['today_uploads'] ?? 0;
     
-    <div class="container-fluid">
-        <div class="row">
-            <?php include '_sidebar.php'; ?>
-            
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                    </h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
-                                <i class="fas fa-sync-alt me-1"></i>Yenile
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    $stmt = $pdo->prepare("SELECT COUNT(*) as today_users FROM users WHERE DATE(created_at) = ?");
+    $stmt->execute([$today]);
+    $todayUsers = $stmt->fetch()['today_users'] ?? 0;
+} catch(PDOException $e) {
+    $todayUploads = 0;
+    $todayUsers = 0;
+}
 
-                <!-- İstatistik Kartları -->
-                <div class="row mb-4">
-                    <div class="col-xl-3 col-md-6">
-                        <div class="dashboard-card primary">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-1"><?php echo number_format((int)$userCount); ?></h4>
-                                    <p class="text-muted mb-0">Toplam Kullanıcı</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-users text-primary" style="font-size: 2rem;"></i>
-                                </div>
-                            </div>
-                            <div class="mt-2">
-                                <a href="users.php" class="btn btn-sm btn-outline-primary">Görüntüle</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xl-3 col-md-6">
-                        <div class="dashboard-card success">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-1"><?php echo number_format((int)($fileStats['total_files'] ?? 0)); ?></h4>
-                                    <p class="text-muted mb-0">Toplam Dosya</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-file text-success" style="font-size: 2rem;"></i>
-                                </div>
-                            </div>
-                            <div class="mt-2">
-                                <a href="uploads.php" class="btn btn-sm btn-outline-success">Görüntüle</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xl-3 col-md-6">
-                        <div class="dashboard-card warning">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-1"><?php echo number_format((int)($fileStats['pending_files'] ?? 0)); ?></h4>
-                                    <p class="text-muted mb-0">Bekleyen Dosya</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-clock text-warning" style="font-size: 2rem;"></i>
-                                </div>
-                            </div>
-                            <div class="mt-2">
-                                <a href="uploads.php?status=pending" class="btn btn-sm btn-outline-warning">İşle</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xl-3 col-md-6">
-                        <div class="dashboard-card danger">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-1"><?php echo number_format((float)$totalCredits, 2); ?></h4>
-                                    <p class="text-muted mb-0">Toplam Kredi</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-coins text-warning" style="font-size: 2rem;"></i>
-                                </div>
-                            </div>
-                            <div class="mt-2">
-                                <a href="credits.php" class="btn btn-sm btn-outline-warning">Yönet</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+// Sistem durumu
+$systemStatus = [
+    'database' => true,
+    'uploads_dir' => is_writable('../uploads/'),
+    'logs_dir' => is_writable('../logs/'),
+    'php_version' => version_compare(PHP_VERSION, '7.4.0', '>=')
+];
 
-                <!-- Katalog Yönetimi Kartları -->
-                <div class="row mb-4">
-                    <div class="col-xl-3 col-md-6">
-                        <div class="dashboard-card info">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-1"><?php echo number_format((int)$totalCategories); ?></h4>
-                                    <p class="text-muted mb-0">Toplam Kategori</p>
-                                    <small class="text-success"><?php echo $activeCategories; ?> aktif</small>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-tags text-info" style="font-size: 2rem;"></i>
-                                </div>
-                            </div>
-                            <div class="mt-2">
-                                <a href="categories.php" class="btn btn-sm btn-outline-info">Yönet</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xl-3 col-md-6">
-                        <div class="dashboard-card secondary">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-1"><?php echo number_format((int)$totalProducts); ?></h4>
-                                    <p class="text-muted mb-0">Toplam Ürün</p>
-                                    <small class="text-success"><?php echo $activeProducts; ?> aktif</small>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-box text-secondary" style="font-size: 2rem;"></i>
-                                </div>
-                            </div>
-                            <div class="mt-2">
-                                <a href="products.php" class="btn btn-sm btn-outline-secondary">Yönet</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xl-3 col-md-6">
-                        <div class="dashboard-card warning">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-1"><?php echo number_format((int)$featuredProducts); ?></h4>
-                                    <p class="text-muted mb-0">Öne Çıkan Ürün</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-star text-warning" style="font-size: 2rem;"></i>
-                                </div>
-                            </div>
-                            <div class="mt-2">
-                                <a href="products.php?featured=1" class="btn btn-sm btn-outline-warning">Görüntüle</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xl-3 col-md-6">
-                        <div class="dashboard-card success">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-1">%<?php echo $totalProducts > 0 ? number_format(($activeProducts / $totalProducts) * 100, 1) : 0; ?></h4>
-                                    <p class="text-muted mb-0">Aktif Ürün Oranı</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-chart-pie text-success" style="font-size: 2rem;"></i>
-                                </div>
-                            </div>
-                            <div class="mt-2">
-                                <a href="products.php?status=active" class="btn btn-sm btn-outline-success">Görüntüle</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+$pageTitle = 'Dashboard';
+$pageDescription = 'Sistem genel durumu ve istatistikler';
+$pageIcon = 'fas fa-tachometer-alt';
 
-                <!-- Dosya Durum Grafiği -->
-                <div class="row mb-4">
-                    <div class="col-md-8">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-chart-pie me-2"></i>Dosya Durumları
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row text-center">
-                                    <div class="col-3">
-                                        <div class="border rounded p-3">
-                                            <h3 class="text-warning"><?php echo (int)($fileStats['pending_files'] ?? 0); ?></h3>
-                                            <p class="text-muted mb-0">Bekleyen</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-3">
-                                        <div class="border rounded p-3">
-                                            <h3 class="text-info"><?php echo (int)($fileStats['processing_files'] ?? 0); ?></h3>
-                                            <p class="text-muted mb-0">İşleniyor</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-3">
-                                        <div class="border rounded p-3">
-                                            <h3 class="text-success"><?php echo (int)($fileStats['completed_files'] ?? 0); ?></h3>
-                                            <p class="text-muted mb-0">Tamamlanan</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-3">
-                                        <div class="border rounded p-3">
-                                            <h3 class="text-danger"><?php echo (int)($fileStats['rejected_files'] ?? 0); ?></h3>
-                                            <p class="text-muted mb-0">Reddedilen</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-cogs me-2"></i>Hızlı İşlemler
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-grid gap-2">
-                                    <a href="uploads.php?status=pending" class="btn btn-warning">
-                                        <i class="fas fa-clock me-2"></i>Bekleyen Dosyalar
-                                    </a>
-                                    <a href="users.php" class="btn btn-outline-primary">
-                                        <i class="fas fa-users me-2"></i>Kullanıcı Yönetimi
-                                    </a>
-                                    <a href="categories.php" class="btn btn-outline-info">
-                                        <i class="fas fa-tags me-2"></i>Kategori Yönetimi
-                                    </a>
-                                    <a href="products.php" class="btn btn-outline-secondary">
-                                        <i class="fas fa-box me-2"></i>Ürün Yönetimi
-                                    </a>
-                                    <a href="brands.php" class="btn btn-outline-success">
-                                        <i class="fas fa-car me-2"></i>Marka/Model Yönetimi
-                                    </a>
-                                    <a href="settings.php" class="btn btn-outline-dark">
-                                        <i class="fas fa-cog me-2"></i>Sistem Ayarları
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+// Sidebar için istatistikler
+$totalUsers = $userCount;
+$totalUploads = $fileStats['total'] ?? 0;
 
-                <!-- Son Yüklenen Dosyalar -->
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-history me-2"></i>Son Yüklenen Dosyalar
-                        </h5>
-                        <a href="uploads.php" class="btn btn-sm btn-outline-primary">Tümünü Görüntüle</a>
-                    </div>
-                    <div class="card-body">
-                        <?php if (empty($recentUploads)): ?>
-                            <div class="text-center py-4">
-                                <i class="fas fa-folder-open text-muted" style="font-size: 3rem;"></i>
-                                <p class="text-muted mt-3">Henüz dosya yüklenmemiş.</p>
-                            </div>
-                        <?php else: ?>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Kullanıcı</th>
-                                            <th>Dosya</th>
-                                            <th>Araç</th>
-                                            <th>Durum</th>
-                                            <th>Tarih</th>
-                                            <th>İşlem</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($recentUploads as $upload): ?>
-                                            <tr>
-                                                <td>
-                                                    <strong><?php echo htmlspecialchars($upload['username']); ?></strong>
-                                                    <br>
-                                                    <small class="text-muted"><?php echo htmlspecialchars($upload['email']); ?></small>
-                                                </td>
-                                                <td>
-                                                    <i class="fas fa-file me-2"></i>
-                                                    <?php echo htmlspecialchars($upload['original_name']); ?>
-                                                    <br>
-                                                    <small class="text-muted"><?php echo number_format((float)($upload['file_size'] ?? 0) / 1024, 2); ?> KB</small>
-                                                </td>
-                                                <td>
-                                                    <?php echo htmlspecialchars($upload['brand_name'] . ' ' . $upload['model_name']); ?>
-                                                    <br>
-                                                    <small class="text-muted"><?php echo $upload['year']; ?></small>
-                                                </td>
-                                                <td>
-                                                    <?php
-                                                    $statusClass = 'secondary';
-                                                    $statusText = $upload['status'];
-                                                    
-                                                    switch ($upload['status']) {
-                                                        case 'pending':
-                                                            $statusClass = 'warning';
-                                                            $statusText = 'Bekliyor';
-                                                            break;
-                                                        case 'processing':
-                                                            $statusClass = 'info';
-                                                            $statusText = 'İşleniyor';
-                                                            break;
-                                                        case 'completed':
-                                                            $statusClass = 'success';
-                                                            $statusText = 'Tamamlandı';
-                                                            break;
-                                                        case 'rejected':
-                                                            $statusClass = 'danger';
-                                                            $statusText = 'Reddedildi';
-                                                            break;
-                                                    }
-                                                    ?>
-                                                    <span class="badge bg-<?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
-                                                </td>
-                                                <td><?php echo formatDate($upload['upload_date']); ?></td>
-                                                <td>
-                                                    <div class="btn-group btn-group-sm">
-                                                        <a href="uploads.php?id=<?php echo $upload['id']; ?>" class="btn btn-outline-primary btn-sm">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                        <?php if ($upload['status'] === 'pending'): ?>
-                                                            <a href="process.php?id=<?php echo $upload['id']; ?>" class="btn btn-outline-success btn-sm">
-                                                                <i class="fas fa-cogs"></i>
-                                                            </a>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <?php endif; ?>
-                    </div>
+// Hızlı eylemler
+$quickActions = [
+    [
+        'text' => 'Yeni Kullanıcı',
+        'url' => 'users.php?action=create',
+        'icon' => 'fas fa-user-plus',
+        'class' => 'success'
+    ],
+    [
+        'text' => 'Dosyaları Görüntüle',
+        'url' => 'uploads.php',
+        'icon' => 'fas fa-folder-open',
+        'class' => 'primary'
+    ],
+    [
+        'text' => 'Sistem Ayarları',
+        'url' => 'settings.php',
+        'icon' => 'fas fa-cog',
+        'class' => 'secondary'
+    ]
+];
+
+// Header ve Sidebar include
+include '../includes/admin_header.php';
+include '../includes/admin_sidebar.php';
+?>
+
+<!-- Ana İstatistikler -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-primary"><?php echo number_format($userCount); ?></div>
+                    <div class="stat-label">Toplam Kullanıcı</div>
+                    <?php if ($todayUsers > 0): ?>
+                        <small class="text-success">
+                            <i class="fas fa-arrow-up me-1"></i>+<?php echo $todayUsers; ?> bugün
+                        </small>
+                    <?php endif; ?>
                 </div>
-            </main>
+                <div class="bg-primary bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-users text-primary fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-info"><?php echo number_format($totalUploads); ?></div>
+                    <div class="stat-label">Toplam Dosya</div>
+                    <?php if ($todayUploads > 0): ?>
+                        <small class="text-success">
+                            <i class="fas fa-arrow-up me-1"></i>+<?php echo $todayUploads; ?> bugün
+                        </small>
+                    <?php endif; ?>
+                </div>
+                <div class="bg-info bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-file text-info fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-success"><?php echo number_format($totalCredits, 2); ?> TL</div>
+                    <div class="stat-label">Toplam Kredi</div>
+                    <small class="text-muted">Kullanıcı bakiyeleri</small>
+                </div>
+                <div class="bg-success bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-coins text-success fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-warning"><?php echo number_format($totalProducts); ?></div>
+                    <div class="stat-label">Toplam Ürün</div>
+                    <small class="text-muted"><?php echo $activeProducts; ?> aktif</small>
+                </div>
+                <div class="bg-warning bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-box text-warning fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dosya İstatistikleri -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="card admin-card border-left-warning">
+            <div class="card-body text-center">
+                <h4 class="text-warning mb-1"><?php echo $fileStats['pending'] ?? 0; ?></h4>
+                <small class="text-muted">Bekleyen Dosya</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card admin-card border-left-info">
+            <div class="card-body text-center">
+                <h4 class="text-info mb-1"><?php echo $fileStats['processing'] ?? 0; ?></h4>
+                <small class="text-muted">İşlenen Dosya</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card admin-card border-left-success">
+            <div class="card-body text-center">
+                <h4 class="text-success mb-1"><?php echo $fileStats['completed'] ?? 0; ?></h4>
+                <small class="text-muted">Tamamlanan</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card admin-card border-left-danger">
+            <div class="card-body text-center">
+                <h4 class="text-danger mb-1"><?php echo $fileStats['rejected'] ?? 0; ?></h4>
+                <small class="text-muted">Reddedilen</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Son Yüklenen Dosyalar -->
+    <div class="col-lg-8">
+        <div class="card admin-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>Son Yüklenen Dosyalar
+                </h5>
+                <a href="uploads.php" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-eye me-1"></i>Tümünü Gör
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <?php if (empty($recentUploads)): ?>
+                    <div class="text-center py-5">
+                        <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">Henüz dosya yüklenmemiş</h6>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Kullanıcı</th>
+                                    <th>Dosya Adı</th>
+                                    <th>Durum</th>
+                                    <th>Tarih</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach (array_slice($recentUploads, 0, 8) as $upload): ?>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2">
+                                                    <i class="fas fa-user text-primary"></i>
+                                                </div>
+                                                <span class="fw-medium"><?php echo htmlspecialchars($upload['username'] ?? 'Bilinmiyor'); ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="text-truncate d-block" style="max-width: 200px;" title="<?php echo htmlspecialchars($upload['original_name'] ?? $upload['filename'] ?? 'Bilinmiyor'); ?>">
+                                                <?php echo htmlspecialchars($upload['original_name'] ?? $upload['filename'] ?? 'Bilinmiyor'); ?>
+                                            </span>
+                                            <small class="text-muted"><?php echo formatFileSize($upload['file_size'] ?? 0); ?></small>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $statusClass = [
+                                                'pending' => 'warning',
+                                                'processing' => 'info',
+                                                'completed' => 'success',
+                                                'rejected' => 'danger'
+                                            ];
+                                            $statusText = [
+                                                'pending' => 'Bekliyor',
+                                                'processing' => 'İşleniyor',
+                                                'completed' => 'Tamamlandı',
+                                                'rejected' => 'Reddedildi'
+                                            ];
+                                            ?>
+                                            <span class="badge bg-<?php echo $statusClass[$upload['status']] ?? 'secondary'; ?>">
+                                                <?php echo $statusText[$upload['status']] ?? 'Bilinmiyor'; ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                <?php echo date('d.m.Y H:i', strtotime($upload['upload_date'])); ?>
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="uploads.php?view=<?php echo $upload['id']; ?>" 
+                                                   class="btn btn-outline-primary btn-sm" title="Detay">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <?php if ($upload['status'] === 'pending'): ?>
+                                                    <a href="uploads.php?action=process&id=<?php echo $upload['id']; ?>" 
+                                                       class="btn btn-outline-success btn-sm" title="İşle">
+                                                        <i class="fas fa-play"></i>
+                                                    </a>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Custom JS -->
-    <script>
-        // Auto refresh dashboard every 2 minutes
-        setTimeout(function() {
-            location.reload();
-        }, 120000);
+    <!-- Sistem Durumu ve Hızlı İşlemler -->
+    <div class="col-lg-4">
+        <!-- Sistem Durumu -->
+        <div class="card admin-card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-server me-2"></i>Sistem Durumu
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Veritabanı</span>
+                    <span class="badge bg-<?php echo $systemStatus['database'] ? 'success' : 'danger'; ?>">
+                        <?php echo $systemStatus['database'] ? 'Aktif' : 'Hata'; ?>
+                    </span>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Upload Dizini</span>
+                    <span class="badge bg-<?php echo $systemStatus['uploads_dir'] ? 'success' : 'danger'; ?>">
+                        <?php echo $systemStatus['uploads_dir'] ? 'Yazılabilir' : 'Hata'; ?>
+                    </span>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Log Dizini</span>
+                    <span class="badge bg-<?php echo $systemStatus['logs_dir'] ? 'success' : 'danger'; ?>">
+                        <?php echo $systemStatus['logs_dir'] ? 'Yazılabilir' : 'Hata'; ?>
+                    </span>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>PHP Sürümü</span>
+                    <span class="badge bg-<?php echo $systemStatus['php_version'] ? 'success' : 'warning'; ?>">
+                        <?php echo PHP_VERSION; ?>
+                    </span>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Disk Kullanımı</span>
+                    <span class="badge bg-info">
+                        <?php 
+                        $diskFree = disk_free_space('../');
+                        $diskTotal = disk_total_space('../');
+                        $diskUsed = (($diskTotal - $diskFree) / $diskTotal) * 100;
+                        echo number_format($diskUsed, 1) . '%';
+                        ?>
+                    </span>
+                </div>
+            </div>
+        </div>
 
-        // Real-time clock
-        function updateClock() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('tr-TR');
-            document.title = timeString + ' - <?php echo $pageTitle . ' - ' . SITE_NAME; ?>';
+        <!-- Hızlı İstatistikler -->
+        <div class="card admin-card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Hızlı İstatistikler
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 border-end">
+                        <h4 class="text-primary mb-1"><?php echo number_format($totalCategories); ?></h4>
+                        <small class="text-muted">Kategori</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success mb-1"><?php echo number_format($activeCategories); ?></h4>
+                        <small class="text-muted">Aktif</small>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h5 class="text-info mb-1"><?php echo number_format($featuredProducts); ?></h5>
+                        <small class="text-muted">Öne Çıkan</small>
+                    </div>
+                    <div class="col-4">
+                        <h5 class="text-warning mb-1"><?php echo number_format($todayUploads); ?></h5>
+                        <small class="text-muted">Bugün</small>
+                    </div>
+                    <div class="col-4">
+                        <h5 class="text-secondary mb-1"><?php echo number_format($todayUsers); ?></h5>
+                        <small class="text-muted">Yeni Üye</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hızlı Eylemler -->
+        <div class="card admin-card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>Hızlı Eylemler
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="uploads.php?status=pending" class="btn btn-warning btn-sm">
+                        <i class="fas fa-clock me-2"></i>Bekleyen Dosyalar (<?php echo $fileStats['pending'] ?? 0; ?>)
+                    </a>
+                    
+                    <a href="users.php?filter=new" class="btn btn-info btn-sm">
+                        <i class="fas fa-user-plus me-2"></i>Yeni Kullanıcılar
+                    </a>
+                    
+                    <a href="reports.php" class="btn btn-success btn-sm">
+                        <i class="fas fa-chart-bar me-2"></i>Günlük Rapor
+                    </a>
+                    
+                    <a href="settings.php" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-cog me-2"></i>Sistem Ayarları
+                    </a>
+                    
+                    <a href="logs.php" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-clipboard-list me-2"></i>Sistem Logları
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grafik Alanı -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card admin-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Son 7 Günlük Aktivite
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="activityChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php
+// Sayfa özel JavaScript
+$pageJS = "
+// File size formatter function
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Activity Chart
+const ctx = document.getElementById('activityChart').getContext('2d');
+const activityChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['6 gün önce', '5 gün önce', '4 gün önce', '3 gün önce', '2 gün önce', 'Dün', 'Bugün'],
+        datasets: [{
+            label: 'Dosya Yüklemeleri',
+            data: [12, 19, 8, 15, 25, 18, " . $todayUploads . "],
+            borderColor: '#007bff',
+            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+        }, {
+            label: 'Yeni Kullanıcılar',
+            data: [2, 5, 3, 8, 4, 6, " . $todayUsers . "],
+            borderColor: '#28a745',
+            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
         }
-        
-        setInterval(updateClock, 1000);
-    </script>
-</body>
-</html>
+    }
+});
+
+// Auto-refresh dashboard every 5 minutes
+setInterval(function() {
+    if (!document.hidden) {
+        location.reload();
+    }
+}, 300000);
+";
+
+// Footer include
+include '../includes/admin_footer.php';
+?>

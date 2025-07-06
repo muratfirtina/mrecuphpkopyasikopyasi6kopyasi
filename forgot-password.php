@@ -28,29 +28,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $pageTitle = 'Şifremi Unuttum';
+$pageDescription = 'Şifrenizi sıfırlayın - Email adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.';
+$pageKeywords = 'şifre sıfırlama, şifremi unuttum, parola sıfırlama';
+
+// Header include
+include 'includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle . ' - ' . SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+
+    <!-- Page Content -->
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
                 <div class="text-center mt-5 mb-4">
-                    <a href="index.php" class="text-decoration-none">
-                        <h1 class="h3 mb-3 fw-normal">
-                            <i class="fas fa-microchip text-primary"></i>
-                            <?php echo SITE_NAME; ?>
-                        </h1>
-                    </a>
-                    <p class="text-muted">Şifrenizi sıfırlayın</p>
+                    <h1 class="h3 mb-3 fw-normal">
+                        <i class="fas fa-key text-primary me-2"></i>
+                        Şifre Sıfırlama
+                    </h1>
+                    <p class="text-muted">Şifrenizi sıfırlamak için email adresinizi girin</p>
                 </div>
                 
                 <div class="card shadow">
@@ -73,9 +67,9 @@ $pageTitle = 'Şifremi Unuttum';
                         <?php else: ?>
                         
                         <div class="text-center mb-4">
-                            <i class="fas fa-key text-primary" style="font-size: 3rem;"></i>
-                            <h5 class="mt-3">Şifrenizi mi unuttunuz?</h5>
-                            <p class="text-muted">Email adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.</p>
+                            <i class="fas fa-envelope text-primary" style="font-size: 3rem;"></i>
+                            <h5 class="mt-3">Email Adresinizi Girin</h5>
+                            <p class="text-muted">Size şifre sıfırlama bağlantısı göndereceğiz.</p>
                         </div>
                         
                         <form method="POST" novalidate>
@@ -111,8 +105,9 @@ $pageTitle = 'Şifremi Unuttum';
                     </p>
                     
                     <p class="text-muted">
-                        <a href="index.php" class="text-decoration-none">
-                            <i class="fas fa-arrow-left me-1"></i>Ana Sayfaya Dön
+                        Hesabınız yok mu? 
+                        <a href="register.php" class="text-decoration-none">
+                            <i class="fas fa-user-plus me-1"></i>Kayıt Ol
                         </a>
                     </p>
                 </div>
@@ -120,7 +115,14 @@ $pageTitle = 'Şifremi Unuttum';
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<?php
+$pageJS = "
+    // Auto-focus on email field
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('email').focus();
+    });
+";
+
+// Footer include
+include 'includes/footer.php';
+?>

@@ -68,20 +68,6 @@ if (!function_exists('secureFileUpload')) {
     }
 }
 
-// Dosya boyutu formatlama
-if (!function_exists('formatFileSize')) {
-    function formatFileSize($bytes) {
-        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        $bytes = max($bytes, 0);
-        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
-        $pow = min($pow, count($units) - 1);
-        
-        $bytes /= pow(1024, $pow);
-        
-        return round($bytes, 2) . ' ' . $units[$pow];
-    }
-}
-
 // Array'den CSV oluşturma
 if (!function_exists('arrayToCSV')) {
     function arrayToCSV($array, $filename) {
@@ -217,4 +203,52 @@ if (!defined('PRODUCTION')) {
 
 // Timezone ayarı
 date_default_timezone_set('Europe/Istanbul');
+
+// Session tabanlı fonksiyonlar
+if (!function_exists('isLoggedIn')) {
+    function isLoggedIn() {
+        return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+    }
+}
+
+if (!function_exists('isAdmin')) {
+    function isAdmin() {
+        return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+    }
+}
+
+if (!function_exists('redirect')) {
+    function redirect($url) {
+        header('Location: ' . $url);
+        exit;
+    }
+}
+
+if (!function_exists('sanitize')) {
+    function sanitize($input) {
+        if (is_array($input)) {
+            return array_map('sanitize', $input);
+        }
+        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+    }
+}
+
+// Admin kontrol fonksiyonu
+if (!function_exists('requireAdmin')) {
+    function requireAdmin() {
+        if (!isLoggedIn() || !isAdmin()) {
+            redirect('../login.php?error=access_denied');
+        }
+    }
+}
+
+// Kullanıcı kontrol fonksiyonu
+if (!function_exists('requireLogin')) {
+    function requireLogin() {
+        if (!isLoggedIn()) {
+            redirect('../login.php?error=login_required');
+        }
+    }
+}
+
 ?>

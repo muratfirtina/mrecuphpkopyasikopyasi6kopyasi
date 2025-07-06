@@ -1,92 +1,104 @@
 <?php
 /**
- * Veritabanı tablo kontrolü ve debug
+ * Mr ECU - Sistem Debug
  */
 
 require_once '../config/config.php';
 require_once '../config/database.php';
 
-echo "<h1>Veritabanı Tablo Kontrolü</h1>";
+echo "<!DOCTYPE html>
+<html>
+<head>
+    <title>Sistem Debug</title>
+    <meta charset='UTF-8'>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .error { color: red; background: #ffe6e6; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .success { color: green; background: #e6ffe6; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .warning { color: orange; background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .info { color: blue; background: #e6f3ff; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>";
 
+echo "<h1>🔍 Sistem Debug</h1>";
+
+// 1. Database bağlantı testi
 try {
-    // Tabloları listele
-    $stmt = $pdo->query("SHOW TABLES");
-    $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    
-    echo "<h2>Mevcut Tablolar:</h2>";
-    echo "<ul>";
-    foreach ($tables as $table) {
-        echo "<li>$table</li>";
-    }
-    echo "</ul>";
-    
-    // Her tablodaki kayıt sayısını kontrol et
-    echo "<h2>Tablo Kayıt Sayıları:</h2>";
-    echo "<table border='1' style='border-collapse:collapse;'>";
-    echo "<tr><th>Tablo</th><th>Kayıt Sayısı</th><th>Örnek Veri</th></tr>";
-    
-    foreach ($tables as $table) {
-        try {
-            $stmt = $pdo->query("SELECT COUNT(*) FROM $table");
-            $count = $stmt->fetchColumn();
-            
-            // İlk kayıtı al
-            $stmt = $pdo->query("SELECT * FROM $table LIMIT 1");
-            $sample = $stmt->fetch();
-            
-            echo "<tr>";
-            echo "<td><strong>$table</strong></td>";
-            echo "<td>$count</td>";
-            echo "<td>" . ($sample ? "✅ Veri var" : "❌ Boş") . "</td>";
-            echo "</tr>";
-        } catch (Exception $e) {
-            echo "<tr>";
-            echo "<td><strong>$table</strong></td>";
-            echo "<td colspan='2'>HATA: " . $e->getMessage() . "</td>";
-            echo "</tr>";
-        }
-    }
-    echo "</table>";
-    
-    // User sınıfını test et
-    echo "<h2>User Sınıfı Test:</h2>";
-    try {
-        require_once '../includes/User.php';
-        $user = new User($pdo);
-        $userCount = $user->getUserCount();
-        echo "<p>getUserCount(): $userCount (" . gettype($userCount) . ")</p>";
-    } catch (Exception $e) {
-        echo "<p style='color:red;'>User sınıfı hatası: " . $e->getMessage() . "</p>";
-    }
-    
-    // FileManager sınıfını test et
-    echo "<h2>FileManager Sınıfı Test:</h2>";
-    try {
-        require_once '../includes/FileManager.php';
-        $fileManager = new FileManager($pdo);
-        $fileStats = $fileManager->getFileStats();
-        echo "<p>getFileStats():</p>";
-        echo "<pre>" . print_r($fileStats, true) . "</pre>";
-    } catch (Exception $e) {
-        echo "<p style='color:red;'>FileManager sınıfı hatası: " . $e->getMessage() . "</p>";
-    }
-    
-    // Krediler testi
-    echo "<h2>Kredi Sorgusu Test:</h2>";
-    try {
-        $stmt = $pdo->query("SELECT SUM(credits) as total_credits FROM users WHERE role = 'user'");
-        $result = $stmt->fetch();
-        $totalCredits = $result['total_credits'] ?? 0;
-        echo "<p>Toplam kredi: $totalCredits (" . gettype($totalCredits) . ")</p>";
-        echo "<p>number_format test: " . number_format((float)$totalCredits, 2) . "</p>";
-    } catch (Exception $e) {
-        echo "<p style='color:red;'>Kredi sorgusu hatası: " . $e->getMessage() . "</p>";
-    }
-    
+    $stmt = $pdo->query("SELECT NOW() as `current_time`, VERSION() as mysql_version");
+    $info = $stmt->fetch();
+    echo "<div class='success'>✅ Database bağlantısı başarılı<br>";
+    echo "Zaman: {$info['current_time']}<br>";
+    echo "MySQL Versiyon: {$info['mysql_version']}</div>";
 } catch (Exception $e) {
-    echo "<p style='color:red;'>Genel hata: " . $e->getMessage() . "</p>";
+    echo "<div class='error'>❌ Database bağlantı hatası: " . $e->getMessage() . "</div>";
 }
 
-echo "<br><a href='../config/install.php'>Kurulum Sayfasına Git</a><br>";
-echo "<a href='index.php'>Admin Paneline Geri Dön</a>";
+// 2. Gerekli tabloları kontrol et
+echo "<h2>2. Tablo Kontrolü</h2>";
+$requiredTables = ['users', 'file_uploads', 'revisions', 'brands', 'models', 'file_responses'];
+foreach ($requiredTables as $table) {
+    try {
+        $stmt = $pdo->query("SELECT COUNT(*) as count FROM $table");
+        $count = $stmt->fetch()['count'];
+        echo "<div class='success'>✅ $table: $count kayıt</div>";
+    } catch (Exception $e) {
+        echo "<div class='error'>❌ $table: " . $e->getMessage() . "</div>";
+    }
+}
+
+// 3. last_login sütunu kontrolü
+echo "<h2>3. last_login Sütunu Kontrolü</h2>";
+try {
+    $stmt = $pdo->query("SHOW COLUMNS FROM users LIKE 'last_login'");
+    if ($stmt->rowCount() > 0) {
+        echo "<div class='success'>✅ last_login sütunu mevcut</div>";
+    } else {
+        echo "<div class='warning'>⚠️ last_login sütunu yok</div>";
+    }
+} catch (Exception $e) {
+    echo "<div class='error'>❌ last_login kontrolü hatası: " . $e->getMessage() . "</div>";
+}
+
+// 4. FileManager sınıfı kontrolü
+echo "<h2>4. Sınıf Kontrolü</h2>";
+if (class_exists('FileManager')) {
+    echo "<div class='success'>✅ FileManager sınıfı yüklendi</div>";
+    $fileManager = new FileManager($pdo);
+    
+    $methods = ['getUserRevisions', 'getAllRevisions', 'getUploadById'];
+    foreach ($methods as $method) {
+        if (method_exists($fileManager, $method)) {
+            echo "<div class='success'>✅ FileManager::$method() metodu mevcut</div>";
+        } else {
+            echo "<div class='warning'>⚠️ FileManager::$method() metodu eksik</div>";
+        }
+    }
+} else {
+    echo "<div class='error'>❌ FileManager sınıfı bulunamadı</div>";
+}
+
+// 5. Upload klasörü kontrolü
+echo "<h2>5. Upload Klasörleri</h2>";
+$uploadDirs = [
+    UPLOAD_DIR . 'user_files/',
+    UPLOAD_DIR . 'response_files/',
+    UPLOAD_DIR . 'revision_files/'
+];
+
+foreach ($uploadDirs as $dir) {
+    if (is_dir($dir)) {
+        $files = count(glob($dir . '*'));
+        echo "<div class='success'>✅ $dir: $files dosya</div>";
+    } else {
+        echo "<div class='warning'>⚠️ $dir: Klasör yok</div>";
+    }
+}
+
+echo "<h2>6. Hızlı Linkler</h2>";
+echo "<p><a href='uploads.php'>📁 Uploads</a> | ";
+echo "<a href='revisions.php'>🔄 Revisions</a> | ";
+echo "<a href='reports.php'>📊 Reports</a></p>";
+
+echo "</body></html>";
 ?>

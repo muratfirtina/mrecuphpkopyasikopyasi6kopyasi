@@ -9,17 +9,17 @@ require_once 'config/database.php';
 try {
     echo "<h1>🔄 Revize Sistemi Kurulumu</h1>";
     
-    // Revisions tablosunu oluştur
+    // Revisions tablosunu oluştur (GUID uyumlu)
     $sql = "
     CREATE TABLE IF NOT EXISTS revisions (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        upload_id INT NOT NULL,
-        user_id INT NOT NULL,
-        admin_id INT NULL,
+        id CHAR(36) PRIMARY KEY,
+        upload_id CHAR(36) NOT NULL,
+        user_id CHAR(36) NOT NULL,
+        admin_id CHAR(36) NULL,
         request_notes TEXT NOT NULL,
         admin_notes TEXT NULL,
         credits_charged DECIMAL(10,2) DEFAULT 0.00,
-        status ENUM('pending', 'completed', 'rejected') DEFAULT 'pending',
+        status ENUM('pending', 'in_progress', 'completed', 'rejected') DEFAULT 'pending',
         requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         completed_at TIMESTAMP NULL,
         FOREIGN KEY (upload_id) REFERENCES file_uploads(id) ON DELETE CASCADE,

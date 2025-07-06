@@ -48,240 +48,399 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $pageTitle = 'Kayıt Ol';
+$pageDescription = 'Mr ECU hesabı oluşturun ve profesyonel ECU hizmetlerimizden faydalanmaya başlayın.';
+$pageKeywords = 'kayıt ol, hesap oluştur, üye ol, ECU hizmetleri';
+$bodyClass = 'bg-light';
+
+// Header include
+include 'includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle . ' - ' . SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="text-center mt-5 mb-4">
-                    <a href="index.php" class="text-decoration-none">
-                        <h1 class="h3 mb-3 fw-normal">
-                            <i class="fas fa-microchip text-primary"></i>
-                            <?php echo SITE_NAME; ?>
-                        </h1>
-                    </a>
-                    <p class="text-muted">Yeni hesap oluşturun</p>
-                </div>
-                
-                <div class="card shadow">
-                    <div class="card-body p-4">
-                        <?php if ($error): ?>
-                            <div class="alert alert-danger" role="alert">
-                                <i class="fas fa-exclamation-triangle me-2"></i><?php echo $error; ?>
-                            </div>
-                        <?php endif; ?>
+
+    <!-- Register Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10">
+                    <div class="card shadow border-0">
+                        <div class="card-header bg-success text-white text-center py-4">
+                            <h3 class="mb-0">
+                                <i class="fas fa-user-plus me-2"></i>
+                                Hesap Oluştur
+                            </h3>
+                            <p class="mb-0 mt-2 opacity-75">Hemen ücretsiz hesabınızı oluşturun</p>
+                        </div>
                         
-                        <?php if ($success): ?>
-                            <div class="alert alert-success" role="alert">
-                                <i class="fas fa-check-circle me-2"></i><?php echo $success; ?>
-                                <div class="mt-2">
-                                    <a href="login.php" class="btn btn-success btn-sm">
-                                        <i class="fas fa-sign-in-alt me-1"></i>Giriş Yap
-                                    </a>
+                        <div class="card-body p-4">
+                            <!-- Hata/Başarı Mesajları -->
+                            <?php if ($error): ?>
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <?php echo $error; ?>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                 </div>
-                            </div>
-                        <?php else: ?>
-                        
-                        <form method="POST" class="needs-validation" novalidate>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="first_name" class="form-label">Ad *</label>
-                                    <input type="text" class="form-control" id="first_name" name="first_name" 
-                                           value="<?php echo isset($_POST['first_name']) ? htmlspecialchars($_POST['first_name']) : ''; ?>" 
-                                           required>
-                                    <div class="invalid-feedback">
-                                        Ad alanı zorunludur.
+                            <?php endif; ?>
+                            
+                            <?php if ($success): ?>
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <?php echo $success; ?>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    <div class="mt-3">
+                                        <a href="login.php" class="btn btn-success">
+                                            <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
+                                        </a>
                                     </div>
                                 </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label for="last_name" class="form-label">Soyad *</label>
-                                    <input type="text" class="form-control" id="last_name" name="last_name" 
-                                           value="<?php echo isset($_POST['last_name']) ? htmlspecialchars($_POST['last_name']) : ''; ?>" 
-                                           required>
-                                    <div class="invalid-feedback">
-                                        Soyad alanı zorunludur.
+                            <?php endif; ?>
+                            
+                            <?php if (!$success): ?>
+                                <!-- Kayıt Formu -->
+                                <form method="POST" action="" id="registerForm" data-loading="true">
+                                    <div class="row">
+                                        <!-- Sol Kolon -->
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="first_name" class="form-label">
+                                                    <i class="fas fa-user me-1"></i>
+                                                    Ad <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" 
+                                                       class="form-control" 
+                                                       id="first_name" 
+                                                       name="first_name" 
+                                                       value="<?php echo isset($_POST['first_name']) ? htmlspecialchars($_POST['first_name']) : ''; ?>"
+                                                       placeholder="Adınız"
+                                                       required>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="last_name" class="form-label">
+                                                    <i class="fas fa-user me-1"></i>
+                                                    Soyad <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" 
+                                                       class="form-control" 
+                                                       id="last_name" 
+                                                       name="last_name" 
+                                                       value="<?php echo isset($_POST['last_name']) ? htmlspecialchars($_POST['last_name']) : ''; ?>"
+                                                       placeholder="Soyadınız"
+                                                       required>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="username" class="form-label">
+                                                    <i class="fas fa-at me-1"></i>
+                                                    Kullanıcı Adı <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" 
+                                                       class="form-control" 
+                                                       id="username" 
+                                                       name="username" 
+                                                       value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>"
+                                                       placeholder="kullanici_adi"
+                                                       pattern="[a-zA-Z0-9_]+"
+                                                       title="Sadece harf, rakam ve alt çizgi kullanabilirsiniz"
+                                                       required>
+                                                <div class="form-text">
+                                                    Sadece harf, rakam ve alt çizgi (_) kullanabilirsiniz.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Sağ Kolon -->
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="email" class="form-label">
+                                                    <i class="fas fa-envelope me-1"></i>
+                                                    E-posta Adresi <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="email" 
+                                                       class="form-control" 
+                                                       id="email" 
+                                                       name="email" 
+                                                       value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>"
+                                                       placeholder="ornek@email.com"
+                                                       required>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="phone" class="form-label">
+                                                    <i class="fas fa-phone me-1"></i>
+                                                    Telefon
+                                                </label>
+                                                <input type="tel" 
+                                                       class="form-control" 
+                                                       id="phone" 
+                                                       name="phone" 
+                                                       value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>"
+                                                       placeholder="+90 (555) 123 45 67">
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="password" class="form-label">
+                                                    <i class="fas fa-lock me-1"></i>
+                                                    Şifre <span class="text-danger">*</span>
+                                                </label>
+                                                <div class="input-group">
+                                                    <input type="password" 
+                                                           class="form-control" 
+                                                           id="password" 
+                                                           name="password" 
+                                                           placeholder="••••••••"
+                                                           minlength="6"
+                                                           required>
+                                                    <button type="button" 
+                                                            class="btn btn-outline-secondary" 
+                                                            onclick="togglePassword('password')"
+                                                            id="togglePasswordBtn1">
+                                                        <i class="fas fa-eye" id="togglePasswordIcon1"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="form-text">En az 6 karakter olmalıdır.</div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Kullanıcı Adı *</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-user text-muted"></i>
-                                    </span>
-                                    <input type="text" class="form-control" id="username" name="username" 
-                                           value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>" 
-                                           required>
-                                    <div class="invalid-feedback">
-                                        Kullanıcı adı zorunludur.
+                                    
+                                    <!-- Şifre Tekrar -->
+                                    <div class="mb-3">
+                                        <label for="confirm_password" class="form-label">
+                                            <i class="fas fa-lock me-1"></i>
+                                            Şifre Tekrar <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="password" 
+                                                   class="form-control" 
+                                                   id="confirm_password" 
+                                                   name="confirm_password" 
+                                                   placeholder="••••••••"
+                                                   required>
+                                            <button type="button" 
+                                                    class="btn btn-outline-secondary" 
+                                                    onclick="togglePassword('confirm_password')"
+                                                    id="togglePasswordBtn2">
+                                                <i class="fas fa-eye" id="togglePasswordIcon2"></i>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-text">
-                                    Sadece harf, rakam ve alt çizgi kullanabilirsiniz.
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email Adresi *</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-envelope text-muted"></i>
-                                    </span>
-                                    <input type="email" class="form-control" id="email" name="email" 
-                                           value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" 
-                                           required>
-                                    <div class="invalid-feedback">
-                                        Geçerli bir email adresi girin.
+                                    
+                                    <!-- Şartlar ve Koşullar -->
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input type="checkbox" 
+                                                   class="form-check-input" 
+                                                   id="terms" 
+                                                   name="terms"
+                                                   required>
+                                            <label class="form-check-label" for="terms">
+                                                <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#termsModal">
+                                                    Kullanım şartları
+                                                </a> ve 
+                                                <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#privacyModal">
+                                                    gizlilik politikası
+                                                </a>nı okudum ve kabul ediyorum. <span class="text-danger">*</span>
+                                            </label>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="phone" class="form-label">Telefon</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-phone text-muted"></i>
-                                    </span>
-                                    <input type="tel" class="form-control" id="phone" name="phone" 
-                                           value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>" 
-                                           placeholder="+90 555 123 45 67">
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="password" class="form-label">Şifre *</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="fas fa-lock text-muted"></i>
-                                        </span>
-                                        <input type="password" class="form-control" id="password" name="password" required>
-                                        <button type="button" class="btn btn-outline-secondary" id="togglePassword">
-                                            <i class="fas fa-eye"></i>
+                                    
+                                    <!-- Submit Button -->
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-success btn-lg" data-original-text="Hesap Oluştur">
+                                            <i class="fas fa-user-plus me-2"></i>
+                                            Hesap Oluştur
                                         </button>
-                                        <div class="invalid-feedback">
-                                            Şifre en az 6 karakter olmalıdır.
-                                        </div>
                                     </div>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label for="confirm_password" class="form-label">Şifre Tekrar *</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="fas fa-lock text-muted"></i>
-                                        </span>
-                                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                                        <div class="invalid-feedback">
-                                            Şifreler eşleşmiyor.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="terms" required>
-                                <label class="form-check-label" for="terms">
-                                    <a href="#" class="text-decoration-none">Kullanım Koşullarını</a> kabul ediyorum *
-                                </label>
-                                <div class="invalid-feedback">
-                                    Kullanım koşullarını kabul etmelisiniz.
-                                </div>
-                            </div>
-                            
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-user-plus me-2"></i>Kayıt Ol
-                                </button>
-                            </div>
-                        </form>
+                                </form>
+                            <?php endif; ?>
+                        </div>
                         
-                        <?php endif; ?>
+                        <div class="card-footer bg-light text-center py-3">
+                            <p class="mb-0 text-muted">
+                                Zaten hesabınız var mı? 
+                                <a href="login.php" class="text-decoration-none fw-bold">
+                                    Giriş yapın
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Avantajlar -->
+                    <div class="row mt-5 text-center">
+                        <div class="col-12 mb-4">
+                            <h4>Ücretsiz Hesabınızla</h4>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <i class="fas fa-upload fa-3x text-primary mb-3"></i>
+                                    <h6>Dosya Yükleme</h6>
+                                    <p class="text-muted small mb-0">
+                                        ECU dosyalarınızı güvenli şekilde yükleyin
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <i class="fas fa-cogs fa-3x text-success mb-3"></i>
+                                    <h6>Profesyonel İşlem</h6>
+                                    <p class="text-muted small mb-0">
+                                        Uzman ekibimiz dosyalarınızı işler
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <i class="fas fa-download fa-3x text-info mb-3"></i>
+                                    <h6>Hızlı İndirme</h6>
+                                    <p class="text-muted small mb-0">
+                                        İşlenmiş dosyalarınızı anında indirin
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="text-center mt-4">
-                    <p class="text-muted">
-                        Zaten hesabınız var mı? 
-                        <a href="login.php" class="text-decoration-none">
-                            <i class="fas fa-sign-in-alt me-1"></i>Giriş Yap
-                        </a>
-                    </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Terms Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Kullanım Şartları</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>1. Genel Hükümler</h6>
+                    <p>Bu kullanım şartları, <?php echo SITE_NAME; ?> platformunu kullanımınızı düzenler.</p>
                     
-                    <p class="text-muted">
-                        <a href="index.php" class="text-decoration-none">
-                            <i class="fas fa-arrow-left me-1"></i>Ana Sayfaya Dön
-                        </a>
-                    </p>
+                    <h6>2. Hizmet Kapsamı</h6>
+                    <p>Platform, ECU dosya işleme hizmetleri sunar. Kullanıcılar dosyalarını yükleyerek profesyonel işleme hizmeti alabilir.</p>
+                    
+                    <h6>3. Kullanıcı Sorumlulukları</h6>
+                    <p>Kullanıcılar yükledikleri dosyaların yasal ve geçerli olmasından sorumludur.</p>
+                    
+                    <h6>4. Gizlilik</h6>
+                    <p>Yüklenen tüm dosyalar gizli tutulur ve üçüncü taraflarla paylaşılmaz.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Privacy Modal -->
+    <div class="modal fade" id="privacyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Gizlilik Politikası</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Kişisel Verilerin Korunması</h6>
+                    <p><?php echo SITE_NAME; ?> olarak kişisel verilerinizin gizliliğini korumak önceliğimizdir.</p>
+                    
+                    <h6>Toplanan Veriler</h6>
+                    <ul>
+                        <li>Ad, soyad bilgileri</li>
+                        <li>E-posta adresi</li>
+                        <li>Telefon numarası (isteğe bağlı)</li>
+                        <li>Yüklenen dosyalar</li>
+                    </ul>
+                    
+                    <h6>Verilerin Kullanımı</h6>
+                    <p>Toplanan veriler sadece hizmet sunumu amacıyla kullanılır.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<?php
+// Sayfa özel JavaScript
+$pageJS = "
+    function togglePassword(fieldId) {
+        const passwordInput = document.getElementById(fieldId);
+        const iconId = fieldId === 'password' ? 'togglePasswordIcon1' : 'togglePasswordIcon2';
+        const toggleIcon = document.getElementById(iconId);
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.className = 'fas fa-eye-slash';
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.className = 'fas fa-eye';
+        }
+    }
     
-    <!-- Custom JS -->
-    <script>
-        // Şifre görünürlük toggle
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const password = document.getElementById('password');
-            const confirmPassword = document.getElementById('confirm_password');
-            const icon = this.querySelector('i');
-            
-            if (password.type === 'password') {
-                password.type = 'text';
-                confirmPassword.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                password.type = 'password';
-                confirmPassword.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        });
+    // Form validation
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        const terms = document.getElementById('terms').checked;
         
-        // Şifre eşleştirme kontrolü
-        document.getElementById('confirm_password').addEventListener('input', function() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = this.value;
-            
-            if (password !== confirmPassword) {
-                this.setCustomValidity('Şifreler eşleşmiyor');
-            } else {
-                this.setCustomValidity('');
-            }
-        });
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('Şifreler eşleşmiyor!');
+            return false;
+        }
         
-        // Form validation
-        (function() {
-            'use strict';
-            window.addEventListener('load', function() {
-                const forms = document.getElementsByClassName('needs-validation');
-                Array.prototype.filter.call(forms, function(form) {
-                    form.addEventListener('submit', function(event) {
-                        if (form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            }, false);
-        })();
-    </script>
-</body>
-</html>
+        if (password.length < 6) {
+            e.preventDefault();
+            alert('Şifre en az 6 karakter olmalıdır!');
+            return false;
+        }
+        
+        if (!terms) {
+            e.preventDefault();
+            alert('Kullanım şartlarını kabul etmelisiniz!');
+            return false;
+        }
+    });
+    
+    // Real-time password match check
+    document.getElementById('confirm_password').addEventListener('input', function() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+        
+        if (confirmPassword && password !== confirmPassword) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+            if (confirmPassword && password === confirmPassword) {
+                this.classList.add('is-valid');
+            }
+        }
+    });
+    
+    // Username validation
+    document.getElementById('username').addEventListener('input', function() {
+        const username = this.value;
+        const regex = /^[a-zA-Z0-9_]+$/;
+        
+        if (username && !regex.test(username)) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+            if (username.length >= 3) {
+                this.classList.add('is-valid');
+            }
+        }
+    });
+";
+
+// Footer include
+include 'includes/footer.php';
+?>

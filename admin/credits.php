@@ -1,32 +1,27 @@
 <?php
 /**
- * Mr ECU - Admin Kredi Yönetimi (GUID System)
+ * Mr ECU - Admin Kredi Yönetimi (Düzeltilmiş Versiyon)
  */
 
 require_once '../config/config.php';
 require_once '../config/database.php';
 
-// Admin kontrolü
-if (!isLoggedIn() || !isAdmin()) {
-    redirect('../login.php');
-}
-
+// Admin kontrolü otomatik yapılır
 $user = new User($pdo);
+$error = '';
+$success = '';
 
 // Kredi ekleme/çıkarma işlemi
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add_credits'])) {
         $user_id = sanitize($_POST['user_id']);
-        $amount = (int)$_POST['amount']; // Tam sayı kontör
+        $amount = floatval($_POST['amount']);
         $description = sanitize($_POST['description']);
         
-        // GUID format kontrolü
         if (!isValidUUID($user_id)) {
-            $_SESSION['message'] = 'Geçersiz kullanıcı ID formatı.';
-            $_SESSION['message_type'] = 'danger';
+            $error = 'Geçersiz kullanıcı ID formatı.';
         } elseif ($amount <= 0) {
-            $_SESSION['message'] = 'Kredi miktarı 0\'dan büyük olmalıdır.';
-            $_SESSION['message_type'] = 'danger';
+            $error = 'Kredi miktarı 0\'dan büyük olmalıdır.';
         } else {
             try {
                 $pdo->beginTransaction();
@@ -37,768 +32,558 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception('Kullanıcı bulunamadı.');
                 }
                 
-                // Mevcut kredinin üstüne ekle
+                // Kredi ekleme
                 $newCredits = $currentUser['credits'] + $amount;
                 
                 $stmt = $pdo->prepare("UPDATE users SET credits = ? WHERE id = ?");
                 $stmt->execute([$newCredits, $user_id]);
                 
-                // Admin ID kontrolü
-                $adminId = null;
-                if (isset($_SESSION['user_id'])) {
-                    if (isValidUUID($_SESSION['user_id'])) {
-                        $stmt_admin = $pdo->prepare("SELECT id FROM users WHERE id = ?");
-                        $stmt_admin->execute([$_SESSION['user_id']]);
-                        if ($stmt_admin->fetch()) {
-                            $adminId = $_SESSION['user_id'];
-                        }
-                    } else {
-                        $adminId = $_SESSION['user_id'];
-                    }
-                }
-                
-                // Kredi işlem kaydı (GUID ID ile)
+                // Credit transactions tablosuna kaydet
                 $transactionId = generateUUID();
                 $stmt = $pdo->prepare("
-                    INSERT INTO credit_transactions (id, user_id, amount, type, description, admin_id) 
-                    VALUES (?, ?, ?, 'deposit', ?, ?)
+                    INSERT INTO credit_transactions (id, user_id, admin_id, type, amount, description, created_at) 
+                    VALUES (?, ?, ?, 'deposit', ?, ?, NOW())
                 ");
-                $stmt->execute([$transactionId, $user_id, $amount, $description, $adminId]);
-                
-                $pdo->commit();
-                $_SESSION['message'] = $amount . ' kredi başarıyla eklendi! Yeni bakiye: ' . number_format($newCredits, 0);
-                $_SESSION['message_type'] = 'success';
-                
-                // SESSION güncellemesi
-                if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
-                    $_SESSION['credits'] = $user->getUserCredits($user_id);
-                }
+                $stmt->execute([$transactionId, $user_id, $_SESSION['user_id'], $amount, $description]);
                 
                 // Log kaydı
-                $user->logAction($_SESSION['user_id'], 'credit_add', "Kullanıcı #{$user_id} için {$amount} kredi eklendi");
+                $user->logAction($_SESSION['user_id'], 'credit_added', "Kullanıcıya {$amount} TL kredi eklendi: {$description}");
                 
+                $pdo->commit();
+                $success = "{$amount} TL kredi başarıyla eklendi. Yeni bakiye: " . number_format($newCredits, 2) . " TL";
             } catch (Exception $e) {
                 $pdo->rollBack();
-                $_SESSION['message'] = 'Hata: ' . $e->getMessage();
-                $_SESSION['message_type'] = 'danger';
+                $error = 'Kredi eklenirken hata oluştu: ' . $e->getMessage();
             }
         }
-        
-        // POST işleminden sonra aynı sayfaya redirect yap (PRG pattern)
-        $redirectUrl = 'credits.php';
-        if (isset($_GET['search']) && !empty($_GET['search'])) {
-            $redirectUrl .= '?search=' . urlencode($_GET['search']);
-        }
-        if (isset($_GET['page']) && $_GET['page'] > 1) {
-            $redirectUrl .= (strpos($redirectUrl, '?') !== false ? '&' : '?') . 'page=' . (int)$_GET['page'];
-        }
-        header('Location: ' . $redirectUrl);
-        exit();
-        
-    } elseif (isset($_POST['subtract_credits'])) {
+    }
+    
+    if (isset($_POST['deduct_credits'])) {
         $user_id = sanitize($_POST['user_id']);
-        $amount = (int)$_POST['amount']; // Tam sayı kontör
+        $amount = floatval($_POST['amount']);
         $description = sanitize($_POST['description']);
         
-        // GUID format kontrolü
         if (!isValidUUID($user_id)) {
-            $_SESSION['message'] = 'Geçersiz kullanıcı ID formatı.';
-            $_SESSION['message_type'] = 'danger';
+            $error = 'Geçersiz kullanıcı ID formatı.';
         } elseif ($amount <= 0) {
-            $_SESSION['message'] = 'Kredi miktarı 0\'dan büyük olmalıdır.';
-            $_SESSION['message_type'] = 'danger';
+            $error = 'Kredi miktarı 0\'dan büyük olmalıdır.';
         } else {
             try {
                 $pdo->beginTransaction();
                 
-                // Kullanıcının mevcut kredisini kontrol et
                 $currentUser = $user->getUserById($user_id);
                 if (!$currentUser) {
                     throw new Exception('Kullanıcı bulunamadı.');
                 }
                 
-                if ($currentUser['credits'] >= $amount) {
-                    $newCredits = $currentUser['credits'] - $amount;
-                    
-                    // Kullanıcının kredisini güncelle
-                    $stmt = $pdo->prepare("UPDATE users SET credits = ? WHERE id = ?");
-                    $stmt->execute([$newCredits, $user_id]);
-                    
-                    // Admin ID kontrolü
-                    $adminId = null;
-                    if (isset($_SESSION['user_id'])) {
-                        if (isValidUUID($_SESSION['user_id'])) {
-                            $stmt_admin = $pdo->prepare("SELECT id FROM users WHERE id = ?");
-                            $stmt_admin->execute([$_SESSION['user_id']]);
-                            if ($stmt_admin->fetch()) {
-                                $adminId = $_SESSION['user_id'];
-                            }
-                        } else {
-                            $adminId = $_SESSION['user_id'];
-                        }
-                    }
-                    
-                    // Kredi işlem kaydı (GUID ID ile)
-                    $transactionId = generateUUID();
-                    $stmt = $pdo->prepare("
-                        INSERT INTO credit_transactions (id, user_id, amount, type, description, admin_id) 
-                        VALUES (?, ?, ?, 'withdraw', ?, ?)
-                    ");
-                    $stmt->execute([$transactionId, $user_id, $amount, $description, $adminId]);
-                    
-                    $pdo->commit();
-                    $_SESSION['message'] = $amount . ' kredi başarıyla düşüldü! Yeni bakiye: ' . number_format($newCredits, 0);
-                    $_SESSION['message_type'] = 'success';
-                    
-                    // SESSION güncellemesi
-                    if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user_id) {
-                        $_SESSION['credits'] = $user->getUserCredits($user_id);
-                    }
-                    
-                    // Log kaydı
-                    $user->logAction($_SESSION['user_id'], 'credit_subtract', "Kullanıcı #{$user_id} için {$amount} kredi düşüldü");
-                    
-                } else {
-                    $_SESSION['message'] = 'Yetersiz kredi! Mevcut: ' . number_format($currentUser['credits'], 0) . ' Kredi';
-                    $_SESSION['message_type'] = 'danger';
+                if ($currentUser['credits'] < $amount) {
+                    throw new Exception('Kullanıcının yeterli kredisi yok.');
                 }
+                
+                // Kredi düşme
+                $newCredits = $currentUser['credits'] - $amount;
+                
+                $stmt = $pdo->prepare("UPDATE users SET credits = ? WHERE id = ?");
+                $stmt->execute([$newCredits, $user_id]);
+                
+                // Credit transactions tablosuna kaydet
+                $transactionId = generateUUID();
+                $stmt = $pdo->prepare("
+                    INSERT INTO credit_transactions (id, user_id, admin_id, type, amount, description, created_at) 
+                    VALUES (?, ?, ?, 'withdraw', ?, ?, NOW())
+                ");
+                $stmt->execute([$transactionId, $user_id, $_SESSION['user_id'], $amount, $description]);
+                
+                // Log kaydı
+                $user->logAction($_SESSION['user_id'], 'credit_deducted', "Kullanıcıdan {$amount} TL kredi düşüldü: {$description}");
+                
+                $pdo->commit();
+                $success = "{$amount} TL kredi başarıyla düşüldü. Kalan bakiye: " . number_format($newCredits, 2) . " TL";
             } catch (Exception $e) {
                 $pdo->rollBack();
-                $_SESSION['message'] = 'Hata: ' . $e->getMessage();
-                $_SESSION['message_type'] = 'danger';
+                $error = 'Kredi düşülürken hata oluştu: ' . $e->getMessage();
             }
         }
-        
-        // POST işleminden sonra aynı sayfaya redirect yap (PRG pattern)
-        $redirectUrl = 'credits.php';
-        if (isset($_GET['search']) && !empty($_GET['search'])) {
-            $redirectUrl .= '?search=' . urlencode($_GET['search']);
-        }
-        if (isset($_GET['page']) && $_GET['page'] > 1) {
-            $redirectUrl .= (strpos($redirectUrl, '?') !== false ? '&' : '?') . 'page=' . (int)$_GET['page'];
-        }
-        header('Location: ' . $redirectUrl);
-        exit();
     }
 }
 
-// Session'dan mesajları al ve temizle
-$message = '';
-$messageType = '';
-if (isset($_SESSION['message'])) {
-    $message = $_SESSION['message'];
-    $messageType = $_SESSION['message_type'];
-    unset($_SESSION['message']);
-    unset($_SESSION['message_type']);
-}
+// Kullanıcıları arama
+$search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$limit = 20;
+$offset = ($page - 1) * $limit;
 
-// Arama parametresi
-$search = isset($_GET['search']) ? trim(sanitize($_GET['search'])) : '';
-
-// Sayfalama
-$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-$per_page = 20;
-$offset = ($page - 1) * $per_page;
-
-// Kullanıcıları getir (arama ile)
-if ($search) {
-    try {
-        $searchTerm = "%{$search}%";
-        
-        // Toplam arama sonucu sayısı
-        $stmt = $pdo->prepare("
-            SELECT COUNT(*) FROM users 
-            WHERE role = 'user' 
-            AND (username LIKE ? OR email LIKE ? OR first_name LIKE ? OR last_name LIKE ? OR id LIKE ?)
-        ");
-        $stmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm]);
-        $total_users = $stmt->fetchColumn();
-        $total_pages = ceil($total_users / $per_page);
-        
-        // Arama sonuçları
-        $stmt = $pdo->prepare("
-            SELECT u.*, 
-                   (SELECT COUNT(*) FROM file_uploads WHERE user_id = u.id) as total_uploads,
-                   (SELECT COUNT(*) FROM file_uploads WHERE user_id = u.id AND status = 'completed') as completed_uploads
-            FROM users u 
-            WHERE u.role = 'user' 
-            AND (u.username LIKE ? OR u.email LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ? OR u.id LIKE ?)
-            ORDER BY u.credits DESC, u.created_at DESC 
-            LIMIT {$per_page} OFFSET {$offset}
-        ");
-        $stmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm]);
-        $users = $stmt->fetchAll();
-        
-    } catch(PDOException $e) {
-        error_log("User search error: " . $e->getMessage());
-        $users = [];
-        $total_users = 0;
-        $total_pages = 0;
-    }
-} else {
-    // Toplam kullanıcı sayısı
-    $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'user'");
-    $total_users = $stmt->fetchColumn();
-    $total_pages = ceil($total_users / $per_page);
+try {
+    $whereClause = "WHERE role = 'user'";
+    $params = [];
     
-    // Tüm kullanıcıları getir
-    $stmt = $pdo->prepare("
-        SELECT u.*, 
-               (SELECT COUNT(*) FROM file_uploads WHERE user_id = u.id) as total_uploads,
-               (SELECT COUNT(*) FROM file_uploads WHERE user_id = u.id AND status = 'completed') as completed_uploads
-        FROM users u 
-        WHERE u.role = 'user' 
-        ORDER BY u.credits DESC, u.created_at DESC 
-        LIMIT {$per_page} OFFSET {$offset}
-    ");
-    $stmt->execute();
-    $users = $stmt->fetchAll();
+    if ($search) {
+        $whereClause .= " AND (username LIKE ? OR email LIKE ? OR first_name LIKE ? OR last_name LIKE ?)";
+        $searchParam = "%$search%";
+        $params = [$searchParam, $searchParam, $searchParam, $searchParam];
+    }
+    
+    // Toplam kullanıcı sayısı
+    $countQuery = "SELECT COUNT(*) FROM users $whereClause";
+    $stmt = $pdo->prepare($countQuery);
+    $stmt->execute($params);
+    $totalUsers = $stmt->fetchColumn();
+    
+    // Kullanıcıları getir
+    $query = "
+        SELECT id, username, email, first_name, last_name, credits, created_at, last_login
+        FROM users 
+        $whereClause 
+        ORDER BY credits DESC, username ASC 
+        LIMIT ? OFFSET ?
+    ";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute(array_merge($params, [$limit, $offset]));
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    $totalPages = ceil($totalUsers / $limit);
+} catch (PDOException $e) {
+    $users = [];
+    $totalUsers = 0;
+    $totalPages = 0;
+    $error = 'Kullanıcılar yüklenirken hata oluştu: ' . $e->getMessage();
+    error_log('Credits.php user loading error: ' . $e->getMessage());
 }
 
-// Toplam kredi istatistikleri
-$stmt = $pdo->query("
-    SELECT 
-        SUM(credits) as total_credits,
-        AVG(credits) as avg_credits,
-        COUNT(*) as user_count
-    FROM users 
-    WHERE role = 'user'
-");
-$stats = $stmt->fetch();
-
-// Son kredi işlemleri (GUID uyumlu)
-$stmt = $pdo->prepare("
-    SELECT ct.*, u.username, u.email, a.username as admin_username
-    FROM credit_transactions ct
-    JOIN users u ON ct.user_id = u.id
-    LEFT JOIN users a ON ct.admin_id = a.id
-    ORDER BY ct.created_at DESC
-    LIMIT 10
-");
-$stmt->execute();
-$recent_transactions = $stmt->fetchAll();
+// Kredi istatistikleri
+try {
+    $stmt = $pdo->query("
+        SELECT 
+            SUM(credits) as total_credits,
+            AVG(credits) as avg_credits,
+            MAX(credits) as max_credits,
+            COUNT(*) as user_count,
+            SUM(CASE WHEN credits > 0 THEN 1 ELSE 0 END) as users_with_credits
+        FROM users 
+        WHERE role = 'user'
+    ");
+    $creditStats = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $creditStats = [
+        'total_credits' => 0,
+        'avg_credits' => 0,
+        'max_credits' => 0,
+        'user_count' => 0,
+        'users_with_credits' => 0
+    ];
+}
 
 $pageTitle = 'Kredi Yönetimi';
+$pageDescription = 'Kullanıcı kredilerini yönetin ve kontrol edin';
+$pageIcon = 'fas fa-coins';
+
+// Header ve Sidebar include
+include '../includes/admin_header.php';
+include '../includes/admin_sidebar.php';
 ?>
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle . ' - ' . SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="../assets/css/style.css" rel="stylesheet">
-</head>
-<body>
-    <?php include '_header.php'; ?>
-    
-    <div class="container-fluid">
-        <div class="row">
-            <?php include '_sidebar.php'; ?>
-            
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="fas fa-coins me-2"></i><?php echo $pageTitle; ?>
-                        <small class="text-muted">(Kontör Sistemi)</small>
-                    </h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <a href="users.php" class="btn btn-sm btn-outline-secondary">
-                                <i class="fas fa-users me-1"></i>Kullanıcı Yönetimi
-                            </a>
-                        </div>
-                    </div>
-                </div>
 
-                <?php if ($message): ?>
-                    <div class="alert alert-<?php echo $messageType; ?> alert-dismissible fade show">
-                        <i class="fas fa-<?php echo $messageType === 'success' ? 'check-circle' : 'exclamation-triangle'; ?> me-2"></i>
-                        <?php echo $message; ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <?php endif; ?>
-
-                <!-- Kredi İstatistikleri -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="card bg-primary text-white">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h4><?php echo number_format((float)$stats['total_credits'], 0); ?></h4>
-                                        <p class="mb-0">Toplam Kredi</p>
-                                    </div>
-                                    <div class="align-self-center">
-                                        <i class="fas fa-coins" style="font-size: 2rem;"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-success text-white">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h4><?php echo number_format((float)$stats['avg_credits'], 0); ?></h4>
-                                        <p class="mb-0">Ortalama Kredi</p>
-                                    </div>
-                                    <div class="align-self-center">
-                                        <i class="fas fa-chart-line" style="font-size: 2rem;"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-info text-white">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h4><?php echo number_format($stats['user_count']); ?></h4>
-                                        <p class="mb-0">Aktif Kullanıcı</p>
-                                    </div>
-                                    <div class="align-self-center">
-                                        <i class="fas fa-users" style="font-size: 2rem;"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-                <!-- Son İşlemler -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-history me-2"></i>Son Kredi İşlemleri
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <?php if (empty($recent_transactions)): ?>
-                            <div class="text-center py-4">
-                                <i class="fas fa-history text-muted" style="font-size: 3rem;"></i>
-                                <p class="text-muted mt-3">Henüz kredi işlemi bulunmuyor.</p>
-                            </div>
-                        <?php else: ?>
-                            <div class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Kullanıcı</th>
-                                            <th>İşlem</th>
-                                            <th>Miktar</th>
-                                            <th>Açıklama</th>
-                                            <th>Admin</th>
-                                            <th>Tarih</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($recent_transactions as $tx): ?>
-                                            <tr>
-                                                <td><?php echo htmlspecialchars($tx['username']); ?></td>
-                                                <td>
-                                                    <?php if ($tx['type'] === 'deposit'): ?>
-                                                        <span class="badge bg-success">Kredi Eklendi</span>
-                                                    <?php elseif ($tx['type'] === 'withdraw'): ?>
-                                                        <span class="badge bg-danger">Kredi Düşüldü</span>
-                                                    <?php elseif ($tx['type'] === 'file_charge'): ?>
-                                                        <span class="badge bg-warning">Dosya Ücreti</span>
-                                                    <?php else: ?>
-                                                        <span class="badge bg-secondary"><?php echo $tx['type']; ?></span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <span class="<?php echo $tx['type'] === 'deposit' ? 'text-success' : 'text-danger'; ?>">
-                                                        <?php echo $tx['type'] === 'deposit' ? '+' : '-'; ?><?php echo number_format($tx['amount'], 0); ?> Kredi
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <small><?php echo htmlspecialchars($tx['description']); ?></small>
-                                                </td>
-                                                <td><?php echo htmlspecialchars($tx['admin_username'] ?? 'Sistem'); ?></td>
-                                                <td>
-                                                    <small><?php echo formatDate($tx['created_at']); ?></small>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- Kullanıcı Kredi Listesi -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-users me-2"></i>Kullanıcı Kredileri
-                            <?php if ($search): ?>
-                                - "<?php echo htmlspecialchars($search); ?>" araması
-                            <?php endif; ?>
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <!-- Arama -->
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <form method="GET" class="d-flex">
-                                    <input type="text" class="form-control" name="search" 
-                                           placeholder="Kullanıcı ara (ad, email, ID)..." 
-                                           value="<?php echo htmlspecialchars($search); ?>">
-                                    <button type="submit" class="btn btn-outline-secondary ms-2">
-                                        <i class="fas fa-search"></i>
-                                    </button>
-                                    <?php if ($search): ?>
-                                        <a href="credits.php" class="btn btn-outline-secondary ms-2" title="Aramayı temizle">
-                                            <i class="fas fa-times"></i>
-                                        </a>
-                                    <?php endif; ?>
-                                </form>
-                            </div>
-                            <div class="col-md-6 text-end">
-                                <small class="text-muted">
-                                    <?php if ($search): ?>
-                                        Arama sonucu: <?php echo count($users); ?> kullanıcı
-                                    <?php else: ?>
-                                        Toplam: <?php echo $total_users; ?> kullanıcı
-                                    <?php endif; ?>
-                                </small>
-                            </div>
-                        </div>
-
-                        <?php if (empty($users)): ?>
-                            <div class="text-center py-5">
-                                <i class="fas fa-search text-muted" style="font-size: 4rem;"></i>
-                                <h4 class="mt-3 text-muted">Kullanıcı bulunamadı</h4>
-                                <p class="text-muted">
-                                    <?php if ($search): ?>
-                                        "<?php echo htmlspecialchars($search); ?>" aramasına uygun kullanıcı bulunamadı.
-                                    <?php else: ?>
-                                        Henüz kullanıcı eklenmemiş.
-                                    <?php endif; ?>
-                                </p>
-                                <?php if ($search): ?>
-                                    <a href="credits.php" class="btn btn-outline-primary">
-                                        <i class="fas fa-list me-1"></i>Tüm Kullanıcıları Göster
-                                    </a>
-                                <?php endif; ?>
-                            </div>
-                        <?php else: ?>
-                            <div class="table-responsive">
-                                <table class="table table-striped table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Kullanıcı</th>
-                                            <th>Mevcut Kredi</th>
-                                            <th>Dosya Sayısı</th>
-                                            <th>Kayıt Tarihi</th>
-                                            <th width="150">İşlemler</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($users as $userItem): ?>
-                                            <tr>
-                                                <td>
-                                                    <code class="small"><?php echo substr($userItem['id'], 0, 8); ?>...</code>
-                                                    <br><small class="text-muted">GUID</small>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="me-3">
-                                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 14px; font-weight: bold;">
-                                                                <?php echo strtoupper(substr($userItem['first_name'], 0, 1) . substr($userItem['last_name'], 0, 1)); ?>
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            <strong><?php echo htmlspecialchars($userItem['username']); ?></strong>
-                                                            <br>
-                                                            <small class="text-muted"><?php echo htmlspecialchars($userItem['email']); ?></small>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-<?php echo $userItem['credits'] > 0 ? 'success' : 'warning'; ?> fs-6">
-                                                        <?php echo number_format((float)$userItem['credits'], 0); ?> Kredi
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span class="text-primary"><?php echo $userItem['total_uploads']; ?></span> toplam
-                                                    <br>
-                                                    <small class="text-success"><?php echo $userItem['completed_uploads']; ?> tamamlanan</small>
-                                                </td>
-                                                <td>
-                                                    <small><?php echo formatDate($userItem['created_at']); ?></small>
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group btn-group-sm" role="group">
-                                                        <button class="btn btn-outline-success" 
-                                                                onclick="openCreditModal('<?php echo htmlspecialchars($userItem['id']); ?>', '<?php echo htmlspecialchars($userItem['username']); ?>', <?php echo $userItem['credits']; ?>, 'add')"
-                                                                title="Kredi Ekle">
-                                                            <i class="fas fa-plus"></i>
-                                                        </button>
-                                                        <button class="btn btn-outline-danger" 
-                                                                onclick="openCreditModal('<?php echo htmlspecialchars($userItem['id']); ?>', '<?php echo htmlspecialchars($userItem['username']); ?>', <?php echo $userItem['credits']; ?>, 'subtract')"
-                                                                title="Kredi Düş">
-                                                            <i class="fas fa-minus"></i>
-                                                        </button>
-                                                        <a href="users.php?id=<?php echo urlencode($userItem['id']); ?>" class="btn btn-outline-primary" title="Detaylar">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <!-- Sayfalama -->
-                            <?php if ($total_pages > 1): ?>
-                                <nav aria-label="Sayfa navigasyonu">
-                                    <ul class="pagination justify-content-center">
-                                        <?php if ($page > 1): ?>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">Önceki</a>
-                                            </li>
-                                        <?php endif; ?>
-                                        
-                                        <?php
-                                        $startPage = max(1, $page - 2);
-                                        $endPage = min($total_pages, $page + 2);
-                                        ?>
-                                        
-                                        <?php if ($startPage > 1): ?>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page=1<?php echo $search ? '&search=' . urlencode($search) : ''; ?>">1</a>
-                                            </li>
-                                            <?php if ($startPage > 2): ?>
-                                                <li class="page-item disabled">
-                                                    <span class="page-link">...</span>
-                                                </li>
-                                            <?php endif; ?>
-                                        <?php endif; ?>
-                                        
-                                        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
-                                            <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                                <a class="page-link" href="?page=<?php echo $i; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>"><?php echo $i; ?></a>
-                                            </li>
-                                        <?php endfor; ?>
-                                        
-                                        <?php if ($endPage < $total_pages): ?>
-                                            <?php if ($endPage < $total_pages - 1): ?>
-                                                <li class="page-item disabled">
-                                                    <span class="page-link">...</span>
-                                                </li>
-                                            <?php endif; ?>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page=<?php echo $total_pages; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>"><?php echo $total_pages; ?></a>
-                                            </li>
-                                        <?php endif; ?>
-                                        
-                                        <?php if ($page < $total_pages): ?>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">Sonraki</a>
-                                            </li>
-                                        <?php endif; ?>
-                                    </ul>
-                                </nav>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </main>
-        </div>
+<!-- Hata/Başarı Mesajları -->
+<?php if ($error): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <?php echo $error; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+<?php endif; ?>
 
-    <!-- Kredi Modal -->
-    <div class="modal fade" id="creditModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header" id="modalHeader">
-                    <h5 class="modal-title" id="creditModalTitle">Kredi İşlemi</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+<?php if ($success): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <?php echo $success; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
+<!-- Kredi İstatistikleri -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-success"><?php echo number_format($creditStats['total_credits'] ?? 0, 2); ?> TL</div>
+                    <div class="stat-label">Toplam Kredi</div>
+                    <small class="text-muted"><?php echo number_format($creditStats['user_count'] ?? 0); ?> kullanıcı</small>
                 </div>
-                <form method="POST" id="creditForm">
-                    <div class="modal-body">
-                        <input type="hidden" name="user_id" id="selectedUserId">
-                        
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>Kullanıcı:</strong> <span id="selectedUserName"></span><br>
-                            <strong>Mevcut Kredi:</strong> <span id="currentCredits"></span>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">İşlem Miktarı <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <input type="number" step="1" min="1" max="10000" name="amount" id="creditAmount" class="form-control" required placeholder="Örn: 100">
-                                <span class="input-group-text">Kredi</span>
-                            </div>
-                            <div class="form-text">1-10.000 kredi arasında değer giriniz.</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Açıklama <span class="text-danger">*</span></label>
-                            <textarea name="description" class="form-control" rows="3" required placeholder="İşlem nedenini belirtin..."></textarea>
-                        </div>
-                        
-                        <!-- İşlem Önizlemesi -->
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <h6 class="card-title text-muted mb-2">İşlem Önizlemesi:</h6>
-                                <div class="row text-center">
-                                    <div class="col-4">
-                                        <strong class="text-muted">Mevcut</strong><br>
-                                        <span class="badge bg-secondary fs-6" id="previewCurrent">0 Kredi</span>
-                                    </div>
-                                    <div class="col-4">
-                                        <strong id="operationLabel">İşlem</strong><br>
-                                        <span class="badge fs-6" id="previewOperation">0 Kredi</span>
-                                    </div>
-                                    <div class="col-4">
-                                        <strong class="text-primary">= Yeni Bakiye</strong><br>
-                                        <span class="badge bg-primary fs-6" id="previewResult">0 Kredi</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-1"></i>İptal
-                        </button>
-                        <button type="submit" name="add_credits" id="addCreditsBtn" class="btn btn-success" style="display: none;">
-                            <i class="fas fa-plus me-1"></i>Kredi Ekle
-                        </button>
-                        <button type="submit" name="subtract_credits" id="subtractCreditsBtn" class="btn btn-danger" style="display: none;">
-                            <i class="fas fa-minus me-1"></i>Kredi Düş
-                        </button>
-                    </div>
-                </form>
+                <div class="bg-success bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-coins text-success fa-lg"></i>
+                </div>
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     
-    <script>
-        let currentOperation = 'add';
-        let userCurrentCredits = 0;
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-primary"><?php echo number_format($creditStats['avg_credits'] ?? 0, 2); ?> TL</div>
+                    <div class="stat-label">Ortalama Kredi</div>
+                    <small class="text-muted">Kullanıcı başı</small>
+                </div>
+                <div class="bg-primary bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-chart-line text-primary fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-warning"><?php echo number_format($creditStats['max_credits'] ?? 0, 2); ?> TL</div>
+                    <div class="stat-label">En Yüksek Kredi</div>
+                    <small class="text-muted">Maksimum bakiye</small>
+                </div>
+                <div class="bg-warning bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-crown text-warning fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-info"><?php echo number_format($creditStats['users_with_credits'] ?? 0); ?></div>
+                    <div class="stat-label">Kredili Kullanıcı</div>
+                    <small class="text-muted">Bakiyesi olan</small>
+                </div>
+                <div class="bg-info bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-users text-info fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Arama -->
+<div class="card admin-card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-8">
+                <label for="search" class="form-label">Kullanıcı Ara</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="<?php echo htmlspecialchars($search); ?>" 
+                       placeholder="Kullanıcı adı, e-posta, ad veya soyad...">
+            </div>
+            
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-1"></i>Ara
+                </button>
+            </div>
+            
+            <div class="col-md-2">
+                <a href="credits.php" class="btn btn-outline-secondary w-100">
+                    <i class="fas fa-undo me-1"></i>Temizle
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Kullanıcı Listesi -->
+<div class="card admin-card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-users me-2"></i>Kullanıcılar (<?php echo number_format($totalUsers); ?> adet)
+        </h5>
+    </div>
+    
+    <div class="card-body p-0">
+        <?php if (empty($users)): ?>
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h6 class="text-muted">
+                    <?php if ($search): ?>
+                        Arama kriterine uygun kullanıcı bulunamadı
+                    <?php else: ?>
+                        Henüz kullanıcı yok
+                    <?php endif; ?>
+                </h6>
+            </div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Kullanıcı</th>
+                            <th>İletişim</th>
+                            <th>Mevcut Kredi</th>
+                            <th>Kayıt Tarihi</th>
+                            <th>Son Giriş</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($users as $userData): ?>
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>
+                                            <a href="user-details.php?id=<?php echo $userData['id']; ?>" class="text-decoration-none">
+                                                <?php echo htmlspecialchars($userData['first_name'] . ' ' . $userData['last_name']); ?>
+                                            </a>
+                                        </strong><br>
+                                        <small class="text-muted">@<?php echo htmlspecialchars($userData['username']); ?></small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <i class="fas fa-envelope me-1"></i>
+                                        <small><?php echo htmlspecialchars($userData['email']); ?></small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-<?php echo $userData['credits'] > 0 ? 'success' : 'secondary'; ?> fs-6">
+                                        <?php echo number_format($userData['credits'], 2); ?> TL
+                                    </span>
+                                </td>
+                                <td>
+                                    <small><?php echo date('d.m.Y', strtotime($userData['created_at'])); ?></small>
+                                </td>
+                                <td>
+                                    <small>
+                                        <?php echo $userData['last_login'] ? date('d.m.Y H:i', strtotime($userData['last_login'])) : 'Hiç giriş yapmamış'; ?>
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-success" 
+                                                onclick="openCreditModal('add', '<?php echo $userData['id']; ?>', '<?php echo htmlspecialchars($userData['first_name'] . ' ' . $userData['last_name']); ?>', <?php echo $userData['credits']; ?>)">
+                                            <i class="fas fa-plus me-1"></i>Ekle
+                                        </button>
+                                        <button type="button" class="btn btn-danger" 
+                                                onclick="openCreditModal('deduct', '<?php echo $userData['id']; ?>', '<?php echo htmlspecialchars($userData['first_name'] . ' ' . $userData['last_name']); ?>', <?php echo $userData['credits']; ?>)">
+                                            <i class="fas fa-minus me-1"></i>Düş
+                                        </button>
+                                        <a href="user-details.php?id=<?php echo $userData['id']; ?>" class="btn btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Sayfalama -->
+            <?php if ($totalPages > 1): ?>
+                <div class="card-footer">
+                    <nav aria-label="Sayfalama">
+                        <ul class="pagination justify-content-center mb-0">
+                            <?php if ($page > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                            
+                            <?php
+                            $startPage = max(1, $page - 2);
+                            $endPage = min($totalPages, $page + 2);
+                            
+                            for ($i = $startPage; $i <= $endPage; $i++): ?>
+                                <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                                    <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>">
+                                        <?php echo $i; ?>
+                                    </a>
+                                </li>
+                            <?php endfor; ?>
+                            
+                            <?php if ($page < $totalPages): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- Kredi İşlemi Modal -->
+<div class="modal fade" id="creditModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="creditForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Kredi İşlemi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="user_id" id="user_id">
+                    <input type="hidden" name="operation" id="operation">
+                    
+                    <div class="alert alert-info">
+                        <strong>Kullanıcı:</strong> <span id="selectedUserName"></span><br>
+                        <strong>Mevcut Kredi:</strong> <span id="currentCredits"></span> TL
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Kredi Miktarı (TL)</label>
+                        <input type="number" class="form-control" id="amount" name="amount" 
+                               step="0.01" min="0.01" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Açıklama</label>
+                        <textarea class="form-control" id="description" name="description" 
+                                  rows="3" required placeholder="İşlem açıklamasını yazın..."></textarea>
+                    </div>
+                    
+                    <!-- Önizleme Kutusu -->
+                    <div id="previewBox" class="alert alert-light border" style="display: none;">
+                        <h6>İşlem Önizlemesi:</h6>
+                        <div id="previewText"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">İşlemi Onayla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<?php
+// Sayfa özel JavaScript
+$pageJS = "
+let currentOperation = '';
+let userCurrentCredits = 0;
+
+function openCreditModal(operation, userId, userName, credits) {
+    currentOperation = operation;
+    userCurrentCredits = parseFloat(credits);
+    
+    document.getElementById('user_id').value = userId;
+    document.getElementById('selectedUserName').textContent = userName;
+    document.getElementById('currentCredits').textContent = parseFloat(credits).toFixed(2);
+    
+    const modal = new bootstrap.Modal(document.getElementById('creditModal'));
+    const modalTitle = document.getElementById('modalTitle');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (operation === 'add') {
+        document.getElementById('operation').name = 'add_credits';
+        modalTitle.textContent = 'Kredi Ekle';
+        submitBtn.textContent = 'Kredi Ekle';
+        submitBtn.className = 'btn btn-success';
+    } else {
+        document.getElementById('operation').name = 'deduct_credits';
+        modalTitle.textContent = 'Kredi Düş';
+        submitBtn.textContent = 'Kredi Düş';
+        submitBtn.className = 'btn btn-danger';
+    }
+    
+    // Form temizle
+    document.getElementById('amount').value = '';
+    document.getElementById('description').value = '';
+    document.getElementById('previewBox').style.display = 'none';
+    
+    modal.show();
+}
+
+// Önizleme güncelleme
+function updatePreview() {
+    const amount = parseFloat(document.getElementById('amount').value) || 0;
+    const previewBox = document.getElementById('previewBox');
+    const previewText = document.getElementById('previewText');
+    
+    if (amount > 0) {
+        previewBox.style.display = 'block';
         
-        function openCreditModal(userId, username, credits, action) {
-            document.getElementById('selectedUserId').value = userId;
-            document.getElementById('selectedUserName').textContent = username;
-            document.getElementById('currentCredits').textContent = parseInt(credits).toLocaleString() + ' Kredi';
-            userCurrentCredits = parseInt(credits);
-            currentOperation = action;
-            
-            const modalHeader = document.getElementById('modalHeader');
-            const creditAmount = document.getElementById('creditAmount');
-            const description = document.querySelector('textarea[name="description"]');
-            
-            if (action === 'add') {
-                document.getElementById('creditModalTitle').textContent = 'Kredi Ekle - ' + username;
-                modalHeader.className = 'modal-header bg-success text-white';
-                document.getElementById('addCreditsBtn').style.display = 'inline-block';
-                document.getElementById('subtractCreditsBtn').style.display = 'none';
-                document.getElementById('operationLabel').textContent = '+ Eklenecek';
-                document.getElementById('operationLabel').className = 'text-success';
-                description.value = 'Admin tarafından kredi eklendi';
-            } else {
-                document.getElementById('creditModalTitle').textContent = 'Kredi Düş - ' + username;
-                modalHeader.className = 'modal-header bg-danger text-white';
-                document.getElementById('addCreditsBtn').style.display = 'none';
-                document.getElementById('subtractCreditsBtn').style.display = 'inline-block';
-                document.getElementById('operationLabel').textContent = '- Düşülecek';
-                document.getElementById('operationLabel').className = 'text-danger';
-                description.value = 'Admin tarafından kredi düşüldü';
-            }
-            
-            // Önizlemeyi sıfırla
-            creditAmount.value = '';
-            updatePreview();
-            
-            var modal = new bootstrap.Modal(document.getElementById('creditModal'));
-            modal.show();
-            
-            // Input alanına focus ver
-            setTimeout(() => creditAmount.focus(), 100);
+        let newBalance;
+        let operation;
+        let color;
+        
+        if (currentOperation === 'add') {
+            newBalance = userCurrentCredits + amount;
+            operation = '+';
+            color = 'text-success';
+        } else {
+            newBalance = userCurrentCredits - amount;
+            operation = '-';
+            color = newBalance >= 0 ? 'text-danger' : 'text-warning';
         }
         
-        function updatePreview() {
-            const amount = parseInt(document.getElementById('creditAmount').value) || 0;
-            const previewCurrent = document.getElementById('previewCurrent');
-            const previewOperation = document.getElementById('previewOperation');
-            const previewResult = document.getElementById('previewResult');
-            
-            previewCurrent.textContent = userCurrentCredits.toLocaleString() + ' Kredi';
-            
-            if (currentOperation === 'add') {
-                previewOperation.textContent = '+' + amount.toLocaleString() + ' Kredi';
-                previewOperation.className = 'badge bg-success fs-6';
-                const newBalance = userCurrentCredits + amount;
-                previewResult.textContent = newBalance.toLocaleString() + ' Kredi';
-            } else {
-                previewOperation.textContent = '-' + amount.toLocaleString() + ' Kredi';
-                previewOperation.className = 'badge bg-danger fs-6';
-                const newBalance = Math.max(0, userCurrentCredits - amount);
-                previewResult.textContent = newBalance.toLocaleString() + ' Kredi';
-                
-                // Yetersiz bakiye uyarısı
-                if (amount > userCurrentCredits) {
-                    previewResult.className = 'badge bg-warning fs-6';
-                    previewResult.innerHTML = newBalance.toLocaleString() + ' Kredi<br><small>⚠️ Yetersiz Bakiye</small>';
-                } else {
-                    previewResult.className = 'badge bg-primary fs-6';
-                }
-            }
-        }
-        
-        // Input değişikliklerini dinle
-        document.getElementById('creditAmount').addEventListener('input', updatePreview);
-        document.getElementById('creditAmount').addEventListener('keyup', updatePreview);
-        
-        // Modal temizleme
-        document.getElementById('creditModal').addEventListener('hidden.bs.modal', function () {
-            document.getElementById('creditForm').reset();
-        });
-        
-        // Form gönderme onayı
-        document.getElementById('creditForm').addEventListener('submit', function(e) {
-            const amount = parseInt(document.getElementById('creditAmount').value) || 0;
-            const username = document.getElementById('selectedUserName').textContent;
-            
-            if (amount <= 0) {
-                e.preventDefault();
-                alert('Lütfen geçerli bir miktar girin.');
-                return false;
-            }
-            
-            let confirmMessage;
-            if (currentOperation === 'add') {
-                const newBalance = userCurrentCredits + amount;
-                confirmMessage = `${username} kullanıcısına ${amount.toLocaleString()} kredi eklemek istediğinizden emin misiniz?\n\nMevcut: ${userCurrentCredits.toLocaleString()} Kredi\nEklenecek: +${amount.toLocaleString()} Kredi\nYeni Bakiye: ${newBalance.toLocaleString()} Kredi`;
-            } else {
-                if (amount > userCurrentCredits) {
-                    e.preventDefault();
-                    alert(`Yetersiz kredi! Kullanıcının mevcut kredisi: ${userCurrentCredits.toLocaleString()} Kredi`);
-                    return false;
-                }
-                const newBalance = userCurrentCredits - amount;
-                confirmMessage = `${username} kullanıcısından ${amount.toLocaleString()} kredi düşmek istediğinizden emin misiniz?\n\nMevcut: ${userCurrentCredits.toLocaleString()} Kredi\nDüşülecek: -${amount.toLocaleString()} Kredi\nYeni Bakiye: ${newBalance.toLocaleString()} Kredi`;
-            }
-            
-            if (!confirm(confirmMessage)) {
-                e.preventDefault();
-                return false;
-            }
-        });
-    </script>
-</body>
-</html>
+        previewText.innerHTML = 
+            'Mevcut: <strong>' + userCurrentCredits.toFixed(2) + ' TL</strong><br>' +
+            'İşlem: <strong class=\"' + color + '\">' + operation + amount.toFixed(2) + ' TL</strong><br>' +
+            'Yeni Bakiye: <strong class=\"' + (newBalance >= 0 ? 'text-primary' : 'text-danger') + '\">' + 
+            newBalance.toFixed(2) + ' TL</strong>' +
+            (newBalance < 0 ? '<br><span class=\"text-danger\">⚠️ Bakiye negatif olacak!</span>' : '');
+    } else {
+        previewBox.style.display = 'none';
+    }
+}
+
+// Event listeners
+document.getElementById('amount').addEventListener('input', updatePreview);
+document.getElementById('amount').addEventListener('keyup', updatePreview);
+
+// Form validation
+document.getElementById('creditForm').addEventListener('submit', function(e) {
+    const amount = parseFloat(document.getElementById('amount').value) || 0;
+    const description = document.getElementById('description').value.trim();
+    
+    if (amount <= 0) {
+        e.preventDefault();
+        alert('Lütfen geçerli bir miktar girin!');
+        return false;
+    }
+    
+    if (!description) {
+        e.preventDefault();
+        alert('Lütfen açıklama yazın!');
+        return false;
+    }
+    
+    if (currentOperation === 'deduct' && amount > userCurrentCredits) {
+        e.preventDefault();
+        alert('Yetersiz kredi! Mevcut: ' + userCurrentCredits.toFixed(2) + ' TL');
+        return false;
+    }
+    
+    // Onay mesajı
+    const username = document.getElementById('selectedUserName').textContent;
+    const newBalance = currentOperation === 'add' ? 
+        userCurrentCredits + amount : userCurrentCredits - amount;
+    
+    const confirmMessage = 
+        username + ' kullanıcısı için kredi işlemi:\\n\\n' +
+        'İşlem: ' + (currentOperation === 'add' ? 'Kredi Ekleme' : 'Kredi Düşme') + '\\n' +
+        'Miktar: ' + amount.toFixed(2) + ' TL\\n' +
+        'Mevcut Bakiye: ' + userCurrentCredits.toFixed(2) + ' TL\\n' +
+        'Yeni Bakiye: ' + newBalance.toFixed(2) + ' TL\\n\\n' +
+        'İşlemi onaylıyor musunuz?';
+    
+    if (!confirm(confirmMessage)) {
+        e.preventDefault();
+        return false;
+    }
+});
+
+// Modal temizleme
+document.getElementById('creditModal').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('creditForm').reset();
+    document.getElementById('previewBox').style.display = 'none';
+});
+";
+
+// Footer include
+include '../includes/admin_footer.php';
+?>

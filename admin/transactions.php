@@ -1,447 +1,378 @@
 <?php
 /**
- * Mr ECU - Admin İşlem Geçmişi
+ * Mr ECU - Admin İşlem Geçmişi (Düzeltilmiş Versiyon)
  */
 
 require_once '../config/config.php';
 require_once '../config/database.php';
 
-// Admin kontrolü
-if (!isLoggedIn() || !isAdmin()) {
-    redirect('../login.php');
-}
+// Admin kontrolü otomatik yapılır
+$user = new User($pdo);
 
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $limit = 50;
 $offset = ($page - 1) * $limit;
 $filter = sanitize($_GET['filter'] ?? 'all');
-$date_filter = sanitize($_GET['date'] ?? '');
+$dateFilter = sanitize($_GET['date'] ?? '');
+$search = sanitize($_GET['search'] ?? '');
 
 try {
-    // İşlem geçmişini al
-    $where_conditions = [];
+    // Temel sorgu
+    $whereClause = "WHERE ct.created_at >= DATE_SUB(NOW(), INTERVAL 90 DAY)";
     $params = [];
     
-    // Kredi işlemleri ve dosya işlemlerini birleştir
-    $base_query = "
-        SELECT 
-            'credit' as type,
-            id,
-            user_id,
-            amount as transaction_amount,
-            transaction_type as action_type,
-            description,
-            reference_id,
-            reference_type,
-            created_at,
-            NULL as admin_id
-        FROM user_credits 
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 90 DAY)
-        
-        UNION ALL
-        
-        SELECT 
-            'file' as type,
-            id,
-            user_id,
-            0 as transaction_amount,
-            status as action_type,
-            CONCAT('Dosya: ', original_name) as description,
-            id as reference_id,
-            'file_upload' as reference_type,
-            upload_date as created_at,
-            NULL as admin_id
-        FROM file_uploads 
-        WHERE upload_date >= DATE_SUB(NOW(), INTERVAL 90 DAY)
-    ";
-    
-    // Filtre uygula
     if ($filter !== 'all') {
-        $base_query = "
-            SELECT * FROM (
-                $base_query
-            ) as combined_transactions
-            WHERE action_type = ?
-        ";
+        $whereClause .= " AND ct.type = ?";
         $params[] = $filter;
-    } else {
-        $base_query = "
-            SELECT * FROM (
-                $base_query
-            ) as combined_transactions
-        ";
     }
     
-    // Tarih filtresi
-    if (!empty($date_filter)) {
-        $base_query .= $filter !== 'all' ? ' AND ' : ' WHERE ';
-        $base_query .= 'DATE(created_at) = ?';
-        $params[] = $date_filter;
-    }
-    
-    $transactions_query = $base_query . "
-        ORDER BY created_at DESC
-        LIMIT $limit OFFSET $offset
-    ";
-    
-    if (!empty($params)) {
-        $transactions_stmt = $pdo->prepare($transactions_query);
-        $transactions_stmt->execute($params);
-    } else {
-        $transactions_stmt = $pdo->query($transactions_query);
-    }
-    $transactions = $transactions_stmt->fetchAll();
-    
-    // Toplam kayıt sayısı
-    try {
-        $count_base_query = "
-            SELECT created_at, 'credit' as type, transaction_type as action_type
-            FROM user_credits WHERE created_at >= DATE_SUB(NOW(), INTERVAL 90 DAY)
-            UNION ALL
-            SELECT upload_date as created_at, 'file' as type, status as action_type
-            FROM file_uploads WHERE upload_date >= DATE_SUB(NOW(), INTERVAL 90 DAY)
-        ";
-        
-        if ($filter !== 'all' || !empty($date_filter)) {
-            $count_query = "SELECT COUNT(*) as total FROM ($count_base_query) as combined_transactions";
-            $count_params = [];
-            
-            $count_conditions = [];
-            if ($filter !== 'all') {
-                $count_conditions[] = 'action_type = ?';
-                $count_params[] = $filter;
-            }
-            if (!empty($date_filter)) {
-                $count_conditions[] = 'DATE(created_at) = ?';
-                $count_params[] = $date_filter;
-            }
-            
-            if (!empty($count_conditions)) {
-                $count_query .= ' WHERE ' . implode(' AND ', $count_conditions);
-            }
-            
-            $count_stmt = $pdo->prepare($count_query);
-            $count_stmt->execute($count_params);
-        } else {
-            $count_query = "SELECT COUNT(*) as total FROM ($count_base_query) as combined_transactions";
-            $count_stmt = $pdo->query($count_query);
+    if ($dateFilter) {
+        switch ($dateFilter) {
+            case 'today':
+                $whereClause .= " AND DATE(ct.created_at) = CURDATE()";
+                break;
+            case 'week':
+                $whereClause .= " AND ct.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
+                break;
+            case 'month':
+                $whereClause .= " AND ct.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
+                break;
         }
-        
-        $count_result = $count_stmt->fetch();
-        $total_records = $count_result ? (int)$count_result['total'] : 0;
-        $total_pages = ceil($total_records / $limit);
-        
-    } catch (Exception $e) {
-        error_log('Count query error: ' . $e->getMessage());
-        $total_records = 0;
-        $total_pages = 1;
     }
+    
+    if ($search) {
+        $whereClause .= " AND (u.username LIKE ? OR u.email LIKE ? OR ct.description LIKE ?)";
+        $searchParam = "%$search%";
+        $params = array_merge($params, [$searchParam, $searchParam, $searchParam]);
+    }
+    
+    // credit_transactions tablosu var mı kontrol et
+    $table_check = $pdo->query("SHOW TABLES LIKE 'credit_transactions'");
+    $transactions = [];
+    $totalTransactions = 0;
+    
+    if ($table_check->fetch()) {
+        // Toplam transaction sayısı
+        $countQuery = "
+            SELECT COUNT(*) 
+            FROM credit_transactions ct
+            LEFT JOIN users u ON ct.user_id = u.id
+            $whereClause
+        ";
+        $stmt = $pdo->prepare($countQuery);
+        $stmt->execute($params);
+        $totalTransactions = $stmt->fetchColumn();
+        
+        // Transactions getir
+        $query = "
+            SELECT ct.*, u.username, u.email, u.first_name, u.last_name,
+                   admin.username as admin_username
+            FROM credit_transactions ct
+            LEFT JOIN users u ON ct.user_id = u.id
+            LEFT JOIN users admin ON ct.admin_id = admin.id
+            $whereClause 
+            ORDER BY ct.created_at DESC 
+            LIMIT ? OFFSET ?
+        ";
+        $stmt = $pdo->prepare($query);
+        $stmt->execute(array_merge($params, [$limit, $offset]));
+        $transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    $totalPages = ceil($totalTransactions / $limit);
     
     // İstatistikler
-    $stats_query = "
-        SELECT 
-            (SELECT COUNT(*) FROM user_credits WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)) as daily_credits,
-            (SELECT COUNT(*) FROM file_uploads WHERE upload_date >= DATE_SUB(NOW(), INTERVAL 24 HOUR)) as daily_uploads,
-            (SELECT SUM(ABS(amount)) FROM user_credits WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)) as monthly_credit_volume,
-            (SELECT COUNT(*) FROM file_uploads WHERE upload_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)) as monthly_uploads
-    ";
-    $stats_stmt = $pdo->query($stats_query);
-    $stats = $stats_stmt->fetch();
+    $stats = ['total_credits' => 0, 'total_debits' => 0, 'today_transactions' => 0];
     
-} catch (Exception $e) {
-    error_log('Transactions page error: ' . $e->getMessage());
+    if ($table_check->rowCount() > 0) {
+        $stmt = $pdo->query("
+            SELECT 
+                SUM(CASE WHEN type IN ('deposit', 'refund') THEN amount ELSE 0 END) as total_credits,
+                SUM(CASE WHEN type IN ('withdraw', 'file_charge') THEN amount ELSE 0 END) as total_debits,
+                COUNT(CASE WHEN DATE(created_at) = CURDATE() THEN 1 END) as today_transactions
+            FROM credit_transactions
+        ");
+        $stats = $stmt->fetch();
+    }
+    
+} catch(PDOException $e) {
     $transactions = [];
-    $total_records = 0;
-    $total_pages = 1;
-    $stats = ['daily_credits' => 0, 'daily_uploads' => 0, 'monthly_credit_volume' => 0, 'monthly_uploads' => 0];
+    $totalTransactions = 0;
+    $totalPages = 0;
+    $stats = ['total_credits' => 0, 'total_debits' => 0, 'today_transactions' => 0];
+    error_log('Transactions error: ' . $e->getMessage());
 }
 
 $pageTitle = 'İşlem Geçmişi';
+$pageDescription = 'Kredi işlemlerini görüntüleyin ve yönetin';
+$pageIcon = 'fas fa-history';
+
+// Header ve Sidebar include
+include '../includes/admin_header.php';
+include '../includes/admin_sidebar.php';
 ?>
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle . ' - ' . SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="../assets/css/style.css" rel="stylesheet">
-    <style>
-        .transaction-credit { border-left: 4px solid #28a745; }
-        .transaction-file { border-left: 4px solid #17a2b8; }
-        .amount-positive { color: #28a745; font-weight: bold; }
-        .amount-negative { color: #dc3545; font-weight: bold; }
-        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-    </style>
-</head>
-<body>
-    <?php include '_header.php'; ?>
-    
-    <div class="container-fluid">
-        <div class="row">
-            <?php include '_sidebar.php'; ?>
-            
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="fas fa-exchange-alt me-2"></i><?php echo $pageTitle; ?>
-                    </h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
-                                <i class="fas fa-sync-alt me-1"></i>Yenile
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-success" onclick="exportTransactions()">
-                                <i class="fas fa-download me-1"></i>Excel İndir
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- İstatistikler -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="card stat-card">
-                            <div class="card-body text-center">
-                                <i class="fas fa-coins fa-2x mb-2"></i>
-                                <h4><?php echo number_format($stats['daily_credits']); ?></h4>
-                                <p class="mb-0">Günlük Kredi İşlemleri</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card bg-success text-white">
-                            <div class="card-body text-center">
-                                <i class="fas fa-upload fa-2x mb-2"></i>
-                                <h4><?php echo number_format($stats['daily_uploads']); ?></h4>
-                                <p class="mb-0">Günlük Dosya Yüklemeleri</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card bg-info text-white">
-                            <div class="card-body text-center">
-                                <i class="fas fa-chart-line fa-2x mb-2"></i>
-                                <h4><?php echo number_format($stats['monthly_credit_volume']); ?></h4>
-                                <p class="mb-0">Aylık Kredi Hacmi</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card bg-warning text-white">
-                            <div class="card-body text-center">
-                                <i class="fas fa-file-upload fa-2x mb-2"></i>
-                                <h4><?php echo number_format($stats['monthly_uploads']); ?></h4>
-                                <p class="mb-0">Aylık Dosya Sayısı</p>
-                            </div>
-                        </div>
-                    </div>
+<!-- İstatistik Kartları -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-success"><?php echo number_format($stats['total_credits'] ?? 0, 2); ?> TL</div>
+                    <div class="stat-label">Toplam Kredi</div>
+                    <small class="text-muted">Yüklenen toplam kredi</small>
                 </div>
-
-                <!-- Filtreler -->
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <select class="form-select" onchange="filterTransactions(this.value, '<?php echo $date_filter; ?>')">
-                            <option value="all" <?php echo $filter === 'all' ? 'selected' : ''; ?>>Tüm İşlemler</option>
-                            <option value="credit_purchase" <?php echo $filter === 'credit_purchase' ? 'selected' : ''; ?>>Kredi Alımı</option>
-                            <option value="file_charge" <?php echo $filter === 'file_charge' ? 'selected' : ''; ?>>Dosya Ücreti</option>
-                            <option value="pending" <?php echo $filter === 'pending' ? 'selected' : ''; ?>>Bekleyen Dosyalar</option>
-                            <option value="completed" <?php echo $filter === 'completed' ? 'selected' : ''; ?>>Tamamlanan Dosyalar</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="date" class="form-control" value="<?php echo $date_filter; ?>" 
-                               onchange="filterTransactions('<?php echo $filter; ?>', this.value)">
-                    </div>
-                    <div class="col-md-6">
-                        <div class="alert alert-info mb-0">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>Son 90 günlük işlemler gösteriliyor.</strong> 
-                            Toplam <?php echo number_format((int)$total_records); ?> kayıt bulundu.
-                        </div>
-                    </div>
+                <div class="bg-success bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-plus text-success fa-lg"></i>
                 </div>
-
-                <!-- İşlem Listesi -->
-                <div class="card">
-                    <div class="card-body">
-                        <?php if (empty($transactions)): ?>
-                            <div class="text-center py-5">
-                                <i class="fas fa-exchange-alt text-muted" style="font-size: 3rem;"></i>
-                                <p class="text-muted mt-3">Henüz işlem kaydı bulunmuyor.</p>
-                            </div>
-                        <?php else: ?>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Tarih</th>
-                                            <th>Tür</th>
-                                            <th>Kullanıcı</th>
-                                            <th>İşlem</th>
-                                            <th>Açıklama</th>
-                                            <th>Miktar</th>
-                                            <th>Durum</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($transactions as $transaction): ?>
-                                            <tr class="transaction-<?php echo $transaction['type']; ?>">
-                                                <td>
-                                                    <small><?php echo formatDate($transaction['created_at']); ?></small>
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-<?php echo $transaction['type'] === 'credit' ? 'success' : 'info'; ?>">
-                                                        <?php echo $transaction['type'] === 'credit' ? 'Kredi' : 'Dosya'; ?>
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <?php
-                                                    // Kullanıcı bilgisini al
-                                                    try {
-                                                        $user_stmt = $pdo->prepare("SELECT username, email FROM users WHERE id = ?");
-                                                        $user_stmt->execute([$transaction['user_id']]);
-                                                        $user_info = $user_stmt->fetch();
-                                                        if ($user_info) {
-                                                            echo '<strong>' . htmlspecialchars($user_info['username']) . '</strong><br>';
-                                                            echo '<small class="text-muted">' . htmlspecialchars($user_info['email']) . '</small>';
-                                                        } else {
-                                                            echo '<span class="text-muted">Kullanıcı bulunamadı</span>';
-                                                        }
-                                                    } catch (Exception $e) {
-                                                        echo '<span class="text-muted">ID: ' . $transaction['user_id'] . '</span>';
-                                                    }
-                                                    ?>
-                                                </td>
-                                                <td>
-                                                    <strong><?php echo htmlspecialchars($transaction['action_type']); ?></strong>
-                                                    <br>
-                                                    <small class="text-muted">
-                                                        <?php echo htmlspecialchars($transaction['reference_type']); ?>
-                                                    </small>
-                                                </td>
-                                                <td>
-                                                    <?php echo htmlspecialchars($transaction['description']); ?>
-                                                </td>
-                                                <td>
-                                                    <?php if ($transaction['type'] === 'credit'): ?>
-                                                        <span class="<?php echo $transaction['transaction_amount'] > 0 ? 'amount-positive' : 'amount-negative'; ?>">
-                                                            <?php echo $transaction['transaction_amount'] > 0 ? '+' : ''; ?>
-                                                            <?php echo number_format($transaction['transaction_amount'], 2); ?> ₺
-                                                        </span>
-                                                    <?php else: ?>
-                                                        <span class="text-muted">-</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <?php
-                                                    $statusClass = 'secondary';
-                                                    $statusText = $transaction['action_type'];
-                                                    
-                                                    switch ($transaction['action_type']) {
-                                                        case 'credit_purchase':
-                                                            $statusClass = 'success';
-                                                            $statusText = 'Kredi Alındı';
-                                                            break;
-                                                        case 'file_charge':
-                                                            $statusClass = 'warning';
-                                                            $statusText = 'Ücret Kesildi';
-                                                            break;
-                                                        case 'pending':
-                                                            $statusClass = 'warning';
-                                                            $statusText = 'Bekliyor';
-                                                            break;
-                                                        case 'processing':
-                                                            $statusClass = 'info';
-                                                            $statusText = 'İşleniyor';
-                                                            break;
-                                                        case 'completed':
-                                                            $statusClass = 'success';
-                                                            $statusText = 'Tamamlandı';
-                                                            break;
-                                                        case 'rejected':
-                                                            $statusClass = 'danger';
-                                                            $statusText = 'Reddedildi';
-                                                            break;
-                                                    }
-                                                    ?>
-                                                    <span class="badge bg-<?php echo $statusClass; ?>">
-                                                        <?php echo $statusText; ?>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <!-- Pagination -->
-                            <?php if ($total_pages > 1): ?>
-                                <nav aria-label="Transaction pagination" class="mt-4">
-                                    <ul class="pagination justify-content-center">
-                                        <?php 
-                                        $start_page = max(1, $page - 2);
-                                        $end_page = min($total_pages, $page + 2);
-                                        
-                                        if ($page > 1): ?>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page=1&filter=<?php echo urlencode($filter); ?>&date=<?php echo urlencode($date_filter); ?>">İlk</a>
-                                            </li>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page=<?php echo $page - 1; ?>&filter=<?php echo urlencode($filter); ?>&date=<?php echo urlencode($date_filter); ?>">Önceki</a>
-                                            </li>
-                                        <?php endif; ?>
-                                        
-                                        <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
-                                            <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                                <a class="page-link" href="?page=<?php echo (int)$i; ?>&filter=<?php echo urlencode($filter); ?>&date=<?php echo urlencode($date_filter); ?>">
-                                                    <?php echo (int)$i; ?>
-                                                </a>
-                                            </li>
-                                        <?php endfor; ?>
-                                        
-                                        <?php if ($page < $total_pages): ?>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page=<?php echo $page + 1; ?>&filter=<?php echo urlencode($filter); ?>&date=<?php echo urlencode($date_filter); ?>">Sonraki</a>
-                                            </li>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page=<?php echo $total_pages; ?>&filter=<?php echo urlencode($filter); ?>&date=<?php echo urlencode($date_filter); ?>">Son</a>
-                                            </li>
-                                        <?php endif; ?>
-                                    </ul>
-                                </nav>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </main>
+            </div>
         </div>
     </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-danger"><?php echo number_format($stats['total_debits'] ?? 0, 2); ?> TL</div>
+                    <div class="stat-label">Toplam Düşürülen</div>
+                    <small class="text-muted">Kullanılan/düşürülen kredi</small>
+                </div>
+                <div class="bg-danger bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-minus text-danger fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-primary"><?php echo number_format($totalTransactions); ?></div>
+                    <div class="stat-label">Toplam İşlem</div>
+                    <small class="text-muted">Son 90 gün</small>
+                </div>
+                <div class="bg-primary bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-exchange-alt text-primary fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-info"><?php echo number_format($stats['today_transactions'] ?? 0); ?></div>
+                    <div class="stat-label">Bugünkü İşlemler</div>
+                    <small class="text-muted">Günlük aktivite</small>
+                </div>
+                <div class="bg-info bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-clock text-info fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function filterTransactions(filter, date) {
-            let url = '?filter=' + encodeURIComponent(filter);
-            if (date) {
-                url += '&date=' + encodeURIComponent(date);
-            }
-            window.location.href = url;
-        }
-
-        function exportTransactions() {
-            // Excel export işlemi
-            const currentParams = new URLSearchParams(window.location.search);
-            currentParams.set('export', 'excel');
+<!-- Filtre Kartı -->
+<div class="card admin-card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-2">
+                <label for="filter" class="form-label">İşlem Tipi</label>
+                <select class="form-select" id="filter" name="filter">
+                    <option value="all" <?php echo $filter === 'all' ? 'selected' : ''; ?>>Tümü</option>
+                    <option value="deposit" <?php echo $filter === 'deposit' ? 'selected' : ''; ?>>Kredi Yükleme</option>
+                    <option value="withdraw" <?php echo $filter === 'withdraw' ? 'selected' : ''; ?>>Kredi Düşme</option>
+                    <option value="file_charge" <?php echo $filter === 'file_charge' ? 'selected' : ''; ?>>Dosya Ücreti</option>
+                    <option value="refund" <?php echo $filter === 'refund' ? 'selected' : ''; ?>>İade</option>
+                </select>
+            </div>
             
-            const exportUrl = 'export-transactions.php?' + currentParams.toString();
-            window.open(exportUrl, '_blank');
-        }
+            <div class="col-md-2">
+                <label for="date" class="form-label">Tarih</label>
+                <select class="form-select" id="date" name="date">
+                    <option value="" <?php echo $dateFilter === '' ? 'selected' : ''; ?>>Son 90 Gün</option>
+                    <option value="today" <?php echo $dateFilter === 'today' ? 'selected' : ''; ?>>Bugün</option>
+                    <option value="week" <?php echo $dateFilter === 'week' ? 'selected' : ''; ?>>Son 7 Gün</option>
+                    <option value="month" <?php echo $dateFilter === 'month' ? 'selected' : ''; ?>>Son 30 Gün</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label for="search" class="form-label">Arama</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="<?php echo htmlspecialchars($search); ?>" 
+                       placeholder="Kullanıcı adı, e-posta veya açıklama...">
+            </div>
+            
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-1"></i>Filtrele
+                </button>
+            </div>
+            
+            <div class="col-md-2">
+                <a href="transactions.php" class="btn btn-outline-secondary w-100">
+                    <i class="fas fa-undo me-1"></i>Temizle
+                </a>
+            </div>
+            
+            <div class="col-md-1">
+                <button type="button" class="btn btn-success w-100" onclick="exportTransactions()">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
-        // Auto refresh every 2 minutes
-        setInterval(function() {
-            location.reload();
-        }, 120000);
-    </script>
-</body>
-</html>
+<!-- İşlem Listesi -->
+<div class="card admin-card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-list me-2"></i>Kredi İşlemleri (<?php echo number_format($totalTransactions); ?> adet)
+        </h5>
+    </div>
+    
+    <div class="card-body p-0">
+        <?php if (empty($transactions)): ?>
+            <div class="text-center py-5">
+                <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                <h6 class="text-muted">
+                    <?php if ($search || $filter !== 'all' || $dateFilter): ?>
+                        Filtreye uygun işlem bulunamadı
+                    <?php else: ?>
+                        Henüz kredi işlemi yok
+                    <?php endif; ?>
+                </h6>
+            </div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Kullanıcı</th>
+                            <th>İşlem Tipi</th>
+                            <th>Miktar</th>
+                            <th>Açıklama</th>
+                            <th>Admin</th>
+                            <th>Tarih</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($transactions as $transaction): ?>
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>
+                                            <a href="user-details.php?id=<?php echo $transaction['user_id']; ?>" class="text-decoration-none">
+                                                <?php echo htmlspecialchars($transaction['first_name'] . ' ' . $transaction['last_name']); ?>
+                                            </a>
+                                        </strong><br>
+                                        <small class="text-muted">@<?php echo htmlspecialchars($transaction['username']); ?></small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <?php
+                                    $typeClass = [
+                                        'deposit' => 'success',
+                                        'refund' => 'info',
+                                        'withdraw' => 'warning',
+                                        'file_charge' => 'danger'
+                                    ];
+                                    $typeText = [
+                                        'deposit' => 'Kredi Yükleme',
+                                        'refund' => 'İade',
+                                        'withdraw' => 'Kredi Düşme',
+                                        'file_charge' => 'Dosya Ücreti'
+                                    ];
+                                    ?>
+                                    <span class="badge bg-<?php echo $typeClass[$transaction['type']] ?? 'secondary'; ?>">
+                                        <?php echo $typeText[$transaction['type']] ?? $transaction['type']; ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-<?php echo in_array($transaction['type'], ['deposit', 'refund']) ? 'success' : 'danger'; ?>">
+                                        <?php echo in_array($transaction['type'], ['deposit', 'refund']) ? '+' : '-'; ?>
+                                        <?php echo number_format($transaction['amount'], 2); ?> TL
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="max-width: 250px;">
+                                        <?php echo htmlspecialchars($transaction['description'] ?? 'Açıklama yok'); ?>
+                                    </div>
+                                </td>
+                                <td>
+                                    <?php if ($transaction['admin_username']): ?>
+                                        <small class="text-muted"><?php echo htmlspecialchars($transaction['admin_username']); ?></small>
+                                    <?php else: ?>
+                                        <small class="text-muted">Sistem</small>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong><?php echo date('d.m.Y', strtotime($transaction['created_at'])); ?></strong><br>
+                                        <small class="text-muted"><?php echo date('H:i', strtotime($transaction['created_at'])); ?></small>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Sayfalama -->
+            <?php if ($totalPages > 1): ?>
+                <div class="card-footer">
+                    <nav aria-label="Sayfalama">
+                        <ul class="pagination justify-content-center mb-0">
+                            <?php if ($page > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?php echo $page - 1; ?>&filter=<?php echo urlencode($filter); ?>&date=<?php echo urlencode($dateFilter); ?>&search=<?php echo urlencode($search); ?>">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                            
+                            <?php
+                            $startPage = max(1, $page - 2);
+                            $endPage = min($totalPages, $page + 2);
+                            
+                            for ($i = $startPage; $i <= $endPage; $i++): ?>
+                                <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                                    <a class="page-link" href="?page=<?php echo $i; ?>&filter=<?php echo urlencode($filter); ?>&date=<?php echo urlencode($dateFilter); ?>&search=<?php echo urlencode($search); ?>">
+                                        <?php echo $i; ?>
+                                    </a>
+                                </li>
+                            <?php endfor; ?>
+                            
+                            <?php if ($page < $totalPages): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?php echo $page + 1; ?>&filter=<?php echo urlencode($filter); ?>&date=<?php echo urlencode($dateFilter); ?>&search=<?php echo urlencode($search); ?>">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+<?php
+// Sayfa özel JavaScript
+$pageJS = "
+function exportTransactions() {
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', '1');
+    window.open('?' + params.toString(), '_blank');
+}
+";
+
+// Footer include
+include '../includes/admin_footer.php';
+?>
