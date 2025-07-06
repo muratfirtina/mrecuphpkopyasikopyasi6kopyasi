@@ -64,7 +64,7 @@ class FileManager {
                 $params[] = $dateTo;
             }
             
-            // LIMIT ve OFFSET için direkt sayısal değerler kullan
+            // LIMIT ve OFFSET'i direkt sorguya ekle
             $query = "
                 SELECT r.*, fu.original_name, 
                        u.username, u.email, u.first_name, u.last_name,
@@ -113,7 +113,7 @@ class FileManager {
                 $params[] = $userId;
             }
             
-            $stmt = $this->pdo->prepare("
+            $query = "
                 SELECT fu.*, 
                        u.username, u.email, u.first_name, u.last_name,
                        b.name as brand_name, m.name as model_name
@@ -123,13 +123,15 @@ class FileManager {
                 LEFT JOIN models m ON fu.model_id = m.id
                 {$whereClause}
                 ORDER BY fu.upload_date DESC
-                LIMIT ? OFFSET ?
-            ");
+                LIMIT $limit OFFSET $offset
+            ";
             
-            $params[] = $limit;
-            $params[] = $offset;
-            
-            $stmt->execute($params);
+            if (!empty($params)) {
+                $stmt = $this->pdo->prepare($query);
+                $stmt->execute($params);
+            } else {
+                $stmt = $this->pdo->query($query);
+            }
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
             
         } catch(PDOException $e) {
@@ -226,10 +228,10 @@ class FileManager {
                 SELECT * FROM file_uploads 
                 WHERE user_id = ? 
                 ORDER BY upload_date DESC 
-                LIMIT ? OFFSET ?
+                LIMIT $limit OFFSET $offset
             ");
             
-            $stmt->execute([$userId, $limit, $offset]);
+            $stmt->execute([$userId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
             
         } catch(PDOException $e) {

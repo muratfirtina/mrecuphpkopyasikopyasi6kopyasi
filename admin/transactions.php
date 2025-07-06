@@ -63,7 +63,7 @@ try {
         $stmt->execute($params);
         $totalTransactions = $stmt->fetchColumn();
         
-        // Transactions getir
+        // Transactions getir - LIMIT ve OFFSET'i direkt sorguya ekle
         $query = "
             SELECT ct.*, u.username, u.email, u.first_name, u.last_name,
                    admin.username as admin_username
@@ -72,10 +72,15 @@ try {
             LEFT JOIN users admin ON ct.admin_id = admin.id
             $whereClause 
             ORDER BY ct.created_at DESC 
-            LIMIT ? OFFSET ?
+            LIMIT $limit OFFSET $offset
         ";
-        $stmt = $pdo->prepare($query);
-        $stmt->execute(array_merge($params, [$limit, $offset]));
+        
+        if (!empty($params)) {
+            $stmt = $pdo->prepare($query);
+            $stmt->execute($params);
+        } else {
+            $stmt = $pdo->query($query);
+        }
         $transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     

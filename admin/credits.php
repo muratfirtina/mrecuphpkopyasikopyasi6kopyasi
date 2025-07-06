@@ -129,16 +129,21 @@ try {
     $stmt->execute($params);
     $totalUsers = $stmt->fetchColumn();
     
-    // Kullanıcıları getir
+    // Kullanıcıları getir - LIMIT ve OFFSET'i direkt sorguya ekle
     $query = "
         SELECT id, username, email, first_name, last_name, credits, created_at, last_login
         FROM users 
         $whereClause 
         ORDER BY credits DESC, username ASC 
-        LIMIT ? OFFSET ?
+        LIMIT $limit OFFSET $offset
     ";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute(array_merge($params, [$limit, $offset]));
+    
+    if (!empty($params)) {
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
+    } else {
+        $stmt = $pdo->query($query);
+    }
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     $totalPages = ceil($totalUsers / $limit);
