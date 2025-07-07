@@ -258,7 +258,15 @@ class FileManager {
             ");
             
             $stmt->execute([$uploadId]);
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // filename'den file_path oluştur
+            if ($result && !empty($result['filename'])) {
+                // Dosya path'ini uploads/user_files/ yapısına göre oluştur
+                $result['file_path'] = '../uploads/user_files/' . $result['filename'];
+            }
+            
+            return $result;
             
         } catch(PDOException $e) {
             error_log('getUploadById error: ' . $e->getMessage());
@@ -266,7 +274,7 @@ class FileManager {
         }
     }
     
-    // Yanıt dosyası yükle
+    // Yanıt dosyası yükle (file_responses tablosuna kaydet)
     public function uploadResponseFile($uploadId, $fileData, $creditsCharged, $responseNotes = '') {
         try {
             if (!isValidUUID($uploadId)) {
@@ -278,46 +286,121 @@ class FileManager {
                 return ['success' => false, 'message' => 'Yanıt dosyası yüklenmedi.'];
             }
             
+            // Original upload var mı kontrol et
+            $upload = $this->getUploadById($uploadId);
+            if (!$upload) {
+                return ['success' => false, 'message' => 'Orijinal dosya bulunamadı.'];
+            }
+            
             $fileName = generateUUID() . '_response_' . basename($fileData['name']);
-            $uploadPath = UPLOAD_PATH . 'responses/' . $fileName;
+            $uploadPath = UPLOAD_PATH . 'response_files/' . $fileName;
             
             // Dizin yoksa oluştur
-            if (!is_dir(UPLOAD_PATH . 'responses/')) {
-                mkdir(UPLOAD_PATH . 'responses/', 0755, true);
+            if (!is_dir(UPLOAD_PATH . 'response_files/')) {
+                mkdir(UPLOAD_PATH . 'response_files/', 0755, true);
             }
             
             if (move_uploaded_file($fileData['tmp_name'], $uploadPath)) {
-                // Dosya durumunu güncelle
+                $this->pdo->beginTransaction();
+                
+                // file_responses tablosuna kaydet
+                $responseId = generateUUID();
                 $stmt = $this->pdo->prepare("
-                    UPDATE file_uploads 
-                    SET status = 'completed', response_file = ?, response_notes = ?, 
-                        credits_charged = ?, completed_at = NOW() 
-                    WHERE id = ?
+                    INSERT INTO file_responses (id, upload_id, admin_id, filename, original_name, file_size, credits_charged, admin_notes, upload_date) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
                 ");
                 
-                $result = $stmt->execute([$fileName, $responseNotes, $creditsCharged, $uploadId]);
+                $result = $stmt->execute([
+                    $responseId,
+                    $uploadId,
+                    $_SESSION['user_id'] ?? null,
+                    $fileName,
+                    $fileData['name'],
+                    $fileData['size'],
+                    $creditsCharged,
+                    $responseNotes
+                ]);
                 
-                if ($result && $creditsCharged > 0) {
-                    // Kredi düş
-                    $upload = $this->getUploadById($uploadId);
-                    if ($upload) {
+                if ($result) {
+                    // file_uploads tablosunu güncelle
+                    $stmt = $this->pdo->prepare("
+                        UPDATE file_uploads 
+                        SET status = 'completed', credits_charged = ?, updated_at = NOW(), completed_at = NOW()
+                        WHERE id = ?
+                    ");
+                    $stmt->execute([$creditsCharged, $uploadId]);
+                    
+                    // Kredi düş (eğer belirtilmişse)
+                    if ($creditsCharged > 0) {
                         $user = new User($this->pdo);
-                        $user->addCreditDirectSimple($upload['user_id'], $creditsCharged, 'file_charge', 'Dosya işleme ücreti: ' . $upload['original_name']);
+                        $creditResult = $user->addCreditDirectSimple(
+                            $upload['user_id'], 
+                            $creditsCharged, 
+                            'file_charge', 
+                            'Dosya işleme ücreti: ' . $upload['original_name']
+                        );
+                        
+                        if (!$creditResult) {
+                            $this->pdo->rollBack();
+                            return ['success' => false, 'message' => 'Yetersiz kredi. İşlem iptal edildi.'];
+                        }
                     }
+                    
+                    $this->pdo->commit();
+                    return ['success' => true, 'message' => 'Yanıt dosyası başarıyla yüklendi.', 'response_id' => $responseId];
+                } else {
+                    $this->pdo->rollBack();
+                    return ['success' => false, 'message' => 'Veritabanı kaydı başarısız.'];
                 }
-                
-                return ['success' => true, 'message' => 'Yanıt dosyası başarıyla yüklendi ve kredi düşüldü.'];
             }
             
             return ['success' => false, 'message' => 'Yanıt dosyası yüklenemedi.'];
             
         } catch(PDOException $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
             error_log('uploadResponseFile error: ' . $e->getMessage());
             return ['success' => false, 'message' => 'Veritabanı hatası oluştu.'];
+        } catch(Exception $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            error_log('uploadResponseFile error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Dosya yükleme hatası: ' . $e->getMessage()];
         }
     }
     
-
+    // Dosya silme
+    public function deleteUpload($uploadId) {
+        try {
+            if (!isValidUUID($uploadId)) {
+                return false;
+            }
+            
+            // Önce dosya bilgisini al
+            $upload = $this->getUploadById($uploadId);
+            if (!$upload) {
+                return false;
+            }
+            
+            // Fiziksel dosyayı sil
+            if (!empty($upload['filename'])) {
+                $filePath = UPLOAD_PATH . 'user_files/' . $upload['filename'];
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+            }
+            
+            // Veritabanından sil
+            $stmt = $this->pdo->prepare("DELETE FROM file_uploads WHERE id = ?");
+            return $stmt->execute([$uploadId]);
+            
+        } catch(PDOException $e) {
+            error_log('deleteUpload error: ' . $e->getMessage());
+            return false;
+        }
+    }
     
     // Revize talebi güncelle
     public function updateRevisionStatus($revisionId, $adminId, $status, $adminNotes = '', $creditsCharged = 0) {

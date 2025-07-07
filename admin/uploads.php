@@ -6,6 +6,13 @@
 require_once '../config/config.php';
 require_once '../config/database.php';
 
+// Gerekli sınıfları ve fonksiyonları include et
+if (!function_exists('isValidUUID')) {
+    require_once '../includes/functions.php';
+}
+require_once '../includes/FileManager.php';
+require_once '../includes/User.php';
+
 // Admin kontrolü otomatik yapılır
 $fileManager = new FileManager($pdo);
 $user = new User($pdo);
@@ -546,7 +553,7 @@ include '../includes/admin_sidebar.php';
                                 <td>
                                     <div class="btn-group-vertical btn-group-sm" style="width: 140px;">
                                         <button type="button" class="btn btn-outline-primary btn-sm" 
-                                                onclick="viewFileDetails('<?php echo $upload['id']; ?>')">
+                                                onclick="window.location.href='file-detail.php?id=<?php echo $upload['id']; ?>'">
                                             <i class="fas fa-eye me-1"></i>Detay
                                         </button>
                                         
@@ -555,20 +562,18 @@ include '../includes/admin_sidebar.php';
                                                     onclick="processFile('<?php echo $upload['id']; ?>')">
                                                 <i class="fas fa-play me-1"></i>İşle
                                             </button>
-                                        <?php elseif ($upload['status'] === 'processing'): ?>
-                                            <button type="button" class="btn btn-outline-warning btn-sm" 
-                                                    onclick="uploadResponse('<?php echo $upload['id']; ?>')">
-                                                <i class="fas fa-upload me-1"></i>Yanıt Yükle
-                                            </button>
                                         <?php endif; ?>
                                         
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" 
-                                                onclick="updateStatus('<?php echo $upload['id']; ?>')">
-                                            <i class="fas fa-edit me-1"></i>Durum Güncelle
-                                        </button>
+                                        <?php 
+                                        $originalFileExists = false;
+                                        if (!empty($upload['filename'])) {
+                                            // filename'den tam path oluştur
+                                            $fullPath = $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/user_files/' . $upload['filename'];
+                                            $originalFileExists = file_exists($fullPath);
+                                        }
                                         
-                                        <?php if (!empty($upload['original_file_path']) && file_exists('../' . $upload['original_file_path'])): ?>
-                                            <a href="download-original.php?id=<?php echo $upload['id']; ?>" 
+                                        if ($originalFileExists): ?>
+                                            <a href="download.php?type=original&id=<?php echo $upload['id']; ?>" 
                                                class="btn btn-outline-info btn-sm">
                                                 <i class="fas fa-download me-1"></i>İndir
                                             </a>
@@ -629,114 +634,6 @@ include '../includes/admin_sidebar.php';
                 </div>
             <?php endif; ?>
         <?php endif; ?>
-    </div>
-</div>
-
-<!-- Dosya Detay Modal -->
-<div class="modal fade" id="fileDetailModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-file-alt me-2"></i>Dosya Detayları
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="fileDetailContent">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Yükleniyor...</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Durum Güncelleme Modal -->
-<div class="modal fade" id="updateStatusModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-edit me-2"></i>Durum Güncelle
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST" id="updateStatusForm">
-                <div class="modal-body">
-                    <input type="hidden" name="update_status" value="1">
-                    <input type="hidden" name="upload_id" id="status_upload_id">
-                    
-                    <div class="mb-3">
-                        <label for="status" class="form-label">Yeni Durum <span class="text-danger">*</span></label>
-                        <select class="form-select" id="status" name="status" required>
-                            <option value="pending">Bekleyen</option>
-                            <option value="processing">İşleniyor</option>
-                            <option value="completed">Tamamlandı</option>
-                            <option value="rejected">Reddedildi</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="admin_notes" class="form-label">Admin Notları</label>
-                        <textarea class="form-control" id="admin_notes" name="admin_notes" 
-                                  rows="4" placeholder="Durum değişikliği hakkında notlar..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>Güncelle
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Yanıt Dosyası Yükleme Modal -->
-<div class="modal fade" id="uploadResponseModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-upload me-2"></i>Yanıt Dosyası Yükle
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST" enctype="multipart/form-data" id="uploadResponseForm">
-                <div class="modal-body">
-                    <input type="hidden" name="upload_id" id="response_upload_id">
-                    
-                    <div class="mb-3">
-                        <label for="response_file" class="form-label">İşlenmiş Dosya <span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" id="response_file" name="response_file" 
-                               accept=".bin,.hex,.a2l,.kp,.ori,.mod,.ecu,.tun" required>
-                        <div class="form-text">Desteklenen formatlar: .bin, .hex, .a2l, .kp, .ori, .mod, .ecu, .tun</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="credits_charged" class="form-label">Kesilen Kredi (TL) <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="credits_charged" name="credits_charged" 
-                               min="0" step="0.01" value="5.00" required>
-                        <div class="form-text">Bu işlem için kullanıcıdan kesilecek kredi miktarı</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="response_notes" class="form-label">İşlem Notları</label>
-                        <textarea class="form-control" id="response_notes" name="response_notes" 
-                                  rows="4" placeholder="İşlem hakkında notlar ve açıklamalar..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-check me-2"></i>Tamamla & Yükle
-                    </button>
-                </div>
-            </form>
-        </div>
     </div>
 </div>
 
