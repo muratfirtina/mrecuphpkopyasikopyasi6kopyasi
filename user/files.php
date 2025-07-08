@@ -23,6 +23,51 @@ if (!isValidUUID($userId)) {
     redirect('../logout.php');
 }
 
+// AJAX response dosya detayları endpoint'i
+if (isset($_GET['get_response_details']) && isset($_GET['file_id'])) {
+    header('Content-Type: application/json');
+    $fileId = sanitize($_GET['file_id']);
+    
+    if (!isValidUUID($fileId)) {
+        echo json_encode(['error' => 'Geçersiz dosya ID formatı']);
+        exit;
+    }
+    
+    try {
+        // Response dosyasını getir
+        $stmt = $pdo->prepare("
+            SELECT fr.*, fu.user_id, fu.original_name as original_upload_name,
+                   fu.brand_id, fu.model_id, fu.year, fu.ecu_type, fu.engine_code,
+                   b.name as brand_name, m.name as model_name,
+                   a.username as admin_username
+            FROM file_responses fr
+            LEFT JOIN file_uploads fu ON fr.upload_id = fu.id
+            LEFT JOIN brands b ON fu.brand_id = b.id
+            LEFT JOIN models m ON fu.model_id = m.id
+            LEFT JOIN users a ON fr.admin_id = a.id
+            WHERE fr.id = ? AND fu.user_id = ?
+        ");
+        $stmt->execute([$fileId, $userId]);
+        $response = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$response) {
+            echo json_encode(['error' => 'Yanıt dosyası bulunamadı veya yetkiniz yok']);
+            exit;
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'file' => $response
+        ]);
+        
+    } catch(PDOException $e) {
+        error_log('get_response_details error: ' . $e->getMessage());
+        echo json_encode(['error' => 'Veritabanı hatası']);
+    }
+    
+    exit;
+}
+
 // AJAX dosya detayları endpoint'i
 if (isset($_GET['get_file_details']) && isset($_GET['file_id'])) {
     header('Content-Type: application/json');
@@ -95,10 +140,13 @@ $search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $limit = 12;
 
-// Kullanıcının dosyalarını getir
-$userUploads = $fileManager->getUserUploads($userId, $page, $limit, $status, $search);
-$totalUploads = $fileManager->getUserUploadCount($userId, $status, $search);
-$totalPages = ceil($totalUploads / $limit);
+// Kullanıcının dosyalarını getir (yüklenen + yanıt dosyaları birleşik)
+$userFiles = $fileManager->getUserAllFiles($userId, $page, $limit, $status, $search);
+
+// Sayfalama için tüm dosyaları al (limit olmadan)
+$allUserFiles = $fileManager->getUserAllFiles($userId, 1, 1000, $status, $search); // Büyük limit ile tüm dosyaları al
+$totalFiles = count($allUserFiles);
+$totalPages = ceil($totalFiles / $limit);
 
 // İstatistikler
 $stats = $fileManager->getUserFileStats($userId);
@@ -266,6 +314,7 @@ include '../includes/user_header.php';
                                 <option value="processing" <?php echo $status === 'processing' ? 'selected' : ''; ?>>İşleniyor</option>
                                 <option value="completed" <?php echo $status === 'completed' ? 'selected' : ''; ?>>Tamamlanan</option>
                                 <option value="rejected" <?php echo $status === 'rejected' ? 'selected' : ''; ?>>Reddedilen</option>
+                                <option value="response" <?php echo $status === 'response' ? 'selected' : ''; ?>>Yanıt Dosyaları</option>
                             </select>
                         </div>
                         
@@ -297,7 +346,7 @@ include '../includes/user_header.php';
             </div>
 
             <!-- Dosya Listesi -->
-            <?php if (empty($userUploads)): ?>
+            <?php if (empty($userFiles)): ?>
                 <div class="empty-state-card">
                     <div class="empty-content">
                         <div class="empty-icon">
@@ -332,21 +381,25 @@ include '../includes/user_header.php';
             <?php else: ?>
                 <!-- Dosya Grid -->
                 <div class="files-grid">
-                    <?php foreach ($userUploads as $upload): ?>
-                        <div class="file-card">
+                    <?php foreach ($userFiles as $file): ?>
+                        <div class="file-card <?php echo $file['file_type'] === 'response' ? 'response-file' : 'upload-file'; ?>">
                             <div class="file-card-header">
-                                <div class="file-icon-large">
-                                    <i class="fas fa-file-alt"></i>
+                                <div class="file-icon-large <?php echo $file['file_type'] === 'response' ? 'response-icon' : ''; ?>">
+                                    <i class="fas <?php echo $file['file_type'] === 'response' ? 'fa-reply' : 'fa-file-alt'; ?>"></i>
                                 </div>
                                 <div class="file-status">
                                     <?php
-                                    $statusConfig = [
-                                        'pending' => ['class' => 'warning', 'text' => 'Bekliyor', 'icon' => 'clock'],
-                                        'processing' => ['class' => 'info', 'text' => 'İşleniyor', 'icon' => 'cogs'],
-                                        'completed' => ['class' => 'success', 'text' => 'Tamamlandı', 'icon' => 'check-circle'],
-                                        'rejected' => ['class' => 'danger', 'text' => 'Reddedildi', 'icon' => 'times-circle']
-                                    ];
-                                    $config = $statusConfig[$upload['status']] ?? ['class' => 'secondary', 'text' => 'Bilinmiyor', 'icon' => 'question'];
+                                    if ($file['file_type'] === 'response') {
+                                        $config = ['class' => 'success', 'text' => 'Yanıt Dosyası', 'icon' => 'reply'];
+                                    } else {
+                                        $statusConfig = [
+                                            'pending' => ['class' => 'warning', 'text' => 'Bekliyor', 'icon' => 'clock'],
+                                            'processing' => ['class' => 'info', 'text' => 'İşleniyor', 'icon' => 'cogs'],
+                                            'completed' => ['class' => 'success', 'text' => 'Tamamlandı', 'icon' => 'check-circle'],
+                                            'rejected' => ['class' => 'danger', 'text' => 'Reddedildi', 'icon' => 'times-circle']
+                                        ];
+                                        $config = $statusConfig[$file['status']] ?? ['class' => 'secondary', 'text' => 'Bilinmiyor', 'icon' => 'question'];
+                                    }
                                     ?>
                                     <span class="badge bg-<?php echo $config['class']; ?> status-badge">
                                         <i class="fas fa-<?php echo $config['icon']; ?> me-1"></i>
@@ -356,30 +409,42 @@ include '../includes/user_header.php';
                             </div>
                             
                             <div class="file-card-body">
-                                <h6 class="file-name" title="<?php echo htmlspecialchars($upload['original_name'] ?? 'Bilinmeyen dosya'); ?>">
-                                <?php echo htmlspecialchars($upload['original_name'] ?? 'Bilinmeyen dosya'); ?>
+                                <h6 class="file-name" title="<?php echo htmlspecialchars($file['original_name'] ?? 'Bilinmeyen dosya'); ?>">
+                                    <?php echo htmlspecialchars($file['original_name'] ?? 'Bilinmeyen dosya'); ?>
+                                    <?php if ($file['file_type'] === 'response'): ?>
+                                        <small class="text-muted d-block">
+                                            <i class="fas fa-arrow-left me-1"></i>
+                                            Yanıt: <?php echo htmlspecialchars($file['original_upload_name'] ?? ''); ?>
+                                        </small>
+                                    <?php endif; ?>
                                 </h6>
                                 
                                 <div class="file-meta">
                                     <div class="meta-item">
                                         <i class="fas fa-car me-1"></i>
-                                        <span><?php echo htmlspecialchars($upload['brand_name'] ?? 'Bilinmiyor'); ?></span>
+                                        <span><?php echo htmlspecialchars($file['brand_name'] ?? 'Bilinmiyor'); ?></span>
                                     </div>
                                     <div class="meta-item">
                                         <i class="fas fa-cog me-1"></i>
-                                        <span><?php echo htmlspecialchars($upload['model_name'] ?? 'Model belirtilmemiş'); ?></span>
+                                        <span><?php echo htmlspecialchars($file['model_name'] ?? 'Model belirtilmemiş'); ?></span>
                                     </div>
                                     <div class="meta-item">
                                         <i class="fas fa-calendar me-1"></i>
-                                        <span><?php echo date('d.m.Y', strtotime($upload['upload_date'])); ?></span>
+                                        <span><?php echo date('d.m.Y', strtotime($file['upload_date'])); ?></span>
                                     </div>
                                     <div class="meta-item">
                                         <i class="fas fa-hdd me-1"></i>
-                                        <span><?php echo formatFileSize($upload['file_size'] ?? 0); ?></span>
+                                        <span><?php echo formatFileSize($file['file_size'] ?? 0); ?></span>
                                     </div>
+                                    <?php if ($file['file_type'] === 'response' && !empty($file['admin_username'])): ?>
+                                        <div class="meta-item">
+                                            <i class="fas fa-user-cog me-1"></i>
+                                            <span>Admin: <?php echo htmlspecialchars($file['admin_username']); ?></span>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                                 
-                                <?php if (!empty($upload['admin_notes'])): ?>
+                                <?php if (!empty($file['admin_notes'])): ?>
                                     <div class="admin-note">
                                         <i class="fas fa-comment-dots me-1"></i>
                                         <small>Admin notu mevcut</small>
@@ -389,54 +454,56 @@ include '../includes/user_header.php';
                             
                             <div class="file-card-footer">
                                 <div class="file-actions">
-                                <?php if ($upload['status'] === 'completed'): ?>
-                                <a href="download.php?id=<?php echo $upload['id']; ?>" 
-                                class="btn btn-success btn-sm action-btn">
-                                <i class="fas fa-download me-1"></i>İndir
-                                </a>
-                                <?php endif; ?>
-                                
-                                <button type="button" class="btn btn-outline-primary btn-sm action-btn" 
-                                onclick="viewFileDetails('<?php echo $upload['id']; ?>')">
-                                <i class="fas fa-eye me-1"></i>Detay
-                                </button>
-                                
-                                <?php if ($upload['status'] === 'completed'): ?>
-                                <button type="button" class="btn btn-outline-warning btn-sm action-btn" 
-                                onclick="requestRevision('<?php echo $upload['id']; ?>')">
-                                <i class="fas fa-redo me-1"></i>Revize
-                                </button>
-                                <?php endif; ?>
+                                    <?php if ($file['file_type'] === 'response' || $file['status'] === 'completed'): ?>
+                                        <a href="download.php?id=<?php echo $file['id']; ?>&type=<?php echo $file['file_type'] === 'response' ? 'response' : 'upload'; ?>" 
+                                           class="btn btn-success btn-sm action-btn">
+                                            <i class="fas fa-download me-1"></i>İndir
+                                        </a>
+                                    <?php endif; ?>
+                                    
+                                    <button type="button" class="btn btn-outline-primary btn-sm action-btn" 
+                                            onclick="viewFileDetails('<?php echo $file['id']; ?>', '<?php echo $file['file_type']; ?>')">
+                                        <i class="fas fa-eye me-1"></i>Detay
+                                    </button>
+                                    
+                                    <?php if ($file['file_type'] === 'upload' && $file['status'] === 'completed'): ?>
+                                        <button type="button" class="btn btn-outline-warning btn-sm action-btn" 
+                                                onclick="requestRevision('<?php echo $file['id']; ?>')">
+                                            <i class="fas fa-redo me-1"></i>Revize
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                                 
-                                <div class="file-progress">
-                                    <?php 
-                                    $progressValue = 0;
-                                    $progressClass = 'bg-secondary';
-                                    switch($upload['status']) {
-                                        case 'pending':
-                                            $progressValue = 25;
-                                            $progressClass = 'bg-warning';
-                                            break;
-                                        case 'processing':
-                                            $progressValue = 75;
-                                            $progressClass = 'bg-info';
-                                            break;
-                                        case 'completed':
-                                            $progressValue = 100;
-                                            $progressClass = 'bg-success';
-                                            break;
-                                        case 'rejected':
-                                            $progressValue = 100;
-                                            $progressClass = 'bg-danger';
-                                            break;
-                                    }
-                                    ?>
-                                    <div class="progress progress-sm">
-                                        <div class="progress-bar <?php echo $progressClass; ?>" 
-                                             style="width: <?php echo $progressValue; ?>%"></div>
+                                <?php if ($file['file_type'] !== 'response'): ?>
+                                    <div class="file-progress">
+                                        <?php 
+                                        $progressValue = 0;
+                                        $progressClass = 'bg-secondary';
+                                        switch($file['status']) {
+                                            case 'pending':
+                                                $progressValue = 25;
+                                                $progressClass = 'bg-warning';
+                                                break;
+                                            case 'processing':
+                                                $progressValue = 75;
+                                                $progressClass = 'bg-info';
+                                                break;
+                                            case 'completed':
+                                                $progressValue = 100;
+                                                $progressClass = 'bg-success';
+                                                break;
+                                            case 'rejected':
+                                                $progressValue = 100;
+                                                $progressClass = 'bg-danger';
+                                                break;
+                                        }
+                                        ?>
+                                        <div class="progress progress-sm">
+                                            <div class="progress-bar <?php echo $progressClass; ?>" 
+                                                 style="width: <?php echo $progressValue; ?>%"></div>
+                                        </div>
                                     </div>
-                                </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -484,7 +551,7 @@ include '../includes/user_header.php';
                         <div class="pagination-info">
                             <small class="text-muted">
                                 Sayfa <?php echo $page; ?> / <?php echo $totalPages; ?> 
-                                (Toplam <?php echo $totalUploads; ?> dosya)
+                                (Toplam <?php echo $totalFiles; ?> dosya)
                             </small>
                         </div>
                     </div>
@@ -973,11 +1040,34 @@ include '../includes/user_header.php';
         text-align: left;
     }
 }
+
+/* Response File Styles */
+.response-file {
+    border-left: 4px solid #28a745;
+    background: linear-gradient(145deg, #ffffff 0%, #f8fff9 100%);
+}
+
+.response-file:hover {
+    border-left-color: #1e7e34;
+    box-shadow: 0 8px 30px rgba(40, 167, 69, 0.15);
+}
+
+.response-icon {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.upload-file {
+    border-left: 4px solid #007bff;
+}
+
+.upload-file:hover {
+    border-left-color: #0056b3;
+}
 </style>
 
 <script>
 // File Details Modal
-function viewFileDetails(uploadId) {
+function viewFileDetails(uploadId, fileType = 'upload') {
     const modal = new bootstrap.Modal(document.getElementById('fileDetailModal'));
     const content = document.getElementById('fileDetailContent');
     
@@ -992,8 +1082,16 @@ function viewFileDetails(uploadId) {
     
     modal.show();
     
+    // Response dosyaları için farklı endpoint
+    let endpoint = '';
+    if (fileType === 'response') {
+        endpoint = `?get_response_details=1&file_id=${encodeURIComponent(uploadId)}`;
+    } else {
+        endpoint = `?get_file_details=1&file_id=${encodeURIComponent(uploadId)}`;
+    }
+    
     // AJAX ile dosya detaylarını getir
-    fetch(`?get_file_details=1&file_id=${encodeURIComponent(uploadId)}`)
+    fetch(endpoint)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -1008,6 +1106,8 @@ function viewFileDetails(uploadId) {
             
             if (data.success && data.file) {
                 const file = data.file;
+                const isResponse = fileType === 'response';
+                
                 const statusConfig = {
                     'pending': { class: 'warning', text: 'Bekliyor', icon: 'clock' },
                     'processing': { class: 'info', text: 'İşleniyor', icon: 'cogs' },
@@ -1015,24 +1115,34 @@ function viewFileDetails(uploadId) {
                     'rejected': { class: 'danger', text: 'Reddedildi', icon: 'times-circle' }
                 };
                 
-                const status = statusConfig[file.status] || { class: 'secondary', text: 'Bilinmiyor', icon: 'question' };
+                const status = isResponse ? 
+                    { class: 'success', text: 'Yanıt Dosyası', icon: 'reply' } :
+                    (statusConfig[file.status] || { class: 'secondary', text: 'Bilinmiyor', icon: 'question' });
                 
                 content.innerHTML = `
                     <div class="file-detail-content">
                         <!-- Dosya Başlık -->
                         <div class="file-detail-header mb-4">
                             <div class="d-flex align-items-center">
-                                <div class="file-icon-large me-3">
-                                    <i class="fas fa-file-alt"></i>
+                                <div class="file-icon-large me-3 ${isResponse ? 'response-icon' : ''}">
+                                    <i class="fas fa-${isResponse ? 'reply' : 'file-alt'}"></i>
                                 </div>
                                 <div class="flex-grow-1">
                                     <h5 class="mb-1">${file.original_name || 'Bilinmeyen dosya'}</h5>
+                                    ${isResponse && file.original_upload_name ? `
+                                        <small class="text-muted d-block mb-2">
+                                            <i class="fas fa-arrow-left me-1"></i>
+                                            Yanıt: ${file.original_upload_name}
+                                        </small>
+                                    ` : ''}
                                     <span class="badge bg-${status.class}">
                                         <i class="fas fa-${status.icon} me-1"></i>${status.text}
                                     </span>
                                 </div>
-                                ${file.status === 'completed' ? `
-                                    
+                                ${(isResponse || file.status === 'completed') ? `
+                                    <a href="download.php?id=${file.id}&type=${isResponse ? 'response' : 'upload'}" class="btn btn-success">
+                                        <i class="fas fa-download me-2"></i>İndir
+                                    </a>
                                 ` : ''}
                             </div>
                         </div>
@@ -1057,13 +1167,25 @@ function viewFileDetails(uploadId) {
                                         <span class="value">${formatFileSize(file.file_size || 0)}</span>
                                     </div>
                                     <div class="detail-item">
-                                        <span class="label">Yüklenme Tarihi:</span>
+                                        <span class="label">${isResponse ? 'Oluşturulma' : 'Yüklenme'} Tarihi:</span>
                                         <span class="value">${formatDate(file.upload_date)}</span>
                                     </div>
-                                    ${file.completed_at ? `
+                                    ${file.processed_date && !isResponse ? `
                                         <div class="detail-item">
                                             <span class="label">Tamamlanma Tarihi:</span>
-                                            <span class="value">${formatDate(file.completed_at)}</span>
+                                            <span class="value">${formatDate(file.processed_date)}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${isResponse && file.admin_username ? `
+                                        <div class="detail-item">
+                                            <span class="label">Oluşturan Admin:</span>
+                                            <span class="value">${file.admin_username}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${file.credits_charged ? `
+                                        <div class="detail-item">
+                                            <span class="label">Ücret:</span>
+                                            <span class="value">${file.credits_charged} kredi</span>
                                         </div>
                                     ` : ''}
                                 </div>
@@ -1104,10 +1226,10 @@ function viewFileDetails(uploadId) {
                             </div>
                         </div>
                         
-                        ${file.notes ? `
+                        ${file.notes && file.notes !== file.admin_notes ? `
                             <div class="mt-4">
                                 <h6 class="text-muted mb-3">
-                                    <i class="fas fa-comment me-2"></i>Notlar
+                                    <i class="fas fa-comment me-2"></i>${isResponse ? 'Orijinal' : ''} Notlar
                                 </h6>
                                 <div class="notes-content">
                                     ${file.notes.replace(/\n/g, '<br>')}
@@ -1126,14 +1248,11 @@ function viewFileDetails(uploadId) {
                             </div>
                         ` : ''}
                         
-                        ${file.status === 'completed' ? `
+                        ${!isResponse && file.status === 'completed' ? `
                             <div class="mt-4 text-center">
                                 <button type="button" class="btn btn-warning me-2" onclick="requestRevision('${file.id}'); bootstrap.Modal.getInstance(document.getElementById('fileDetailModal')).hide();">
                                     <i class="fas fa-redo me-2"></i>Revize Talep Et
                                 </button>
-                                <a href="download.php?id=${file.id}" class="btn btn-success">
-                                    <i class="fas fa-download me-2"></i>Dosyayı İndir
-                                </a>
                             </div>
                         ` : ''}
                     </div>
@@ -1190,8 +1309,8 @@ function refreshPage() {
 }
 
 // Auto-refresh for processing files
-<?php if (!empty($userUploads)): ?>
-const hasProcessingFiles = <?php echo json_encode(array_filter($userUploads, function($u) { return $u['status'] === 'processing'; })); ?>.length > 0;
+<?php if (!empty($userFiles)): ?>
+const hasProcessingFiles = <?php echo json_encode(array_filter($userFiles, function($u) { return $u['status'] === 'processing'; })); ?>.length > 0;
 if (hasProcessingFiles) {
     setTimeout(() => {
         if (!document.hidden) {

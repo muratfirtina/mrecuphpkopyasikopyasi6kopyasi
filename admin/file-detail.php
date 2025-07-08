@@ -666,8 +666,8 @@ include '../includes/admin_sidebar.php';
                     <div class="mb-3">
                         <label for="response_file" class="form-label">İşlenmiş Dosya <span class="text-danger">*</span></label>
                         <input type="file" class="form-control" id="response_file" name="response_file" 
-                               accept=".bin,.hex,.a2l,.kp,.ori,.mod,.ecu,.tun" required>
-                        <div class="form-text">Desteklenen formatlar: .bin, .hex, .a2l, .kp, .ori, .mod, .ecu, .tun</div>
+                               accept=".bin,.hex,.a2l,.kp,.ori,.mod,.ecu,.tun,.zip,.rar" required>
+                        <div class="form-text">Desteklenen formatlar: .bin, .hex, .a2l, .kp, .ori, .mod, .ecu, .tun, .zip, .rar</div>
                     </div>
                     
                     <div class="mb-3">

@@ -181,8 +181,8 @@ class FileManager {
     // Dosya yükle (GUID ID ile)
     public function uploadFile($userId, $fileData, $vehicleData, $notes = '') {
         try {
-            // GUID format kontrolü
-            if (!isValidUUID($userId)) {
+            // GUID format kontrolü - sadece GUID ise kontrol et
+            if (preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $userId) && !isValidUUID($userId)) {
                 return ['success' => false, 'message' => 'Geçersiz kullanıcı ID formatı.'];
             }
             
@@ -196,17 +196,36 @@ class FileManager {
                 return ['success' => false, 'message' => 'Dosya boyutu çok büyük.'];
             }
             
+            // Dosya uzantısı kontrolü
+            $extension = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
+            if (!in_array($extension, ALLOWED_EXTENSIONS)) {
+                return ['success' => false, 'message' => 'Desteklenmeyen dosya formatı.'];
+            }
+            
             // UUID oluştur
             $uploadId = generateUUID();
-            $fileName = generateUUID() . '_' . basename($fileData['name']);
-            $uploadPath = UPLOAD_PATH . $fileName;
+            $fileName = generateUUID() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($fileData['name']));
+            
+            // user_files klasörü yoksa oluştur
+            $userFilesDir = UPLOAD_PATH . 'user_files/';
+            if (!is_dir($userFilesDir)) {
+                mkdir($userFilesDir, 0755, true);
+            }
+            
+            $uploadPath = $userFilesDir . $fileName;
             
             // Dosyayı taşı
             if (move_uploaded_file($fileData['tmp_name'], $uploadPath)) {
-                // Veritabanına kaydet
+                $this->pdo->beginTransaction();
+                
+                // Veritabanına kaydet - vehicleData dahil
                 $stmt = $this->pdo->prepare("
-                    INSERT INTO file_uploads (id, user_id, original_name, filename, file_size, status, upload_notes, upload_date)
-                    VALUES (?, ?, ?, ?, ?, 'pending', ?, NOW())
+                    INSERT INTO file_uploads (
+                        id, user_id, original_name, filename, file_size, 
+                        brand_id, model_id, year, ecu_type, engine_code, 
+                        gearbox_type, fuel_type, hp_power, nm_torque,
+                        status, upload_notes, upload_date
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, NOW())
                 ");
                 
                 $result = $stmt->execute([
@@ -215,19 +234,43 @@ class FileManager {
                     $fileData['name'],
                     $fileName,
                     $fileData['size'],
+                    $vehicleData['brand_id'] ?? null,
+                    $vehicleData['model_id'] ?? null,
+                    $vehicleData['year'] ?? null,
+                    $vehicleData['ecu_type'] ?? null,
+                    $vehicleData['engine_code'] ?? null,
+                    $vehicleData['gearbox_type'] ?? null,
+                    $vehicleData['fuel_type'] ?? null,
+                    $vehicleData['hp_power'] ?? null,
+                    $vehicleData['nm_torque'] ?? null,
                     $notes
                 ]);
                 
                 if ($result) {
+                    $this->pdo->commit();
                     return ['success' => true, 'message' => 'Dosya başarıyla yüklendi.', 'upload_id' => $uploadId];
+                } else {
+                    $this->pdo->rollBack();
+                    // Dosyayı sil
+                    if (file_exists($uploadPath)) {
+                        unlink($uploadPath);
+                    }
+                    return ['success' => false, 'message' => 'Veritabanı kaydı başarısız.'];
                 }
             }
             
             return ['success' => false, 'message' => 'Dosya yükleme sırasında hata oluştu.'];
             
         } catch(PDOException $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            // Dosyayı sil
+            if (isset($uploadPath) && file_exists($uploadPath)) {
+                unlink($uploadPath);
+            }
             error_log('uploadFile error: ' . $e->getMessage());
-            return ['success' => false, 'message' => 'Veritabanı hatası oluştu.'];
+            return ['success' => false, 'message' => 'Veritabanı hatası oluştu: ' . $e->getMessage()];
         }
     }
     
@@ -252,8 +295,8 @@ class FileManager {
         }
     }
     
-    // Kullanıcının dosyalarını getir (güncellenmiş versiyon)
-    public function getUserUploads($userId, $page = 1, $limit = 10, $status = '', $search = '') {
+    // Kullanıcının yanıt dosyalarını getir (admin tarafından gönderilen dosyalar)
+    public function getUserResponseFiles($userId, $page = 1, $limit = 10, $search = '') {
         try {
             if (!isValidUUID($userId)) {
                 return [];
@@ -263,26 +306,29 @@ class FileManager {
             $whereClause = "WHERE fu.user_id = ?";
             $params = [$userId];
             
-            if ($status) {
-                $whereClause .= " AND fu.status = ?";
-                $params[] = $status;
-            }
-            
             if ($search) {
-                $whereClause .= " AND (fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                $whereClause .= " AND (fr.original_name LIKE ? OR fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
                 $searchTerm = "%$search%";
+                $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
             }
             
             $stmt = $this->pdo->prepare("
-                SELECT fu.*, b.name as brand_name, m.name as model_name
-                FROM file_uploads fu
+                SELECT fr.*, fu.original_name as original_upload_name, fu.upload_date as original_upload_date,
+                       fu.brand_id, fu.model_id, fu.year, fu.ecu_type, fu.engine_code,
+                       fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
+                       b.name as brand_name, m.name as model_name,
+                       a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
+                       'response' as file_type
+                FROM file_responses fr
+                INNER JOIN file_uploads fu ON fr.upload_id = fu.id
                 LEFT JOIN brands b ON fu.brand_id = b.id
                 LEFT JOIN models m ON fu.model_id = m.id
+                LEFT JOIN users a ON fr.admin_id = a.id
                 {$whereClause}
-                ORDER BY fu.upload_date DESC 
+                ORDER BY fr.upload_date DESC 
                 LIMIT $limit OFFSET $offset
             ");
             
@@ -290,8 +336,204 @@ class FileManager {
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
             
         } catch(PDOException $e) {
-            error_log('getUserUploads error: ' . $e->getMessage());
+            error_log('getUserResponseFiles error: ' . $e->getMessage());
             return [];
+        }
+    }
+    
+    // Kullanıcının yanıt dosya sayısını getir
+    public function getUserResponseFileCount($userId, $search = '') {
+        try {
+            if (!isValidUUID($userId)) {
+                return 0;
+            }
+            
+            $whereClause = "WHERE fu.user_id = ?";
+            $params = [$userId];
+            
+            if ($search) {
+                $whereClause .= " AND (fr.original_name LIKE ? OR fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                $searchTerm = "%$search%";
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+            }
+            
+            $stmt = $this->pdo->prepare("
+                SELECT COUNT(*) as count
+                FROM file_responses fr
+                INNER JOIN file_uploads fu ON fr.upload_id = fu.id
+                LEFT JOIN brands b ON fu.brand_id = b.id
+                LEFT JOIN models m ON fu.model_id = m.id
+                {$whereClause}
+            ");
+            
+            $stmt->execute($params);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['count'] ?? 0;
+            
+        } catch(PDOException $e) {
+            error_log('getUserResponseFileCount error: ' . $e->getMessage());
+            return 0;
+        }
+    }
+    
+    // Kullanıcının tüm dosyalarını getir (yüklenen + yanıt dosyaları birleşik)
+    public function getUserAllFiles($userId, $page = 1, $limit = 10, $status = '', $search = '') {
+        try {
+            if (!isValidUUID($userId)) {
+                return [];
+            }
+            
+            $offset = ($page - 1) * $limit;
+            
+            // Ana yüklenen dosyalar sorgusu
+            $uploadQuery = "
+                SELECT fu.id, fu.original_name, fu.filename, fu.file_size, fu.status, fu.upload_date,
+                       fu.admin_notes, fu.upload_notes as notes, fu.processed_date, fu.credits_charged,
+                       fu.brand_id, fu.model_id, fu.year, fu.ecu_type, fu.engine_code,
+                       fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
+                       b.name as brand_name, m.name as model_name,
+                       'upload' as file_type, NULL as admin_username, NULL as admin_first_name, NULL as admin_last_name,
+                       NULL as original_upload_name, NULL as original_upload_date
+                FROM file_uploads fu
+                LEFT JOIN brands b ON fu.brand_id = b.id
+                LEFT JOIN models m ON fu.model_id = m.id
+                WHERE fu.user_id = ?";
+            
+            $params = [$userId];
+            
+            if ($status && $status !== 'response') {
+                $uploadQuery .= " AND fu.status = ?";
+                $params[] = $status;
+            }
+            
+            if ($search) {
+                $uploadQuery .= " AND (fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                $searchTerm = "%$search%";
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+            }
+            
+            // Yanıt dosyaları sorgusu (sadece status = 'response' değilse)
+            $responseQuery = "";
+            if ($status !== 'pending' && $status !== 'processing' && $status !== 'completed' && $status !== 'rejected') {
+                $responseQuery = "
+                    UNION ALL
+                    SELECT fr.id, fr.original_name, fr.filename, fr.file_size, 'response' as status, fr.upload_date,
+                           fr.admin_notes, NULL as notes, fr.upload_date as processed_date, fr.credits_charged,
+                           fu.brand_id, fu.model_id, fu.year, fu.ecu_type, fu.engine_code,
+                           fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
+                           b.name as brand_name, m.name as model_name,
+                           'response' as file_type, a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
+                           fu.original_name as original_upload_name, fu.upload_date as original_upload_date
+                    FROM file_responses fr
+                    INNER JOIN file_uploads fu ON fr.upload_id = fu.id
+                    LEFT JOIN brands b ON fu.brand_id = b.id
+                    LEFT JOIN models m ON fu.model_id = m.id
+                    LEFT JOIN users a ON fr.admin_id = a.id
+                    WHERE fu.user_id = ?";
+                
+                $params[] = $userId; // response query için user_id
+                
+                if ($status === 'response') {
+                    // Sadece yanıt dosyalarını göster, upload dosyalarını gösterme
+                    $uploadQuery = $responseQuery;
+                    $responseQuery = "";
+                    // params dizisini düzenle - ilk userId'yi kaldır
+                    array_shift($params);
+                }
+                
+                if ($search && $status !== 'response') {
+                    $responseQuery .= " AND (fr.original_name LIKE ? OR fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                    $searchTerm = "%$search%";
+                    $params[] = $searchTerm;
+                    $params[] = $searchTerm;
+                    $params[] = $searchTerm;
+                    $params[] = $searchTerm;
+                }
+            }
+            
+            $fullQuery = "(
+                {$uploadQuery}
+                {$responseQuery}
+            ) ORDER BY upload_date DESC
+            LIMIT $limit OFFSET $offset";
+            
+            $stmt = $this->pdo->prepare($fullQuery);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch(PDOException $e) {
+            error_log('getUserAllFiles error: ' . $e->getMessage());
+            return [];
+        }
+    }
+    
+    // Kullanıcının tüm dosya sayısını getir (yüklenen + yanıt dosyaları)
+    public function getUserAllFileCount($userId, $status = '', $search = '') {
+        try {
+            if (!isValidUUID($userId)) {
+                return 0;
+            }
+            
+            // Ana yüklenen dosyalar sayısı
+            $uploadCount = 0;
+            $uploadQuery = "SELECT COUNT(*) as count FROM file_uploads fu LEFT JOIN brands b ON fu.brand_id = b.id LEFT JOIN models m ON fu.model_id = m.id WHERE fu.user_id = ?";
+            $params = [$userId];
+            
+            if ($status && $status !== 'response') {
+                $uploadQuery .= " AND fu.status = ?";
+                $params[] = $status;
+            }
+            
+            if ($search) {
+                $uploadQuery .= " AND (fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                $searchTerm = "%$search%";
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+            }
+            
+            if ($status !== 'response') {
+                $stmt = $this->pdo->prepare($uploadQuery);
+                $stmt->execute($params);
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                $uploadCount = $result['count'] ?? 0;
+            }
+            
+            // Yanıt dosyaları sayısı
+            $responseCount = 0;
+            if ($status !== 'pending' && $status !== 'processing' && $status !== 'completed' && $status !== 'rejected') {
+                $responseParams = [$userId];
+                $responseQuery = "SELECT COUNT(*) as count FROM file_responses fr INNER JOIN file_uploads fu ON fr.upload_id = fu.id LEFT JOIN brands b ON fu.brand_id = b.id LEFT JOIN models m ON fu.model_id = m.id WHERE fu.user_id = ?";
+                
+                if ($search) {
+                    $responseQuery .= " AND (fr.original_name LIKE ? OR fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                    $searchTerm = "%$search%";
+                    $responseParams[] = $searchTerm;
+                    $responseParams[] = $searchTerm;
+                    $responseParams[] = $searchTerm;
+                    $responseParams[] = $searchTerm;
+                }
+                
+                $stmt = $this->pdo->prepare($responseQuery);
+                $stmt->execute($responseParams);
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                $responseCount = $result['count'] ?? 0;
+            }
+            
+            if ($status === 'response') {
+                return $responseCount;
+            }
+            
+            return $uploadCount + $responseCount;
+            
+        } catch(PDOException $e) {
+            error_log('getUserAllFileCount error: ' . $e->getMessage());
+            return 0;
         }
     }
     

@@ -67,6 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
         if ($vehicleData['year'] < 1990 || $vehicleData['year'] > date('Y') + 1) {
             $error = 'Geçerli bir model yılı girin.';
         } else {
+            // Debug: session user_id kontrol
+            error_log('Upload attempt - User ID: ' . $_SESSION['user_id'] . ', Type: ' . gettype($_SESSION['user_id']));
+            error_log('Vehicle data: ' . print_r($vehicleData, true));
+            
             $result = $fileManager->uploadFile($_SESSION['user_id'], $_FILES['file'], $vehicleData, $notes);
             
             if ($result['success']) {
@@ -75,6 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
                 $_POST = [];
             } else {
                 $error = $result['message'];
+                // Debug: hata detayı
+                error_log('Upload error: ' . $result['message']);
             }
         }
     }
