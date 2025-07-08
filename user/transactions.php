@@ -1,6 +1,6 @@
 <?php
 /**
- * Mr ECU - Kullanıcı İşlem Geçmişi
+ * Mr ECU - Modern Kullanıcı İşlem Geçmişi Sayfası
  */
 
 require_once '../config/config.php';
@@ -16,13 +16,16 @@ $fileManager = new FileManager($pdo);
 
 // Session'daki kredi bilgisini güncelle
 $_SESSION['credits'] = $user->getUserCredits($_SESSION['user_id']);
-
 $userId = $_SESSION['user_id'];
 
-// Sayfalama parametreleri
-$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-$limit = 20;
+// Filtreleme parametreleri
 $type = isset($_GET['type']) ? sanitize($_GET['type']) : '';
+$dateFrom = isset($_GET['date_from']) ? sanitize($_GET['date_from']) : '';
+$dateTo = isset($_GET['date_to']) ? sanitize($_GET['date_to']) : '';
+
+// Sayfalama
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$limit = 15;
 
 // Kredi işlemlerini getir
 try {
@@ -32,8 +35,18 @@ try {
     $params = [$userId];
     
     if ($type) {
-        $whereClause .= ' AND ct.type = ?';
+        $whereClause .= ' AND ct.transaction_type = ?';
         $params[] = $type;
+    }
+    
+    if ($dateFrom) {
+        $whereClause .= ' AND DATE(ct.created_at) >= ?';
+        $params[] = $dateFrom;
+    }
+    
+    if ($dateTo) {
+        $whereClause .= ' AND DATE(ct.created_at) <= ?';
+        $params[] = $dateTo;
     }
     
     $stmt = $pdo->prepare("
@@ -50,483 +63,790 @@ try {
     
     $stmt->execute($params);
     $creditTransactions = $stmt->fetchAll();
+    
+    // Toplam sayı
+    $countStmt = $pdo->prepare("
+        SELECT COUNT(*) 
+        FROM credit_transactions ct
+        {$whereClause}
+    ");
+    $countStmt->execute(array_slice($params, 0, -2));
+    $totalTransactions = $countStmt->fetchColumn();
+    $totalPages = ceil($totalTransactions / $limit);
+    
 } catch(PDOException $e) {
     $creditTransactions = [];
+    $totalTransactions = 0;
+    $totalPages = 0;
 }
 
-// Sistem loglarını getir
+// Son dosya işlemleri
 try {
     $stmt = $pdo->prepare("
-        SELECT * FROM system_logs 
-        WHERE user_id = ?
-        ORDER BY created_at DESC
-        LIMIT 50
+        SELECT fu.*, 
+               b.name as brand_name, 
+               vm.name as model_name,
+               vm.display_name as model_display_name
+        FROM file_uploads fu
+        LEFT JOIN vehicle_brands b ON fu.brand_id = b.id
+        LEFT JOIN vehicle_models vm ON fu.model_id = vm.id
+        WHERE fu.user_id = ?
+        ORDER BY fu.upload_date DESC
+        LIMIT 10
     ");
     $stmt->execute([$userId]);
-    $systemLogs = $stmt->fetchAll();
+    $recentFiles = $stmt->fetchAll();
 } catch(PDOException $e) {
-    $systemLogs = [];
+    $recentFiles = [];
 }
 
-// Dosya işlemlerini getir
-$userFiles = $fileManager->getUserUploads($userId, 1, 20);
-
 // İstatistikler
-$totalTransactions = count($creditTransactions);
-$totalLogs = count($systemLogs);
-$totalFiles = count($userFiles);
+try {
+    // Toplam kredi işlemleri
+    $stmt = $pdo->prepare("SELECT transaction_type, COUNT(*) as count, SUM(amount) as total FROM credit_transactions WHERE user_id = ? GROUP BY transaction_type");
+    $stmt->execute([$userId]);
+    $transactionStats = [];
+    while ($row = $stmt->fetch()) {
+        $transactionStats[$row['transaction_type']] = $row;
+    }
+    
+    // Bu ay ki işlemler
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM credit_transactions WHERE user_id = ? AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())");
+    $stmt->execute([$userId]);
+    $monthlyTransactions = $stmt->fetchColumn();
+    
+    // Toplam harcama
+    $stmt = $pdo->prepare("SELECT SUM(amount) FROM credit_transactions WHERE user_id = ? AND transaction_type = 'deduct'");
+    $stmt->execute([$userId]);
+    $totalSpent = $stmt->fetchColumn() ?: 0;
+    
+    // Toplam yükleme
+    $stmt = $pdo->prepare("SELECT SUM(amount) FROM credit_transactions WHERE user_id = ? AND transaction_type = 'add'");
+    $stmt->execute([$userId]);
+    $totalLoaded = $stmt->fetchColumn() ?: 0;
+    
+} catch(PDOException $e) {
+    $transactionStats = [];
+    $monthlyTransactions = 0;
+    $totalSpent = 0;
+    $totalLoaded = 0;
+}
 
 $pageTitle = 'İşlem Geçmişi';
+
+// Header include
+include '../includes/user_header.php';
 ?>
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle . ' - ' . SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="../assets/css/style.css" rel="stylesheet">
-</head>
-<body>
-    <?php include '_header.php'; ?>
-    
-    <div class="container-fluid">
-        <div class="row">
-            <?php include '_sidebar.php'; ?>
-            
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="fas fa-history me-2"></i>İşlem Geçmişi
+
+<div class="container-fluid">
+    <div class="row">
+        <?php include '_sidebar.php'; ?>
+        
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <div>
+                    <h1 class="h2 mb-0">
+                        <i class="fas fa-history me-2 text-info"></i>İşlem Geçmişi
                     </h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="exportTransactions()">
-                                <i class="fas fa-download me-1"></i>Dışa Aktar
-                            </button>
-                        </div>
+                    <p class="text-muted mb-0">Kredi işlemlerinizi ve hesap aktivitelerinizi takip edin</p>
+                </div>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-outline-primary" onclick="exportTransactions()">
+                            <i class="fas fa-download me-1"></i>Dışa Aktar
+                        </button>
                     </div>
                 </div>
+            </div>
 
-                <!-- İstatistik Kartları -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="dashboard-card primary">
-                            <div class="d-flex justify-content-between">
+            <!-- İstatistik Kartları -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card transactions">
+                        <div class="stat-card-body">
+                            <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <h4 class="mb-1"><?php echo $totalTransactions; ?></h4>
-                                    <p class="text-muted mb-0">Kredi İşlemi</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-coins text-primary" style="font-size: 2rem;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <div class="dashboard-card success">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-1"><?php echo $totalFiles; ?></h4>
-                                    <p class="text-muted mb-0">Dosya İşlemi</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-file text-success" style="font-size: 2rem;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <div class="dashboard-card warning">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="mb-1"><?php echo $totalLogs; ?></h4>
-                                    <p class="text-muted mb-0">Sistem Aktivitesi</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-chart-line text-warning" style="font-size: 2rem;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tab Navigation -->
-                <ul class="nav nav-tabs" id="transactionTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="credits-tab" data-bs-toggle="tab" data-bs-target="#credits" type="button" role="tab">
-                            <i class="fas fa-coins me-2"></i>Kredi İşlemleri
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button" role="tab">
-                            <i class="fas fa-file me-2"></i>Dosya İşlemleri
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="activities-tab" data-bs-toggle="tab" data-bs-target="#activities" type="button" role="tab">
-                            <i class="fas fa-activity me-2"></i>Sistem Aktiviteleri
-                        </button>
-                    </li>
-                </ul>
-
-                <!-- Tab Content -->
-                <div class="tab-content" id="transactionTabsContent">
-                    <!-- Kredi İşlemleri Tab -->
-                    <div class="tab-pane fade show active" id="credits" role="tabpanel">
-                        <div class="card border-0">
-                            <div class="card-header bg-transparent">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <h6 class="mb-0">Kredi İşlemleri</h6>
+                                    <div class="stat-number text-success"><?php echo number_format($totalLoaded, 2); ?></div>
+                                    <div class="stat-label">Toplam Yüklenen</div>
+                                    <div class="stat-trend">
+                                        <i class="fas fa-arrow-up text-success"></i>
+                                        <span class="text-success">Kredi TL</span>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="btn-group btn-group-sm float-end">
-                                            <a href="?type=" class="btn btn-outline-secondary <?php echo empty($type) ? 'active' : ''; ?>">Tümü</a>
-                                            <a href="?type=deposit" class="btn btn-outline-success <?php echo $type === 'deposit' ? 'active' : ''; ?>">Yükleme</a>
-                                            <a href="?type=withdraw" class="btn btn-outline-danger <?php echo $type === 'withdraw' ? 'active' : ''; ?>">Çekme</a>
-                                            <a href="?type=file_charge" class="btn btn-outline-warning <?php echo $type === 'file_charge' ? 'active' : ''; ?>">Dosya</a>
+                                </div>
+                                <div class="stat-icon bg-success">
+                                    <i class="fas fa-plus-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card transactions">
+                        <div class="stat-card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="stat-number text-danger"><?php echo number_format($totalSpent, 2); ?></div>
+                                    <div class="stat-label">Toplam Harcanan</div>
+                                    <div class="stat-trend">
+                                        <i class="fas fa-arrow-down text-danger"></i>
+                                        <span class="text-danger">Kredi TL</span>
+                                    </div>
+                                </div>
+                                <div class="stat-icon bg-danger">
+                                    <i class="fas fa-minus-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card transactions">
+                        <div class="stat-card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="stat-number text-primary"><?php echo $totalTransactions; ?></div>
+                                    <div class="stat-label">Toplam İşlem</div>
+                                    <div class="stat-trend">
+                                        <i class="fas fa-chart-line text-primary"></i>
+                                        <span class="text-primary">Tüm zamanlar</span>
+                                    </div>
+                                </div>
+                                <div class="stat-icon bg-primary">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card transactions">
+                        <div class="stat-card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="stat-number text-warning"><?php echo $monthlyTransactions; ?></div>
+                                    <div class="stat-label">Bu Ay İşlem</div>
+                                    <div class="stat-trend">
+                                        <i class="fas fa-calendar text-warning"></i>
+                                        <span class="text-warning">Aylık aktivite</span>
+                                    </div>
+                                </div>
+                                <div class="stat-icon bg-warning">
+                                    <i class="fas fa-calendar-day"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtre ve Arama -->
+            <div class="filter-card mb-4">
+                <div class="filter-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-filter me-2"></i>Filtrele ve Ara
+                    </h6>
+                </div>
+                <div class="filter-body">
+                    <form method="GET" class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label for="type" class="form-label">
+                                <i class="fas fa-tag me-1"></i>İşlem Tipi
+                            </label>
+                            <select class="form-select form-control-modern" id="type" name="type">
+                                <option value="">Tüm İşlemler</option>
+                                <option value="add" <?php echo $type === 'add' ? 'selected' : ''; ?>>Kredi Yükleme</option>
+                                <option value="deduct" <?php echo $type === 'deduct' ? 'selected' : ''; ?>>Kredi Kullanımı</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="date_from" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Başlangıç Tarihi
+                            </label>
+                            <input type="date" class="form-control form-control-modern" id="date_from" name="date_from" 
+                                   value="<?php echo htmlspecialchars($dateFrom); ?>">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="date_to" class="form-label">
+                                <i class="fas fa-calendar-check me-1"></i>Bitiş Tarihi
+                            </label>
+                            <input type="date" class="form-control form-control-modern" id="date_to" name="date_to" 
+                                   value="<?php echo htmlspecialchars($dateTo); ?>">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary btn-modern">
+                                    <i class="fas fa-search me-1"></i>Filtrele
+                                </button>
+                                <a href="transactions.php" class="btn btn-outline-secondary btn-modern">
+                                    <i class="fas fa-undo me-1"></i>Temizle
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- İşlem Listesi -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list me-2 text-primary"></i>Kredi İşlemleri
+                                <?php if ($totalTransactions > 0): ?>
+                                    <span class="badge bg-primary ms-2"><?php echo $totalTransactions; ?></span>
+                                <?php endif; ?>
+                            </h5>
+                            <div class="transaction-tabs">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="?type=" class="btn <?php echo empty($type) ? 'btn-primary' : 'btn-outline-primary'; ?>">Tümü</a>
+                                    <a href="?type=add" class="btn <?php echo $type === 'add' ? 'btn-success' : 'btn-outline-success'; ?>">Yükleme</a>
+                                    <a href="?type=deduct" class="btn <?php echo $type === 'deduct' ? 'btn-danger' : 'btn-outline-danger'; ?>">Kullanım</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body p-0">
+                            <?php if (empty($creditTransactions)): ?>
+                                <div class="empty-state-transactions">
+                                    <div class="empty-content">
+                                        <div class="empty-icon">
+                                            <i class="fas fa-receipt"></i>
+                                        </div>
+                                        <h6>
+                                            <?php if ($type || $dateFrom || $dateTo): ?>
+                                                Filtreye uygun işlem bulunamadı
+                                            <?php else: ?>
+                                                Henüz işlem yapılmamış
+                                            <?php endif; ?>
+                                        </h6>
+                                        <p class="text-muted mb-3">
+                                            <?php if ($type || $dateFrom || $dateTo): ?>
+                                                Farklı filtre kriterleri deneyebilirsiniz.
+                                            <?php else: ?>
+                                                İlk kredi yüklemenizi yapmak için butona tıklayın.
+                                            <?php endif; ?>
+                                        </p>
+                                        <div class="empty-actions">
+                                            <?php if ($type || $dateFrom || $dateTo): ?>
+                                                <a href="transactions.php" class="btn btn-outline-primary">
+                                                    <i class="fas fa-list me-1"></i>Tüm İşlemler
+                                                </a>
+                                            <?php endif; ?>
+                                            <a href="credits.php" class="btn btn-primary">
+                                                <i class="fas fa-credit-card me-1"></i>Kredi Yükle
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="card-body">
-                                <?php if (empty($creditTransactions)): ?>
-                                    <div class="text-center py-5">
-                                        <i class="fas fa-receipt text-muted" style="font-size: 4rem;"></i>
-                                        <h4 class="mt-3 text-muted">İşlem bulunamadı</h4>
-                                        <p class="text-muted">
-                                            <?php if ($type): ?>
-                                                Bu kategoride işlem bulunmuyor.
-                                            <?php else: ?>
-                                                Henüz kredi işlemi yapmadınız.
-                                            <?php endif; ?>
-                                        </p>
-                                        <a href="credits.php" class="btn btn-primary">
-                                            <i class="fas fa-plus me-1"></i>Kredi Satın Al
-                                        </a>
-                                    </div>
-                                <?php else: ?>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>Tarih</th>
-                                                    <th>İşlem Tipi</th>
-                                                    <th>Miktar</th>
-                                                    <th>Açıklama</th>
-                                                    <th>Durum</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php foreach ($creditTransactions as $transaction): ?>
-                                                    <tr>
-                                                        <td>
-                                                            <div><?php echo formatDate($transaction['created_at']); ?></div>
-                                                            <small class="text-muted"><?php echo date('H:i', strtotime($transaction['created_at'])); ?></small>
-                                                        </td>
-                                                        <td>
+                            <?php else: ?>
+                                <!-- İşlem Timeline -->
+                                <div class="transaction-timeline">
+                                    <?php foreach ($creditTransactions as $transaction): ?>
+                                        <div class="transaction-item">
+                                            <div class="transaction-icon">
+                                                <?php
+                                                $iconClass = 'fas fa-circle';
+                                                $iconColor = 'secondary';
+                                                $amountClass = 'secondary';
+                                                $amountPrefix = '';
+                                                
+                                                switch ($transaction['transaction_type']) {
+                                                    case 'add':
+                                                        $iconClass = 'fas fa-plus-circle';
+                                                        $iconColor = 'success';
+                                                        $amountClass = 'success';
+                                                        $amountPrefix = '+';
+                                                        break;
+                                                    case 'deduct':
+                                                        $iconClass = 'fas fa-minus-circle';
+                                                        $iconColor = 'danger';
+                                                        $amountClass = 'danger';
+                                                        $amountPrefix = '-';
+                                                        break;
+                                                }
+                                                ?>
+                                                <i class="<?php echo $iconClass; ?> text-<?php echo $iconColor; ?>"></i>
+                                            </div>
+                                            
+                                            <div class="transaction-content">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div class="transaction-details">
+                                                        <h6 class="transaction-title">
                                                             <?php
-                                                            $iconClass = '';
-                                                            $badgeClass = '';
-                                                            $typeText = '';
-                                                            
-                                                            switch ($transaction['type']) {
-                                                                case 'deposit':
-                                                                    $iconClass = 'fas fa-plus-circle';
-                                                                    $badgeClass = 'bg-success';
-                                                                    $typeText = 'Kredi Yükleme';
+                                                            $title = 'Bilinmeyen İşlem';
+                                                            switch ($transaction['transaction_type']) {
+                                                                case 'add':
+                                                                    $title = 'Kredi Yükleme';
                                                                     break;
-                                                                case 'withdraw':
-                                                                    $iconClass = 'fas fa-minus-circle';
-                                                                    $badgeClass = 'bg-danger';
-                                                                    $typeText = 'Kredi Çekme';
-                                                                    break;
-                                                                case 'file_charge':
-                                                                    $iconClass = 'fas fa-download';
-                                                                    $badgeClass = 'bg-warning';
-                                                                    $typeText = 'Dosya İndirme';
-                                                                    break;
-                                                                case 'refund':
-                                                                    $iconClass = 'fas fa-undo';
-                                                                    $badgeClass = 'bg-info';
-                                                                    $typeText = 'İade';
+                                                                case 'deduct':
+                                                                    $title = 'Kredi Kullanımı';
                                                                     break;
                                                             }
+                                                            echo $title;
                                                             ?>
-                                                            <span class="badge <?php echo $badgeClass; ?>">
-                                                                <i class="<?php echo $iconClass; ?> me-1"></i><?php echo $typeText; ?>
-                                                            </span>
-                                                        </td>
-                                                        <td>
-                                                            <strong class="<?php echo ($transaction['type'] === 'deposit' || $transaction['type'] === 'refund') ? 'text-success' : 'text-danger'; ?>">
-                                                                <?php if ($transaction['type'] === 'deposit' || $transaction['type'] === 'refund'): ?>
-                                                                    +<?php echo number_format($transaction['amount'], 2); ?>
-                                                                <?php else: ?>
-                                                                    -<?php echo number_format($transaction['amount'], 2); ?>
-                                                                <?php endif; ?>
-                                                            </strong>
-                                                        </td>
-                                                        <td>
-                                                            <?php if ($transaction['description']): ?>
-                                                                <span title="<?php echo htmlspecialchars($transaction['description']); ?>">
-                                                                    <?php echo htmlspecialchars(substr($transaction['description'], 0, 50)); ?>
-                                                                    <?php if (strlen($transaction['description']) > 50): ?>...<?php endif; ?>
-                                                                </span>
-                                                            <?php else: ?>
-                                                                <span class="text-muted">-</span>
-                                                            <?php endif; ?>
-                                                        </td>
-                                                        <td>
-                                                            <span class="badge bg-success">Tamamlandı</span>
-                                                            <?php if ($transaction['admin_username']): ?>
-                                                                <br><small class="text-muted">Admin: <?php echo htmlspecialchars($transaction['admin_username']); ?></small>
-                                                            <?php endif; ?>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    <!-- Sayfalama -->
-                                    <?php if (count($creditTransactions) >= $limit): ?>
-                                        <nav aria-label="Sayfa navigasyonu">
-                                            <ul class="pagination justify-content-center">
-                                                <?php if ($page > 1): ?>
-                                                    <li class="page-item">
-                                                        <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $type ? '&type=' . $type : ''; ?>">Önceki</a>
-                                                    </li>
-                                                <?php endif; ?>
-                                                
-                                                <li class="page-item active">
-                                                    <span class="page-link"><?php echo $page; ?></span>
-                                                </li>
-                                                
-                                                <li class="page-item">
-                                                    <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $type ? '&type=' . $type : ''; ?>">Sonraki</a>
-                                                </li>
-                                            </ul>
-                                        </nav>
-                                    <?php endif; ?>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dosya İşlemleri Tab -->
-                    <div class="tab-pane fade" id="files" role="tabpanel">
-                        <div class="card border-0">
-                            <div class="card-header bg-transparent">
-                                <h6 class="mb-0">Dosya İşlemleri</h6>
-                            </div>
-                            <div class="card-body">
-                                <?php if (empty($userFiles)): ?>
-                                    <div class="text-center py-5">
-                                        <i class="fas fa-folder-open text-muted" style="font-size: 4rem;"></i>
-                                        <h4 class="mt-3 text-muted">Dosya işlemi yok</h4>
-                                        <p class="text-muted">Henüz dosya yüklemesi yapmadınız.</p>
-                                        <a href="upload.php" class="btn btn-primary">
-                                            <i class="fas fa-upload me-1"></i>Dosya Yükle
-                                        </a>
-                                    </div>
-                                <?php else: ?>
-                                    <div class="timeline">
-                                        <?php foreach ($userFiles as $file): ?>
-                                            <div class="timeline-item">
-                                                <div class="d-flex justify-content-between align-items-start">
-                                                    <div>
-                                                        <h6 class="mb-1">
-                                                            <i class="fas fa-file me-2"></i>
-                                                            <?php echo htmlspecialchars($file['original_name']); ?>
                                                         </h6>
-                                                        <p class="text-muted mb-1">
-                                                            <strong><?php echo htmlspecialchars($file['brand_name'] . ' ' . $file['model_name']); ?></strong>
-                                                            (<?php echo $file['year']; ?>) - <?php echo $file['fuel_type']; ?>
-                                                        </p>
-                                                        <small class="text-muted">
-                                                            <?php echo formatDate($file['upload_date']); ?>
-                                                        </small>
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <?php
-                                                        $statusClass = 'secondary';
-                                                        $statusText = $file['status'];
                                                         
-                                                        switch ($file['status']) {
-                                                            case 'pending':
-                                                                $statusClass = 'warning';
-                                                                $statusText = 'Bekliyor';
-                                                                break;
-                                                            case 'processing':
-                                                                $statusClass = 'info';
-                                                                $statusText = 'İşleniyor';
-                                                                break;
-                                                            case 'completed':
-                                                                $statusClass = 'success';
-                                                                $statusText = 'Tamamlandı';
-                                                                break;
-                                                            case 'rejected':
-                                                                $statusClass = 'danger';
-                                                                $statusText = 'Reddedildi';
-                                                                break;
-                                                        }
-                                                        ?>
-                                                        <span class="badge bg-<?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
-                                                        <br>
-                                                        <a href="files.php?id=<?php echo $file['id']; ?>" class="btn btn-sm btn-outline-primary mt-1">
-                                                            <i class="fas fa-eye"></i> Detay
-                                                        </a>
+                                                        <?php if ($transaction['description']): ?>
+                                                            <p class="transaction-description">
+                                                                <?php echo htmlspecialchars($transaction['description']); ?>
+                                                            </p>
+                                                        <?php endif; ?>
+                                                        
+                                                        <div class="transaction-meta">
+                                                            <span class="meta-item">
+                                                                <i class="fas fa-calendar-alt me-1"></i>
+                                                                <?php echo date('d.m.Y H:i', strtotime($transaction['created_at'])); ?>
+                                                            </span>
+                                                            
+                                                            <?php if ($transaction['admin_username']): ?>
+                                                                <span class="meta-item">
+                                                                    <i class="fas fa-user-cog me-1"></i>
+                                                                    <?php echo htmlspecialchars($transaction['admin_username']); ?>
+                                                                </span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="transaction-amount">
+                                                        <span class="amount text-<?php echo $amountClass; ?>">
+                                                            <?php echo $amountPrefix; ?><?php echo number_format($transaction['amount'], 2); ?> TL
+                                                        </span>
+                                                        <span class="badge bg-<?php echo $iconColor; ?> badge-sm">
+                                                            <?php echo $transaction['transaction_type'] === 'add' ? 'Yüklendi' : 'Kullanıldı'; ?>
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>
-                                        <?php endforeach; ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                
+                                <!-- Pagination -->
+                                <?php if ($totalPages > 1): ?>
+                                    <div class="card-footer bg-white border-0">
+                                        <nav aria-label="İşlem sayfalama">
+                                            <ul class="pagination pagination-sm justify-content-center mb-0">
+                                                <!-- Önceki sayfa -->
+                                                <?php if ($page > 1): ?>
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $type ? '&type=' . $type : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
+                                                            <i class="fas fa-chevron-left"></i>
+                                                        </a>
+                                                    </li>
+                                                <?php endif; ?>
+                                                
+                                                <!-- Sayfa numaraları -->
+                                                <?php 
+                                                $start = max(1, $page - 2);
+                                                $end = min($totalPages, $page + 2);
+                                                ?>
+                                                
+                                                <?php for ($i = $start; $i <= $end; $i++): ?>
+                                                    <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                                                        <a class="page-link" href="?page=<?php echo $i; ?><?php echo $type ? '&type=' . $type : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
+                                                            <?php echo $i; ?>
+                                                        </a>
+                                                    </li>
+                                                <?php endfor; ?>
+                                                
+                                                <!-- Sonraki sayfa -->
+                                                <?php if ($page < $totalPages): ?>
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $type ? '&type=' . $type : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
+                                                            <i class="fas fa-chevron-right"></i>
+                                                        </a>
+                                                    </li>
+                                                <?php endif; ?>
+                                            </ul>
+                                        </nav>
+                                        
+                                        <div class="text-center mt-2">
+                                            <small class="text-muted">
+                                                Sayfa <?php echo $page; ?> / <?php echo $totalPages; ?> 
+                                                (Toplam <?php echo $totalTransactions; ?> işlem)
+                                            </small>
+                                        </div>
                                     </div>
                                 <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sistem Aktiviteleri Tab -->
-                    <div class="tab-pane fade" id="activities" role="tabpanel">
-                        <div class="card border-0">
-                            <div class="card-header bg-transparent">
-                                <h6 class="mb-0">Sistem Aktiviteleri</h6>
-                            </div>
-                            <div class="card-body">
-                                <?php if (empty($systemLogs)): ?>
-                                    <div class="text-center py-5">
-                                        <i class="fas fa-chart-line text-muted" style="font-size: 4rem;"></i>
-                                        <h4 class="mt-3 text-muted">Aktivite kaydı yok</h4>
-                                        <p class="text-muted">Henüz sistem aktivitesi bulunmuyor.</p>
-                                    </div>
-                                <?php else: ?>
-                                    <div class="table-responsive">
-                                        <table class="table table-sm">
-                                            <thead>
-                                                <tr>
-                                                    <th>Tarih</th>
-                                                    <th>Aktivite</th>
-                                                    <th>Açıklama</th>
-                                                    <th>IP Adresi</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php foreach ($systemLogs as $log): ?>
-                                                    <tr>
-                                                        <td>
-                                                            <small><?php echo formatDate($log['created_at']); ?></small>
-                                                        </td>
-                                                        <td>
-                                                            <?php
-                                                            $iconClass = 'fas fa-circle';
-                                                            $textClass = 'text-secondary';
-                                                            
-                                                            switch ($log['action']) {
-                                                                case 'login':
-                                                                    $iconClass = 'fas fa-sign-in-alt';
-                                                                    $textClass = 'text-success';
-                                                                    break;
-                                                                case 'logout':
-                                                                    $iconClass = 'fas fa-sign-out-alt';
-                                                                    $textClass = 'text-warning';
-                                                                    break;
-                                                                case 'file_upload':
-                                                                    $iconClass = 'fas fa-upload';
-                                                                    $textClass = 'text-primary';
-                                                                    break;
-                                                                case 'file_download':
-                                                                    $iconClass = 'fas fa-download';
-                                                                    $textClass = 'text-info';
-                                                                    break;
-                                                                case 'profile_update':
-                                                                    $iconClass = 'fas fa-user-edit';
-                                                                    $textClass = 'text-secondary';
-                                                                    break;
-                                                                case 'password_change':
-                                                                    $iconClass = 'fas fa-key';
-                                                                    $textClass = 'text-warning';
-                                                                    break;
-                                                            }
-                                                            ?>
-                                                            <i class="<?php echo $iconClass; ?> <?php echo $textClass; ?> me-2"></i>
-                                                            <span class="<?php echo $textClass; ?>"><?php echo ucfirst($log['action']); ?></span>
-                                                        </td>
-                                                        <td>
-                                                            <?php if ($log['description']): ?>
-                                                                <small><?php echo htmlspecialchars($log['description']); ?></small>
-                                                            <?php else: ?>
-                                                                <span class="text-muted">-</span>
-                                                            <?php endif; ?>
-                                                        </td>
-                                                        <td>
-                                                            <small class="text-muted"><?php echo $log['ip_address']; ?></small>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
-            </main>
-        </div>
+
+                <!-- Yan Panel -->
+                <div class="col-lg-4">
+                    <!-- Hızlı İşlemler -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h6 class="mb-0">
+                                <i class="fas fa-bolt me-2 text-warning"></i>Hızlı İşlemler
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-3">
+                                <a href="credits.php" class="btn btn-primary btn-modern">
+                                    <i class="fas fa-credit-card me-2"></i>Kredi Yükle
+                                </a>
+                                
+                                <a href="files.php" class="btn btn-outline-primary btn-modern">
+                                    <i class="fas fa-folder me-2"></i>Dosyalarım
+                                </a>
+                                
+                                <button type="button" class="btn btn-outline-secondary btn-modern" onclick="exportTransactions()">
+                                    <i class="fas fa-download me-2"></i>Excel İndir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Son Dosya İşlemleri -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h6 class="mb-0">
+                                <i class="fas fa-file me-2 text-secondary"></i>Son Dosya İşlemleri
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <?php if (empty($recentFiles)): ?>
+                                <div class="text-center py-3">
+                                    <i class="fas fa-folder-open fa-2x text-muted mb-2"></i>
+                                    <p class="text-muted mb-0">Henüz dosya işlemi yok</p>
+                                </div>
+                            <?php else: ?>
+                                <div class="recent-files-list">
+                                    <?php foreach (array_slice($recentFiles, 0, 5) as $file): ?>
+                                        <div class="recent-file-item">
+                                            <div class="file-icon">
+                                                <i class="fas fa-file-alt"></i>
+                                            </div>
+                                            <div class="file-details">
+                                                <div class="file-name" title="<?php echo htmlspecialchars($file['original_filename']); ?>">
+                                                    <?php echo htmlspecialchars(substr($file['original_filename'], 0, 20)); ?>
+                                                    <?php if (strlen($file['original_filename']) > 20): ?>...<?php endif; ?>
+                                                </div>
+                                                <div class="file-meta">
+                                                    <span><?php echo htmlspecialchars($file['brand_name']); ?></span>
+                                                    <span><?php echo date('d.m.Y', strtotime($file['upload_date'])); ?></span>
+                                                </div>
+                                            </div>
+                                            <div class="file-status">
+                                                <?php
+                                                $statusConfig = [
+                                                    'pending' => ['class' => 'warning', 'icon' => 'clock'],
+                                                    'processing' => ['class' => 'info', 'icon' => 'cogs'],
+                                                    'completed' => ['class' => 'success', 'icon' => 'check'],
+                                                    'rejected' => ['class' => 'danger', 'icon' => 'times']
+                                                ];
+                                                $config = $statusConfig[$file['status']] ?? ['class' => 'secondary', 'icon' => 'question'];
+                                                ?>
+                                                <i class="fas fa-<?php echo $config['icon']; ?> text-<?php echo $config['class']; ?>"></i>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a href="files.php" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-list me-1"></i>Tüm Dosyalar
+                                    </a>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
+</div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+/* Modern Transactions Page Styles */
+.stat-card.transactions {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: none;
+    overflow: hidden;
+}
+
+.stat-card.transactions:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+/* Empty State */
+.empty-state-transactions {
+    padding: 3rem 2rem;
+    text-align: center;
+}
+
+.empty-state-transactions .empty-icon {
+    font-size: 4rem;
+    color: #e9ecef;
+    margin-bottom: 1.5rem;
+}
+
+.empty-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Transaction Timeline */
+.transaction-timeline {
+    padding: 1.5rem;
+}
+
+.transaction-item {
+    display: flex;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.transaction-item:last-child {
+    margin-bottom: 0;
+}
+
+.transaction-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 40px;
+    bottom: -24px;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.transaction-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    margin-top: 0.25rem;
+    position: relative;
+    z-index: 1;
+    background: white;
+}
+
+.transaction-icon i {
+    font-size: 1.25rem;
+}
+
+.transaction-content {
+    flex: 1;
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid #e9ecef;
+}
+
+.transaction-title {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.transaction-description {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+.transaction-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    color: #9ca3af;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+}
+
+.meta-item i {
+    color: #9ca3af;
+}
+
+.transaction-amount {
+    text-align: right;
+}
+
+.amount {
+    font-size: 1.25rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.badge-sm {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Transaction Tabs */
+.transaction-tabs .btn-group .btn {
+    border-radius: 6px;
+    margin: 0 2px;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+}
+
+/* Recent Files */
+.recent-files-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.recent-file-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.recent-file-item:last-child {
+    border-bottom: none;
+}
+
+.recent-file-item .file-icon {
+    width: 32px;
+    height: 32px;
+    background: #e9ecef;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    color: #6c757d;
+}
+
+.file-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.file-name {
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-meta {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.file-status {
+    margin-left: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .transaction-timeline {
+        padding: 1rem;
+    }
     
-    <!-- Custom JS -->
-    <script>
-        function exportTransactions() {
-            // Export işlemi - CSV formatında
-            const transactions = <?php echo json_encode($creditTransactions); ?>;
-            
-            if (transactions.length === 0) {
-                alert('Dışa aktarılacak işlem bulunamadı.');
-                return;
-            }
+    .transaction-item {
+        margin-bottom: 1rem;
+    }
+    
+    .transaction-content {
+        padding: 1rem;
+    }
+    
+    .transaction-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .transaction-amount {
+        text-align: left;
+        margin-top: 0.5rem;
+    }
+    
+    .amount {
+        font-size: 1.1rem;
+    }
+    
+    .empty-state-transactions {
+        padding: 2rem 1rem;
+    }
+    
+    .empty-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+</style>
 
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Tarih,İşlem Tipi,Miktar,Açıklama,Admin\n";
+<script>
+// Export Transactions to Excel
+function exportTransactions() {
+    const transactions = <?php echo json_encode($creditTransactions); ?>;
+    
+    if (transactions.length === 0) {
+        alert('Dışa aktarılacak işlem bulunamadı.');
+        return;
+    }
 
-            transactions.forEach(function(transaction) {
-                const row = [
-                    transaction.created_at,
-                    transaction.type,
-                    transaction.amount,
-                    transaction.description || '',
-                    transaction.admin_username || ''
-                ].map(field => `"${field}"`).join(",");
-                csvContent += row + "\n";
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Tarih,İşlem Tipi,Miktar,Açıklama,Admin\n";
+
+    transactions.forEach(function(transaction) {
+        const row = [
+            transaction.created_at,
+            transaction.transaction_type === 'add' ? 'Kredi Yükleme' : 'Kredi Kullanımı',
+            transaction.amount,
+            transaction.description || '',
+            transaction.admin_username || ''
+        ].map(field => `"${field.toString().replace(/"/g, '""')}"`).join(",");
+        csvContent += row + "\n";
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "islem_gecmisi_" + new Date().toISOString().split('T')[0] + ".csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Smooth scrolling for anchors
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
             });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "islem_gecmisi_" + new Date().toISOString().split('T')[0] + ".csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
         }
+    });
+});
+</script>
 
-        // URL'deki tab parametresine göre aktif tab'ı ayarla
-        const urlParams = new URLSearchParams(window.location.search);
-        const activeTab = urlParams.get('tab');
-        
-        if (activeTab) {
-            const tabButton = document.getElementById(activeTab + '-tab');
-            if (tabButton) {
-                const tab = new bootstrap.Tab(tabButton);
-                tab.show();
-            }
-        }
-    </script>
-</body>
-</html>
+<?php
+// Footer include
+include '../includes/user_footer.php';
+?>

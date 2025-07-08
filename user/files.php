@@ -1,12 +1,16 @@
 <?php
 /**
- * Mr ECU - Kullanıcı Dosyaları Sayfası (GUID System)
+ * Mr ECU - Modern Kullanıcı Dosyaları Sayfası (GUID System)
  */
 
 require_once '../config/config.php';
 require_once '../config/database.php';
 
-// Giriş kontrolü otomatik yapılır
+// Giriş kontrolü
+if (!isLoggedIn()) {
+    redirect('../login.php?redirect=user/files.php');
+}
+
 $user = new User($pdo);
 $fileManager = new FileManager($pdo);
 
@@ -17,6 +21,35 @@ $userId = $_SESSION['user_id'];
 // GUID format kontrolü - User ID
 if (!isValidUUID($userId)) {
     redirect('../logout.php');
+}
+
+// AJAX dosya detayları endpoint'i
+if (isset($_GET['get_file_details']) && isset($_GET['file_id'])) {
+    header('Content-Type: application/json');
+    $fileId = sanitize($_GET['file_id']);
+    
+    if (!isValidUUID($fileId)) {
+        echo json_encode(['error' => 'Geçersiz dosya ID formatı']);
+        exit;
+    }
+    
+    $upload = $fileManager->getUploadById($fileId);
+    if (!$upload) {
+        echo json_encode(['error' => 'Dosya bulunamadı']);
+        exit;
+    }
+    
+    // Kullanıcı kendi dosyasına erişmeye çalışıyor mu kontrol et
+    if ($upload['user_id'] !== $userId) {
+        echo json_encode(['error' => 'Bu dosyaya erişim yetkiniz yok']);
+        exit;
+    }
+    
+    echo json_encode([
+        'success' => true,
+        'file' => $upload
+    ]);
+    exit;
 }
 
 $error = '';
@@ -60,7 +93,7 @@ $search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
 
 // Sayfalama
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$limit = 10;
+$limit = 12;
 
 // Kullanıcının dosyalarını getir
 $userUploads = $fileManager->getUserUploads($userId, $page, $limit, $status, $search);
@@ -70,356 +103,394 @@ $totalPages = ceil($totalUploads / $limit);
 // İstatistikler
 $stats = $fileManager->getUserFileStats($userId);
 
-// Sayfa bilgileri
 $pageTitle = 'Dosyalarım';
-$pageDescription = 'Yüklediğiniz dosyaları görüntüleyin, indirin ve yönetin.';
 
-// Header ve Sidebar include
+// Header include
 include '../includes/user_header.php';
-include '../includes/user_sidebar.php';
 ?>
 
-<!-- Dosya İstatistikleri -->
-<div class="row g-4 mb-4">
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="stat-number text-primary"><?php echo $stats['total']; ?></div>
-                    <div class="stat-label">Toplam Dosya</div>
-                </div>
-                <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-file text-primary fa-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="stat-number text-warning"><?php echo $stats['pending']; ?></div>
-                    <div class="stat-label">Bekleyen</div>
-                </div>
-                <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-clock text-warning fa-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="stat-number text-info"><?php echo $stats['processing']; ?></div>
-                    <div class="stat-label">İşleniyor</div>
-                </div>
-                <div class="bg-info bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-cogs text-info fa-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="stat-number text-success"><?php echo $stats['completed']; ?></div>
-                    <div class="stat-label">Tamamlanan</div>
-                </div>
-                <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-check-circle text-success fa-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Filtre ve Arama -->
-<div class="card border-0 shadow-sm mb-4">
-    <div class="card-body">
-        <form method="GET" class="row g-3 align-items-end">
-            <div class="col-md-4">
-                <label for="search" class="form-label">
-                    <i class="fas fa-search me-1"></i>Dosya Ara
-                </label>
-                <input type="text" class="form-control" id="search" name="search" 
-                       value="<?php echo htmlspecialchars($search); ?>" 
-                       placeholder="Dosya adı ile ara...">
-            </div>
-            
-            <div class="col-md-4">
-                <label for="status" class="form-label">
-                    <i class="fas fa-filter me-1"></i>Durum Filtresi
-                </label>
-                <select class="form-select" id="status" name="status">
-                    <option value="">Tüm Durumlar</option>
-                    <option value="pending" <?php echo $status === 'pending' ? 'selected' : ''; ?>>Bekleyen</option>
-                    <option value="processing" <?php echo $status === 'processing' ? 'selected' : ''; ?>>İşleniyor</option>
-                    <option value="completed" <?php echo $status === 'completed' ? 'selected' : ''; ?>>Tamamlanan</option>
-                    <option value="rejected" <?php echo $status === 'rejected' ? 'selected' : ''; ?>>Reddedilen</option>
-                </select>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search me-1"></i>Filtrele
-                    </button>
-                    <a href="files.php" class="btn btn-outline-secondary">
-                        <i class="fas fa-undo me-1"></i>Temizle
-                    </a>
-                    <a href="upload.php" class="btn btn-success">
-                        <i class="fas fa-plus me-1"></i>Yeni Dosya
-                    </a>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Hata/Başarı Mesajları -->
-<?php if ($error): ?>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
-        <?php echo $error; ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-<?php endif; ?>
-
-<?php if ($success): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
-        <?php echo $success; ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-<?php endif; ?>
-
-<!-- Dosya Listesi -->
-<div class="card border-0 shadow-sm">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">
-            <i class="fas fa-folder me-2"></i>
-            Dosyalarım (<?php echo $totalUploads; ?> dosya)
-        </h5>
+<div class="container-fluid">
+    <div class="row">
+        <?php include '_sidebar.php'; ?>
         
-        <?php if (!empty($userUploads)): ?>
-            <div class="dropdown">
-                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-download me-1"></i>Toplu İşlemler
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#" onclick="downloadCompleted()">
-                        <i class="fas fa-download me-2"></i>Tamamlananları İndir
-                    </a></li>
-                    <li><a class="dropdown-item" href="#" onclick="exportList()">
-                        <i class="fas fa-file-excel me-2"></i>Excel Export
-                    </a></li>
-                </ul>
-            </div>
-        <?php endif; ?>
-    </div>
-    
-    <div class="card-body p-0">
-        <?php if (empty($userUploads)): ?>
-            <div class="text-center py-5">
-                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-                <h6 class="text-muted">
-                    <?php if ($search || $status): ?>
-                        Filtreye uygun dosya bulunamadı
-                    <?php else: ?>
-                        Henüz dosya yüklenmemiş
-                    <?php endif; ?>
-                </h6>
-                <p class="text-muted mb-3">İlk dosyanızı yüklemek için butona tıklayın</p>
-                <a href="upload.php" class="btn btn-primary">
-                    <i class="fas fa-upload me-2"></i>Dosya Yükle
-                </a>
-            </div>
-        <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-hover mb-0" id="filesTable">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 30px;">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="selectAll" onchange="toggleAllFiles(this)">
-                                </div>
-                            </th>
-                            <th>Dosya Bilgileri</th>
-                            <th>Araç Bilgileri</th>
-                            <th>Durum</th>
-                            <th>Tarih</th>
-                            <th>İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($userUploads as $upload): ?>
-                            <tr>
-                                <td>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input file-checkbox" 
-                                               value="<?php echo $upload['id']; ?>">
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="file-icon me-3">
-                                            <i class="fas fa-file-alt fa-2x text-primary"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-1 text-truncate" style="max-width: 200px;" 
-                                                title="<?php echo htmlspecialchars($upload['original_filename']); ?>">
-                                                <?php echo htmlspecialchars($upload['original_filename']); ?>
-                                            </h6>
-                                            <small class="text-muted">
-                                                <?php echo formatFileSize($upload['file_size'] ?? 0); ?>
-                                                <?php if (!empty($upload['service_type'])): ?>
-                                                    • <?php echo ucfirst(str_replace('_', ' ', $upload['service_type'])); ?>
-                                                <?php endif; ?>
-                                            </small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        <strong><?php echo htmlspecialchars($upload['brand_name'] ?? 'Bilinmiyor'); ?></strong><br>
-                                        <small class="text-muted"><?php echo htmlspecialchars($upload['model_name'] ?? 'Model belirtilmemiş'); ?></small>
-                                    </div>
-                                </td>
-                                <td>
-                                    <?php
-                                    $statusClass = [
-                                        'pending' => 'warning',
-                                        'processing' => 'info',
-                                        'completed' => 'success',
-                                        'rejected' => 'danger'
-                                    ];
-                                    $statusText = [
-                                        'pending' => 'Bekliyor',
-                                        'processing' => 'İşleniyor',
-                                        'completed' => 'Tamamlandı',
-                                        'rejected' => 'Reddedildi'
-                                    ];
-                                    $statusIcon = [
-                                        'pending' => 'clock',
-                                        'processing' => 'cogs',
-                                        'completed' => 'check-circle',
-                                        'rejected' => 'times-circle'
-                                    ];
-                                    ?>
-                                    <span class="badge bg-<?php echo $statusClass[$upload['status']] ?? 'secondary'; ?> d-flex align-items-center" style="width: fit-content;">
-                                        <i class="fas fa-<?php echo $statusIcon[$upload['status']] ?? 'question'; ?> me-1"></i>
-                                        <?php echo $statusText[$upload['status']] ?? 'Bilinmiyor'; ?>
-                                    </span>
-                                    
-                                    <?php if (!empty($upload['admin_notes'])): ?>
-                                        <div class="mt-1">
-                                            <small class="text-muted" title="<?php echo htmlspecialchars($upload['admin_notes']); ?>">
-                                                <i class="fas fa-comment fa-sm"></i> Admin notu var
-                                            </small>
-                                        </div>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <div>
-                                        <strong><?php echo date('d.m.Y', strtotime($upload['upload_date'])); ?></strong><br>
-                                        <small class="text-muted"><?php echo date('H:i', strtotime($upload['upload_date'])); ?></small>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="btn-group-vertical btn-group-sm d-flex gap-1" style="width: 140px;">
-                                        <!-- Ana İşlemler -->
-                                        <?php if ($upload['status'] === 'completed' && !empty($upload['processed_file_path'])): ?>
-                                            <a href="download.php?id=<?php echo $upload['id']; ?>" 
-                                               class="btn btn-success btn-sm">
-                                                <i class="fas fa-download me-1"></i>İndir
-                                            </a>
-                                        <?php endif; ?>
-                                        
-                                        <button type="button" class="btn btn-outline-primary btn-sm" 
-                                                onclick="viewFileDetails('<?php echo $upload['id']; ?>')">
-                                            <i class="fas fa-eye me-1"></i>Detay
-                                        </button>
-                                        
-                                        <!-- Durum bazlı işlemler -->
-                                        <?php if ($upload['status'] === 'completed'): ?>
-                                            <button type="button" class="btn btn-outline-warning btn-sm" 
-                                                    onclick="requestRevision('<?php echo $upload['id']; ?>')">
-                                                <i class="fas fa-redo me-1"></i>Revize Talep
-                                            </button>
-                                        <?php elseif ($upload['status'] === 'rejected'): ?>
-                                            <small class="text-danger mt-1">
-                                                <i class="fas fa-info-circle"></i> Reddedildi
-                                            </small>
-                                        <?php elseif ($upload['status'] === 'pending'): ?>
-                                            <small class="text-warning mt-1">
-                                                <i class="fas fa-clock"></i> Sırada
-                                            </small>
-                                        <?php else: ?>
-                                            <small class="text-info mt-1">
-                                                <i class="fas fa-cogs"></i> İşleniyor
-                                            </small>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Pagination -->
-            <?php if ($totalPages > 1): ?>
-                <div class="card-footer">
-                    <nav aria-label="Dosya sayfalama">
-                        <ul class="pagination pagination-sm justify-content-center mb-0">
-                            <!-- Önceki sayfa -->
-                            <?php if ($page > 1): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                            
-                            <!-- Sayfa numaraları -->
-                            <?php 
-                            $start = max(1, $page - 2);
-                            $end = min($totalPages, $page + 2);
-                            ?>
-                            
-                            <?php for ($i = $start; $i <= $end; $i++): ?>
-                                <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                    <a class="page-link" href="?page=<?php echo $i; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
-                                        <?php echo $i; ?>
-                                    </a>
-                                </li>
-                            <?php endfor; ?>
-                            
-                            <!-- Sonraki sayfa -->
-                            <?php if ($page < $totalPages): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                        </ul>
-                    </nav>
-                    
-                    <div class="text-center mt-2">
-                        <small class="text-muted">
-                            Sayfa <?php echo $page; ?> / <?php echo $totalPages; ?> 
-                            (Toplam <?php echo $totalUploads; ?> dosya)
-                        </small>
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <div>
+                    <h1 class="h2 mb-0">
+                        <i class="fas fa-folder me-2 text-primary"></i>Dosyalarım
+                    </h1>
+                    <p class="text-muted mb-0">Yüklediğiniz dosyaları görüntüleyin, indirin ve yönetin</p>
+                </div>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="upload.php" class="btn btn-primary">
+                            <i class="fas fa-upload me-1"></i>Yeni Dosya
+                        </a>
                     </div>
                 </div>
+            </div>
+
+            <!-- Hata/Başarı Mesajları -->
+            <?php if ($error): ?>
+                <div class="alert alert-danger alert-modern alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+                        <div>
+                            <strong>Hata!</strong> <?php echo $error; ?>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
             <?php endif; ?>
-        <?php endif; ?>
+
+            <?php if ($success): ?>
+                <div class="alert alert-success alert-modern alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle me-3 fa-lg"></i>
+                        <div>
+                            <strong>Başarılı!</strong> <?php echo $success; ?>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+
+            <!-- İstatistik Kartları -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card modern">
+                        <div class="stat-card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="stat-number text-primary"><?php echo $stats['total']; ?></div>
+                                    <div class="stat-label">Toplam Dosya</div>
+                                    <div class="stat-trend">
+                                        <i class="fas fa-chart-line text-success"></i>
+                                        <span class="text-success">Aktif koleksiyon</span>
+                                    </div>
+                                </div>
+                                <div class="stat-icon bg-primary">
+                                    <i class="fas fa-file"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card modern">
+                        <div class="stat-card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="stat-number text-warning"><?php echo $stats['pending']; ?></div>
+                                    <div class="stat-label">Bekleyen</div>
+                                    <div class="stat-trend">
+                                        <i class="fas fa-clock text-warning"></i>
+                                        <span class="text-warning">İnceleme sırası</span>
+                                    </div>
+                                </div>
+                                <div class="stat-icon bg-warning">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card modern">
+                        <div class="stat-card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="stat-number text-info"><?php echo $stats['processing']; ?></div>
+                                    <div class="stat-label">İşleniyor</div>
+                                    <div class="stat-trend">
+                                        <i class="fas fa-cogs text-info"></i>
+                                        <span class="text-info">Aktif işlem</span>
+                                    </div>
+                                </div>
+                                <div class="stat-icon bg-info">
+                                    <i class="fas fa-cogs"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card modern">
+                        <div class="stat-card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="stat-number text-success"><?php echo $stats['completed']; ?></div>
+                                    <div class="stat-label">Tamamlanan</div>
+                                    <div class="stat-trend">
+                                        <i class="fas fa-download text-success"></i>
+                                        <span class="text-success">İndirilmeye hazır</span>
+                                    </div>
+                                </div>
+                                <div class="stat-icon bg-success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtre ve Arama -->
+            <div class="filter-card mb-4">
+                <div class="filter-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-filter me-2"></i>Filtrele ve Ara
+                    </h6>
+                </div>
+                <div class="filter-body">
+                    <form method="GET" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">
+                                <i class="fas fa-search me-1"></i>Dosya Ara
+                            </label>
+                            <input type="text" class="form-control form-control-modern" id="search" name="search" 
+                                   value="<?php echo htmlspecialchars($search); ?>" 
+                                   placeholder="Dosya adı, marka veya model...">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">
+                                <i class="fas fa-tag me-1"></i>Durum
+                            </label>
+                            <select class="form-select form-control-modern" id="status" name="status">
+                                <option value="">Tüm Durumlar</option>
+                                <option value="pending" <?php echo $status === 'pending' ? 'selected' : ''; ?>>Bekleyen</option>
+                                <option value="processing" <?php echo $status === 'processing' ? 'selected' : ''; ?>>İşleniyor</option>
+                                <option value="completed" <?php echo $status === 'completed' ? 'selected' : ''; ?>>Tamamlanan</option>
+                                <option value="rejected" <?php echo $status === 'rejected' ? 'selected' : ''; ?>>Reddedilen</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-5">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary btn-modern">
+                                    <i class="fas fa-search me-1"></i>Filtrele
+                                </button>
+                                <a href="files.php" class="btn btn-outline-secondary btn-modern">
+                                    <i class="fas fa-undo me-1"></i>Temizle
+                                </a>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-info btn-modern dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-download me-1"></i>İşlemler
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" onclick="exportToExcel()">
+                                            <i class="fas fa-file-excel me-2"></i>Excel Export
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="refreshPage()">
+                                            <i class="fas fa-sync me-2"></i>Sayfayı Yenile
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Dosya Listesi -->
+            <?php if (empty($userUploads)): ?>
+                <div class="empty-state-card">
+                    <div class="empty-content">
+                        <div class="empty-icon">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                        <h4>
+                            <?php if ($search || $status): ?>
+                                Filtreye uygun dosya bulunamadı
+                            <?php else: ?>
+                                Henüz dosya yüklenmemiş
+                            <?php endif; ?>
+                        </h4>
+                        <p class="text-muted mb-4">
+                            <?php if ($search || $status): ?>
+                                Farklı filtre kriterleri deneyebilir veya tüm dosyalarınızı görüntüleyebilirsiniz.
+                            <?php else: ?>
+                                İlk ECU dosyanızı yüklemek için butona tıklayın ve işlem sürecini başlatın.
+                            <?php endif; ?>
+                        </p>
+                        <div class="empty-actions">
+                            <?php if ($search || $status): ?>
+                                <a href="files.php" class="btn btn-outline-primary btn-lg">
+                                    <i class="fas fa-list me-2"></i>Tüm Dosyalar
+                                </a>
+                            <?php endif; ?>
+                            <a href="upload.php" class="btn btn-primary btn-lg">
+                                <i class="fas fa-upload me-2"></i>Dosya Yükle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <?php else: ?>
+                <!-- Dosya Grid -->
+                <div class="files-grid">
+                    <?php foreach ($userUploads as $upload): ?>
+                        <div class="file-card">
+                            <div class="file-card-header">
+                                <div class="file-icon-large">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="file-status">
+                                    <?php
+                                    $statusConfig = [
+                                        'pending' => ['class' => 'warning', 'text' => 'Bekliyor', 'icon' => 'clock'],
+                                        'processing' => ['class' => 'info', 'text' => 'İşleniyor', 'icon' => 'cogs'],
+                                        'completed' => ['class' => 'success', 'text' => 'Tamamlandı', 'icon' => 'check-circle'],
+                                        'rejected' => ['class' => 'danger', 'text' => 'Reddedildi', 'icon' => 'times-circle']
+                                    ];
+                                    $config = $statusConfig[$upload['status']] ?? ['class' => 'secondary', 'text' => 'Bilinmiyor', 'icon' => 'question'];
+                                    ?>
+                                    <span class="badge bg-<?php echo $config['class']; ?> status-badge">
+                                        <i class="fas fa-<?php echo $config['icon']; ?> me-1"></i>
+                                        <?php echo $config['text']; ?>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="file-card-body">
+                                <h6 class="file-name" title="<?php echo htmlspecialchars($upload['original_name'] ?? 'Bilinmeyen dosya'); ?>">
+                                <?php echo htmlspecialchars($upload['original_name'] ?? 'Bilinmeyen dosya'); ?>
+                                </h6>
+                                
+                                <div class="file-meta">
+                                    <div class="meta-item">
+                                        <i class="fas fa-car me-1"></i>
+                                        <span><?php echo htmlspecialchars($upload['brand_name'] ?? 'Bilinmiyor'); ?></span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-cog me-1"></i>
+                                        <span><?php echo htmlspecialchars($upload['model_name'] ?? 'Model belirtilmemiş'); ?></span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        <span><?php echo date('d.m.Y', strtotime($upload['upload_date'])); ?></span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-hdd me-1"></i>
+                                        <span><?php echo formatFileSize($upload['file_size'] ?? 0); ?></span>
+                                    </div>
+                                </div>
+                                
+                                <?php if (!empty($upload['admin_notes'])): ?>
+                                    <div class="admin-note">
+                                        <i class="fas fa-comment-dots me-1"></i>
+                                        <small>Admin notu mevcut</small>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <div class="file-card-footer">
+                                <div class="file-actions">
+                                <?php if ($upload['status'] === 'completed'): ?>
+                                <a href="download.php?id=<?php echo $upload['id']; ?>" 
+                                class="btn btn-success btn-sm action-btn">
+                                <i class="fas fa-download me-1"></i>İndir
+                                </a>
+                                <?php endif; ?>
+                                
+                                <button type="button" class="btn btn-outline-primary btn-sm action-btn" 
+                                onclick="viewFileDetails('<?php echo $upload['id']; ?>')">
+                                <i class="fas fa-eye me-1"></i>Detay
+                                </button>
+                                
+                                <?php if ($upload['status'] === 'completed'): ?>
+                                <button type="button" class="btn btn-outline-warning btn-sm action-btn" 
+                                onclick="requestRevision('<?php echo $upload['id']; ?>')">
+                                <i class="fas fa-redo me-1"></i>Revize
+                                </button>
+                                <?php endif; ?>
+                                </div>
+                                
+                                <div class="file-progress">
+                                    <?php 
+                                    $progressValue = 0;
+                                    $progressClass = 'bg-secondary';
+                                    switch($upload['status']) {
+                                        case 'pending':
+                                            $progressValue = 25;
+                                            $progressClass = 'bg-warning';
+                                            break;
+                                        case 'processing':
+                                            $progressValue = 75;
+                                            $progressClass = 'bg-info';
+                                            break;
+                                        case 'completed':
+                                            $progressValue = 100;
+                                            $progressClass = 'bg-success';
+                                            break;
+                                        case 'rejected':
+                                            $progressValue = 100;
+                                            $progressClass = 'bg-danger';
+                                            break;
+                                    }
+                                    ?>
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar <?php echo $progressClass; ?>" 
+                                             style="width: <?php echo $progressValue; ?>%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                
+                <!-- Pagination -->
+                <?php if ($totalPages > 1): ?>
+                    <div class="pagination-wrapper">
+                        <nav aria-label="Dosya sayfalama">
+                            <ul class="pagination justify-content-center">
+                                <!-- Önceki sayfa -->
+                                <?php if ($page > 1): ?>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                <?php endif; ?>
+                                
+                                <!-- Sayfa numaraları -->
+                                <?php 
+                                $start = max(1, $page - 2);
+                                $end = min($totalPages, $page + 2);
+                                ?>
+                                
+                                <?php for ($i = $start; $i <= $end; $i++): ?>
+                                    <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                                        <a class="page-link" href="?page=<?php echo $i; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
+                                            <?php echo $i; ?>
+                                        </a>
+                                    </li>
+                                <?php endfor; ?>
+                                
+                                <!-- Sonraki sayfa -->
+                                <?php if ($page < $totalPages): ?>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                <?php endif; ?>
+                            </ul>
+                        </nav>
+                        
+                        <div class="pagination-info">
+                            <small class="text-muted">
+                                Sayfa <?php echo $page; ?> / <?php echo $totalPages; ?> 
+                                (Toplam <?php echo $totalUploads; ?> dosya)
+                            </small>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            <?php endif; ?>
+        </main>
     </div>
 </div>
 
@@ -429,15 +500,16 @@ include '../includes/user_sidebar.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-file-alt me-2"></i>Dosya Detayları
+                    <i class="fas fa-file-alt me-2 text-primary"></i>Dosya Detayları
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="fileDetailContent">
-                <div class="text-center py-3">
+                <div class="text-center py-4">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Yükleniyor...</span>
                     </div>
+                    <p class="mt-2 text-muted">Dosya detayları yükleniyor...</p>
                 </div>
             </div>
         </div>
@@ -450,7 +522,7 @@ include '../includes/user_sidebar.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-redo me-2"></i>Revize Talebi
+                    <i class="fas fa-redo me-2 text-warning"></i>Revize Talebi
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -460,21 +532,28 @@ include '../includes/user_sidebar.php';
                     <input type="hidden" name="request_revision" value="1">
                     
                     <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Revize Talebi Hakkında:</strong><br>
-                        Dosyanızda bir değişiklik istiyorsanız bu formu kullanabilirsiniz. 
-                        Talep incelendikten sonra size geri dönüş yapılacaktır.
+                        <div class="d-flex">
+                            <i class="fas fa-info-circle me-3 mt-1"></i>
+                            <div>
+                                <strong>Revize Talebi Hakkında</strong>
+                                <p class="mb-0 mt-1">
+                                    Dosyanızda bir değişiklik veya düzenleme istiyorsanız bu formu kullanabilirsiniz. 
+                                    Talep incelendikten sonra size geri dönüş yapılacaktır.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="revision_notes" class="form-label">
+                        <label for="revision_notes" class="form-label fw-semibold">
                             <i class="fas fa-comment me-1"></i>
                             Revize Talebi Açıklaması <span class="text-danger">*</span>
                         </label>
-                        <textarea class="form-control" id="revision_notes" name="revision_notes" 
-                                  rows="4" required
-                                  placeholder="Lütfen dosyada hangi değişiklikleri istediğinizi detaylı olarak açıklayın..."></textarea>
+                        <textarea class="form-control form-control-modern" id="revision_notes" name="revision_notes" 
+                                  rows="5" required
+                                  placeholder="Lütfen dosyada hangi değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: 'Güç artırımı', 'EGR kapatma', 'DPF silme' gibi..."></textarea>
                         <div class="form-text">
+                            <i class="fas fa-lightbulb me-1"></i>
                             Ne tür değişiklik istediğinizi mümkün olduğunca detaylı açıklayın.
                         </div>
                     </div>
@@ -490,115 +569,642 @@ include '../includes/user_sidebar.php';
     </div>
 </div>
 
-<?php
-// Sayfa özel JavaScript
-$pageJS = "
-// File size formatter
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+<style>
+/* Modern Files Page Styles */
+.stat-card.modern {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: none;
+    overflow: hidden;
 }
 
-// Toggle all checkboxes
-function toggleAllFiles(source) {
-    const checkboxes = document.querySelectorAll('.file-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = source.checked;
-    });
+.stat-card.modern:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
 }
 
-// View file details
+.stat-card-body {
+    padding: 1.75rem;
+}
+
+.stat-number {
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+
+.stat-trend {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.stat-trend i {
+    margin-right: 0.375rem;
+}
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+/* Filter Card */
+.filter-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    border: 1px solid #f0f0f0;
+}
+
+.filter-header {
+    background: #f8f9fa;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 12px 12px 0 0;
+}
+
+.filter-body {
+    padding: 1.5rem;
+}
+
+/* Empty State */
+.empty-state-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.empty-content {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.empty-icon {
+    font-size: 5rem;
+    color: #e9ecef;
+    margin-bottom: 2rem;
+}
+
+.empty-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Files Grid */
+.files-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.file-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+    border: 1px solid #f0f0f0;
+    overflow: hidden;
+}
+
+.file-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+.file-card-header {
+    padding: 1.5rem 1.5rem 1rem;
+    position: relative;
+}
+
+.file-icon-large {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+}
+
+.file-status {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.status-badge {
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+}
+
+.file-card-body {
+    padding: 0 1.5rem 1rem;
+}
+
+.file-name {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.file-meta {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.meta-item i {
+    color: #9ca3af;
+    width: 16px;
+}
+
+.admin-note {
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: #fff3cd;
+    border-radius: 6px;
+    color: #856404;
+    font-size: 0.8rem;
+}
+
+.file-card-footer {
+    padding: 1rem 1.5rem 1.5rem;
+    border-top: 1px solid #f8f9fa;
+}
+
+.file-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+}
+
+.action-btn {
+    flex: 1;
+    min-width: 80px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.file-progress {
+    margin-top: 0.75rem;
+}
+
+.progress-sm {
+    height: 4px;
+    border-radius: 2px;
+}
+
+/* Pagination */
+.pagination-wrapper {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.pagination-info {
+    margin-top: 1rem;
+}
+
+.pagination .page-link {
+    border-radius: 8px;
+    margin: 0 2px;
+    border: 1px solid #e9ecef;
+    color: #495057;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: transparent;
+    color: white;
+}
+
+.pagination .page-link:hover {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+/* Modern Form Controls */
+.form-control-modern {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control-modern:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn-modern {
+    border-radius: 8px;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-modern:hover {
+    transform: translateY(-1px);
+}
+
+/* Alert Modern */
+.alert-modern {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .files-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .file-card-header {
+        padding: 1.25rem 1.25rem 0.75rem;
+    }
+    
+    .file-card-body {
+        padding: 0 1.25rem 0.75rem;
+    }
+    
+    .file-card-footer {
+        padding: 0.75rem 1.25rem 1.25rem;
+    }
+    
+    .file-actions {
+        flex-direction: column;
+    }
+    
+    .action-btn {
+        flex: none;
+    }
+    
+    .empty-state-card {
+        padding: 2rem 1rem;
+    }
+    
+    .empty-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* File Detail Modal Styles */
+.file-detail-header {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 1rem;
+}
+
+.file-detail-header .file-icon-large {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.75rem;
+}
+
+.detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-item .label {
+    font-weight: 500;
+    color: #6c757d;
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.detail-item .value {
+    color: #495057;
+    font-weight: 600;
+    text-align: right;
+    word-break: break-word;
+}
+
+.notes-content, .admin-notes-content {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    border-left: 3px solid #667eea;
+    line-height: 1.6;
+    color: #495057;
+}
+
+.admin-notes-content {
+    border-left-color: #28a745;
+    background: #f8fff9;
+}
+
+/* Responsive modal content */
+@media (max-width: 767.98px) {
+    .file-detail-header .d-flex {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .detail-item .value {
+        text-align: left;
+    }
+}
+</style>
+
+<script>
+// File Details Modal
 function viewFileDetails(uploadId) {
     const modal = new bootstrap.Modal(document.getElementById('fileDetailModal'));
     const content = document.getElementById('fileDetailContent');
     
     content.innerHTML = `
-        <div class=\"text-center py-3\">
-            <div class=\"spinner-border text-primary\" role=\"status\">
-                <span class=\"visually-hidden\">Yükleniyor...</span>
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
             </div>
+            <p class="mt-2 text-muted">Dosya detayları yükleniyor...</p>
         </div>
     `;
     
     modal.show();
     
-    // AJAX call to get file details (you'll need to implement this endpoint)
-    fetch('ajax/get-file-details.php?id=' + uploadId)
+    // AJAX ile dosya detaylarını getir
+    fetch(`?get_file_details=1&file_id=${encodeURIComponent(uploadId)}`)
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                content.innerHTML = data.html;
+            if (data.error) {
+                content.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        ${data.error}
+                    </div>
+                `;
+                return;
+            }
+            
+            if (data.success && data.file) {
+                const file = data.file;
+                const statusConfig = {
+                    'pending': { class: 'warning', text: 'Bekliyor', icon: 'clock' },
+                    'processing': { class: 'info', text: 'İşleniyor', icon: 'cogs' },
+                    'completed': { class: 'success', text: 'Tamamlandı', icon: 'check-circle' },
+                    'rejected': { class: 'danger', text: 'Reddedildi', icon: 'times-circle' }
+                };
+                
+                const status = statusConfig[file.status] || { class: 'secondary', text: 'Bilinmiyor', icon: 'question' };
+                
+                content.innerHTML = `
+                    <div class="file-detail-content">
+                        <!-- Dosya Başlık -->
+                        <div class="file-detail-header mb-4">
+                            <div class="d-flex align-items-center">
+                                <div class="file-icon-large me-3">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-1">${file.original_name || 'Bilinmeyen dosya'}</h5>
+                                    <span class="badge bg-${status.class}">
+                                        <i class="fas fa-${status.icon} me-1"></i>${status.text}
+                                    </span>
+                                </div>
+                                ${file.status === 'completed' ? `
+                                    <a href="download.php?id=${file.id}" class="btn btn-success">
+                                        <i class="fas fa-download me-2"></i>İndir
+                                    </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <!-- Dosya Bilgileri -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>Dosya Bilgileri
+                                </h6>
+                                <div class="detail-list">
+                                    <div class="detail-item">
+                                        <span class="label">Dosya ID:</span>
+                                        <span class="value font-monospace">${file.id}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Orijinal Ad:</span>
+                                        <span class="value">${file.original_name || 'Belirtilmemiş'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Dosya Boyutu:</span>
+                                        <span class="value">${formatFileSize(file.file_size || 0)}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Yüklenme Tarihi:</span>
+                                        <span class="value">${formatDate(file.upload_date)}</span>
+                                    </div>
+                                    ${file.completed_at ? `
+                                        <div class="detail-item">
+                                            <span class="label">Tamamlanma Tarihi:</span>
+                                            <span class="value">${formatDate(file.completed_at)}</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-car me-2"></i>Araç Bilgileri
+                                </h6>
+                                <div class="detail-list">
+                                    <div class="detail-item">
+                                        <span class="label">Marka:</span>
+                                        <span class="value">${file.brand_name || 'Belirtilmemiş'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Model:</span>
+                                        <span class="value">${file.model_name || 'Belirtilmemiş'}</span>
+                                    </div>
+                                    ${file.year ? `
+                                        <div class="detail-item">
+                                            <span class="label">Yıl:</span>
+                                            <span class="value">${file.year}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${file.ecu_type ? `
+                                        <div class="detail-item">
+                                            <span class="label">ECU Tipi:</span>
+                                            <span class="value">${file.ecu_type}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${file.engine_code ? `
+                                        <div class="detail-item">
+                                            <span class="label">Motor Kodu:</span>
+                                            <span class="value">${file.engine_code}</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${file.notes ? `
+                            <div class="mt-4">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-comment me-2"></i>Notlar
+                                </h6>
+                                <div class="notes-content">
+                                    ${file.notes.replace(/\n/g, '<br>')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${file.admin_notes ? `
+                            <div class="mt-4">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-user-cog me-2"></i>Admin Notları
+                                </h6>
+                                <div class="admin-notes-content">
+                                    ${file.admin_notes.replace(/\n/g, '<br>')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${file.status === 'completed' ? `
+                            <div class="mt-4 text-center">
+                                <button type="button" class="btn btn-warning me-2" onclick="requestRevision('${file.id}'); bootstrap.Modal.getInstance(document.getElementById('fileDetailModal')).hide();">
+                                    <i class="fas fa-redo me-2"></i>Revize Talep Et
+                                </button>
+                                <a href="download.php?id=${file.id}" class="btn btn-success">
+                                    <i class="fas fa-download me-2"></i>Dosyayı İndir
+                                </a>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
             } else {
                 content.innerHTML = `
-                    <div class=\"alert alert-danger\">
-                        <i class=\"fas fa-exclamation-triangle me-2\"></i>
-                        Dosya detayları yüklenirken hata oluştu.
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Dosya detayları alınamadı.
                     </div>
                 `;
             }
         })
         .catch(error => {
+            console.error('Error:', error);
             content.innerHTML = `
-                <div class=\"alert alert-danger\">
-                    <i class=\"fas fa-exclamation-triangle me-2\"></i>
-                    Bağlantı hatası oluştu.
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Dosya detayları yüklenirken hata oluştu.
                 </div>
             `;
         });
 }
 
-// Request revision
+// Helper functions
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'Belirtilmemiş';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('tr-TR') + ' ' + date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+}
+
+// Request Revision
 function requestRevision(uploadId) {
     document.getElementById('revisionUploadId').value = uploadId;
     const modal = new bootstrap.Modal(document.getElementById('revisionModal'));
     modal.show();
 }
 
-// Download completed files
-function downloadCompleted() {
-    const completedFiles = [];
-    const checkboxes = document.querySelectorAll('.file-checkbox:checked');
-    
-    checkboxes.forEach(checkbox => {
-        // Check if the file is completed (you might need to add data attributes)
-        completedFiles.push(checkbox.value);
-    });
-    
-    if (completedFiles.length === 0) {
-        showToast('Lütfen indirmek için dosya seçin!', 'warning');
-        return;
-    }
-    
-    // Create download links for each completed file
-    completedFiles.forEach(fileId => {
-        const link = document.createElement('a');
-        link.href = 'download.php?id=' + fileId;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    });
+// Export Functions
+function exportToExcel() {
+    window.location.href = 'export-files.php?format=excel';
 }
 
-// Export list to Excel
-function exportList() {
-    window.open('export-files.php?format=excel', '_blank');
+function refreshPage() {
+    location.reload();
 }
 
 // Auto-refresh for processing files
-const processingFiles = document.querySelectorAll('tr:has(.badge.bg-info)');
-if (processingFiles.length > 0) {
+<?php if (!empty($userUploads)): ?>
+const hasProcessingFiles = <?php echo json_encode(array_filter($userUploads, function($u) { return $u['status'] === 'processing'; })); ?>.length > 0;
+if (hasProcessingFiles) {
     setTimeout(() => {
         if (!document.hidden) {
             location.reload();
         }
-    }, 30000); // 30 saniye sonra yenile
+    }, 30000); // 30 seconds
 }
-";
+<?php endif; ?>
+</script>
 
+<?php
 // Footer include
 include '../includes/user_footer.php';
 ?>

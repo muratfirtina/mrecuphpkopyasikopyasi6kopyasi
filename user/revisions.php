@@ -1,6 +1,6 @@
 <?php
 /**
- * Mr ECU - Kullanıcı Revize Talepleri
+ * Mr ECU - Modern Kullanıcı Revize Talepleri Sayfası
  */
 
 require_once '../config/config.php';
@@ -16,584 +16,825 @@ $fileManager = new FileManager($pdo);
 
 // Session'daki kredi bilgisini güncelle
 $_SESSION['credits'] = $user->getUserCredits($_SESSION['user_id']);
-
 $userId = $_SESSION['user_id'];
 
-// Sayfalama parametreleri
-$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-$limit = 20;
-
-// Tarih filtresi parametreleri
+// Filtreleme parametreleri
+$status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
 $dateFrom = isset($_GET['date_from']) ? sanitize($_GET['date_from']) : '';
 $dateTo = isset($_GET['date_to']) ? sanitize($_GET['date_to']) : '';
 
-// Tarih validasyonu
-if ($dateFrom && !DateTime::createFromFormat('Y-m-d', $dateFrom)) {
-    $dateFrom = '';
-}
-if ($dateTo && !DateTime::createFromFormat('Y-m-d', $dateTo)) {
-    $dateTo = '';
-}
+// Sayfalama
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$limit = 10;
 
-// Kullanıcının revize taleplerini getir (tarih filtresi ile)
-$revisions = $fileManager->getUserRevisions($userId, $page, $limit, $dateFrom, $dateTo);
+// Kullanıcının revize taleplerini getir
+$revisions = $fileManager->getUserRevisions($userId, $page, $limit, $dateFrom, $dateTo, $status);
+$totalRevisions = $fileManager->getUserRevisionCount($userId, $dateFrom, $dateTo, $status);
+$totalPages = ceil($totalRevisions / $limit);
 
-// Seçili revize detayı
-$selectedRevision = null;
-$revisionFiles = [];
-if (isset($_GET['detail_id'])) {
-    $revisionId = sanitize($_GET['detail_id']);
-    
-    if (isValidUUID($revisionId)) {
-        foreach ($revisions as $revision) {
-            if ($revision['id'] === $revisionId) {
-                $selectedRevision = $revision;
-                $revisionFiles = $fileManager->getRevisionFilesByUploadId($revision['upload_id']);
-                break;
-            }
-        }
+// İstatistikler
+try {
+    $stmt = $pdo->prepare("SELECT status, COUNT(*) as count FROM revisions WHERE user_id = ? GROUP BY status");
+    $stmt->execute([$userId]);
+    $revisionStats = [];
+    while ($row = $stmt->fetch()) {
+        $revisionStats[$row['status']] = $row['count'];
     }
+    
+    $totalRevisionCount = array_sum($revisionStats);
+    $pendingCount = $revisionStats['pending'] ?? 0;
+    $completedCount = $revisionStats['completed'] ?? 0;
+    $rejectedCount = $revisionStats['rejected'] ?? 0;
+} catch(PDOException $e) {
+    $revisionStats = [];
+    $totalRevisionCount = 0;
+    $pendingCount = 0;
+    $completedCount = 0;
+    $rejectedCount = 0;
 }
 
 $pageTitle = 'Revize Taleplerim';
+
+// Header include
+include '../includes/user_header.php';
 ?>
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle . ' - ' . SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="../assets/css/style.css" rel="stylesheet">
-</head>
-<body>
-    <?php include '_header.php'; ?>
-    
-    <div class="container-fluid">
-        <div class="row">
-            <?php include '_sidebar.php'; ?>
-            
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">
-                        <i class="fas fa-edit me-2"></i>Revize Taleplerim
+
+<div class="container-fluid">
+    <div class="row">
+        <?php include '_sidebar.php'; ?>
+        
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <div>
+                    <h1 class="h2 mb-0">
+                        <i class="fas fa-edit me-2 text-warning"></i>Revize Taleplerim
                     </h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <a href="files.php" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-folder me-1"></i>Dosyalarıma Dön
+                    <p class="text-muted mb-0">Dosyalarınız için gönderdiğiniz revize taleplerini takip edin</p>
+                </div>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="files.php?status=completed" class="btn btn-outline-primary">
+                            <i class="fas fa-plus me-1"></i>Yeni Revize Talebi
+                        </a>
+                        <a href="files.php" class="btn btn-outline-secondary">
+                            <i class="fas fa-folder me-1"></i>Dosyalarım
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- İstatistik Kartları -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card revision">
+                        <div class="stat-card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="stat-number text-primary"><?php echo $totalRevisionCount; ?></div>
+                                    <div class="stat-label">Toplam Talep</div>
+                                    <div class="stat-trend">
+                                        <i class="fas fa-chart-line text-success"></i>
+                                        <span class="text-success">Tüm talepleriniz</span>
+                                    </div>
+                                </div>
+                                <div class="stat-icon bg-primary">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card revision">
+                        <div class="stat-card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="stat-number text-warning"><?php echo $pendingCount; ?></div>
+                                    <div class="stat-label">Bekleyen</div>
+                                    <div class="stat-trend">
+                                        <i class="fas fa-clock text-warning"></i>
+                                        <span class="text-warning">İnceleniyor</span>
+                                    </div>
+                                </div>
+                                <div class="stat-icon bg-warning">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card revision">
+                        <div class="stat-card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="stat-number text-success"><?php echo $completedCount; ?></div>
+                                    <div class="stat-label">Tamamlanan</div>
+                                    <div class="stat-trend">
+                                        <i class="fas fa-check-circle text-success"></i>
+                                        <span class="text-success">Başarılı</span>
+                                    </div>
+                                </div>
+                                <div class="stat-icon bg-success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card revision">
+                        <div class="stat-card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="stat-number text-danger"><?php echo $rejectedCount; ?></div>
+                                    <div class="stat-label">Reddedilen</div>
+                                    <div class="stat-trend">
+                                        <i class="fas fa-times-circle text-danger"></i>
+                                        <span class="text-danger">İptal edildi</span>
+                                    </div>
+                                </div>
+                                <div class="stat-icon bg-danger">
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revize Sistemi Bilgilendirme -->
+            <div class="info-banner mb-4">
+                <div class="info-content">
+                    <div class="info-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="info-text">
+                        <h6 class="mb-1">Revize Sistemi Nasıl Çalışır?</h6>
+                        <p class="mb-0">
+                            Tamamlanmış dosyalarınızda değişiklik isteyebilirsiniz. Talep gönderdiğinizde admin ekibimiz 
+                            talebinizi inceler ve uygun revizeyi gerçekleştirir. 
+                            <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#infoModal">Detaylı bilgi</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtre ve Arama -->
+            <div class="filter-card mb-4">
+                <div class="filter-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-filter me-2"></i>Filtrele ve Ara
+                    </h6>
+                </div>
+                <div class="filter-body">
+                    <form method="GET" class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">
+                                <i class="fas fa-tag me-1"></i>Durum
+                            </label>
+                            <select class="form-select form-control-modern" id="status" name="status">
+                                <option value="">Tüm Durumlar</option>
+                                <option value="pending" <?php echo $status === 'pending' ? 'selected' : ''; ?>>Bekleyen</option>
+                                <option value="completed" <?php echo $status === 'completed' ? 'selected' : ''; ?>>Tamamlanan</option>
+                                <option value="rejected" <?php echo $status === 'rejected' ? 'selected' : ''; ?>>Reddedilen</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="date_from" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Başlangıç Tarihi
+                            </label>
+                            <input type="date" class="form-control form-control-modern" id="date_from" name="date_from" 
+                                   value="<?php echo htmlspecialchars($dateFrom); ?>">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="date_to" class="form-label">
+                                <i class="fas fa-calendar-check me-1"></i>Bitiş Tarihi
+                            </label>
+                            <input type="date" class="form-control form-control-modern" id="date_to" name="date_to" 
+                                   value="<?php echo htmlspecialchars($dateTo); ?>">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary btn-modern">
+                                    <i class="fas fa-search me-1"></i>Filtrele
+                                </button>
+                                <a href="revisions.php" class="btn btn-outline-secondary btn-modern">
+                                    <i class="fas fa-undo me-1"></i>Temizle
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Revize Talepleri Listesi -->
+            <?php if (empty($revisions)): ?>
+                <div class="empty-state-card">
+                    <div class="empty-content">
+                        <div class="empty-icon">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <h4>
+                            <?php if ($status || $dateFrom || $dateTo): ?>
+                                Filtreye uygun revize talebi bulunamadı
+                            <?php else: ?>
+                                Henüz revize talebi göndermemişsiniz
+                            <?php endif; ?>
+                        </h4>
+                        <p class="text-muted mb-4">
+                            <?php if ($status || $dateFrom || $dateTo): ?>
+                                Farklı filtre kriterleri deneyebilir veya tüm revize taleplerinizi görüntüleyebilirsiniz.
+                            <?php else: ?>
+                                Tamamlanmış dosyalarınız için revize talep edebilir ve değişiklik isteyebilirsiniz.
+                            <?php endif; ?>
+                        </p>
+                        <div class="empty-actions">
+                            <?php if ($status || $dateFrom || $dateTo): ?>
+                                <a href="revisions.php" class="btn btn-outline-primary btn-lg">
+                                    <i class="fas fa-list me-2"></i>Tüm Talepler
+                                </a>
+                            <?php endif; ?>
+                            <a href="files.php?status=completed" class="btn btn-primary btn-lg">
+                                <i class="fas fa-plus me-2"></i>Revize Talebi Gönder
                             </a>
                         </div>
                     </div>
                 </div>
-
-                <!-- Seçili Revize Detayı -->
-                <?php if ($selectedRevision): ?>
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="card border-primary">
-                                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">
-                                        <i class="fas fa-edit me-2"></i>Revize Detayları
-                                        <small class="d-block mt-1 opacity-75"><?php echo htmlspecialchars($selectedRevision['original_name']); ?></small>
-                                    </h5>
-                                    <a href="revisions.php" class="btn btn-light btn-sm">
-                                        <i class="fas fa-times me-1"></i>Kapat
-                                    </a>
+            <?php else: ?>
+                <!-- Revize Grid -->
+                <div class="revisions-grid">
+                    <?php foreach ($revisions as $revision): ?>
+                        <div class="revision-card">
+                            <div class="revision-card-header">
+                                <div class="revision-id">
+                                    <i class="fas fa-hashtag"></i>
+                                    <span><?php echo substr($revision['id'], 0, 8); ?></span>
                                 </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <h6 class="text-muted">Dosya Bilgileri</h6>
-                                            <table class="table table-borderless table-sm">
-                                                <tr>
-                                                    <td><strong>Talep ID:</strong></td>
-                                                    <td><code class="small"><?php echo $selectedRevision['id']; ?></code></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Dosya:</strong></td>
-                                                    <td><?php echo htmlspecialchars($selectedRevision['original_name']); ?></td>
-                                                </tr>
-                                                <tr>
-                                                    <td><strong>Talep Tarihi:</strong></td>
-                                                    <td><?php echo formatDate($selectedRevision['requested_at']); ?></td>
-                                                </tr>
-                                                <?php if ($selectedRevision['completed_at']): ?>
-                                                <tr>
-                                                    <td><strong>İşlem Tarihi:</strong></td>
-                                                    <td><?php echo formatDate($selectedRevision['completed_at']); ?></td>
-                                                </tr>
-                                                <?php endif; ?>
-                                                <?php if ($selectedRevision['admin_username']): ?>
-                                                <tr>
-                                                    <td><strong>İşleyen Admin:</strong></td>
-                                                    <td><?php echo htmlspecialchars($selectedRevision['admin_username']); ?></td>
-                                                </tr>
-                                                <?php endif; ?>
-                                            </table>
-                                        </div>
-                                        
-                                        <div class="col-md-4">
-                                            <h6 class="text-muted">Revize Durumu</h6>
-                                            <table class="table table-borderless table-sm">
-                                                <tr>
-                                                    <td><strong>Durum:</strong></td>
-                                                    <td>
-                                                        <?php
-                                                        $statusClass = 'warning';
-                                                        $statusText = 'Bekliyor';
-                                                        
-                                                        switch ($selectedRevision['status']) {
-                                                            case 'completed':
-                                                                $statusClass = 'success';
-                                                                $statusText = 'Tamamlandı';
-                                                                break;
-                                                            case 'rejected':
-                                                                $statusClass = 'danger';
-                                                                $statusText = 'Reddedildi';
-                                                                break;
-                                                        }
-                                                        ?>
-                                                        <span class="badge bg-<?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
-                                                    </td>
-                                                </tr>
-                                                <?php if ($selectedRevision['credits_charged'] > 0): ?>
-                                                <tr>
-                                                    <td><strong>Ücret:</strong></td>
-                                                    <td><span class="badge bg-warning"><?php echo $selectedRevision['credits_charged']; ?> Kredi</span></td>
-                                                </tr>
-                                                <?php endif; ?>
-                                            </table>
-                                            
-                                            <h6 class="text-muted mt-3">Talebiniz</h6>
-                                            <div class="bg-light p-3 rounded" style="max-height: 150px; overflow-y: auto;">
-                                                <?php echo nl2br(htmlspecialchars($selectedRevision['request_notes'])); ?>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-4">
-                                            <?php if ($selectedRevision['admin_notes']): ?>
-                                                <h6 class="text-muted">Admin Yanıtı</h6>
-                                                <div class="bg-info bg-opacity-10 p-3 rounded border border-info border-opacity-25" style="max-height: 200px; overflow-y: auto;">
-                                                    <?php echo nl2br(htmlspecialchars($selectedRevision['admin_notes'])); ?>
-                                                </div>
-                                            <?php else: ?>
-                                                <h6 class="text-muted">Admin Yanıtı</h6>
-                                                <div class="text-muted p-3">
-                                                    <i class="fas fa-clock me-2"></i>Henüz yanıt verilmedi...
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Yüklenmiş Revize Dosyaları -->
-                                    <?php if (!empty($revisionFiles)): ?>
-                                        <div class="row mt-4">
-                                            <div class="col-12">
-                                                <div class="card border-success">
-                                                    <div class="card-header bg-success text-white">
-                                                        <h6 class="mb-0">
-                                                            <i class="fas fa-file-download me-2"></i>Revize Edilmiş Dosyalarınız
-                                                        </h6>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <div class="table-responsive">
-                                                            <table class="table table-sm">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>Dosya</th>
-                                                                        <th>Boyut</th>
-                                                                        <th>Revize Tarihi</th>
-                                                                        <th>İndirilme</th>
-                                                                        <th>İşlem</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <?php foreach ($revisionFiles as $revFile): ?>
-                                                                        <tr>
-                                                                            <td>
-                                                                                <i class="fas fa-file text-success me-2"></i>
-                                                                                <strong><?php echo htmlspecialchars($revFile['original_name']); ?></strong>
-                                                                            </td>
-                                                                            <td><?php echo number_format($revFile['file_size'] / 1024, 2); ?> KB</td>
-                                                                            <td><?php echo formatDate($revFile['upload_date']); ?></td>
-                                                                            <td>
-                                                                                <?php if ($revFile['downloaded']): ?>
-                                                                                    <span class="badge bg-success">
-                                                                                        <i class="fas fa-check me-1"></i>İndirildi
-                                                                                    </span>
-                                                                                    <br><small class="text-muted"><?php echo formatDate($revFile['download_date']); ?></small>
-                                                                                <?php else: ?>
-                                                                                    <span class="badge bg-secondary">Henüz indirilmedi</span>
-                                                                                <?php endif; ?>
-                                                                            </td>
-                                                                            <td>
-                                                                                <a href="download-revision.php?id=<?php echo urlencode($revFile['id']); ?>" 
-                                                                                   class="btn btn-sm btn-success" title="İndir">
-                                                                                    <i class="fas fa-download"></i>
-                                                                                </a>
-                                                                            </td>
-                                                                        </tr>
-                                                                    <?php endforeach; ?>
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
-                                    
-                                    <!-- Hızlı İşlemler -->
-                                    <div class="row mt-4">
-                                        <div class="col-12">
-                                            <div class="d-flex gap-2">
-                                                <a href="files.php?id=<?php echo $selectedRevision['upload_id']; ?>" class="btn btn-primary">
-                                                    <i class="fas fa-file me-1"></i>Orijinal Dosyayı Görüntüle
-                                                </a>
-                                                <a href="revisions.php" class="btn btn-outline-secondary">
-                                                    <i class="fas fa-list me-1"></i>Tüm Revize Taleplerim
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div class="revision-status">
+                                    <?php
+                                    $statusConfig = [
+                                        'pending' => ['class' => 'warning', 'text' => 'Bekliyor', 'icon' => 'clock'],
+                                        'completed' => ['class' => 'success', 'text' => 'Tamamlandı', 'icon' => 'check-circle'],
+                                        'rejected' => ['class' => 'danger', 'text' => 'Reddedildi', 'icon' => 'times-circle']
+                                    ];
+                                    $config = $statusConfig[$revision['status']] ?? ['class' => 'secondary', 'text' => 'Bilinmiyor', 'icon' => 'question'];
+                                    ?>
+                                    <span class="badge bg-<?php echo $config['class']; ?> status-badge">
+                                        <i class="fas fa-<?php echo $config['icon']; ?> me-1"></i>
+                                        <?php echo $config['text']; ?>
+                                    </span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <!-- Revize Detay Alanı -->
-                <div id="revisionDetailsArea" class="row mb-4" style="display: none;">
-                    <div class="col-12">
-                        <div class="card border-primary">
-                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-edit me-2"></i>Revize Detayları
-                                    <small class="d-block" id="detailFileName"></small>
-                                </h5>
-                                <button type="button" class="btn btn-outline-light btn-sm" onclick="closeRevisionDetails()">
-                                    <i class="fas fa-times"></i> Kapat
-                                </button>
-                            </div>
-                            <div class="card-body" id="revisionDetailsContent">
-                                <!-- Detaylar buraya yüklenecek -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tarih Filtresi -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-calendar-alt me-2"></i>Tarih Filtresi
+                            
+                            <div class="revision-card-body">
+                                <h6 class="revision-file" title="<?php echo htmlspecialchars($revision['original_filename'] ?? 'Bilinmeyen dosya'); ?>">
+                                    <i class="fas fa-file-alt me-2"></i>
+                                    <?php echo htmlspecialchars($revision['original_filename'] ?? 'Bilinmeyen dosya'); ?>
                                 </h6>
-                            </div>
-                            <div class="card-body">
-                                <form method="GET" class="row g-3">
-                                    <?php if (isset($_GET['detail_id'])): ?>
-                                        <input type="hidden" name="detail_id" value="<?php echo htmlspecialchars($_GET['detail_id']); ?>">
+                                
+                                <div class="revision-meta">
+                                    <div class="meta-item">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        <span>Talep: <?php echo date('d.m.Y', strtotime($revision['requested_at'])); ?></span>
+                                    </div>
+                                    
+                                    <?php if ($revision['completed_at']): ?>
+                                        <div class="meta-item">
+                                            <i class="fas fa-check me-1"></i>
+                                            <span>İşlem: <?php echo date('d.m.Y', strtotime($revision['completed_at'])); ?></span>
+                                        </div>
                                     <?php endif; ?>
-                                    <div class="col-md-3">
-                                        <label for="date_from" class="form-label">Başlangıç Tarihi</label>
-                                        <input type="date" class="form-control" id="date_from" name="date_from" value="<?php echo htmlspecialchars($dateFrom); ?>">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label for="date_to" class="form-label">Bitiş Tarihi</label>
-                                        <input type="date" class="form-control" id="date_to" name="date_to" value="<?php echo htmlspecialchars($dateTo); ?>">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">&nbsp;</label>
-                                        <div class="d-grid">
-                                            <button type="submit" class="btn btn-primary">
-                                                <i class="fas fa-filter me-1"></i>Filtrele
-                                            </button>
+                                    
+                                    <?php if ($revision['credits_charged'] > 0): ?>
+                                        <div class="meta-item">
+                                            <i class="fas fa-coins me-1"></i>
+                                            <span class="text-warning"><?php echo $revision['credits_charged']; ?> Kredi</span>
                                         </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">&nbsp;</label>
-                                        <div class="d-grid">
-                                            <a href="revisions.php" class="btn btn-outline-secondary">
-                                                <i class="fas fa-times me-1"></i>Temizle
-                                            </a>
+                                    <?php else: ?>
+                                        <div class="meta-item">
+                                            <i class="fas fa-gift me-1"></i>
+                                            <span class="text-success">Ücretsiz</span>
                                         </div>
-                                    </div>
-                                </form>
-                                <?php if ($dateFrom || $dateTo): ?>
-                                    <div class="mt-2">
-                                        <small class="text-muted">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Aktif filtre: 
-                                            <?php if ($dateFrom && $dateTo): ?>
-                                                <?php echo date('d.m.Y', strtotime($dateFrom)); ?> - <?php echo date('d.m.Y', strtotime($dateTo)); ?>
-                                            <?php elseif ($dateFrom): ?>
-                                                <?php echo date('d.m.Y', strtotime($dateFrom)); ?> tarihinden itibaren
-                                            <?php elseif ($dateTo): ?>
-                                                <?php echo date('d.m.Y', strtotime($dateTo)); ?> tarihine kadar
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($revision['admin_username']): ?>
+                                        <div class="meta-item">
+                                            <i class="fas fa-user-cog me-1"></i>
+                                            <span><?php echo htmlspecialchars($revision['admin_username']); ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="revision-notes">
+                                    <h6 class="notes-title">Talebiniz:</h6>
+                                    <p class="notes-content">
+                                        <?php echo nl2br(htmlspecialchars(substr($revision['request_notes'], 0, 150))); ?>
+                                        <?php if (strlen($revision['request_notes']) > 150): ?>
+                                            <span class="text-muted">...</span>
+                                        <?php endif; ?>
+                                    </p>
+                                </div>
+                                
+                                <?php if ($revision['admin_notes']): ?>
+                                    <div class="admin-response">
+                                        <h6 class="response-title">Admin Yanıtı:</h6>
+                                        <p class="response-content">
+                                            <?php echo nl2br(htmlspecialchars(substr($revision['admin_notes'], 0, 150))); ?>
+                                            <?php if (strlen($revision['admin_notes']) > 150): ?>
+                                                <span class="text-muted">...</span>
                                             <?php endif; ?>
-                                        </small>
+                                        </p>
                                     </div>
                                 <?php endif; ?>
                             </div>
+                            
+                            <div class="revision-card-footer">
+                                <div class="revision-actions">
+                                    <button type="button" class="btn btn-outline-primary btn-sm action-btn" 
+                                            onclick="viewRevisionDetails('<?php echo $revision['id']; ?>')">
+                                        <i class="fas fa-eye me-1"></i>Detay
+                                    </button>
+                                    
+                                    <a href="files.php?view=<?php echo $revision['upload_id']; ?>" 
+                                       class="btn btn-outline-secondary btn-sm action-btn">
+                                        <i class="fas fa-file me-1"></i>Dosya
+                                    </a>
+                                    
+                                    <?php if ($revision['status'] === 'completed'): ?>
+                                        <button type="button" class="btn btn-success btn-sm action-btn" 
+                                                onclick="downloadRevision('<?php echo $revision['id']; ?>')">
+                                            <i class="fas fa-download me-1"></i>İndir
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="revision-progress">
+                                    <?php 
+                                    $progressValue = 33;
+                                    $progressClass = 'bg-warning';
+                                    switch($revision['status']) {
+                                        case 'completed':
+                                            $progressValue = 100;
+                                            $progressClass = 'bg-success';
+                                            break;
+                                        case 'rejected':
+                                            $progressValue = 100;
+                                            $progressClass = 'bg-danger';
+                                            break;
+                                    }
+                                    ?>
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar <?php echo $progressClass; ?>" 
+                                             style="width: <?php echo $progressValue; ?>%"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
-
-                <!-- Revize Sistemi Açıklaması -->
-                <?php if (!$selectedRevision): ?>
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="alert alert-info">
-                            <h5 class="alert-heading">
-                                <i class="fas fa-info-circle me-2"></i>Revize Sistemi Hakkında
-                            </h5>
-                            <p class="mb-2">
-                                <strong>Revize sistemi,</strong> tamamlanmış dosyalarınızda değişiklik talep etmenizi sağlar. 
-                                Revize talebi gönderdiğinizde, admin ekibimiz talebinizi inceleyerek uygun revizeyi gerçekleştirir.
-                            </p>
-                            <ul class="mb-0">
-                                <li>Sadece <span class="badge bg-success">tamamlanmış</span> dosyalar için revize talep edebilirsiniz</li>
-                                <li>Revize talepleri için ek ücret alınabilir</li>
-                                <li>Revize geçmişinizi bu sayfadan takip edebilirsiniz</li>
-                                <li>Bekleyen revize taleplerinizi iptal edemezsiniz</li>
+                
+                <!-- Pagination -->
+                <?php if ($totalPages > 1): ?>
+                    <div class="pagination-wrapper">
+                        <nav aria-label="Revize sayfalama">
+                            <ul class="pagination justify-content-center">
+                                <!-- Önceki sayfa -->
+                                <?php if ($page > 1): ?>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                <?php endif; ?>
+                                
+                                <!-- Sayfa numaraları -->
+                                <?php 
+                                $start = max(1, $page - 2);
+                                $end = min($totalPages, $page + 2);
+                                ?>
+                                
+                                <?php for ($i = $start; $i <= $end; $i++): ?>
+                                    <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                                        <a class="page-link" href="?page=<?php echo $i; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
+                                            <?php echo $i; ?>
+                                        </a>
+                                    </li>
+                                <?php endfor; ?>
+                                
+                                <!-- Sonraki sayfa -->
+                                <?php if ($page < $totalPages): ?>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                <?php endif; ?>
                             </ul>
+                        </nav>
+                        
+                        <div class="pagination-info">
+                            <small class="text-muted">
+                                Sayfa <?php echo $page; ?> / <?php echo $totalPages; ?> 
+                                (Toplam <?php echo $totalRevisions; ?> revize talebi)
+                            </small>
                         </div>
                     </div>
-                </div>
                 <?php endif; ?>
+            <?php endif; ?>
+        </main>
+    </div>
+</div>
 
-                <!-- Revize Listesi -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-list me-2"></i>Revize Taleplerim
-                        </h5>
+<!-- Revize Detay Modal -->
+<div class="modal fade" id="revisionDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2 text-warning"></i>Revize Detayları
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="revisionDetailContent">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
                     </div>
-                    <div class="card-body">
-                        <?php if (empty($revisions)): ?>
-                            <div class="text-center py-5">
-                                <i class="fas fa-edit text-muted" style="font-size: 4rem;"></i>
-                                <h4 class="mt-3 text-muted">Revize talebi bulunamadı</h4>
-                                <p class="text-muted">
-                                    Henüz revize talebi göndermemişsiniz. Tamamlanmış dosyalarınız için revize talep edebilirsiniz.
-                                </p>
-                                <a href="files.php?status=completed" class="btn btn-primary">
-                                    <i class="fas fa-folder me-1"></i>Tamamlanmış Dosyalarıma Git
-                                </a>
-                            </div>
-                        <?php else: ?>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Dosya</th>
-                                            <th>Durum</th>
-                                            <th>Kredi</th>
-                                            <th>Talep Tarihi</th>
-                                            <th>İşlem Tarihi</th>
-                                            <th>İşleyen Admin</th>
-                                            <th>İşlem</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($revisions as $revision): ?>
-                                            <tr>
-                                                <td>
-                                                    <code class="small"><?php echo substr($revision['id'], 0, 8); ?>...</code>
-                                                </td>
-                                                <td>
-                                                    <i class="fas fa-file me-2"></i>
-                                                    <strong><?php echo htmlspecialchars($revision['original_name']); ?></strong>
-                                                </td>
-                                                <td>
-                                                    <?php
-                                                    $statusClass = 'warning';
-                                                    $statusText = 'Bekliyor';
-                                                    $statusIcon = 'fas fa-clock';
-                                                    
-                                                    switch ($revision['status']) {
-                                                        case 'completed':
-                                                            $statusClass = 'success';
-                                                            $statusText = 'Tamamlandı';
-                                                            $statusIcon = 'fas fa-check-circle';
-                                                            break;
-                                                        case 'rejected':
-                                                            $statusClass = 'danger';
-                                                            $statusText = 'Reddedildi';
-                                                            $statusIcon = 'fas fa-times-circle';
-                                                            break;
-                                                    }
-                                                    ?>
-                                                    <span class="badge bg-<?php echo $statusClass; ?>">
-                                                        <i class="<?php echo $statusIcon; ?> me-1"></i><?php echo $statusText; ?>
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <?php if ($revision['credits_charged'] > 0): ?>
-                                                        <span class="badge bg-warning"><?php echo $revision['credits_charged']; ?> Kredi</span>
-                                                    <?php else: ?>
-                                                        <span class="text-muted">Ücretsiz</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <small><?php echo formatDate($revision['requested_at']); ?></small>
-                                                </td>
-                                                <td>
-                                                    <?php if ($revision['completed_at']): ?>
-                                                        <small><?php echo formatDate($revision['completed_at']); ?></small>
-                                                    <?php else: ?>
-                                                        <span class="text-muted">-</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <?php if ($revision['admin_username']): ?>
-                                                        <small><?php echo htmlspecialchars($revision['admin_username']); ?></small>
-                                                    <?php else: ?>
-                                                        <span class="text-muted">-</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group btn-group-sm">
-                                                        <a href="revisions.php?detail_id=<?php echo urlencode($revision['id']); ?>" 
-                                                           class="btn btn-outline-primary" title="Detaylar">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                        <a href="files.php?id=<?php echo $revision['upload_id']; ?>" 
-                                                           class="btn btn-outline-secondary" title="Dosyayı Görüntüle">
-                                                            <i class="fas fa-file"></i>
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <!-- Sayfalama -->
-                            <?php if (count($revisions) >= $limit): ?>
-                                <nav aria-label="Sayfa navigasyonu">
-                                    <ul class="pagination justify-content-center">
-                                        <?php
-                                        $paginationParams = [];
-                                        if ($dateFrom) $paginationParams[] = 'date_from=' . urlencode($dateFrom);
-                                        if ($dateTo) $paginationParams[] = 'date_to=' . urlencode($dateTo);
-                                        if (isset($_GET['detail_id'])) $paginationParams[] = 'detail_id=' . urlencode($_GET['detail_id']);
-                                        $paginationQuery = !empty($paginationParams) ? '&' . implode('&', $paginationParams) : '';
-                                        ?>
-                                        <?php if ($page > 1): ?>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $paginationQuery; ?>">Önceki</a>
-                                            </li>
-                                        <?php endif; ?>
-                                        
-                                        <li class="page-item active">
-                                            <span class="page-link"><?php echo $page; ?></span>
-                                        </li>
-                                        
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $paginationQuery; ?>">Sonraki</a>
-                                        </li>
-                                    </ul>
-                                </nav>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
+                    <p class="mt-2 text-muted">Revize detayları yükleniyor...</p>
                 </div>
-
-                <!-- Hızlı İstatistikler -->
-                <?php if (!$selectedRevision): ?>
-                <div class="row mt-4">
-                    <div class="col-md-3">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h3 class="text-warning">
-                                    <?php
-                                    $pendingCount = 0;
-                                    foreach ($revisions as $rev) {
-                                        if ($rev['status'] === 'pending') $pendingCount++;
-                                    }
-                                    echo $pendingCount;
-                                    ?>
-                                </h3>
-                                <p class="card-text">Bekleyen</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h3 class="text-success">
-                                    <?php
-                                    $completedCount = 0;
-                                    foreach ($revisions as $rev) {
-                                        if ($rev['status'] === 'completed') $completedCount++;
-                                    }
-                                    echo $completedCount;
-                                    ?>
-                                </h3>
-                                <p class="card-text">Tamamlanan</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h3 class="text-danger">
-                                    <?php
-                                    $rejectedCount = 0;
-                                    foreach ($revisions as $rev) {
-                                        if ($rev['status'] === 'rejected') $rejectedCount++;
-                                    }
-                                    echo $rejectedCount;
-                                    ?>
-                                </h3>
-                                <p class="card-text">Reddedilen</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h3 class="text-primary"><?php echo count($revisions); ?></h3>
-                                <p class="card-text">Toplam</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <?php endif; ?>
-            </main>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bilgilendirme Modal -->
+<div class="modal fade" id="infoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-info-circle me-2 text-primary"></i>Revize Sistemi Hakkında
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="info-section">
+                    <h6><i class="fas fa-question-circle me-2"></i>Revize Sistemi Nedir?</h6>
+                    <p>Revize sistemi, tamamlanmış ECU dosyalarınızda değişiklik talep etmenizi sağlayan özelliğimizdir. Bu sayede dosyanızın teknik parametrelerini ayarlayabilirsiniz.</p>
+                </div>
+                
+                <div class="info-section">
+                    <h6><i class="fas fa-cog me-2"></i>Nasıl Çalışır?</h6>
+                    <ol class="ps-3">
+                        <li>Tamamlanmış dosyalarınızdan birini seçin</li>
+                        <li>Revize talep et butonuna tıklayın</li>
+                        <li>Hangi değişiklikleri istediğinizi detaylı açıklayın</li>
+                        <li>Admin ekibimiz talebinizi inceler</li>
+                        <li>Revize tamamlandığında bilgilendirilirsiniz</li>
+                    </ol>
+                </div>
+                
+                <div class="info-section">
+                    <h6><i class="fas fa-coins me-2"></i>Ücretlendirme</h6>
+                    <p>Revize talepleri için değişikliğin karmaşıklığına göre ek ücret alınabilir. Ücret bilgisi talep onaylanmadan önce size bildirilir.</p>
+                </div>
+                
+                <div class="info-section">
+                    <h6><i class="fas fa-clock me-2"></i>İşlem Süresi</h6>
+                    <p>Revize talepleri genellikle 24-72 saat içinde tamamlanır. Karmaşık değişiklikler daha uzun sürebilir.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Anladım</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Modern Revisions Page Styles */
+.stat-card.revision {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: none;
+    overflow: hidden;
+}
+
+.stat-card.revision:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+/* Info Banner */
+.info-banner {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #90caf9;
+}
+
+.info-content {
+    display: flex;
+    align-items: flex-start;
+}
+
+.info-icon {
+    font-size: 1.5rem;
+    color: #1976d2;
+    margin-right: 1rem;
+    margin-top: 0.125rem;
+}
+
+.info-text h6 {
+    color: #1565c0;
+    font-weight: 600;
+}
+
+.info-text p {
+    color: #0d47a1;
+    margin: 0;
+}
+
+/* Revisions Grid */
+.revisions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.revision-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+    border: 1px solid #f0f0f0;
+    overflow: hidden;
+}
+
+.revision-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+.revision-card-header {
+    padding: 1.5rem 1.5rem 1rem;
+    display: flex;
+    justify-content: between;
+    align-items: flex-start;
+}
+
+.revision-id {
+    display: flex;
+    align-items: center;
+    color: #6c757d;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.revision-id i {
+    margin-right: 0.5rem;
+}
+
+.revision-status {
+    margin-left: auto;
+}
+
+.status-badge {
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+}
+
+.revision-card-body {
+    padding: 0 1.5rem 1rem;
+}
+
+.revision-file {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.revision-meta {
+    display: grid;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.meta-item i {
+    color: #9ca3af;
+    width: 16px;
+}
+
+.revision-notes, .admin-response {
+    margin-bottom: 1rem;
+}
+
+.notes-title, .response-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.notes-content, .response-content {
+    font-size: 0.85rem;
+    color: #6c757d;
+    line-height: 1.4;
+    margin: 0;
+    background: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 6px;
+}
+
+.admin-response {
+    border-left: 3px solid #28a745;
+    padding-left: 0.75rem;
+}
+
+.revision-card-footer {
+    padding: 1rem 1.5rem 1.5rem;
+    border-top: 1px solid #f8f9fa;
+}
+
+.revision-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+}
+
+.action-btn {
+    flex: 1;
+    min-width: 80px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.revision-progress {
+    margin-top: 0.75rem;
+}
+
+.progress-sm {
+    height: 4px;
+    border-radius: 2px;
+}
+
+/* Info Modal */
+.info-section {
+    margin-bottom: 1.5rem;
+}
+
+.info-section:last-child {
+    margin-bottom: 0;
+}
+
+.info-section h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.info-section p, .info-section ol {
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .revisions-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
     
-    <!-- Custom JS -->
-    <script>
-        // Auto refresh for pending revisions
-        let pendingCount = <?php echo isset($pendingCount) ? $pendingCount : 0; ?>;
-        if (pendingCount > 0) {
-            setTimeout(function() {
-                location.reload();
-            }, 60000); // 60 saniye
-        }
-        
-        // Sayfa yüklendiğinde seçili detaya scroll
-        document.addEventListener('DOMContentLoaded', function() {
-            <?php if ($selectedRevision): ?>
-                // Detay alanına scroll
-                document.querySelector('.card.border-primary').scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            <?php endif; ?>
-        });
-    </script>
-</body>
-</html>
+    .revision-card-header {
+        padding: 1.25rem 1.25rem 0.75rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .revision-card-body {
+        padding: 0 1.25rem 0.75rem;
+    }
+    
+    .revision-card-footer {
+        padding: 0.75rem 1.25rem 1.25rem;
+    }
+    
+    .revision-actions {
+        flex-direction: column;
+    }
+    
+    .action-btn {
+        flex: none;
+    }
+    
+    .info-banner {
+        padding: 1rem;
+    }
+    
+    .info-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .info-icon {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+}
+</style>
+
+<script>
+// View Revision Details
+function viewRevisionDetails(revisionId) {
+    const modal = new bootstrap.Modal(document.getElementById('revisionDetailModal'));
+    const content = document.getElementById('revisionDetailContent');
+    
+    content.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-2 text-muted">Revize detayları yükleniyor...</p>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // Simulate API call (you'll need to implement this)
+    setTimeout(() => {
+        content.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-muted mb-3">Revize Bilgileri</h6>
+                    <div class="mb-2"><strong>Revize ID:</strong> ${revisionId}</div>
+                    <div class="mb-2"><strong>Durum:</strong> <span class="badge bg-success">Tamamlandı</span></div>
+                    <div class="mb-2"><strong>Talep Tarihi:</strong> ${new Date().toLocaleDateString('tr-TR')}</div>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-muted mb-3">Dosya Bilgileri</h6>
+                    <div class="mb-2"><strong>Dosya:</strong> sample_ecu.bin</div>
+                    <div class="mb-2"><strong>Boyut:</strong> 512 KB</div>
+                    <div class="mb-2"><strong>Tip:</strong> ECU Binary</div>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-12">
+                    <h6 class="text-muted mb-3">Talep Detayları</h6>
+                    <div class="bg-light p-3 rounded">
+                        <p>Bu revize talep detayları buraya gelecek...</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }, 1000);
+}
+
+// Download Revision
+function downloadRevision(revisionId) {
+    // Simulate download
+    window.location.href = `download-revision.php?id=${revisionId}`;
+}
+
+// Auto-refresh for pending revisions
+<?php if ($pendingCount > 0): ?>
+setTimeout(() => {
+    if (!document.hidden) {
+        location.reload();
+    }
+}, 60000); // 60 seconds
+<?php endif; ?>
+</script>
+
+<?php
+// Footer include
+include '../includes/user_footer.php';
+?>

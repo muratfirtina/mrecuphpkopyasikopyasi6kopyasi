@@ -33,7 +33,7 @@ if (!isValidUUID($userId)) {
 }
 
 $fileManager = new FileManager($pdo);
-$result = $fileManager->downloadFile($fileId, $userId, 'response');
+$result = $fileManager->downloadFile($fileId, $userId, 'upload');
 
 if (!$result['success']) {
     $_SESSION['error'] = $result['message'];

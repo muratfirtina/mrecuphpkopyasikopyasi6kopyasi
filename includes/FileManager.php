@@ -1,7 +1,7 @@
 <?php
 /**
- * Mr ECU - File Manager Class (GUID System) - FIXED VERSION
- * GUID tabanlı dosya yönetimi sınıfı - Doğru tablo isimleri ile
+ * Mr ECU - File Manager Class (GUID System) - COMPLETE VERSION
+ * GUID tabanlı dosya yönetimi sınıfı - Tüm metodlar dahil
  */
 
 class FileManager {
@@ -9,6 +9,44 @@ class FileManager {
     
     public function __construct($database) {
         $this->pdo = $database;
+    }
+    
+    // Araç markalarını getir
+    public function getBrands() {
+        try {
+            $stmt = $this->pdo->query("
+                SELECT id, name 
+                FROM brands 
+                ORDER BY name ASC
+            ");
+            
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch(PDOException $e) {
+            error_log('getBrands error: ' . $e->getMessage());
+            return [];
+        }
+    }
+    
+    // Markaya göre modelleri getir
+    public function getModelsByBrand($brandId) {
+        try {
+            if (!isValidUUID($brandId)) {
+                return [];
+            }
+            
+            $stmt = $this->pdo->prepare("
+                SELECT id, name, CONCAT(name, ' (', year_start, '-', COALESCE(year_end, 'Devam'), ')') as display_name
+                FROM models 
+                WHERE brand_id = ? 
+                ORDER BY name ASC
+            ");
+            
+            $stmt->execute([$brandId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch(PDOException $e) {
+            error_log('getModelsByBrand error: ' . $e->getMessage());
+            return [];
+        }
     }
     
     // Dosya istatistiklerini getir (Admin Dashboard için)
@@ -167,8 +205,8 @@ class FileManager {
             if (move_uploaded_file($fileData['tmp_name'], $uploadPath)) {
                 // Veritabanına kaydet
                 $stmt = $this->pdo->prepare("
-                    INSERT INTO file_uploads (id, user_id, original_name, filename, file_size, file_path, status, notes, upload_date)
-                    VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, NOW())
+                    INSERT INTO file_uploads (id, user_id, original_name, filename, file_size, status, upload_notes, upload_date)
+                    VALUES (?, ?, ?, ?, ?, 'pending', ?, NOW())
                 ");
                 
                 $result = $stmt->execute([
@@ -177,7 +215,6 @@ class FileManager {
                     $fileData['name'],
                     $fileName,
                     $fileData['size'],
-                    $uploadPath,
                     $notes
                 ]);
                 
@@ -203,7 +240,7 @@ class FileManager {
             
             $stmt = $this->pdo->prepare("
                 UPDATE file_uploads 
-                SET status = ?, admin_notes = ?, updated_at = NOW() 
+                SET status = ?, admin_notes = ?, processed_date = NOW() 
                 WHERE id = ?
             ");
             
@@ -215,28 +252,256 @@ class FileManager {
         }
     }
     
-    // Kullanıcının dosyalarını getir
-    public function getUserUploads($userId, $page = 1, $limit = 10) {
+    // Kullanıcının dosyalarını getir (güncellenmiş versiyon)
+    public function getUserUploads($userId, $page = 1, $limit = 10, $status = '', $search = '') {
         try {
             if (!isValidUUID($userId)) {
                 return [];
             }
             
             $offset = ($page - 1) * $limit;
+            $whereClause = "WHERE fu.user_id = ?";
+            $params = [$userId];
+            
+            if ($status) {
+                $whereClause .= " AND fu.status = ?";
+                $params[] = $status;
+            }
+            
+            if ($search) {
+                $whereClause .= " AND (fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                $searchTerm = "%$search%";
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+            }
             
             $stmt = $this->pdo->prepare("
-                SELECT * FROM file_uploads 
-                WHERE user_id = ? 
-                ORDER BY upload_date DESC 
+                SELECT fu.*, b.name as brand_name, m.name as model_name
+                FROM file_uploads fu
+                LEFT JOIN brands b ON fu.brand_id = b.id
+                LEFT JOIN models m ON fu.model_id = m.id
+                {$whereClause}
+                ORDER BY fu.upload_date DESC 
                 LIMIT $limit OFFSET $offset
             ");
             
-            $stmt->execute([$userId]);
+            $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
             
         } catch(PDOException $e) {
             error_log('getUserUploads error: ' . $e->getMessage());
             return [];
+        }
+    }
+    
+    // Kullanıcının dosya sayısını getir
+    public function getUserUploadCount($userId, $status = '', $search = '') {
+        try {
+            if (!isValidUUID($userId)) {
+                return 0;
+            }
+            
+            $whereClause = "WHERE fu.user_id = ?";
+            $params = [$userId];
+            
+            if ($status) {
+                $whereClause .= " AND fu.status = ?";
+                $params[] = $status;
+            }
+            
+            if ($search) {
+                $whereClause .= " AND (fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                $searchTerm = "%$search%";
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+            }
+            
+            $stmt = $this->pdo->prepare("
+                SELECT COUNT(*) as count
+                FROM file_uploads fu
+                LEFT JOIN brands b ON fu.brand_id = b.id
+                LEFT JOIN models m ON fu.model_id = m.id
+                {$whereClause}
+            ");
+            
+            $stmt->execute($params);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['count'] ?? 0;
+            
+        } catch(PDOException $e) {
+            error_log('getUserUploadCount error: ' . $e->getMessage());
+            return 0;
+        }
+    }
+    
+    // Kullanıcının dosya istatistiklerini getir
+    public function getUserFileStats($userId) {
+        try {
+            if (!isValidUUID($userId)) {
+                return ['total' => 0, 'pending' => 0, 'processing' => 0, 'completed' => 0, 'rejected' => 0];
+            }
+            
+            $stmt = $this->pdo->prepare("
+                SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+                    SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing,
+                    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
+                    SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+                FROM file_uploads
+                WHERE user_id = ?
+            ");
+            
+            $stmt->execute([$userId]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+            
+        } catch(PDOException $e) {
+            error_log('getUserFileStats error: ' . $e->getMessage());
+            return ['total' => 0, 'pending' => 0, 'processing' => 0, 'completed' => 0, 'rejected' => 0];
+        }
+    }
+    
+    // Kullanıcının revize taleplerini getir
+    public function getUserRevisions($userId, $page = 1, $limit = 10, $dateFrom = '', $dateTo = '', $status = '') {
+        try {
+            if (!isValidUUID($userId)) {
+                return [];
+            }
+            
+            $offset = ($page - 1) * $limit;
+            $whereClause = "WHERE r.user_id = ?";
+            $params = [$userId];
+            
+            if ($status) {
+                $whereClause .= " AND r.status = ?";
+                $params[] = $status;
+            }
+            
+            if ($dateFrom && $dateTo) {
+                $whereClause .= " AND DATE(r.requested_at) BETWEEN ? AND ?";
+                $params[] = $dateFrom;
+                $params[] = $dateTo;
+            } elseif ($dateFrom) {
+                $whereClause .= " AND DATE(r.requested_at) >= ?";
+                $params[] = $dateFrom;
+            } elseif ($dateTo) {
+                $whereClause .= " AND DATE(r.requested_at) <= ?";
+                $params[] = $dateTo;
+            }
+            
+            $stmt = $this->pdo->prepare("
+                SELECT r.*, fu.original_name, 
+                       a.username as admin_username
+                FROM revisions r
+                LEFT JOIN file_uploads fu ON r.upload_id = fu.id
+                LEFT JOIN users a ON r.admin_id = a.id
+                {$whereClause}
+                ORDER BY r.requested_at DESC
+                LIMIT $limit OFFSET $offset
+            ");
+            
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch(PDOException $e) {
+            error_log('getUserRevisions error: ' . $e->getMessage());
+            return [];
+        }
+    }
+    
+    // Kullanıcının revize talep sayısını getir
+    public function getUserRevisionCount($userId, $dateFrom = '', $dateTo = '', $status = '') {
+        try {
+            if (!isValidUUID($userId)) {
+                return 0;
+            }
+            
+            $whereClause = "WHERE user_id = ?";
+            $params = [$userId];
+            
+            if ($status) {
+                $whereClause .= " AND status = ?";
+                $params[] = $status;
+            }
+            
+            if ($dateFrom && $dateTo) {
+                $whereClause .= " AND DATE(requested_at) BETWEEN ? AND ?";
+                $params[] = $dateFrom;
+                $params[] = $dateTo;
+            } elseif ($dateFrom) {
+                $whereClause .= " AND DATE(requested_at) >= ?";
+                $params[] = $dateFrom;
+            } elseif ($dateTo) {
+                $whereClause .= " AND DATE(requested_at) <= ?";
+                $params[] = $dateTo;
+            }
+            
+            $stmt = $this->pdo->prepare("
+                SELECT COUNT(*) as count
+                FROM revisions
+                {$whereClause}
+            ");
+            
+            $stmt->execute($params);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['count'] ?? 0;
+            
+        } catch(PDOException $e) {
+            error_log('getUserRevisionCount error: ' . $e->getMessage());
+            return 0;
+        }
+    }
+    
+    // Revize talebi gönder
+    public function requestRevision($uploadId, $userId, $revisionNotes) {
+        try {
+            if (!isValidUUID($uploadId) || !isValidUUID($userId)) {
+                return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
+            }
+            
+            // Dosya kontrolü
+            $upload = $this->getUploadById($uploadId);
+            if (!$upload || $upload['user_id'] !== $userId) {
+                return ['success' => false, 'message' => 'Dosya bulunamadı veya size ait değil.'];
+            }
+            
+            if ($upload['status'] !== 'completed') {
+                return ['success' => false, 'message' => 'Sadece tamamlanmış dosyalar için revize talep edebilirsiniz.'];
+            }
+            
+            // Daha önce bekleyen revize talebi var mı kontrol et
+            $stmt = $this->pdo->prepare("
+                SELECT COUNT(*) as count 
+                FROM revisions 
+                WHERE upload_id = ? AND status = 'pending'
+            ");
+            $stmt->execute([$uploadId]);
+            $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($existing['count'] > 0) {
+                return ['success' => false, 'message' => 'Bu dosya için zaten bekleyen bir revize talebi bulunuyor.'];
+            }
+            
+            // Revize talebi oluştur
+            $revisionId = generateUUID();
+            $stmt = $this->pdo->prepare("
+                INSERT INTO revisions (id, upload_id, user_id, request_notes, status, requested_at)
+                VALUES (?, ?, ?, ?, 'pending', NOW())
+            ");
+            
+            $result = $stmt->execute([$revisionId, $uploadId, $userId, $revisionNotes]);
+            
+            if ($result) {
+                return ['success' => true, 'message' => 'Revize talebi başarıyla gönderildi.', 'revision_id' => $revisionId];
+            }
+            
+            return ['success' => false, 'message' => 'Revize talebi gönderilemedi.'];
+            
+        } catch(PDOException $e) {
+            error_log('requestRevision error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Veritabanı hatası oluştu.'];
         }
     }
     
@@ -325,7 +590,7 @@ class FileManager {
                     // file_uploads tablosunu güncelle
                     $stmt = $this->pdo->prepare("
                         UPDATE file_uploads 
-                        SET status = 'completed', credits_charged = ?, updated_at = NOW(), completed_at = NOW()
+                        SET status = 'completed', credits_charged = ?, processed_date = NOW()
                         WHERE id = ?
                     ");
                     $stmt->execute([$creditsCharged, $uploadId]);
@@ -446,6 +711,66 @@ class FileManager {
             
         } catch(PDOException $e) {
             error_log('updateRevisionStatus error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Veritabanı hatası oluştu.'];
+        }
+    }
+    
+    // Dosya indirme işlemi
+    public function downloadFile($fileId, $userId, $type = 'response') {
+        try {
+            if (!isValidUUID($fileId) || !isValidUUID($userId)) {
+                return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
+            }
+            
+            if ($type === 'response') {
+                // Yanıt dosyası indirme
+                $stmt = $this->pdo->prepare("
+                    SELECT fr.*, fu.user_id, fu.original_name as upload_filename
+                    FROM file_responses fr
+                    LEFT JOIN file_uploads fu ON fr.upload_id = fu.id
+                    WHERE fr.id = ? AND fu.user_id = ?
+                ");
+                $stmt->execute([$fileId, $userId]);
+                $file = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if (!$file) {
+                    return ['success' => false, 'message' => 'Dosya bulunamadı veya yetkiniz yok.'];
+                }
+                
+                $filePath = UPLOAD_PATH . 'response_files/' . $file['filename'];
+                $originalName = $file['original_name'];
+                
+            } else {
+                // Normal dosya indirme
+                $stmt = $this->pdo->prepare("
+                    SELECT * FROM file_uploads 
+                    WHERE id = ? AND user_id = ? AND status = 'completed'
+                ");
+                $stmt->execute([$fileId, $userId]);
+                $file = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if (!$file) {
+                    return ['success' => false, 'message' => 'Dosya bulunamadı veya henüz tamamlanmamış.'];
+                }
+                
+                // Dosya yolunu düzelt - user_files klasörü ekle
+                $filePath = UPLOAD_PATH . 'user_files/' . $file['filename'];
+                $originalName = $file['original_name'];
+            }
+            
+            if (!file_exists($filePath)) {
+                return ['success' => false, 'message' => 'Fiziksel dosya bulunamadı.'];
+            }
+            
+            return [
+                'success' => true,
+                'file_path' => $filePath,
+                'original_name' => $originalName,
+                'file_size' => filesize($filePath)
+            ];
+            
+        } catch(PDOException $e) {
+            error_log('downloadFile error: ' . $e->getMessage());
             return ['success' => false, 'message' => 'Veritabanı hatası oluştu.'];
         }
     }
