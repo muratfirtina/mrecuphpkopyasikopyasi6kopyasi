@@ -243,7 +243,7 @@
 
 .nav-link.active {
     color: #fff;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
     box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }
 
@@ -281,17 +281,17 @@
 }
 
 .gradient-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
     color: white;
 }
 
 .stats-card {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    color: white;
+    
+    color: green;
 }
 
 .support-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
     color: white;
 }
 

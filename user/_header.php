@@ -198,7 +198,7 @@
 
 <style>
 .bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%) !important;
 }
 
 .navbar-brand-icon {

@@ -545,7 +545,7 @@ include '../includes/user_header.php';
 }
 
 .step.active .step-number {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
     color: white;
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
@@ -576,7 +576,7 @@ include '../includes/user_header.php';
 }
 
 .step.active + .step-line {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
 }
 
 /* Form Steps */

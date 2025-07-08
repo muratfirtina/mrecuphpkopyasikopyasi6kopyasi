@@ -23537,8 +23537,7 @@ readers do not read off random characters that represent icons */
   color: white;
 }
 .sidebar .nav-link i {
-  width: 1.5rem;
-  margin-right: 0.5rem;
+  
 }
 
 .modal .modal-content {

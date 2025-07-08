@@ -18,6 +18,45 @@ $fileManager = new FileManager($pdo);
 $_SESSION['credits'] = $user->getUserCredits($_SESSION['user_id']);
 $userId = $_SESSION['user_id'];
 
+// AJAX revize detayları endpoint'i
+if (isset($_GET['get_revision_details']) && isset($_GET['revision_id'])) {
+    header('Content-Type: application/json');
+    $revisionId = sanitize($_GET['revision_id']);
+    
+    if (!isValidUUID($revisionId)) {
+        echo json_encode(['error' => 'Geçersiz revize ID formatı']);
+        exit;
+    }
+    
+    try {
+        $stmt = $pdo->prepare("
+            SELECT r.*, fu.original_name, fu.filename, fu.file_size, fu.status as file_status,
+                   u.username as admin_username, u.first_name as admin_first_name, u.last_name as admin_last_name
+            FROM revisions r
+            LEFT JOIN file_uploads fu ON r.upload_id = fu.id
+            LEFT JOIN users u ON r.admin_id = u.id
+            WHERE r.id = ? AND r.user_id = ?
+        ");
+        $stmt->execute([$revisionId, $userId]);
+        $revision = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$revision) {
+            echo json_encode(['error' => 'Revize bulunamadı']);
+            exit;
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'revision' => $revision
+        ]);
+        exit;
+        
+    } catch(PDOException $e) {
+        echo json_encode(['error' => 'Veritabanı hatası']);
+        exit;
+    }
+}
+
 // Filtreleme parametreleri
 $status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
 $dateFrom = isset($_GET['date_from']) ? sanitize($_GET['date_from']) : '';
@@ -97,7 +136,7 @@ include '../includes/user_header.php';
                                         <span class="text-success">Tüm talepleriniz</span>
                                     </div>
                                 </div>
-                                <div class="stat-icon bg-primary">
+                                <div class="stat-icon text-primary">
                                     <i class="fas fa-edit"></i>
                                 </div>
                             </div>
@@ -117,7 +156,7 @@ include '../includes/user_header.php';
                                         <span class="text-warning">İnceleniyor</span>
                                     </div>
                                 </div>
-                                <div class="stat-icon bg-warning">
+                                <div class="stat-icon text-warning">
                                     <i class="fas fa-clock"></i>
                                 </div>
                             </div>
@@ -137,7 +176,7 @@ include '../includes/user_header.php';
                                         <span class="text-success">Başarılı</span>
                                     </div>
                                 </div>
-                                <div class="stat-icon bg-success">
+                                <div class="stat-icon text-success">
                                     <i class="fas fa-check-circle"></i>
                                 </div>
                             </div>
@@ -157,7 +196,7 @@ include '../includes/user_header.php';
                                         <span class="text-danger">İptal edildi</span>
                                     </div>
                                 </div>
-                                <div class="stat-icon bg-danger">
+                                <div class="stat-icon text-danger">
                                     <i class="fas fa-times-circle"></i>
                                 </div>
                             </div>
@@ -294,9 +333,9 @@ include '../includes/user_header.php';
                             </div>
                             
                             <div class="revision-card-body">
-                                <h6 class="revision-file" title="<?php echo htmlspecialchars($revision['original_filename'] ?? 'Bilinmeyen dosya'); ?>">
+                                <h6 class="revision-file" title="<?php echo htmlspecialchars($revision['original_name'] ?? 'Bilinmeyen dosya'); ?>">
                                     <i class="fas fa-file-alt me-2"></i>
-                                    <?php echo htmlspecialchars($revision['original_filename'] ?? 'Bilinmeyen dosya'); ?>
+                                    <?php echo htmlspecialchars($revision['original_name'] ?? 'Bilinmeyen dosya'); ?>
                                 </h6>
                                 
                                 <div class="revision-meta">
@@ -788,40 +827,180 @@ function viewRevisionDetails(revisionId) {
     
     modal.show();
     
-    // Simulate API call (you'll need to implement this)
-    setTimeout(() => {
-        content.innerHTML = `
-            <div class="row">
-                <div class="col-md-6">
-                    <h6 class="text-muted mb-3">Revize Bilgileri</h6>
-                    <div class="mb-2"><strong>Revize ID:</strong> ${revisionId}</div>
-                    <div class="mb-2"><strong>Durum:</strong> <span class="badge bg-success">Tamamlandı</span></div>
-                    <div class="mb-2"><strong>Talep Tarihi:</strong> ${new Date().toLocaleDateString('tr-TR')}</div>
-                </div>
-                <div class="col-md-6">
-                    <h6 class="text-muted mb-3">Dosya Bilgileri</h6>
-                    <div class="mb-2"><strong>Dosya:</strong> sample_ecu.bin</div>
-                    <div class="mb-2"><strong>Boyut:</strong> 512 KB</div>
-                    <div class="mb-2"><strong>Tip:</strong> ECU Binary</div>
-                </div>
-            </div>
-            <hr>
-            <div class="row">
-                <div class="col-12">
-                    <h6 class="text-muted mb-3">Talep Detayları</h6>
-                    <div class="bg-light p-3 rounded">
-                        <p>Bu revize talep detayları buraya gelecek...</p>
+    // AJAX ile revize detaylarını getir
+    fetch(`?get_revision_details=1&revision_id=${encodeURIComponent(revisionId)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                content.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        ${data.error}
                     </div>
+                `;
+                return;
+            }
+            
+            if (data.success && data.revision) {
+                const revision = data.revision;
+                const statusConfig = {
+                    'pending': { class: 'warning', text: 'Bekliyor', icon: 'clock' },
+                    'completed': { class: 'success', text: 'Tamamlandı', icon: 'check-circle' },
+                    'rejected': { class: 'danger', text: 'Reddedildi', icon: 'times-circle' }
+                };
+                
+                const status = statusConfig[revision.status] || { class: 'secondary', text: 'Bilinmiyor', icon: 'question' };
+                
+                content.innerHTML = `
+                    <div class="revision-detail-content">
+                        <!-- Revize Başlık -->
+                        <div class="revision-detail-header mb-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h5 class="mb-1">Revize Talebi #${revision.id.substring(0, 8)}</h5>
+                                    <span class="badge bg-${status.class}">
+                                        <i class="fas fa-${status.icon} me-1"></i>${status.text}
+                                    </span>
+                                </div>
+                                ${revision.status === 'completed' ? `
+                                    
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <!-- Revize Bilgileri -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>Revize Bilgileri
+                                </h6>
+                                <div class="detail-list">
+                                    <div class="detail-item">
+                                        <span class="label">Revize ID:</span>
+                                        <span class="value font-monospace">${revision.id}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Durum:</span>
+                                        <span class="value">
+                                            <span class="badge bg-${status.class}">
+                                                <i class="fas fa-${status.icon} me-1"></i>${status.text}
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Talep Tarihi:</span>
+                                        <span class="value">${formatDate(revision.requested_at)}</span>
+                                    </div>
+                                    ${revision.completed_at ? `
+                                        <div class="detail-item">
+                                            <span class="label">Tamamlanma Tarihi:</span>
+                                            <span class="value">${formatDate(revision.completed_at)}</span>
+                                        </div>
+                                    ` : ''}
+                                    <div class="detail-item">
+                                        <span class="label">Kredi:</span>
+                                        <span class="value ${revision.credits_charged > 0 ? 'text-warning' : 'text-success'}">
+                                            ${revision.credits_charged > 0 ? revision.credits_charged + ' Kredi' : 'Ücretsiz'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-file me-2"></i>Dosya Bilgileri
+                                </h6>
+                                <div class="detail-list">
+                                    <div class="detail-item">
+                                        <span class="label">Dosya Adı:</span>
+                                        <span class="value">${revision.original_name || 'Bilinmiyor'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Dosya Boyutu:</span>
+                                        <span class="value">${formatFileSize(revision.file_size || 0)}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Dosya Durumu:</span>
+                                        <span class="value">${revision.file_status || 'Bilinmiyor'}</span>
+                                    </div>
+                                    ${revision.admin_username ? `
+                                        <div class="detail-item">
+                                            <span class="label">Admin:</span>
+                                            <span class="value">${revision.admin_username}</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Talep Notları -->
+                        <div class="mt-4">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-comment me-2"></i>Talep Detaylarınız
+                            </h6>
+                            <div class="notes-content">
+                                ${revision.request_notes ? revision.request_notes.replace(/\n/g, '<br>') : 'Not belirtilmemiş'}
+                            </div>
+                        </div>
+                        
+                        ${revision.admin_notes ? `
+                            <div class="mt-4">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-user-cog me-2"></i>Admin Yanıtı
+                                </h6>
+                                <div class="admin-notes-content">
+                                    ${revision.admin_notes.replace(/\n/g, '<br>')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${revision.status === 'completed' ? `
+                            <div class="mt-4 text-center">
+                                <button type="button" class="btn btn-success btn-lg" onclick="downloadRevision('${revision.id}')">
+                                    <i class="fas fa-download me-2"></i>Revize Dosyasını İndir
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Revize detayları alınamadı.
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            content.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Revize detayları yüklenirken hata oluştu.
                 </div>
-            </div>
-        `;
-    }, 1000);
+            `;
+        });
 }
 
 // Download Revision
 function downloadRevision(revisionId) {
-    // Simulate download
     window.location.href = `download-revision.php?id=${revisionId}`;
+}
+
+// Helper functions
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'Belirtilmemiş';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('tr-TR') + ' ' + date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 }
 
 // Auto-refresh for pending revisions

@@ -342,7 +342,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
         .progress-warning { background: #ffc107; }
         .progress-critical { background: #dc3545; }
         .feature-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
             color: white;
             padding: 30px;
             border-radius: 15px;
@@ -696,7 +696,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
         .progress-warning { background: #ffc107; }
         .progress-critical { background: #dc3545; }
         .feature-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
             color: white;
             padding: 30px;
             border-radius: 15px;

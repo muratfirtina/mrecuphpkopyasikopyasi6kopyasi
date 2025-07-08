@@ -123,7 +123,7 @@ $cssPath = '../assets/css/style.css';
         }
         
         .stat-number {
-            font-size: 2.5rem;
+            font-size: 1.5rem;
             font-weight: 700;
             line-height: 1;
             margin-bottom: 0.5rem;
@@ -167,7 +167,7 @@ $cssPath = '../assets/css/style.css';
         }
         
         .quick-stats {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
             color: white;
             border-radius: 0.5rem;
             padding: 1.5rem;

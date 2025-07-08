@@ -415,7 +415,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
         .progress-warning { background: linear-gradient(90deg, #ffc107, #fd7e14); }
         .progress-critical { background: linear-gradient(90deg, #dc3545, #e74c3c); }
         .feature-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
             color: white;
             padding: 40px;
             border-radius: 20px;

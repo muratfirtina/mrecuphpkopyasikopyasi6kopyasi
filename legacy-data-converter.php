@@ -410,7 +410,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }

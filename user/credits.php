@@ -33,10 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_credits'])) {
         // Gerçek uygulamada burada ödeme gateway entegrasyonu olacak
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO credit_transactions (user_id, transaction_type, amount, description, created_at) 
-                VALUES (?, 'add', ?, ?, NOW())
+                INSERT INTO credit_transactions (id, user_id, transaction_type, amount, description, created_at) 
+                VALUES (?, ?, 'deposit', ?, ?, NOW())
             ");
-            $stmt->execute([$userId, $amount, "Kredi yükleme - $paymentMethod"]);
+            $stmt->execute([generateUUID(), $userId, $amount, "Kredi yükleme - $paymentMethod"]);
             
             // Kullanıcının kredisini güncelle
             $stmt = $pdo->prepare("UPDATE users SET credits = credits + ? WHERE id = ?");
@@ -53,28 +53,123 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_credits'])) {
     }
 }
 
-// Son kredi işlemlerini getir
+// Filtreleme parametreleri - URL'den al
+$type = isset($_GET['type']) ? sanitize($_GET['type']) : '';
+$dateFrom = isset($_GET['date_from']) ? sanitize($_GET['date_from']) : '';
+$dateTo = isset($_GET['date_to']) ? sanitize($_GET['date_to']) : '';
+
+// Sayfalama
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$limit = 5; // Credits sayfasında az gösterelim
+
+// Debug için (geliştirme aşamasında)
+if (isset($_GET['debug']) || !empty($type) || !empty($dateFrom) || !empty($dateTo)) {
+    echo "<div style='background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; border: 2px solid #333;'>";
+    echo "<strong>DEBUG - Filtreleme Durumu:</strong><br>";
+    echo "GET Parameters: " . json_encode($_GET) . "<br>";
+    echo "Type: '" . htmlspecialchars($type) . "' (Length: " . strlen($type) . ")<br>";
+    echo "Date From: '" . htmlspecialchars($dateFrom) . "'<br>";
+    echo "Date To: '" . htmlspecialchars($dateTo) . "'<br>";
+    echo "Page: $page<br>";
+    echo "</div>";
+}
+
+// Son kredi işlemlerini getir (filtreleme ile)
 try {
-    $stmt = $pdo->prepare("
-        SELECT ct.*, u.username as admin_username 
+    // Filtreleme parametreleri
+    $whereClause = 'WHERE ct.user_id = ?';
+    $params = [$userId];
+    
+    // Sadece boş olmayan filtreleri ekle
+    if (!empty($type)) {
+        $whereClause .= ' AND (ct.transaction_type = ? OR ct.type = ?)';
+        $params[] = $type;
+        $params[] = $type;
+    }
+    
+    if (!empty($dateFrom)) {
+        $whereClause .= ' AND DATE(ct.created_at) >= ?';
+        $params[] = $dateFrom;
+    }
+    
+    if (!empty($dateTo)) {
+        $whereClause .= ' AND DATE(ct.created_at) <= ?';
+        $params[] = $dateTo;
+    }
+    
+    // Sayfalama
+    $offset = ($page - 1) * $limit;
+    
+    // Ana sorgu
+    $query = "
+        SELECT ct.*, u.username as admin_username,
+               CASE 
+                   WHEN ct.transaction_type IS NOT NULL THEN ct.transaction_type
+                   WHEN ct.type IS NOT NULL THEN ct.type
+                   ELSE 'unknown'
+               END as effective_type
         FROM credit_transactions ct
         LEFT JOIN users u ON ct.admin_id = u.id
-        WHERE ct.user_id = ?
+        {$whereClause}
         ORDER BY ct.created_at DESC
-        LIMIT 10
-    ");
-    $stmt->execute([$userId]);
+        LIMIT ? OFFSET ?
+    ";
+    
+    $queryParams = array_merge($params, [$limit, $offset]);
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($queryParams);
     $recentTransactions = $stmt->fetchAll();
+    
+    // Toplam sayı
+    $countQuery = "
+        SELECT COUNT(*) 
+        FROM credit_transactions ct
+        {$whereClause}
+    ";
+    
+    $countStmt = $pdo->prepare($countQuery);
+    $countStmt->execute($params);
+    $filteredTransactions = $countStmt->fetchColumn();
+    $totalPages = ceil($filteredTransactions / $limit);
+    
 } catch(PDOException $e) {
-    $recentTransactions = [];
+    // Hata durumunda eski basit sorguyu kullan
+    error_log('Credits transactions error: ' . $e->getMessage());
+    
+    try {
+        $stmt = $pdo->prepare("
+            SELECT ct.*, u.username as admin_username,
+                   COALESCE(ct.transaction_type, ct.type, 'unknown') as effective_type
+            FROM credit_transactions ct
+            LEFT JOIN users u ON ct.admin_id = u.id
+            WHERE ct.user_id = ?
+            ORDER BY ct.created_at DESC
+            LIMIT 10
+        ");
+        $stmt->execute([$userId]);
+        $recentTransactions = $stmt->fetchAll();
+        $filteredTransactions = count($recentTransactions);
+        $totalPages = 1;
+        
+        // Reset filters on error
+        $type = '';
+        $dateFrom = '';
+        $dateTo = '';
+        
+    } catch(PDOException $e2) {
+        error_log('Credits fallback error: ' . $e2->getMessage());
+        $recentTransactions = [];
+        $filteredTransactions = 0;
+        $totalPages = 0;
+    }
 }
 
 // İstatistikler
 try {
     $stmt = $pdo->prepare("
         SELECT 
-            SUM(CASE WHEN transaction_type = 'add' THEN amount ELSE 0 END) as total_loaded,
-            SUM(CASE WHEN transaction_type = 'deduct' THEN amount ELSE 0 END) as total_spent,
+            SUM(CASE WHEN transaction_type IN ('deposit', 'add') THEN amount ELSE 0 END) as total_loaded,
+            SUM(CASE WHEN transaction_type IN ('withdraw', 'file_charge', 'deduct', 'purchase') THEN amount ELSE 0 END) as total_spent,
             COUNT(*) as total_transactions
         FROM credit_transactions 
         WHERE user_id = ?
@@ -88,10 +183,10 @@ try {
     
     // Bu ay harcama
     $stmt = $pdo->prepare("
-        SELECT SUM(amount) 
+        SELECT COALESCE(SUM(amount), 0) 
         FROM credit_transactions 
         WHERE user_id = ? 
-        AND transaction_type = 'deduct' 
+        AND transaction_type IN ('withdraw', 'file_charge', 'deduct', 'purchase') 
         AND MONTH(created_at) = MONTH(CURRENT_DATE()) 
         AND YEAR(created_at) = YEAR(CURRENT_DATE())
     ");
@@ -208,7 +303,7 @@ include '../includes/user_header.php';
                                         <span class="text-success">Kredi TL</span>
                                     </div>
                                 </div>
-                                <div class="stat-icon bg-success">
+                                <div class="stat-icon text-success">
                                     <i class="fas fa-plus-circle"></i>
                                 </div>
                             </div>
@@ -228,7 +323,7 @@ include '../includes/user_header.php';
                                         <span class="text-danger">Kredi TL</span>
                                     </div>
                                 </div>
-                                <div class="stat-icon bg-danger">
+                                <div class="stat-icon text-danger">
                                     <i class="fas fa-minus-circle"></i>
                                 </div>
                             </div>
@@ -248,7 +343,7 @@ include '../includes/user_header.php';
                                         <span class="text-warning">Aylık kullanım</span>
                                     </div>
                                 </div>
-                                <div class="stat-icon bg-warning">
+                                <div class="stat-icon text-warning">
                                     <i class="fas fa-calendar-alt"></i>
                                 </div>
                             </div>
@@ -268,7 +363,7 @@ include '../includes/user_header.php';
                                         <span class="text-primary">Tüm zamanlar</span>
                                     </div>
                                 </div>
-                                <div class="stat-icon bg-primary">
+                                <div class="stat-icon text-primary">
                                     <i class="fas fa-exchange-alt"></i>
                                 </div>
                             </div>
@@ -395,11 +490,68 @@ include '../includes/user_header.php';
                     <div class="recent-transactions-section">
                         <div class="section-header">
                             <h4 class="mb-2">
-                                <i class="fas fa-clock me-2 text-secondary"></i>Son İşlemler
+                                <i class="fas fa-clock me-2 text-secondary"></i>Kredi İşlem Geçmişi
+                                <?php if ($filteredTransactions > 0): ?>
+                                    <span class="badge bg-primary ms-2"><?php echo $filteredTransactions; ?></span>
+                                <?php endif; ?>
                             </h4>
-                            <a href="transactions.php" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-list me-1"></i>Tümünü Gör
-                            </a>
+                            <div class="d-flex gap-2">
+                                <a href="transactions.php" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-list me-1"></i>Detaylı Görünüm
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Filtre Formu -->
+                        <div class="filter-card-compact mb-3">
+                            <form method="GET" id="filterForm" class="row g-2 align-items-end">
+                                <!-- Preserve existing GET parameters -->
+                                <?php if (isset($_GET['page']) && $_GET['page'] != 1): ?>
+                                    <input type="hidden" name="page" value="1">
+                                <?php endif; ?>
+                                
+                                <div class="col-md-3">
+                                    <label for="type_filter" class="form-label form-label-sm">
+                                        <i class="fas fa-tag me-1"></i>İşlem Tipi
+                                    </label>
+                                    <select class="form-select form-select-sm" id="type_filter" name="type">
+                                        <option value="">Tüm İşlemler</option>
+                                        <option value="add" <?php echo $type === 'add' ? 'selected' : ''; ?>>Kredi Yükleme</option>
+                                        <option value="deduct" <?php echo $type === 'deduct' ? 'selected' : ''; ?>>Kredi Kullanımı</option>
+                                        <option value="file_charge" <?php echo $type === 'file_charge' ? 'selected' : ''; ?>>Dosya Ücreti</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <label for="date_from_filter" class="form-label form-label-sm">
+                                        <i class="fas fa-calendar me-1"></i>Başlangıç
+                                    </label>
+                                    <input type="date" class="form-control form-control-sm" id="date_from_filter" name="date_from" 
+                                           value="<?php echo htmlspecialchars($dateFrom); ?>">
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <label for="date_to_filter" class="form-label form-label-sm">
+                                        <i class="fas fa-calendar-check me-1"></i>Bitiş
+                                    </label>
+                                    <input type="date" class="form-control form-control-sm" id="date_to_filter" name="date_to" 
+                                           value="<?php echo htmlspecialchars($dateTo); ?>">
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <div class="d-flex gap-1">
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-search me-1"></i>Filtrele
+                                        </button>
+                                        <a href="credits.php" class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-undo me-1"></i>Temizle
+                                        </a>
+                                        <a href="credits.php?debug=1<?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" class="btn btn-outline-info btn-sm" title="Debug">
+                                            <i class="fas fa-bug"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                         
                         <?php if (empty($recentTransactions)): ?>
@@ -407,27 +559,55 @@ include '../includes/user_header.php';
                                 <div class="empty-icon">
                                     <i class="fas fa-receipt"></i>
                                 </div>
-                                <h6>Henüz işlem bulunmuyor</h6>
-                                <p class="text-muted">İlk kredi yüklemenizi yaparak başlayabilirsiniz</p>
+                                <h6>
+                                    <?php if ($type || $dateFrom || $dateTo): ?>
+                                        Filtreye uygun işlem bulunamadı
+                                    <?php else: ?>
+                                        Henüz işlem bulunmuyor
+                                    <?php endif; ?>
+                                </h6>
+                                <p class="text-muted">
+                                    <?php if ($type || $dateFrom || $dateTo): ?>
+                                        Farklı filtre kriterleri deneyebilirsiniz.
+                                    <?php else: ?>
+                                        İlk kredi yüklemenizi yaparak başlayabilirsiniz.
+                                    <?php endif; ?>
+                                </p>
+                                <?php if (!($type || $dateFrom || $dateTo)): ?>
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="selectPackage(50, 50)">
+                                            <i class="fas fa-credit-card me-1"></i>Hızlı Kredi Yükle
+                                        </button>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         <?php else: ?>
+                            <!-- İşlem Listesi -->
                             <div class="transactions-list">
-                                <?php foreach (array_slice($recentTransactions, 0, 5) as $transaction): ?>
+                                <?php foreach ($recentTransactions as $transaction): ?>
                                     <div class="transaction-item">
                                         <div class="transaction-icon">
                                             <?php
                                             $iconClass = 'fas fa-circle';
                                             $iconColor = 'secondary';
                                             
-                                            $transactionType = $transaction['transaction_type'] ?? '';
-                                            switch ($transactionType) {
+                                            $effectiveType = $transaction['effective_type'] ?? $transaction['transaction_type'] ?? $transaction['type'] ?? 'unknown';
+                                            switch ($effectiveType) {
                                                 case 'add':
+                                                case 'deposit':
                                                     $iconClass = 'fas fa-plus-circle';
                                                     $iconColor = 'success';
                                                     break;
                                                 case 'deduct':
+                                                case 'withdraw':
+                                                case 'file_charge':
+                                                case 'purchase':
                                                     $iconClass = 'fas fa-minus-circle';
                                                     $iconColor = 'danger';
+                                                    break;
+                                                default:
+                                                    $iconClass = 'fas fa-circle';
+                                                    $iconColor = 'secondary';
                                                     break;
                                             }
                                             ?>
@@ -438,12 +618,15 @@ include '../includes/user_header.php';
                                             <div class="transaction-title">
                                                 <?php
                                                 $title = 'Bilinmeyen İşlem';
-                                                $transactionType = $transaction['transaction_type'] ?? '';
-                                                switch ($transactionType) {
+                                                switch ($effectiveType) {
                                                     case 'add':
+                                                    case 'deposit':
                                                         $title = 'Kredi Yükleme';
                                                         break;
                                                     case 'deduct':
+                                                    case 'withdraw':
+                                                    case 'file_charge':
+                                                    case 'purchase':
                                                         $title = 'Kredi Kullanımı';
                                                         break;
                                                 }
@@ -451,22 +634,131 @@ include '../includes/user_header.php';
                                                 ?>
                                             </div>
                                             <div class="transaction-desc">
-                                                <?php echo htmlspecialchars($transaction['description']); ?>
+                                                <?php echo htmlspecialchars($transaction['description'] ?? 'Açıklama yok'); ?>
                                             </div>
                                             <div class="transaction-date">
+                                                <i class="fas fa-calendar-alt me-1"></i>
                                                 <?php echo date('d.m.Y H:i', strtotime($transaction['created_at'])); ?>
+                                                <?php if ($transaction['admin_username']): ?>
+                                                    <span class="admin-info ms-2">
+                                                        <i class="fas fa-user-cog me-1"></i>
+                                                        <?php echo htmlspecialchars($transaction['admin_username']); ?>
+                                                    </span>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                         
                                         <div class="transaction-amount">
-                                            <span class="amount text-<?php echo ($transaction['transaction_type'] ?? '') === 'add' ? 'success' : 'danger'; ?>">
-                                                <?php echo ($transaction['transaction_type'] ?? '') === 'add' ? '+' : '-'; ?>
+                                            <span class="amount text-<?php echo in_array($effectiveType, ['add', 'deposit']) ? 'success' : 'danger'; ?>">
+                                                <?php echo in_array($effectiveType, ['add', 'deposit']) ? '+' : '-'; ?>
                                                 <?php echo number_format($transaction['amount'], 2); ?> TL
+                                            </span>
+                                            <span class="badge bg-<?php echo $iconColor; ?> badge-sm">
+                                                <?php echo in_array($effectiveType, ['add', 'deposit']) ? 'Yüklendi' : 'Kullanıldı'; ?>
                                             </span>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
+                            
+                            <!-- Sayfalama -->
+                            <?php if ($totalPages > 1): ?>
+                                <div class="pagination-compact mt-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="pagination-info">
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Sayfa <?php echo $page; ?> / <?php echo $totalPages; ?> 
+                                                (Toplam <?php echo $filteredTransactions; ?> işlem)
+                                            </small>
+                                        </div>
+                                        <div class="pagination-jump">
+                                            <form method="GET" class="d-flex align-items-center gap-2" style="margin: 0;">
+                                                <!-- Preserve filters -->
+                                                <?php if ($type): ?><input type="hidden" name="type" value="<?php echo htmlspecialchars($type); ?>"><?php endif; ?>
+                                                <?php if ($dateFrom): ?><input type="hidden" name="date_from" value="<?php echo htmlspecialchars($dateFrom); ?>"><?php endif; ?>
+                                                <?php if ($dateTo): ?><input type="hidden" name="date_to" value="<?php echo htmlspecialchars($dateTo); ?>"><?php endif; ?>
+                                                
+                                                <small class="text-muted">Sayfa:</small>
+                                                <input type="number" name="page" value="<?php echo $page; ?>" 
+                                                       min="1" max="<?php echo $totalPages; ?>" 
+                                                       class="form-control form-control-sm" 
+                                                       style="width: 60px; font-size: 0.75rem;">
+                                                <button type="submit" class="btn btn-sm btn-outline-primary" style="padding: 0.25rem 0.5rem;">
+                                                    <i class="fas fa-arrow-right"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    
+                                    <nav aria-label="İşlem sayfalama" class="pagination-nav">
+                                        <ul class="pagination pagination-sm mb-0 justify-content-center">
+                                            <!-- First Page -->
+                                            <?php if ($page > 1): ?>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page=1<?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" title="İlk sayfa">
+                                                        <i class="fas fa-angle-double-left"></i>
+                                                    </a>
+                                                </li>
+                                            <?php endif; ?>
+                                            
+                                            <!-- Previous Page -->
+                                            <?php if ($page > 1): ?>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" title="Önceki sayfa">
+                                                        <i class="fas fa-chevron-left"></i>
+                                                    </a>
+                                                </li>
+                                            <?php endif; ?>
+                                            
+                                            <!-- Page Numbers -->
+                                            <?php 
+                                            $start = max(1, $page - 2);
+                                            $end = min($totalPages, $page + 2);
+                                            ?>
+                                            
+                                            <?php for ($i = $start; $i <= $end; $i++): ?>
+                                                <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                                                    <?php if ($i === $page): ?>
+                                                        <span class="page-link bg-primary text-white"><?php echo $i; ?></span>
+                                                    <?php else: ?>
+                                                        <a class="page-link" href="?page=<?php echo $i; ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>">
+                                                            <?php echo $i; ?>
+                                                        </a>
+                                                    <?php endif; ?>
+                                                </li>
+                                            <?php endfor; ?>
+                                            
+                                            <!-- Next Page -->
+                                            <?php if ($page < $totalPages): ?>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" title="Sonraki sayfa">
+                                                        <i class="fas fa-chevron-right"></i>
+                                                    </a>
+                                                </li>
+                                            <?php endif; ?>
+                                            
+                                            <!-- Last Page -->
+                                            <?php if ($page < $totalPages): ?>
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page=<?php echo $totalPages; ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" title="Son sayfa">
+                                                        <i class="fas fa-angle-double-right"></i>
+                                                    </a>
+                                                </li>
+                                            <?php endif; ?>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            <?php elseif ($filteredTransactions > 0): ?>
+                                <div class="pagination-compact mt-3">
+                                    <div class="text-center">
+                                        <small class="text-muted">
+                                            <i class="fas fa-check-circle text-success me-1"></i>
+                                            Tüm işlemler gösteriliyor (<?php echo $filteredTransactions; ?> işlem)
+                                        </small>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -607,7 +899,7 @@ include '../includes/user_header.php';
 <style>
 /* Modern Credits Page Styles */
 .credit-banner {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
     border-radius: 20px;
     padding: 2rem;
     color: white;
@@ -1094,6 +1386,257 @@ include '../includes/user_header.php';
         gap: 1rem;
     }
 }
+
+/* Compact Filter Styles */
+.filter-card-compact {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid #e9ecef;
+}
+
+.form-label-sm {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.form-select-sm, .form-control-sm {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+}
+
+.form-select-sm:focus, .form-control-sm:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Enhanced Transaction Items */
+.transaction-item {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    padding: 1rem 0.75rem;
+}
+
+.transaction-item:hover {
+    background: #f8f9fa;
+    transform: translateX(2px);
+}
+
+.transaction-date {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.admin-info {
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.badge-sm {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    margin-top: 0.25rem;
+    display: inline-block;
+}
+
+/* Compact Pagination */
+.pagination-compact {
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem;
+    border: 1px solid #e9ecef;
+}
+
+.pagination-info {
+    flex: 1;
+}
+
+.pagination-sm .page-link {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    margin: 0 1px;
+}
+
+.pagination-sm .page-item.active .page-link {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+/* Enhanced Empty State */
+.empty-transactions {
+    text-align: center;
+    padding: 2rem 1rem;
+    background: white;
+    border-radius: 12px;
+    border: 2px dashed #e9ecef;
+}
+
+.empty-transactions .empty-icon {
+    font-size: 2.5rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.empty-transactions h6 {
+    color: #495057;
+    margin-bottom: 0.75rem;
+}
+
+.empty-transactions p {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+/* Filter Active States */
+.form-select-sm:not([value=""]),
+.form-control-sm:not([value=""]) {
+    border-color: #667eea;
+    background-color: #f0f4ff;
+}
+
+/* Button Variants */
+.btn-sm {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+}
+
+/* Responsive Enhancements */
+@media (max-width: 767.98px) {
+    .filter-card-compact {
+        padding: 0.75rem;
+    }
+    
+    .filter-card-compact .row {
+        margin: 0;
+    }
+    
+    .filter-card-compact .col-md-3 {
+        padding: 0.25rem;
+    }
+    
+    .pagination-compact {
+        padding: 0.5rem;
+    }
+    
+    .pagination-compact .d-flex {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .transaction-date {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .admin-info {
+        margin-left: 0 !important;
+    }
+    
+    .pagination-jump {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .pagination-nav .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+/* Enhanced Pagination Styles */
+.pagination-nav {
+    margin-top: 1rem;
+}
+
+.pagination-jump {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.pagination-compact {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.page-link {
+    border-radius: 6px !important;
+    margin: 0 2px;
+    transition: all 0.3s ease;
+    border: 1px solid #dee2e6;
+}
+
+.page-link:hover {
+    background-color: #667eea;
+    border-color: #667eea;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.page-item.active .page-link {
+    background-color: #667eea;
+    border-color: #667eea;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+/* Quick Actions */
+.filter-badge {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Filter Active Indicators */
+.form-select-sm:not([value=""]):not([value="0"]),
+.form-control-sm:not([value=""]) {
+    border-color: #667eea;
+    background-color: #f0f4ff;
+    font-weight: 500;
+}
+
+/* Loading States */
+.transaction-loading {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.transaction-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
 </style>
 
 <script>
@@ -1109,6 +1652,8 @@ function selectPackage(amount, price) {
         behavior: 'smooth',
         block: 'center'
     });
+
+
     
     // Highlight form
     const form = document.querySelector('.custom-amount-card');
@@ -1214,6 +1759,295 @@ function showToast(message, type = 'info') {
         }
     }, 5000);
 }
+
+// AJAX Filtreleme için JavaScript desteği
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtre formu AJAX handling
+    const filterForm = document.getElementById('filterForm');
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Sayfa yenilenmesini engelle
+            performAjaxFilterInternal();
+        });
+        
+        // Auto-filter on select change (without page reload)
+        const typeSelect = document.getElementById('type_filter');
+        const dateFromInput = document.getElementById('date_from_filter');
+        const dateToInput = document.getElementById('date_to_filter');
+        
+        if (typeSelect) {
+            typeSelect.addEventListener('change', function() {
+                performAjaxFilterInternal();
+            });
+        }
+        
+        if (dateFromInput) {
+            dateFromInput.addEventListener('change', function() {
+                if (this.value) {
+                    performAjaxFilterInternal();
+                }
+            });
+        }
+        
+        if (dateToInput) {
+            dateToInput.addEventListener('change', function() {
+                if (this.value) {
+                    performAjaxFilterInternal();
+                }
+            });
+        }
+    }
+    
+    // AJAX Filtreleme Fonksiyonu
+    function performAjaxFilterInternal() {
+        const form = document.getElementById('filterForm');
+        const formData = new FormData(form);
+        
+        // Loading state göster
+        showFilterLoading(true);
+        
+        // AJAX request
+        fetch('credits_ajax.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return response.text(); // Önce text olarak al
+        })
+        .then(text => {
+            console.log('Raw response:', text);
+            
+            try {
+                const data = JSON.parse(text);
+                console.log('Parsed data:', data);
+                
+                if (data.success) {
+                    // Sonuçları güncelle
+                    updateTransactionsList(data.transactions);
+                    updatePagination(data.pagination);
+                    updateFilterInfo(data.info);
+                    showToast('Filtre başarıyla uygulandı!', 'success');
+                } else {
+                    console.error('Server error:', data.error);
+                    if (data.debug) {
+                        console.error('Debug info:', data.debug);
+                    }
+                    showToast('Hata: ' + (data.error || 'Bilinmeyen hata'), 'error');
+                }
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                console.error('Response text:', text);
+                showToast('Sunucu yanıtı geçersiz!', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Ajax Error:', error);
+            showToast('Bağlantı hatası: ' + error.message, 'error');
+        })
+        .finally(() => {
+            showFilterLoading(false);
+        });
+    }
+    
+    // Global fonksiyonları ayarla
+    window.filterFormInstance = filterForm;
+    window.performAjaxFilterFunction = performAjaxFilterInternal;
+    
+    // Loading durumunu göster/gizle
+    function showFilterLoading(show) {
+        const submitBtn = document.querySelector('#filterForm button[type="submit"]');
+        const transactionsList = document.querySelector('.transactions-list');
+        
+        if (show) {
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Filtreliyor...';
+            }
+            if (transactionsList) {
+                transactionsList.classList.add('transaction-loading');
+            }
+        } else {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-search me-1"></i>Filtrele';
+            }
+            if (transactionsList) {
+                transactionsList.classList.remove('transaction-loading');
+            }
+        }
+    }
+    
+    // İşlem listesini güncelle
+    function updateTransactionsList(transactions) {
+        const container = document.querySelector('.recent-transactions-section');
+        const listContainer = container.querySelector('.transactions-list') || container.querySelector('.empty-transactions');
+        
+        if (transactions.length === 0) {
+            // Boş durum göster
+            listContainer.outerHTML = `
+                <div class="empty-transactions">
+                    <div class="empty-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <h6>Filtreye uygun işlem bulunamadı</h6>
+                    <p class="text-muted">Farklı filtre kriterleri deneyebilirsiniz.</p>
+                </div>
+            `;
+        } else {
+            // İşlem listesini oluştur
+            let html = '<div class="transactions-list">';
+            
+            transactions.forEach(function(transaction) {
+                const effectiveType = transaction.effective_type || transaction.transaction_type || transaction.type || 'unknown';
+                const isPositive = ['add', 'deposit'].includes(effectiveType);
+                const iconClass = isPositive ? 'fas fa-plus-circle' : 'fas fa-minus-circle';
+                const iconColor = isPositive ? 'success' : 'danger';
+                const title = isPositive ? 'Kredi Yükleme' : 'Kredi Kullanımı';
+                const badge = isPositive ? 'Yüklendi' : 'Kullanıldı';
+                const amountPrefix = isPositive ? '+' : '-';
+                
+                html += `
+                    <div class="transaction-item">
+                        <div class="transaction-icon">
+                            <i class="${iconClass} text-${iconColor}"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <div class="transaction-title">${title}</div>
+                            <div class="transaction-desc">${transaction.description || 'Açıklama yok'}</div>
+                            <div class="transaction-date">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                ${formatDate(transaction.created_at)}
+                                ${transaction.admin_username ? `<span class="admin-info ms-2"><i class="fas fa-user-cog me-1"></i>${transaction.admin_username}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="transaction-amount">
+                            <span class="amount text-${iconColor}">
+                                ${amountPrefix}${parseFloat(transaction.amount).toFixed(2)} TL
+                            </span>
+                            <span class="badge bg-${iconColor} badge-sm">${badge}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            listContainer.outerHTML = html;
+        }
+    }
+    
+    // Sayfalama güncelle
+    function updatePagination(pagination) {
+        const paginationContainer = document.querySelector('.pagination-compact');
+        if (paginationContainer && pagination.html) {
+            paginationContainer.outerHTML = pagination.html;
+        }
+    }
+    
+    // Filtre bilgisini güncelle
+    function updateFilterInfo(info) {
+        const badge = document.querySelector('.section-header .badge');
+        if (badge) {
+            badge.textContent = info.total;
+        } else if (info.total > 0) {
+            const header = document.querySelector('.section-header h4');
+            if (header && !header.querySelector('.badge')) {
+                header.innerHTML += `<span class="badge bg-primary ms-2">${info.total}</span>`;
+            }
+        }
+    }
+    
+    // Tarih formatla
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('tr-TR', {
+            day: '2-digit',
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+    
+    // Sayfalama form handling
+    const paginationForms = document.querySelectorAll('.pagination-jump form');
+    paginationForms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            const pageInput = this.querySelector('input[name="page"]');
+            if (pageInput) {
+                const pageNum = parseInt(pageInput.value);
+                const maxPage = parseInt(pageInput.getAttribute('max'));
+                
+                if (pageNum < 1 || pageNum > maxPage) {
+                    e.preventDefault();
+                    showToast(`Sayfa numarası 1 ile ${maxPage} arasında olmalıdır!`, 'error');
+                    return false;
+                }
+            }
+        });
+    });
+    
+    // Pagination links smooth scroll
+    const paginationLinks = document.querySelectorAll('.pagination-nav a');
+    paginationLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+            const transactionSection = document.querySelector('.recent-transactions-section');
+            if (transactionSection) {
+                // Scroll to top of section
+                setTimeout(() => {
+                    transactionSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        });
+    });
+    
+    // Enhanced transaction hover
+    const transactionItems = document.querySelectorAll('.transaction-item');
+    transactionItems.forEach(function(item) {
+        item.addEventListener('mouseenter', function() {
+            this.style.borderLeft = '3px solid #667eea';
+            this.style.paddingLeft = '0.7rem';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.borderLeft = '';
+            this.style.paddingLeft = '0.75rem';
+        });
+    });
+});
+
+// Global sayfalama fonksiyonları
+window.changePage = function(page) {
+    if (window.filterFormInstance) {
+        // Page parametresini ekle
+        let pageInput = window.filterFormInstance.querySelector('input[name="page"]');
+        if (!pageInput) {
+            pageInput = document.createElement('input');
+            pageInput.type = 'hidden';
+            pageInput.name = 'page';
+            window.filterFormInstance.appendChild(pageInput);
+        }
+        pageInput.value = page;
+        
+        // Filtreleme yap
+        if (window.performAjaxFilterFunction) {
+            window.performAjaxFilterFunction();
+        }
+    }
+};
+
+window.jumpToPage = function(page) {
+    const pageNum = parseInt(page);
+    if (pageNum && pageNum > 0) {
+        changePage(pageNum);
+    }
+};
 </script>
 
 <?php

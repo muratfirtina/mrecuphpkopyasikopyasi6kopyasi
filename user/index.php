@@ -22,40 +22,42 @@ $userId = $_SESSION['user_id'];
 $userCredits = $user->getUserCredits($userId);
 $userUploads = $fileManager->getUserUploads($userId, 1, 10);
 
-// İstatistikler
+// İstatistikler - FileManager kullanarak
 try {
-    // Toplam dosya sayısı
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM file_uploads WHERE user_id = ?");
-    $stmt->execute([$userId]);
-    $totalUploads = $stmt->fetchColumn();
-
-    // Durum bazında dosya sayıları
-    $stmt = $pdo->prepare("SELECT status, COUNT(*) as count FROM file_uploads WHERE user_id = ? GROUP BY status");
-    $stmt->execute([$userId]);
-    $statusCounts = [];
-    while ($row = $stmt->fetch()) {
-        $statusCounts[$row['status']] = $row['count'];
-    }
-
-    $pendingUploads = $statusCounts['pending'] ?? 0;
-    $processingUploads = $statusCounts['processing'] ?? 0;
-    $completedUploads = $statusCounts['completed'] ?? 0;
-    $rejectedUploads = $statusCounts['rejected'] ?? 0;
+    // FileManager ile istatistikleri al
+    $stats = $fileManager->getUserFileStats($userId);
+    $totalUploads = $stats['total'];
+    $pendingUploads = $stats['pending'];
+    $processingUploads = $stats['processing'];
+    $completedUploads = $stats['completed'];
+    $rejectedUploads = $stats['rejected'];
 
     // Bu ayki istatistikler
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM file_uploads WHERE user_id = ? AND MONTH(upload_date) = MONTH(CURRENT_DATE()) AND YEAR(upload_date) = YEAR(CURRENT_DATE())");
     $stmt->execute([$userId]);
     $monthlyUploads = $stmt->fetchColumn();
 
-    // Bu ayki harcama
-    $stmt = $pdo->prepare("SELECT SUM(amount) FROM credit_transactions WHERE user_id = ? AND transaction_type = 'deduct' AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())");
-    $stmt->execute([$userId]);
-    $monthlySpent = $stmt->fetchColumn() ?: 0;
+    // Bu ayki harcama - sadece credit_transactions tablosu varsa
+    $monthlySpent = 0;
+    try {
+        $stmt = $pdo->prepare("SELECT COALESCE(SUM(amount), 0) FROM credit_transactions WHERE user_id = ? AND type IN ('withdraw', 'file_charge') AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())");
+        $stmt->execute([$userId]);
+        $monthlySpent = $stmt->fetchColumn() ?: 0;
+    } catch(PDOException $e) {
+        // credit_transactions tablosu yoksa 0 olarak bırak
+        $monthlySpent = 0;
+    }
 
-    // Son işlemler
-    $stmt = $pdo->prepare("SELECT * FROM credit_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT 5");
-    $stmt->execute([$userId]);
-    $recentTransactions = $stmt->fetchAll();
+    // Son işlemler - sadece credit_transactions tablosu varsa
+    $recentTransactions = [];
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM credit_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT 5");
+        $stmt->execute([$userId]);
+        $recentTransactions = $stmt->fetchAll();
+    } catch(PDOException $e) {
+        // credit_transactions tablosu yoksa boş array
+        $recentTransactions = [];
+    }
 
 } catch(PDOException $e) {
     $totalUploads = 0;
@@ -262,7 +264,7 @@ include '../includes/user_header.php';
                                                                 <i class="fas fa-file-alt"></i>
                                                             </div>
                                                             <div>
-                                                                <div class="fw-medium"><?php echo htmlspecialchars($upload['original_filename'] ?? 'Bilinmeyen dosya'); ?></div>
+                                                                <div class="fw-medium"><?php echo htmlspecialchars($upload['original_name'] ?? 'Bilinmeyen dosya'); ?></div>
                                                                 <small class="text-muted">
                                                                     <?php 
                                                                     $fileSize = isset($upload['file_size']) ? formatFileSize($upload['file_size']) : 'N/A';
@@ -297,7 +299,7 @@ include '../includes/user_header.php';
                                                     </td>
                                                     <td class="text-center">
                                                         <div class="btn-group btn-group-sm">
-                                                            <?php if ($upload['status'] === 'completed' && !empty($upload['processed_file_path'])): ?>
+                                                            <?php if ($upload['status'] === 'completed'): ?>
                                                                 <a href="download.php?id=<?php echo $upload['id']; ?>" 
                                                                    class="btn btn-success btn-sm" title="İndir">
                                                                     <i class="fas fa-download"></i>
@@ -459,7 +461,7 @@ include '../includes/user_header.php';
 <style>
 /* Modern Dashboard Stilleri */
 .welcome-banner {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
     border-radius: 16px;
     padding: 2rem;
     color: white;

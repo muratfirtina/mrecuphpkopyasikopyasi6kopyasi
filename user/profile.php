@@ -118,8 +118,8 @@ try {
     // Kredi istatistikleri
     $stmt = $pdo->prepare("
         SELECT 
-            SUM(CASE WHEN transaction_type = 'add' THEN amount ELSE 0 END) as total_loaded,
-            SUM(CASE WHEN transaction_type = 'deduct' THEN amount ELSE 0 END) as total_spent,
+            SUM(CASE WHEN type = 'deposit' THEN amount ELSE 0 END) as total_loaded,
+            SUM(CASE WHEN type IN ('withdraw', 'file_charge') THEN amount ELSE 0 END) as total_spent,
             COUNT(*) as total_transactions
         FROM credit_transactions 
         WHERE user_id = ?
@@ -620,7 +620,7 @@ include '../includes/user_header.php';
 <style>
 /* Modern Profile Page Styles */
 .profile-banner {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
     border-radius: 20px;
     padding: 2rem;
     color: white;

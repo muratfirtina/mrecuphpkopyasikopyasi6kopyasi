@@ -35,7 +35,7 @@ try {
     $params = [$userId];
     
     if ($type) {
-        $whereClause .= ' AND ct.transaction_type = ?';
+        $whereClause .= ' AND COALESCE(ct.transaction_type, ct.type) = ?';
         $params[] = $type;
     }
     
@@ -50,7 +50,8 @@ try {
     }
     
     $stmt = $pdo->prepare("
-        SELECT ct.*, u.username as admin_username 
+        SELECT ct.*, u.username as admin_username,
+               COALESCE(ct.transaction_type, ct.type) as effective_type
         FROM credit_transactions ct
         LEFT JOIN users u ON ct.admin_id = u.id
         {$whereClause}
@@ -83,13 +84,14 @@ try {
 // Son dosya işlemleri
 try {
     $stmt = $pdo->prepare("
-        SELECT fu.*, 
+        SELECT fu.id, fu.user_id, 
+               COALESCE(fu.original_name, fu.filename, fu.name) as file_name,
+               fu.file_size, fu.status, fu.upload_date,
                b.name as brand_name, 
-               vm.name as model_name,
-               vm.display_name as model_display_name
+               m.name as model_name
         FROM file_uploads fu
-        LEFT JOIN vehicle_brands b ON fu.brand_id = b.id
-        LEFT JOIN vehicle_models vm ON fu.model_id = vm.id
+        LEFT JOIN brands b ON fu.brand_id = b.id
+        LEFT JOIN models m ON fu.model_id = m.id
         WHERE fu.user_id = ?
         ORDER BY fu.upload_date DESC
         LIMIT 10
@@ -103,25 +105,25 @@ try {
 // İstatistikler
 try {
     // Toplam kredi işlemleri
-    $stmt = $pdo->prepare("SELECT transaction_type, COUNT(*) as count, SUM(amount) as total FROM credit_transactions WHERE user_id = ? GROUP BY transaction_type");
+    $stmt = $pdo->prepare("SELECT COALESCE(transaction_type, type) as effective_type, COUNT(*) as count, SUM(amount) as total FROM credit_transactions WHERE user_id = ? GROUP BY COALESCE(transaction_type, type)");
     $stmt->execute([$userId]);
     $transactionStats = [];
     while ($row = $stmt->fetch()) {
-        $transactionStats[$row['transaction_type']] = $row;
+        $transactionStats[$row['effective_type']] = $row;
     }
     
-    // Bu ay ki işlemler
+    // Bu ay ki işlemler  
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM credit_transactions WHERE user_id = ? AND MONTH(created_at) = MONTH(CURRENT_DATE()) AND YEAR(created_at) = YEAR(CURRENT_DATE())");
     $stmt->execute([$userId]);
     $monthlyTransactions = $stmt->fetchColumn();
     
     // Toplam harcama
-    $stmt = $pdo->prepare("SELECT SUM(amount) FROM credit_transactions WHERE user_id = ? AND transaction_type = 'deduct'");
+    $stmt = $pdo->prepare("SELECT SUM(amount) FROM credit_transactions WHERE user_id = ? AND COALESCE(transaction_type, type) IN ('deduct', 'purchase', 'withdraw', 'file_charge')");
     $stmt->execute([$userId]);
     $totalSpent = $stmt->fetchColumn() ?: 0;
     
     // Toplam yükleme
-    $stmt = $pdo->prepare("SELECT SUM(amount) FROM credit_transactions WHERE user_id = ? AND transaction_type = 'add'");
+    $stmt = $pdo->prepare("SELECT SUM(amount) FROM credit_transactions WHERE user_id = ? AND COALESCE(transaction_type, type) IN ('add', 'deposit')");
     $stmt->execute([$userId]);
     $totalLoaded = $stmt->fetchColumn() ?: 0;
     
@@ -357,18 +359,29 @@ include '../includes/user_header.php';
                                                 $amountClass = 'secondary';
                                                 $amountPrefix = '';
                                                 
-                                                switch ($transaction['transaction_type']) {
+                                                $effectiveType = $transaction['effective_type'] ?? $transaction['transaction_type'] ?? $transaction['type'] ?? 'unknown';
+                                                switch ($effectiveType) {
                                                     case 'add':
+                                                    case 'deposit':
                                                         $iconClass = 'fas fa-plus-circle';
                                                         $iconColor = 'success';
                                                         $amountClass = 'success';
                                                         $amountPrefix = '+';
                                                         break;
                                                     case 'deduct':
+                                                    case 'withdraw':
+                                                    case 'file_charge':
+                                                    case 'purchase':
                                                         $iconClass = 'fas fa-minus-circle';
                                                         $iconColor = 'danger';
                                                         $amountClass = 'danger';
                                                         $amountPrefix = '-';
+                                                        break;
+                                                    default:
+                                                        $iconClass = 'fas fa-circle';
+                                                        $iconColor = 'secondary';
+                                                        $amountClass = 'secondary';
+                                                        $amountPrefix = '';
                                                         break;
                                                 }
                                                 ?>
@@ -381,11 +394,16 @@ include '../includes/user_header.php';
                                                         <h6 class="transaction-title">
                                                             <?php
                                                             $title = 'Bilinmeyen İşlem';
-                                                            switch ($transaction['transaction_type']) {
+                                                            $effectiveType = $transaction['effective_type'] ?? $transaction['transaction_type'] ?? $transaction['type'] ?? 'unknown';
+                                                            switch ($effectiveType) {
                                                                 case 'add':
+                                                                case 'deposit':
                                                                     $title = 'Kredi Yükleme';
                                                                     break;
                                                                 case 'deduct':
+                                                                case 'withdraw':
+                                                                case 'file_charge':
+                                                                case 'purchase':
                                                                     $title = 'Kredi Kullanımı';
                                                                     break;
                                                             }
@@ -419,7 +437,10 @@ include '../includes/user_header.php';
                                                             <?php echo $amountPrefix; ?><?php echo number_format($transaction['amount'], 2); ?> TL
                                                         </span>
                                                         <span class="badge bg-<?php echo $iconColor; ?> badge-sm">
-                                                            <?php echo $transaction['transaction_type'] === 'add' ? 'Yüklendi' : 'Kullanıldı'; ?>
+                                                            <?php 
+                                                            $effectiveType = $transaction['effective_type'] ?? $transaction['transaction_type'] ?? $transaction['type'] ?? 'unknown';
+                                                            echo in_array($effectiveType, ['add', 'deposit']) ? 'Yüklendi' : 'Kullanıldı'; 
+                                                            ?>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -527,13 +548,15 @@ include '../includes/user_header.php';
                                                 <i class="fas fa-file-alt"></i>
                                             </div>
                                             <div class="file-details">
-                                                <div class="file-name" title="<?php echo htmlspecialchars($file['original_filename']); ?>">
-                                                    <?php echo htmlspecialchars(substr($file['original_filename'], 0, 20)); ?>
-                                                    <?php if (strlen($file['original_filename']) > 20): ?>...<?php endif; ?>
+                                                <div class="file-name" title="<?php echo htmlspecialchars($file['file_name'] ?? 'Bilinmeyen dosya'); ?>">
+                                                    <?php 
+                                                    $fileName = $file['file_name'] ?? 'Bilinmeyen dosya';
+                                                    echo htmlspecialchars(strlen($fileName) > 20 ? substr($fileName, 0, 20) . '...' : $fileName); 
+                                                    ?>
                                                 </div>
                                                 <div class="file-meta">
-                                                    <span><?php echo htmlspecialchars($file['brand_name']); ?></span>
-                                                    <span><?php echo date('d.m.Y', strtotime($file['upload_date'])); ?></span>
+                                                    <span><?php echo htmlspecialchars($file['brand_name'] ?? 'Bilinmeyen marka'); ?></span>
+                                                    <span><?php echo isset($file['upload_date']) ? date('d.m.Y', strtotime($file['upload_date'])) : 'Tarih yok'; ?></span>
                                                 </div>
                                             </div>
                                             <div class="file-status">
@@ -544,7 +567,7 @@ include '../includes/user_header.php';
                                                     'completed' => ['class' => 'success', 'icon' => 'check'],
                                                     'rejected' => ['class' => 'danger', 'icon' => 'times']
                                                 ];
-                                                $config = $statusConfig[$file['status']] ?? ['class' => 'secondary', 'icon' => 'question'];
+                                                $config = $statusConfig[$file['status'] ?? 'unknown'] ?? ['class' => 'secondary', 'icon' => 'question'];
                                                 ?>
                                                 <i class="fas fa-<?php echo $config['icon']; ?> text-<?php echo $config['class']; ?>"></i>
                                             </div>
@@ -812,9 +835,10 @@ function exportTransactions() {
     csvContent += "Tarih,İşlem Tipi,Miktar,Açıklama,Admin\n";
 
     transactions.forEach(function(transaction) {
+        const transactionType = transaction.effective_type || transaction.transaction_type || transaction.type || 'unknown';
         const row = [
             transaction.created_at,
-            transaction.transaction_type === 'add' ? 'Kredi Yükleme' : 'Kredi Kullanımı',
+            (transactionType === 'add' || transactionType === 'deposit') ? 'Kredi Yükleme' : 'Kredi Kullanımı',
             transaction.amount,
             transaction.description || '',
             transaction.admin_username || ''

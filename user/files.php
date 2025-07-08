@@ -271,7 +271,7 @@ include '../includes/user_header.php';
                         
                         <div class="col-md-5">
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary btn-modern">
+                                <button type="submit" class="btn btn-primary btn-modern bg-success">
                                     <i class="fas fa-search me-1"></i>Filtrele
                                 </button>
                                 <a href="files.php" class="btn btn-outline-secondary btn-modern">
@@ -700,7 +700,7 @@ include '../includes/user_header.php';
 .file-icon-large {
     width: 64px;
     height: 64px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: grey;
     border-radius: 16px;
     display: flex;
     align-items: center;
@@ -813,7 +813,7 @@ include '../includes/user_header.php';
 }
 
 .pagination .page-item.active .page-link {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
     border-color: transparent;
     color: white;
 }
@@ -900,7 +900,7 @@ include '../includes/user_header.php';
 .file-detail-header .file-icon-large {
     width: 64px;
     height: 64px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
     border-radius: 16px;
     display: flex;
     align-items: center;
@@ -1032,9 +1032,7 @@ function viewFileDetails(uploadId) {
                                     </span>
                                 </div>
                                 ${file.status === 'completed' ? `
-                                    <a href="download.php?id=${file.id}" class="btn btn-success">
-                                        <i class="fas fa-download me-2"></i>İndir
-                                    </a>
+                                    
                                 ` : ''}
                             </div>
                         </div>

@@ -160,12 +160,12 @@ $cssPath = '../assets/css/style.css';
         }
 
         .btn-primary {
-            background: var(--primary-gradient);
+            /* background: var(--primary-gradient); */
             border: none;
         }
 
         .btn-success {
-            background: var(--success-gradient);
+            /* background: var(--success-gradient); */
             border: none;
         }
 

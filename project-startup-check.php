@@ -33,7 +33,7 @@ echo "<!DOCTYPE html>
         .error { background: linear-gradient(135deg, #f8d7da, #f5c6cb); border-left: 5px solid #dc3545; }
         .warning { background: linear-gradient(135deg, #fff3cd, #ffeaa7); border-left: 5px solid #ffc107; }
         .header-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
             color: white;
             padding: 30px;
             border-radius: 15px;

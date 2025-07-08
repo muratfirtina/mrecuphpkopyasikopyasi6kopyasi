@@ -309,7 +309,7 @@ class User {
             // İşlem kaydı ekle
             $transactionId = generateUUID();
             $stmt = $this->pdo->prepare("
-                INSERT INTO credit_transactions (id, user_id, amount, type, description, reference_id, reference_type, admin_id, created_at) 
+                INSERT INTO credit_transactions (id, user_id, amount, transaction_type, description, reference_id, reference_type, admin_id, created_at) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
             ");
             $stmt->execute([$transactionId, $userId, $amount, $type, $description, $referenceId, $referenceType, $adminId]);

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AJAX Test</title>
+    <script>
+    function testAjax() {
+        const formData = new FormData();
+        formData.append('type', 'add');
+        formData.append('date_from', '');
+        formData.append('date_to', '');
+        formData.append('page', '1');
+        
+        console.log('Testing AJAX...');
+        
+        fetch('credits_ajax.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.text();
+        })
+        .then(text => {
+            console.log('Raw response:', text);
+            
+            try {
+                const data = JSON.parse(text);
+                console.log('Parsed data:', data);
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (e) {
+                console.error('Parse error:', e);
+                document.getElementById('result').innerHTML = '<div style="color:red;">Parse Error: ' + e.message + '</div><pre>' + text + '</pre>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('result').innerHTML = '<div style="color:red;">Error: ' + error.message + '</div>';
+        });
+    }
+    </script>
+</head>
+<body>
+    <h1>AJAX Test</h1>
+    <button onclick="testAjax()">Test AJAX</button>
+    <div id="result"></div>
+</body>
+</html>
