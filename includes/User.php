@@ -50,21 +50,48 @@ class User {
     // Log işlemi (GUID ID ile)
     public function logAction($userId, $action, $description = '', $ipAddress = null) {
         try {
+            error_log('logAction başlatıldı: ' . $action . ' - ' . $description);
+            
             if (!isValidUUID($userId)) {
+                error_log('logAction: Geçersiz UUID - ' . $userId);
                 return false;
             }
             
             if (!$ipAddress) {
-                $ipAddress = getRealIP();
+                $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+                error_log('logAction: IP adresi: ' . $ipAddress);
             }
             
-            $logId = generateUUID();
+            // UUID oluştur
+            if (function_exists('generateUUID')) {
+                $logId = generateUUID();
+                error_log('logAction: UUID oluşturuldu - ' . $logId);
+            } else {
+                error_log('logAction: generateUUID fonksiyonu bulunamadı!');
+                // Alternatif UUID oluşturma
+                $logId = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+                    mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+                    mt_rand(0, 0xffff),
+                    mt_rand(0, 0x0fff) | 0x4000,
+                    mt_rand(0, 0x3fff) | 0x8000,
+                    mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+                );
+                error_log('logAction: Alternatif UUID - ' . $logId);
+            }
+            
+            // System_logs tablosunu kontrol et
+            $checkTable = $this->pdo->query("SHOW TABLES LIKE 'system_logs'");
+            if ($checkTable->rowCount() == 0) {
+                error_log('logAction: system_logs tablosu bulunamadı!');
+                return false;
+            }
+            
             $stmt = $this->pdo->prepare("
                 INSERT INTO system_logs (id, user_id, action, description, ip_address, user_agent, created_at) 
                 VALUES (?, ?, ?, ?, ?, ?, NOW())
             ");
             
-            return $stmt->execute([
+            $result = $stmt->execute([
                 $logId,
                 $userId,
                 $action,
@@ -73,9 +100,18 @@ class User {
                 $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown'
             ]);
             
+            if ($result) {
+                error_log('logAction: Başarılı!');
+            } else {
+                error_log('logAction: Execute başarısız!');
+            }
+            
+            return $result;
+            
         } catch(PDOException $e) {
-            error_log('logAction error: ' . $e->getMessage());
-            return false;
+            error_log('Security log database error: ' . $e->getMessage());
+            // Log hatası olsa bile işlemi devam ettir
+            return true; // Önemli: Ana işlemi durdurmamak için true dön
         }
     }
     

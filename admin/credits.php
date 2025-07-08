@@ -3,6 +3,10 @@
  * Mr ECU - Admin Kredi Yönetimi (Düzeltilmiş Versiyon)
  */
 
+// DEBUG: Sayfa açıldığını log'la
+error_log('Credits.php sayfası açıldı. Method: ' . $_SERVER['REQUEST_METHOD']);
+error_log('Request URI: ' . $_SERVER['REQUEST_URI']);
+
 require_once '../config/config.php';
 require_once '../config/database.php';
 
@@ -11,17 +15,47 @@ $user = new User($pdo);
 $error = '';
 $success = '';
 
+// Session'dan mesajları al
+if (isset($_SESSION['success_message'])) {
+    $success = $_SESSION['success_message'];
+    unset($_SESSION['success_message']);
+}
+if (isset($_SESSION['error_message'])) {
+    $error = $_SESSION['error_message'];
+    unset($_SESSION['error_message']);
+}
+
 // Kredi ekleme/çıkarma işlemi
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['add_credits'])) {
+    // DEBUG: Form verisini log'la
+    error_log('Credits.php POST verisi: ' . print_r($_POST, true));
+    error_log('Session verisi: ' . print_r($_SESSION, true));
+    error_log('Content-Type: ' . ($_SERVER['CONTENT_TYPE'] ?? 'not set'));
+    error_log('Content-Length: ' . ($_SERVER['CONTENT_LENGTH'] ?? 'not set'));
+    
+    // POST verilerini kontrol et
+    $hasAddCredits = isset($_POST['add_credits']) && !empty($_POST['add_credits']);
+    $hasDeductCredits = isset($_POST['deduct_credits']) && !empty($_POST['deduct_credits']);
+    
+    error_log('Has add_credits: ' . ($hasAddCredits ? 'true' : 'false'));
+    error_log('Has deduct_credits: ' . ($hasDeductCredits ? 'true' : 'false'));
+    
+    if ($hasAddCredits) {
+        error_log('Add credits işlemi başlatılıyor...');
         $user_id = sanitize($_POST['user_id']);
         $amount = floatval($_POST['amount']);
         $description = sanitize($_POST['description']);
         
         if (!isValidUUID($user_id)) {
             $error = 'Geçersiz kullanıcı ID formatı.';
+            $_SESSION['error_message'] = $error;
+            header('Location: credits.php');
+            exit();
         } elseif ($amount <= 0) {
             $error = 'Kredi miktarı 0\'dan büyük olmalıdır.';
+            $_SESSION['error_message'] = $error;
+            header('Location: credits.php');
+            exit();
         } else {
             try {
                 $pdo->beginTransaction();
@@ -51,22 +85,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $pdo->commit();
                 $success = "{$amount} TL kredi başarıyla eklendi. Yeni bakiye: " . number_format($newCredits, 2) . " TL";
+                error_log('Kredi ekleme başarılı. Redirect yapılıyor...');
+                
+                // Başarı mesajını session'a kaydet ve redirect et
+                $_SESSION['success_message'] = $success;
+                header('Location: credits.php');
+                exit();
             } catch (Exception $e) {
                 $pdo->rollBack();
                 $error = 'Kredi eklenirken hata oluştu: ' . $e->getMessage();
+                error_log('Kredi ekleme hatası: ' . $e->getMessage());
+                $_SESSION['error_message'] = $error;
+                header('Location: credits.php');
+                exit();
             }
         }
     }
     
-    if (isset($_POST['deduct_credits'])) {
+    if ($hasDeductCredits) {
+        error_log('Deduct credits işlemi başlatılıyor...');
         $user_id = sanitize($_POST['user_id']);
         $amount = floatval($_POST['amount']);
         $description = sanitize($_POST['description']);
         
         if (!isValidUUID($user_id)) {
             $error = 'Geçersiz kullanıcı ID formatı.';
+            $_SESSION['error_message'] = $error;
+            header('Location: credits.php');
+            exit();
         } elseif ($amount <= 0) {
             $error = 'Kredi miktarı 0\'dan büyük olmalıdır.';
+            $_SESSION['error_message'] = $error;
+            header('Location: credits.php');
+            exit();
         } else {
             try {
                 $pdo->beginTransaction();
@@ -99,11 +150,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $pdo->commit();
                 $success = "{$amount} TL kredi başarıyla düşüldü. Kalan bakiye: " . number_format($newCredits, 2) . " TL";
+                error_log('Kredi düşme başarılı. Redirect yapılıyor...');
+                
+                // Başarı mesajını session'a kaydet ve redirect et
+                $_SESSION['success_message'] = $success;
+                header('Location: credits.php');
+                exit();
             } catch (Exception $e) {
                 $pdo->rollBack();
                 $error = 'Kredi düşülürken hata oluştu: ' . $e->getMessage();
+                error_log('Kredi düşme hatası: ' . $e->getMessage());
+                $_SESSION['error_message'] = $error;
+                header('Location: credits.php');
+                exit();
             }
         }
+    }
+    
+    // Hiçbir işlem bulunamadıysa
+    if (!$hasAddCredits && !$hasDeductCredits) {
+        error_log('POST işlemi geldi ama hiçbir kredi işlemi bulunamadı!');
+        error_log('POST keys: ' . implode(', ', array_keys($_POST)));
+        $_SESSION['error_message'] = 'Geçersiz işlem tipi.';
+        header('Location: credits.php');
+        exit();
     }
 }
 
@@ -423,16 +493,18 @@ include '../includes/admin_sidebar.php';
 <div class="modal fade" id="creditModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" id="creditForm">
+            <form method="POST" action="credits.php" id="creditForm">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitle">Kredi İşlemi</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="user_id" id="user_id">
-                    <input type="hidden" name="operation" id="operation">
+                    <!-- Işlem türü için ayrı hidden inputlar -->
+                    <input type="hidden" name="add_credits" id="add_credits" value="">
+                    <input type="hidden" name="deduct_credits" id="deduct_credits" value="">
                     
-                    <div class="alert alert-info">
+                    <div class="alert alert-info alert-permanent">
                         <strong>Kullanıcı:</strong> <span id="selectedUserName"></span><br>
                         <strong>Mevcut Kredi:</strong> <span id="currentCredits"></span> TL
                     </div>
@@ -450,9 +522,9 @@ include '../includes/admin_sidebar.php';
                     </div>
                     
                     <!-- Önizleme Kutusu -->
-                    <div id="previewBox" class="alert alert-light border" style="display: none;">
+                    <div id="previewBox" class="alert alert-light border alert-permanent">
                         <h6>İşlem Önizlemesi:</h6>
-                        <div id="previewText"></div>
+                        <div id="previewText">Lütfen miktar girin...</div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -464,131 +536,216 @@ include '../includes/admin_sidebar.php';
     </div>
 </div>
 
-<?php
-// Sayfa özel JavaScript
-$pageJS = "
+<script>
+// Tüm değişkenler ve fonksiyonlar
 let currentOperation = '';
 let userCurrentCredits = 0;
 
 function openCreditModal(operation, userId, userName, credits) {
+    console.log('Modal açılıyor:', operation, userId, userName, credits);
+    
     currentOperation = operation;
     userCurrentCredits = parseFloat(credits);
     
+    // Modal verilerini ayarla
     document.getElementById('user_id').value = userId;
     document.getElementById('selectedUserName').textContent = userName;
     document.getElementById('currentCredits').textContent = parseFloat(credits).toFixed(2);
     
-    const modal = new bootstrap.Modal(document.getElementById('creditModal'));
     const modalTitle = document.getElementById('modalTitle');
     const submitBtn = document.getElementById('submitBtn');
     
+    // Hidden input'ları sıfırla
+    document.getElementById('add_credits').value = '';
+    document.getElementById('deduct_credits').value = '';
+    
     if (operation === 'add') {
-        document.getElementById('operation').name = 'add_credits';
         modalTitle.textContent = 'Kredi Ekle';
         submitBtn.textContent = 'Kredi Ekle';
         submitBtn.className = 'btn btn-success';
     } else {
-        document.getElementById('operation').name = 'deduct_credits';
         modalTitle.textContent = 'Kredi Düş';
         submitBtn.textContent = 'Kredi Düş';
         submitBtn.className = 'btn btn-danger';
     }
     
-    // Form temizle
+    // Formu temizle
     document.getElementById('amount').value = '';
     document.getElementById('description').value = '';
-    document.getElementById('previewBox').style.display = 'none';
     
+    // Önizlemeyi başlangıç durumuna getir
+    updatePreview();
+    
+    // Modalı göster
+    const modal = new bootstrap.Modal(document.getElementById('creditModal'));
     modal.show();
 }
 
-// Önizleme güncelleme
 function updatePreview() {
-    const amount = parseFloat(document.getElementById('amount').value) || 0;
+    const amountField = document.getElementById('amount');
     const previewBox = document.getElementById('previewBox');
     const previewText = document.getElementById('previewText');
     
-    if (amount > 0) {
-        previewBox.style.display = 'block';
-        
-        let newBalance;
-        let operation;
-        let color;
-        
-        if (currentOperation === 'add') {
-            newBalance = userCurrentCredits + amount;
-            operation = '+';
-            color = 'text-success';
-        } else {
-            newBalance = userCurrentCredits - amount;
-            operation = '-';
-            color = newBalance >= 0 ? 'text-danger' : 'text-warning';
-        }
-        
-        previewText.innerHTML = 
-            'Mevcut: <strong>' + userCurrentCredits.toFixed(2) + ' TL</strong><br>' +
-            'İşlem: <strong class=\"' + color + '\">' + operation + amount.toFixed(2) + ' TL</strong><br>' +
-            'Yeni Bakiye: <strong class=\"' + (newBalance >= 0 ? 'text-primary' : 'text-danger') + '\">' + 
-            newBalance.toFixed(2) + ' TL</strong>' +
-            (newBalance < 0 ? '<br><span class=\"text-danger\">⚠️ Bakiye negatif olacak!</span>' : '');
-    } else {
-        previewBox.style.display = 'none';
+    // Element kontrolü
+    if (!amountField || !previewBox || !previewText) {
+        console.log('Gerekli elementler bulunamadı');
+        return;
     }
+    
+    const amount = parseFloat(amountField.value) || 0;
+    
+    console.log('Önizleme güncelleniyor:', amount, currentOperation, userCurrentCredits);
+    
+    // Önizleme kutusunu her zaman göster
+    previewBox.style.display = 'block';
+    
+    if (amount === 0) {
+        previewText.innerHTML = '<small class="text-muted">Lütfen miktar girin...</small>';
+        return;
+    }
+    
+    let newBalance;
+    let operation;
+    let color;
+    
+    if (currentOperation === 'add') {
+        newBalance = userCurrentCredits + amount;
+        operation = '+';
+        color = 'text-success';
+    } else {
+        newBalance = userCurrentCredits - amount;
+        operation = '-';
+        color = newBalance >= 0 ? 'text-danger' : 'text-warning';
+    }
+    
+    previewText.innerHTML = 
+        'Mevcut: <strong>' + userCurrentCredits.toFixed(2) + ' TL</strong><br>' +
+        'İşlem: <strong class="' + color + '">' + operation + amount.toFixed(2) + ' TL</strong><br>' +
+        'Yeni Bakiye: <strong class="' + (newBalance >= 0 ? 'text-primary' : 'text-danger') + '">' + 
+        newBalance.toFixed(2) + ' TL</strong>' +
+        (newBalance < 0 ? '<br><span class="text-danger">⚠️ Bakiye negatif olacak!</span>' : '');
 }
 
-// Event listeners
-document.getElementById('amount').addEventListener('input', updatePreview);
-document.getElementById('amount').addEventListener('keyup', updatePreview);
-
-// Form validation
-document.getElementById('creditForm').addEventListener('submit', function(e) {
-    const amount = parseFloat(document.getElementById('amount').value) || 0;
-    const description = document.getElementById('description').value.trim();
-    
-    if (amount <= 0) {
-        e.preventDefault();
-        alert('Lütfen geçerli bir miktar girin!');
-        return false;
+// Sayfa yüklendiğinde event listener'ları ekle
+document.addEventListener('DOMContentLoaded', function() {
+    // Amount field event'leri
+    const amountField = document.getElementById('amount');
+    if (amountField) {
+        amountField.addEventListener('input', updatePreview);
+        amountField.addEventListener('keyup', updatePreview);
+        amountField.addEventListener('change', updatePreview);
     }
     
-    if (!description) {
-        e.preventDefault();
-        alert('Lütfen açıklama yazın!');
-        return false;
+    // Form validation
+    const creditForm = document.getElementById('creditForm');
+    if (creditForm) {
+        creditForm.addEventListener('submit', function(e) {
+            console.log('Form submit event tetiklendi!');
+            console.log('Current operation:', currentOperation);
+            
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
+            const description = document.getElementById('description').value.trim();
+            const userId = document.getElementById('user_id').value;
+            
+            console.log('Form values:', { amount, description, userId, currentOperation });
+            
+            if (amount <= 0) {
+                e.preventDefault();
+                alert('Lütfen geçerli bir miktar girin!');
+                return false;
+            }
+            
+            if (!description) {
+                e.preventDefault();
+                alert('Lütfen açıklama yazın!');
+                return false;
+            }
+            
+            if (!userId) {
+                e.preventDefault();
+                alert('Kullanıcı ID eksik!');
+                return false;
+            }
+            
+            if (!currentOperation) {
+                e.preventDefault();
+                alert('Işlem tipi belirlenmemiş!');
+                return false;
+            }
+            
+            if (currentOperation === 'deduct' && amount > userCurrentCredits) {
+                e.preventDefault();
+                alert('Yetersiz kredi! Mevcut: ' + userCurrentCredits.toFixed(2) + ' TL');
+                return false;
+            }
+            
+            // Onay mesajı
+            const username = document.getElementById('selectedUserName').textContent;
+            const newBalance = currentOperation === 'add' ? 
+                userCurrentCredits + amount : userCurrentCredits - amount;
+            
+            const confirmMessage = 
+                username + ' kullanıcısı için kredi işlemi:\n\n' +
+                'İşlem: ' + (currentOperation === 'add' ? 'Kredi Ekleme' : 'Kredi Düşme') + '\n' +
+                'Miktar: ' + amount.toFixed(2) + ' TL\n' +
+                'Mevcut Bakiye: ' + userCurrentCredits.toFixed(2) + ' TL\n' +
+                'Yeni Bakiye: ' + newBalance.toFixed(2) + ' TL\n\n' +
+                'İşlemi onaylıyor musunuz?';
+            
+            if (!confirm(confirmMessage)) {
+                e.preventDefault();
+                console.log('Kullanıcı işlemi iptal etti.');
+                return false;
+            }
+            
+            // Doğru hidden input'u ayarla
+            const addCreditsInput = document.getElementById('add_credits');
+            const deductCreditsInput = document.getElementById('deduct_credits');
+            
+            // Önce her ikisini de temizle
+            addCreditsInput.value = '';
+            deductCreditsInput.value = '';
+            
+            if (currentOperation === 'add') {
+                addCreditsInput.value = '1';
+                console.log('Add credits input set to: 1');
+            } else {
+                deductCreditsInput.value = '1';
+                console.log('Deduct credits input set to: 1');
+            }
+            
+            console.log('Form submit ediliyor. İşlem:', currentOperation);
+            console.log('Add credits value:', addCreditsInput.value);
+            console.log('Deduct credits value:', deductCreditsInput.value);
+            console.log('Form data before submit:');
+            
+            // FormData'yı log'la
+            const formData = new FormData(this);
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+            
+            // Form submit'e izin ver
+            return true;
+        });
     }
     
-    if (currentOperation === 'deduct' && amount > userCurrentCredits) {
-        e.preventDefault();
-        alert('Yetersiz kredi! Mevcut: ' + userCurrentCredits.toFixed(2) + ' TL');
-        return false;
-    }
-    
-    // Onay mesajı
-    const username = document.getElementById('selectedUserName').textContent;
-    const newBalance = currentOperation === 'add' ? 
-        userCurrentCredits + amount : userCurrentCredits - amount;
-    
-    const confirmMessage = 
-        username + ' kullanıcısı için kredi işlemi:\\n\\n' +
-        'İşlem: ' + (currentOperation === 'add' ? 'Kredi Ekleme' : 'Kredi Düşme') + '\\n' +
-        'Miktar: ' + amount.toFixed(2) + ' TL\\n' +
-        'Mevcut Bakiye: ' + userCurrentCredits.toFixed(2) + ' TL\\n' +
-        'Yeni Bakiye: ' + newBalance.toFixed(2) + ' TL\\n\\n' +
-        'İşlemi onaylıyor musunuz?';
-    
-    if (!confirm(confirmMessage)) {
-        e.preventDefault();
-        return false;
+    // Modal events
+    const creditModal = document.getElementById('creditModal');
+    if (creditModal) {
+        creditModal.addEventListener('hidden.bs.modal', function () {
+            console.log('Modal kapandı, temizleniyor');
+            document.getElementById('creditForm').reset();
+            document.getElementById('add_credits').value = '';
+            document.getElementById('deduct_credits').value = '';
+            document.getElementById('previewText').innerHTML = 'Lütfen miktar girin...';
+            currentOperation = ''; // Operation'u da sıfırla
+        });
     }
 });
+</script>
 
-// Modal temizleme
-document.getElementById('creditModal').addEventListener('hidden.bs.modal', function () {
-    document.getElementById('creditForm').reset();
-    document.getElementById('previewBox').style.display = 'none';
-});
-";
-
+<?php
 // Footer include
 include '../includes/admin_footer.php';
 ?>
