@@ -74,6 +74,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if ($result['success']) {
                 $success = 'Revize edilmiş yanıt dosyası başarıyla yüklendi.';
+                
+                // Revize durumunu completed yap
+                try {
+                    $stmt = $pdo->prepare("
+                        UPDATE revisions 
+                        SET status = 'completed', completed_at = NOW()
+                        WHERE upload_id = ? AND response_id IS NOT NULL AND status = 'in_progress'
+                        ORDER BY requested_at DESC
+                        LIMIT 1
+                    ");
+                    $stmt->execute([$uploadId]);
+                } catch(PDOException $e) {
+                    error_log('Revize durumu güncellenemedi: ' . $e->getMessage());
+                }
+                
                 $user->logAction($_SESSION['user_id'], 'response_revision_upload', "Revize yanıt dosyası yüklendi: {$uploadId}");
             } else {
                 $error = $result['message'];
@@ -85,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Dosya detaylarını al
 try {
     if ($fileType === 'response') {
-        // Response dosyası detaylarını al
+        // Response dosyası detaylarını al - upload_id'ye göre en son response dosyasını bul
         $stmt = $pdo->prepare("
             SELECT fr.*, fu.user_id, fu.original_name as original_upload_name,
                    fu.brand_id, fu.model_id, fu.year, fu.ecu_type, fu.engine_code,
@@ -99,7 +114,7 @@ try {
             LEFT JOIN models m ON fu.model_id = m.id
             LEFT JOIN users a ON fr.admin_id = a.id
             LEFT JOIN users u ON fu.user_id = u.id
-            WHERE fu.id = ?
+            WHERE fr.upload_id = ?
             ORDER BY fr.upload_date DESC
             LIMIT 1
         ");
@@ -107,6 +122,7 @@ try {
         $upload = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if (!$upload) {
+            $_SESSION['error'] = 'Response dosyası bulunamadı.';
             redirect('uploads.php');
         }
         
@@ -115,8 +131,21 @@ try {
             $upload['file_path'] = '../uploads/response_files/' . $upload['filename'];
         }
         
+        // Response dosyası ID'sini kaydet (indir butonu için)
+        $responseId = $upload['id'];
+        
         // Response dosyası için responseFiles'i boş bırak
         $responseFiles = [];
+        
+        // Bu response dosyası için onaylanmış revize talebi var mı?
+        $stmt = $pdo->prepare("
+            SELECT * FROM revisions 
+            WHERE response_id = ? AND status = 'in_progress'
+            ORDER BY requested_at DESC 
+            LIMIT 1
+        ");
+        $stmt->execute([$responseId]);
+        $approvedRevision = $stmt->fetch();
         
     } else {
         // Normal upload dosyası detaylarını al
@@ -125,6 +154,9 @@ try {
         if (!$upload) {
             redirect('uploads.php');
         }
+        
+        $responseId = null;
+        $approvedRevision = null;
         
         // file_responses tablosundan yanıt dosyalarını al
         $stmt = $pdo->prepare("
@@ -223,15 +255,23 @@ function checkFilePath($filePath) {
 
 // Filename'den path oluştur
 function checkFileByName($filename, $type = 'user') {
-    if (empty($filename)) return ['exists' => false, 'path' => ''];
+    if (empty($filename)) {
+        error_log('checkFileByName: Filename boş');
+        return ['exists' => false, 'path' => ''];
+    }
     
     $subdir = $type === 'response' ? 'response_files' : 'user_files';
     $fullPath = $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/' . $subdir . '/' . $filename;
     
+    $exists = file_exists($fullPath);
+    
+    // Debug info
+    error_log('checkFileByName: filename=' . $filename . ', type=' . $type . ', path=' . $fullPath . ', exists=' . ($exists ? 'true' : 'false'));
+    
     return [
-        'exists' => file_exists($fullPath),
+        'exists' => $exists,
         'path' => $fullPath,
-        'size' => file_exists($fullPath) ? filesize($fullPath) : 0
+        'size' => $exists ? filesize($fullPath) : 0
     ];
 }
 
@@ -244,6 +284,9 @@ if ($fileType === 'response') {
     $originalFileCheck = checkFileByName($upload['filename'], 'response');
     $pageTitle = 'Yanıt Dosyası Detayları - ' . htmlspecialchars($upload['original_name']);
     $pageDescription = 'Yanıt dosyası detaylarını görüntüleyin ve yönetin';
+    
+    // Debug info
+    error_log('Response file debug - ResponseId: ' . $responseId . ', Filename: ' . $upload['filename']);
 } else {
     $originalFileCheck = checkFileByName($upload['filename'], 'user');
     $pageTitle = 'Dosya Detayları - ' . htmlspecialchars($upload['original_name']);
@@ -301,9 +344,15 @@ include '../includes/admin_sidebar.php';
                 <?php endif; ?>
                 
                 <?php if ($originalFileCheck['exists']): ?>
-                    <a href="download-file.php?id=<?php echo $uploadId; ?>&type=<?php echo $fileType; ?>" class="btn btn-success btn-sm">
-                        <i class="fas fa-download me-1"></i>İndir
-                    </a>
+                    <?php if ($fileType === 'response'): ?>
+                        <a href="download-file.php?id=<?php echo $responseId; ?>&type=response" class="btn btn-success btn-sm">
+                            <i class="fas fa-download me-1"></i>İndir
+                        </a>
+                    <?php else: ?>
+                        <a href="download-file.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-success btn-sm">
+                            <i class="fas fa-download me-1"></i>İndir
+                        </a>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>
@@ -462,9 +511,15 @@ include '../includes/admin_sidebar.php';
                         
                         <div class="mb-2">
                             <small class="text-muted">Dosya Durumu:</small><br>
-                            <span class="badge bg-<?php echo $statusClass[$upload['status']] ?? 'secondary'; ?> fs-6">
-                                <?php echo $statusText[$upload['status']] ?? 'Bilinmiyor'; ?>
-                            </span>
+                            <?php if ($fileType === 'response'): ?>
+                                <span class="badge bg-success fs-6">
+                                    <i class="fas fa-reply me-1"></i>Yanıt Dosyası
+                                </span>
+                            <?php else: ?>
+                                <span class="badge bg-<?php echo $statusClass[$upload['status']] ?? 'secondary'; ?> fs-6">
+                                    <?php echo $statusText[$upload['status']] ?? 'Bilinmiyor'; ?>
+                                </span>
+                            <?php endif; ?>
                         </div>
                         
                         <hr>
@@ -485,14 +540,36 @@ include '../includes/admin_sidebar.php';
 </div>
 
 <!-- Yanıt Dosyası Yükleme (sadece normal dosyalar için) -->
-<?php if ($fileType !== 'response' && $upload['status'] === 'pending'): ?>
+<?php if ($fileType !== 'response' && ($upload['status'] === 'pending' || $upload['status'] === 'processing')): ?>
     <div class="card admin-card mb-4">
         <div class="card-header">
-            <h6 class="mb-0">
-                <i class="fas fa-reply me-2"></i>Yanıt Dosyası Yükle
-            </h6>
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">
+                    <i class="fas fa-reply me-2"></i>Yanıt Dosyası Yükle
+                </h6>
+                <?php if ($upload['status'] === 'processing'): ?>
+                    <span class="badge bg-info">
+                        <i class="fas fa-cogs me-1"></i>Dosya İşleme Alındı
+                    </span>
+                <?php endif; ?>
+            </div>
         </div>
         <div class="card-body">
+            <?php if ($upload['status'] === 'processing'): ?>
+                <div class="alert alert-info mb-3">
+                    <div class="d-flex">
+                        <i class="fas fa-info-circle me-3 mt-1"></i>
+                        <div>
+                            <strong>Dosya işleme alındı!</strong><br>
+                            <small class="text-muted">
+                                Bu dosya indirildi ve düzenleme aşamasında. Düzenleme tamamlandıktan sonra 
+                                buradan yanıt dosyasını yükleyebilirsiniz.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+            
             <form method="POST" enctype="multipart/form-data">
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -523,21 +600,36 @@ include '../includes/admin_sidebar.php';
     </div>
 <?php endif; ?>
 
+<!-- Debug Info (geliştirme için) -->
+<?php if ($fileType === 'response'): ?>
+    <div class="card admin-card mb-4" style="border-left: 4px solid #17a2b8;">
+        <div class="card-header bg-info text-white">
+            <h6 class="mb-0">
+                <i class="fas fa-bug me-2"></i>Debug Bilgisi
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Response ID:</strong> <?php echo $responseId; ?></p>
+                    <p><strong>Upload ID:</strong> <?php echo $uploadId; ?></p>
+                    <p><strong>Filename:</strong> <?php echo $upload['filename']; ?></p>
+                    <p><strong>File Exists:</strong> <?php echo $originalFileCheck['exists'] ? '✅ Evet' : '❌ Hayır'; ?></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Approved Revision:</strong> <?php echo $approvedRevision ? '✅ Var' : '❌ Yok'; ?></p>
+                    <?php if ($approvedRevision): ?>
+                        <p><strong>Revision Status:</strong> <?php echo $approvedRevision['status']; ?></p>
+                        <p><strong>Revision Date:</strong> <?php echo $approvedRevision['requested_at']; ?></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
 <!-- Revize Yanıt Dosyası Yükleme (response dosyası için) -->
 <?php if ($fileType === 'response'): ?>
-    <?php 
-    // Bu response dosyası için bekleyen revize talebi var mı?
-    $stmt = $pdo->prepare("
-        SELECT * FROM revisions 
-        WHERE response_id = (SELECT id FROM file_responses WHERE upload_id = ? ORDER BY upload_date DESC LIMIT 1)
-        AND status = 'completed'
-        ORDER BY requested_at DESC 
-        LIMIT 1
-    ");
-    $stmt->execute([$uploadId]);
-    $approvedRevision = $stmt->fetch();
-    ?>
-    
     <?php if ($approvedRevision): ?>
         <div class="card admin-card mb-4">
             <div class="card-header">
@@ -545,41 +637,85 @@ include '../includes/admin_sidebar.php';
                     <h6 class="mb-0">
                         <i class="fas fa-redo me-2 text-warning"></i>Revize Edilmiş Yanıt Dosyası Yükle
                     </h6>
-                    <span class="badge bg-success">Revize Talebi Onaylandı</span>
+                    <span class="badge bg-info">Revize Talebi İşleme Alındı</span>
                 </div>
             </div>
             <div class="card-body">
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>Revize Talebi:</strong> <?php echo htmlspecialchars($approvedRevision['request_notes']); ?>
+                <div class="alert alert-info mb-3">
+                    <div class="d-flex">
+                        <i class="fas fa-info-circle me-3 mt-1"></i>
+                        <div>
+                            <strong>Revize Talebi İşleme Alındı:</strong><br>
+                            <span class="text-muted"><?php echo nl2br(htmlspecialchars($approvedRevision['request_notes'])); ?></span>
+                            <br><small class="text-muted">Tarih: <?php echo formatDate($approvedRevision['requested_at']); ?></small>
+                        </div>
+                    </div>
                 </div>
                 
                 <form method="POST" enctype="multipart/form-data">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="revised_response_file" class="form-label">Revize Edilmiş Yanıt Dosyası</label>
+                            <label for="revised_response_file" class="form-label">Revize Edilmiş Yanıt Dosyası <span class="text-danger">*</span></label>
                             <input type="file" class="form-control" id="revised_response_file" name="revised_response_file" required>
+                            <div class="form-text">Revize edilen yanıt dosyasını seçin</div>
                         </div>
                         
                         <div class="col-md-6">
                             <label for="revised_credits_charged" class="form-label">Düşürülecek Kredi</label>
                             <input type="number" class="form-control" id="revised_credits_charged" name="revised_credits_charged" 
                                    value="0" min="0" step="0.01">
+                            <div class="form-text">Revize için kullanıcıdan düşürülecek kredi miktarı</div>
                         </div>
                         
                         <div class="col-12">
                             <label for="revised_response_notes" class="form-label">Revize Notları</label>
                             <textarea class="form-control" id="revised_response_notes" name="revised_response_notes" rows="3"
                                       placeholder="Revize edilen dosya ile ilgili notlarınızı buraya yazın..."></textarea>
+                            <div class="form-text">Revize detayları ve değişiklikler hakkında bilgi verin</div>
                         </div>
                         
                         <div class="col-12">
-                            <button type="submit" name="upload_revised_response" class="btn btn-warning">
-                                <i class="fas fa-upload me-1"></i>Revize Edilmiş Dosyayı Yükle
+                            <button type="submit" name="upload_revised_response" class="btn btn-warning btn-lg">
+                                <i class="fas fa-upload me-2"></i>Revize Edilmiş Dosyayı Yükle
                             </button>
+                            <small class="text-muted d-block mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Yeni dosya yüklendikten sonra kullanıcı bunu indirebilecek
+                            </small>
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+    <?php else: ?>
+        <div class="card admin-card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle me-2 text-info"></i>Revize Durumu
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <div class="d-flex">
+                        <i class="fas fa-exclamation-triangle me-3 mt-1"></i>
+                        <div>
+                            <strong>Bu yanıt dosyası için henüz onaylanmış revize talebi bulunmuyor.</strong><br>
+                            <small class="text-muted">
+                                Kullanıcı bu yanıt dosyası için revize talebi gönderdiyse ve siz onu onaylandıysanız, 
+                                burada revize dosyası yükleme formu görünecektir.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <a href="revisions.php" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-list me-1"></i>Revize Taleplerini Görüntüle
+                    </a>
+                    <a href="file-detail.php?id=<?php echo $uploadId; ?>" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-file-alt me-1"></i>Orijinal Dosyaya Dön
+                    </a>
+                </div>
             </div>
         </div>
     <?php endif; ?>

@@ -1002,15 +1002,7 @@ class FileManager {
                 return ['success' => false, 'message' => 'Revize talebi bulunamadı.'];
             }
             
-            // Kredi düşür (eğer belirtilmişse)
-            if ($status === 'completed' && $creditsCharged > 0) {
-                $user = new User($this->pdo);
-                $creditResult = $user->addCreditDirectSimple($revision['user_id'], $creditsCharged, 'revision_charge', 'Revize işlemi: ' . $revisionId);
-                
-                if (!$creditResult) {
-                    return ['success' => false, 'message' => 'Yetersiz kredi. İşlem iptal edildi.'];
-                }
-            }
+            // Kredi işlemi şimdilik atlandı - dosya yüklenirken yapılacak
             
             // Revize durumunu güncelle
             $stmt = $this->pdo->prepare("
@@ -1030,7 +1022,7 @@ class FileManager {
             
         } catch(PDOException $e) {
             error_log('updateRevisionStatus error: ' . $e->getMessage());
-            return ['success' => false, 'message' => 'Veritabanı hatası oluştu.'];
+            return ['success' => false, 'message' => 'Veritabanı hatası: ' . $e->getMessage()];
         }
     }
     

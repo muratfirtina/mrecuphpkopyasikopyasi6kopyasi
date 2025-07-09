@@ -697,7 +697,7 @@ function viewFileDetails(uploadId) {
 // Process file (approve and start processing)
 function processFile(uploadId) {
     if (confirmAdminAction('Bu dosyayı işleme almak istediğinizden emin misiniz?')) {
-        updateFileStatus(uploadId, 'processing', 'Dosya işleme alındı');
+        updateFileStatus(uploadId, 'processing', 'Dosya işleme alındı', true);
     }
 }
 
@@ -723,7 +723,7 @@ function uploadResponse(uploadId) {
 }
 
 // Update file status via AJAX
-function updateFileStatus(uploadId, status, notes = '') {
+function updateFileStatus(uploadId, status, notes = '', redirectToDetail = false) {
     const formData = new FormData();
     formData.append('update_status', '1');
     formData.append('upload_id', uploadId);
@@ -736,8 +736,13 @@ function updateFileStatus(uploadId, status, notes = '') {
     })
     .then(response => response.text())
     .then(data => {
-        // Reload page to see changes
-        location.reload();
+        if (redirectToDetail) {
+            // Redirect to file detail page
+            window.location.href = 'file-detail.php?id=' + uploadId;
+        } else {
+            // Reload page to see changes
+            location.reload();
+        }
     })
     .catch(error => {
         showAdminNotification('Güncelleme sırasında hata oluştu!', 'danger');
