@@ -107,9 +107,12 @@ class FileManager {
                 SELECT r.*, fu.original_name, 
                        u.username, u.email, u.first_name, u.last_name,
                        a.username as admin_username,
-                       b.name as brand_name, m.name as model_name
+                       b.name as brand_name, m.name as model_name,
+                       r.response_id,
+                       fr.original_name as response_original_name
                 FROM revisions r
                 LEFT JOIN file_uploads fu ON r.upload_id = fu.id
+                LEFT JOIN file_responses fr ON r.response_id = fr.id
                 LEFT JOIN users u ON r.user_id = u.id
                 LEFT JOIN users a ON r.admin_id = a.id
                 LEFT JOIN brands b ON fu.brand_id = b.id
@@ -758,7 +761,7 @@ class FileManager {
             
             // Response dosyası kontrolü
             $stmt = $this->pdo->prepare("
-                SELECT fr.*, fu.user_id 
+                SELECT fr.*, fu.user_id, fu.id as upload_id
                 FROM file_responses fr
                 LEFT JOIN file_uploads fu ON fr.upload_id = fu.id
                 WHERE fr.id = ?
@@ -780,9 +783,9 @@ class FileManager {
             $stmt = $this->pdo->prepare("
                 SELECT COUNT(*) as count 
                 FROM revisions 
-                WHERE upload_id = ? AND status = 'pending' AND request_notes LIKE '[YANIT DOSYASI REVİZE]%'
+                WHERE response_id = ? AND status = 'pending'
             ");
-            $stmt->execute([$response['upload_id']]);
+            $stmt->execute([$responseId]);
             $existing = $stmt->fetch(PDO::FETCH_ASSOC);
             
             error_log('requestResponseRevision - existing count: ' . $existing['count']);
@@ -791,18 +794,18 @@ class FileManager {
                 return ['success' => false, 'message' => 'Bu yanıt dosyası için zaten bekleyen bir revize talebi bulunuyor.'];
             }
             
-            // Revize talebi oluştur - upload_id ekle
+            // Revize talebi oluştur - response_id ve upload_id'yi ekle
             $revisionId = generateUUID();
             error_log('requestResponseRevision - attempting to insert with revisionId: ' . $revisionId);
             
             $stmt = $this->pdo->prepare("
-                INSERT INTO revisions (id, upload_id, user_id, request_notes, status, requested_at)
-                VALUES (?, ?, ?, ?, 'pending', NOW())
+                INSERT INTO revisions (id, upload_id, response_id, user_id, request_notes, status, requested_at)
+                VALUES (?, ?, ?, ?, ?, 'pending', NOW())
             ");
             
             // Yanıt dosyası revize talebi olduğunu belirt
             $prefixedNotes = "[YANIT DOSYASI REVİZE] " . $revisionNotes;
-            $result = $stmt->execute([$revisionId, $response['upload_id'], $userId, $prefixedNotes]);
+            $result = $stmt->execute([$revisionId, $response['upload_id'], $responseId, $userId, $prefixedNotes]);
             error_log('requestResponseRevision - insert result: ' . ($result ? 'true' : 'false'));
             
             if ($result) {

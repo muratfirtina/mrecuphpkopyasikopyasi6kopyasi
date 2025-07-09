@@ -26,13 +26,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['process_revision'])) 
     } elseif ($creditsCharged < 0) {
         $error = 'Kredi miktarı negatif olamaz.';
     } else {
-        // FileManager metodu ile revize talebini güncelle
-        $result = $fileManager->updateRevisionStatus($revisionId, $_SESSION['user_id'], $status, $adminNotes, $creditsCharged);
+        // Revize talebini getir
+        $stmt = $pdo->prepare("SELECT * FROM revisions WHERE id = ?");
+        $stmt->execute([$revisionId]);
+        $revision = $stmt->fetch();
         
-        if ($result['success']) {
-            $success = $result['message'];
+        if (!$revision) {
+            $error = 'Revize talebi bulunamadı.';
         } else {
-            $error = $result['message'];
+            // Response dosyası revize talebi mi kontrol et
+            if ($revision['response_id']) {
+                // Response dosyası revize talebi
+                if ($status === 'completed') {
+                    $success = 'Yanıt dosyası revize talebi onaylandı. Yeni yanıt dosyası yüklemek için dosya detay sayfasına gidin.';
+                } else {
+                    $success = 'Yanıt dosyası revize talebi reddedildi.';
+                }
+            } else {
+                // Normal upload dosyası revize talebi
+                if ($status === 'completed') {
+                    $success = 'Dosya revize talebi onaylandı. Yeni dosya yüklemek için dosya detay sayfasına gidin.';
+                } else {
+                    $success = 'Dosya revize talebi reddedildi.';
+                }
+            }
+            
+            // FileManager metodu ile revize talebini güncelle
+            $result = $fileManager->updateRevisionStatus($revisionId, $_SESSION['user_id'], $status, $adminNotes, $creditsCharged);
+            
+            if (!$result['success']) {
+                $error = $result['message'];
+                $success = ''; // Success mesajını temizle
+            }
         }
     }
 }
@@ -295,7 +320,12 @@ include '../includes/admin_sidebar.php';
                                 </td>
                                 <td>
                                     <div>
-                                        <strong><?php echo htmlspecialchars($revision['original_name'] ?? 'Dosya adı yok'); ?></strong><br>
+                                        <?php if ($revision['response_id']): ?>
+                                            <strong><?php echo htmlspecialchars($revision['response_original_name'] ?? 'Yanıt dosyası'); ?></strong><br>
+                                            <small class="text-muted">Yanıt: <?php echo htmlspecialchars($revision['original_name'] ?? 'Bilinmiyor'); ?></small><br>
+                                        <?php else: ?>
+                                            <strong><?php echo htmlspecialchars($revision['original_name'] ?? 'Dosya adı yok'); ?></strong><br>
+                                        <?php endif; ?>
                                         <?php if (!empty($revision['brand_name']) || !empty($revision['model_name'])): ?>
                                             <small class="text-muted"><?php echo htmlspecialchars($revision['brand_name'] . ' ' . $revision['model_name']); ?></small>
                                         <?php endif; ?>
@@ -345,6 +375,21 @@ include '../includes/admin_sidebar.php';
                                             </button>
                                         <?php else: ?>
                                             <span class="text-muted small">İşlenmiş</span>
+                                        <?php endif; ?>
+                                        
+                                        <!-- Dosyayı Gör Butonu -->
+                                        <?php if ($revision['response_id']): ?>
+                                            <!-- Yanıt dosyası revize talebi -->
+                                            <a href="file-detail.php?id=<?php echo $revision['upload_id']; ?>&type=response" 
+                                               class="btn btn-outline-info btn-sm mt-1">
+                                                <i class="fas fa-eye me-1"></i>Yanıt Dosyasını Gör
+                                            </a>
+                                        <?php else: ?>
+                                            <!-- Normal upload dosyası revize talebi -->
+                                            <a href="file-detail.php?id=<?php echo $revision['upload_id']; ?>" 
+                                               class="btn btn-outline-info btn-sm mt-1">
+                                                <i class="fas fa-eye me-1"></i>Dosyayı Gör
+                                            </a>
                                         <?php endif; ?>
                                     </div>
                                 </td>

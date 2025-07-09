@@ -174,19 +174,21 @@ function formatDate($date) {
     return date('d.m.Y H:i', strtotime($date));
 }
 
-function formatFileSize($bytes) {
-    if ($bytes <= 0) {
-        return '0 B';
+if (!function_exists('formatFileSize')) {
+    function formatFileSize($bytes) {
+        if ($bytes <= 0) {
+            return '0 B';
+        }
+        
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+        
+        $bytes /= (1 << (10 * $pow));
+        
+        return round($bytes, 2) . ' ' . $units[$pow];
     }
-    
-    $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    $bytes = max($bytes, 0);
-    $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
-    $pow = min($pow, count($units) - 1);
-    
-    $bytes /= (1 << (10 * $pow));
-    
-    return round($bytes, 2) . ' ' . $units[$pow];
 }
 
 function generateToken() {
