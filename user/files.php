@@ -113,16 +113,23 @@ if (isset($_SESSION['success'])) {
 
 // Revize talep işlemi
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_revision'])) {
-    $uploadId = sanitize($_POST['upload_id']);
+    $fileId = sanitize($_POST['file_id']);
+    $fileType = sanitize($_POST['file_type']);
     $revisionNotes = sanitize($_POST['revision_notes']);
     
     // GUID format kontrolü
-    if (!isValidUUID($uploadId)) {
+    if (!isValidUUID($fileId)) {
         $error = 'Geçersiz dosya ID formatı.';
     } elseif (empty($revisionNotes)) {
         $error = 'Revize talebi için açıklama gereklidir.';
     } else {
-        $result = $fileManager->requestRevision($uploadId, $userId, $revisionNotes);
+        if ($fileType === 'response') {
+            // Yanıt dosyası için revize talebi
+            $result = $fileManager->requestResponseRevision($fileId, $userId, $revisionNotes);
+        } else {
+            // Upload dosyası için revize talebi
+            $result = $fileManager->requestRevision($fileId, $userId, $revisionNotes);
+        }
         
         if ($result['success']) {
             $success = $result['message'];
@@ -468,7 +475,12 @@ include '../includes/user_header.php';
                                     
                                     <?php if ($file['file_type'] === 'upload' && $file['status'] === 'completed'): ?>
                                         <button type="button" class="btn btn-outline-warning btn-sm action-btn" 
-                                                onclick="requestRevision('<?php echo $file['id']; ?>')">
+                                                onclick="requestRevision('<?php echo $file['id']; ?>', 'upload')">
+                                            <i class="fas fa-redo me-1"></i>Revize
+                                        </button>
+                                    <?php elseif ($file['file_type'] === 'response'): ?>
+                                        <button type="button" class="btn btn-outline-warning btn-sm action-btn" 
+                                                onclick="requestRevision('<?php echo $file['id']; ?>', 'response')">
                                             <i class="fas fa-redo me-1"></i>Revize
                                         </button>
                                     <?php endif; ?>
@@ -595,7 +607,8 @@ include '../includes/user_header.php';
             </div>
             <form method="POST" id="revisionForm">
                 <div class="modal-body">
-                    <input type="hidden" name="upload_id" id="revisionUploadId">
+                    <input type="hidden" name="file_id" id="revisionFileId">
+                    <input type="hidden" name="file_type" id="revisionFileType">
                     <input type="hidden" name="request_revision" value="1">
                     
                     <div class="alert alert-info">
@@ -603,7 +616,7 @@ include '../includes/user_header.php';
                             <i class="fas fa-info-circle me-3 mt-1"></i>
                             <div>
                                 <strong>Revize Talebi Hakkında</strong>
-                                <p class="mb-0 mt-1">
+                                <p class="mb-0 mt-1" id="revisionInfoText">
                                     Dosyanızda bir değişiklik veya düzenleme istiyorsanız bu formu kullanabilirsiniz. 
                                     Talep incelendikten sonra size geri dönüş yapılacaktır.
                                 </p>
@@ -1250,8 +1263,16 @@ function viewFileDetails(uploadId, fileType = 'upload') {
                         
                         ${!isResponse && file.status === 'completed' ? `
                             <div class="mt-4 text-center">
-                                <button type="button" class="btn btn-warning me-2" onclick="requestRevision('${file.id}'); bootstrap.Modal.getInstance(document.getElementById('fileDetailModal')).hide();">
+                                <button type="button" class="btn btn-warning me-2" onclick="requestRevision('${file.id}', 'upload'); bootstrap.Modal.getInstance(document.getElementById('fileDetailModal')).hide();">
                                     <i class="fas fa-redo me-2"></i>Revize Talep Et
+                                </button>
+                            </div>
+                        ` : ''}
+                        
+                        ${isResponse ? `
+                            <div class="mt-4 text-center">
+                                <button type="button" class="btn btn-warning me-2" onclick="requestRevision('${file.id}', 'response'); bootstrap.Modal.getInstance(document.getElementById('fileDetailModal')).hide();">
+                                    <i class="fas fa-redo me-2"></i>Yanıt Dosyası için Revize Talep Et
                                 </button>
                             </div>
                         ` : ''}
@@ -1293,8 +1314,27 @@ function formatDate(dateString) {
 }
 
 // Request Revision
-function requestRevision(uploadId) {
-    document.getElementById('revisionUploadId').value = uploadId;
+function requestRevision(fileId, fileType = 'upload') {
+    document.getElementById('revisionFileId').value = fileId;
+    document.getElementById('revisionFileType').value = fileType;
+    
+    // Modal içeriğini dosya tipine göre ayarla
+    const revisionInfoText = document.getElementById('revisionInfoText');
+    const modalTitle = document.querySelector('#revisionModal .modal-title');
+    
+    if (fileType === 'response') {
+        modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Yanıt Dosyası Revize Talebi';
+        revisionInfoText.innerHTML = 'Yanıt dosyasında bir değişiklik veya düzenleme istiyorsanız bu formu kullanabilirsiniz. Admin ekibimiz dosyanızı yeniden gözden geçirecek ve geliştirilmiş bir sürüm hazırlayacaktır.';
+        document.getElementById('revision_notes').placeholder = 'Yanıt dosyasında hangi değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Daha fazla güç istiyorum", "Yakıt tüketimi daha iyi olsun", "Torku artmalı" gibi...';
+    } else {
+        modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Revize Talebi';
+        revisionInfoText.innerHTML = 'Dosyanızda bir değişiklik veya düzenleme istiyorsanız bu formu kullanabilirsiniz. Talep incelendikten sonra size geri dönüş yapılacaktır.';
+        document.getElementById('revision_notes').placeholder = 'Lütfen dosyada hangi değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Güç artırımı", "EGR kapatma", "DPF silme" gibi...';
+    }
+    
+    // Formu temizle
+    document.getElementById('revision_notes').value = '';
+    
     const modal = new bootstrap.Modal(document.getElementById('revisionModal'));
     modal.show();
 }

@@ -696,7 +696,7 @@ class FileManager {
         }
     }
     
-    // Revize talebi gönder
+    // Revize talebi gönder (Upload dosyası için)
     public function requestRevision($uploadId, $userId, $revisionNotes) {
         try {
             if (!isValidUUID($uploadId) || !isValidUUID($userId)) {
@@ -729,8 +729,8 @@ class FileManager {
             // Revize talebi oluştur
             $revisionId = generateUUID();
             $stmt = $this->pdo->prepare("
-                INSERT INTO revisions (id, upload_id, user_id, request_notes, status, requested_at)
-                VALUES (?, ?, ?, ?, 'pending', NOW())
+                INSERT INTO revisions (id, upload_id, user_id, request_notes, request_type, status, requested_at)
+                VALUES (?, ?, ?, ?, 'upload', 'pending', NOW())
             ");
             
             $result = $stmt->execute([$revisionId, $uploadId, $userId, $revisionNotes]);
@@ -744,6 +744,80 @@ class FileManager {
         } catch(PDOException $e) {
             error_log('requestRevision error: ' . $e->getMessage());
             return ['success' => false, 'message' => 'Veritabanı hatası oluştu.'];
+        }
+    }
+    
+    // Yanıt dosyası için revize talebi gönder
+    public function requestResponseRevision($responseId, $userId, $revisionNotes) {
+        try {
+            if (!isValidUUID($responseId) || !isValidUUID($userId)) {
+                return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
+            }
+            
+            error_log('requestResponseRevision - responseId: ' . $responseId . ', userId: ' . $userId);
+            
+            // Response dosyası kontrolü
+            $stmt = $this->pdo->prepare("
+                SELECT fr.*, fu.user_id 
+                FROM file_responses fr
+                LEFT JOIN file_uploads fu ON fr.upload_id = fu.id
+                WHERE fr.id = ?
+            ");
+            $stmt->execute([$responseId]);
+            $response = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            error_log('requestResponseRevision - response data: ' . print_r($response, true));
+            
+            if (!$response) {
+                return ['success' => false, 'message' => 'Yanıt dosyası bulunamadı.'];
+            }
+            
+            if ($response['user_id'] !== $userId) {
+                return ['success' => false, 'message' => 'Yanıt dosyası size ait değil.'];
+            }
+            
+            // Daha önce bekleyen revize talebi var mı kontrol et (bu response dosyası için)
+            $stmt = $this->pdo->prepare("
+                SELECT COUNT(*) as count 
+                FROM revisions 
+                WHERE upload_id = ? AND status = 'pending' AND request_notes LIKE '[YANIT DOSYASI REVİZE]%'
+            ");
+            $stmt->execute([$response['upload_id']]);
+            $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            error_log('requestResponseRevision - existing count: ' . $existing['count']);
+            
+            if ($existing['count'] > 0) {
+                return ['success' => false, 'message' => 'Bu yanıt dosyası için zaten bekleyen bir revize talebi bulunuyor.'];
+            }
+            
+            // Revize talebi oluştur - upload_id ekle
+            $revisionId = generateUUID();
+            error_log('requestResponseRevision - attempting to insert with revisionId: ' . $revisionId);
+            
+            $stmt = $this->pdo->prepare("
+                INSERT INTO revisions (id, upload_id, user_id, request_notes, status, requested_at)
+                VALUES (?, ?, ?, ?, 'pending', NOW())
+            ");
+            
+            // Yanıt dosyası revize talebi olduğunu belirt
+            $prefixedNotes = "[YANIT DOSYASI REVİZE] " . $revisionNotes;
+            $result = $stmt->execute([$revisionId, $response['upload_id'], $userId, $prefixedNotes]);
+            error_log('requestResponseRevision - insert result: ' . ($result ? 'true' : 'false'));
+            
+            if ($result) {
+                return ['success' => true, 'message' => 'Yanıt dosyası için revize talebi başarıyla gönderildi.', 'revision_id' => $revisionId];
+            }
+            
+            return ['success' => false, 'message' => 'Revize talebi gönderilemedi.'];
+            
+        } catch(PDOException $e) {
+            error_log('requestResponseRevision PDOException: ' . $e->getMessage());
+            error_log('requestResponseRevision SQL Error: ' . $e->getCode());
+            return ['success' => false, 'message' => 'Veritabanı hatası: ' . $e->getMessage()];
+        } catch(Exception $e) {
+            error_log('requestResponseRevision Exception: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Genel hata: ' . $e->getMessage()];
         }
     }
     

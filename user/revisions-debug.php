@@ -164,7 +164,7 @@ if ($revisionTableExists) {
 
 // Test revize talebi işlemi
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['test_revision'])) {
-    $testUploadId = (int)$_POST['upload_id'];
+    $testUploadId = sanitize($_POST['upload_id']);
     $testNotes = sanitize($_POST['test_notes']);
     
     echo "<h3>Test Revize Talebi Sonucu:</h3>";
