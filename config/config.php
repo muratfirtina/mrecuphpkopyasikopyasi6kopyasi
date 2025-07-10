@@ -2,6 +2,10 @@
 /**
  * Mr ECU - Global Configuration
  * Genel sistem ayarları ve güvenlik entegrasyonu
+ * 
+ * @global SecurityManager|null $security Global security manager instance
+ * @global SecureDatabase|null $secureDb Global secure database wrapper
+ * @global PDO|null $pdo Global database connection
  */
 
 // Site ayarları
@@ -77,7 +81,9 @@ spl_autoload_register(function ($class_name) {
 });
 
 // Global güvenlik nesneleri
+/** @var SecurityManager|null $security */
 $security = null;
+/** @var SecureDatabase|null $secureDb */
 $secureDb = null;
 
 // Güvenlik sistemini başlat (sadece dosyalar mevcutsa)
@@ -320,10 +326,17 @@ function recordBruteForceAttempt($identifier) {
     }
 }
 
+/**
+ * Execute a secure database query with optional security features
+ * 
+ * @param string $query SQL query string
+ * @param array $params Query parameters
+ * @return PDOStatement|false Query result
+ */
 function executeSecureQuery($query, $params = []) {
     global $security, $secureDb;
     
-    if ($secureDb && SECURITY_ENABLED) {
+    if ($secureDb && $security && SECURITY_ENABLED) {
         return $security->executeSafeQuery($query, $params);
     }
     
