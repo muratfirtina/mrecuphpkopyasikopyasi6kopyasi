@@ -194,16 +194,22 @@ try {
 try {
     $stmt = $pdo->query("
         SELECT 
-            COUNT(*) as total_uploads,
-            SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_count,
-            SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing_count,
-            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_count,
-            SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected_count,
-            SUM(CASE WHEN upload_date >= DATE_SUB(NOW(), INTERVAL 24 HOUR) THEN 1 ELSE 0 END) as today_uploads,
-            AVG(file_size) as avg_file_size
+            COALESCE(COUNT(*), 0) as total_uploads,
+            COALESCE(SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END), 0) as pending_count,
+            COALESCE(SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END), 0) as processing_count,
+            COALESCE(SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END), 0) as completed_count,
+            COALESCE(SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END), 0) as rejected_count,
+            COALESCE(SUM(CASE WHEN upload_date >= DATE_SUB(NOW(), INTERVAL 24 HOUR) THEN 1 ELSE 0 END), 0) as today_uploads,
+            COALESCE(AVG(file_size), 0) as avg_file_size
         FROM file_uploads
     ");
     $stats = $stmt->fetch();
+    
+    // Null değerleri 0 ile değiştir
+    $stats = array_map(function($value) {
+        return $value === null ? 0 : $value;
+    }, $stats);
+    
 } catch(PDOException $e) {
     $stats = ['total_uploads' => 0, 'pending_count' => 0, 'processing_count' => 0, 'completed_count' => 0, 'rejected_count' => 0, 'today_uploads' => 0, 'avg_file_size' => 0];
 }
@@ -275,7 +281,7 @@ include '../includes/admin_sidebar.php';
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <div class="stat-number text-primary"><?php echo number_format($stats['total_uploads']); ?></div>
+                    <div class="stat-number text-primary"><?php echo safe_number_format($stats['total_uploads']); ?></div>
                     <div class="stat-label">Toplam Dosya</div>
                     <small class="text-success">+<?php echo $stats['today_uploads']; ?> bugün</small>
                 </div>
@@ -290,7 +296,7 @@ include '../includes/admin_sidebar.php';
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <div class="stat-number text-warning"><?php echo number_format($stats['pending_count']); ?></div>
+                    <div class="stat-number text-warning"><?php echo safe_number_format($stats['pending_count']); ?></div>
                     <div class="stat-label">Bekleyen</div>
                     <small class="text-muted">İşlem bekliyor</small>
                 </div>
@@ -305,7 +311,7 @@ include '../includes/admin_sidebar.php';
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <div class="stat-number text-info"><?php echo number_format($stats['processing_count']); ?></div>
+                    <div class="stat-number text-info"><?php echo safe_number_format($stats['processing_count']); ?></div>
                     <div class="stat-label">İşleniyor</div>
                     <small class="text-muted">Aktif işlemde</small>
                 </div>
@@ -320,9 +326,9 @@ include '../includes/admin_sidebar.php';
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <div class="stat-number text-success"><?php echo number_format($stats['completed_count']); ?></div>
+                    <div class="stat-number text-success"><?php echo safe_number_format($stats['completed_count']); ?></div>
                     <div class="stat-label">Tamamlanan</div>
-                    <small class="text-danger"><?php echo number_format($stats['rejected_count']); ?> reddedilen</small>
+                    <small class="text-danger"><?php echo safe_number_format($stats['rejected_count']); ?> reddedilen</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
                     <i class="fas fa-check-circle text-success fa-lg"></i>

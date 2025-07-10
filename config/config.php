@@ -390,4 +390,12 @@ function formatFileSize($bytes) {
     
     return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
 }
+
+// Güvenli number_format fonksiyonu (PHP 8.0+ null value fix)
+function safe_number_format($num, $decimals = 0, $decimal_separator = '.', $thousands_separator = ',') {
+    if ($num === null || $num === '') {
+        return '0';
+    }
+    return number_format((float)$num, $decimals, $decimal_separator, $thousands_separator);
+}
 ?>
