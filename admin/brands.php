@@ -104,7 +104,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_model'])) {
 // Markaları getir
 try {
     $stmt = $pdo->query("
-        SELECT b.*, COUNT(m.id) as model_count 
+        SELECT b.*, 
+               COALESCE(b.is_active, 1) as is_active,
+               COUNT(m.id) as model_count 
         FROM brands b 
         LEFT JOIN models m ON b.id = m.brand_id 
         GROUP BY b.id 
@@ -127,7 +129,7 @@ if (isset($_GET['brand_id'])) {
         $selectedBrand = $stmt->fetch();
         
         if ($selectedBrand) {
-            $stmt = $pdo->prepare("SELECT * FROM models WHERE brand_id = ? ORDER BY name");
+            $stmt = $pdo->prepare("SELECT *, COALESCE(is_active, 1) as is_active FROM models WHERE brand_id = ? ORDER BY name");
             $stmt->execute([$brandId]);
             $brandModels = $stmt->fetchAll();
         }
@@ -272,8 +274,8 @@ include '../includes/admin_sidebar.php';
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <span class="badge bg-<?php echo $model['is_active'] ? 'success' : 'secondary'; ?>">
-                                                    <?php echo $model['is_active'] ? 'Aktif' : 'Pasif'; ?>
+                                                <span class="badge bg-<?php echo (isset($model['is_active']) && $model['is_active']) ? 'success' : 'secondary'; ?>">
+                                                    <?php echo (isset($model['is_active']) && $model['is_active']) ? 'Aktif' : 'Pasif'; ?>
                                                 </span>
                                             </td>
                                             <td>
@@ -282,7 +284,7 @@ include '../includes/admin_sidebar.php';
                                                         data-model-name="<?php echo htmlspecialchars($model['name']); ?>"
                                                         data-model-year-start="<?php echo htmlspecialchars($model['year_start'] ?? ''); ?>"
                                                         data-model-year-end="<?php echo htmlspecialchars($model['year_end'] ?? ''); ?>"
-                                                        data-model-status="<?php echo $model['is_active'] ? 'active' : 'inactive'; ?>"
+                                                        data-model-status="<?php echo (isset($model['is_active']) && $model['is_active']) ? 'active' : 'inactive'; ?>"
                                                         onclick="editModel(this)">
                                                     <i class="fas fa-edit me-1"></i>Düzenle
                                                 </button>

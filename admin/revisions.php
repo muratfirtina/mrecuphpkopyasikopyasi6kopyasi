@@ -122,7 +122,7 @@ $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $limit = 20;
 
 // Revize taleplerini getir (FileManager metodu ile)
-$revisions = $fileManager->getAllRevisions($page, $limit, $status, $dateFrom, $dateTo);
+$revisions = $fileManager->getAllRevisions($page, $limit, $status, $dateFrom, $dateTo, $search);
 
 // Toplam revize sayısı için ayrı sorgu
 try {
@@ -134,14 +134,22 @@ try {
         $countParams[] = $status;
     }
     
+    if ($search) {
+        $operator = $status ? " AND" : " WHERE";
+        $countQuery .= "$operator (r.id IN (SELECT r2.id FROM revisions r2 LEFT JOIN file_uploads fu ON r2.upload_id = fu.id LEFT JOIN users u ON r2.user_id = u.id LEFT JOIN brands b ON fu.brand_id = b.id LEFT JOIN models m ON fu.model_id = m.id WHERE fu.original_name LIKE ? OR u.username LIKE ? OR u.email LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ? OR b.name LIKE ? OR m.name LIKE ? OR fu.plate LIKE ?))";
+        $searchParam = "%$search%";
+        $countParams = array_merge($countParams, [$searchParam, $searchParam, $searchParam, $searchParam, $searchParam, $searchParam, $searchParam, $searchParam]);
+    }
+    
     if ($dateFrom) {
-        $countQuery .= ($status ? " AND" : " WHERE") . " DATE(r.requested_at) >= ?";
+        $operator = ($status || $search) ? " AND" : " WHERE";
+        $countQuery .= "$operator DATE(r.requested_at) >= ?";
         $countParams[] = $dateFrom;
     }
     
     if ($dateTo) {
-        $operator = ($status || $dateFrom) ? " AND" : " WHERE";
-        $countQuery .= $operator . " DATE(r.requested_at) <= ?";
+        $operator = ($status || $search || $dateFrom) ? " AND" : " WHERE";
+        $countQuery .= "$operator DATE(r.requested_at) <= ?";
         $countParams[] = $dateTo;
     }
     
@@ -288,6 +296,15 @@ include '../includes/admin_sidebar.php';
     <div class="card-body">
         <form method="GET" class="row g-3 align-items-end">
             <div class="col-md-3">
+                <label for="search" class="form-label">
+                    <i class="fas fa-search me-1"></i>Arama
+                </label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="<?php echo htmlspecialchars($search); ?>" 
+                       placeholder="Dosya adı, kullanıcı, marka, plaka...">
+            </div>
+            
+            <div class="col-md-2">
                 <label for="status" class="form-label">Durum</label>
                 <select class="form-select" id="status" name="status">
                     <option value="">Tüm Durumlar</option>
@@ -298,13 +315,13 @@ include '../includes/admin_sidebar.php';
                 </select>
             </div>
             
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label for="date_from" class="form-label">Başlangıç</label>
                 <input type="date" class="form-control" id="date_from" name="date_from" 
                        value="<?php echo htmlspecialchars($dateFrom); ?>">
             </div>
             
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label for="date_to" class="form-label">Bitiş</label>
                 <input type="date" class="form-control" id="date_to" name="date_to" 
                        value="<?php echo htmlspecialchars($dateTo); ?>">
@@ -471,7 +488,7 @@ include '../includes/admin_sidebar.php';
                         <ul class="pagination justify-content-center mb-0">
                             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                                 <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                    <a class="page-link" href="?page=<?php echo $i; ?>&status=<?php echo urlencode($status); ?>&date_from=<?php echo urlencode($dateFrom); ?>&date_to=<?php echo urlencode($dateTo); ?>">
+                                    <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&date_from=<?php echo urlencode($dateFrom); ?>&date_to=<?php echo urlencode($dateTo); ?>">
                                         <?php echo $i; ?>
                                     </a>
                                 </li>

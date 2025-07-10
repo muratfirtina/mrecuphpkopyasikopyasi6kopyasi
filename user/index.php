@@ -20,7 +20,7 @@ $_SESSION['credits'] = $user->getUserCredits($_SESSION['user_id']);
 // Kullanıcı istatistikleri
 $userId = $_SESSION['user_id'];
 $userCredits = $user->getUserCredits($userId);
-$userUploads = $fileManager->getUserUploads($userId, 1, 10);
+$userUploads = $fileManager->getUserAllFiles($userId, 1, 10);
 
 // İstatistikler - FileManager kullanarak
 try {

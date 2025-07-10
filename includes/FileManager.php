@@ -75,8 +75,8 @@ class FileManager {
         }
     }
     
-    // Revize taleplerini getir
-    public function getAllRevisions($page = 1, $limit = 20, $status = '', $dateFrom = '', $dateTo = '') {
+    // Tüm revize taleplerini getir
+    public function getAllRevisions($page = 1, $limit = 20, $status = '', $dateFrom = '', $dateTo = '', $search = '') {
         try {
             $offset = ($page - 1) * $limit;
             $whereClause = "";
@@ -87,17 +87,24 @@ class FileManager {
                 $params[] = $status;
             }
             
-            if ($dateFrom && $dateTo) {
+            if ($search) {
                 $operator = $status ? " AND" : " WHERE";
+                $whereClause .= "$operator (fu.original_name LIKE ? OR u.username LIKE ? OR u.email LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ? OR b.name LIKE ? OR m.name LIKE ? OR fu.plate LIKE ?)";
+                $searchParam = "%$search%";
+                $params = array_merge($params, [$searchParam, $searchParam, $searchParam, $searchParam, $searchParam, $searchParam, $searchParam, $searchParam]);
+            }
+            
+            if ($dateFrom && $dateTo) {
+                $operator = ($status || $search) ? " AND" : " WHERE";
                 $whereClause .= "$operator DATE(r.requested_at) BETWEEN ? AND ?";
                 $params[] = $dateFrom;
                 $params[] = $dateTo;
             } elseif ($dateFrom) {
-                $operator = $status ? " AND" : " WHERE";
+                $operator = ($status || $search) ? " AND" : " WHERE";
                 $whereClause .= "$operator DATE(r.requested_at) >= ?";
                 $params[] = $dateFrom;
             } elseif ($dateTo) {
-                $operator = $status ? " AND" : " WHERE";
+                $operator = ($status || $search) ? " AND" : " WHERE";
                 $whereClause .= "$operator DATE(r.requested_at) <= ?";
                 $params[] = $dateTo;
             }
@@ -221,14 +228,14 @@ class FileManager {
             if (move_uploaded_file($fileData['tmp_name'], $uploadPath)) {
                 $this->pdo->beginTransaction();
                 
-                // Veritabanına kaydet - vehicleData dahil
+                // Veritabanına kaydet - vehicleData dahil (plaka ile)
                 $stmt = $this->pdo->prepare("
                     INSERT INTO file_uploads (
                         id, user_id, original_name, filename, file_size, 
-                        brand_id, model_id, year, ecu_type, engine_code, 
+                        brand_id, model_id, year, plate, ecu_type, engine_code, 
                         gearbox_type, fuel_type, hp_power, nm_torque,
                         status, upload_notes, upload_date
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, NOW())
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, NOW())
                 ");
                 
                 $result = $stmt->execute([
@@ -240,6 +247,7 @@ class FileManager {
                     $vehicleData['brand_id'] ?? null,
                     $vehicleData['model_id'] ?? null,
                     $vehicleData['year'] ?? null,
+                    $vehicleData['plate'] ?? null,
                     $vehicleData['ecu_type'] ?? null,
                     $vehicleData['engine_code'] ?? null,
                     $vehicleData['gearbox_type'] ?? null,
@@ -310,8 +318,9 @@ class FileManager {
             $params = [$userId];
             
             if ($search) {
-                $whereClause .= " AND (fr.original_name LIKE ? OR fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                $whereClause .= " AND (fr.original_name LIKE ? OR fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ? OR fu.plate LIKE ?)";
                 $searchTerm = "%$search%";
+                $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
@@ -320,7 +329,7 @@ class FileManager {
             
             $stmt = $this->pdo->prepare("
                 SELECT fr.*, fu.original_name as original_upload_name, fu.upload_date as original_upload_date,
-                       fu.brand_id, fu.model_id, fu.year, fu.ecu_type, fu.engine_code,
+                       fu.brand_id, fu.model_id, fu.year, fu.plate, fu.ecu_type, fu.engine_code,
                        fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
                        b.name as brand_name, m.name as model_name,
                        a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
@@ -355,8 +364,9 @@ class FileManager {
             $params = [$userId];
             
             if ($search) {
-                $whereClause .= " AND (fr.original_name LIKE ? OR fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                $whereClause .= " AND (fr.original_name LIKE ? OR fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ? OR fu.plate LIKE ?)";
                 $searchTerm = "%$search%";
+                $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
@@ -395,7 +405,7 @@ class FileManager {
             $uploadQuery = "
                 SELECT fu.id, fu.original_name, fu.filename, fu.file_size, fu.status, fu.upload_date,
                        fu.admin_notes, fu.upload_notes as notes, fu.processed_date, fu.credits_charged,
-                       fu.brand_id, fu.model_id, fu.year, fu.ecu_type, fu.engine_code,
+                       fu.brand_id, fu.model_id, fu.year, fu.plate, fu.ecu_type, fu.engine_code,
                        fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
                        b.name as brand_name, m.name as model_name,
                        'upload' as file_type, NULL as admin_username, NULL as admin_first_name, NULL as admin_last_name,
@@ -413,8 +423,9 @@ class FileManager {
             }
             
             if ($search) {
-                $uploadQuery .= " AND (fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                $uploadQuery .= " AND (fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ? OR fu.plate LIKE ?)";
                 $searchTerm = "%$search%";
+                $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
@@ -427,7 +438,7 @@ class FileManager {
                     UNION ALL
                     SELECT fr.id, fr.original_name, fr.filename, fr.file_size, 'response' as status, fr.upload_date,
                            fr.admin_notes, NULL as notes, fr.upload_date as processed_date, fr.credits_charged,
-                           fu.brand_id, fu.model_id, fu.year, fu.ecu_type, fu.engine_code,
+                           fu.brand_id, fu.model_id, fu.year, fu.plate, fu.ecu_type, fu.engine_code,
                            fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
                            b.name as brand_name, m.name as model_name,
                            'response' as file_type, a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
@@ -450,8 +461,9 @@ class FileManager {
                 }
                 
                 if ($search && $status !== 'response') {
-                    $responseQuery .= " AND (fr.original_name LIKE ? OR fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                    $responseQuery .= " AND (fr.original_name LIKE ? OR fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ? OR fu.plate LIKE ?)";
                     $searchTerm = "%$search%";
+                    $params[] = $searchTerm;
                     $params[] = $searchTerm;
                     $params[] = $searchTerm;
                     $params[] = $searchTerm;
@@ -493,8 +505,9 @@ class FileManager {
             }
             
             if ($search) {
-                $uploadQuery .= " AND (fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                $uploadQuery .= " AND (fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ? OR fu.plate LIKE ?)";
                 $searchTerm = "%$search%";
+                $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
@@ -514,8 +527,9 @@ class FileManager {
                 $responseQuery = "SELECT COUNT(*) as count FROM file_responses fr INNER JOIN file_uploads fu ON fr.upload_id = fu.id LEFT JOIN brands b ON fu.brand_id = b.id LEFT JOIN models m ON fu.model_id = m.id WHERE fu.user_id = ?";
                 
                 if ($search) {
-                    $responseQuery .= " AND (fr.original_name LIKE ? OR fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                    $responseQuery .= " AND (fr.original_name LIKE ? OR fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ? OR fu.plate LIKE ?)";
                     $searchTerm = "%$search%";
+                    $responseParams[] = $searchTerm;
                     $responseParams[] = $searchTerm;
                     $responseParams[] = $searchTerm;
                     $responseParams[] = $searchTerm;
@@ -556,8 +570,9 @@ class FileManager {
             }
             
             if ($search) {
-                $whereClause .= " AND (fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                $whereClause .= " AND (fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ? OR fu.plate LIKE ?)";
                 $searchTerm = "%$search%";
+                $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
@@ -609,7 +624,7 @@ class FileManager {
     }
     
     // Kullanıcının revize taleplerini getir
-    public function getUserRevisions($userId, $page = 1, $limit = 10, $dateFrom = '', $dateTo = '', $status = '') {
+    public function getUserRevisions($userId, $page = 1, $limit = 10, $dateFrom = '', $dateTo = '', $status = '', $search = '') {
         try {
             if (!isValidUUID($userId)) {
                 return [];
@@ -622,6 +637,14 @@ class FileManager {
             if ($status) {
                 $whereClause .= " AND r.status = ?";
                 $params[] = $status;
+            }
+            
+            if ($search) {
+                $whereClause .= " AND (fu.original_name LIKE ? OR r.request_notes LIKE ? OR r.admin_notes LIKE ?)";
+                $searchParam = "%$search%";
+                $params[] = $searchParam;
+                $params[] = $searchParam;
+                $params[] = $searchParam;
             }
             
             if ($dateFrom && $dateTo) {
@@ -657,35 +680,44 @@ class FileManager {
     }
     
     // Kullanıcının revize talep sayısını getir
-    public function getUserRevisionCount($userId, $dateFrom = '', $dateTo = '', $status = '') {
+    public function getUserRevisionCount($userId, $dateFrom = '', $dateTo = '', $status = '', $search = '') {
         try {
             if (!isValidUUID($userId)) {
                 return 0;
             }
             
-            $whereClause = "WHERE user_id = ?";
+            $whereClause = "WHERE r.user_id = ?";
             $params = [$userId];
             
             if ($status) {
-                $whereClause .= " AND status = ?";
+                $whereClause .= " AND r.status = ?";
                 $params[] = $status;
             }
             
+            if ($search) {
+                $whereClause .= " AND (fu.original_name LIKE ? OR r.request_notes LIKE ? OR r.admin_notes LIKE ?)";
+                $searchParam = "%$search%";
+                $params[] = $searchParam;
+                $params[] = $searchParam;
+                $params[] = $searchParam;
+            }
+            
             if ($dateFrom && $dateTo) {
-                $whereClause .= " AND DATE(requested_at) BETWEEN ? AND ?";
+                $whereClause .= " AND DATE(r.requested_at) BETWEEN ? AND ?";
                 $params[] = $dateFrom;
                 $params[] = $dateTo;
             } elseif ($dateFrom) {
-                $whereClause .= " AND DATE(requested_at) >= ?";
+                $whereClause .= " AND DATE(r.requested_at) >= ?";
                 $params[] = $dateFrom;
             } elseif ($dateTo) {
-                $whereClause .= " AND DATE(requested_at) <= ?";
+                $whereClause .= " AND DATE(r.requested_at) <= ?";
                 $params[] = $dateTo;
             }
             
             $stmt = $this->pdo->prepare("
                 SELECT COUNT(*) as count
-                FROM revisions
+                FROM revisions r
+                LEFT JOIN file_uploads fu ON r.upload_id = fu.id
                 {$whereClause}
             ");
             

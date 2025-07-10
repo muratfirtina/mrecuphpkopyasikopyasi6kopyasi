@@ -308,7 +308,7 @@ include '../includes/user_header.php';
                             </label>
                             <input type="text" class="form-control form-control-modern" id="search" name="search" 
                                    value="<?php echo htmlspecialchars($search); ?>" 
-                                   placeholder="Dosya adı, marka veya model...">
+                                   placeholder="Dosya adı, marka, model, plaka...">
                         </div>
                         
                         <div class="col-md-3">
@@ -433,8 +433,22 @@ include '../includes/user_header.php';
                                     </div>
                                     <div class="meta-item">
                                         <i class="fas fa-cog me-1"></i>
-                                        <span><?php echo htmlspecialchars($file['model_name'] ?? 'Model belirtilmemiş'); ?></span>
+                                        <span>
+                                            <?php 
+                                            $modelDisplay = htmlspecialchars($file['model_name'] ?? 'Model belirtilmemiş');
+                                            if (!empty($file['year'])) {
+                                                $modelDisplay .= ' (' . $file['year'] . ')';
+                                            }
+                                            echo $modelDisplay;
+                                            ?>
+                                        </span>
                                     </div>
+                                    <?php if (!empty($file['plate'])): ?>
+                                        <div class="meta-item">
+                                            <i class="fas fa-id-card me-1"></i>
+                                            <span><?php echo strtoupper(htmlspecialchars($file['plate'])); ?></span>
+                                        </div>
+                                    <?php endif; ?>
                                     <div class="meta-item">
                                         <i class="fas fa-calendar me-1"></i>
                                         <span><?php echo date('d.m.Y', strtotime($file['upload_date'])); ?></span>
@@ -1221,6 +1235,12 @@ function viewFileDetails(uploadId, fileType = 'upload') {
                                         <div class="detail-item">
                                             <span class="label">Yıl:</span>
                                             <span class="value">${file.year}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${file.plate ? `
+                                        <div class="detail-item">
+                                            <span class="label">Plaka:</span>
+                                            <span class="value">${file.plate.toUpperCase()}</span>
                                         </div>
                                     ` : ''}
                                     ${file.ecu_type ? `

@@ -103,7 +103,7 @@ try {
         // Response dosyası detaylarını al - upload_id'ye göre en son response dosyasını bul
         $stmt = $pdo->prepare("
             SELECT fr.*, fu.user_id, fu.original_name as original_upload_name,
-                   fu.brand_id, fu.model_id, fu.year, fu.ecu_type, fu.engine_code,
+                   fu.brand_id, fu.model_id, fu.year, fu.plate, fu.ecu_type, fu.engine_code,
                    fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
                    b.name as brand_name, m.name as model_name,
                    a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
@@ -441,16 +441,26 @@ include '../includes/admin_sidebar.php';
                     <div class="col-sm-6">
                         <label class="form-label">Model</label>
                         <div class="form-control-plaintext">
-                            <?php echo safeHtml($upload['model_name']); ?>
+                            <?php 
+                            $modelDisplay = safeHtml($upload['model_name']);
+                            if (!empty($upload['year'])) {
+                                $modelDisplay = safeHtml($upload['model_name'] . ' (' . $upload['year'] . ')');
+                            }
+                            echo $modelDisplay;
+                            ?>
                         </div>
                     </div>
                     
-                    <div class="col-sm-6">
-                        <label class="form-label">Yıl</label>
-                        <div class="form-control-plaintext">
-                            <?php echo safeHtml($upload['year']); ?>
+                    <?php if (!empty($upload['plate'])): ?>
+                        <div class="col-sm-6">
+                            <label class="form-label">Plaka</label>
+                            <div class="form-control-plaintext">
+                                <span class="text-primary fw-bold">
+                                    <i class="fas fa-id-card me-1"></i><?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
+                                </span>
+                            </div>
                         </div>
-                    </div>
+                    <?php endif; ?>
                     
                     <div class="col-sm-6">
                         <label class="form-label">ECU Tipi</label>

@@ -379,4 +379,15 @@ function includeSecurityScript() {
         echo '<script nonce="' . $nonce . '" src="' . SITE_URL . 'security/security-guard.js"></script>' . "\n";
     }
 }
+
+// Dosya boyutu formatlama fonksiyonu
+function formatFileSize($bytes) {
+    if ($bytes === 0) return '0 B';
+    
+    $k = 1024;
+    $sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    $i = floor(log($bytes) / log($k));
+    
+    return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
+}
 ?>

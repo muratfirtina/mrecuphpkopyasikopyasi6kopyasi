@@ -57,7 +57,8 @@ if (isset($_GET['get_revision_details']) && isset($_GET['revision_id'])) {
     }
 }
 
-// Filtreleme parametreleri
+// Filtreleme ve arama parametreleri
+$search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
 $status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
 $dateFrom = isset($_GET['date_from']) ? sanitize($_GET['date_from']) : '';
 $dateTo = isset($_GET['date_to']) ? sanitize($_GET['date_to']) : '';
@@ -67,8 +68,8 @@ $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $limit = 10;
 
 // Kullanıcının revize taleplerini getir
-$revisions = $fileManager->getUserRevisions($userId, $page, $limit, $dateFrom, $dateTo, $status);
-$totalRevisions = $fileManager->getUserRevisionCount($userId, $dateFrom, $dateTo, $status);
+$revisions = $fileManager->getUserRevisions($userId, $page, $limit, $dateFrom, $dateTo, $status, $search);
+$totalRevisions = $fileManager->getUserRevisionCount($userId, $dateFrom, $dateTo, $status, $search);
 $totalPages = ceil($totalRevisions / $limit);
 
 // İstatistikler
@@ -232,6 +233,15 @@ include '../includes/user_header.php';
                 <div class="filter-body">
                     <form method="GET" class="row g-3 align-items-end">
                         <div class="col-md-3">
+                            <label for="search" class="form-label">
+                                <i class="fas fa-search me-1"></i>Arama
+                            </label>
+                            <input type="text" class="form-control form-control-modern" id="search" name="search" 
+                                   value="<?php echo htmlspecialchars($search); ?>" 
+                                   placeholder="Dosya adı, notlar...">
+                        </div>
+                        
+                        <div class="col-md-2">
                             <label for="status" class="form-label">
                                 <i class="fas fa-tag me-1"></i>Durum
                             </label>
@@ -243,7 +253,7 @@ include '../includes/user_header.php';
                             </select>
                         </div>
                         
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label for="date_from" class="form-label">
                                 <i class="fas fa-calendar me-1"></i>Başlangıç Tarihi
                             </label>
@@ -251,7 +261,7 @@ include '../includes/user_header.php';
                                    value="<?php echo htmlspecialchars($dateFrom); ?>">
                         </div>
                         
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label for="date_to" class="form-label">
                                 <i class="fas fa-calendar-check me-1"></i>Bitiş Tarihi
                             </label>
@@ -281,21 +291,21 @@ include '../includes/user_header.php';
                             <i class="fas fa-edit"></i>
                         </div>
                         <h4>
-                            <?php if ($status || $dateFrom || $dateTo): ?>
-                                Filtreye uygun revize talebi bulunamadı
+                            <?php if ($search || $status || $dateFrom || $dateTo): ?>
+                                Arama veya filtreye uygun revize talebi bulunamadı
                             <?php else: ?>
                                 Henüz revize talebi göndermemişsiniz
                             <?php endif; ?>
                         </h4>
                         <p class="text-muted mb-4">
-                            <?php if ($status || $dateFrom || $dateTo): ?>
-                                Farklı filtre kriterleri deneyebilir veya tüm revize taleplerinizi görüntüleyebilirsiniz.
+                            <?php if ($search || $status || $dateFrom || $dateTo): ?>
+                                Farklı arama terimi veya filtre kriterleri deneyebilir veya tüm revize taleplerinizi görüntüleyebilirsiniz.
                             <?php else: ?>
                                 Tamamlanmış dosyalarınız için revize talep edebilir ve değişiklik isteyebilirsiniz.
                             <?php endif; ?>
                         </p>
                         <div class="empty-actions">
-                            <?php if ($status || $dateFrom || $dateTo): ?>
+                            <?php if ($search || $status || $dateFrom || $dateTo): ?>
                                 <a href="revisions.php" class="btn btn-outline-primary btn-lg">
                                     <i class="fas fa-list me-2"></i>Tüm Talepler
                                 </a>
@@ -447,7 +457,7 @@ include '../includes/user_header.php';
                                 <!-- Önceki sayfa -->
                                 <?php if ($page > 1): ?>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
+                                        <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
                                             <i class="fas fa-chevron-left"></i>
                                         </a>
                                     </li>
@@ -461,7 +471,7 @@ include '../includes/user_header.php';
                                 
                                 <?php for ($i = $start; $i <= $end; $i++): ?>
                                     <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                        <a class="page-link" href="?page=<?php echo $i; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
+                                        <a class="page-link" href="?page=<?php echo $i; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
                                             <?php echo $i; ?>
                                         </a>
                                     </li>
@@ -470,7 +480,7 @@ include '../includes/user_header.php';
                                 <!-- Sonraki sayfa -->
                                 <?php if ($page < $totalPages): ?>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
+                                        <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
                                             <i class="fas fa-chevron-right"></i>
                                         </a>
                                     </li>

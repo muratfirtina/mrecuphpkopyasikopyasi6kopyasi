@@ -127,9 +127,9 @@ try {
     $params = [];
     
     if ($search) {
-        $whereClause .= " AND (u.original_name LIKE ? OR users.username LIKE ? OR users.email LIKE ?)";
+        $whereClause .= " AND (u.original_name LIKE ? OR users.username LIKE ? OR users.email LIKE ? OR u.plate LIKE ?)";
         $searchParam = "%$search%";
-        $params = array_merge($params, [$searchParam, $searchParam, $searchParam]);
+        $params = array_merge($params, [$searchParam, $searchParam, $searchParam, $searchParam]);
     }
     
     if ($status) {
@@ -342,7 +342,7 @@ include '../includes/admin_sidebar.php';
                 </label>
                 <input type="text" class="form-control" id="search" name="search" 
                        value="<?php echo htmlspecialchars($search); ?>" 
-                       placeholder="Dosya adı, kullanıcı adı...">
+                       placeholder="Dosya adı, kullanıcı adı, plaka...">
             </div>
             
             <div class="col-md-2">
@@ -507,7 +507,20 @@ include '../includes/admin_sidebar.php';
                                 <td>
                                     <div>
                                         <strong><?php echo htmlspecialchars($upload['brand_name'] ?? 'Bilinmiyor'); ?></strong><br>
-                                        <small class="text-muted"><?php echo htmlspecialchars($upload['model_name'] ?? 'Model belirtilmemiş'); ?></small>
+                                        <small class="text-muted">
+                                            <?php 
+                                            $modelDisplay = htmlspecialchars($upload['model_name'] ?? 'Model belirtilmemiş');
+                                            if (!empty($upload['year'])) {
+                                                $modelDisplay .= ' (' . $upload['year'] . ')';
+                                            }
+                                            echo $modelDisplay;
+                                            ?>
+                                        </small>
+                                        <?php if (!empty($upload['plate'])): ?>
+                                            <br><small class="text-primary">
+                                                <i class="fas fa-id-card me-1"></i><?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
+                                            </small>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                                 <td>

@@ -53,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
             'brand_id' => $brandId,
             'model_id' => $modelId,
             'year' => (int)$_POST['year'],
+            'plate' => !empty($_POST['plate']) ? strtoupper(sanitize($_POST['plate'])) : null,
             'ecu_type' => sanitize($_POST['ecu_type']),
             'engine_code' => sanitize($_POST['engine_code']),
             'gearbox_type' => sanitize($_POST['gearbox_type']),
@@ -174,7 +175,7 @@ include '../includes/user_header.php';
                                         </div>
                                         
                                         <div class="row g-3">
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <label for="brand_id" class="form-label fw-semibold">Marka *</label>
                                                 <select class="form-select form-control-modern" id="brand_id" name="brand_id" required>
                                                     <option value="">Marka Seçin</option>
@@ -194,7 +195,7 @@ include '../includes/user_header.php';
                                                 </div>
                                             </div>
                                             
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <label for="model_id" class="form-label fw-semibold">Model *</label>
                                                 <select class="form-select form-control-modern" id="model_id" name="model_id" required disabled>
                                                     <option value="">Önce marka seçin</option>
@@ -207,13 +208,24 @@ include '../includes/user_header.php';
                                                 </div>
                                             </div>
                                             
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <label for="year" class="form-label fw-semibold">Model Yılı *</label>
                                                 <input type="number" class="form-control form-control-modern" id="year" name="year" 
                                                        min="1990" max="<?php echo date('Y') + 1; ?>" 
                                                        value="<?php echo isset($_POST['year']) ? $_POST['year'] : ''; ?>" 
                                                        placeholder="<?php echo date('Y'); ?>" required>
                                                 <div class="invalid-feedback">Geçerli bir model yılı girin.</div>
+                                            </div>
+                                            
+                                            <div class="col-md-3">
+                                                <label for="plate" class="form-label fw-semibold">Plaka</label>
+                                                <input type="text" class="form-control form-control-modern" id="plate" name="plate" 
+                                                       placeholder="34 ABC 123" 
+                                                       value="<?php echo isset($_POST['plate']) ? htmlspecialchars($_POST['plate']) : ''; ?>" 
+                                                       style="text-transform: uppercase;">
+                                                <div class="form-help">
+                                                    <small class="text-muted">Araç plaka numarası</small>
+                                                </div>
                                             </div>
                                         </div>
                                         
@@ -377,6 +389,10 @@ include '../includes/user_header.php';
                                                 <div class="summary-item">
                                                     <span class="label">Model Yılı:</span>
                                                     <span class="value" id="summary-year">-</span>
+                                                </div>
+                                                <div class="summary-item">
+                                                    <span class="label">Plaka:</span>
+                                                    <span class="value" id="summary-plate">-</span>
                                                 </div>
                                                 <div class="summary-item">
                                                     <span class="label">ECU Tipi:</span>
@@ -1071,6 +1087,7 @@ function updateSummary() {
     const brand = document.getElementById('brand_id').selectedOptions[0]?.text || '-';
     const model = document.getElementById('model_id').selectedOptions[0]?.text || '-';
     const year = document.getElementById('year').value || '-';
+    const plate = document.getElementById('plate').value ? document.getElementById('plate').value.toUpperCase() : 'Belirtilmedi';
     const ecu = document.getElementById('ecu_type').value || 'Belirtilmedi';
     const engine = document.getElementById('engine_code').value || 'Belirtilmedi';
     const hp = document.getElementById('hp_power').value;
@@ -1087,6 +1104,7 @@ function updateSummary() {
     
     document.getElementById('summary-brand-model').textContent = `${brand} ${model}`;
     document.getElementById('summary-year').textContent = year;
+    document.getElementById('summary-plate').textContent = plate;
     document.getElementById('summary-ecu').textContent = ecu;
     document.getElementById('summary-engine').textContent = engine;
     document.getElementById('summary-power').textContent = power;

@@ -154,7 +154,7 @@
         </div>
 
         <!-- İstatistik Widget -->
-        <div class="px-3 mt-3">
+        <!-- <div class="px-3 mt-3">
             <div class="sidebar-widget stats-card">
                 <div class="widget-content">
                     <div class="widget-header">
@@ -187,7 +187,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <!-- Destek Widget -->
         <div class="px-3 mt-3">
