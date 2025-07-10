@@ -1,13 +1,19 @@
 <?php
 /**
  * Mr ECU - Admin Revize Yönetimi
+ * 
+ * @global PDO|null $pdo Global database connection
+ * @global FileManager|null $fileManager File manager instance
+ * @global User|null $user User management instance
  */
 
 require_once '../config/config.php';
 require_once '../config/database.php';
 
 // Admin kontrolü otomatik yapılır
+/** @var FileManager $fileManager */
 $fileManager = new FileManager($pdo);
+/** @var User $user */
 $user = new User($pdo);
 $error = '';
 $success = '';
@@ -122,6 +128,7 @@ $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $limit = 20;
 
 // Revize taleplerini getir (FileManager metodu ile)
+/** @var array $revisions Array of revision data */
 $revisions = $fileManager->getAllRevisions($page, $limit, $status, $dateFrom, $dateTo, $search);
 
 // Toplam revize sayısı için ayrı sorgu
@@ -167,16 +174,24 @@ try {
 try {
     $stmt = $pdo->query("
         SELECT 
-            COUNT(*) as total_revisions,
-            SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_count,
-            SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as processing_count,
-            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_count,
-            SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected_count,
-            SUM(CASE WHEN requested_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR) THEN 1 ELSE 0 END) as today_requests
+            COALESCE(COUNT(*), 0) as total_revisions,
+            COALESCE(SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END), 0) as pending_count,
+            COALESCE(SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END), 0) as processing_count,
+            COALESCE(SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END), 0) as completed_count,
+            COALESCE(SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END), 0) as rejected_count,
+            COALESCE(SUM(CASE WHEN requested_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR) THEN 1 ELSE 0 END), 0) as today_requests
         FROM revisions
     ");
+    /** @var array $stats Statistics array with guaranteed integer values */
     $stats = $stmt->fetch();
+    
+    // Null değerleri 0 ile değiştir
+    $stats = array_map(function($value) {
+        return $value === null ? 0 : $value;
+    }, $stats);
+    
 } catch(PDOException $e) {
+    /** @var array $stats Fallback statistics array */
     $stats = [
         'total_revisions' => 0,
         'pending_count' => 0, 
@@ -234,7 +249,7 @@ include '../includes/admin_sidebar.php';
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <div class="stat-number text-primary"><?php echo number_format($stats['total_revisions']); ?></div>
+                    <div class="stat-number text-primary"><?php echo safe_number_format($stats['total_revisions']); ?></div>
                     <div class="stat-label">Toplam Revize</div>
                     <small class="text-success">+<?php echo $stats['today_requests']; ?> bugün</small>
                 </div>
@@ -249,7 +264,7 @@ include '../includes/admin_sidebar.php';
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <div class="stat-number text-warning"><?php echo number_format($stats['pending_count']); ?></div>
+                    <div class="stat-number text-warning"><?php echo safe_number_format($stats['pending_count']); ?></div>
                     <div class="stat-label">Bekleyen</div>
                     <small class="text-muted">İşlem bekliyor</small>
                 </div>
@@ -264,7 +279,7 @@ include '../includes/admin_sidebar.php';
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <div class="stat-number text-info"><?php echo number_format($stats['processing_count']); ?></div>
+                    <div class="stat-number text-info"><?php echo safe_number_format($stats['processing_count']); ?></div>
                     <div class="stat-label">İşleniyor</div>
                     <small class="text-muted">Aktif işlemde</small>
                 </div>
@@ -279,9 +294,9 @@ include '../includes/admin_sidebar.php';
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <div class="stat-number text-success"><?php echo number_format($stats['completed_count']); ?></div>
+                    <div class="stat-number text-success"><?php echo safe_number_format($stats['completed_count']); ?></div>
                     <div class="stat-label">Tamamlanan</div>
-                    <small class="text-danger"><?php echo number_format($stats['rejected_count']); ?> reddedilen</small>
+                    <small class="text-danger"><?php echo safe_number_format($stats['rejected_count']); ?> reddedilen</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
                     <i class="fas fa-check-circle text-success fa-lg"></i>
