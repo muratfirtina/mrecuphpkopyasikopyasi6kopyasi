@@ -13,6 +13,9 @@ define('SITE_NAME', 'Mr ECU');
 define('SITE_URL', 'http://localhost:8888/mrecuphpkopyasikopyasi6kopyasi/');
 define('SITE_EMAIL', 'info@mrecu.com');
 
+// Debug modu (geliştirme ortamı için)
+define('DEBUG', true); // Production'da false yapın
+
 // Dosya yükleme ayarları
 define('UPLOAD_DIR', __DIR__ . '/../uploads/');
 define('UPLOAD_PATH', __DIR__ . '/../uploads/'); // FileManager için
