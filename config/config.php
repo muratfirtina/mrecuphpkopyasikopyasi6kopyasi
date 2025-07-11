@@ -19,12 +19,19 @@ define('UPLOAD_PATH', __DIR__ . '/../uploads/'); // FileManager için
 define('MAX_FILE_SIZE', 50 * 1024 * 1024); // 50MB
 define('ALLOWED_EXTENSIONS', ['bin', 'hex', 'ecu', 'ori', 'mod', 'zip', 'rar']);
 
-// Email ayarları (SMTP)
-define('SMTP_HOST', 'smtp.gmail.com');
+// Email ayarları (SMTP) - mrecu@outlook.com
+define('SMTP_HOST', 'smtp-mail.outlook.com');
 define('SMTP_PORT', 587);
-define('SMTP_USERNAME', 'your-email@gmail.com');
-define('SMTP_PASSWORD', 'your-app-password');
+define('SMTP_USERNAME', 'mrecu@outlook.com');
+define('SMTP_PASSWORD', ''); // Güvenlik için boş bırakıldı, veritabanından alınacak
 define('SMTP_ENCRYPTION', 'tls');
+define('SMTP_FROM_EMAIL', 'mrecu@outlook.com');
+define('SMTP_FROM_NAME', 'Mr ECU');
+
+// Email test modu (MAMP için)
+// true = Email'leri log dosyasına yazar (test)
+// false = Gerçek email göndermeye çalışır
+define('EMAIL_TEST_MODE', true);
 
 // Güvenlik ayarları
 define('SECURE_SALT', 'mr_ecu_2025_secure_salt_key_' . hash('sha256', __DIR__));

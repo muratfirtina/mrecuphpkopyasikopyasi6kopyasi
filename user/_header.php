@@ -34,41 +34,101 @@
                     </div>
                 </li>
 
-                <!-- Bildirimler -->
+                <!-- Gelişmiş Bildirim Sistemi -->
                 <?php
                 try {
-                    // Bekleyen revize talepleri
+                    // Kullanıcının bekleyen revize talepleri
                     $stmt = $pdo->prepare("SELECT COUNT(*) FROM revisions WHERE user_id = ? AND status = 'pending'");
                     $stmt->execute([$_SESSION['user_id']]);
                     $pendingUserRevisions = $stmt->fetchColumn();
 
-                    // Tamamlanan dosyalar
+                    // Tamamlanan dosyalar (henüz bildirilmemiş)
                     $stmt = $pdo->prepare("SELECT COUNT(*) FROM file_uploads WHERE user_id = ? AND status = 'completed' AND notified = 0");
                     $stmt->execute([$_SESSION['user_id']]);
                     $completedFiles = $stmt->fetchColumn();
+                    
+                    // Kullanıcı bildirimlerini al
+                    $userNotifications = [];
+                    $unreadNotificationCount = 0;
+                    
+                    if (isset($_SESSION['user_id'])) {
+                        $notificationManager = new NotificationManager($pdo);
+                        $userNotifications = $notificationManager->getUserNotifications($_SESSION['user_id'], 5, true);
+                        $unreadNotificationCount = $notificationManager->getUnreadCount($_SESSION['user_id']);
+                    }
                 } catch(PDOException $e) {
                     $pendingUserRevisions = 0;
                     $completedFiles = 0;
+                    $userNotifications = [];
+                    $unreadNotificationCount = 0;
                 }
                 
-                $totalNotifications = $pendingUserRevisions + $completedFiles;
+                $totalNotifications = $pendingUserRevisions + $completedFiles + $unreadNotificationCount;
                 ?>
                 
                 <?php if ($totalNotifications > 0): ?>
                 <li class="nav-item dropdown me-2">
-                    <a class="nav-link position-relative p-2" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link position-relative p-2" href="#" id="userNotificationDropdown" role="button" data-bs-toggle="dropdown">
                         <i class="fas fa-bell fa-lg text-white"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                             <?php echo $totalNotifications; ?>
                         </span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 300px;">
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 350px; max-height: 400px; overflow-y: auto;">
                         <li class="dropdown-header d-flex justify-content-between align-items-center">
                             <span>Bildirimler</span>
                             <span class="badge bg-primary"><?php echo $totalNotifications; ?></span>
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         
+                        <!-- Sistem Bildirimleri -->
+                        <?php foreach ($userNotifications as $notification): ?>
+                        <li>
+                            <a class="dropdown-item py-3 <?php echo $notification['is_read'] ? '' : 'bg-light'; ?>" 
+                               href="<?php echo $notification['action_url'] ?: '#'; ?>" 
+                               onclick="markNotificationRead('<?php echo htmlspecialchars($notification['id']); ?>')">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3">
+                                        <div class="<?php 
+                                            switch($notification['type']) {
+                                                case 'file_status_update':
+                                                    echo 'bg-success bg-opacity-10 p-2 rounded-circle';
+                                                    break;
+                                                case 'revision_response':
+                                                    echo 'bg-info bg-opacity-10 p-2 rounded-circle';
+                                                    break;
+                                                default:
+                                                    echo 'bg-primary bg-opacity-10 p-2 rounded-circle';
+                                            }
+                                        ?>">
+                                            <i class="<?php 
+                                                switch($notification['type']) {
+                                                    case 'file_status_update':
+                                                        echo 'fas fa-check-circle text-success';
+                                                        break;
+                                                    case 'revision_response':
+                                                        echo 'fas fa-reply text-info';
+                                                        break;
+                                                    default:
+                                                        echo 'fas fa-info-circle text-primary';
+                                                }
+                                            ?>"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold"><?php echo htmlspecialchars($notification['title']); ?></div>
+                                        <div class="text-muted small"><?php echo htmlspecialchars(substr($notification['message'], 0, 100)); ?><?php echo strlen($notification['message']) > 100 ? '...' : ''; ?></div>
+                                        <div class="text-muted small mt-1">
+                                            <i class="fas fa-clock me-1"></i>
+                                            <?php echo date('d.m.Y H:i', strtotime($notification['created_at'])); ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                        <?php endforeach; ?>
+                        
+                        <!-- Tamamlanan Dosyalar -->
                         <?php if ($completedFiles > 0): ?>
                         <li>
                             <a class="dropdown-item d-flex align-items-center py-2" href="files.php?status=completed">
@@ -85,6 +145,7 @@
                         </li>
                         <?php endif; ?>
                         
+                        <!-- Bekleyen Revize Talepleri -->
                         <?php if ($pendingUserRevisions > 0): ?>
                         <li>
                             <a class="dropdown-item d-flex align-items-center py-2" href="revisions.php">
@@ -101,11 +162,19 @@
                         </li>
                         <?php endif; ?>
                         
+                        <?php if (empty($userNotifications) && $completedFiles == 0 && $pendingUserRevisions == 0): ?>
+                        <li class="dropdown-item text-center text-muted py-3">
+                            <i class="fas fa-bell-slash fa-2x mb-2"></i><br>
+                            Henüz bildirim yok
+                        </li>
+                        <?php endif; ?>
+                        
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                            <a class="dropdown-item text-center small text-muted" href="files.php">
-                                Tüm dosyalarımı gör
-                            </a>
+                            <div class="d-flex justify-content-between px-3 py-2">
+                                <a href="#" class="btn btn-sm btn-outline-secondary" onclick="markAllNotificationsRead()">Tümünü Okundu İşaretle</a>
+                                <a href="files.php" class="small text-muted">Tüm dosyalarımı gör</a>
+                            </div>
                         </li>
                     </ul>
                 </li>
@@ -258,3 +327,6 @@
     box-shadow: none;
 }
 </style>
+
+<!-- User Bildirim JavaScript -->
+<script src="../assets/js/notifications.js"></script>

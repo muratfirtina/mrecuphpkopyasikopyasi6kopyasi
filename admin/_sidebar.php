@@ -1,6 +1,7 @@
 <!-- Admin Panel Sidebar -->
-<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-    <div class="position-sticky pt-3">
+<aside class="sidebar">
+<nav id="sidebarMenu" class="sidebar-sticky">
+    <div class="pt-3">
         <ul class="nav flex-column">
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'active' : ''; ?>" href="index.php">
@@ -131,6 +132,21 @@
                     Ayarlar
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'email-settings.php' ? 'active' : ''; ?>" href="email-settings.php">
+                    <i class="fas fa-envelope-open-text"></i>
+                    Email Ayarları
+                    <?php if (EMAIL_TEST_MODE): ?>
+                        <span class="badge bg-warning text-dark ms-1" title="Test Modu Aktif">TEST</span>
+                    <?php endif; ?>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'email-logs.php' ? 'active' : ''; ?>" href="email-logs.php">
+                    <i class="fas fa-file-alt"></i>
+                    Email Logları
+                </a>
+            </li>
         </ul>
 
         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -215,3 +231,4 @@
         </div>
     </div>
 </nav>
+</aside>

@@ -259,6 +259,15 @@ class FileManager {
                 
                 if ($result) {
                     $this->pdo->commit();
+                    
+                    // Bildirim sistemi entegrasyonu
+                    try {
+                        $notificationManager = new NotificationManager($this->pdo);
+                        $notificationManager->notifyFileUpload($uploadId, $userId, $fileData['name'], $vehicleData);
+                    } catch (Exception $e) {
+                        error_log('FileManager upload notification error: ' . $e->getMessage());
+                    }
+                    
                     return ['success' => true, 'message' => 'Dosya başarıyla yüklendi.', 'upload_id' => $uploadId];
                 } else {
                     $this->pdo->rollBack();
@@ -292,13 +301,40 @@ class FileManager {
                 return false;
             }
             
+            // Önce mevcut dosya bilgilerini al
+            $stmt = $this->pdo->prepare("SELECT user_id, original_name FROM file_uploads WHERE id = ?");
+            $stmt->execute([$uploadId]);
+            $fileInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$fileInfo) {
+                return false;
+            }
+            
             $stmt = $this->pdo->prepare("
                 UPDATE file_uploads 
                 SET status = ?, admin_notes = ?, processed_date = NOW() 
                 WHERE id = ?
             ");
             
-            return $stmt->execute([$status, $adminNotes, $uploadId]);
+            $result = $stmt->execute([$status, $adminNotes, $uploadId]);
+            
+            // Bildirim sistemi entegrasyonu
+            if ($result) {
+                try {
+                    $notificationManager = new NotificationManager($this->pdo);
+                    $notificationManager->notifyFileStatusUpdate(
+                        $uploadId, 
+                        $fileInfo['user_id'], 
+                        $fileInfo['original_name'], 
+                        $status, 
+                        $adminNotes
+                    );
+                } catch (Exception $e) {
+                    error_log('FileManager updateUploadStatus notification error: ' . $e->getMessage());
+                }
+            }
+            
+            return $result;
             
         } catch(PDOException $e) {
             error_log('updateUploadStatus error: ' . $e->getMessage());
@@ -841,6 +877,20 @@ class FileManager {
             error_log('requestResponseRevision - insert result: ' . ($result ? 'true' : 'false'));
             
             if ($result) {
+                // Bildirim sistemi entegrasyonu
+                try {
+                    $notificationManager = new NotificationManager($this->pdo);
+                    $notificationManager->notifyRevisionRequest(
+                        $revisionId,
+                        $userId,
+                        $response['upload_id'],
+                        $response['original_name'],
+                        $prefixedNotes
+                    );
+                } catch (Exception $e) {
+                    error_log('FileManager requestResponseRevision notification error: ' . $e->getMessage());
+                }
+                
                 return ['success' => true, 'message' => 'Yanıt dosyası için revize talebi başarıyla gönderildi.', 'revision_id' => $revisionId];
             }
             
@@ -963,6 +1013,21 @@ class FileManager {
                     }
                     
                     $this->pdo->commit();
+                    
+                    // Bildirim sistemi entegrasyonu
+                    try {
+                        $notificationManager = new NotificationManager($this->pdo);
+                        $notificationManager->notifyFileStatusUpdate(
+                            $uploadId,
+                            $upload['user_id'],
+                            $upload['original_name'],
+                            'completed',
+                            'Yanıt dosyası yüklendi: ' . $fileData['name'] . ($responseNotes ? ' - ' . $responseNotes : '')
+                        );
+                    } catch (Exception $e) {
+                        error_log('FileManager uploadResponseFile notification error: ' . $e->getMessage());
+                    }
+                    
                     return ['success' => true, 'message' => 'Yanıt dosyası başarıyla yüklendi.', 'response_id' => $responseId];
                 } else {
                     $this->pdo->rollBack();
@@ -1047,6 +1112,27 @@ class FileManager {
             $result = $stmt->execute([$adminId, $status, $adminNotes, $creditsCharged, $status, $revisionId]);
             
             if ($result) {
+                // Bildirim sistemi entegrasyonu
+                try {
+                    // Önce dosya bilgilerini al
+                    $uploadStmt = $this->pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
+                    $uploadStmt->execute([$revision['upload_id']]);
+                    $uploadInfo = $uploadStmt->fetch(PDO::FETCH_ASSOC);
+                    
+                    if ($uploadInfo) {
+                        $notificationManager = new NotificationManager($this->pdo);
+                        $notificationManager->notifyRevisionResponse(
+                            $revisionId,
+                            $revision['user_id'],
+                            $uploadInfo['original_name'],
+                            $status,
+                            $adminNotes
+                        );
+                    }
+                } catch (Exception $e) {
+                    error_log('FileManager updateRevisionStatus notification error: ' . $e->getMessage());
+                }
+                
                 return ['success' => true, 'message' => 'Revize durumu başarıyla güncellendi.'];
             }
             
@@ -1054,6 +1140,66 @@ class FileManager {
             
         } catch(PDOException $e) {
             error_log('updateRevisionStatus error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Veritabanı hatası: ' . $e->getMessage()];
+        }
+    }
+    
+    // Dosya için revize talebi oluştur (kullanıcı tarafından)
+    public function requestUploadRevision($uploadId, $userId, $revisionNotes) {
+        try {
+            if (!isValidUUID($uploadId) || !isValidUUID($userId)) {
+                return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
+            }
+            
+            // Dosyanın varlığını ve kullanıcıya ait olduğunu kontrol et
+            $stmt = $this->pdo->prepare("SELECT * FROM file_uploads WHERE id = ? AND user_id = ?");
+            $stmt->execute([$uploadId, $userId]);
+            $upload = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$upload) {
+                return ['success' => false, 'message' => 'Dosya bulunamadı veya yetkiniz yok.'];
+            }
+            
+            // Daha önce bu dosya için bekleyen revize talebi var mı kontrol et
+            $stmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM revisions WHERE upload_id = ? AND status = 'pending'");
+            $stmt->execute([$uploadId]);
+            $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($existing['count'] > 0) {
+                return ['success' => false, 'message' => 'Bu dosya için zaten bekleyen bir revize talebi bulunuyor.'];
+            }
+            
+            // Revize talebi oluştur
+            $revisionId = generateUUID();
+            $stmt = $this->pdo->prepare("
+                INSERT INTO revisions (id, upload_id, user_id, request_notes, status, requested_at)
+                VALUES (?, ?, ?, ?, 'pending', NOW())
+            ");
+            
+            $result = $stmt->execute([$revisionId, $uploadId, $userId, $revisionNotes]);
+            
+            if ($result) {
+                // Bildirim sistemi entegrasyonu
+                try {
+                    $notificationManager = new NotificationManager($this->pdo);
+                    $notificationManager->notifyRevisionRequest(
+                        $revisionId,
+                        $userId,
+                        $uploadId,
+                        $upload['original_name'],
+                        $revisionNotes
+                    );
+                } catch (Exception $e) {
+                    error_log('FileManager requestUploadRevision notification error: ' . $e->getMessage());
+                }
+                
+                return ['success' => true, 'message' => 'Revize talebi başarıyla gönderildi.', 'revision_id' => $revisionId];
+            }
+            
+            return ['success' => false, 'message' => 'Revize talebi gönderilemedi.'];
+            
+        } catch(PDOException $e) {
+            error_log('requestUploadRevision error: ' . $e->getMessage());
             return ['success' => false, 'message' => 'Veritabanı hatası: ' . $e->getMessage()];
         }
     }
