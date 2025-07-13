@@ -290,7 +290,7 @@ include '../includes/admin_sidebar.php';
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="uploads.php?view=<?php echo $upload['id']; ?>" 
+                                                <a href="file-detail.php?id=<?php echo $upload['id']; ?>" 
                                                    class="btn btn-outline-primary btn-sm" title="Detay">
                                                     <i class="fas fa-eye"></i>
                                                 </a>

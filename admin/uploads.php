@@ -1,10 +1,20 @@
 <?php
 /**
- * Mr ECU - Admin Dosya Yönetimi
+ * Mr ECU - Admin Dosya Yönetimi - DÜZELTILMIŞ VERSION
  */
 
 require_once '../config/config.php';
 require_once '../config/database.php';
+
+// Session kontrolü
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Admin kontrolü
+if (!isLoggedIn() || !isAdmin()) {
+    redirect('../login.php?error=access_denied');
+}
 
 // Gerekli sınıfları ve fonksiyonları include et
 if (!function_exists('isValidUUID')) {
@@ -59,54 +69,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['response_file'])) {
     }
 }
 
-// Toplu işlemler
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_action'])) {
-    $action = sanitize($_POST['bulk_action']);
-    $selectedUploads = $_POST['selected_uploads'] ?? [];
-    
-    if (empty($selectedUploads)) {
-        $error = 'Lütfen işlem yapmak için dosya seçin.';
-    } else {
-        $affectedFiles = 0;
-        $errors = [];
-        
-        foreach ($selectedUploads as $uploadId) {
-            if (!isValidUUID($uploadId)) continue;
-            
-            try {
-                switch ($action) {
-                    case 'approve':
-                        if ($fileManager->updateUploadStatus($uploadId, 'processing', 'Toplu onaylama')) {
-                            $affectedFiles++;
-                        }
-                        break;
-                    case 'reject':
-                        if ($fileManager->updateUploadStatus($uploadId, 'rejected', 'Toplu reddetme')) {
-                            $affectedFiles++;
-                        }
-                        break;
-                    case 'delete':
-                        if ($fileManager->deleteUpload($uploadId)) {
-                            $affectedFiles++;
-                        }
-                        break;
-                }
-            } catch(Exception $e) {
-                $errors[] = "Dosya $uploadId: " . $e->getMessage();
-            }
-        }
-        
-        if ($affectedFiles > 0) {
-            $success = "$affectedFiles dosya başarıyla güncellendi.";
-            if (!empty($errors)) {
-                $success .= " Bazı dosyalarda hata oluştu.";
-            }
-        } else {
-            $error = "Hiçbir dosya güncellenemedi.";
-        }
-    }
-}
-
 // Filtreleme ve arama parametreleri
 $search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
 $status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
@@ -123,7 +85,7 @@ $offset = ($page - 1) * $limit;
 
 // Dosyaları getir
 try {
-    $whereClause = "WHERE 1=1"; // Tüm dosyaları göster
+    $whereClause = "WHERE 1=1";
     $params = [];
     
     if ($search) {
@@ -227,32 +189,6 @@ $pageTitle = 'Dosya Yüklemeleri';
 $pageDescription = 'Kullanıcı dosya yüklemelerini yönetin ve işleyin.';
 $pageIcon = 'fas fa-upload';
 
-// Sidebar için istatistikler
-$totalUsers = 0; // Bu değer başka bir yerden gelecek
-$totalUploads = $stats['total_uploads'];
-
-// Hızlı eylemler
-$quickActions = [
-    [
-        'text' => 'Bekleyen Dosyalar',
-        'url' => 'uploads.php?status=pending',
-        'icon' => 'fas fa-clock',
-        'class' => 'warning'
-    ],
-    [
-        'text' => 'Excel Export',
-        'url' => 'export-uploads.php',
-        'icon' => 'fas fa-file-excel',
-        'class' => 'success'
-    ],
-    [
-        'text' => 'İstatistikler',
-        'url' => 'reports.php?type=uploads',
-        'icon' => 'fas fa-chart-line',
-        'class' => 'info'
-    ]
-];
-
 // Header ve Sidebar include
 include '../includes/admin_header.php';
 include '../includes/admin_sidebar.php';
@@ -260,18 +196,16 @@ include '../includes/admin_sidebar.php';
 
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
-    <div class="alert alert-admin alert-danger alert-dismissible fade show" role="alert">
+    <div class="alert alert-admin alert-danger" role="alert">
         <i class="fas fa-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
 
 <?php if ($success): ?>
-    <div class="alert alert-admin alert-success alert-dismissible fade show" role="alert">
+    <div class="alert alert-admin alert-success" role="alert">
         <i class="fas fa-check-circle me-2"></i>
         <?php echo $success; ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
 
@@ -416,27 +350,6 @@ include '../includes/admin_sidebar.php';
             <i class="fas fa-file-upload me-2"></i>
             Dosya Yüklemeleri (<?php echo $totalUploads; ?> dosya)
         </h5>
-        
-        <?php if (!empty($uploads)): ?>
-            <div class="dropdown">
-                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-cog me-1"></i>Toplu İşlemler
-                </button>
-                <ul class="dropdown-menu">
-                    <li><h6 class="dropdown-header">Seçili dosyalar için:</h6></li>
-                    <li><a class="dropdown-item" href="#" onclick="bulkAction('approve')">
-                        <i class="fas fa-check me-2 text-success"></i>Onayla & İşle
-                    </a></li>
-                    <li><a class="dropdown-item" href="#" onclick="bulkAction('reject')">
-                        <i class="fas fa-times me-2 text-danger"></i>Reddet
-                    </a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#" onclick="bulkAction('delete')">
-                        <i class="fas fa-trash me-2 text-danger"></i>Sil
-                    </a></li>
-                </ul>
-            </div>
-        <?php endif; ?>
     </div>
     
     <div class="card-body p-0">
@@ -456,11 +369,6 @@ include '../includes/admin_sidebar.php';
                 <table class="table table-admin table-hover mb-0" id="uploadsTable">
                     <thead>
                         <tr>
-                            <th style="width: 30px;">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="selectAll" onchange="toggleAllUploads(this)">
-                                </div>
-                            </th>
                             <th>Dosya Bilgileri</th>
                             <th>Kullanıcı</th>
                             <th>Araç Bilgileri</th>
@@ -473,12 +381,6 @@ include '../includes/admin_sidebar.php';
                         <?php foreach ($uploads as $upload): ?>
                             <tr>
                                 <td>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input upload-checkbox" 
-                                               value="<?php echo $upload['id']; ?>">
-                                    </div>
-                                </td>
-                                <td>
                                     <div class="d-flex align-items-center">
                                         <div class="file-icon me-3">
                                             <i class="fas fa-file-alt fa-2x text-primary"></i>
@@ -490,9 +392,6 @@ include '../includes/admin_sidebar.php';
                                             </h6>
                                             <small class="text-muted">
                                                 <?php echo formatFileSize($upload['file_size'] ?? 0); ?>
-                                                <?php if (!empty($upload['service_type'])): ?>
-                                                    • <?php echo ucfirst(str_replace('_', ' ', $upload['service_type'])); ?>
-                                                <?php endif; ?>
                                             </small>
                                         </div>
                                     </div>
@@ -582,21 +481,6 @@ include '../includes/admin_sidebar.php';
                                                 <i class="fas fa-play me-1"></i>İşle
                                             </button>
                                         <?php endif; ?>
-                                        
-                                        <?php 
-                                        $originalFileExists = false;
-                                        if (!empty($upload['filename'])) {
-                                            // filename'den tam path oluştur
-                                            $fullPath = $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/user_files/' . $upload['filename'];
-                                            $originalFileExists = file_exists($fullPath);
-                                        }
-                                        
-                                        if ($originalFileExists): ?>
-                                            <a href="download.php?type=original&id=<?php echo $upload['id']; ?>" 
-                                               class="btn btn-outline-info btn-sm">
-                                                <i class="fas fa-download me-1"></i>İndir
-                                            </a>
-                                        <?php endif; ?>
                                     </div>
                                 </td>
                             </tr>
@@ -604,258 +488,85 @@ include '../includes/admin_sidebar.php';
                     </tbody>
                 </table>
             </div>
-            
-            <!-- Pagination -->
-            <?php if ($totalPages > 1): ?>
-                <div class="card-footer">
-                    <nav aria-label="Dosya sayfalama">
-                        <ul class="pagination pagination-sm justify-content-center mb-0">
-                            <!-- Önceki sayfa -->
-                            <?php if ($page > 1): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $brand ? '&brand=' . $brand : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                            
-                            <!-- Sayfa numaraları -->
-                            <?php 
-                            $start = max(1, $page - 2);
-                            $end = min($totalPages, $page + 2);
-                            ?>
-                            
-                            <?php for ($i = $start; $i <= $end; $i++): ?>
-                                <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                    <a class="page-link" href="?page=<?php echo $i; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $brand ? '&brand=' . $brand : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
-                                        <?php echo $i; ?>
-                                    </a>
-                                </li>
-                            <?php endfor; ?>
-                            
-                            <!-- Sonraki sayfa -->
-                            <?php if ($page < $totalPages): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $brand ? '&brand=' . $brand : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                        </ul>
-                    </nav>
-                    
-                    <div class="text-center mt-2">
-                        <small class="text-muted">
-                            Sayfa <?php echo $page; ?> / <?php echo $totalPages; ?> 
-                            (Toplam <?php echo $totalUploads; ?> dosya)
-                        </small>
-                    </div>
-                </div>
-            <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>
 
-<!-- Toplu İşlemler için Hidden Form -->
-<form method="POST" id="bulkActionForm" style="display: none;">
-    <input type="hidden" name="bulk_action" id="bulk_action_type">
-    <div id="bulk_selected_uploads"></div>
-</form>
-
-<?php
-// Sayfa özel JavaScript
-$pageJS = "
-// Toggle all checkboxes
-function toggleAllUploads(source) {
-    const checkboxes = document.querySelectorAll('.upload-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = source.checked;
-    });
-}
-
-// View file details
-function viewFileDetails(uploadId) {
-    const modal = new bootstrap.Modal(document.getElementById('fileDetailModal'));
-    const content = document.getElementById('fileDetailContent');
-    
-    content.innerHTML = `
-        <div class=\"text-center py-5\">
-            <div class=\"spinner-border text-primary\" role=\"status\">
-                <span class=\"visually-hidden\">Yükleniyor...</span>
-            </div>
-        </div>
-    `;
-    
-    modal.show();
-    
-    // AJAX call to get file details
-    fetch('ajax/get-upload-details.php?id=' + uploadId)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                content.innerHTML = data.html;
-            } else {
-                content.innerHTML = `
-                    <div class=\"alert alert-danger\">
-                        <i class=\"fas fa-exclamation-triangle me-2\"></i>
-                        Dosya detayları yüklenirken hata oluştu.
-                    </div>
-                `;
-            }
-        })
-        .catch(error => {
-            content.innerHTML = `
-                <div class=\"alert alert-danger\">
-                    <i class=\"fas fa-exclamation-triangle me-2\"></i>
-                    Bağlantı hatası oluştu.
-                </div>
-            `;
-        });
-}
-
-// Process file (approve and start processing)
+<script>
+// Process file function
 function processFile(uploadId) {
-    if (confirmAdminAction('Bu dosyayı işleme almak istediğinizden emin misiniz?')) {
+    console.log('ProcessFile başlatıldı - Upload ID:', uploadId);
+    
+    if (confirm('Bu dosyayı işleme almak istediğinizden emin misiniz?')) {
+        console.log('Kullanıcı onayladı, durum güncelleniyor...');
+        
+        // Loading indicator göster
+        var button = event.target;
+        var originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Yükleniyor...';
+        button.disabled = true;
+        
         updateFileStatus(uploadId, 'processing', 'Dosya işleme alındı', true);
     }
 }
 
-// Update status modal
-function updateStatus(uploadId) {
-    document.getElementById('status_upload_id').value = uploadId;
-    document.getElementById('status').value = '';
-    document.getElementById('admin_notes').value = '';
+// Update file status function
+function updateFileStatus(uploadId, status, notes, redirectToDetail) {
+    notes = notes || '';
+    redirectToDetail = redirectToDetail || false;
     
-    const modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
-    modal.show();
-}
-
-// Upload response modal
-function uploadResponse(uploadId) {
-    document.getElementById('response_upload_id').value = uploadId;
-    document.getElementById('response_file').value = '';
-    document.getElementById('credits_charged').value = '5.00';
-    document.getElementById('response_notes').value = '';
+    console.log('UpdateFileStatus başlatıldı:', uploadId, status, notes, redirectToDetail);
     
-    const modal = new bootstrap.Modal(document.getElementById('uploadResponseModal'));
-    modal.show();
-}
-
-// Update file status via AJAX
-function updateFileStatus(uploadId, status, notes = '', redirectToDetail = false) {
-    const formData = new FormData();
+    var formData = new FormData();
     formData.append('update_status', '1');
     formData.append('upload_id', uploadId);
     formData.append('status', status);
     formData.append('admin_notes', notes);
     
+    console.log('AJAX isteği gönderiliyor...');
+    
     fetch('uploads.php', {
         method: 'POST',
         body: formData
     })
-    .then(response => response.text())
-    .then(data => {
+    .then(function(response) {
+        console.log('Response alındı:', response.status, response.statusText);
+        
+        if (!response.ok) {
+            throw new Error('HTTP hatası: ' + response.status);
+        }
+        
+        return response.text();
+    })
+    .then(function(data) {
+        console.log('Response data:', data.substring(0, 200) + '...');
+        
         if (redirectToDetail) {
-            // Redirect to file detail page
+            console.log('Detay sayfasına yönlendiriliyor...');
             window.location.href = 'file-detail.php?id=' + uploadId;
         } else {
-            // Reload page to see changes
+            console.log('Sayfa yenileniyor...');
             location.reload();
         }
     })
-    .catch(error => {
-        showAdminNotification('Güncelleme sırasında hata oluştu!', 'danger');
+    .catch(function(error) {
+        console.error('UpdateFileStatus hatası:', error);
+        alert('Güncelleme sırasında hata oluştu: ' + error.message);
+        
+        // Button'ı eski haline döndür
+        var buttons = document.querySelectorAll('button:disabled');
+        for (var i = 0; i < buttons.length; i++) {
+            var btn = buttons[i];
+            if (btn.innerHTML.includes('Yükleniyor')) {
+                btn.innerHTML = '<i class="fas fa-play me-1"></i>İşle';
+                btn.disabled = false;
+            }
+        }
     });
 }
+</script>
 
-// Bulk actions
-function bulkAction(action) {
-    const checkboxes = document.querySelectorAll('.upload-checkbox:checked');
-    if (checkboxes.length === 0) {
-        showAdminNotification('Lütfen işlem yapmak için dosya seçin!', 'warning');
-        return;
-    }
-    
-    const uploadIds = Array.from(checkboxes).map(cb => cb.value);
-    
-    let confirmMessage = '';
-    switch (action) {
-        case 'approve':
-            confirmMessage = 'Seçili dosyaları onaylayıp işleme almak istediğinizden emin misiniz?';
-            break;
-        case 'reject':
-            confirmMessage = 'Seçili dosyaları reddetmek istediğinizden emin misiniz?';
-            break;
-        case 'delete':
-            confirmMessage = 'Seçili dosyaları silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!';
-            break;
-    }
-    
-    if (confirmAdminAction(confirmMessage)) {
-        document.getElementById('bulk_action_type').value = action;
-        
-        const selectedUploadsDiv = document.getElementById('bulk_selected_uploads');
-        selectedUploadsDiv.innerHTML = '';
-        
-        uploadIds.forEach(uploadId => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'selected_uploads[]';
-            input.value = uploadId;
-            selectedUploadsDiv.appendChild(input);
-        });
-        
-        document.getElementById('bulkActionForm').submit();
-    }
-}
-
-// File size formatter
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-// Auto-refresh for pending/processing files
-const pendingProcessingFiles = document.querySelectorAll('tr:has(.badge.bg-warning), tr:has(.badge.bg-info)');
-if (pendingProcessingFiles.length > 0) {
-    setTimeout(() => {
-        if (!document.hidden) {
-            location.reload();
-        }
-    }, 60000); // 1 dakika sonra yenile
-}
-
-// Form validation
-document.getElementById('updateStatusForm').addEventListener('submit', function(e) {
-    const status = document.getElementById('status').value;
-    if (!status) {
-        e.preventDefault();
-        showAdminNotification('Lütfen yeni durumu seçin!', 'error');
-        return false;
-    }
-});
-
-document.getElementById('uploadResponseForm').addEventListener('submit', function(e) {
-    const file = document.getElementById('response_file').files[0];
-    const credits = parseFloat(document.getElementById('credits_charged').value);
-    
-    if (!file) {
-        e.preventDefault();
-        showAdminNotification('Lütfen yanıt dosyasını seçin!', 'error');
-        return false;
-    }
-    
-    if (credits < 0) {
-        e.preventDefault();
-        showAdminNotification('Kredi miktarı negatif olamaz!', 'error');
-        return false;
-    }
-});
-";
-
+<?php
 // Footer include
 include '../includes/admin_footer.php';
 ?>

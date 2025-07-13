@@ -52,9 +52,12 @@ define('MAX_FILE_UPLOADS_PER_HOUR', 10);
 define('DEFAULT_CREDITS', 0);
 define('FILE_DOWNLOAD_COST', 1); // Dosya indirme maliyeti
 
-// Hata raporlama
-error_reporting(E_ALL);
+// Hata raporlama - Force enable
+error_reporting(E_ALL & ~E_NOTICE);
 ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../logs/error.log');
 
 // Session güvenlik ayarları (session başlamadan önce)
 if (session_status() == PHP_SESSION_NONE) {

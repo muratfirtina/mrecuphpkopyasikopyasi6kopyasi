@@ -305,7 +305,7 @@ include '../includes/user_header.php';
                                                                     <i class="fas fa-download"></i>
                                                                 </a>
                                                             <?php endif; ?>
-                                                            <a href="files.php?view=<?php echo $upload['id']; ?>" 
+                                                            <a href="file-detail.php?id=<?php echo $upload['id']; ?>" 
                                                                class="btn btn-outline-primary btn-sm" title="Detay">
                                                                 <i class="fas fa-eye"></i>
                                                             </a>

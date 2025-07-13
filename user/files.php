@@ -1,6 +1,6 @@
 <?php
 /**
- * Mr ECU - Modern Kullanıcı Dosyaları Sayfası (GUID System)
+ * Mr ECU - Modern Kullanıcı Dosyaları Sayfası (GUID System) - Liste Görünümü
  */
 
 require_once '../config/config.php';
@@ -21,80 +21,6 @@ $userId = $_SESSION['user_id'];
 // GUID format kontrolü - User ID
 if (!isValidUUID($userId)) {
     redirect('../logout.php');
-}
-
-// AJAX response dosya detayları endpoint'i
-if (isset($_GET['get_response_details']) && isset($_GET['file_id'])) {
-    header('Content-Type: application/json');
-    $fileId = sanitize($_GET['file_id']);
-    
-    if (!isValidUUID($fileId)) {
-        echo json_encode(['error' => 'Geçersiz dosya ID formatı']);
-        exit;
-    }
-    
-    try {
-        // Response dosyasını getir
-        $stmt = $pdo->prepare("
-            SELECT fr.*, fu.user_id, fu.original_name as original_upload_name,
-                   fu.brand_id, fu.model_id, fu.year, fu.ecu_type, fu.engine_code,
-                   b.name as brand_name, m.name as model_name,
-                   a.username as admin_username
-            FROM file_responses fr
-            LEFT JOIN file_uploads fu ON fr.upload_id = fu.id
-            LEFT JOIN brands b ON fu.brand_id = b.id
-            LEFT JOIN models m ON fu.model_id = m.id
-            LEFT JOIN users a ON fr.admin_id = a.id
-            WHERE fr.id = ? AND fu.user_id = ?
-        ");
-        $stmt->execute([$fileId, $userId]);
-        $response = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$response) {
-            echo json_encode(['error' => 'Yanıt dosyası bulunamadı veya yetkiniz yok']);
-            exit;
-        }
-        
-        echo json_encode([
-            'success' => true,
-            'file' => $response
-        ]);
-        
-    } catch(PDOException $e) {
-        error_log('get_response_details error: ' . $e->getMessage());
-        echo json_encode(['error' => 'Veritabanı hatası']);
-    }
-    
-    exit;
-}
-
-// AJAX dosya detayları endpoint'i
-if (isset($_GET['get_file_details']) && isset($_GET['file_id'])) {
-    header('Content-Type: application/json');
-    $fileId = sanitize($_GET['file_id']);
-    
-    if (!isValidUUID($fileId)) {
-        echo json_encode(['error' => 'Geçersiz dosya ID formatı']);
-        exit;
-    }
-    
-    $upload = $fileManager->getUploadById($fileId);
-    if (!$upload) {
-        echo json_encode(['error' => 'Dosya bulunamadı']);
-        exit;
-    }
-    
-    // Kullanıcı kendi dosyasına erişmeye çalışıyor mu kontrol et
-    if ($upload['user_id'] !== $userId) {
-        echo json_encode(['error' => 'Bu dosyaya erişim yetkiniz yok']);
-        exit;
-    }
-    
-    echo json_encode([
-        'success' => true,
-        'file' => $upload
-    ]);
-    exit;
 }
 
 $error = '';
@@ -145,14 +71,11 @@ $search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
 
 // Sayfalama
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$limit = 12;
+$limit = 15;
 
-// Kullanıcının dosyalarını getir (yüklenen + yanıt dosyaları birleşik)
-$userFiles = $fileManager->getUserAllFiles($userId, $page, $limit, $status, $search);
-
-// Sayfalama için tüm dosyaları al (limit olmadan)
-$allUserFiles = $fileManager->getUserAllFiles($userId, 1, 1000, $status, $search); // Büyük limit ile tüm dosyaları al
-$totalFiles = count($allUserFiles);
+// Sadece ana dosyaları getir (file_uploads tablosundan)
+$userFiles = $fileManager->getUserUploads($userId, $page, $limit, $status, $search);
+$totalFiles = $fileManager->getUserUploadCount($userId, $status, $search);
 $totalPages = ceil($totalFiles / $limit);
 
 // İstatistikler
@@ -174,7 +97,7 @@ include '../includes/user_header.php';
                     <h1 class="h2 mb-0">
                         <i class="fas fa-folder me-2 text-primary"></i>Dosyalarım
                     </h1>
-                    <p class="text-muted mb-0">Yüklediğiniz dosyaları görüntüleyin, indirin ve yönetin</p>
+                    <p class="text-muted mb-0">Yüklediğiniz ana dosyaları görüntüleyin ve yönetin</p>
                 </div>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
@@ -321,7 +244,6 @@ include '../includes/user_header.php';
                                 <option value="processing" <?php echo $status === 'processing' ? 'selected' : ''; ?>>İşleniyor</option>
                                 <option value="completed" <?php echo $status === 'completed' ? 'selected' : ''; ?>>Tamamlanan</option>
                                 <option value="rejected" <?php echo $status === 'rejected' ? 'selected' : ''; ?>>Reddedilen</option>
-                                <option value="response" <?php echo $status === 'response' ? 'selected' : ''; ?>>Yanıt Dosyaları</option>
                             </select>
                         </div>
                         
@@ -386,153 +308,136 @@ include '../includes/user_header.php';
                     </div>
                 </div>
             <?php else: ?>
-                <!-- Dosya Grid -->
-                <div class="files-grid">
-                    <?php foreach ($userFiles as $file): ?>
-                        <div class="file-card <?php echo $file['file_type'] === 'response' ? 'response-file' : 'upload-file'; ?>">
-                            <div class="file-card-header">
-                                <div class="file-icon-large <?php echo $file['file_type'] === 'response' ? 'response-icon' : ''; ?>">
-                                    <i class="fas <?php echo $file['file_type'] === 'response' ? 'fa-reply' : 'fa-file-alt'; ?>"></i>
-                                </div>
-                                <div class="file-status">
-                                    <?php
-                                    if ($file['file_type'] === 'response') {
-                                        $config = ['class' => 'success', 'text' => 'Yanıt Dosyası', 'icon' => 'reply'];
-                                    } else {
-                                        $statusConfig = [
-                                            'pending' => ['class' => 'warning', 'text' => 'Bekliyor', 'icon' => 'clock'],
-                                            'processing' => ['class' => 'info', 'text' => 'İşleniyor', 'icon' => 'cogs'],
-                                            'completed' => ['class' => 'success', 'text' => 'Tamamlandı', 'icon' => 'check-circle'],
-                                            'rejected' => ['class' => 'danger', 'text' => 'Reddedildi', 'icon' => 'times-circle']
-                                        ];
-                                        $config = $statusConfig[$file['status']] ?? ['class' => 'secondary', 'text' => 'Bilinmiyor', 'icon' => 'question'];
-                                    }
-                                    ?>
-                                    <span class="badge bg-<?php echo $config['class']; ?> status-badge">
-                                        <i class="fas fa-<?php echo $config['icon']; ?> me-1"></i>
-                                        <?php echo $config['text']; ?>
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <div class="file-card-body">
-                                <h6 class="file-name" title="<?php echo htmlspecialchars($file['original_name'] ?? 'Bilinmeyen dosya'); ?>">
-                                    <?php echo htmlspecialchars($file['original_name'] ?? 'Bilinmeyen dosya'); ?>
-                                    <?php if ($file['file_type'] === 'response'): ?>
-                                        <small class="text-muted d-block">
-                                            <i class="fas fa-arrow-left me-1"></i>
-                                            Yanıt: <?php echo htmlspecialchars($file['original_upload_name'] ?? ''); ?>
-                                        </small>
-                                    <?php endif; ?>
-                                </h6>
-                                
-                                <div class="file-meta">
-                                    <div class="meta-item">
-                                        <i class="fas fa-car me-1"></i>
-                                        <span><?php echo htmlspecialchars($file['brand_name'] ?? 'Bilinmiyor'); ?></span>
-                                    </div>
-                                    <div class="meta-item">
-                                        <i class="fas fa-cog me-1"></i>
-                                        <span>
-                                            <?php 
-                                            $modelDisplay = htmlspecialchars($file['model_name'] ?? 'Model belirtilmemiş');
-                                            if (!empty($file['year'])) {
-                                                $modelDisplay .= ' (' . $file['year'] . ')';
-                                            }
-                                            echo $modelDisplay;
+                <!-- Dosya Tablosu -->
+                <div class="table-responsive">
+                    <div class="table-container">
+                        <table class="table table-hover files-table">
+                            <thead>
+                                <tr>
+                                    <th width="40">
+                                        <i class="fas fa-file-alt"></i>
+                                    </th>
+                                    <th>Dosya Adı</th>
+                                    <th>Araç Bilgileri</th>
+                                    <th>Durum</th>
+                                    <th>Boyut</th>
+                                    <th>Tarih</th>
+                                    <th width="200" class="text-center">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($userFiles as $file): ?>
+                                    <tr class="file-row" data-file-id="<?php echo $file['id']; ?>">
+                                        <td>
+                                            <div class="file-icon">
+                                                <i class="fas fa-file-alt text-primary"></i>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="file-info">
+                                                <h6 class="file-name mb-1" title="<?php echo htmlspecialchars($file['original_name']); ?>">
+                                                    <?php echo htmlspecialchars($file['original_name']); ?>
+                                                </h6>
+                                                <?php if (!empty($file['upload_notes'])): ?>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-sticky-note me-1"></i>
+                                                        <?php echo htmlspecialchars(substr($file['upload_notes'], 0, 50)) . (strlen($file['upload_notes']) > 50 ? '...' : ''); ?>
+                                                    </small>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="vehicle-info">
+                                                <div class="brand-model">
+                                                    <strong><?php echo htmlspecialchars($file['brand_name'] ?? 'Bilinmiyor'); ?></strong>
+                                                    <?php if (!empty($file['model_name'])): ?>
+                                                        - <?php echo htmlspecialchars($file['model_name']); ?>
+                                                    <?php endif; ?>
+                                                    <?php if (!empty($file['year'])): ?>
+                                                        (<?php echo $file['year']; ?>)
+                                                    <?php endif; ?>
+                                                </div>
+                                                <?php if (!empty($file['plate'])): ?>
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-id-card me-1"></i>
+                                                        <?php echo strtoupper(htmlspecialchars($file['plate'])); ?>
+                                                    </small>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $statusConfig = [
+                                                'pending' => ['class' => 'warning', 'text' => 'Bekliyor', 'icon' => 'clock'],
+                                                'processing' => ['class' => 'info', 'text' => 'İşleniyor', 'icon' => 'cogs'],
+                                                'completed' => ['class' => 'success', 'text' => 'Tamamlandı', 'icon' => 'check-circle'],
+                                                'rejected' => ['class' => 'danger', 'text' => 'Reddedildi', 'icon' => 'times-circle']
+                                            ];
+                                            $config = $statusConfig[$file['status']] ?? ['class' => 'secondary', 'text' => 'Bilinmiyor', 'icon' => 'question'];
                                             ?>
-                                        </span>
-                                    </div>
-                                    <?php if (!empty($file['plate'])): ?>
-                                        <div class="meta-item">
-                                            <i class="fas fa-id-card me-1"></i>
-                                            <span><?php echo strtoupper(htmlspecialchars($file['plate'])); ?></span>
-                                        </div>
-                                    <?php endif; ?>
-                                    <div class="meta-item">
-                                        <i class="fas fa-calendar me-1"></i>
-                                        <span><?php echo date('d.m.Y', strtotime($file['upload_date'])); ?></span>
-                                    </div>
-                                    <div class="meta-item">
-                                        <i class="fas fa-hdd me-1"></i>
-                                        <span><?php echo formatFileSize($file['file_size'] ?? 0); ?></span>
-                                    </div>
-                                    <?php if ($file['file_type'] === 'response' && !empty($file['admin_username'])): ?>
-                                        <div class="meta-item">
-                                            <i class="fas fa-user-cog me-1"></i>
-                                            <span>Admin: <?php echo htmlspecialchars($file['admin_username']); ?></span>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                
-                                <?php if (!empty($file['admin_notes'])): ?>
-                                    <div class="admin-note">
-                                        <i class="fas fa-comment-dots me-1"></i>
-                                        <small>Admin notu mevcut</small>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <div class="file-card-footer">
-                                <div class="file-actions">
-                                    <?php if ($file['file_type'] === 'response' || $file['status'] === 'completed'): ?>
-                                        <a href="download.php?id=<?php echo $file['id']; ?>&type=<?php echo $file['file_type'] === 'response' ? 'response' : 'upload'; ?>" 
-                                           class="btn btn-success btn-sm action-btn">
-                                            <i class="fas fa-download me-1"></i>İndir
-                                        </a>
-                                    <?php endif; ?>
-                                    
-                                    <button type="button" class="btn btn-outline-primary btn-sm action-btn" 
-                                            onclick="viewFileDetails('<?php echo $file['id']; ?>', '<?php echo $file['file_type']; ?>')">
-                                        <i class="fas fa-eye me-1"></i>Detay
-                                    </button>
-                                    
-                                    <?php if ($file['file_type'] === 'upload' && $file['status'] === 'completed'): ?>
-                                        <button type="button" class="btn btn-outline-warning btn-sm action-btn" 
-                                                onclick="requestRevision('<?php echo $file['id']; ?>', 'upload')">
-                                            <i class="fas fa-redo me-1"></i>Revize
-                                        </button>
-                                    <?php elseif ($file['file_type'] === 'response'): ?>
-                                        <button type="button" class="btn btn-outline-warning btn-sm action-btn" 
-                                                onclick="requestRevision('<?php echo $file['id']; ?>', 'response')">
-                                            <i class="fas fa-redo me-1"></i>Revize
-                                        </button>
-                                    <?php endif; ?>
-                                </div>
-                                
-                                <?php if ($file['file_type'] !== 'response'): ?>
-                                    <div class="file-progress">
-                                        <?php 
-                                        $progressValue = 0;
-                                        $progressClass = 'bg-secondary';
-                                        switch($file['status']) {
-                                            case 'pending':
-                                                $progressValue = 25;
-                                                $progressClass = 'bg-warning';
-                                                break;
-                                            case 'processing':
-                                                $progressValue = 75;
-                                                $progressClass = 'bg-info';
-                                                break;
-                                            case 'completed':
-                                                $progressValue = 100;
-                                                $progressClass = 'bg-success';
-                                                break;
-                                            case 'rejected':
-                                                $progressValue = 100;
-                                                $progressClass = 'bg-danger';
-                                                break;
-                                        }
-                                        ?>
-                                        <div class="progress progress-sm">
-                                            <div class="progress-bar <?php echo $progressClass; ?>" 
-                                                 style="width: <?php echo $progressValue; ?>%"></div>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
+                                            <span class="badge bg-<?php echo $config['class']; ?> status-badge">
+                                                <i class="fas fa-<?php echo $config['icon']; ?> me-1"></i>
+                                                <?php echo $config['text']; ?>
+                                            </span>
+                                            
+                                            <?php if ($file['status'] !== 'pending'): ?>
+                                                <div class="progress progress-sm mt-2">
+                                                    <?php 
+                                                    $progressValue = 0;
+                                                    $progressClass = 'bg-secondary';
+                                                    switch($file['status']) {
+                                                        case 'processing':
+                                                            $progressValue = 75;
+                                                            $progressClass = 'bg-info';
+                                                            break;
+                                                        case 'completed':
+                                                            $progressValue = 100;
+                                                            $progressClass = 'bg-success';
+                                                            break;
+                                                        case 'rejected':
+                                                            $progressValue = 100;
+                                                            $progressClass = 'bg-danger';
+                                                            break;
+                                                    }
+                                                    ?>
+                                                    <div class="progress-bar <?php echo $progressClass; ?>" 
+                                                         style="width: <?php echo $progressValue; ?>%"></div>
+                                                </div>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <span class="file-size"><?php echo formatFileSize($file['file_size'] ?? 0); ?></span>
+                                        </td>
+                                        <td>
+                                            <div class="date-info">
+                                                <span class="upload-date"><?php echo date('d.m.Y', strtotime($file['upload_date'])); ?></span>
+                                                <small class="text-muted d-block"><?php echo date('H:i', strtotime($file['upload_date'])); ?></small>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="action-buttons">
+                                                <a href="file-detail.php?id=<?php echo $file['id']; ?>" class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-eye me-1"></i>Detay
+                                                </a>
+                                                
+                                                <?php if ($file['status'] === 'completed'): ?>
+                                                    <a href="download.php?id=<?php echo $file['id']; ?>&type=upload" 
+                                                       class="btn btn-success btn-sm">
+                                                        <i class="fas fa-download me-1"></i>İndir
+                                                    </a>
+                                                    
+                                                    <button type="button" class="btn btn-outline-warning btn-sm" 
+                                                            onclick="requestRevision('<?php echo $file['id']; ?>', 'upload')">
+                                                        <i class="fas fa-redo me-1"></i>Revize
+                                                    </button>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 
                 <!-- Pagination -->
@@ -584,28 +489,6 @@ include '../includes/user_header.php';
                 <?php endif; ?>
             <?php endif; ?>
         </main>
-    </div>
-</div>
-
-<!-- Dosya Detay Modal -->
-<div class="modal fade" id="fileDetailModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-file-alt me-2 text-primary"></i>Dosya Detayları
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="fileDetailContent">
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Yükleniyor...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Dosya detayları yükleniyor...</p>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -764,50 +647,75 @@ include '../includes/user_header.php';
     flex-wrap: wrap;
 }
 
-/* Files Grid */
-.files-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.file-card {
+/* Table Styles */
+.table-container {
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-    transition: all 0.3s ease;
-    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     overflow: hidden;
 }
 
-.file-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+.files-table {
+    margin-bottom: 0;
 }
 
-.file-card-header {
-    padding: 1.5rem 1.5rem 1rem;
-    position: relative;
+.files-table thead {
+    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
+    color: white;
 }
 
-.file-icon-large {
-    width: 64px;
-    height: 64px;
-    background: grey;
-    border-radius: 16px;
+.files-table thead th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.files-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.files-table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.files-table td {
+    padding: 1rem;
+    vertical-align: middle;
+    border: none;
+}
+
+.file-icon {
+    width: 40px;
+    height: 40px;
+    background: #e3f2fd;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-size: 1.75rem;
-    margin-bottom: 1rem;
+    font-size: 1.2rem;
 }
 
-.file-status {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
+.file-info .file-name {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vehicle-info .brand-model {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.25rem;
 }
 
 .status-badge {
@@ -817,74 +725,33 @@ include '../includes/user_header.php';
     border-radius: 8px;
 }
 
-.file-card-body {
-    padding: 0 1.5rem 1rem;
-}
-
-.file-name {
-    font-weight: 600;
-    color: #495057;
-    margin-bottom: 1rem;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.file-meta {
-    display: grid;
-    gap: 0.5rem;
-}
-
-.meta-item {
-    display: flex;
-    align-items: center;
-    font-size: 0.85rem;
-    color: #6c757d;
-}
-
-.meta-item i {
-    color: #9ca3af;
-    width: 16px;
-}
-
-.admin-note {
-    margin-top: 0.75rem;
-    padding: 0.5rem 0.75rem;
-    background: #fff3cd;
-    border-radius: 6px;
-    color: #856404;
-    font-size: 0.8rem;
-}
-
-.file-card-footer {
-    padding: 1rem 1.5rem 1.5rem;
-    border-top: 1px solid #f8f9fa;
-}
-
-.file-actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 0.75rem;
-}
-
-.action-btn {
-    flex: 1;
-    min-width: 80px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-.file-progress {
-    margin-top: 0.75rem;
-}
-
 .progress-sm {
     height: 4px;
     border-radius: 2px;
+}
+
+.file-size {
+    font-weight: 500;
+    color: #6c757d;
+}
+
+.date-info .upload-date {
+    font-weight: 500;
+    color: #495057;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.action-buttons .btn {
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.4rem 0.8rem;
 }
 
 /* Pagination */
@@ -950,29 +817,21 @@ include '../includes/user_header.php';
 
 /* Responsive */
 @media (max-width: 767.98px) {
-    .files-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
+    .files-table {
+        font-size: 0.85rem;
     }
     
-    .file-card-header {
-        padding: 1.25rem 1.25rem 0.75rem;
+    .files-table td {
+        padding: 0.75rem 0.5rem;
     }
     
-    .file-card-body {
-        padding: 0 1.25rem 0.75rem;
-    }
-    
-    .file-card-footer {
-        padding: 0.75rem 1.25rem 1.25rem;
-    }
-    
-    .file-actions {
+    .action-buttons {
         flex-direction: column;
     }
     
-    .action-btn {
-        flex: none;
+    .action-buttons .btn {
+        width: 100%;
+        margin-bottom: 0.25rem;
     }
     
     .empty-state-card {
@@ -983,356 +842,27 @@ include '../includes/user_header.php';
         flex-direction: column;
         align-items: center;
     }
-}
-
-/* File Detail Modal Styles */
-.file-detail-header {
-    border-bottom: 1px solid #e9ecef;
-    padding-bottom: 1rem;
-}
-
-.file-detail-header .file-icon-large {
-    width: 64px;
-    height: 64px;
-    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.75rem;
-}
-
-.detail-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.detail-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #f8f9fa;
-}
-
-.detail-item:last-child {
-    border-bottom: none;
-}
-
-.detail-item .label {
-    font-weight: 500;
-    color: #6c757d;
-    min-width: 120px;
-    flex-shrink: 0;
-}
-
-.detail-item .value {
-    color: #495057;
-    font-weight: 600;
-    text-align: right;
-    word-break: break-word;
-}
-
-.notes-content, .admin-notes-content {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 1rem;
-    border-left: 3px solid #667eea;
-    line-height: 1.6;
-    color: #495057;
-}
-
-.admin-notes-content {
-    border-left-color: #28a745;
-    background: #f8fff9;
-}
-
-/* Responsive modal content */
-@media (max-width: 767.98px) {
-    .file-detail-header .d-flex {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
+    
+    .stat-card-body {
+        padding: 1.25rem;
     }
     
-    .detail-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.25rem;
-    }
-    
-    .detail-item .value {
-        text-align: left;
+    .stat-number {
+        font-size: 1.75rem;
     }
 }
 
-/* Response File Styles */
-.response-file {
-    border-left: 4px solid #28a745;
-    background: linear-gradient(145deg, #ffffff 0%, #f8fff9 100%);
+/* File row click effect */
+.file-row {
+    cursor: pointer;
 }
 
-.response-file:hover {
-    border-left-color: #1e7e34;
-    box-shadow: 0 8px 30px rgba(40, 167, 69, 0.15);
-}
-
-.response-icon {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
-}
-
-.upload-file {
-    border-left: 4px solid #007bff;
-}
-
-.upload-file:hover {
-    border-left-color: #0056b3;
+.file-row:hover .file-name {
+    color: #007bff;
 }
 </style>
 
 <script>
-// File Details Modal
-function viewFileDetails(uploadId, fileType = 'upload') {
-    const modal = new bootstrap.Modal(document.getElementById('fileDetailModal'));
-    const content = document.getElementById('fileDetailContent');
-    
-    content.innerHTML = `
-        <div class="text-center py-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
-            </div>
-            <p class="mt-2 text-muted">Dosya detayları yükleniyor...</p>
-        </div>
-    `;
-    
-    modal.show();
-    
-    // Response dosyaları için farklı endpoint
-    let endpoint = '';
-    if (fileType === 'response') {
-        endpoint = `?get_response_details=1&file_id=${encodeURIComponent(uploadId)}`;
-    } else {
-        endpoint = `?get_file_details=1&file_id=${encodeURIComponent(uploadId)}`;
-    }
-    
-    // AJAX ile dosya detaylarını getir
-    fetch(endpoint)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                content.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        ${data.error}
-                    </div>
-                `;
-                return;
-            }
-            
-            if (data.success && data.file) {
-                const file = data.file;
-                const isResponse = fileType === 'response';
-                
-                const statusConfig = {
-                    'pending': { class: 'warning', text: 'Bekliyor', icon: 'clock' },
-                    'processing': { class: 'info', text: 'İşleniyor', icon: 'cogs' },
-                    'completed': { class: 'success', text: 'Tamamlandı', icon: 'check-circle' },
-                    'rejected': { class: 'danger', text: 'Reddedildi', icon: 'times-circle' }
-                };
-                
-                const status = isResponse ? 
-                    { class: 'success', text: 'Yanıt Dosyası', icon: 'reply' } :
-                    (statusConfig[file.status] || { class: 'secondary', text: 'Bilinmiyor', icon: 'question' });
-                
-                content.innerHTML = `
-                    <div class="file-detail-content">
-                        <!-- Dosya Başlık -->
-                        <div class="file-detail-header mb-4">
-                            <div class="d-flex align-items-center">
-                                <div class="file-icon-large me-3 ${isResponse ? 'response-icon' : ''}">
-                                    <i class="fas fa-${isResponse ? 'reply' : 'file-alt'}"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h5 class="mb-1">${file.original_name || 'Bilinmeyen dosya'}</h5>
-                                    ${isResponse && file.original_upload_name ? `
-                                        <small class="text-muted d-block mb-2">
-                                            <i class="fas fa-arrow-left me-1"></i>
-                                            Yanıt: ${file.original_upload_name}
-                                        </small>
-                                    ` : ''}
-                                    <span class="badge bg-${status.class}">
-                                        <i class="fas fa-${status.icon} me-1"></i>${status.text}
-                                    </span>
-                                </div>
-                                ${(isResponse || file.status === 'completed') ? `
-                                    <a href="download.php?id=${file.id}&type=${isResponse ? 'response' : 'upload'}" class="btn btn-success">
-                                        <i class="fas fa-download me-2"></i>İndir
-                                    </a>
-                                ` : ''}
-                            </div>
-                        </div>
-                        
-                        <!-- Dosya Bilgileri -->
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6 class="text-muted mb-3">
-                                    <i class="fas fa-info-circle me-2"></i>Dosya Bilgileri
-                                </h6>
-                                <div class="detail-list">
-                                    <div class="detail-item">
-                                        <span class="label">Dosya ID:</span>
-                                        <span class="value font-monospace">${file.id}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Orijinal Ad:</span>
-                                        <span class="value">${file.original_name || 'Belirtilmemiş'}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Dosya Boyutu:</span>
-                                        <span class="value">${formatFileSize(file.file_size || 0)}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">${isResponse ? 'Oluşturulma' : 'Yüklenme'} Tarihi:</span>
-                                        <span class="value">${formatDate(file.upload_date)}</span>
-                                    </div>
-                                    ${file.processed_date && !isResponse ? `
-                                        <div class="detail-item">
-                                            <span class="label">Tamamlanma Tarihi:</span>
-                                            <span class="value">${formatDate(file.processed_date)}</span>
-                                        </div>
-                                    ` : ''}
-                                    ${isResponse && file.admin_username ? `
-                                        <div class="detail-item">
-                                            <span class="label">Oluşturan Admin:</span>
-                                            <span class="value">${file.admin_username}</span>
-                                        </div>
-                                    ` : ''}
-                                    ${file.credits_charged ? `
-                                        <div class="detail-item">
-                                            <span class="label">Ücret:</span>
-                                            <span class="value">${file.credits_charged} kredi</span>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <h6 class="text-muted mb-3">
-                                    <i class="fas fa-car me-2"></i>Araç Bilgileri
-                                </h6>
-                                <div class="detail-list">
-                                    <div class="detail-item">
-                                        <span class="label">Marka:</span>
-                                        <span class="value">${file.brand_name || 'Belirtilmemiş'}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Model:</span>
-                                        <span class="value">${file.model_name || 'Belirtilmemiş'}</span>
-                                    </div>
-                                    ${file.year ? `
-                                        <div class="detail-item">
-                                            <span class="label">Yıl:</span>
-                                            <span class="value">${file.year}</span>
-                                        </div>
-                                    ` : ''}
-                                    ${file.plate ? `
-                                        <div class="detail-item">
-                                            <span class="label">Plaka:</span>
-                                            <span class="value">${file.plate.toUpperCase()}</span>
-                                        </div>
-                                    ` : ''}
-                                    ${file.ecu_type ? `
-                                        <div class="detail-item">
-                                            <span class="label">ECU Tipi:</span>
-                                            <span class="value">${file.ecu_type}</span>
-                                        </div>
-                                    ` : ''}
-                                    ${file.engine_code ? `
-                                        <div class="detail-item">
-                                            <span class="label">Motor Kodu:</span>
-                                            <span class="value">${file.engine_code}</span>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        ${file.notes && file.notes !== file.admin_notes ? `
-                            <div class="mt-4">
-                                <h6 class="text-muted mb-3">
-                                    <i class="fas fa-comment me-2"></i>${isResponse ? 'Orijinal' : ''} Notlar
-                                </h6>
-                                <div class="notes-content">
-                                    ${file.notes.replace(/\n/g, '<br>')}
-                                </div>
-                            </div>
-                        ` : ''}
-                        
-                        ${file.admin_notes ? `
-                            <div class="mt-4">
-                                <h6 class="text-muted mb-3">
-                                    <i class="fas fa-user-cog me-2"></i>Admin Notları
-                                </h6>
-                                <div class="admin-notes-content">
-                                    ${file.admin_notes.replace(/\n/g, '<br>')}
-                                </div>
-                            </div>
-                        ` : ''}
-                        
-                        ${!isResponse && file.status === 'completed' ? `
-                            <div class="mt-4 text-center">
-                                <button type="button" class="btn btn-warning me-2" onclick="requestRevision('${file.id}', 'upload'); bootstrap.Modal.getInstance(document.getElementById('fileDetailModal')).hide();">
-                                    <i class="fas fa-redo me-2"></i>Revize Talep Et
-                                </button>
-                            </div>
-                        ` : ''}
-                        
-                        ${isResponse ? `
-                            <div class="mt-4 text-center">
-                                <button type="button" class="btn btn-warning me-2" onclick="requestRevision('${file.id}', 'response'); bootstrap.Modal.getInstance(document.getElementById('fileDetailModal')).hide();">
-                                    <i class="fas fa-redo me-2"></i>Yanıt Dosyası için Revize Talep Et
-                                </button>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            } else {
-                content.innerHTML = `
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Dosya detayları alınamadı.
-                    </div>
-                `;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            content.innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Dosya detayları yüklenirken hata oluştu.
-                </div>
-            `;
-        });
-}
-
-// Helper functions
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-function formatDate(dateString) {
-    if (!dateString) return 'Belirtilmemiş';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('tr-TR') + ' ' + date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-}
-
 // Request Revision
 function requestRevision(fileId, fileType = 'upload') {
     document.getElementById('revisionFileId').value = fileId;
@@ -1367,6 +897,24 @@ function exportToExcel() {
 function refreshPage() {
     location.reload();
 }
+
+// File row click handler - detay sayfasına gitmek için
+document.addEventListener('DOMContentLoaded', function() {
+    const fileRows = document.querySelectorAll('.file-row');
+    fileRows.forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Eğer buton üzerine tıklandıysa, detay sayfasına gitme
+            if (e.target.closest('.btn') || e.target.closest('button')) {
+                return;
+            }
+            
+            const fileId = this.dataset.fileId;
+            if (fileId) {
+                window.location.href = `file-detail.php?id=${fileId}`;
+            }
+        });
+    });
+});
 
 // Auto-refresh for processing files
 <?php if (!empty($userFiles)): ?>

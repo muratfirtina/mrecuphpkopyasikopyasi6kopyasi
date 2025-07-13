@@ -22,29 +22,53 @@ $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approve_revision_direct'])) {
     $revisionId = sanitize($_POST['revision_id']);
     
+    // Debug logging
+    error_log("Direct revision approval started for ID: " . $revisionId);
+    error_log("Session user_id: " . ($_SESSION['user_id'] ?? 'not set'));
+    error_log("Is admin: " . (isAdmin() ? 'yes' : 'no'));
+    
     if (!isValidUUID($revisionId)) {
         $error = 'Geçersiz revize ID formatı.';
+        error_log("Invalid revision ID format: " . $revisionId);
     } else {
-        // Revize talebini getir
-        $stmt = $pdo->prepare("SELECT * FROM revisions WHERE id = ?");
-        $stmt->execute([$revisionId]);
-        $revision = $stmt->fetch();
-        
-        if (!$revision) {
-            $error = 'Revize talebi bulunamadı.';
-        } else {
-            // FileManager metodu ile revize talebini güncelle (kredi düşürmeden)
-            $result = $fileManager->updateRevisionStatus($revisionId, $_SESSION['user_id'], 'in_progress', 'Revize talebi işleme alındı.', 0);
+        try {
+            // Revize talebini getir
+            $stmt = $pdo->prepare("SELECT * FROM revisions WHERE id = ?");
+            $stmt->execute([$revisionId]);
+            $revision = $stmt->fetch();
             
-            if ($result['success']) {
-                if ($revision['response_id']) {
-                    $success = 'Yanıt dosyası revize talebi işleme alındı. Dosya detay sayfasında revize edilmiş yanıt dosyasını yükleyebilirsiniz.';
-                } else {
-                    $success = 'Dosya revize talebi işleme alındı. Dosya detay sayfasında revize edilmiş dosyayı yükleyebilirsiniz.';
-                }
+            if (!$revision) {
+                $error = 'Revize talebi bulunamadı.';
+                error_log("Revision not found for ID: " . $revisionId);
             } else {
-                $error = $result['message'];
+                error_log("Revision found: " . print_r($revision, true));
+                
+                // Admin kontrolü
+                if (!isset($_SESSION['user_id']) || !isValidUUID($_SESSION['user_id'])) {
+                    $error = 'Geçersiz admin session.';
+                    error_log("Invalid admin session");
+                } else {
+                    // FileManager metodu ile revize talebini güncelle (kredi düşürmeden)
+                    $result = $fileManager->updateRevisionStatus($revisionId, $_SESSION['user_id'], 'in_progress', 'Revize talebi işleme alındı.', 0);
+                    
+                    error_log("UpdateRevisionStatus result: " . print_r($result, true));
+                    
+                    if ($result['success']) {
+                        if ($revision['response_id']) {
+                            $success = 'Yanıt dosyası revize talebi işleme alındı. Dosya detay sayfasında revize edilmiş yanıt dosyasını yükleyebilirsiniz.';
+                        } else {
+                            $success = 'Dosya revize talebi işleme alındı. Dosya detay sayfasında revize edilmiş dosyayı yükleyebilirsiniz.';
+                        }
+                    } else {
+                        $error = $result['message'];
+                        error_log("UpdateRevisionStatus failed: " . $result['message']);
+                    }
+                }
             }
+        } catch (Exception $e) {
+            $error = 'Veritabanı hatası: ' . $e->getMessage();
+            error_log("Database exception in revision approval: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
         }
     }
 }
@@ -54,15 +78,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reject_revision_direc
     $revisionId = sanitize($_POST['revision_id']);
     $adminNotes = sanitize($_POST['admin_notes']) ?: 'Revize talebi reddedildi.';
     
+    error_log("Direct revision rejection started for ID: " . $revisionId);
+    
     if (!isValidUUID($revisionId)) {
         $error = 'Geçersiz revize ID formatı.';
+        error_log("Invalid revision ID format: " . $revisionId);
     } else {
-        $result = $fileManager->updateRevisionStatus($revisionId, $_SESSION['user_id'], 'rejected', $adminNotes, 0);
-        
-        if ($result['success']) {
-            $success = 'Revize talebi reddedildi.';
-        } else {
-            $error = $result['message'];
+        try {
+            if (!isset($_SESSION['user_id']) || !isValidUUID($_SESSION['user_id'])) {
+                $error = 'Geçersiz admin session.';
+                error_log("Invalid admin session");
+            } else {
+                $result = $fileManager->updateRevisionStatus($revisionId, $_SESSION['user_id'], 'rejected', $adminNotes, 0);
+                
+                error_log("UpdateRevisionStatus (reject) result: " . print_r($result, true));
+                
+                if ($result['success']) {
+                    $success = 'Revize talebi reddedildi.';
+                } else {
+                    $error = $result['message'];
+                    error_log("UpdateRevisionStatus (reject) failed: " . $result['message']);
+                }
+            }
+        } catch (Exception $e) {
+            $error = 'Veritabanı hatası: ' . $e->getMessage();
+            error_log("Database exception in revision rejection: " . $e->getMessage());
         }
     }
 }
@@ -228,18 +268,16 @@ include '../includes/admin_sidebar.php';
 
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <div class="alert alert-danger" role="alert">
         <i class="fas fa-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
 
 <?php if ($success): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert alert-success" role="alert">
         <i class="fas fa-check-circle me-2"></i>
         <?php echo $success; ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
 

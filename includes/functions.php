@@ -251,4 +251,62 @@ if (!function_exists('requireLogin')) {
     }
 }
 
+// Dosya boyutunu insan okunabilir formata çevir
+if (!function_exists('formatFileSize')) {
+    function formatFileSize($bytes, $precision = 2) {
+        if ($bytes == 0) {
+            return '0 B';
+        }
+        
+        $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+        $base = log($bytes, 1024);
+        $index = floor($base);
+        
+        if ($index >= count($units)) {
+            $index = count($units) - 1;
+        }
+        
+        $size = round(pow(1024, $base - $index), $precision);
+        
+        return $size . ' ' . $units[$index];
+    }
+}
+
+// Tarih formatı düzenleme
+if (!function_exists('formatDate')) {
+    function formatDate($date, $format = 'd.m.Y H:i') {
+        if (empty($date)) {
+            return 'Belirtilmemiş';
+        }
+        
+        $timestamp = is_numeric($date) ? $date : strtotime($date);
+        
+        if ($timestamp === false) {
+            return 'Geçersiz tarih';
+        }
+        
+        return date($format, $timestamp);
+    }
+}
+
+// Türkçe karakter temizleme
+if (!function_exists('turkishToEnglish')) {
+    function turkishToEnglish($text) {
+        $search = array('Ğ','Ü','Ş','İ','Ö','Ç','ğ','ü','ş','ı','ö','ç');
+        $replace = array('G','U','S','I','O','C','g','u','s','i','o','c');
+        return str_replace($search, $replace, $text);
+    }
+}
+
+// URL dostu slug oluşturma
+if (!function_exists('createSlug')) {
+    function createSlug($text) {
+        $text = turkishToEnglish($text);
+        $text = strtolower($text);
+        $text = preg_replace('/[^a-z0-9]+/', '-', $text);
+        $text = trim($text, '-');
+        return $text;
+    }
+}
+
 ?>

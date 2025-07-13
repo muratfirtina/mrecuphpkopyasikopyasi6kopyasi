@@ -115,6 +115,64 @@ class User {
         }
     }
     
+    // Kredi ekle/çıkar (basit versiyon) - MAIN METHOD
+    public function addCreditDirectSimple($userId, $amount, $type = 'deposit', $description = '', $referenceId = null, $referenceType = null, $adminId = null) {
+        try {
+            if (!isValidUUID($userId)) {
+                return false;
+            }
+            
+            if ($adminId && !isValidUUID($adminId)) {
+                return false;
+            }
+            
+            if ($referenceId && !isValidUUID($referenceId)) {
+                return false;
+            }
+            
+            // Kullanıcının mevcut kredi bakiyesini güncelle
+            if ($type === 'withdraw' || $type === 'file_charge') {
+                $currentCredits = $this->getUserCredits($userId);
+                
+                if ($currentCredits < $amount) {
+                    return false;
+                }
+                
+                $stmt = $this->pdo->prepare("UPDATE users SET credits = credits - ? WHERE id = ?");
+                $result = $stmt->execute([$amount, $userId]);
+                
+                if (!$result) {
+                    return false;
+                }
+            } else {
+                $stmt = $this->pdo->prepare("UPDATE users SET credits = credits + ? WHERE id = ?");
+                $stmt->execute([$amount, $userId]);
+            }
+            
+            // İşlem kaydı ekle (tablo varsa)
+            try {
+                $transactionId = generateUUID();
+                $stmt = $this->pdo->prepare("
+                    INSERT INTO credit_transactions (id, user_id, amount, transaction_type, description, reference_id, reference_type, admin_id, created_at) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                ");
+                $stmt->execute([$transactionId, $userId, $amount, $type, $description, $referenceId, $referenceType, $adminId]);
+            } catch(PDOException $e) {
+                // Credit transaction tablosu yoksa devam et
+                error_log('Credit transaction log failed: ' . $e->getMessage());
+            }
+            
+            // Session'daki kredi bilgisini güncelle
+            $this->updateUserCreditsInSession($userId);
+            
+            return true;
+            
+        } catch(PDOException $e) {
+            error_log("addCreditDirectSimple error: " . $e->getMessage());
+            return false;
+        }
+    }
+    
     // Kredi çıkarma (GUID ID ile)
     public function deductCredits($userId, $amount, $description = '') {
         try {
@@ -304,59 +362,6 @@ class User {
                 $id
             ]);
         } catch(PDOException $e) {
-            return false;
-        }
-    }
-    
-    // Kredi ekle/çıkar (basit versiyon)
-    public function addCreditDirectSimple($userId, $amount, $type = 'deposit', $description = '', $referenceId = null, $referenceType = null, $adminId = null) {
-        try {
-            if (!isValidUUID($userId)) {
-                return false;
-            }
-            
-            if ($adminId && !isValidUUID($adminId)) {
-                return false;
-            }
-            
-            if ($referenceId && !isValidUUID($referenceId)) {
-                return false;
-            }
-            
-            // Kullanıcının mevcut kredi bakiyesini güncelle
-            if ($type === 'withdraw' || $type === 'file_charge') {
-                $currentCredits = $this->getUserCredits($userId);
-                
-                if ($currentCredits < $amount) {
-                    return false;
-                }
-                
-                $stmt = $this->pdo->prepare("UPDATE users SET credits = credits - ? WHERE id = ?");
-                $result = $stmt->execute([$amount, $userId]);
-                
-                if (!$result) {
-                    return false;
-                }
-            } else {
-                $stmt = $this->pdo->prepare("UPDATE users SET credits = credits + ? WHERE id = ?");
-                $stmt->execute([$amount, $userId]);
-            }
-            
-            // İşlem kaydı ekle
-            $transactionId = generateUUID();
-            $stmt = $this->pdo->prepare("
-                INSERT INTO credit_transactions (id, user_id, amount, transaction_type, description, reference_id, reference_type, admin_id, created_at) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
-            ");
-            $stmt->execute([$transactionId, $userId, $amount, $type, $description, $referenceId, $referenceType, $adminId]);
-            
-            // Session'daki kredi bilgisini güncelle
-            $this->updateUserCreditsInSession($userId);
-            
-            return true;
-            
-        } catch(PDOException $e) {
-            error_log("addCreditDirectSimple error: " . $e->getMessage());
             return false;
         }
     }

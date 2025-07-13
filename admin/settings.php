@@ -90,18 +90,16 @@ include '../includes/admin_sidebar.php';
 
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
-    <div class="alert alert-admin alert-danger alert-dismissible fade show" role="alert">
+    <div class="alert alert-admin alert-danger" role="alert">
         <i class="fas fa-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
 
 <?php if ($success): ?>
-    <div class="alert alert-admin alert-success alert-dismissible fade show" role="alert">
+    <div class="alert alert-admin alert-success" role="alert">
         <i class="fas fa-check-circle me-2"></i>
         <?php echo $success; ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
 

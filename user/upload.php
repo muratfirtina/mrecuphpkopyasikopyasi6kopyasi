@@ -3,39 +3,106 @@
  * Mr ECU - Modern Dosya Yükleme Sayfası (GUID System)
  */
 
-require_once '../config/config.php';
-require_once '../config/database.php';
+// Debug ve error handling
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Ajax ile model getirme - SAYFA YÜKLENMESINDEN ÖNCE KONTROL ET
+if (isset($_GET['get_models']) && isset($_GET['brand_id'])) {
+    // AJAX request - sayfa render etme
+    try {
+        require_once '../config/config.php';
+        require_once '../config/database.php';
+        
+        // AJAX response için tüm output'u temizle
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        
+        header('Content-Type: application/json');
+        
+        // Giriş kontrolü
+        if (!isLoggedIn()) {
+            echo json_encode(['error' => 'Giriş gerekli']);
+            exit;
+        }
+        
+        // FileManager'i başlat
+        $fileManager = new FileManager($pdo);
+        
+        $brandId = sanitize($_GET['brand_id']);
+        
+        // GUID format kontrolü
+        if (!isValidUUID($brandId)) {
+            echo json_encode(['error' => 'Geçersiz marka ID formatı']);
+            exit;
+        }
+        
+        $models = $fileManager->getModelsByBrand($brandId);
+        echo json_encode($models);
+        
+    } catch (Exception $e) {
+        error_log('AJAX Model Error: ' . $e->getMessage());
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        echo json_encode(['error' => 'Server hatası oluştu']);
+    }
+    exit; // AJAX request bitir
+}
+
+// Normal sayfa yükleme devam eder
+try {
+    require_once '../config/config.php';
+    require_once '../config/database.php';
+    
+    // Database bağlantısı kontrolü
+    if (!isset($pdo) || $pdo === null) {
+        throw new Exception('Database bağlantısı kurulamadı!');
+    }
+    
+} catch (Exception $e) {
+    error_log('Upload page init error: ' . $e->getMessage());
+    echo "<div class='alert alert-danger'>Sistem hatası: " . $e->getMessage() . "</div>";
+    echo "<p><a href='../login.php'>Giriş sayfasına dön</a></p>";
+    exit;
+}
 
 // Giriş kontrolü
 if (!isLoggedIn()) {
     redirect('../login.php?redirect=user/upload.php');
 }
 
-$user = new User($pdo);
-$fileManager = new FileManager($pdo);
+// Sınıfları başlat
+try {
+    $user = new User($pdo);
+    $fileManager = new FileManager($pdo);
+} catch (Exception $e) {
+    error_log('Class initialization error: ' . $e->getMessage());
+    echo "<div class='alert alert-danger'>Sınıf başlatma hatası: " . $e->getMessage() . "</div>";
+    exit;
+}
 
 // Session'daki kredi bilgisini güncelle
-$_SESSION['credits'] = $user->getUserCredits($_SESSION['user_id']);
+try {
+    $_SESSION['credits'] = $user->getUserCredits($_SESSION['user_id']);
+    echo '<!-- DEBUG: User credits güncellendi: ' . $_SESSION['credits'] . ' -->';
+} catch (Exception $e) {
+    echo '<!-- DEBUG: Credits güncelleme hatası: ' . $e->getMessage() . ' -->';
+    $_SESSION['credits'] = 0;
+}
+
 $error = '';
 $success = '';
 
 // Araç markalarını getir
-$brands = $fileManager->getBrands();
-
-// Ajax ile model getirme
-if (isset($_GET['get_models']) && isset($_GET['brand_id'])) {
-    header('Content-Type: application/json');
-    $brandId = sanitize($_GET['brand_id']);
-    
-    // GUID format kontrolü
-    if (!isValidUUID($brandId)) {
-        echo json_encode(['error' => 'Geçersiz marka ID formatı']);
-        exit;
-    }
-    
-    $models = $fileManager->getModelsByBrand($brandId);
-    echo json_encode($models);
-    exit;
+try {
+    $brands = $fileManager->getBrands();
+    echo '<!-- DEBUG: Markalar getirildi, adet: ' . count($brands) . ' -->';
+} catch (Exception $e) {
+    echo '<!-- DEBUG: Marka getirme hatası: ' . $e->getMessage() . ' -->';
+    $brands = [];
 }
 
 // Dosya yükleme işlemi
@@ -62,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
             'nm_torque' => !empty($_POST['nm_torque']) ? (int)$_POST['nm_torque'] : null
         ];
         
-        $notes = sanitize($_POST['notes']);
+        $notes = sanitize($_POST['notes']); // Form'dan notes gelir ama veritabanında upload_notes olarak saklanır
         
         // Validation
         if ($vehicleData['year'] < 1990 || $vehicleData['year'] > date('Y') + 1) {
@@ -89,8 +156,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
 
 $pageTitle = 'Dosya Yükle';
 
+echo '<!-- DEBUG: Header yüklenmeye hazırlanıyor -->';
+
 // Header include
-include '../includes/user_header.php';
+try {
+    include '../includes/user_header.php';
+    echo '<!-- DEBUG: Header başarıyla yüklendi -->';
+} catch (Exception $e) {
+    die('Header yükleme hatası: ' . $e->getMessage());
+}
 ?>
 
 <div class="container-fluid">
@@ -1121,13 +1195,39 @@ document.getElementById('brand_id').addEventListener('change', function() {
     const brandId = this.value;
     const modelSelect = document.getElementById('model_id');
     
+    console.log('Brand changed:', brandId);
+    
     if (brandId && isValidGUID(brandId)) {
+        console.log('Valid GUID, fetching models...');
+        modelSelect.innerHTML = '<option value="">Yüklenyor...</option>';
+        modelSelect.disabled = true;
+        
         fetch(`?get_models=1&brand_id=${encodeURIComponent(brandId)}`)
-            .then(response => response.json())
+            .then(response => {
+                console.log('Fetch response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Received data:', data);
+                
                 if (data.error) {
                     console.error('Server error:', data.error);
-                    modelSelect.innerHTML = '<option value="">Hata oluştu</option>';
+                    modelSelect.innerHTML = `<option value="">Hata: ${data.error}</option>`;
+                    return;
+                }
+                
+                if (!Array.isArray(data)) {
+                    console.error('Invalid data format:', data);
+                    modelSelect.innerHTML = '<option value="">Geçersiz veri formatı</option>';
+                    return;
+                }
+                
+                if (data.length === 0) {
+                    console.warn('No models found for brand:', brandId);
+                    modelSelect.innerHTML = '<option value="">Bu marka için model bulunamadı</option>';
                     return;
                 }
                 
@@ -1137,16 +1237,19 @@ document.getElementById('brand_id').addEventListener('change', function() {
                     modelSelect.innerHTML += `<option value="${model.id}" data-guid="${model.id}">${displayName}</option>`;
                 });
                 modelSelect.disabled = false;
+                console.log('Models loaded successfully, count:', data.length);
             })
             .catch(error => {
-                console.error('Error:', error);
-                modelSelect.innerHTML = '<option value="">Hata oluştu</option>';
+                console.error('Fetch error:', error);
+                modelSelect.innerHTML = `<option value="">Bağlantı hatası</option>`;
+                modelSelect.disabled = true;
             });
     } else if (brandId && !isValidGUID(brandId)) {
         console.error('Invalid GUID format for brand:', brandId);
         modelSelect.innerHTML = '<option value="">Geçersiz marka ID</option>';
         modelSelect.disabled = true;
     } else {
+        console.log('No brand selected or empty value');
         modelSelect.innerHTML = '<option value="">Önce marka seçin</option>';
         modelSelect.disabled = true;
     }
