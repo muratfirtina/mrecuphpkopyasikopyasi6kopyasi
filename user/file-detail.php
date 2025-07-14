@@ -854,7 +854,6 @@ include '../includes/user_header.php';
                         </div>
                     </div>
                 <?php endif; ?>
-                
             <?php endif; ?>
         </main>
     </div>

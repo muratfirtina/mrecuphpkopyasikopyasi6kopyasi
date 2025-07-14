@@ -425,19 +425,28 @@ try {
             ");
             $stmt->execute([$responseId]);
         } else {
-            // Normal upload dosyası için revize taleplerini al
+            // Normal upload dosyası için TÜM revize taleplerini al (ana dosya + response dosyaları)
             $stmt = $pdo->prepare("
                 SELECT r.*, u.username, u.first_name, u.last_name,
-                       a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name
+                       a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
+                       fr.original_name as response_file_name
                 FROM revisions r
                 LEFT JOIN users u ON r.user_id = u.id
                 LEFT JOIN users a ON r.admin_id = a.id
-                WHERE r.upload_id = ? AND r.response_id IS NULL
+                LEFT JOIN file_responses fr ON r.response_id = fr.id
+                WHERE (r.upload_id = ? OR (r.response_id IS NOT NULL AND fr.upload_id = ?))
                 ORDER BY r.requested_at DESC
             ");
-            $stmt->execute([$uploadId]);
+            $stmt->execute([$uploadId, $uploadId]);
         }
         $revisionRequests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // DEBUG: Revize taleplerini logla
+        error_log('DEBUG: Revision Requests for upload_id: ' . $uploadId);
+        foreach ($revisionRequests as $rev) {
+            error_log('DEBUG: Revision ID: ' . $rev['id'] . ', Request Notes: ' . $rev['request_notes']);
+        }
+        
     } catch (Exception $e) {
         error_log('Revision requests query error: ' . $e->getMessage());
         $revisionRequests = [];
@@ -487,8 +496,11 @@ try {
             }
         }
         
-        // 3. Revize talepleri (user sayfasındaki mantıkla)
+        // 3. Revize talepleri (detaylı olanlar) - User sayfasındaki mantıkla
         foreach ($revisionRequests as $revision) {
+            // DEBUG: Her revize talebi için user notes'u logla
+            error_log('DEBUG: Adding revision to communication history - ID: ' . $revision['id'] . ', User Notes: "' . $revision['request_notes'] . '"');
+            
             // Kullanıcının revize talebi
             $communicationHistory[] = [
                 'type' => 'user_revision_request',
@@ -496,9 +508,9 @@ try {
                 'user_notes' => $revision['request_notes'],
                 'admin_notes' => '',
                 'status' => $revision['status'],
-                'file_name' => $fileType === 'response' ? 'Yanıt Dosyası' : $upload['original_name'],
                 'revision_id' => $revision['id'],
-                'revision_status' => $revision['status']
+                'revision_status' => $revision['status'],
+                'response_file_name' => $revision['response_file_name'] ?? null // Hangi dosya için revize talebi
             ];
             
             // Admin'in revize cevabı (varsa ve geçerli ise)
@@ -511,10 +523,10 @@ try {
                     'admin_username' => $revision['admin_username'] ?? '',
                     'admin_name' => ($revision['admin_first_name'] ?? '') . ' ' . ($revision['admin_last_name'] ?? ''),
                     'status' => $revision['status'] === 'completed' ? 'success' : ($revision['status'] === 'rejected' ? 'danger' : 'info'),
-                    'file_name' => $fileType === 'response' ? 'Yanıt Dosyası' : $upload['original_name'],
                     'revision_id' => $revision['id'],
                     'revision_status' => $revision['status'],
-                    'credits_charged' => $revision['credits_charged'] ?? 0
+                    'credits_charged' => $revision['credits_charged'] ?? 0,
+                    'response_file_name' => $revision['response_file_name'] ?? null // Hangi dosya için revize cevabı
                 ];
             }
         }
@@ -980,6 +992,67 @@ include '../includes/admin_sidebar.php';
     </div>
 </div>
 
+<!-- Yanıt Dosyaları Listesi (sadece normal dosyalar için) -->
+<?php if ($fileType !== 'response' && !empty($responseFiles)): ?>
+    <div class="card admin-card mb-4" id="response-files">
+        <div class="card-header">
+            <h6 class="mb-0">
+                <i class="fas fa-reply me-2"></i>Yanıt Dosyaları (<?php echo count($responseFiles); ?>)
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Dosya Adı</th>
+                            <th>Boyut</th>
+                            <th>Yükleme Tarihi</th>
+                            <th>Admin</th>
+                            <th>Kredi</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($responseFiles as $responseFile): ?>
+                            <tr>
+                                <td>
+                                    <strong><?php echo safeHtml($responseFile['original_name']); ?></strong>
+                                </td>
+                                <td><?php echo formatFileSize($responseFile['file_size']); ?></td>
+                                <td><?php echo date('d.m.Y H:i', strtotime($responseFile['upload_date'])); ?></td>
+                                <td>
+                                    <?php if ($responseFile['admin_username']): ?>
+                                        <?php echo safeHtml($responseFile['first_name'] . ' ' . $responseFile['last_name']); ?>
+                                        <small class="text-muted d-block">@<?php echo $responseFile['admin_username']; ?></small>
+                                    <?php else: ?>
+                                        <span class="text-muted">Bilinmiyor</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php echo $responseFile['credits_charged']; ?> kredi
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a href="file-detail.php?id=<?php echo $uploadId; ?>&type=response&response_id=<?php echo $responseFile['id']; ?>" 
+                                           class="btn btn-outline-primary btn-sm" title="Detayları Görüntüle">
+                                            <i class="fas fa-eye me-1"></i>Detay
+                                        </a>
+                                        <a href="download-file.php?id=<?php echo $responseFile['id']; ?>&type=response" 
+                                           class="btn btn-success btn-sm" title="Dosyayı İndir">
+                                            <i class="fas fa-download me-1"></i>İndir
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
 <!-- İletişim Geçmişi (Tüm Kullanıcı Admin Etkileşimleri) -->  
 <?php if (!empty($communicationHistory)): ?>
 <div class="card admin-card mb-4">
@@ -1003,29 +1076,34 @@ include '../includes/admin_sidebar.php';
         
         <div class="communication-timeline">
             <?php foreach ($communicationHistory as $index => $comm): ?>
-                <div class="timeline-item <?php echo $comm['status']; ?>">
+                <div class="timeline-item communication-item <?php echo $comm['status']; ?>">
                     <div class="timeline-marker">
                         <?php 
-                        $iconClass = [
-                            'user_upload' => 'fas fa-upload text-primary',
-                            'user_revision_request' => 'fas fa-comment-dots text-warning',
-                            'admin_response' => 'fas fa-reply text-success',
-                            'admin_revision_response' => 'fas fa-user-shield text-info',
+                        $typeConfig = [
+                            'user_upload' => ['icon' => 'fas fa-upload text-primary', 'color' => 'primary'],
+                            'admin_response' => ['icon' => 'fas fa-reply text-success', 'color' => 'success'],
+                            'user_revision_request' => ['icon' => 'fas fa-edit text-warning', 'color' => 'warning'],
+                            'admin_revision_response' => ['icon' => 'fas fa-user-shield text-info', 'color' => 'info']
                         ];
+                        $config = $typeConfig[$comm['type']] ?? ['icon' => 'fas fa-comment text-secondary', 'color' => 'secondary'];
                         ?>
-                        <i class="<?php echo $iconClass[$comm['type']] ?? 'fas fa-comment text-secondary'; ?>"></i>
+                        <i class="<?php echo $config['icon']; ?>"></i>
                     </div>
-                    <div class="timeline-content">
+                    <div class="timeline-content <?php echo ($comm['type'] === 'user_revision_request') ? 'revision-request-highlight' : ''; ?>">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
                                 <h6 class="mb-1">
                                     <?php if ($comm['type'] === 'user_upload'): ?>
                                         <span class="badge bg-primary">
-                                            <i class="fas fa-upload me-1"></i>Dosya Yükleme Notu
+                                            <i class="fas fa-user me-1"></i>Kullanıcının Yükleme Notu
+                                        </span>
+                                    <?php elseif ($comm['type'] === 'admin_response'): ?>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-user-shield me-1"></i>Admin'in Yanıt Dosyası Notu
                                         </span>
                                     <?php elseif ($comm['type'] === 'user_revision_request'): ?>
-                                        <span class="badge bg-warning">
-                                            <i class="fas fa-comment-dots me-1"></i>Revize Talebi
+                                        <span class="badge bg-warning" style="background-color: #ffc107 !important; color: #212529 !important; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px;">
+                                            <i class="fas fa-edit me-1"></i>Kullanıcının Revize Talebi
                                         </span>
                                         <?php if (isset($comm['revision_status'])): ?>
                                             <span class="badge bg-<?php echo 
@@ -1038,59 +1116,92 @@ include '../includes/admin_sidebar.php';
                                                     ($comm['revision_status'] === 'completed' ? 'Tamamlandı' : 'Reddedildi')); ?>
                                             </span>
                                         <?php endif; ?>
-                                    <?php elseif ($comm['type'] === 'admin_response'): ?>
-                                        <span class="badge bg-success">
-                                            <i class="fas fa-reply me-1"></i>Admin Yanıtı
-                                        </span>
                                     <?php elseif ($comm['type'] === 'admin_revision_response'): ?>
                                         <span class="badge bg-info">
-                                            <i class="fas fa-user-shield me-1"></i>Revize Cevabı
+                                            <i class="fas fa-reply me-1"></i>Admin'in Revize Cevabı
+                                        </span>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (isset($comm['file_name'])): ?>
+                                        <span class="badge bg-secondary ms-2">
+                                            <i class="fas fa-file me-1"></i><?php echo htmlspecialchars(substr($comm['file_name'], 0, 20)) . (strlen($comm['file_name']) > 20 ? '...' : ''); ?>
                                         </span>
                                     <?php endif; ?>
                                 </h6>
                                 <small class="text-muted">
                                     <i class="fas fa-calendar me-1"></i>
                                     <?php echo formatDate($comm['date']); ?>
+                                    
+                                    <?php if (isset($comm['admin_username']) && !empty($comm['admin_username'])): ?>
+                                        <span class="ms-2">
+                                            <i class="fas fa-user-shield me-1"></i>
+                                            Admin: <?php echo htmlspecialchars($comm['admin_username']); ?>
+                                        </span>
+                                    <?php endif; ?>
                                 </small>
                             </div>
                         </div>
                         
-                        <!-- Dosya Referansı -->
-                        <?php if (!empty($comm['file_name'])): ?>
-                            <div class="file-reference mb-3">
-                                <i class="fas fa-file text-muted me-2"></i>
-                                <small class="text-muted">Dosya: <?php echo safeHtml($comm['file_name']); ?></small>
-                            </div>
+                        <!-- Hangi dosya için revize talebi olduğunu belirt (sadece revize talepleri için) -->
+                        <?php if ($comm['type'] === 'user_revision_request' || $comm['type'] === 'admin_revision_response'): ?>
+                            <?php if (!empty($comm['response_file_name'])): ?>
+                                <div class="mb-3">
+                                    <div class="file-reference">
+                                        <i class="fas fa-arrow-right text-primary me-2"></i>
+                                        <strong>Revize edilen dosya:</strong> 
+                                        <span class="text-primary"><?php echo htmlspecialchars($comm['response_file_name']); ?></span>
+                                        <small class="text-muted ms-2">(Yanıt Dosyası)</small>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="mb-3">
+                                    <div class="file-reference">
+                                        <i class="fas fa-arrow-right text-success me-2"></i>
+                                        <strong>Revize edilen dosya:</strong> 
+                                        <span class="text-success">Ana Dosya</span>
+                                        <small class="text-muted ms-2">(Orijinal Yüklenen Dosya)</small>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         <?php endif; ?>
                         
-                        <!-- Kullanıcı Notu -->
+                        <!-- Kullanıcı Notları -->
                         <?php if (!empty($comm['user_notes'])): ?>
-                        <div class="revision-note user-note mb-3">
-                        <div class="note-header">
-                        <i class="fas fa-user me-2 text-primary"></i>
-                        <strong>
-                                <?php if ($comm['type'] === 'user_upload'): ?>
-                                    Kullanıcının Yükleme Notu:
-                            <?php else: ?>
-                                    Kullanıcının Revize Talebi:
-                                    <?php endif; ?>
+
+                            <div class="revision-note user-note mb-3">
+                                <div class="note-header">
+                                    <i class="fas fa-user me-2 text-primary"></i>
+                                    <strong>
+                                        <?php if ($comm['type'] === 'user_upload'): ?>
+                                            Kullanıcının yükleme sırasında yazdığı notlar:
+                                        <?php else: ?>
+                                            Kullanıcının revize talebi:
+                                        <?php endif; ?>
                                     </strong>
-                </div>
-                <div class="note-content">
-                    <?php echo nl2br(htmlspecialchars($comm['user_notes'])); ?>
-                </div>
-            </div>
-        <?php endif; ?>
+                                </div>
+                                <div class="note-content">
+                                    <?php echo nl2br(htmlspecialchars($comm['user_notes'])); ?>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <!-- DEBUG: No user notes for type: <?php echo $comm['type']; ?> -->
+                        <?php endif; ?>
                         
-                        <!-- Admin Notu -->
+                        <!-- Admin Cevabı -->
                         <?php if (!empty($comm['admin_notes'])): ?>
                             <div class="revision-note admin-note mb-2">
                                 <div class="note-header">
                                     <i class="fas fa-user-shield me-2 text-success"></i>
-                                    <strong>Admin Cevabı:</strong>
+                                    <strong>
+                                        <?php if ($comm['type'] === 'admin_response'): ?>
+                                            Admin'in yanıt dosyası notları:
+                                        <?php else: ?>
+                                            Admin'in cevabı:
+                                        <?php endif; ?>
+                                    </strong>
                                     <?php if (!empty($comm['admin_username'])): ?>
                                         <small class="text-muted">
-                                            - <?php echo safeHtml($comm['admin_name'] . ' (@' . $comm['admin_username'] . ')'); ?>
+                                            - <?php echo htmlspecialchars($comm['admin_username']); ?>
                                         </small>
                                     <?php endif; ?>
                                 </div>
@@ -1098,9 +1209,23 @@ include '../includes/admin_sidebar.php';
                                     <?php echo nl2br(htmlspecialchars($comm['admin_notes'])); ?>
                                 </div>
                             </div>
+                        <?php else: ?>
+                            <?php if ($comm['type'] === 'user_revision_request' && $comm['status'] === 'pending'): ?>
+                                <div class="revision-note admin-note mb-2 pending-response">
+                                    <div class="note-header">
+                                        <i class="fas fa-hourglass-half me-2 text-muted"></i>
+                                        <strong>Admin Cevabı:</strong>
+                                    </div>
+                                    <div class="note-content">
+                                        <em class="text-muted">
+                                            Kullanıcının talebi inceleniyor, admin cevabı bekleniyor...
+                                        </em>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         <?php endif; ?>
                         
-                        <!-- Kredi ve Ek Bilgiler -->
+                        <!-- Ek Bilgiler -->
                         <div class="communication-meta">
                             <?php if (isset($comm['credits_charged']) && $comm['credits_charged'] > 0): ?>
                                 <span class="meta-item text-warning">
@@ -1111,10 +1236,17 @@ include '../includes/admin_sidebar.php';
                             
                             <?php if (isset($comm['response_id'])): ?>
                                 <a href="file-detail.php?id=<?php echo $uploadId; ?>&type=response&response_id=<?php echo $comm['response_id']; ?>" 
-                                   class="meta-item text-primary">
-                                    <i class="fas fa-eye me-1"></i>
+                                   class="meta-item text-primary" style="text-decoration: none;">
+                                    <i class="fas fa-external-link-alt me-1"></i>
                                     Yanıt Dosyasını Görüntüle
                                 </a>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($comm['revision_id'])): ?>
+                                <span class="meta-item text-info">
+                                    <i class="fas fa-hashtag me-1"></i>
+                                    Revize #<?php echo substr($comm['revision_id'], 0, 8); ?>
+                                </span>
                             <?php endif; ?>
                             
                             <?php if (isset($comm['revision_id']) && $comm['type'] === 'user_revision_request'): ?>
@@ -1143,6 +1275,34 @@ include '../includes/admin_sidebar.php';
                     <div class="timeline-divider"></div>
                 <?php endif; ?>
             <?php endforeach; ?>
+        </div>
+        
+        <!-- İletişim Özeti -->
+        <div class="communication-summary mt-4 p-3 bg-light rounded">
+            <h6 class="mb-2">
+                <i class="fas fa-chart-line me-2 text-info"></i>İletişim Özeti
+            </h6>
+            <div class="row text-center">
+                <?php 
+                $typeCounts = array_count_values(array_column($communicationHistory, 'type'));
+                ?>
+                <div class="col-3">
+                    <span class="badge bg-primary fs-6"><?php echo $typeCounts['user_upload'] ?? 0; ?></span>
+                    <br><small>Kullanıcı Notu</small>
+                </div>
+                <div class="col-3">
+                    <span class="badge bg-success fs-6"><?php echo $typeCounts['admin_response'] ?? 0; ?></span>
+                    <br><small>Admin Yanıt</small>
+                </div>
+                <div class="col-3">
+                    <span class="badge bg-warning fs-6"><?php echo $typeCounts['user_revision_request'] ?? 0; ?></span>
+                    <br><small>Revize Talebi</small>
+                </div>
+                <div class="col-3">
+                    <span class="badge bg-info fs-6"><?php echo $typeCounts['admin_revision_response'] ?? 0; ?></span>
+                    <br><small>Admin Cevap</small>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -1470,67 +1630,6 @@ include '../includes/admin_sidebar.php';
     <?php endif; ?>
 <?php endif; ?>
 
-<!-- Yanıt Dosyaları Listesi (sadece normal dosyalar için) -->
-<?php if ($fileType !== 'response' && !empty($responseFiles)): ?>
-    <div class="card admin-card mb-4" id="response-files">
-        <div class="card-header">
-            <h6 class="mb-0">
-                <i class="fas fa-reply me-2"></i>Yanıt Dosyaları (<?php echo count($responseFiles); ?>)
-            </h6>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Dosya Adı</th>
-                            <th>Boyut</th>
-                            <th>Yükleme Tarihi</th>
-                            <th>Admin</th>
-                            <th>Kredi</th>
-                            <th>İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($responseFiles as $responseFile): ?>
-                            <tr>
-                                <td>
-                                    <strong><?php echo safeHtml($responseFile['original_name']); ?></strong>
-                                </td>
-                                <td><?php echo formatFileSize($responseFile['file_size']); ?></td>
-                                <td><?php echo date('d.m.Y H:i', strtotime($responseFile['upload_date'])); ?></td>
-                                <td>
-                                    <?php if ($responseFile['admin_username']): ?>
-                                        <?php echo safeHtml($responseFile['first_name'] . ' ' . $responseFile['last_name']); ?>
-                                        <small class="text-muted d-block">@<?php echo $responseFile['admin_username']; ?></small>
-                                    <?php else: ?>
-                                        <span class="text-muted">Bilinmiyor</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php echo $responseFile['credits_charged']; ?> kredi
-                                </td>
-                                <td>
-                                    <div class="d-flex gap-1">
-                                        <a href="file-detail.php?id=<?php echo $uploadId; ?>&type=response&response_id=<?php echo $responseFile['id']; ?>" 
-                                           class="btn btn-outline-primary btn-sm" title="Detayları Görüntüle">
-                                            <i class="fas fa-eye me-1"></i>Detay
-                                        </a>
-                                        <a href="download-file.php?id=<?php echo $responseFile['id']; ?>&type=response" 
-                                           class="btn btn-success btn-sm" title="Dosyayı İndir">
-                                            <i class="fas fa-download me-1"></i>İndir
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-<?php endif; ?>
-
 <!-- Revize Reddetme Modal -->
 <div class="modal fade" id="rejectRevisionModal" tabindex="-1" aria-labelledby="rejectRevisionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -1604,6 +1703,26 @@ include '../includes/admin_sidebar.php';
     border-radius: 50%;
     margin-right: 1rem;
     z-index: 2;
+}
+
+.communication-timeline .timeline-item.pending .timeline-marker {
+    border-color: #ffc107;
+    background: #fff3cd;
+}
+
+.communication-timeline .timeline-item.in_progress .timeline-marker {
+    border-color: #0dcaf0;
+    background: #cff4fc;
+}
+
+.communication-timeline .timeline-item.completed .timeline-marker {
+    border-color: #198754;
+    background: #d1e7dd;
+}
+
+.communication-timeline .timeline-item.rejected .timeline-marker {
+    border-color: #dc3545;
+    background: #f8d7da;
 }
 
 .communication-timeline .timeline-content {
@@ -1758,9 +1877,43 @@ include '../includes/admin_sidebar.php';
     border: 1px solid #b8daff;
 }
 
+/* Kullanıcının revize talepleri için özel stil */
+.communication-timeline .timeline-item .timeline-content:has(.badge:contains("Kullanıcının Revize Talebi")),
+.communication-timeline .timeline-item:has(.badge[class*="bg-warning"]:contains("Revize Talebi")) .timeline-content {
+    background: #fff8e1 !important;
+    border: 2px solid #ffc107 !important;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+}
+
+/* Revize talebi vurgusu */
+.revision-request-highlight {
+    background: linear-gradient(135deg, #fff3cd 0%, #fff8e1 100%) !important;
+    border-left: 4px solid #ffc107 !important;
+    position: relative;
+}
+
+.revision-request-highlight::before {
+    content: '⚠️ REVIZE TALEBİ';
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    background: #ffc107;
+    color: #212529;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+    z-index: 10;
+}
+
 .revision-note.admin-note {
     background: #d4edda;
     border: 1px solid #c3e6cb;
+}
+
+.revision-note.pending-response {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
 }
 
 .revision-note .note-header {
@@ -1772,7 +1925,7 @@ include '../includes/admin_sidebar.php';
 
 .revision-note .note-content {
     padding: 0.75rem;
-    white-space: pre-wrap;
+    white-space: normal;
     word-wrap: break-word;
 }
 
@@ -1782,6 +1935,23 @@ include '../includes/admin_sidebar.php';
 
 .admin-note .note-header {
     background: rgba(25, 135, 84, 0.1);
+}
+
+.pending-response .note-header {
+    background: rgba(255, 193, 7, 0.1);
+}
+
+.communication-summary {
+    border: 1px solid #dee2e6;
+}
+
+.communication-summary .badge {
+    min-width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
 }
 
 @media (max-width: 768px) {
