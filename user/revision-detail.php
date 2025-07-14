@@ -76,6 +76,12 @@ try {
     redirect('revisions.php');
 }
 
+// Revizyon dosyalarını getir (eğer revizyon tamamlanmışsa)
+$revisionFiles = [];
+if ($revision['status'] === 'completed') {
+    $revisionFiles = $fileManager->getRevisionFiles($revisionId, $userId);
+}
+
 // Status konfigürasyonu
 $statusConfig = [
     'pending' => ['class' => 'warning', 'text' => 'Bekliyor', 'icon' => 'clock', 'bg' => 'warning'],

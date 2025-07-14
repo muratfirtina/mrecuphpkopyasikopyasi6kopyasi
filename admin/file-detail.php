@@ -291,6 +291,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
+        // Revizyon dosyası yükleme (yeni eklenen)
+        if (isset($_FILES['revision_file']) && isset($_POST['upload_revision'])) {
+            error_log("Revision file upload request started");
+            $revisionId = sanitize($_POST['revision_id']);
+            $adminNotes = sanitize($_POST['revision_notes'] ?? '');
+            
+            if (!isValidUUID($revisionId)) {
+                $error = 'Geçersiz revizyon ID formatı.';
+                error_log("Invalid revision ID format: " . $revisionId);
+            } else {
+                // Dosya yükleme hatası kontrolü
+                if (!isset($_FILES['revision_file']) || $_FILES['revision_file']['error'] !== UPLOAD_ERR_OK) {
+                    $errorMessages = [
+                        UPLOAD_ERR_INI_SIZE => 'Dosya çok büyük (php.ini limit)',
+                        UPLOAD_ERR_FORM_SIZE => 'Dosya çok büyük (form limit)',
+                        UPLOAD_ERR_PARTIAL => 'Dosya kısmen yüklendi',
+                        UPLOAD_ERR_NO_FILE => 'Dosya seçilmedi',
+                        UPLOAD_ERR_NO_TMP_DIR => 'Geçici dizin yok',
+                        UPLOAD_ERR_CANT_WRITE => 'Diske yazılamadı',
+                        UPLOAD_ERR_EXTENSION => 'Uzantı yüklemeyi durdurdu'
+                    ];
+                    
+                    $fileError = $_FILES['revision_file']['error'] ?? UPLOAD_ERR_NO_FILE;
+                    $error = 'Revizyon dosyası yükleme hatası: ' . ($errorMessages[$fileError] ?? 'Bilinmeyen hata (' . $fileError . ')');
+                    error_log("Revision file upload error: " . $error);
+                } else {
+                    error_log("Processing revision file upload - Notes: " . $adminNotes);
+                    
+                    // Session kontrolü
+                    if (!isset($_SESSION['user_id'])) {
+                        throw new Exception("User session not found");
+                    }
+                    
+                    $result = $fileManager->uploadRevisionFile($revisionId, $_FILES['revision_file'], $adminNotes);
+                    
+                    error_log("Revision upload result: " . print_r($result, true));
+                    
+                    if ($result['success']) {
+                        $success = $result['message'];
+                        $user->logAction($_SESSION['user_id'], 'revision_file_upload', "Revizyon dosyası yüklendi: {$revisionId}");
+                        
+                        // Başarılı yükleme sonrası redirect
+                        header("Location: file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
+                        exit;
+                    } else {
+                        $error = $result['message'];
+                        error_log("Revision upload failed: " . $error);
+                    }
+                }
+            }
+        }
+        
     } catch (Exception $e) {
         $error = 'İşlem sırasında hata oluştu: ' . $e->getMessage();
         error_log('POST processing error: ' . $e->getMessage());

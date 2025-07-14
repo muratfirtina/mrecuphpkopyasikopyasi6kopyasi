@@ -1075,5 +1075,349 @@ class FileManager {
             return false;
         }
     }
+    
+    // ============ REVİZYON DOSYASI YÖNETİMİ ============
+    
+    /**
+     * Admin tarafından revizyon dosyası yükleme
+     * @param string $revisionId - Revizyon talebi ID
+     * @param array $file - Yüklenen dosya bilgileri
+     * @param string $adminNotes - Admin notları
+     * @return array - Başarı durumu ve mesaj
+     */
+    public function uploadRevisionFile($revisionId, $file, $adminNotes = '') {
+        try {
+            if (!isValidUUID($revisionId)) {
+                return ['success' => false, 'message' => 'Geçersiz revizyon ID formatı.'];
+            }
+            
+            // Revizyon talebini kontrol et
+            $stmt = $this->pdo->prepare("SELECT * FROM revisions WHERE id = ?");
+            $stmt->execute([$revisionId]);
+            $revision = $stmt->fetch();
+            
+            if (!$revision) {
+                return ['success' => false, 'message' => 'Revizyon talebi bulunamadı.'];
+            }
+            
+            if ($revision['status'] !== 'in_progress') {
+                return ['success' => false, 'message' => 'Sadece işlemdeki revizyon talepleri için dosya yüklenebilir.'];
+            }
+            
+            // Dosya kontrolleri
+            if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+                return ['success' => false, 'message' => 'Geçersiz dosya yüklemesi.'];
+            }
+            
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                return ['success' => false, 'message' => 'Dosya yükleme hatası: ' . $file['error']];
+            }
+            
+            if ($file['size'] > MAX_FILE_SIZE) {
+                return ['success' => false, 'message' => 'Dosya boyutu çok büyük. Maksimum: ' . formatFileSize(MAX_FILE_SIZE)];
+            }
+            
+            // Dosya uzantısı kontrolü
+            $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            if (!in_array($extension, ALLOWED_EXTENSIONS)) {
+                return ['success' => false, 'message' => 'Desteklenmeyen dosya formatı. İzin verilen: ' . implode(', ', ALLOWED_EXTENSIONS)];
+            }
+            
+            // Revizyon dosyaları dizinini kontrol et
+            $uploadDir = UPLOAD_PATH . 'revision_files/';
+            if (!is_dir($uploadDir)) {
+                if (!mkdir($uploadDir, 0755, true)) {
+                    return ['success' => false, 'message' => 'Revizyon dosyaları dizini oluşturulamadı.'];
+                }
+            }
+            
+            // Benzersiz dosya adı oluştur
+            $filename = generateUUID() . '.' . $extension;
+            $filePath = $uploadDir . $filename;
+            
+            // Dosyayı taşı
+            if (!move_uploaded_file($file['tmp_name'], $filePath)) {
+                return ['success' => false, 'message' => 'Dosya taşınamadı.'];
+            }
+            
+            // revision_files tablosuna kaydet
+            $revisionFileId = generateUUID();
+            $stmt = $this->pdo->prepare("
+                INSERT INTO revision_files (
+                    id, revision_id, upload_id, admin_id, original_name, filename, 
+                    file_size, file_type, admin_notes, upload_date
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            ");
+            
+            $result = $stmt->execute([
+                $revisionFileId,
+                $revisionId,
+                $revision['upload_id'],
+                $_SESSION['user_id'],
+                $file['name'],
+                $filename,
+                $file['size'],
+                $extension,
+                $adminNotes
+            ]);
+            
+            if ($result) {
+                // Revizyon durumunu 'completed' yap
+                $updateResult = $this->updateRevisionStatus(
+                    $revisionId, 
+                    $_SESSION['user_id'], 
+                    'completed', 
+                    'Revizyon dosyası yüklendi: ' . $adminNotes,
+                    0
+                );
+                
+                if ($updateResult['success']) {
+                    return [
+                        'success' => true, 
+                        'message' => 'Revizyon dosyası başarıyla yüklendi ve revizyon talebi tamamlandı.',
+                        'revision_file_id' => $revisionFileId
+                    ];
+                } else {
+                    // Dosyayı ve kaydı sil
+                    unlink($filePath);
+                    $this->pdo->prepare("DELETE FROM revision_files WHERE id = ?")->execute([$revisionFileId]);
+                    return ['success' => false, 'message' => 'Revizyon durumu güncellenemedi: ' . $updateResult['message']];
+                }
+            } else {
+                // Dosyayı sil
+                unlink($filePath);
+                return ['success' => false, 'message' => 'Veritabanı kaydı oluşturulamadı.'];
+            }
+            
+        } catch (Exception $e) {
+            error_log('uploadRevisionFile error: ' . $e->getMessage());
+            // Dosyayı sil (eğer oluşturulduysa)
+            if (isset($filePath) && file_exists($filePath)) {
+                unlink($filePath);
+            }
+            return ['success' => false, 'message' => 'Revizyon dosyası yükleme hatası: ' . $e->getMessage()];
+        }
+    }
+    
+    /**
+     * Revizyon talebine ait dosyaları getir
+     * @param string $revisionId - Revizyon talebi ID
+     * @param string $userId - Kullanıcı ID (yetki kontrolü için)
+     * @return array - Revizyon dosyaları listesi
+     */
+    public function getRevisionFiles($revisionId, $userId = null) {
+        try {
+            if (!isValidUUID($revisionId)) {
+                return [];
+            }
+            
+            // Eğer userId verilmişse, revizyonun kullanıcıya ait olup olmadığını kontrol et
+            if ($userId && !isValidUUID($userId)) {
+                return [];
+            }
+            
+            $whereClause = "WHERE rf.revision_id = ?";
+            $params = [$revisionId];
+            
+            if ($userId) {
+                $whereClause .= " AND r.user_id = ?";
+                $params[] = $userId;
+            }
+            
+            $stmt = $this->pdo->prepare("
+                SELECT rf.*, 
+                       a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
+                       r.status as revision_status, r.requested_at
+                FROM revision_files rf
+                LEFT JOIN revisions r ON rf.revision_id = r.id
+                LEFT JOIN users a ON rf.admin_id = a.id
+                $whereClause
+                ORDER BY rf.upload_date DESC
+            ");
+            
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch(PDOException $e) {
+            error_log('getRevisionFiles error: ' . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Upload ID'ye göre tüm revizyon dosyalarını getir
+     * @param string $uploadId - Ana dosya ID
+     * @param string $userId - Kullanıcı ID (yetki kontrolü için)
+     * @return array - Revizyon dosyaları listesi
+     */
+    public function getUploadRevisionFiles($uploadId, $userId = null) {
+        try {
+            if (!isValidUUID($uploadId)) {
+                return [];
+            }
+            
+            // Eğer userId verilmişse, dosyanın kullanıcıya ait olup olmadığını kontrol et
+            if ($userId && !isValidUUID($userId)) {
+                return [];
+            }
+            
+            $whereClause = "WHERE rf.upload_id = ?";
+            $params = [$uploadId];
+            
+            if ($userId) {
+                $whereClause .= " AND r.user_id = ?";
+                $params[] = $userId;
+            }
+            
+            $stmt = $this->pdo->prepare("
+                SELECT rf.*, r.request_notes, r.status as revision_status, r.requested_at,
+                       a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name
+                FROM revision_files rf
+                LEFT JOIN revisions r ON rf.revision_id = r.id
+                LEFT JOIN users a ON rf.admin_id = a.id
+                $whereClause
+                ORDER BY rf.upload_date DESC
+            ");
+            
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch(PDOException $e) {
+            error_log('getUploadRevisionFiles error: ' . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Revizyon dosyası indirme kontrolü ve dosya bilgilerini getir
+     * @param string $revisionFileId - Revizyon dosya ID
+     * @param string $userId - Kullanıcı ID (yetki kontrolü için)
+     * @return array - Dosya bilgileri veya hata
+     */
+    public function downloadRevisionFile($revisionFileId, $userId) {
+        try {
+            if (!isValidUUID($revisionFileId) || !isValidUUID($userId)) {
+                return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
+            }
+            
+            // Revizyon dosyasını ve yetki kontrolünü yap
+            $stmt = $this->pdo->prepare("
+                SELECT rf.*, r.user_id as revision_user_id, r.status as revision_status
+                FROM revision_files rf
+                LEFT JOIN revisions r ON rf.revision_id = r.id
+                WHERE rf.id = ? AND r.user_id = ?
+            ");
+            $stmt->execute([$revisionFileId, $userId]);
+            $revisionFile = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$revisionFile) {
+                return ['success' => false, 'message' => 'Revizyon dosyası bulunamadı veya yetkiniz yok.'];
+            }
+            
+            if ($revisionFile['revision_status'] !== 'completed') {
+                return ['success' => false, 'message' => 'Sadece tamamlanan revizyon dosyaları indirilebilir.'];
+            }
+            
+            // Fiziksel dosya kontrolü
+            $filePath = UPLOAD_PATH . 'revision_files/' . $revisionFile['filename'];
+            
+            if (!file_exists($filePath)) {
+                return ['success' => false, 'message' => 'Fiziksel dosya bulunamadı.'];
+            }
+            
+            // İndirme kaydını güncelle
+            $this->pdo->prepare("
+                UPDATE revision_files 
+                SET downloaded = TRUE, download_date = NOW() 
+                WHERE id = ?
+            ")->execute([$revisionFileId]);
+            
+            return [
+                'success' => true,
+                'file_path' => $filePath,
+                'original_name' => $revisionFile['original_name'],
+                'file_size' => $revisionFile['file_size'],
+                'file_type' => $revisionFile['file_type']
+            ];
+            
+        } catch(PDOException $e) {
+            error_log('downloadRevisionFile error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Veritabanı hatası oluştu.'];
+        }
+    }
+    
+    /**
+     * Revizyon ID'sine göre revizyon detaylarını getir
+     * @param string $revisionId - Revizyon ID
+     * @param string $userId - Kullanıcı ID (yetki kontrolü için)
+     * @return array|null - Revizyon detayları
+     */
+    public function getRevisionDetail($revisionId, $userId = null) {
+        try {
+            if (!isValidUUID($revisionId)) {
+                return null;
+            }
+            
+            $whereClause = "WHERE r.id = ?";
+            $params = [$revisionId];
+            
+            if ($userId && isValidUUID($userId)) {
+                $whereClause .= " AND r.user_id = ?";
+                $params[] = $userId;
+            }
+            
+            $stmt = $this->pdo->prepare("
+                SELECT r.*, fu.original_name, fu.filename, fu.file_size,
+                       u.username, u.first_name, u.last_name, u.email,
+                       a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
+                       b.name as brand_name, m.name as model_name,
+                       fr.original_name as response_original_name, fr.filename as response_filename
+                FROM revisions r
+                LEFT JOIN file_uploads fu ON r.upload_id = fu.id
+                LEFT JOIN users u ON r.user_id = u.id
+                LEFT JOIN users a ON r.admin_id = a.id
+                LEFT JOIN brands b ON fu.brand_id = b.id
+                LEFT JOIN models m ON fu.model_id = m.id
+                LEFT JOIN file_responses fr ON r.response_id = fr.id
+                $whereClause
+            ");
+            
+            $stmt->execute($params);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+            
+        } catch(PDOException $e) {
+            error_log('getRevisionDetail error: ' . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Revizyon istatistiklerini getir (Admin Dashboard için)
+     * @return array - Revizyon istatistikleri
+     */
+    public function getRevisionStats() {
+        try {
+            $stmt = $this->pdo->query("
+                SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+                    SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as in_progress,
+                    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
+                    SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+                FROM revisions
+            ");
+            
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch(PDOException $e) {
+            error_log('getRevisionStats error: ' . $e->getMessage());
+            return [
+                'total' => 0,
+                'pending' => 0,
+                'in_progress' => 0,
+                'completed' => 0,
+                'rejected' => 0
+            ];
+        }
+    }
 }
 ?>
