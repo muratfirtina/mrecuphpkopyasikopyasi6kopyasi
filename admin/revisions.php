@@ -439,14 +439,83 @@ include '../includes/admin_sidebar.php';
                                 </td>
                                 <td>
                                     <div>
-                                        <?php if ($revision['response_id']): ?>
-                                            <strong><?php echo htmlspecialchars($revision['response_original_name'] ?? 'Yanıt dosyası'); ?></strong><br>
-                                            <small class="text-muted">Yanıt: <?php echo htmlspecialchars($revision['original_name'] ?? 'Bilinmiyor'); ?></small><br>
-                                        <?php else: ?>
-                                            <strong><?php echo htmlspecialchars($revision['original_name'] ?? 'Dosya adı yok'); ?></strong><br>
+                                        <?php 
+                                        // Hangi dosyaya revize talep edildiğini belirle
+                                        $targetFileName = 'Ana Dosya';
+                                        $targetFileType = 'Orijinal Yüklenen Dosya';
+                                        $targetFileColor = 'success';
+                                        $targetFileIcon = 'file-alt';
+                                        
+                                        if ($revision['response_id']): 
+                                            // Yanıt dosyasına revize talebi
+                                            $targetFileName = $revision['response_original_name'] ?? 'Yanıt Dosyası';
+                                            $targetFileType = 'Yanıt Dosyası';
+                                            $targetFileColor = 'primary';
+                                            $targetFileIcon = 'reply';
+                                        else:
+                                            // Ana dosya veya revizyon dosyasına revize talebi
+                                            // Önceki revizyon dosyaları var mı kontrol et
+                                            try {
+                                                $stmt = $pdo->prepare("
+                                                    SELECT rf.original_name 
+                                                    FROM revisions r1
+                                                    JOIN revision_files rf ON r1.id = rf.revision_id
+                                                    WHERE r1.upload_id = ? 
+                                                    AND r1.status = 'completed'
+                                                    AND r1.requested_at < ?
+                                                    ORDER BY r1.requested_at DESC 
+                                                    LIMIT 1
+                                                ");
+                                                $stmt->execute([$revision['upload_id'], $revision['requested_at']]);
+                                                $previousRevisionFile = $stmt->fetch(PDO::FETCH_ASSOC);
+                                                
+                                                if ($previousRevisionFile) {
+                                                    $targetFileName = $previousRevisionFile['original_name'];
+                                                    $targetFileType = 'Revizyon Dosyası';
+                                                    $targetFileColor = 'warning';
+                                                    $targetFileIcon = 'edit';
+                                                } else {
+                                                    $targetFileName = $revision['original_name'] ?? 'Ana Dosya';
+                                                }
+                                            } catch (Exception $e) {
+                                                error_log('Previous revision file query error: ' . $e->getMessage());
+                                                $targetFileName = $revision['original_name'] ?? 'Ana Dosya';
+                                            }
+                                        endif;
+                                        ?>
+                                        
+                                        <!-- Revize Talep Edilen Dosya -->
+                                        <div class="mb-2">
+                                            <i class="fas fa-<?php echo $targetFileIcon; ?> text-<?php echo $targetFileColor; ?> me-2"></i>
+                                            <strong class="text-<?php echo $targetFileColor; ?>"><?php echo $targetFileType; ?>:</strong><br>
+                                            <span class="fw-semibold"><?php echo htmlspecialchars($targetFileName); ?></span>
+                                        </div>
+                                        
+                                        <!-- Ana Proje Dosyası Bilgisi -->
+                                        <?php if ($revision['response_id'] || $targetFileType === 'Revizyon Dosyası'): ?>
+                                            <div class="text-muted small">
+                                                <i class="fas fa-level-up-alt me-1"></i>
+                                                <strong>Ana Proje:</strong> <?php echo htmlspecialchars($revision['original_name'] ?? 'Bilinmiyor'); ?>
+                                            </div>
                                         <?php endif; ?>
+                                        
+                                        <!-- Araç Bilgisi -->
                                         <?php if (!empty($revision['brand_name']) || !empty($revision['model_name'])): ?>
-                                            <small class="text-muted"><?php echo htmlspecialchars($revision['brand_name'] . ' ' . $revision['model_name']); ?></small>
+                                            <div class="text-muted small mt-1">
+                                                <i class="fas fa-car me-1"></i>
+                                                <?php echo htmlspecialchars($revision['brand_name'] . ' ' . $revision['model_name']); ?>
+                                                <?php if (!empty($revision['year'])): ?>
+                                                    (<?php echo $revision['year']; ?>)
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                        
+                                        <!-- Plaka Bilgisi -->
+                                        <?php if (!empty($revision['plate'])): ?>
+                                            <div class="text-muted small">
+                                                <i class="fas fa-id-card me-1"></i>
+                                                <?php echo strtoupper(htmlspecialchars($revision['plate'])); ?>
+                                            </div>
                                         <?php endif; ?>
                                     </div>
                                 </td>

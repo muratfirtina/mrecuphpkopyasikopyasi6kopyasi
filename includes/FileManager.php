@@ -926,8 +926,9 @@ class FileManager {
             }
             
             if ($search) {
-                $whereClause .= " AND (r.request_notes LIKE ? OR fu.original_name LIKE ? OR u.username LIKE ? OR u.email LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ? OR b.name LIKE ? OR m.name LIKE ?)";
+                $whereClause .= " AND (r.request_notes LIKE ? OR fu.original_name LIKE ? OR u.username LIKE ? OR u.email LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ? OR b.name LIKE ? OR m.name LIKE ? OR fu.plate LIKE ?)";
                 $searchTerm = "%$search%";
+                $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
@@ -940,7 +941,7 @@ class FileManager {
             
             // LIMIT ve OFFSET'i güvenli şekilde string olarak ekle
             $sql = "
-                SELECT r.*, fu.original_name, fu.filename, fu.file_size,
+                SELECT r.*, fu.original_name, fu.filename, fu.file_size, fu.plate, fu.year,
                        u.username, u.email, u.first_name, u.last_name,
                        b.name as brand_name, m.name as model_name,
                        fr.original_name as response_original_name

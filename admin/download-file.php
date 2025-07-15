@@ -49,7 +49,7 @@ try {
             SELECT rf.*, r.id as revision_id, fu.original_name as original_upload_name
             FROM revision_files rf
             LEFT JOIN revisions r ON rf.revision_id = r.id
-            LEFT JOIN file_uploads fu ON rf.upload_id = fu.id
+            LEFT JOIN file_uploads fu ON r.upload_id = fu.id
             WHERE r.id = ?
             ORDER BY rf.upload_date DESC
             LIMIT 1
@@ -58,6 +58,22 @@ try {
         $file = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if (!$file) {
+            // Alternatif sorgu - revision_files ID'si ile deneme
+            $stmt = $pdo->prepare("
+                SELECT rf.*, r.id as revision_id, fu.original_name as original_upload_name
+                FROM revision_files rf
+                LEFT JOIN revisions r ON rf.revision_id = r.id
+                LEFT JOIN file_uploads fu ON r.upload_id = fu.id
+                WHERE rf.id = ?
+                ORDER BY rf.upload_date DESC
+                LIMIT 1
+            ");
+            $stmt->execute([$fileId]);
+            $file = $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+        
+        if (!$file) {
+            error_log("Revision file not found for ID: $fileId");
             http_response_code(404);
             die('Revizyon dosyası bulunamadı.');
         }

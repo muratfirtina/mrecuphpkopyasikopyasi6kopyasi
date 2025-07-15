@@ -1043,9 +1043,24 @@ try {
         $stmt->execute([$uploadId]);
         $pendingRevisions = $stmt->fetchColumn();
         
+        // Bekleyen revizyon taleplerinin detaylarını çek
+        $stmt = $pdo->prepare("
+            SELECT r.*, u.username, u.first_name, u.last_name, u.email,
+                   fr.original_name as response_file_name
+            FROM revisions r
+            LEFT JOIN users u ON r.user_id = u.id
+            LEFT JOIN file_responses fr ON r.response_id = fr.id
+            WHERE r.upload_id = ? AND r.status = 'pending'
+            ORDER BY r.requested_at DESC
+        ");
+        $stmt->execute([$uploadId]);
+        $pendingRevisionDetails = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
     } catch(PDOException $e) {
         $totalRevisions = 0;
         $pendingRevisions = 0;
+        $pendingRevisionDetails = [];
+        error_log('Pending revisions query error: ' . $e->getMessage());
     }
     ?>
     
@@ -1058,18 +1073,210 @@ try {
                 </h6>
             </div>
             <div class="card-body">
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    <strong>Bu dosya için bekleyen revizyon talepleri var.</strong><br>
-                    Revizyon taleplerini işleme almak için <a href="revisions.php" class="alert-link">Revizyon Yönetimi</a> sayfasını ziyaret edin.
+                <div class="alert alert-info mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Bu dosya için bekleyen revizyon talepleri bulundu.</strong><br>
+                    <small class="text-muted">
+                        Aşağıdaki revizyon taleplerini inceleyip "İşleme Al" veya "Reddet" seçeneklerini kullanabilirsiniz.
+                    </small>
                 </div>
                 
-                <div class="d-flex gap-2">
-                    <a href="revisions.php?search=<?php echo urlencode($upload['original_name']); ?>" 
-                       class="btn btn-warning">
-                        <i class="fas fa-list me-1"></i>Revizyon Taleplerini Görüntüle
-                    </a>
-                </div>
+                <?php foreach ($pendingRevisionDetails as $revision): ?>
+                    <div class="pending-revision-item mb-4 p-4 border rounded bg-light">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <!-- Kullanıcı Bilgileri -->
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="avatar-circle me-3 bg-warning text-white">
+                                        <?php echo strtoupper(substr($revision['first_name'], 0, 1) . substr($revision['last_name'], 0, 1)); ?>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0"><?php echo htmlspecialchars($revision['first_name'] . ' ' . $revision['last_name']); ?></h6>
+                                        <small class="text-muted">@<?php echo htmlspecialchars($revision['username']); ?> • <?php echo htmlspecialchars($revision['email']); ?></small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hangi Dosyaya Revizyon Talep Edildi -->
+                                <div class="mb-3">
+                                    <h6 class="text-primary mb-2">
+                                        <i class="fas fa-file-alt me-2"></i>Revizyon Talep Edilen Dosya:
+                                    </h6>
+                                    <div class="file-reference-box p-3 bg-white rounded border">
+                                        <?php if (!empty($revision['response_file_name'])): ?>
+                                            <i class="fas fa-reply text-primary me-2"></i>
+                                            <strong>Yanıt Dosyası:</strong> 
+                                            <span class="text-primary"><?php echo htmlspecialchars($revision['response_file_name']); ?></span>
+                                            <small class="text-muted d-block mt-1">Kullanıcı yanıt dosyasında değişiklik istiyor</small>
+                                        <?php else: ?>
+                                            <?php
+                                            // Son revizyon dosyasını bul
+                                            $targetFileName = 'Ana Dosya';
+                                            $targetFileType = 'Orijinal Yüklenen Dosya';
+                                            $targetFileColor = 'success';
+                                            $targetFileIcon = 'file-alt';
+                                            
+                                            try {
+                                                $stmt = $pdo->prepare("
+                                                    SELECT rf.original_name 
+                                                    FROM revisions r1
+                                                    JOIN revision_files rf ON r1.id = rf.revision_id
+                                                    WHERE r1.upload_id = ? 
+                                                    AND r1.status = 'completed'
+                                                    AND r1.requested_at < ?
+                                                    ORDER BY r1.requested_at DESC 
+                                                    LIMIT 1
+                                                ");
+                                                $stmt->execute([$uploadId, $revision['requested_at']]);
+                                                $previousRevisionFile = $stmt->fetch(PDO::FETCH_ASSOC);
+                                                
+                                                if ($previousRevisionFile) {
+                                                    $targetFileName = $previousRevisionFile['original_name'];
+                                                    $targetFileType = 'Revizyon Dosyası';
+                                                    $targetFileColor = 'warning';
+                                                    $targetFileIcon = 'edit';
+                                                }
+                                            } catch (Exception $e) {
+                                                error_log('Previous revision file query error: ' . $e->getMessage());
+                                            }
+                                            ?>
+                                            <i class="fas fa-<?php echo $targetFileIcon; ?> text-<?php echo $targetFileColor; ?> me-2"></i>
+                                            <strong><?php echo $targetFileType; ?>:</strong> 
+                                            <span class="text-<?php echo $targetFileColor; ?>"><?php echo htmlspecialchars($targetFileName); ?></span>
+                                            <small class="text-muted d-block mt-1">
+                                                <?php if ($targetFileType === 'Revizyon Dosyası'): ?>
+                                                    Kullanıcı revizyon dosyasında ek değişiklik istiyor
+                                                <?php else: ?>
+                                                    Kullanıcı ana dosyada değişiklik istiyor
+                                                <?php endif; ?>
+                                            </small>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                
+                                <!-- Revizyon Talep Notu -->
+                                <div class="mb-3">
+                                    <h6 class="text-info mb-2">
+                                        <i class="fas fa-comment-dots me-2"></i>Kullanıcının Revizyon Talebi:
+                                    </h6>
+                                    <div class="revision-request-note p-3 bg-white rounded border border-info">
+                                        <?php echo nl2br(htmlspecialchars($revision['request_notes'])); ?>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tarih Bilgisi -->
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        <strong>Talep Tarihi:</strong> <?php echo date('d.m.Y H:i', strtotime($revision['requested_at'])); ?>
+                                        (<?php echo date('H:i', strtotime($revision['requested_at'])); ?>)
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <!-- İşlem Butonları -->
+                                <div class="action-buttons">
+                                    <h6 class="mb-3 text-center">
+                                        <i class="fas fa-cogs me-2"></i>İşlemler
+                                    </h6>
+                                    
+                                    <!-- Dosyayı İndir -->
+                                    <div class="mb-3">
+                                        <?php if (!empty($revision['response_file_name'])): ?>
+                                            <!-- Yanıt dosyasını indir -->
+                                            <?php
+                                            try {
+                                                $stmt = $pdo->prepare("SELECT id FROM file_responses WHERE upload_id = ? AND original_name = ? ORDER BY upload_date DESC LIMIT 1");
+                                                $stmt->execute([$uploadId, $revision['response_file_name']]);
+                                                $responseFileId = $stmt->fetchColumn();
+                                            } catch (Exception $e) {
+                                                $responseFileId = null;
+                                            }
+                                            ?>
+                                            <?php if ($responseFileId): ?>
+                                                <a href="download-file.php?id=<?php echo $responseFileId; ?>&type=response" 
+                                                   class="btn btn-outline-primary btn-sm w-100 mb-2" 
+                                                   title="Revizyon talep edilen yanıt dosyasını indir">
+                                                    <i class="fas fa-download me-1"></i>Yanıt Dosyasını İndir
+                                                </a>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <!-- Ana dosya veya revizyon dosyasını indir -->
+                                            <?php
+                                            $downloadFileId = $uploadId;
+                                            $downloadType = 'upload';
+                                            
+                                            // Son revizyon dosyası varsa onu indir
+                                            try {
+                                                $stmt = $pdo->prepare("
+                                                    SELECT r.id as revision_id
+                                                    FROM revisions r
+                                                    JOIN revision_files rf ON r.id = rf.revision_id
+                                                    WHERE r.upload_id = ? 
+                                                    AND r.status = 'completed'
+                                                    AND r.requested_at < ?
+                                                    ORDER BY r.requested_at DESC 
+                                                    LIMIT 1
+                                                ");
+                                                $stmt->execute([$uploadId, $revision['requested_at']]);
+                                                $latestRevisionId = $stmt->fetchColumn();
+                                                
+                                                if ($latestRevisionId) {
+                                                    $downloadFileId = $latestRevisionId;
+                                                    $downloadType = 'revision';
+                                                }
+                                            } catch (Exception $e) {
+                                                error_log('Download file query error: ' . $e->getMessage());
+                                            }
+                                            ?>
+                                            <a href="download-file.php?id=<?php echo $downloadFileId; ?>&type=<?php echo $downloadType; ?>" 
+                                               class="btn btn-outline-primary btn-sm w-100 mb-2" 
+                                               title="Revizyon talep edilen dosyayı indir">
+                                                <i class="fas fa-download me-1"></i>
+                                                <?php echo $downloadType === 'revision' ? 'Revizyon Dosyasını İndir' : 'Ana Dosyayı İndir'; ?>
+                                            </a>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <!-- İşleme Al Butonu -->
+                                    <form method="POST" class="mb-2">
+                                        <input type="hidden" name="revision_id" value="<?php echo $revision['id']; ?>">
+                                        <button type="submit" name="approve_revision_direct" 
+                                                class="btn btn-success w-100"
+                                                onclick="return confirm('Bu revizyon talebini işleme almak istediğinizden emin misiniz?')">
+                                            <i class="fas fa-check me-1"></i>İşleme Al
+                                        </button>
+                                    </form>
+                                    
+                                    <!-- Reddet Butonu -->
+                                    <button type="button" class="btn btn-danger w-100" 
+                                            onclick="showRejectModal('<?php echo $revision['id']; ?>')">
+                                        <i class="fas fa-times me-1"></i>Reddet
+                                    </button>
+                                    
+                                    <hr class="my-3">
+                                    
+                                    <!-- Detaylı Görünüm -->
+                                    <a href="revisions.php?search=<?php echo urlencode($upload['original_name']); ?>" 
+                                       class="btn btn-outline-secondary btn-sm w-100">
+                                        <i class="fas fa-list me-1"></i>Tüm Revizyon Geçmişi
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="revision-id-info mt-3 pt-3 border-top">
+                            <small class="text-muted">
+                                <i class="fas fa-hashtag me-1"></i>
+                                <strong>Revizyon ID:</strong> <code><?php echo substr($revision['id'], 0, 8); ?>...</code>
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <?php if ($revision !== end($pendingRevisionDetails)): ?>
+                        <hr class="my-4">
+                    <?php endif; ?>
+                <?php endforeach; ?>
             </div>
         </div>
     <?php elseif ($totalRevisions > 0): ?>
@@ -2420,6 +2627,78 @@ try {
     padding: 0.75rem;
     font-size: 0.9rem;
 }
+
+/* Pending Revision Items */
+.pending-revision-item {
+    transition: all 0.3s ease;
+    border: 2px solid #ffc107 !important;
+}
+
+.pending-revision-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+}
+
+.file-reference-box {
+    transition: all 0.2s ease;
+}
+
+.file-reference-box:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.revision-request-note {
+    line-height: 1.6;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.action-buttons .btn {
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.action-buttons .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.avatar-circle {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.revision-id-info {
+    background: rgba(0,0,0,0.02);
+}
+
+.revision-id-info code {
+    background: #e9ecef;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .pending-revision-item .row {
+        flex-direction: column;
+    }
+    
+    .pending-revision-item .col-md-4 {
+        margin-top: 1rem;
+    }
+    
+    .action-buttons .btn {
+        margin-bottom: 0.5rem;
+    }
+}
+
 </style>
 
 <script>
