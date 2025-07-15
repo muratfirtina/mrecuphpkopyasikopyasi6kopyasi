@@ -1452,26 +1452,67 @@ try {
                         
                         <!-- Hangi dosya için revize talebi olduğunu belirt (sadece revize talepleri için) -->
                         <?php if ($comm['type'] === 'user_revision_request' || $comm['type'] === 'admin_revision_response'): ?>
-                            <?php if (!empty($comm['response_file_name'])): ?>
-                                <div class="mb-3">
-                                    <div class="file-reference">
-                                        <i class="fas fa-arrow-right text-primary me-2"></i>
-                                        <strong>Revize talep edilen dosya:</strong> 
-                                        <span class="text-primary"><?php echo htmlspecialchars($comm['response_file_name']); ?></span>
-                                        <small class="text-muted ms-2">(Yanıt Dosyası)</small>
-                                    </div>
-                                </div>
-                            <?php else: ?>
-                                <div class="mb-3">
-                                    <div class="file-reference">
-                                        <i class="fas fa-arrow-right text-success me-2"></i>
-                                        <strong>Revize edilen dosya:</strong> 
-                                        <span class="text-success">Ana Dosya</span>
-                                        <small class="text-muted ms-2">(Orijinal Yüklenen Dosya)</small>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
+                        <?php if (!empty($comm['response_file_name'])): ?>
+                        <div class="mb-3">
+                        <div class="file-reference">
+                        <i class="fas fa-arrow-right text-primary me-2"></i>
+                        <strong>Revize talep edilen dosya:</strong> 
+                        <span class="text-primary"><?php echo htmlspecialchars($comm['response_file_name']); ?></span>
+                        <small class="text-muted ms-2">(Yanıt Dosyası)</small>
+                        </div>
+                        </div>
+                        <?php else: ?>
+                        <?php
+                        // Eğer bu revize talebinden önce başka revizyon dosyaları varsa, son revizyon dosyasını bul
+                        $targetFileName = 'Ana Dosya';
+                        $targetFileType = 'Orijinal Yüklenen Dosya';
+                        
+                        if (isset($comm['revision_id'])) {
+                        try {
+                                // Bu revize talebinden önce tamamlanmış revize taleplerini bul
+                                    $stmt = $pdo->prepare("
+                                            SELECT rf.original_name 
+                            FROM revisions r1
+                            JOIN revision_files rf ON r1.id = rf.revision_id
+                            WHERE r1.upload_id = ? 
+                            AND r1.status = 'completed'
+                            AND r1.requested_at < (
+                                SELECT r2.requested_at 
+                                FROM revisions r2 
+                                WHERE r2.id = ?
+                            )
+                            ORDER BY r1.requested_at DESC 
+                            LIMIT 1
+                        ");
+                        $stmt->execute([$uploadId, $comm['revision_id']]);
+                        $previousRevisionFile = $stmt->fetch(PDO::FETCH_ASSOC);
+                        
+                        if ($previousRevisionFile) {
+                            $targetFileName = $previousRevisionFile['original_name'];
+                            $targetFileType = 'Revizyon Dosyası';
+                        }
+                    } catch (Exception $e) {
+                        error_log('Previous revision file query error: ' . $e->getMessage());
+                    }
+                }
+                ?>
+                <div class="mb-3">
+                    <div class="file-reference">
+                        <?php if ($targetFileType === 'Revizyon Dosyası'): ?>
+                            <i class="fas fa-arrow-right text-warning me-2"></i>
+                            <strong>Revize talep edilen dosya:</strong> 
+                            <span class="text-warning"><?php echo htmlspecialchars($targetFileName); ?></span>
+                            <small class="text-muted ms-2">(<?php echo $targetFileType; ?>)</small>
+                        <?php else: ?>
+                            <i class="fas fa-arrow-right text-success me-2"></i>
+                            <strong>Revize edilen dosya:</strong> 
+                            <span class="text-success"><?php echo $targetFileName; ?></span>
+                            <small class="text-muted ms-2">(<?php echo $targetFileType; ?>)</small>
                         <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
                         
                         <!-- Kullanıcı Notları -->
                         <?php if (!empty($comm['user_notes'])): ?>
