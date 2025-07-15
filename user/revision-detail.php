@@ -131,10 +131,21 @@ include '../includes/user_header.php';
                         <a href="revisions.php" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-1"></i>Listeye Dön
                         </a>
-                        <?php if ($revision['status'] === 'completed'): ?>
-                            <a href="download-revision.php?id=<?php echo $revision['id']; ?>" class="btn btn-success">
-                                <i class="fas fa-download me-1"></i>Revize Dosyasını İndir
-                            </a>
+                        <?php if ($revision['status'] === 'completed' && !empty($revisionFiles)): ?>
+                            <?php if (count($revisionFiles) == 1): ?>
+                                <a href="download-revision.php?id=<?php echo $revisionFiles[0]['id']; ?>" class="btn btn-success">
+                                    <i class="fas fa-download me-1"></i>Revize Dosyasını İndir
+                                </a>
+                            <?php else: ?>
+                                <div class="btn-group">
+                                    <a href="download-revision.php?id=<?php echo $revisionFiles[0]['id']; ?>" class="btn btn-success">
+                                        <i class="fas fa-download me-1"></i>Ana Dosyayı İndir
+                                    </a>
+                                    <a href="download-revision.php?id=<?php echo $revision['id']; ?>" class="btn btn-outline-success">
+                                        <i class="fas fa-download me-1"></i>Tümünü
+                                    </a>
+                                </div>
+                            <?php endif; ?>
                         <?php endif; ?>
                         <a href="files.php?view=<?php echo $revision['upload_id']; ?>" class="btn btn-outline-primary">
                             <i class="fas fa-file me-1"></i>Orijinal Dosya
@@ -176,9 +187,9 @@ include '../includes/user_header.php';
                                     <div class="timeline-content">
                                         <h6>Admin Atandı</h6>
                                         <p class="text-muted mb-1">
-                                            <strong><?php echo htmlspecialchars($revision['admin_username']); ?></strong>
-                                            <?php if ($revision['admin_first_name']): ?>
-                                                (<?php echo htmlspecialchars($revision['admin_first_name'] . ' ' . $revision['admin_last_name']); ?>)
+                                            <strong><?php echo htmlspecialchars(($revision['admin_username'] ?? 'Admin bilgisi yok')); ?></strong>
+                                            <?php if (($revision['admin_first_name'] ?? '')): ?>
+                                                (<?php echo htmlspecialchars(($revision['admin_first_name'] ?? '') . ' ' . ($revision['admin_last_name'] ?? '')); ?>)
                                             <?php endif; ?>
                                         </p>
                                         <small class="text-muted">Talebiniz uzman bir admin tarafından incelemeye alındı.</small>
@@ -255,19 +266,19 @@ include '../includes/user_header.php';
                     </div>
 
                     <!-- Admin Yanıtı -->
-                    <?php if ($revision['admin_notes']): ?>
+                    <?php if (($revision['admin_notes'] ?? 'Admin notu yok')): ?>
                     <div class="card mb-4">
                         <div class="card-header bg-light">
                             <h5 class="card-title mb-0">
                                 <i class="fas fa-user-cog me-2"></i>Admin Yanıtı
-                                <?php if ($revision['admin_username']): ?>
-                                    <small class="text-muted">- <?php echo htmlspecialchars($revision['admin_username']); ?></small>
+                                <?php if (($revision['admin_username'] ?? 'Admin bilgisi yok')): ?>
+                                    <small class="text-muted">- <?php echo htmlspecialchars(($revision['admin_username'] ?? 'Admin bilgisi yok')); ?></small>
                                 <?php endif; ?>
                             </h5>
                         </div>
                         <div class="card-body">
                             <div class="admin-response">
-                                <?php echo nl2br(htmlspecialchars($revision['admin_notes'])); ?>
+                                <?php echo nl2br(htmlspecialchars(($revision['admin_notes'] ?? 'Admin notu yok'))); ?>
                             </div>
                         </div>
                     </div>
@@ -296,16 +307,16 @@ include '../includes/user_header.php';
                                                     <i class="fas fa-hdd me-1"></i>
                                                     <?php echo formatFileSize($revision['file_size'] ?? 0); ?>
                                                 </span>
-                                                <?php if ($revision['brand_name']): ?>
+                                                <?php if (($revision['brand_name'] ?? 'Marka bilgisi yok')): ?>
                                                 <span class="badge bg-primary me-2">
                                                     <i class="fas fa-car me-1"></i>
-                                                    <?php echo htmlspecialchars($revision['brand_name']); ?>
+                                                    <?php echo htmlspecialchars(($revision['brand_name'] ?? 'Marka bilgisi yok')); ?>
                                                 </span>
                                                 <?php endif; ?>
-                                                <?php if ($revision['category_name']): ?>
+                                                <?php if (($revision['category_name'] ?? 'Kategori belirtilmemiş')): ?>
                                                 <span class="badge bg-secondary me-2">
                                                     <i class="fas fa-tag me-1"></i>
-                                                    <?php echo htmlspecialchars($revision['category_name']); ?>
+                                                    <?php echo htmlspecialchars(($revision['category_name'] ?? 'Kategori belirtilmemiş')); ?>
                                                 </span>
                                                 <?php endif; ?>
                                             </div>
@@ -320,29 +331,46 @@ include '../includes/user_header.php';
                                 <!-- Revize Dosya -->
                                 <div class="col-md-6">
                                     <h6 class="text-muted mb-3">Revize Dosya</h6>
-                                    <?php if ($revision['status'] === 'completed' && $revision['revision_filename']): ?>
-                                    <div class="file-info">
-                                        <div class="file-icon">
-                                            <i class="fas fa-file-code text-success"></i>
-                                        </div>
-                                        <div class="file-details">
-                                            <h6 class="file-name"><?php echo htmlspecialchars($revision['revision_filename']); ?></h6>
-                                            <div class="file-meta">
-                                                <span class="badge bg-light text-dark me-2">
-                                                    <i class="fas fa-hdd me-1"></i>
-                                                    <?php echo formatFileSize($revision['revision_file_size'] ?? 0); ?>
-                                                </span>
-                                                <span class="badge bg-success">
-                                                    <i class="fas fa-check me-1"></i>
-                                                    Hazır
-                                                </span>
+                                    <?php if ($revision['status'] === 'completed' && !empty($revisionFiles)): ?>
+                                        <?php $firstRevisionFile = $revisionFiles[0]; // İlk revizyon dosyasını göster ?>
+                                        <div class="file-info">
+                                            <div class="file-icon">
+                                                <i class="fas fa-file-code text-success"></i>
                                             </div>
-                                            <small class="text-muted">
-                                                <i class="fas fa-calendar me-1"></i>
-                                                <?php echo $revision['revision_uploaded_at'] ? date('d.m.Y H:i', strtotime($revision['revision_uploaded_at'])) : 'Bilinmiyor'; ?>
-                                            </small>
+                                            <div class="file-details">
+                                                <h6 class="file-name"><?php echo htmlspecialchars($firstRevisionFile['original_name']); ?></h6>
+                                                <div class="file-meta">
+                                                    <span class="badge bg-light text-dark me-2">
+                                                        <i class="fas fa-hdd me-1"></i>
+                                                        <?php echo formatFileSize($firstRevisionFile['file_size']); ?>
+                                                    </span>
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>
+                                                        Hazır
+                                                    </span>
+                                                    <?php if (count($revisionFiles) > 1): ?>
+                                                    <span class="badge bg-info">
+                                                        <i class="fas fa-plus me-1"></i>
+                                                        +<?php echo count($revisionFiles) - 1; ?> dosya daha
+                                                    </span>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    <?php echo date('d.m.Y H:i', strtotime($firstRevisionFile['upload_date'])); ?>
+                                                </small>
+                                                <div class="mt-2">
+                                                    <a href="download-revision.php?id=<?php echo $firstRevisionFile['id']; ?>" class="btn btn-success btn-sm">
+                                                        <i class="fas fa-download me-1"></i>İndir
+                                                    </a>
+                                                    <?php if (count($revisionFiles) > 1): ?>
+                                                        <a href="download-revision.php?id=<?php echo $revision['id']; ?>" class="btn btn-outline-success btn-sm ms-2">
+                                                            <i class="fas fa-download me-1"></i>Tümünü İndir
+                                                        </a>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
                                     <?php else: ?>
                                     <div class="text-center py-4">
                                         <i class="fas fa-clock text-muted" style="font-size: 2rem;"></i>
@@ -411,10 +439,10 @@ include '../includes/user_header.php';
                                         <?php echo $revision['credits_charged'] > 0 ? $revision['credits_charged'] . ' Kredi' : 'Ücretsiz'; ?>
                                     </span>
                                 </div>
-                                <?php if ($revision['admin_username']): ?>
+                                <?php if (($revision['admin_username'] ?? 'Admin bilgisi yok')): ?>
                                 <div class="summary-item">
                                     <span class="summary-label">Admin:</span>
-                                    <span class="summary-value"><?php echo htmlspecialchars($revision['admin_username']); ?></span>
+                                    <span class="summary-value"><?php echo htmlspecialchars(($revision['admin_username'] ?? 'Admin bilgisi yok')); ?></span>
                                 </div>
                                 <?php endif; ?>
                             </div>
@@ -430,10 +458,19 @@ include '../includes/user_header.php';
                         </div>
                         <div class="card-body">
                             <div class="d-grid gap-2">
-                                <?php if ($revision['status'] === 'completed' && $revision['revision_file_path']): ?>
-                                <a href="download-revision.php?id=<?php echo $revision['id']; ?>" class="btn btn-success">
-                                    <i class="fas fa-download me-2"></i>Revize Dosyasını İndir
-                                </a>
+                                <?php if ($revision['status'] === 'completed' && !empty($revisionFiles)): ?>
+                                    <?php if (count($revisionFiles) == 1): ?>
+                                        <a href="download-revision.php?id=<?php echo $revisionFiles[0]['id']; ?>" class="btn btn-success">
+                                            <i class="fas fa-download me-2"></i>Revize Dosyasını İndir
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="download-revision.php?id=<?php echo $revisionFiles[0]['id']; ?>" class="btn btn-success">
+                                            <i class="fas fa-download me-2"></i>Ana Dosyayı İndir
+                                        </a>
+                                        <a href="download-revision.php?id=<?php echo $revision['id']; ?>" class="btn btn-outline-success">
+                                            <i class="fas fa-download me-2"></i>Tüm Dosyaları İndir
+                                        </a>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                                 
                                 <a href="files.php?view=<?php echo $revision['upload_id']; ?>" class="btn btn-outline-primary">
@@ -470,7 +507,57 @@ include '../includes/user_header.php';
                                     <i class="fas fa-info me-2"></i>Revize Hakkında
                                 </button>
                             </div>
+                        
+            <!-- Revizyon Dosyaları Bölümü -->
+            <?php if (!empty($revisionFiles)): ?>
+                <div class="col-12">
+                    <div class="info-card">
+                        <div class="info-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-download me-2 text-success"></i>
+                                Revizyon Dosyaları (<?php echo count($revisionFiles); ?> adet)
+                            </h6>
                         </div>
+                        <div class="info-content">
+                            <?php foreach ($revisionFiles as $revFile): ?>
+                                <div class="revision-file-item mb-3 p-3 border rounded">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="file-info">
+                                            <h6 class="mb-1">
+                                                <i class="fas fa-file-download me-1 text-success"></i>
+                                                <?php echo htmlspecialchars($revFile['original_name']); ?>
+                                            </h6>
+                                            <div class="file-meta">
+                                                <span class="badge bg-light text-dark me-2">
+                                                    <?php echo formatFileSize($revFile['file_size']); ?>
+                                                </span>
+                                                <span class="text-muted">
+                                                    <?php echo date('d.m.Y H:i', strtotime($revFile['upload_date'])); ?>
+                                                </span>
+                                            </div>
+                                            <?php if ($revFile['admin_notes']): ?>
+                                                <div class="admin-notes mt-2">
+                                                    <small class="text-muted">
+                                                        <strong>Admin Notları:</strong> <?php echo nl2br(htmlspecialchars($revFile['admin_notes'])); ?>
+                                                    </small>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="file-actions">
+                                            <a href="download-revision.php?id=<?php echo $revFile['id']; ?>" 
+                                               class="btn btn-success btn-sm">
+                                                <i class="fas fa-download me-1"></i>İndir
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+        </div>
                     </div>
                 </div>
             </div>

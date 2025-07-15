@@ -184,6 +184,24 @@ if ($fileType === 'response') {
     // Ana dosyaya ait revize taleplerini getir
     $revisions = $fileManager->getFileRevisions($fileId, $userId);
     
+    // Ana dosya için tüm revizyon dosyalarını al
+    $allRevisionFiles = [];
+    if (!empty($revisions)) {
+        foreach ($revisions as $revision) {
+            if ($revision['status'] === 'completed') {
+                $revisionFiles = $fileManager->getRevisionFiles($revision['id'], $userId);
+                if (!empty($revisionFiles)) {
+                    foreach ($revisionFiles as $revFile) {
+                        $revFile['revision_id'] = $revision['id'];
+                        $revFile['revision_notes'] = $revision['request_notes'];
+                        $revFile['revision_date'] = $revision['requested_at'];
+                        $allRevisionFiles[] = $revFile;
+                    }
+                }
+            }
+        }
+    }
+    
     // Kullanıcının bu dosya ile ilgili tüm revize taleplerini al (detaylı)
     $detailedRevisions = [];
     try {
@@ -653,6 +671,80 @@ include '../includes/user_header.php';
                         </div>
                     </div>
                 <?php endif; ?>
+                <!-- Revize Dosyaları -->
+                <?php if (!empty($allRevisionFiles)): ?>
+                    <div class="detail-card mb-4">
+                        <div class="detail-card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-edit me-2"></i>Revize Dosyaları (<?php echo count($allRevisionFiles); ?>)
+                            </h5>
+                        </div>
+                        <div class="detail-card-body">
+                            <div class="revision-files-list">
+                                <?php foreach ($allRevisionFiles as $revFile): ?>
+                                    <div class="revision-file-item">
+                                        <div class="file-icon">
+                                            <i class="fas fa-edit text-warning"></i>
+                                        </div>
+                                        <div class="file-info">
+                                            <h6 class="file-name">
+                                                <?php echo htmlspecialchars($revFile['original_name']); ?>
+                                            </h6>
+                                            <div class="file-meta">
+                                                <span class="meta-item">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    <?php echo date('d.m.Y H:i', strtotime($revFile['upload_date'])); ?>
+                                                </span>
+                                                <span class="meta-item">
+                                                    <i class="fas fa-hdd me-1"></i>
+                                                    <?php echo formatFileSize($revFile['file_size']); ?>
+                                                </span>
+                                                <?php if (!empty($revFile['admin_username'])): ?>
+                                                    <span class="meta-item">
+                                                        <i class="fas fa-user-cog me-1"></i>
+                                                        <?php echo htmlspecialchars($revFile['admin_username']); ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                                <span class="meta-item">
+                                                    <i class="fas fa-hashtag me-1"></i>
+                                                    Revize #<?php echo substr($revFile['revision_id'], 0, 8); ?>
+                                                </span>
+                                            </div>
+                                            <?php if (!empty($revFile['revision_notes'])): ?>
+                                                <div class="file-notes mt-2">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-comment-dots me-1"></i>
+                                                        <strong>Talep:</strong> <?php echo htmlspecialchars(substr($revFile['revision_notes'], 0, 100)) . (strlen($revFile['revision_notes']) > 100 ? '...' : ''); ?>
+                                                    </small>
+                                                </div>
+                                            <?php endif; ?>
+                                            <?php if (!empty($revFile['admin_notes'])): ?>
+                                                <div class="file-notes mt-1">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-user-shield me-1"></i>
+                                                        <strong>Admin Notu:</strong> <?php echo htmlspecialchars(substr($revFile['admin_notes'], 0, 100)) . (strlen($revFile['admin_notes']) > 100 ? '...' : ''); ?>
+                                                    </small>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="file-actions">
+                                            <a href="revision-detail.php?id=<?php echo $revFile['revision_id']; ?>" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-eye me-1"></i>Detay
+                                            </a>
+                                            <a href="download-revision.php?id=<?php echo $revFile['id']; ?>" class="btn btn-warning btn-sm">
+                                                <i class="fas fa-download me-1"></i>İndir
+                                            </a>
+                                            <button type="button" class="btn btn-outline-warning btn-sm" 
+                                                    onclick="requestRevision('<?php echo $revFile['id']; ?>', 'revision')">
+                                                <i class="fas fa-redo me-1"></i>Yeniden Revize
+                                            </button>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
                 <!-- İletişim Geçmişi (Tüm Kullanıcı Admin Etkileşimleri) -->
                 <?php if (!empty($communicationHistory)): ?>
@@ -775,6 +867,7 @@ include '../includes/user_header.php';
                                                     <div class="note-content">
                                                         <?php echo nl2br(htmlspecialchars($comm['admin_notes'])); ?>
                                                     </div>
+                                                    
                                                 </div>
                                             <?php else: ?>
                                                 <?php if ($comm['type'] === 'user_revision_request' && $comm['status'] === 'pending'): ?>
@@ -782,7 +875,6 @@ include '../includes/user_header.php';
                                                         <div class="note-header">
                                                             <i class="fas fa-hourglass-half me-2 text-muted"></i>
                                                             <strong>Admin Cevabı:</strong>
-                                                        </div>
                                                         <div class="note-content">
                                                             <em class="text-muted">
                                                                 Talebiniz inceleniyor, lütfen bekleyin...
@@ -1010,9 +1102,24 @@ include '../includes/user_header.php';
     flex-direction: column;
     gap: 1rem;
 }
+.revision-files-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
 
 .response-file-item {
     background: #f8fff9;
+    border: 1px solid #d4edda;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+.revision-file-item {
+    background:rgb(250, 244, 207);
     border: 1px solid #d4edda;
     border-radius: 12px;
     padding: 1.5rem;
@@ -1045,6 +1152,33 @@ include '../includes/user_header.php';
 }
 
 .response-file-item .file-name {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+.revision-file-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
+}
+
+.revision-file-item .file-icon {
+    width: 48px;
+    height: 48px;
+    background:rgb(167, 129, 40);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.revision-file-item .file-info {
+    flex: 1;
+}
+
+.revision-file-item .file-name {
     font-weight: 600;
     color: #495057;
     margin-bottom: 0.5rem;
@@ -1280,7 +1414,7 @@ include '../includes/user_header.php';
 
 .communication-timeline .revision-note .note-content {
     padding: 0.75rem;
-    white-space: pre-wrap;
+    white-space: normal;
     word-wrap: break-word;
     line-height: 1.6;
 }

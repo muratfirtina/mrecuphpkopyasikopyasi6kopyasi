@@ -35,6 +35,15 @@ $revisions = $fileManager->getUserRevisions($userId, $page, $limit, $dateFrom, $
 $totalRevisions = $fileManager->getUserRevisionCount($userId, $dateFrom, $dateTo, $status, $search);
 $totalPages = ceil($totalRevisions / $limit);
 
+// Her revizyon için dosyalarını al
+foreach ($revisions as &$revision) {
+    if ($revision['status'] === 'completed') {
+        $revision['revision_files'] = $fileManager->getRevisionFiles($revision['id'], $userId);
+    } else {
+        $revision['revision_files'] = [];
+    }
+}
+
 // İstatistikler
 try {
     $stmt = $pdo->prepare("SELECT status, COUNT(*) as count FROM revisions WHERE user_id = ? GROUP BY status");
@@ -402,8 +411,8 @@ include '../includes/user_header.php';
                                                         <i class="fas fa-file"></i>
                                                     </a>
                                                     
-                                                    <?php if ($revision['status'] === 'completed'): ?>
-                                                        <a href="download-revision.php?id=<?php echo $revision['id']; ?>" 
+                                                    <?php if ($revision['status'] === 'completed' && !empty($revision['revision_files'])): ?>
+                                                        <a href="download-revision.php?id=<?php echo $revision['revision_files'][0]['id']; ?>" 
                                                            class="btn btn-success" title="Revize Dosyasını İndir">
                                                             <i class="fas fa-download"></i>
                                                         </a>
