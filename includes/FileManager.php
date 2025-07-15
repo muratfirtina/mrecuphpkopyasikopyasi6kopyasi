@@ -4,6 +4,19 @@
  * GUID tabanlı dosya yönetimi sınıfı - Duplicate metodlar temizlendi
  */
 
+// UUID oluşturma fonksiyonu
+if (!function_exists('generateUUID')) {
+    function generateUUID() {
+        return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+        );
+    }
+}
+
 class FileManager {
     private $pdo;
     
@@ -459,7 +472,7 @@ class FileManager {
                 return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
             }
             
-            // Yanıt dosyası kontrolü
+            // Yanıt dosyası kontrolü ve yetki doğrulama
             $stmt = $this->pdo->prepare("
                 SELECT fr.*, fu.user_id 
                 FROM file_responses fr
@@ -508,7 +521,69 @@ class FileManager {
         }
     }
     
-    // Dosya indirme işlemi
+    // Revizyon dosyası için revize talebi gönder
+    public function requestRevisionFileRevision($revisionFileId, $userId, $revisionNotes) {
+        try {
+            if (!isValidUUID($revisionFileId) || !isValidUUID($userId)) {
+                return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
+            }
+            
+            // Revizyon dosyası kontrolü ve yetki doğrulama
+            $stmt = $this->pdo->prepare("
+                SELECT rf.*, r.user_id, r.upload_id, r.id as original_revision_id
+                FROM revision_files rf
+                LEFT JOIN revisions r ON rf.revision_id = r.id
+                WHERE rf.id = ? AND r.user_id = ?
+            ");
+            $stmt->execute([$revisionFileId, $userId]);
+            $revisionFile = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$revisionFile) {
+                return ['success' => false, 'message' => 'Revizyon dosyası bulunamadı veya yetkiniz yok.'];
+            }
+            
+            // Daha önce bu revizyon dosyası için bekleyen revize talebi var mı kontrol et
+            $stmt = $this->pdo->prepare("
+                SELECT COUNT(*) as count 
+                FROM revisions 
+                WHERE revision_file_id = ? AND status = 'pending'
+            ");
+            $stmt->execute([$revisionFileId]);
+            $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($existing['count'] > 0) {
+                return ['success' => false, 'message' => 'Bu revizyon dosyası için zaten bekleyen bir revize talebi bulunuyor.'];
+            }
+            
+            // Yeni revize talebi oluştur
+            $newRevisionId = generateUUID();
+            $stmt = $this->pdo->prepare("
+                INSERT INTO revisions (
+                    id, upload_id, user_id, revision_file_id, parent_revision_id, 
+                    request_notes, status, requested_at
+                ) VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())
+            ");
+            
+            $result = $stmt->execute([
+                $newRevisionId, 
+                $revisionFile['upload_id'], 
+                $userId, 
+                $revisionFileId,
+                $revisionFile['original_revision_id'],
+                $revisionNotes
+            ]);
+            
+            if ($result) {
+                return ['success' => true, 'message' => 'Revizyon dosyası için yeni revize talebi başarıyla gönderildi. Admin ekibimiz dosyanızı yeniden değerlendirecektir.'];
+            } else {
+                return ['success' => false, 'message' => 'Revize talebi oluşturulurken hata oluştu.'];
+            }
+            
+        } catch(PDOException $e) {
+            error_log('requestRevisionFileRevision error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Veritabanı hatası oluştu.'];
+        }
+    }
     public function downloadFile($fileId, $userId, $type = 'upload') {
         try {
             if (!isValidUUID($fileId) || !isValidUUID($userId)) {
@@ -678,7 +753,7 @@ class FileManager {
         }
     }
     
-    // Kullanıcının revize taleplerini getir
+    // Kullanıcının revize taleplerini getir (Tüm Tipler - Ana, Yanıt, Revizyon Dosyaları)
     public function getUserRevisions($userId, $page = 1, $limit = 10, $dateFrom = '', $dateTo = '', $status = '', $search = '') {
         try {
             if (!isValidUUID($userId)) {
@@ -705,18 +780,44 @@ class FileManager {
             }
             
             if ($search) {
-                $whereClause .= " AND (r.request_notes LIKE ? OR fu.original_name LIKE ?)";
+                $whereClause .= " AND (r.request_notes LIKE ? OR fu.original_name LIKE ? OR fr.original_name LIKE ? OR rf.original_name LIKE ?)";
                 $searchTerm = "%$search%";
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
             }
             
-            // LIMIT ve OFFSET'i güvenli şekilde string olarak ekle
+            // Tüm revize tiplerini destekleyen gelişmiş sorgu
             $sql = "
-                SELECT r.*, fu.original_name, fu.filename, fu.file_size,
-                       u.username as admin_username, u.first_name as admin_first_name, u.last_name as admin_last_name
+                SELECT r.*, 
+                       -- Ana dosya bilgisi (upload_id için)
+                       fu.original_name, fu.filename, fu.file_size,
+                       -- Yanıt dosyası bilgisi (response_id için)
+                       fr.original_name as response_original_name, fr.filename as response_filename,
+                       -- Revizyon dosyası bilgisi (revision_file_id için)
+                       rf.original_name as revision_file_original_name, rf.filename as revision_filename,
+                       -- Ana revizyon talebi bilgisi (parent için)
+                       parent_r.request_notes as parent_request_notes,
+                       -- Admin bilgisi
+                       u.username as admin_username, u.first_name as admin_first_name, u.last_name as admin_last_name,
+                       -- Revize tipi belirleme
+                       CASE 
+                           WHEN r.revision_file_id IS NOT NULL THEN 'revision_file'
+                           WHEN r.response_id IS NOT NULL THEN 'response'
+                           ELSE 'upload'
+                       END as revision_type,
+                       -- Gösterilecek dosya adı belirleme
+                       CASE 
+                           WHEN r.revision_file_id IS NOT NULL THEN CONCAT('REV: ', rf.original_name)
+                           WHEN r.response_id IS NOT NULL THEN CONCAT('RESP: ', fr.original_name)
+                           ELSE fu.original_name
+                       END as display_file_name
                 FROM revisions r
                 LEFT JOIN file_uploads fu ON r.upload_id = fu.id
+                LEFT JOIN file_responses fr ON r.response_id = fr.id
+                LEFT JOIN revision_files rf ON r.revision_file_id = rf.id
+                LEFT JOIN revisions parent_r ON r.parent_revision_id = parent_r.id
                 LEFT JOIN users u ON r.admin_id = u.id
                 $whereClause
                 ORDER BY r.requested_at DESC
@@ -725,7 +826,24 @@ class FileManager {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($params);
             
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Sonuçları işle ve görüntüleme için hazırla
+            foreach ($results as &$result) {
+                // original_name alanını display_file_name ile güncelle
+                $result['original_name'] = $result['display_file_name'];
+                
+                // Debug bilgisi ekle
+                $result['debug_info'] = [
+                    'revision_type' => $result['revision_type'],
+                    'upload_id' => $result['upload_id'],
+                    'response_id' => $result['response_id'],
+                    'revision_file_id' => $result['revision_file_id'],
+                    'parent_revision_id' => $result['parent_revision_id']
+                ];
+            }
+            
+            return $results;
             
         } catch(PDOException $e) {
             error_log('getUserRevisions error: ' . $e->getMessage());
@@ -733,7 +851,7 @@ class FileManager {
         }
     }
     
-    // Kullanıcının revize talep sayısını getir
+    // Kullanıcının revize talep sayısını getir (Tüm Tipler Dahil)
     public function getUserRevisionCount($userId, $dateFrom = '', $dateTo = '', $status = '', $search = '') {
         try {
             if (!isValidUUID($userId)) {
@@ -759,8 +877,10 @@ class FileManager {
             }
             
             if ($search) {
-                $whereClause .= " AND (r.request_notes LIKE ? OR fu.original_name LIKE ?)";
+                $whereClause .= " AND (r.request_notes LIKE ? OR fu.original_name LIKE ? OR fr.original_name LIKE ? OR rf.original_name LIKE ?)";
                 $searchTerm = "%$search%";
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
                 $params[] = $searchTerm;
                 $params[] = $searchTerm;
             }
@@ -769,6 +889,8 @@ class FileManager {
                 SELECT COUNT(*) 
                 FROM revisions r
                 LEFT JOIN file_uploads fu ON r.upload_id = fu.id
+                LEFT JOIN file_responses fr ON r.response_id = fr.id
+                LEFT JOIN revision_files rf ON r.revision_file_id = rf.id
                 $whereClause
             ");
             

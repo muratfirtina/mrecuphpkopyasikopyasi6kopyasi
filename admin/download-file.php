@@ -43,6 +43,40 @@ try {
         $filePath = '../uploads/response_files/' . $file['filename'];
         $downloadName = $file['original_name'];
         
+    } elseif ($fileType === 'revision') {
+        // Revizyon dosyası indirme
+        $stmt = $pdo->prepare("
+            SELECT rf.*, r.id as revision_id, fu.original_name as original_upload_name
+            FROM revision_files rf
+            LEFT JOIN revisions r ON rf.revision_id = r.id
+            LEFT JOIN file_uploads fu ON rf.upload_id = fu.id
+            WHERE r.id = ?
+            ORDER BY rf.upload_date DESC
+            LIMIT 1
+        ");
+        $stmt->execute([$fileId]);
+        $file = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$file) {
+            http_response_code(404);
+            die('Revizyon dosyası bulunamadı.');
+        }
+        
+        $filePath = '../uploads/revision_files/' . $file['filename'];
+        $downloadName = $file['original_name'];
+        
+        // İndirme kaydını güncelle
+        try {
+            $updateStmt = $pdo->prepare("
+                UPDATE revision_files 
+                SET downloaded = 1, download_date = NOW() 
+                WHERE id = ?
+            ");
+            $updateStmt->execute([$file['id']]);
+        } catch (Exception $e) {
+            error_log('Download tracking error: ' . $e->getMessage());
+        }
+        
     } else {
         // Normal upload dosyası indirme
         $stmt = $pdo->prepare("

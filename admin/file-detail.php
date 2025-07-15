@@ -620,6 +620,26 @@ try {
             
             // Admin'in revize cevabı (varsa ve geçerli ise)
             if (!empty($revision['admin_notes'])) {
+                // Revizyon dosyası bilgilerini al
+                $revisionFileData = null;
+                if ($revision['status'] === 'completed') {
+                    try {
+                        $revFileStmt = $pdo->prepare("
+                            SELECT rf.original_name, rf.filename, rf.file_size, rf.upload_date,
+                                   u.username as admin_username
+                            FROM revision_files rf
+                            LEFT JOIN users u ON rf.admin_id = u.id
+                            WHERE rf.revision_id = ?
+                            ORDER BY rf.upload_date DESC
+                            LIMIT 1
+                        ");
+                        $revFileStmt->execute([$revision['id']]);
+                        $revisionFileData = $revFileStmt->fetch(PDO::FETCH_ASSOC);
+                    } catch (PDOException $e) {
+                        error_log('Revision file query error: ' . $e->getMessage());
+                    }
+                }
+                
                 $communicationHistory[] = [
                     'type' => 'admin_revision_response',
                     'date' => $revision['completed_at'] ?: $revision['updated_at'] ?: $revision['requested_at'],
@@ -631,7 +651,8 @@ try {
                     'revision_id' => $revision['id'],
                     'revision_status' => $revision['status'],
                     'credits_charged' => $revision['credits_charged'] ?? 0,
-                    'response_file_name' => $revision['response_file_name'] ?? null // Hangi dosya için revize cevabı
+                    'response_file_name' => $revision['response_file_name'] ?? null, // Hangi dosya için revize cevabı
+                    'revision_file_data' => $revisionFileData // Admin'in yüklediği revizyon dosyası bilgileri
                 ];
             }
         }
@@ -1435,7 +1456,7 @@ try {
                                 <div class="mb-3">
                                     <div class="file-reference">
                                         <i class="fas fa-arrow-right text-primary me-2"></i>
-                                        <strong>Revize edilen dosya:</strong> 
+                                        <strong>Revize talep edilen dosya:</strong> 
                                         <span class="text-primary"><?php echo htmlspecialchars($comm['response_file_name']); ?></span>
                                         <small class="text-muted ms-2">(Yanıt Dosyası)</small>
                                     </div>
@@ -1495,6 +1516,35 @@ try {
                                 <div class="note-content">
                                     <?php echo nl2br(htmlspecialchars($comm['admin_notes'])); ?>
                                 </div>
+                                
+                                <!-- Admin'in Yüklediği Revizyon Dosyası -->
+                                <?php if (!empty($comm['revision_file_data']) && $comm['type'] === 'admin_revision_response'): ?>
+                                    <div class="revision-file-info mt-3 p-3 bg-success bg-opacity-10 border border-success rounded">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1 text-success">
+                                                    <i class="fas fa-file-download me-2"></i>
+                                                    Admin'in Yüklediği Revizyon Dosyası
+                                                </h6>
+                                                <div class="file-details">
+                                                    <strong><?php echo htmlspecialchars($comm['revision_file_data']['original_name']); ?></strong>
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-weight me-1"></i><?php echo formatFileSize($comm['revision_file_data']['file_size']); ?>
+                                                        &nbsp;&nbsp;
+                                                        <i class="fas fa-calendar me-1"></i><?php echo formatDate($comm['revision_file_data']['upload_date']); ?>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <a href="download-file.php?id=<?php echo $comm['revision_id']; ?>&type=revision" 
+                                                   class="btn btn-success btn-sm" title="Revizyon Dosyasını İndir">
+                                                    <i class="fas fa-download me-1"></i>İndir
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         <?php else: ?>
                             <?php if ($comm['type'] === 'user_revision_request' && $comm['status'] === 'pending'): ?>

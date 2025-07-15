@@ -41,9 +41,6 @@ function displayAdminNotes($adminNotes, $emptyMessage = 'Henüz admin notu eklen
         return '<em class="text-muted">' . $emptyMessage . '</em>';
     }
     
-    // Debug için - admin notunu göster
-    // echo '<!-- DEBUG: Admin Notes: ' . htmlspecialchars($adminNotes) . ' -->';
-    
     if (filterAdminNotes($adminNotes)) {
         return nl2br(htmlspecialchars($adminNotes));
     } else {
@@ -106,6 +103,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_revision'])) 
         if ($revisionFileType === 'response') {
             // Yanıt dosyası için revize talebi
             $result = $fileManager->requestResponseRevision($revisionFileId, $userId, $revisionNotes);
+        } elseif ($revisionFileType === 'revision') {
+            // Revize dosyası için revize talebi
+            $result = $fileManager->requestRevisionFileRevision($revisionFileId, $userId, $revisionNotes);
         } else {
             // Upload dosyası için revize talebi
             $result = $fileManager->requestRevision($revisionFileId, $userId, $revisionNotes);
@@ -146,6 +146,8 @@ if ($fileType === 'response') {
     
     $originalUploadId = $fileDetail['upload_id'];
     $responses = []; // Yanıt dosyasının kendisi için boş
+    $allRevisionFiles = []; // Yanıt dosyası için revizyon dosyaları yok
+    $communicationHistory = []; // Yanıt dosyası için basit geçmiş
     
     // Yanıt dosyası için revize taleplerini al
     $detailedRevisions = [];
@@ -205,35 +207,19 @@ if ($fileType === 'response') {
     // Kullanıcının bu dosya ile ilgili tüm revize taleplerini al (detaylı)
     $detailedRevisions = [];
     try {
-        if ($fileType === 'response') {
-            // Yanıt dosyası için revize taleplerini al
-            $stmt = $pdo->prepare("
-                SELECT r.*, u.username, u.first_name, u.last_name,
-                       a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
-                       fr.original_name as response_file_name
-                FROM revisions r
-                LEFT JOIN users u ON r.user_id = u.id
-                LEFT JOIN users a ON r.admin_id = a.id
-                LEFT JOIN file_responses fr ON r.response_id = fr.id
-                WHERE r.response_id = ? AND r.user_id = ?
-                ORDER BY r.requested_at DESC
-            ");
-            $stmt->execute([$fileId, $userId]);
-        } else {
-            // Ana dosya için revize taleplerini al
-            $stmt = $pdo->prepare("
-                SELECT r.*, u.username, u.first_name, u.last_name,
-                       a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
-                       fr.original_name as response_file_name
-                FROM revisions r
-                LEFT JOIN users u ON r.user_id = u.id
-                LEFT JOIN users a ON r.admin_id = a.id
-                LEFT JOIN file_responses fr ON r.response_id = fr.id
-                WHERE r.upload_id = ? AND r.user_id = ?
-                ORDER BY r.requested_at DESC
-            ");
-            $stmt->execute([$fileId, $userId]);
-        }
+        // Ana dosya için revize taleplerini al
+        $stmt = $pdo->prepare("
+            SELECT r.*, u.username, u.first_name, u.last_name,
+                   a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
+                   fr.original_name as response_file_name
+            FROM revisions r
+            LEFT JOIN users u ON r.user_id = u.id
+            LEFT JOIN users a ON r.admin_id = a.id
+            LEFT JOIN file_responses fr ON r.response_id = fr.id
+            WHERE r.upload_id = ? AND r.user_id = ?
+            ORDER BY r.requested_at DESC
+        ");
+        $stmt->execute([$fileId, $userId]);
         $detailedRevisions = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {
         error_log('Detailed revisions query error: ' . $e->getMessage());
@@ -290,6 +276,12 @@ if ($fileType === 'response') {
             
             // Admin'in cevabı (varsa)
             if (!empty($revision['admin_notes'])) {
+                // Bu revize için dosyaları al
+                $revisionResponseFiles = [];
+                if ($revision['status'] === 'completed') {
+                    $revisionResponseFiles = $fileManager->getRevisionFiles($revision['id'], $userId);
+                }
+                
                 $communicationHistory[] = [
                     'type' => 'admin_revision_response',
                     'date' => $revision['completed_at'] ?: $revision['requested_at'],
@@ -299,7 +291,8 @@ if ($fileType === 'response') {
                     'admin_name' => ($revision['admin_first_name'] ?? '') . ' ' . ($revision['admin_last_name'] ?? ''),
                     'status' => $revision['status'],
                     'revision_id' => $revision['id'],
-                    'credits_charged' => $revision['credits_charged'] ?? 0
+                    'credits_charged' => $revision['credits_charged'] ?? 0,
+                    'revision_files' => $revisionResponseFiles
                 ];
             }
         }
@@ -351,6 +344,7 @@ include '../includes/user_header.php';
         <?php include '_sidebar.php'; ?>
         
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <!-- Breadcrumb ve Header -->
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <nav aria-label="breadcrumb">
@@ -671,6 +665,7 @@ include '../includes/user_header.php';
                         </div>
                     </div>
                 <?php endif; ?>
+
                 <!-- Revize Dosyaları -->
                 <?php if (!empty($allRevisionFiles)): ?>
                     <div class="detail-card mb-4">
@@ -867,14 +862,43 @@ include '../includes/user_header.php';
                                                     <div class="note-content">
                                                         <?php echo nl2br(htmlspecialchars($comm['admin_notes'])); ?>
                                                     </div>
-                                                    
                                                 </div>
+                                                
+                                                <!-- Admin'in yükledıği revizyon dosyaları -->
+                                                <?php if (!empty($comm['revision_files'])): ?>
+                                                    <div class="admin-files mt-3">
+                                                        <h6 class="text-success mb-2">
+                                                            <i class="fas fa-file-download me-2"></i>
+                                                            Admin'in Yükledıği Revizyon Dosyaları:
+                                                        </h6>
+                                                        <div class="admin-files-list">
+                                                            <?php foreach ($comm['revision_files'] as $revFile): ?>
+                                                                <div class="admin-file-item">
+                                                                    <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-2">
+                                                                        <div class="file-info">
+                                                                            <i class="fas fa-file-download text-success me-2"></i>
+                                                                            <strong><?php echo htmlspecialchars($revFile['original_name']); ?></strong>
+                                                                            <span class="text-muted ms-2">
+                                                                                (<?php echo formatFileSize($revFile['file_size']); ?>)
+                                                                            </span>
+                                                                        </div>
+                                                                        <a href="download-revision.php?id=<?php echo $revFile['id']; ?>" 
+                                                                           class="btn btn-success btn-sm">
+                                                                            <i class="fas fa-download me-1"></i>İndir
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
                                             <?php else: ?>
                                                 <?php if ($comm['type'] === 'user_revision_request' && $comm['status'] === 'pending'): ?>
                                                     <div class="revision-note admin-note mb-2 pending-response">
                                                         <div class="note-header">
                                                             <i class="fas fa-hourglass-half me-2 text-muted"></i>
                                                             <strong>Admin Cevabı:</strong>
+                                                        </div>
                                                         <div class="note-content">
                                                             <em class="text-muted">
                                                                 Talebiniz inceleniyor, lütfen bekleyin...
@@ -1020,7 +1044,7 @@ include '../includes/user_header.php';
     padding: 1.5rem;
     border-bottom: 1px solid #e9ecef;
     display: flex;
-    justify-content: between;
+    justify-content: space-between;
     align-items: center;
 }
 
@@ -1097,18 +1121,13 @@ include '../includes/user_header.php';
 }
 
 /* Response Files List */
-.response-files-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-.revision-files-list {
+.response-files-list, .revision-files-list {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-.response-file-item {
+.response-file-item, .revision-file-item {
     background: #f8fff9;
     border: 1px solid #d4edda;
     border-radius: 12px;
@@ -1118,23 +1137,22 @@ include '../includes/user_header.php';
     gap: 1rem;
     transition: all 0.3s ease;
 }
+
 .revision-file-item {
-    background:rgb(250, 244, 207);
-    border: 1px solid #d4edda;
-    border-radius: 12px;
-    padding: 1.5rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    transition: all 0.3s ease;
+    background: #fff3cd;
+    border-color: #ffeaa7;
 }
 
-.response-file-item:hover {
+.response-file-item:hover, .revision-file-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
 }
 
-.response-file-item .file-icon {
+.revision-file-item:hover {
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
+}
+
+.response-file-item .file-icon, .revision-file-item .file-icon {
     width: 48px;
     height: 48px;
     background: #28a745;
@@ -1147,38 +1165,16 @@ include '../includes/user_header.php';
     flex-shrink: 0;
 }
 
-.response-file-item .file-info {
-    flex: 1;
-}
-
-.response-file-item .file-name {
-    font-weight: 600;
-    color: #495057;
-    margin-bottom: 0.5rem;
-}
-.revision-file-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
-}
-
 .revision-file-item .file-icon {
-    width: 48px;
-    height: 48px;
-    background:rgb(167, 129, 40);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.2rem;
-    flex-shrink: 0;
+    background: #ffe9a7;
+    color: #212529;
 }
 
-.revision-file-item .file-info {
+.response-file-item .file-info, .revision-file-item .file-info {
     flex: 1;
 }
 
-.revision-file-item .file-name {
+.response-file-item .file-name, .revision-file-item .file-name {
     font-weight: 600;
     color: #495057;
     margin-bottom: 0.5rem;
@@ -1211,69 +1207,6 @@ include '../includes/user_header.php';
     padding: 0.4rem 0.8rem;
 }
 
-/* Revisions List */
-.revisions-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.revision-item {
-    background: #fff3cd;
-    border: 1px solid #ffeaa7;
-    border-radius: 12px;
-    padding: 1.5rem;
-    position: relative;
-}
-
-.revision-status {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-}
-
-.revision-content {
-    margin-right: 100px;
-}
-
-.revision-meta {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-    color: #6c757d;
-}
-
-.revision-notes h6 {
-    font-weight: 600;
-    color: #495057;
-    margin-bottom: 0.5rem;
-    margin-top: 1rem;
-}
-
-.revision-notes h6:first-child {
-    margin-top: 0;
-}
-
-.revision-notes p {
-    margin-bottom: 0;
-    line-height: 1.6;
-}
-
-.admin-response {
-    background: #e7f3ff;
-    border-radius: 8px;
-    padding: 1rem;
-    border-left: 3px solid #007bff;
-}
-
-/* Breadcrumb */
-.breadcrumb {
-    background: none;
-    padding: 0;
-    margin-bottom: 1rem;
-}
-
 .communication-meta {
     display: flex;
     gap: 1rem;
@@ -1293,6 +1226,46 @@ include '../includes/user_header.php';
 
 .communication-meta .meta-item:hover {
     background: rgba(0,0,0,0.1);
+}
+
+/* Admin Files Styles */
+.admin-files {
+    border: 1px solid #c3e6cb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background: #f8fff9;
+}
+
+.admin-files h6 {
+    margin-bottom: 1rem;
+    color: #198754;
+    font-weight: 600;
+}
+
+.admin-files-list {
+    margin: 0;
+}
+
+.admin-file-item {
+    margin-bottom: 0.5rem;
+}
+
+.admin-file-item:last-child {
+    margin-bottom: 0;
+}
+
+.admin-file-item .file-info {
+    flex: 1;
+}
+
+.admin-file-item .file-info strong {
+    color: #198754;
+    font-weight: 600;
+}
+
+.admin-file-item .btn {
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
 }
 
 /* User Side Timeline Styles - Admin Communications */
@@ -1518,12 +1491,12 @@ include '../includes/user_header.php';
         text-align: left;
     }
     
-    .response-file-item {
+    .response-file-item, .revision-file-item {
         flex-direction: column;
         text-align: center;
     }
     
-    .response-file-item .file-info {
+    .response-file-item .file-info, .revision-file-item .file-info {
         text-align: left;
     }
     
@@ -1534,18 +1507,6 @@ include '../includes/user_header.php';
     
     .file-actions .btn {
         flex: 1;
-    }
-    
-    .revision-content {
-        margin-right: 0;
-        margin-top: 3rem;
-    }
-    
-    .revision-status {
-        position: relative;
-        top: auto;
-        right: auto;
-        margin-bottom: 1rem;
     }
     
     .file-meta {
@@ -1568,6 +1529,10 @@ function requestRevision(fileId, fileType = 'upload') {
         modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Yanıt Dosyası Revize Talebi';
         revisionInfoText.innerHTML = 'Yanıt dosyasında bir değişiklik veya düzenleme istiyorsanız bu formu kullanabilirsiniz. Admin ekibimiz dosyanızı yeniden gözden geçirecek ve geliştirilmiş bir sürüm hazırlayacaktır.';
         document.getElementById('revision_notes').placeholder = 'Yanıt dosyasında hangi değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Daha fazla güç istiyorum", "Yakıt tüketimi daha iyi olsun", "Torku artmalı" gibi...';
+    } else if (fileType === 'revision') {
+        modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Revize Dosyası İçin Yeni Revize Talebi';
+        revisionInfoText.innerHTML = 'Mevcut revize dosyasında ek değişiklikler istiyorsanız bu formu kullanabilirsiniz. Admin ekibimiz dosyanızı tekrar gözden geçirecek ve istekleriniz doğrultusunda düzenleyecektir.';
+        document.getElementById('revision_notes').placeholder = 'Revize dosyasında hangi ek değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Daha fazla performans", "Farklı ayarlar", "Ek özellikler" gibi...';
     } else {
         modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Revize Talebi';
         revisionInfoText.innerHTML = 'Dosyanızda bir değişiklik veya düzenleme istiyorsanız bu formu kullanabilirsiniz. Talep incelendikten sonra size geri dönüş yapılacaktır.';
