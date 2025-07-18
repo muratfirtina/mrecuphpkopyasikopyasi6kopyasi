@@ -18,142 +18,138 @@ $user = new User($pdo);
 $error = '';
 $success = '';
 
-// Direkt revize onaylama (yanıt dosyası revizeleri için)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approve_revision_direct'])) {
-    $revisionId = sanitize($_POST['revision_id']);
-    
-    // Debug logging
-    error_log("Direct revision approval started for ID: " . $revisionId);
-    error_log("Session user_id: " . ($_SESSION['user_id'] ?? 'not set'));
-    error_log("Is admin: " . (isAdmin() ? 'yes' : 'no'));
-    
-    if (!isValidUUID($revisionId)) {
-        $error = 'Geçersiz revize ID formatı.';
-        error_log("Invalid revision ID format: " . $revisionId);
-    } else {
-        try {
-            // Revize talebini getir
-            $stmt = $pdo->prepare("SELECT * FROM revisions WHERE id = ?");
-            $stmt->execute([$revisionId]);
-            $revision = $stmt->fetch();
-            
-            if (!$revision) {
-                $error = 'Revize talebi bulunamadı.';
-                error_log("Revision not found for ID: " . $revisionId);
-            } else {
-                error_log("Revision found: " . print_r($revision, true));
-                
-                // Admin kontrolü
-                if (!isset($_SESSION['user_id']) || !isValidUUID($_SESSION['user_id'])) {
-                    $error = 'Geçersiz admin session.';
-                    error_log("Invalid admin session");
-                } else {
-                    // FileManager metodu ile revize talebini güncelle (kredi düşürmeden)
-                    $result = $fileManager->updateRevisionStatus($revisionId, $_SESSION['user_id'], 'in_progress', 'Revize talebi işleme alındı.', 0);
-                    
-                    error_log("UpdateRevisionStatus result: " . print_r($result, true));
-                    
-                    if ($result['success']) {
-                        if ($revision['response_id']) {
-                            $success = 'Yanıt dosyası revize talebi işleme alındı. Dosya detay sayfasında revize edilmiş yanıt dosyasını yükleyebilirsiniz.';
-                        } else {
-                            $success = 'Dosya revize talebi işleme alındı. Dosya detay sayfasında revize edilmiş dosyayı yükleyebilirsiniz.';
-                        }
-                    } else {
-                        $error = $result['message'];
-                        error_log("UpdateRevisionStatus failed: " . $result['message']);
-                    }
-                }
-            }
-        } catch (Exception $e) {
-            $error = 'Veritabanı hatası: ' . $e->getMessage();
-            error_log("Database exception in revision approval: " . $e->getMessage());
-            error_log("Stack trace: " . $e->getTraceAsString());
-        }
-    }
+// URL'den success mesajını al
+if (isset($_GET['success'])) {
+    $success = sanitize($_GET['success']);
 }
 
-// Revize talebini reddet
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reject_revision_direct'])) {
-    $revisionId = sanitize($_POST['revision_id']);
-    $adminNotes = sanitize($_POST['admin_notes']) ?: 'Revize talebi reddedildi.';
+// URL'den error mesajını al
+if (isset($_GET['error'])) {
+    $error = sanitize($_GET['error']);
+}
+
+// Session mesajlarını al ve temizle - PRG pattern için
+if (isset($_SESSION['error'])) {
+    $error = $_SESSION['error'];
+    unset($_SESSION['error']);
+}
+
+if (isset($_SESSION['success'])) {
+    $success = $_SESSION['success'];
+    unset($_SESSION['success']);
+}
+
+// POST işlemleri
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    error_log("POST request received on revisions.php");
+    error_log("POST data: " . print_r($_POST, true));
     
-    error_log("Direct revision rejection started for ID: " . $revisionId);
-    
-    if (!isValidUUID($revisionId)) {
-        $error = 'Geçersiz revize ID formatı.';
-        error_log("Invalid revision ID format: " . $revisionId);
-    } else {
-        try {
-            if (!isset($_SESSION['user_id']) || !isValidUUID($_SESSION['user_id'])) {
-                $error = 'Geçersiz admin session.';
-                error_log("Invalid admin session");
+    try {
+        // Revize talebini onaylama (işleme alma)
+        if (isset($_POST['approve_revision_direct'])) {
+            error_log("Direct revision approval started");
+            $revisionId = sanitize($_POST['revision_id']);
+            
+            if (!isValidUUID($revisionId)) {
+                $error = 'Geçersiz revize ID formatı.';
+                error_log("Invalid revision ID format: " . $revisionId);
             } else {
+                error_log("Processing revision approval for ID: " . $revisionId);
+                error_log("Session user_id: " . ($_SESSION['user_id'] ?? 'not set'));
+                error_log("Is admin: " . (isAdmin() ? 'yes' : 'no'));
+                
+                $result = $fileManager->updateRevisionStatus($revisionId, $_SESSION['user_id'], 'in_progress', 'Revize talebi işleme alındı.', 0);
+                
+                error_log("UpdateRevisionStatus result: " . print_r($result, true));
+                
+                if ($result['success']) {
+                    $success = 'Revize talebi işleme alındı. Dosya detay sayfasında revize edilmiş dosyayı yükleyebilirsiniz.';
+                    $user->logAction($_SESSION['user_id'], 'revision_approved', "Revize talebi işleme alındı: {$revisionId}");
+                    
+                    // Başarılı işlem sonrası redirect
+                    header("Location: revisions.php?success=" . urlencode($success));
+                    exit;
+                } else {
+                    $error = $result['message'];
+                    error_log("UpdateRevisionStatus failed: " . $error);
+                }
+            }
+        }
+        
+        // Revize talebini reddetme
+        if (isset($_POST['reject_revision_direct'])) {
+            error_log("Direct revision rejection started");
+            $revisionId = sanitize($_POST['revision_id']);
+            $adminNotes = sanitize($_POST['admin_notes']) ?: 'Revize talebi reddedildi.';
+            
+            if (!isValidUUID($revisionId)) {
+                $error = 'Geçersiz revize ID formatı.';
+                error_log("Invalid revision ID format: " . $revisionId);
+            } elseif (strlen(trim($adminNotes)) < 10) {
+                $error = 'Reddetme sebebi en az 10 karakter olmalıdır.';
+                error_log("Admin notes too short: " . $adminNotes);
+            } else {
+                error_log("Processing revision rejection for ID: " . $revisionId . " with notes: " . $adminNotes);
+                
                 $result = $fileManager->updateRevisionStatus($revisionId, $_SESSION['user_id'], 'rejected', $adminNotes, 0);
                 
                 error_log("UpdateRevisionStatus (reject) result: " . print_r($result, true));
                 
                 if ($result['success']) {
                     $success = 'Revize talebi reddedildi.';
+                    $user->logAction($_SESSION['user_id'], 'revision_rejected', "Revize talebi reddedildi: {$revisionId}");
+                    
+                    // Başarılı işlem sonrası redirect
+                    header("Location: revisions.php?success=" . urlencode($success));
+                    exit;
                 } else {
                     $error = $result['message'];
-                    error_log("UpdateRevisionStatus (reject) failed: " . $result['message']);
+                    error_log("UpdateRevisionStatus (reject) failed: " . $error);
                 }
             }
-        } catch (Exception $e) {
-            $error = 'Veritabanı hatası: ' . $e->getMessage();
-            error_log("Database exception in revision rejection: " . $e->getMessage());
         }
-    }
-}
-
-// Revize talebini işle (modal ile - sadece özel durumlar için)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['process_revision'])) {
-    $revisionId = sanitize($_POST['revision_id']);
-    $status = sanitize($_POST['status']);
-    $adminNotes = sanitize($_POST['admin_notes']);
-    $creditsCharged = (float)$_POST['credits_charged'];
-    
-    if (!isValidUUID($revisionId)) {
-        $error = 'Geçersiz revize ID formatı.';
-    } elseif (!in_array($status, ['in_progress', 'rejected'])) {
-        $error = 'Geçersiz durum seçimi.';
-    } elseif ($creditsCharged < 0) {
-        $error = 'Kredi miktarı negatif olamaz.';
-    } else {
-        // Revize talebini getir
-        $stmt = $pdo->prepare("SELECT * FROM revisions WHERE id = ?");
-        $stmt->execute([$revisionId]);
-        $revision = $stmt->fetch();
         
-        if (!$revision) {
-            $error = 'Revize talebi bulunamadı.';
-        } else {
-            // Response dosyası revize talebi mi kontrol et
-            if ($revision['response_id']) {
-                // Response dosyası revize talebi
-                if ($status === 'in_progress') {
-                    $success = 'Yanıt dosyası revize talebi işleme alındı. Dosya detay sayfasına giderek revize dosyasını yükleyebilirsiniz.';
-                } else {
-                    $success = 'Yanıt dosyası revize talebi reddedildi.';
-                }
+        // Revize talebini işle (modal ile - sadece özel durumlar için)
+        if (isset($_POST['process_revision'])) {
+            $revisionId = sanitize($_POST['revision_id']);
+            $status = sanitize($_POST['status']);
+            $adminNotes = sanitize($_POST['admin_notes']);
+            $creditsCharged = (float)$_POST['credits_charged'];
+            
+            if (!isValidUUID($revisionId)) {
+                $error = 'Geçersiz revize ID formatı.';
+            } elseif (!in_array($status, ['in_progress', 'rejected'])) {
+                $error = 'Geçersiz durum seçimi.';
+            } elseif ($creditsCharged < 0) {
+                $error = 'Kredi miktarı negatif olamaz.';
             } else {
-                // Normal upload dosyası revize talebi
-                if ($status === 'in_progress') {
-                    $success = 'Dosya revize talebi işleme alındı. Dosya detay sayfasına giderek revize dosyasını yükleyebilirsiniz.';
+                // FileManager metodu ile revize talebini güncelle
+                $result = $fileManager->updateRevisionStatus($revisionId, $_SESSION['user_id'], $status, $adminNotes, $creditsCharged);
+                
+                if ($result['success']) {
+                    $success = ($status === 'in_progress') ? 'Revize talebi işleme alındı.' : 'Revize talebi reddedildi.';
+                    $user->logAction($_SESSION['user_id'], 'revision_processed', "Revize talebi işlendi: {$revisionId}, Durum: {$status}");
+                    
+                    // Başarılı işlem sonrası redirect
+                    header("Location: revisions.php?success=" . urlencode($success));
+                    exit;
                 } else {
-                    $success = 'Dosya revize talebi reddedildi.';
+                    $error = $result['message'];
                 }
-            }
-            
-            // FileManager metodu ile revize talebini güncelle
-            $result = $fileManager->updateRevisionStatus($revisionId, $_SESSION['user_id'], $status, $adminNotes, $creditsCharged);
-            
-            if (!$result['success']) {
-                $error = $result['message'];
-                $success = ''; // Success mesajını temizle
             }
         }
+        
+    } catch (Exception $e) {
+        $error = 'İşlem sırasında hata oluştu: ' . $e->getMessage();
+        error_log('POST processing error: ' . $e->getMessage());
+        error_log('Stack trace: ' . $e->getTraceAsString());
+    }
+    
+    // Hata varsa session'a koy ve redirect et
+    if ($error) {
+        $_SESSION['error'] = $error;
+        header("Location: revisions.php");
+        exit;
     }
 }
 
@@ -268,16 +264,18 @@ include '../includes/admin_sidebar.php';
 
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
-    <div class="alert alert-danger" role="alert">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <i class="fas fa-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 <?php endif; ?>
 
 <?php if ($success): ?>
-    <div class="alert alert-success" role="alert">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
         <i class="fas fa-check-circle me-2"></i>
         <?php echo $success; ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 <?php endif; ?>
 
@@ -551,32 +549,19 @@ include '../includes/admin_sidebar.php';
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="btn-group-vertical btn-group-sm">
+                                    <div class="btn-group-vertical btn-group-sm" style="min-width: 120px;">
                                         <?php if ($revision['status'] === 'pending'): ?>
-                                            <?php if ($revision['response_id']): ?>
-                                                <!-- Yanıt dosyası revize talebi - Direkt butonlar -->
-                                                <form method="POST" style="display: inline-block; width: 100%;">
-                                                    <input type="hidden" name="revision_id" value="<?php echo $revision['id']; ?>">
-                                                    <button type="submit" name="approve_revision_direct" class="btn btn-outline-success btn-sm" 
-                                                            onclick="return confirm('Yanıt dosyası revize talebini işleme almak istediğinizden emin misiniz?')">
-                                                        <i class="fas fa-check me-1"></i>Onayla
-                                                    </button>
-                                                </form>
-                                                <button type="button" class="btn btn-outline-danger btn-sm mt-1" 
-                                                        onclick="showRejectModal('<?php echo $revision['id']; ?>')">
-                                                    <i class="fas fa-times me-1"></i>Reddet
-                                                </button>
-                                            <?php else: ?>
-                                                <!-- Normal dosya revize talebi - Modal butonlar -->
-                                                <button type="button" class="btn btn-outline-success btn-sm" 
-                                                        onclick="processRevision('<?php echo $revision['id']; ?>', 'in_progress')">
-                                                    <i class="fas fa-check me-1"></i>Onayla
-                                                </button>
-                                                <button type="button" class="btn btn-outline-danger btn-sm" 
-                                                        onclick="processRevision('<?php echo $revision['id']; ?>', 'rejected')">
-                                                    <i class="fas fa-times me-1"></i>Reddet
-                                                </button>
-                                            <?php endif; ?>
+                                            <!-- Onayla Butonu -->
+                                            <button type="button" class="btn btn-success btn-sm w-100 mb-1" 
+                                                    onclick="showApproveModal('<?php echo $revision['id']; ?>', '<?php echo htmlspecialchars($revision['first_name'] . ' ' . $revision['last_name'], ENT_QUOTES); ?>')">
+                                                <i class="fas fa-check me-1"></i>Onayla
+                                            </button>
+                                            
+                                            <!-- Reddet Butonu -->
+                                            <button type="button" class="btn btn-danger btn-sm w-100 mb-1" 
+                                                    onclick="showRejectModal('<?php echo $revision['id']; ?>')">
+                                                <i class="fas fa-times me-1"></i>Reddet
+                                            </button>
                                         <?php else: ?>
                                             <span class="text-muted small">İşlenmiş</span>
                                         <?php endif; ?>
@@ -585,13 +570,13 @@ include '../includes/admin_sidebar.php';
                                         <?php if ($revision['response_id']): ?>
                                             <!-- Yanıt dosyası revize talebi -->
                                             <a href="file-detail.php?id=<?php echo $revision['upload_id']; ?>&type=response" 
-                                               class="btn btn-outline-info btn-sm mt-1">
+                                               class="btn btn-outline-info btn-sm w-100">
                                                 <i class="fas fa-eye me-1"></i>Yanıt Dosyasını Gör
                                             </a>
                                         <?php else: ?>
                                             <!-- Normal upload dosyası revize talebi -->
                                             <a href="file-detail.php?id=<?php echo $revision['upload_id']; ?>" 
-                                               class="btn btn-outline-info btn-sm mt-1">
+                                               class="btn btn-outline-info btn-sm w-100">
                                                 <i class="fas fa-eye me-1"></i>Dosyayı Gör
                                             </a>
                                         <?php endif; ?>
@@ -623,35 +608,83 @@ include '../includes/admin_sidebar.php';
     </div>
 </div>
 
-<!-- Revize İşleme Modal -->
-<div class="modal fade" id="processRevisionModal" tabindex="-1">
+<!-- Revize Onaylama Modal -->
+<div class="modal fade" id="approveRevisionModal" tabindex="-1" aria-labelledby="approveRevisionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST">
-                <div class="modal-header">
-                    <h5 class="modal-title">Revize Talebini İşle</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <form id="approveRevisionForm" method="POST">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="approveRevisionModalLabel">
+                        <i class="fas fa-check-circle me-2"></i>Revize Talebini Onayla
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" name="revision_id" id="modal_revision_id">
-                    <input type="hidden" name="status" id="modal_status">
+                    <input type="hidden" name="revision_id" id="approve_revision_id">
+                    <input type="hidden" name="approve_revision_direct" value="1">
                     
-                    <div class="mb-3">
-                        <label for="admin_notes" class="form-label">Reddetme Sebebi</label>
-                        <textarea class="form-control" id="admin_notes" name="admin_notes" rows="3" 
-                                  placeholder="Revize talebinin neden reddedildiğini açıklayın..."></textarea>
+                    <div class="alert alert-success">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong id="user-name-display"></strong> kullanıcısının revize talebi işleme alınacak.
                     </div>
                     
-                    <div class="mb-3" id="credits_section" style="display: none;">
-                        <label for="credits_charged" class="form-label">Düşürülecek Kredi</label>
-                        <input type="number" class="form-control" id="credits_charged" name="credits_charged" 
-                               value="0" min="0" step="0.01">
-                        <div class="form-text">Revize için kullanıcıdan düşürülecek kredi miktarı</div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        <div>
+                            <strong>Bilgi:</strong> Revize talebi onaylandıktan sonra dosya detay sayfasında revize edilmiş dosyayı yükleyebilirsiniz.
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                    <button type="submit" name="process_revision" class="btn btn-danger" id="modal_submit_btn">Reddet</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Vazgeç
+                    </button>
+                    <button type="submit" class="btn btn-success" id="approve-submit-btn">
+                        <i class="fas fa-check me-1"></i>Onayla ve İşleme Al
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Revize Reddetme Modal -->
+<div class="modal fade" id="rejectRevisionModal" tabindex="-1" aria-labelledby="rejectRevisionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="rejectRevisionForm" method="POST">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="rejectRevisionModalLabel">
+                        <i class="fas fa-times-circle me-2"></i>Revize Talebini Reddet
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="revision_id" id="reject_revision_id">
+                    <input type="hidden" name="reject_revision_direct" value="1">
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Dikkat!</strong> Bu revizyon talebi reddedilecek ve kullanıcıya bildirilecek.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reject_admin_notes" class="form-label">
+                            <i class="fas fa-comment me-1"></i>
+                            Reddetme Sebebi <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="reject_admin_notes" name="admin_notes" rows="3" 
+                                  placeholder="Revize talebinin neden reddedildiğini açıklayın..." required minlength="10"></textarea>
+                        <div class="form-text">Bu mesaj kullanıcıya gönderilecektir. En az 10 karakter olmalıdır.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Vazgeç
+                    </button>
+                    <button type="submit" class="btn btn-danger" id="reject-submit-btn">
+                        <i class="fas fa-times me-1"></i>Reddet
+                    </button>
                 </div>
             </form>
         </div>
@@ -661,32 +694,149 @@ include '../includes/admin_sidebar.php';
 <?php
 // Sayfa özel JavaScript
 $pageJS = "
-// Yanıt dosyası revize talebi reddetme
-function showRejectModal(revisionId) {
-    const reason = prompt('Revize talebini reddetme sebebini belirtin:');
-    if (reason !== null && reason.trim() !== '') {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.innerHTML = \`
-            <input type=\\\"hidden\\\" name=\\\"revision_id\\\" value=\\\"\${revisionId}\\\">
-            <input type=\\\"hidden\\\" name=\\\"admin_notes\\\" value=\\\"\${reason}\\\">
-            <input type=\\\"hidden\\\" name=\\\"reject_revision_direct\\\" value=\\\"1\\\">
-        \`;
-        document.body.appendChild(form);
-        form.submit();
+// Global değişken - beforeunload'u geçici olarak devre dışı bırakmak için
+let allowPageUnload = false;
+
+// Revize onaylama modal gösterme
+function showApproveModal(revisionId, userName) {
+    if (!revisionId) {
+        alert('Geçersiz revize ID!');
+        return;
     }
+    
+    console.log('Opening approve modal for revision:', revisionId);
+    
+    // Modal input alanlarını doldur
+    document.getElementById('approve_revision_id').value = revisionId;
+    document.getElementById('user-name-display').textContent = userName || 'Bilinmeyen Kullanıcı';
+    
+    // Modal'ı göster
+    const modal = new bootstrap.Modal(document.getElementById('approveRevisionModal'));
+    modal.show();
 }
 
-// Normal dosya revizeleri için modal
-function processRevision(revisionId, status) {
-    document.getElementById('modal_revision_id').value = revisionId;
-    document.getElementById('modal_status').value = status;
+// Revize reddetme modal gösterme
+function showRejectModal(revisionId) {
+    if (!revisionId) {
+        alert('Geçersiz revize ID!');
+        return;
+    }
     
-    const modalTitle = status === 'in_progress' ? 'Revize Talebini İşleme Al' : 'Revize Talebini Reddet';
-    document.querySelector('#processRevisionModal .modal-title').textContent = modalTitle;
+    console.log('Opening reject modal for revision:', revisionId);
     
-    new bootstrap.Modal(document.getElementById('processRevisionModal')).show();
+    // Modal input alanlarını doldur
+    document.getElementById('reject_revision_id').value = revisionId;
+    document.getElementById('reject_admin_notes').value = '';
+    
+    // Modal'ı göster
+    const modal = new bootstrap.Modal(document.getElementById('rejectRevisionModal'));
+    modal.show();
 }
+
+// Sayfa yüklendiğinde kontroller
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Revisions page loaded - setting up modal event handlers');
+    
+    // Onaylama formu için event listener
+    const approveForm = document.getElementById('approveRevisionForm');
+    if (approveForm) {
+        approveForm.addEventListener('submit', function(e) {
+            console.log('Approve form submitted');
+            
+            // Sayfa değişikliğine izin ver
+            allowPageUnload = true;
+            
+            // Submit butonunu disable et
+            const submitBtn = document.getElementById('approve-submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class=\"fas fa-spinner fa-spin me-1\"></i>İşleniyor...';
+            
+            // Modal'ı kapat
+            const modal = bootstrap.Modal.getInstance(document.getElementById('approveRevisionModal'));
+            if (modal) {
+                modal.hide();
+            }
+            
+            return true;
+        });
+    }
+    
+    // Reddetme formu için doğrulama
+    const rejectForm = document.getElementById('rejectRevisionForm');
+    if (rejectForm) {
+        rejectForm.addEventListener('submit', function(e) {
+            const notes = document.getElementById('reject_admin_notes').value.trim();
+            console.log('Reject form submitted with notes length:', notes.length);
+            
+            if (notes.length < 10) {
+                e.preventDefault();
+                alert('Reddetme sebebi en az 10 karakter olmalıdır.');
+                return false;
+            }
+            
+            // Sayfa değişikliğine izin ver
+            allowPageUnload = true;
+            
+            // Submit butonunu disable et
+            const submitBtn = document.getElementById('reject-submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class=\"fas fa-spinner fa-spin me-1\"></i>İşleniyor...';
+            
+            // Modal'ı kapat
+            const modal = bootstrap.Modal.getInstance(document.getElementById('rejectRevisionModal'));
+            if (modal) {
+                modal.hide();
+            }
+            
+            console.log('Reject form validation passed, submitting...');
+            return true;
+        });
+    }
+    
+    // Alert mesajlarını otomatik kapat
+    const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            if (alert && alert.parentNode) {
+                const bsAlert = new bootstrap.Alert(alert);
+                if (bsAlert) {
+                    bsAlert.close();
+                }
+            }
+        }, 8000); // 8 saniye
+    });
+    
+    console.log('Modal event handlers set up successfully');
+});
+
+// Konsol hatalarını yakala
+window.addEventListener('error', function(e) {
+    console.error('JavaScript Error on revisions page:', e.error);
+});
+
+// Sayfa kapanmadan önce kontrol et - SADECE gerekli durumlarda
+window.addEventListener('beforeunload', function(e) {
+    // Eğer allowPageUnload true ise veya form submit edilmişse engellenmesin
+    if (allowPageUnload) {
+        return;
+    }
+    
+    // Sadece disabled butonlar varsa ve form submit edilmemişse uyar
+    const disabledButtons = document.querySelectorAll('button[disabled]:not([data-bs-dismiss])');
+    const activeModals = document.querySelectorAll('.modal.show');
+    
+    // Modal açıksa veya işlem devam ediyorsa uyar
+    if ((disabledButtons.length > 0 || activeModals.length > 0) && !allowPageUnload) {
+        e.preventDefault();
+        e.returnValue = 'İşlem devam ediyor, sayfayı kapatmak istediğinizden emin misiniz?';
+        return e.returnValue;
+    }
+});
+
+// Sayfa href değişikliklerinde allowPageUnload'u sıfırla
+window.addEventListener('unload', function() {
+    allowPageUnload = false;
+});
 ";
 
 // Footer include

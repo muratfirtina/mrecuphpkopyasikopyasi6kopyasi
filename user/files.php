@@ -45,9 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_revision'])) 
     
     // GUID format kontrolü
     if (!isValidUUID($fileId)) {
-        $error = 'Geçersiz dosya ID formatı.';
+        $_SESSION['error'] = 'Geçersiz dosya ID formatı.';
+        header('Location: files.php');
+        exit;
     } elseif (empty($revisionNotes)) {
-        $error = 'Revize talebi için açıklama gereklidir.';
+        $_SESSION['error'] = 'Revize talebi için açıklama gereklidir.';
+        header('Location: files.php');
+        exit;
     } else {
         if ($fileType === 'response') {
             // Yanıt dosyası için revize talebi
@@ -58,9 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_revision'])) 
         }
         
         if ($result['success']) {
-            $success = $result['message'];
+            // Başarılı revize talebi sonrası redirect - PRG pattern
+            $_SESSION['success'] = $result['message'];
+            header('Location: files.php');
+            exit;
         } else {
-            $error = $result['message'];
+            $_SESSION['error'] = $result['message'];
+            header('Location: files.php');
+            exit;
         }
     }
 }

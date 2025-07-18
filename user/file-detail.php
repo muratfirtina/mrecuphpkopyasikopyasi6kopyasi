@@ -96,9 +96,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_revision'])) 
     
     // GUID format kontrolü
     if (!isValidUUID($revisionFileId)) {
-        $error = 'Geçersiz dosya ID formatı.';
+        $_SESSION['error'] = 'Geçersiz dosya ID formatı.';
+        header('Location: file-detail.php?id=' . urlencode($fileId) . '&type=' . urlencode($fileType));
+        exit;
     } elseif (empty($revisionNotes)) {
-        $error = 'Revize talebi için açıklama gereklidir.';
+        $_SESSION['error'] = 'Revize talebi için açıklama gereklidir.';
+        header('Location: file-detail.php?id=' . urlencode($fileId) . '&type=' . urlencode($fileType));
+        exit;
     } else {
         if ($revisionFileType === 'response') {
             // Yanıt dosyası için revize talebi
@@ -112,9 +116,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_revision'])) 
         }
         
         if ($result['success']) {
-            $success = $result['message'];
+            // Başarılı revize talebi sonrası redirect - PRG pattern
+            $_SESSION['success'] = $result['message'];
+            header('Location: file-detail.php?id=' . urlencode($fileId) . '&type=' . urlencode($fileType));
+            exit;
         } else {
-            $error = $result['message'];
+            $_SESSION['error'] = $result['message'];
+            header('Location: file-detail.php?id=' . urlencode($fileId) . '&type=' . urlencode($fileType));
+            exit;
         }
     }
 }

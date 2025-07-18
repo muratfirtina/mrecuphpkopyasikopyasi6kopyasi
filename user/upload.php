@@ -102,6 +102,17 @@ try {
 $error = '';
 $success = '';
 
+// Session mesajlarını al ve temizle - PRG pattern için
+if (isset($_SESSION['error'])) {
+    $error = $_SESSION['error'];
+    unset($_SESSION['error']);
+}
+
+if (isset($_SESSION['success'])) {
+    $success = $_SESSION['success'];
+    unset($_SESSION['success']);
+}
+
 // TERS KREDİ SİSTEMİ: Dosya yükleme kredi kontrolü
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file_upload'])) {
     error_log('User file upload attempt started');
@@ -111,14 +122,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file_upload'])) {
         $creditCheck = $user->canUserUploadFile($_SESSION['user_id']);
         
         if (!$creditCheck['can_upload']) {
-            $error = $creditCheck['message'];
-            error_log('Upload rejected due to credit limit: ' . $error);
+            $_SESSION['error'] = $creditCheck['message'];
+            error_log('Upload rejected due to credit limit: ' . $creditCheck['message']);
+            header('Location: upload.php');
+            exit;
         } else {
             // Dosya yükleme işlemine devam et
             $uploadResult = $fileManager->uploadUserFile($_SESSION['user_id'], $_FILES['file_upload'], $_POST);
             
             if ($uploadResult['success']) {
-                $success = $uploadResult['message'];
                 error_log('File upload successful: ' . $uploadResult['upload_id'] ?? 'unknown');
                 
                 // Session kredi bilgisini güncelle
@@ -127,17 +139,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file_upload'])) {
                 $_SESSION['credit_quota'] = $userCreditDetails['credit_quota'];
                 $_SESSION['credit_used'] = $userCreditDetails['credit_used'];
                 
-                // Başarılı yükleme sonrası redirect (isteğe bağlı)
-                header('Location: uploads.php?success=' . urlencode($success));
+                // Başarılı yükleme sonrası redirect - PRG pattern
+                $_SESSION['success'] = $uploadResult['message'];
+                header('Location: upload.php');
                 exit;
             } else {
-                $error = $uploadResult['message'];
-                error_log('File upload failed: ' . $error);
+                $_SESSION['error'] = $uploadResult['message'];
+                error_log('File upload failed: ' . $uploadResult['message']);
+                header('Location: upload.php');
+                exit;
             }
         }
     } catch (Exception $e) {
-        $error = 'Dosya yükleme sırasında hata oluştu: ' . $e->getMessage();
+        $_SESSION['error'] = 'Dosya yükleme sırasında hata oluştu: ' . $e->getMessage();
         error_log('Upload processing error: ' . $e->getMessage());
+        header('Location: upload.php');
+        exit;
     }
 }
 
@@ -157,9 +174,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
     
     // GUID format kontrolleri
     if (!isValidUUID($brandId)) {
-        $error = 'Geçersiz marka ID formatı.';
+        $_SESSION['error'] = 'Geçersiz marka ID formatı.';
+        header('Location: upload.php');
+        exit;
     } elseif (!isValidUUID($modelId)) {
-        $error = 'Geçersiz model ID formatı.';
+        $_SESSION['error'] = 'Geçersiz model ID formatı.';
+        header('Location: upload.php');
+        exit;
     } else {
         $vehicleData = [
             'brand_id' => $brandId,
@@ -178,7 +199,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
         
         // Validation
         if ($vehicleData['year'] < 1990 || $vehicleData['year'] > date('Y') + 1) {
-            $error = 'Geçerli bir model yılı girin.';
+            $_SESSION['error'] = 'Geçerli bir model yılı girin.';
+            header('Location: upload.php');
+            exit;
         } else {
             // Debug: session user_id kontrol
             error_log('Upload attempt - User ID: ' . $_SESSION['user_id'] . ', Type: ' . gettype($_SESSION['user_id']));
@@ -187,13 +210,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
             $result = $fileManager->uploadFile($_SESSION['user_id'], $_FILES['file'], $vehicleData, $notes);
             
             if ($result['success']) {
-                $success = $result['message'];
-                // Form verilerini temizle
-                $_POST = [];
+                // Form verilerini temizle ve redirect yap - PRG pattern
+                $_SESSION['success'] = $result['message'];
+                header('Location: upload.php');
+                exit;
             } else {
-                $error = $result['message'];
+                $_SESSION['error'] = $result['message'];
                 // Debug: hata detayı
                 error_log('Upload error: ' . $result['message']);
+                header('Location: upload.php');
+                exit;
             }
         }
     }
