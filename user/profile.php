@@ -223,15 +223,12 @@ include '../includes/user_header.php';
                     <div class="profile-stats">
                         <div class="stat-card-mini">
                             <div class="stat-value"><?php echo $stats['total_uploads']; ?></div>
-                            <div class="stat-label">Dosya</div>
+                            <div class="stat-label" style="color: #e9ecef;">Dosya</div>
                         </div>
-                        <div class="stat-card-mini">
-                            <div class="stat-value"><?php echo number_format($_SESSION['credits'], 0); ?></div>
-                            <div class="stat-label">Kredi</div>
-                        </div>
+                        
                         <div class="stat-card-mini">
                             <div class="stat-value"><?php echo $creditStats['total_transactions']; ?></div>
-                            <div class="stat-label">İşlem</div>
+                            <div class="stat-label" style="color: #e9ecef;">İşlem</div>
                         </div>
                     </div>
                 </div>

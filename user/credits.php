@@ -14,8 +14,17 @@ if (!isLoggedIn()) {
 $user = new User($pdo);
 $userId = $_SESSION['user_id'];
 
-// Session'daki kredi bilgisini güncelle
-$_SESSION['credits'] = $user->getUserCredits($userId);
+// TERS KREDİ SİSTEMİ: Kullanıcının kredi durumunu al
+$stmt = $pdo->prepare("SELECT credit_quota, credit_used FROM users WHERE id = ?");
+$stmt->execute([$userId]);
+$userCreditInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$creditQuota = $userCreditInfo['credit_quota'] ?? 0;
+$creditUsed = $userCreditInfo['credit_used'] ?? 0;
+$availableCredits = $creditQuota - $creditUsed;
+
+// Session'a kullanılabilir kredi bilgisini kaydet (eski sistemle uyumluluk için)
+$_SESSION['credits'] = $availableCredits;
 
 $error = '';
 $success = '';
@@ -261,29 +270,109 @@ include '../includes/user_header.php';
                 </div>
             <?php endif; ?>
 
-            <!-- Kredi Durumu Banner -->
+            <!-- Kredi Durumu Banner - Ters Kredi Sistemi -->
             <div class="credit-banner mb-4">
                 <div class="credit-content">
                     <div class="credit-info">
-                        <h3 class="credit-title">Mevcut Kredi Bakiyeniz</h3>
-                        <div class="credit-amount">
-                            <span class="amount"><?php echo number_format($_SESSION['credits'], 2); ?></span>
-                            <span class="currency">TL</span>
+                        <h3 class="credit-title">Kredi Kullanım Durumunuz</h3>
+                        
+                        <!-- Kredi Progress Bar -->
+                        <div class="credit-progress-container mb-3">
+                            <div class="progress-header d-flex justify-content-between align-items-center mb-2">
+                                <div class="progress-label">
+                                    <span class="quota-info">Kredi Kotanız: <strong><?php echo number_format($creditQuota, 2); ?> TL</strong></span>
+                                </div>
+                                <div class="usage-percentage">
+                                    <?php 
+                                    $usagePercentage = $creditQuota > 0 ? ($creditUsed / $creditQuota) * 100 : 0;
+                                    $remainingPercentage = 100 - $usagePercentage;
+                                    ?>
+                                    <span class="percentage-text"><?php echo number_format($usagePercentage, 1); ?>% Kullanıldı</span>
+                                </div>
+                            </div>
+                            
+                            <div class="credit-progress-bar">
+                                <div class="progress" style="height: 24px; border-radius: 12px; background-color: #e8f5e8;">
+                                    <div class="progress-bar progress-bar-used" 
+                                         style="width: <?php echo $usagePercentage; ?>%; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); border-radius: 12px;" 
+                                         data-bs-toggle="tooltip" 
+                                         title="Kullanılan: <?php echo number_format($creditUsed, 2); ?> TL">
+                                    </div>
+                                    <div class="progress-bar progress-bar-remaining" 
+                                         style="width: <?php echo $remainingPercentage; ?>%; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border-radius: 12px;" 
+                                         data-bs-toggle="tooltip" 
+                                         title="Kalan: <?php echo number_format($availableCredits, 2); ?> TL">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="progress-footer d-flex justify-content-between mt-2">
+                                <div class="used-info">
+                                    <i class="fas fa-minus-circle text-danger me-1"></i>
+                                    <span class="text-danger">Kullanılan: <strong><?php echo number_format($creditUsed, 2); ?> TL</strong></span>
+                                </div>
+                                <div class="remaining-info">
+                                    <i class="fas fa-check-circle text-success me-1"></i>
+                                    <span class="text-success">Kalan: <strong><?php echo number_format($availableCredits, 2); ?> TL</strong></span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="credit-stats">
+                        
+                        <!-- Mevcut Bakiye Gösterimi -->
+                        <!-- <div class="current-balance-display">
+                            <div class="balance-card">
+                                <div class="balance-header">
+                                    <i class="fas fa-wallet me-2"></i>
+                                    <span>Kullanılabilir Bakiye</span>
+                                </div>
+                                <div class="balance-amount">
+                                    <span class="amount"><?php echo number_format($availableCredits, 2); ?></span>
+                                    <span class="currency">TL</span>
+                                </div>
+                                <div class="balance-status">
+                                    <?php if ($availableCredits > 0): ?>
+                                        <span class="status-badge status-active">
+                                            <i class="fas fa-check-circle me-1"></i>Aktif
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="status-badge status-exhausted">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>Tükendi
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div> -->
+                        
+                        <!-- İstatistikler -->
+                        <div class="credit-stats mt-3">
                             <div class="stat-item">
-                                <i class="fas fa-arrow-up text-success"></i>
-                                <span>Toplam Yüklenen: <strong><?php echo number_format($totalLoaded, 2); ?> TL</strong></span>
+                                <i class="fas fa-chart-line text-info"></i>
+                                <span>Toplam İşlem: <strong><?php echo $totalTransactions; ?></strong></span>
                             </div>
                             <div class="stat-item">
-                                <i class="fas fa-arrow-down text-danger"></i>
-                                <span>Toplam Harcanan: <strong><?php echo number_format($totalSpent, 2); ?> TL</strong></span>
+                                <i class="fas fa-calendar-alt text-warning"></i>
+                                <span>Bu Ay: <strong><?php echo number_format($monthlySpent, 2); ?> TL</strong></span>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Kredi Durumu Görseli -->
                     <div class="credit-visual">
-                        <div class="credit-icon">
-                            <i class="fas fa-wallet"></i>
+                        <div class="credit-status-circle">
+                            <div class="circle-progress" data-percentage="<?php echo $usagePercentage; ?>">
+                                <div class="circle-inner">
+                                    <div class="percentage-display">
+                                        <span class="percentage"><?php echo number_format($remainingPercentage, 0); ?>%</span>
+                                        <span class="label">Kalan</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="quota-info-visual mt-3">
+                            <div class="quota-item">
+                                <span class="quota-label">Toplam Kota</span>
+                                <span class="quota-value"><?php echo number_format($creditQuota, 0); ?> TL</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -376,7 +465,7 @@ include '../includes/user_header.php';
                 <!-- Sol Kolon - Kredi Paketleri -->
                 <div class="col-lg-8">
                     <!-- Kredi Paketleri -->
-                    <div class="packages-section mb-4">
+                    <!-- <div class="packages-section mb-4">
                         <div class="section-header">
                             <h4 class="mb-2">
                                 <i class="fas fa-gift me-2 text-primary"></i>Kredi Paketleri
@@ -432,10 +521,10 @@ include '../includes/user_header.php';
                                 </div>
                             <?php endforeach; ?>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Özel Tutar -->
-                    <div class="custom-amount-section">
+                    <!-- <div class="custom-amount-section">
                         <div class="section-header">
                             <h4 class="mb-2">
                                 <i class="fas fa-edit me-2 text-info"></i>Özel Tutar
@@ -484,7 +573,7 @@ include '../includes/user_header.php';
                                 </div>
                             </form>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Son İşlemler -->
                     <div class="recent-transactions-section">
@@ -806,7 +895,7 @@ include '../includes/user_header.php';
 </div>
 
 <style>
-/* Modern Credits Page Styles */
+/* Modern Credits Page Styles - Ters Kredi Sistemi */
 .credit-banner {
     background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
     border-radius: 20px;
@@ -817,8 +906,9 @@ include '../includes/user_header.php';
 
 .credit-content {
     display: flex;
-    justify-content: between;
-    align-items: center;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
 }
 
 .credit-info {
@@ -828,29 +918,132 @@ include '../includes/user_header.php';
 .credit-title {
     font-size: 1.5rem;
     font-weight: 600;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     opacity: 0.9;
 }
 
-.credit-amount {
-    display: flex;
-    align-items: baseline;
-    margin-bottom: 1.5rem;
+/* Kredi Progress Container */
+.credit-progress-container {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.amount {
-    font-size: 3.5rem;
+.progress-header {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.quota-info {
+    font-weight: 500;
+}
+
+.usage-percentage .percentage-text {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.credit-progress-bar {
+    position: relative;
+    margin: 1rem 0;
+}
+
+.credit-progress-bar .progress {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+}
+
+.progress-bar-used {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    transition: all 0.3s ease;
+}
+
+.progress-bar-remaining {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    transition: all 0.3s ease;
+}
+
+.progress-footer {
+    font-size: 0.85rem;
+    opacity: 0.95;
+}
+
+.used-info, .remaining-info {
+    font-weight: 500;
+}
+
+/* Mevcut Bakiye Kartı */
+.current-balance-display {
+    margin-top: 1.5rem;
+}
+
+.balance-card {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.balance-header {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.balance-amount {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+}
+
+.balance-amount .amount {
+    font-size: 2.5rem;
     font-weight: 700;
     line-height: 1;
 }
 
-.currency {
-    font-size: 1.5rem;
+.balance-amount .currency {
+    font-size: 1.2rem;
     font-weight: 500;
     margin-left: 0.5rem;
     opacity: 0.8;
 }
 
+.balance-status {
+    margin-top: 0.5rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-active {
+    background: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.status-exhausted {
+    background: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+/* İstatistikler */
 .credit-stats {
     display: flex;
     gap: 2rem;
@@ -861,26 +1054,106 @@ include '../includes/user_header.php';
     display: flex;
     align-items: center;
     opacity: 0.9;
+    font-size: 0.9rem;
 }
 
 .stat-item i {
     margin-right: 0.5rem;
 }
 
+/* Kredi Görseli */
 .credit-visual {
-    margin-left: 2rem;
+    min-width: 200px;
+    text-align: center;
 }
 
-.credit-icon {
-    width: 120px;
-    height: 120px;
-    background: rgba(255,255,255,0.1);
+.credit-status-circle {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto;
+}
+
+.circle-progress {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        #dc3545 0deg,
+        #dc3545 calc(var(--used-percentage, 0) * 3.6deg),
+        #28a745 calc(var(--used-percentage, 0) * 3.6deg),
+        #28a745 360deg
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    animation: rotate 2s ease-in-out;
+}
+
+.circle-inner {
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3rem;
-    opacity: 0.3;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.percentage-display {
+    text-align: center;
+    color: #495057;
+}
+
+.percentage {
+    font-size: 1.8rem;
+    font-weight: 700;
+    display: block;
+    line-height: 1;
+}
+
+.label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+}
+
+.quota-info-visual {
+    margin-top: 1rem;
+}
+
+.quota-item {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.quota-label {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+.quota-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(-90deg);
+    }
+    to {
+        transform: rotate(0deg);
+    }
 }
 
 /* Stat Cards */
@@ -1262,21 +1535,72 @@ include '../includes/user_header.php';
     color: #667eea;
 }
 
-/* Responsive */
+/* Progress Bar Animasyonları */
+.progress-bar-used,
+.progress-bar-remaining {
+    transition: width 1s ease-in-out;
+}
+
+/* Hover Efektleri */
+.balance-card:hover {
+    transform: translateY(-2px);
+    transition: transform 0.3s ease;
+}
+
+.credit-progress-container:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transition: background 0.3s ease;
+}
+
+/* Tooltip Stilleri */
+.progress-bar[data-bs-toggle="tooltip"] {
+    cursor: help;
+}
+
+/* Responsive İyileştirmeler */
 @media (max-width: 767.98px) {
     .credit-content {
         flex-direction: column;
         text-align: center;
+        gap: 1.5rem;
     }
     
     .credit-visual {
-        margin-left: 0;
-        margin-top: 2rem;
+        min-width: auto;
+    }
+    
+    .circle-progress {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .circle-inner {
+        width: 85px;
+        height: 85px;
+    }
+    
+    .percentage {
+        font-size: 1.5rem;
+    }
+    
+    .balance-amount .amount {
+        font-size: 2rem;
+    }
+    
+    .credit-progress-container {
+        padding: 1rem;
     }
     
     .credit-stats {
         flex-direction: column;
         gap: 1rem;
+        text-align: left;
+    }
+    
+    .progress-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
     }
     
     .packages-grid {
@@ -1648,6 +1972,59 @@ document.querySelectorAll('.package-card').forEach(function(card) {
     });
 });
 
+// Circle Progress Animation
+document.addEventListener('DOMContentLoaded', function() {
+    const circleProgress = document.querySelector('.circle-progress');
+    if (circleProgress) {
+        const usagePercentage = circleProgress.getAttribute('data-percentage') || 0;
+        
+        // CSS custom property olarak kullanım yüzdesini ayarla
+        circleProgress.style.setProperty('--used-percentage', usagePercentage);
+        
+        // Progress bar'ları animasyon ile yükle
+        setTimeout(() => {
+            const progressBars = document.querySelectorAll('.progress-bar-used, .progress-bar-remaining');
+            progressBars.forEach(bar => {
+                bar.style.animation = 'progressLoad 1.5s ease-out';
+            });
+        }, 500);
+    }
+    
+    // Tooltip'leri aktifleştir
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    if (typeof bootstrap !== 'undefined') {
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+    
+    // Balance card hover animasyonu
+    const balanceCard = document.querySelector('.balance-card');
+    if (balanceCard) {
+        balanceCard.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px) scale(1.02)';
+        });
+        
+        balanceCard.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    }
+});
+
+// Progress bar animasyon CSS'i dinamik olarak ekle
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes progressLoad {
+        from {
+            width: 0 !important;
+        }
+        to {
+            width: var(--final-width) !important;
+        }
+    }
+`;
+document.head.appendChild(style);
+
 // Toast Notification Function
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');
@@ -1671,6 +2048,49 @@ function showToast(message, type = 'info') {
 
 // AJAX Filtreleme için JavaScript desteği
 document.addEventListener('DOMContentLoaded', function() {
+    // Kredi durumu circle progress animasyonu
+    initCreditProgressAnimation();
+    
+    function initCreditProgressAnimation() {
+        const circleProgress = document.querySelector('.circle-progress');
+        if (circleProgress) {
+            const usagePercentage = parseFloat(circleProgress.getAttribute('data-percentage')) || 0;
+            
+            // Circle gradient'ini ayarla
+            const usageDegrees = (usagePercentage / 100) * 360;
+            const gradient = `conic-gradient(
+                from 0deg,
+                #dc3545 0deg,
+                #dc3545 ${usageDegrees}deg,
+                #28a745 ${usageDegrees}deg,
+                #28a745 360deg
+            )`;
+            
+            circleProgress.style.background = gradient;
+            
+            // Animasyon ile göster
+            circleProgress.style.opacity = '0';
+            circleProgress.style.transform = 'scale(0.8) rotate(-90deg)';
+            
+            setTimeout(() => {
+                circleProgress.style.transition = 'all 1s ease-out';
+                circleProgress.style.opacity = '1';
+                circleProgress.style.transform = 'scale(1) rotate(0deg)';
+            }, 300);
+        }
+        
+        // Progress bar animasyonu
+        const progressBars = document.querySelectorAll('.progress-bar-used, .progress-bar-remaining');
+        progressBars.forEach((bar, index) => {
+            const finalWidth = bar.style.width;
+            bar.style.width = '0%';
+            
+            setTimeout(() => {
+                bar.style.transition = 'width 1.2s ease-out';
+                bar.style.width = finalWidth;
+            }, 500 + (index * 200));
+        });
+    }
     // Filtre formu AJAX handling
     const filterForm = document.getElementById('filterForm');
     if (filterForm) {

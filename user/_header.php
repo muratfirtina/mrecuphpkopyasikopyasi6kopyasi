@@ -1,3 +1,33 @@
+<?php
+// Ters kredi sistemi için kullanıcı kredi bilgilerini al
+if (isset($_SESSION['user_id'])) {
+    try {
+        $stmt = $pdo->prepare("SELECT credit_quota, credit_used FROM users WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $userCreditInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $creditQuota = $userCreditInfo['credit_quota'] ?? 0;
+        $creditUsed = $userCreditInfo['credit_used'] ?? 0;
+        $availableCredits = $creditQuota - $creditUsed;
+        $usagePercentage = $creditQuota > 0 ? ($creditUsed / $creditQuota) * 100 : 0;
+        
+        // Session'a kullanılabilir kredi bilgisini kaydet (eski sistemle uyumluluk için)
+        $_SESSION['credits'] = $availableCredits;
+    } catch(PDOException $e) {
+        $creditQuota = 0;
+        $creditUsed = 0;
+        $availableCredits = 0;
+        $usagePercentage = 0;
+        $_SESSION['credits'] = 0;
+    }
+} else {
+    $creditQuota = 0;
+    $creditUsed = 0;
+    $availableCredits = 0;
+    $usagePercentage = 0;
+}
+?>
+
 <!-- User Panel Header -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-primary shadow-sm">
     <div class="container-fluid">
@@ -25,12 +55,55 @@
             </ul>
             
             <ul class="navbar-nav">
-                <!-- Kredi Durumu -->
-                <li class="nav-item me-3 d-flex align-items-center">
-                    <div class="credit-display bg-white bg-opacity-15 px-3 py-1 rounded-pill">
-                        <i class="fas fa-coins text-warning me-1"></i>
-                        <span class="fw-bold text-white"><?php echo number_format($_SESSION['credits'], 2); ?></span>
-                        <small class="text-white-75">Kredi</small>
+                <!-- Kredi Durumu - Ters Kredi Sistemi -->
+                <li class="nav-item me-3">
+                    <div class="credit-display-new bg-white bg-opacity-15 px-3 py-2 rounded-3" 
+                         data-bs-toggle="tooltip" 
+                         data-bs-placement="bottom" 
+                         title="Kota: <?php echo number_format($creditQuota, 0); ?> TL | Kullanılan: <?php echo number_format($creditUsed, 2); ?> TL">
+                        
+                        <!-- Kredi Başlığı -->
+                        <div class="credit-header d-flex align-items-center justify-content-between mb-1">
+                            <div class="credit-icon-label d-flex align-items-center">
+                                <i class="fas fa-wallet text-warning me-1"></i>
+                                <span class="credit-label">Kullanılabilir</span>
+                            </div>
+                            <div class="credit-status">
+                                <?php if ($availableCredits > 0): ?>
+                                    <span class="status-dot bg-success"></span>
+                                <?php else: ?>
+                                    <span class="status-dot bg-danger"></span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
+                        <!-- Ana Kredi Tutaran -->
+                        <div class="credit-amount-display d-flex align-items-baseline mb-2">
+                            <span class="amount-value"><?php echo number_format($creditUsed, 0); ?></span>
+                            <span class="amount-currency">TL</span>
+                            <span class="quota-info">/ <?php echo number_format($creditQuota, 0); ?>TL</span>
+                        </div>
+                        
+                        <!-- Mini Progress Bar -->
+                        <div class="credit-progress-mini">
+                            <div class="progress-track">
+                                <div class="progress-used" style="width: <?php echo $usagePercentage; ?>%;"></div>
+                                <div class="progress-remaining" style="width: <?php echo 100 - $usagePercentage; ?>%;"></div>
+                            </div>
+                            <div class="progress-labels d-flex justify-content-between">
+                                <small class="usage-label">
+                                    <i class="fas fa-minus-circle text-danger me-1"></i>
+                                    <?php echo number_format($creditUsed, 0); ?> TL
+                                </small>
+                                <small class="remaining-label">
+                                    <i class="fas fa-check-circle text-success me-1"></i>
+                                    <?php echo number_format($availableCredits, 0); ?> TL
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Klik Yönlendirme -->
+                        <a href="credits.php" class="credit-link-overlay"></a>
                     </div>
                 </li>
 
@@ -298,6 +371,130 @@
     border: 1px solid rgba(255,255,255,0.1);
 }
 
+/* Yeni Ters Kredi Sistemi Gösterimi */
+.credit-display-new {
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    min-width: 200px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.25) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.credit-display-new:hover {
+    background: rgba(255,255,255,0.25) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.credit-header {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.9);
+}
+
+.credit-label {
+    font-weight: 500;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.8);
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.credit-amount-display {
+    color: white;
+}
+
+.amount-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+}
+
+.amount-currency {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-left: 0.25rem;
+    color: rgba(255,255,255,0.8);
+}
+
+.quota-info {
+    font-size: 0.8rem;
+    font-weight: 400;
+    margin-left: 0.25rem;
+    color: rgba(255,255,255,0.6);
+}
+
+/* Mini Progress Bar */
+.credit-progress-mini {
+    margin-top: 0.5rem;
+}
+
+.progress-track {
+    display: flex;
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.2);
+    margin-bottom: 0.5rem;
+}
+
+.progress-used {
+    background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+    transition: width 1s ease-out;
+    border-radius: 2px 0 0 2px;
+}
+
+.progress-remaining {
+    background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+    transition: width 1s ease-out;
+    border-radius: 0 2px 2px 0;
+}
+
+.progress-labels {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.8);
+    line-height: 1;
+}
+
+.usage-label, .remaining-label {
+    font-weight: 500;
+}
+
+.usage-label i {
+    font-size: 0.6rem;
+}
+
+.remaining-label i {
+    font-size: 0.6rem;
+}
+
+/* Klik Overlay */
+.credit-link-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    text-decoration: none;
+}
+
 .user-avatar {
     width: 35px;
     height: 35px;
@@ -326,7 +523,92 @@
 .navbar-toggler:focus {
     box-shadow: none;
 }
+
+/* Responsive İyileştirmeler */
+@media (max-width: 991.98px) {
+    .credit-display-new {
+        min-width: 180px;
+        padding: 0.75rem 1rem !important;
+        margin-bottom: 1rem;
+    }
+    
+    .amount-value {
+        font-size: 1.2rem;
+    }
+    
+    .progress-labels {
+        font-size: 0.6rem;
+    }
+    
+    .progress-labels .fas {
+        display: none;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .credit-display-new {
+        min-width: 160px;
+        padding: 0.5rem 0.75rem !important;
+    }
+    
+    .amount-value {
+        font-size: 1.1rem;
+    }
+    
+    .credit-label {
+        font-size: 0.7rem;
+    }
+    
+    .quota-info {
+        font-size: 0.7rem;
+    }
+    
+    .progress-labels {
+        font-size: 0.55rem;
+    }
+    
+    .progress-track {
+        height: 3px;
+    }
+}
 </style>
 
 <!-- User Bildirim JavaScript -->
 <script src="../assets/js/notifications.js"></script>
+
+<!-- Kredi Gösterim Tooltip & Animasyon JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tooltip'leri aktifleştir
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    if (typeof bootstrap !== 'undefined') {
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+    
+    // Progress bar animasyonu
+    const progressBars = document.querySelectorAll('.progress-used, .progress-remaining');
+    progressBars.forEach((bar, index) => {
+        const finalWidth = bar.style.width;
+        bar.style.width = '0%';
+        
+        setTimeout(() => {
+            bar.style.transition = 'width 1s ease-out';
+            bar.style.width = finalWidth;
+        }, 300 + (index * 150));
+    });
+    
+    // Kredi kartina hover efekti
+    const creditDisplay = document.querySelector('.credit-display-new');
+    if (creditDisplay) {
+        creditDisplay.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        creditDisplay.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    }
+});
+</script>

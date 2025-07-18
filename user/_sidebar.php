@@ -1,3 +1,33 @@
+<?php
+// Ters kredi sistemi için kullanıcı kredi bilgilerini al
+if (isset($_SESSION['user_id'])) {
+    try {
+        $stmt = $pdo->prepare("SELECT credit_quota, credit_used FROM users WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $sidebarCreditInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $sidebarCreditQuota = $sidebarCreditInfo['credit_quota'] ?? 0;
+        $sidebarCreditUsed = $sidebarCreditInfo['credit_used'] ?? 0;
+        $sidebarAvailableCredits = $sidebarCreditQuota - $sidebarCreditUsed;
+        $sidebarUsagePercentage = $sidebarCreditQuota > 0 ? ($sidebarCreditUsed / $sidebarCreditQuota) * 100 : 0;
+        
+        // Session'a kullanılabilir kredi bilgisini kaydet (eski sistemle uyumluluk için)
+        $_SESSION['credits'] = $sidebarAvailableCredits;
+    } catch(PDOException $e) {
+        $sidebarCreditQuota = 0;
+        $sidebarCreditUsed = 0;
+        $sidebarAvailableCredits = 0;
+        $sidebarUsagePercentage = 0;
+        $_SESSION['credits'] = 0;
+    }
+} else {
+    $sidebarCreditQuota = 0;
+    $sidebarCreditUsed = 0;
+    $sidebarAvailableCredits = 0;
+    $sidebarUsagePercentage = 0;
+}
+?>
+
 <!-- User Panel Sidebar -->
 <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse modern-sidebar">
     <div class="position-sticky pt-3">
@@ -133,21 +163,80 @@
             </li>
         </ul>
 
-        <!-- Kredi Durumu Widget -->
+        <!-- Kredi Durumu Widget - Ters Kredi Sistemi -->
         <div class="px-3 mt-4">
-            <div class="sidebar-widget gradient-card">
+            <div class="sidebar-widget gradient-card credit-widget-enhanced">
                 <div class="widget-content">
+                    <!-- Widget Başlığı -->
                     <div class="widget-header">
-                        <i class="fas fa-coins widget-icon"></i>
-                        <h6 class="widget-title">Kredi Bakiyesi</h6>
+                        <i class="fas fa-wallet widget-icon"></i>
+                        <div class="header-info">
+                            <h6 class="widget-title">Kredi Durumu</h6>
+                            <small class="widget-subtitle">Kullanılabilir Bakiye</small>
+                        </div>
+                        <div class="credit-status-indicator">
+                            <?php if ($sidebarAvailableCredits > 0): ?>
+                                <span class="status-dot active" title="Aktif"></span>
+                            <?php else: ?>
+                                <span class="status-dot depleted" title="Tükendi"></span>
+                            <?php endif; ?>
+                        </div>
                     </div>
-                    <div class="widget-value">
-                        <?php echo number_format($_SESSION['credits'], 2); ?> <span class="currency">TL</span>
+                    
+                    <!-- Ana Kredi Gösterimi -->
+                    <div class="credit-main-display">
+                        <span class="amount-value"><?php echo number_format($creditUsed, 0); ?></span>
+                            <span class="amount-currency">TL</span>
+                            <span class="quota-info">/ <?php echo number_format($creditQuota, 0); ?> TL</span>
                     </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="credit-progress-sidebar">
+                        <div class="progress-container">
+                            <div class="progress-bar-sidebar">
+                                <div class="progress-used-sidebar" 
+                                     style="width: <?php echo $sidebarUsagePercentage; ?>%;"
+                                     data-bs-toggle="tooltip" 
+                                     title="Kullanılan: <?php echo number_format($sidebarCreditUsed, 2); ?> TL">
+                                </div>
+                                <div class="progress-remaining-sidebar" 
+                                     style="width: <?php echo 100 - $sidebarUsagePercentage; ?>%;"
+                                     data-bs-toggle="tooltip" 
+                                     title="Kalan: <?php echo number_format($sidebarAvailableCredits, 2); ?> TL">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress İstatistikleri -->
+                        <div class="progress-stats">
+                            <div class="stat-used">
+                                <i class="fas fa-minus-circle"></i>
+                                <span><?php echo number_format($sidebarCreditUsed, 0); ?> TL</span>
+                            </div>
+                            <div class="stat-remaining">
+                                <i class="fas fa-check-circle"></i>
+                                <span><?php echo number_format($sidebarAvailableCredits, 0); ?> TL</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Yüzde Gösterimi -->
+                    <div class="usage-percentage-display">
+                        <div class="percentage-circle">
+                            <div class="percentage-text">
+                                <?php echo number_format(100 - $sidebarUsagePercentage, 0); ?>%
+                            </div>
+                            <div class="percentage-label">Kalan</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Widget Aksiyonları -->
                     <div class="widget-actions">
-                        <a href="credits.php" class="btn btn-sm btn-light-custom">
-                            <i class="fas fa-plus me-1"></i>Yükle
-                        </a>
+                        <div class="action-buttons">
+                            <a href="credits.php" class="btn btn-sm btn-light-custom btn-secondary-action">
+                                <i class="fas fa-history me-1"></i>Geçmiş
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -285,6 +374,274 @@
     color: white;
 }
 
+/* Ters Kredi Sistemi Widget Geliştirmeleri */
+.credit-widget-enhanced {
+    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
+    color: white;
+    position: relative;
+    overflow: visible;
+}
+
+.credit-widget-enhanced::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
+    border-radius: 14px;
+    z-index: -1;
+}
+
+.widget-content {
+    padding: 1.25rem;
+    position: relative;
+    z-index: 1;
+}
+
+.widget-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.header-info {
+    flex: 1;
+}
+
+.widget-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    font-size: 1rem;
+    background: rgba(255,255,255,0.2);
+    border-radius: 6px;
+    backdrop-filter: blur(10px);
+}
+
+.widget-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.widget-subtitle {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    font-weight: 400;
+}
+
+/* Status Indicator */
+.credit-status-indicator {
+    margin-left: 0.5rem;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+.status-dot.active {
+    background: #28a745;
+    box-shadow: 0 0 8px rgba(40, 167, 69, 0.6);
+}
+
+.status-dot.depleted {
+    background: #dc3545;
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.6);
+}
+
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* Ana Kredi Gösterimi */
+.credit-main-display {
+    text-align: center;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.credit-amount-large {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    margin-bottom: 0.25rem;
+}
+
+.credit-amount-large .amount {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+}
+
+.credit-amount-large .currency {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-left: 0.25rem;
+    opacity: 0.8;
+}
+
+.credit-quota-info {
+    text-align: center;
+}
+
+.quota-text {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    font-weight: 400;
+}
+
+/* Progress Bar */
+.credit-progress-sidebar {
+    margin: 1rem 0;
+}
+
+.progress-container {
+    margin-bottom: 0.75rem;
+}
+
+.progress-bar-sidebar {
+    display: flex;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.2);
+    margin-bottom: 0.5rem;
+}
+
+.progress-used-sidebar {
+    background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+    transition: width 1.2s ease-out;
+    border-radius: 3px 0 0 3px;
+}
+
+.progress-remaining-sidebar {
+    background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+    transition: width 1.2s ease-out;
+    border-radius: 0 3px 3px 0;
+}
+
+/* Progress İstatistikleri */
+.progress-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    opacity: 0.9;
+}
+
+.stat-used, .stat-remaining {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.stat-used i {
+    color: #dc3545;
+    margin-right: 0.25rem;
+    font-size: 0.65rem;
+}
+
+.stat-remaining i {
+    color: #28a745;
+    margin-right: 0.25rem;
+    font-size: 0.65rem;
+}
+
+/* Yüzde Gösterimi */
+.usage-percentage-display {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.percentage-circle {
+    width: 60px;
+    height: 60px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.2);
+}
+
+.percentage-text {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+}
+
+.percentage-label {
+    font-size: 0.6rem;
+    opacity: 0.8;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.1rem;
+}
+
+/* Widget Aksiyonları */
+.widget-actions {
+    margin-top: 1rem;
+}
+
+.action-buttons {
+    display: grid;
+    
+    gap: 0.5rem;
+}
+
+.btn-primary-action {
+    background-color: rgba(255,255,255,0.25) !important;
+    border: 1px solid rgba(255,255,255,0.4) !important;
+    color: white !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    padding: 0.5rem 0.75rem !important;
+}
+
+.btn-secondary-action {
+    background-color: rgba(255,255,255,0.1) !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    color: rgba(255,255,255,0.9) !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    padding: 0.5rem 0.75rem !important;
+}
+
+.btn-primary-action:hover {
+    background-color: rgba(255,255,255,0.35) !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-secondary-action:hover {
+    background-color: rgba(255,255,255,0.2) !important;
+    color: white !important;
+    transform: translateY(-1px);
+}
+
 .stats-card {
     
     color: green;
@@ -397,7 +754,202 @@
     }
     
     .widget-content {
-        padding: 0.75rem;
+        padding: 1rem;
+    }
+    
+    /* Kredi Widget Responsive */
+    .credit-amount-large .amount {
+        font-size: 1.5rem;
+    }
+    
+    .percentage-circle {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .percentage-text {
+        font-size: 0.9rem;
+    }
+    
+    .percentage-label {
+        font-size: 0.55rem;
+    }
+    
+    .action-buttons {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .btn-primary-action, .btn-secondary-action {
+        padding: 0.6rem 1rem !important;
+        font-size: 0.8rem !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .credit-widget-enhanced {
+        margin: 0.5rem;
+    }
+    
+    .credit-amount-large .amount {
+        font-size: 1.4rem;
+    }
+    
+    .quota-text {
+        font-size: 0.75rem;
+    }
+    
+    .progress-stats {
+        font-size: 0.65rem;
+    }
+    
+    .stat-used i, .stat-remaining i {
+        font-size: 0.6rem;
     }
 }
 </style>
+
+<!-- Sidebar Kredi Widget JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sidebar kredi widget animasyonları
+    initSidebarCreditAnimations();
+    
+    function initSidebarCreditAnimations() {
+        // Progress bar animasyonu
+        const progressBars = document.querySelectorAll('.progress-used-sidebar, .progress-remaining-sidebar');
+        progressBars.forEach((bar, index) => {
+            const finalWidth = bar.style.width;
+            bar.style.width = '0%';
+            
+            setTimeout(() => {
+                bar.style.transition = 'width 1.5s ease-out';
+                bar.style.width = finalWidth;
+            }, 400 + (index * 200));
+        });
+        
+        // Percentage circle animasyonu
+        const percentageCircle = document.querySelector('.percentage-circle');
+        if (percentageCircle) {
+            percentageCircle.style.opacity = '0';
+            percentageCircle.style.transform = 'scale(0.8)';
+            
+            setTimeout(() => {
+                percentageCircle.style.transition = 'all 0.8s ease-out';
+                percentageCircle.style.opacity = '1';
+                percentageCircle.style.transform = 'scale(1)';
+            }, 800);
+        }
+        
+        // Tooltip'leri aktifleştir
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('.sidebar-widget [data-bs-toggle="tooltip"]'));
+        if (typeof bootstrap !== 'undefined') {
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    placement: 'top'
+                });
+            });
+        }
+        
+        // Widget hover efektleri
+        const creditWidget = document.querySelector('.credit-widget-enhanced');
+        if (creditWidget) {
+            creditWidget.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.transition = 'transform 0.3s ease';
+            });
+            
+            creditWidget.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        }
+        
+        // Button hover animasyonları
+        const actionButtons = document.querySelectorAll('.btn-primary-action, .btn-secondary-action');
+        actionButtons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-1px) scale(1.02)';
+            });
+            
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    }
+    
+    // Kredi değişikliklerini dinle (AJAX güncellemeleri için)
+    window.updateSidebarCredit = function(availableCredits, creditQuota, creditUsed) {
+        const amountElement = document.querySelector('.credit-amount-large .amount');
+        const quotaElement = document.querySelector('.quota-text');
+        const percentageElement = document.querySelector('.percentage-text');
+        const progressUsed = document.querySelector('.progress-used-sidebar');
+        const progressRemaining = document.querySelector('.progress-remaining-sidebar');
+        const statUsed = document.querySelector('.stat-used span');
+        const statRemaining = document.querySelector('.stat-remaining span');
+        const statusDot = document.querySelector('.status-dot');
+        
+        if (amountElement) {
+            // Animasyonlu sayı güncellemesi
+            animateNumber(amountElement, parseInt(amountElement.textContent.replace(/[^0-9]/g, '')), availableCredits, 1000);
+        }
+        
+        if (quotaElement) {
+            quotaElement.textContent = `/ ${creditQuota.toLocaleString()} TL Kota`;
+        }
+        
+        const usagePercentage = creditQuota > 0 ? (creditUsed / creditQuota) * 100 : 0;
+        const remainingPercentage = 100 - usagePercentage;
+        
+        if (percentageElement) {
+            animateNumber(percentageElement, parseInt(percentageElement.textContent), Math.round(remainingPercentage), 800);
+        }
+        
+        if (progressUsed) {
+            progressUsed.style.width = usagePercentage + '%';
+        }
+        
+        if (progressRemaining) {
+            progressRemaining.style.width = remainingPercentage + '%';
+        }
+        
+        if (statUsed) {
+            statUsed.textContent = creditUsed.toLocaleString() + ' TL';
+        }
+        
+        if (statRemaining) {
+            statRemaining.textContent = availableCredits.toLocaleString() + ' TL';
+        }
+        
+        // Status dot güncelle
+        if (statusDot) {
+            statusDot.className = 'status-dot ' + (availableCredits > 0 ? 'active' : 'depleted');
+            statusDot.title = availableCredits > 0 ? 'Aktif' : 'Tükendi';
+        }
+    };
+    
+    // Sayı animasyonu fonksiyonu
+    function animateNumber(element, start, end, duration) {
+        const startTime = performance.now();
+        const difference = end - start;
+        
+        function updateNumber(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            const current = Math.round(start + (difference * easeOutQuart(progress)));
+            element.textContent = current.toLocaleString();
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateNumber);
+            }
+        }
+        
+        requestAnimationFrame(updateNumber);
+    }
+    
+    // Easing fonksiyonu
+    function easeOutQuart(t) {
+        return 1 - (--t) * t * t * t;
+    }
+});
+</script>

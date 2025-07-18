@@ -333,6 +333,53 @@ if ($fileType === 'response') {
     $originalUploadId = $fileId;
 }
 
+// Bu dosya için harcanan tüm kredilerin toplamını hesapla
+$totalCreditsSpent = 0;
+try {
+    // Ana dosya veya yanıt dosyası için harcanan kredileri al
+    if ($fileType === 'response') {
+        // Yanıt dosyası ise, bu yanıt dosyası için harcanan krediyi al
+        $stmt = $pdo->prepare("SELECT COALESCE(credits_charged, 0) as credits FROM file_responses WHERE id = ?");
+        $stmt->execute([$fileId]);
+        $responseCredits = $stmt->fetchColumn() ?: 0;
+        $totalCreditsSpent += $responseCredits;
+        
+        // Bu yanıt dosyası için yapılan revizyon talepleri için harcanan kredileri al
+        $stmt = $pdo->prepare("SELECT COALESCE(SUM(credits_charged), 0) as total_credits FROM revisions WHERE response_id = ? AND user_id = ?");
+        $stmt->execute([$fileId, $userId]);
+        $responseRevisionCredits = $stmt->fetchColumn() ?: 0;
+        $totalCreditsSpent += $responseRevisionCredits;
+    } else {
+        // Ana dosya ise, bu ana dosya ile ilgili tüm harcamaları al
+        
+        // 1. Ana dosya için yanıt dosyalarında harcanan krediler
+        $stmt = $pdo->prepare("SELECT COALESCE(SUM(credits_charged), 0) as total_credits FROM file_responses WHERE upload_id = ?");
+        $stmt->execute([$fileId]);
+        $responseCredits = $stmt->fetchColumn() ?: 0;
+        $totalCreditsSpent += $responseCredits;
+        
+        // 2. Ana dosya için revizyon talepleri ve cevaplarında harcanan krediler
+        $stmt = $pdo->prepare("SELECT COALESCE(SUM(credits_charged), 0) as total_credits FROM revisions WHERE upload_id = ? AND user_id = ?");
+        $stmt->execute([$fileId, $userId]);
+        $revisionCredits = $stmt->fetchColumn() ?: 0;
+        $totalCreditsSpent += $revisionCredits;
+        
+        // 3. Ana dosya ile ilgili yanıt dosyalarının revizyon talepleri için harcanan krediler
+        $stmt = $pdo->prepare("
+            SELECT COALESCE(SUM(r.credits_charged), 0) as total_credits 
+            FROM revisions r 
+            INNER JOIN file_responses fr ON r.response_id = fr.id 
+            WHERE fr.upload_id = ? AND r.user_id = ?
+        ");
+        $stmt->execute([$fileId, $userId]);
+        $responseRevisionCredits = $stmt->fetchColumn() ?: 0;
+        $totalCreditsSpent += $responseRevisionCredits;
+    }
+} catch(PDOException $e) {
+    error_log('Total credits calculation error: ' . $e->getMessage());
+    $totalCreditsSpent = 0;
+}
+
 $pageTitle = $fileDetail['original_name'] ?? 'Dosya Detayı';
 
 // Header include
@@ -441,6 +488,28 @@ include '../includes/user_header.php';
                                     <span class="label">Dosya ID:</span>
                                     <span class="value font-monospace"><?php echo $fileDetail['id']; ?></span>
                                 </div>
+                            <?php if ($totalCreditsSpent > 0): ?>
+                                <div class="detail-item total-credits-item">
+                                    <span class="label">
+                                        <i class="fas fa-coins text-warning me-1"></i>
+                                        <?php echo $fileType === 'response' ? 'Bu Dosya için Toplam Harcama:' : 'Bu Dosya için Toplam Harcama:'; ?>
+                                    </span>
+                                    <span class="value total-credits-value">
+                                        <?php echo number_format($totalCreditsSpent, 2); ?> kredi
+                                        <?php if ($totalCreditsSpent != $fileDetail['credits_charged']): ?>
+                                            <small class="text-muted d-block">
+                                                <?php 
+                                                if ($fileType === 'response') {
+                                                    echo '(Dosya + revizyon talepleri)';
+                                                } else {
+                                                    echo '(Yanıt + revizyon talepleri)';
+                                                }
+                                                ?>
+                                            </small>
+                                        <?php endif; ?>
+                                    </span>
+                                </div>
+                            <?php endif; ?>
                                 <div class="detail-item">
                                     <span class="label">Orijinal Ad:</span>
                                     <span class="value"><?php echo htmlspecialchars($fileDetail['original_name'] ?? 'Belirtilmemiş'); ?></span>
@@ -1088,6 +1157,35 @@ include '../includes/user_header.php';
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     border: 1px solid #f0f0f0;
     overflow: hidden;
+}
+
+/* Toplam Kredi Gösterimi */
+.total-credits-item {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border: 2px solid #f39c12;
+    border-radius: 12px;
+    padding: 0.75rem 1rem !important;
+    margin: 0.5rem 0;
+}
+
+.total-credits-item .label {
+    font-weight: 700;
+    color: #d68910;
+    display: flex;
+    align-items: center;
+}
+
+.total-credits-value {
+    font-weight: 700;
+    color: #b7950b;
+    font-size: 1.1rem;
+}
+
+.total-credits-value small {
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: #85651d;
+    margin-top: 0.25rem;
 }
 
 .detail-card-header {

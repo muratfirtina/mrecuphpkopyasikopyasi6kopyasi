@@ -11,14 +11,24 @@ class User {
         $this->pdo = $database;
     }
     
-    // Kullanıcıyı ID ile getir (GUID ID ile)
+    // Kullanıcıyı ID ile getir (GUID ID ile) - TERS KREDİ SİSTEMİ ile
     public function getUserById($userId) {
         try {
             if (!isValidUUID($userId)) {
                 return null;
             }
             
-            $stmt = $this->pdo->prepare("SELECT * FROM users WHERE id = ?");
+            $stmt = $this->pdo->prepare("
+                SELECT *, 
+                       (credit_quota - credit_used) as available_credits,
+                       CASE 
+                           WHEN credit_quota = 0 THEN 'Kota Belirlenmemiş'
+                           WHEN credit_used >= credit_quota THEN 'Limit Aşıldı'
+                           WHEN (credit_quota - credit_used) <= 100 THEN 'Düşük Kredi'
+                           ELSE 'Normal'
+                       END as credit_status
+                FROM users WHERE id = ?
+            ");
             $stmt->execute([$userId]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -28,18 +38,23 @@ class User {
         }
     }
     
-    // Kullanıcı kredisini al (GUID ID ile)
+    // TERS KREDİ SİSTEMİ: Kullanıcı kredisini al (GUID ID ile)
     public function getUserCredits($userId) {
         try {
             if (!isValidUUID($userId)) {
                 return 0;
             }
             
-            $stmt = $this->pdo->prepare("SELECT credits FROM users WHERE id = ?");
+            $stmt = $this->pdo->prepare("SELECT credit_quota, credit_used FROM users WHERE id = ?");
             $stmt->execute([$userId]);
-            $result = $stmt->fetch();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            return $result ? (float)$result['credits'] : 0;
+            if ($result) {
+                // Kullanılabilir kredi hesapla (eski sistemle uyumluluk için)
+                return (float)$result['credit_quota'] - (float)$result['credit_used'];
+            }
+            
+            return 0;
             
         } catch(PDOException $e) {
             error_log('getUserCredits error: ' . $e->getMessage());
@@ -407,6 +422,80 @@ class User {
             return $stmt->fetchColumn();
         } catch(PDOException $e) {
             return 0;
+        }
+    }
+    
+    // TERS KREDİ SİSTEMİ: Kullanıcı kredi durumu detayı
+    public function getUserCreditDetails($userId) {
+        try {
+            if (!isValidUUID($userId)) {
+                return ['credit_quota' => 0, 'credit_used' => 0, 'available_credits' => 0];
+            }
+            
+            $stmt = $this->pdo->prepare("SELECT credit_quota, credit_used FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($result) {
+                return [
+                    'credit_quota' => (float)$result['credit_quota'],
+                    'credit_used' => (float)$result['credit_used'],
+                    'available_credits' => (float)$result['credit_quota'] - (float)$result['credit_used']
+                ];
+            }
+            
+            return ['credit_quota' => 0, 'credit_used' => 0, 'available_credits' => 0];
+        } catch(PDOException $e) {
+            error_log('getUserCreditDetails error: ' . $e->getMessage());
+            return ['credit_quota' => 0, 'credit_used' => 0, 'available_credits' => 0];
+        }
+    }
+    
+    // TERS KREDİ SİSTEMİ: Kredi kontrolü (dosya yüklerken)
+    public function canUserUploadFile($userId, $estimatedCredits = 0) {
+        try {
+            $creditDetails = $this->getUserCreditDetails($userId);
+            
+            // Eğer kredi kota sıfır ise yine de yüklemeye izin ver (admin henüz kota vermemiş)
+            if ($creditDetails['credit_quota'] == 0) {
+                return [
+                    'can_upload' => true,
+                    'message' => 'Kredi kota henüz belirlenmiş. Yükleme yapılabilir.',
+                    'available_credits' => 0
+                ];
+            }
+            
+            // Kullanılabilir kredi kontrol et
+            if ($creditDetails['available_credits'] <= 0) {
+                return [
+                    'can_upload' => false,
+                    'message' => 'Kredi limitinizi aştınız. Daha fazla dosya yükleyemezsiniz.',
+                    'available_credits' => $creditDetails['available_credits']
+                ];
+            }
+            
+            // Tahmini kredi kontrolü
+            if ($estimatedCredits > 0 && $creditDetails['available_credits'] < $estimatedCredits) {
+                return [
+                    'can_upload' => false,
+                    'message' => "Yetersiz kredi. Gerekli: {$estimatedCredits} TL, Mevcut: {$creditDetails['available_credits']} TL",
+                    'available_credits' => $creditDetails['available_credits']
+                ];
+            }
+            
+            return [
+                'can_upload' => true,
+                'message' => 'Dosya yüklenebilir.',
+                'available_credits' => $creditDetails['available_credits']
+            ];
+            
+        } catch(PDOException $e) {
+            error_log('canUserUploadFile error: ' . $e->getMessage());
+            return [
+                'can_upload' => false,
+                'message' => 'Kredi durumu kontrol edilemedi.',
+                'available_credits' => 0
+            ];
         }
     }
     

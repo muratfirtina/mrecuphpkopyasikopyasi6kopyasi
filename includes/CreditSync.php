@@ -12,7 +12,7 @@ class CreditSync {
     }
     
     /**
-     * Kullanıcının güncel kredi bakiyesini veritabanından al ve session'ı güncelle
+     * TERS KREDİ SİSTEMİ: Kullanıcının güncel kredi durumunu veritabanından al ve session'ı güncelle
      */
     public function refreshUserCredits($userId = null) {
         if (!$userId && isset($_SESSION['user_id'])) {
@@ -24,13 +24,21 @@ class CreditSync {
         }
         
         try {
-            $stmt = $this->pdo->prepare("SELECT credits FROM users WHERE id = ?");
+            // TERS KREDİ SİSTEMİ: Kota ve kullanılan krediyi al
+            $stmt = $this->pdo->prepare("SELECT credit_quota, credit_used FROM users WHERE id = ?");
             $stmt->execute([$userId]);
             $result = $stmt->fetch();
             
             if ($result && isset($_SESSION['user_id']) && $_SESSION['user_id'] == $userId) {
-                $_SESSION['credits'] = (float)$result['credits'];
-                return $_SESSION['credits'];
+                // Kullanılabilir kredi hesapla
+                $availableCredits = (float)$result['credit_quota'] - (float)$result['credit_used'];
+                
+                // Session'a kullanılabilir kredi bilgisini kaydet (eski sistemle uyumluluk için)
+                $_SESSION['credits'] = $availableCredits;
+                $_SESSION['credit_quota'] = (float)$result['credit_quota'];
+                $_SESSION['credit_used'] = (float)$result['credit_used'];
+                
+                return $availableCredits;
             }
             
             return false;

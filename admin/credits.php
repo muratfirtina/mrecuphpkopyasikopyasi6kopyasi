@@ -66,25 +66,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception('Kullanıcı bulunamadı.');
                 }
                 
-                // Kredi ekleme
-                $newCredits = $currentUser['credits'] + $amount;
+                // TERS KREDİ SİSTEMİ: Kredi kotası artırma
+                $newCreditQuota = $currentUser['credit_quota'] + $amount;
                 
-                $stmt = $pdo->prepare("UPDATE users SET credits = ? WHERE id = ?");
-                $stmt->execute([$newCredits, $user_id]);
+                $stmt = $pdo->prepare("UPDATE users SET credit_quota = ? WHERE id = ?");
+                $stmt->execute([$newCreditQuota, $user_id]);
+                
+                // Kullanılabilir kredi hesapla
+                $availableCredits = $newCreditQuota - $currentUser['credit_used'];
                 
                 // Credit transactions tablosuna kaydet
                 $transactionId = generateUUID();
                 $stmt = $pdo->prepare("
-                    INSERT INTO credit_transactions (id, user_id, admin_id, type, amount, description, created_at) 
-                    VALUES (?, ?, ?, 'deposit', ?, ?, NOW())
+                    INSERT INTO credit_transactions (id, user_id, admin_id, transaction_type, type, amount, description, created_at) 
+                    VALUES (?, ?, ?, 'add', 'quota_add', ?, ?, NOW())
                 ");
                 $stmt->execute([$transactionId, $user_id, $_SESSION['user_id'], $amount, $description]);
                 
                 // Log kaydı
-                $user->logAction($_SESSION['user_id'], 'credit_added', "Kullanıcıya {$amount} TL kredi eklendi: {$description}");
+                $user->logAction($_SESSION['user_id'], 'credit_quota_increased', "Kullanıcının kredi kotası {$amount} TL artırıldı: {$description}");
                 
                 $pdo->commit();
-                $success = "{$amount} TL kredi başarıyla eklendi. Yeni bakiye: " . number_format($newCredits, 2) . " TL";
+                $success = "{$amount} TL kredi kotası başarıyla artırıldı. Yeni kota: " . number_format($newCreditQuota, 2) . " TL (Kullanılabilir: " . number_format($availableCredits, 2) . " TL)";
                 error_log('Kredi ekleme başarılı. Redirect yapılıyor...');
                 
                 // Başarı mesajını session'a kaydet ve redirect et
@@ -127,29 +130,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception('Kullanıcı bulunamadı.');
                 }
                 
-                if ($currentUser['credits'] < $amount) {
-                    throw new Exception('Kullanıcının yeterli kredisi yok.');
+                // TERS KREDİ SİSTEMİ: Kullanılan krediyi azaltma (kredi iadesi)
+                if ($currentUser['credit_used'] < $amount) {
+                    throw new Exception('Kullanıcının iade edilebilir kredisi yok. Mevcut kullanım: ' . $currentUser['credit_used'] . ' TL');
                 }
                 
-                // Kredi düşme
-                $newCredits = $currentUser['credits'] - $amount;
+                // Kullanılan krediyi azalt (kredi iadesi)
+                $newCreditUsed = $currentUser['credit_used'] - $amount;
                 
-                $stmt = $pdo->prepare("UPDATE users SET credits = ? WHERE id = ?");
-                $stmt->execute([$newCredits, $user_id]);
+                $stmt = $pdo->prepare("UPDATE users SET credit_used = ? WHERE id = ?");
+                $stmt->execute([$newCreditUsed, $user_id]);
+                
+                // Kullanılabilir kredi hesapla
+                $availableCredits = $currentUser['credit_quota'] - $newCreditUsed;
                 
                 // Credit transactions tablosuna kaydet
                 $transactionId = generateUUID();
                 $stmt = $pdo->prepare("
-                    INSERT INTO credit_transactions (id, user_id, admin_id, type, amount, description, created_at) 
-                    VALUES (?, ?, ?, 'withdraw', ?, ?, NOW())
+                    INSERT INTO credit_transactions (id, user_id, admin_id, transaction_type, type, amount, description, created_at) 
+                    VALUES (?, ?, ?, 'deduct', 'refund', ?, ?, NOW())
                 ");
                 $stmt->execute([$transactionId, $user_id, $_SESSION['user_id'], $amount, $description]);
                 
                 // Log kaydı
-                $user->logAction($_SESSION['user_id'], 'credit_deducted', "Kullanıcıdan {$amount} TL kredi düşüldü: {$description}");
+                $user->logAction($_SESSION['user_id'], 'credit_usage_removed', "Kullanıcının kullanılan kredisi {$amount} TL azaltıldı (iade): {$description}");
                 
                 $pdo->commit();
-                $success = "{$amount} TL kredi başarıyla düşüldü. Kalan bakiye: " . number_format($newCredits, 2) . " TL";
+                $success = "{$amount} TL kullanım kredisi başarıyla iade edildi. Kalan kullanım: " . number_format($newCreditUsed, 2) . " TL (Kullanılabilir: " . number_format($availableCredits, 2) . " TL)";
                 error_log('Kredi düşme başarılı. Redirect yapılıyor...');
                 
                 // Başarı mesajını session'a kaydet ve redirect et
@@ -199,12 +206,13 @@ try {
     $stmt->execute($params);
     $totalUsers = $stmt->fetchColumn();
     
-    // Kullanıcıları getir - LIMIT ve OFFSET'i direkt sorguya ekle
+    // TERS KREDİ SİSTEMİ: Kullanıcıları getir - LIMIT ve OFFSET'i direkt sorguya ekle
     $query = "
-        SELECT id, username, email, first_name, last_name, credits, created_at, last_login
+        SELECT id, username, email, first_name, last_name, credit_quota, credit_used, 
+               (credit_quota - credit_used) as available_credits, created_at, last_login
         FROM users 
         $whereClause 
-        ORDER BY credits DESC, username ASC 
+        ORDER BY credit_quota DESC, available_credits DESC, username ASC 
         LIMIT $limit OFFSET $offset
     ";
     
@@ -225,26 +233,36 @@ try {
     error_log('Credits.php user loading error: ' . $e->getMessage());
 }
 
-// Kredi istatistikleri
+// TERS KREDİ SİSTEMİ: Kredi istatistikleri
 try {
     $stmt = $pdo->query("
         SELECT 
-            SUM(credits) as total_credits,
-            AVG(credits) as avg_credits,
-            MAX(credits) as max_credits,
+            SUM(credit_quota) as total_quota,
+            SUM(credit_used) as total_used,
+            SUM(credit_quota - credit_used) as total_available,
+            AVG(credit_quota) as avg_quota,
+            AVG(credit_used) as avg_used,
+            AVG(credit_quota - credit_used) as avg_available,
+            MAX(credit_quota) as max_quota,
             COUNT(*) as user_count,
-            SUM(CASE WHEN credits > 0 THEN 1 ELSE 0 END) as users_with_credits
+            SUM(CASE WHEN credit_quota > 0 THEN 1 ELSE 0 END) as users_with_quota,
+            SUM(CASE WHEN (credit_quota - credit_used) > 0 THEN 1 ELSE 0 END) as users_with_available_credits
         FROM users 
         WHERE role = 'user'
     ");
     $creditStats = $stmt->fetch(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $creditStats = [
-        'total_credits' => 0,
-        'avg_credits' => 0,
-        'max_credits' => 0,
+        'total_quota' => 0,
+        'total_used' => 0,
+        'total_available' => 0,
+        'avg_quota' => 0,
+        'avg_used' => 0,
+        'avg_available' => 0,
+        'max_quota' => 0,
         'user_count' => 0,
-        'users_with_credits' => 0
+        'users_with_quota' => 0,
+        'users_with_available_credits' => 0
     ];
 }
 
@@ -280,8 +298,8 @@ include '../includes/admin_sidebar.php';
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <div class="stat-number text-success"><?php echo number_format($creditStats['total_credits'] ?? 0, 2); ?> TL</div>
-                    <div class="stat-label">Toplam Kredi</div>
+                    <div class="stat-number text-success"><?php echo number_format($creditStats['total_quota'] ?? 0, 2); ?> TL</div>
+                    <div class="stat-label">Toplam Kredi Kotası</div>
                     <small class="text-muted"><?php echo number_format($creditStats['user_count'] ?? 0); ?> kullanıcı</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
@@ -295,27 +313,12 @@ include '../includes/admin_sidebar.php';
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <div class="stat-number text-primary"><?php echo number_format($creditStats['avg_credits'] ?? 0, 2); ?> TL</div>
-                    <div class="stat-label">Ortalama Kredi</div>
-                    <small class="text-muted">Kullanıcı başı</small>
-                </div>
-                <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-chart-line text-primary fa-lg"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-widget">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="stat-number text-warning"><?php echo number_format($creditStats['max_credits'] ?? 0, 2); ?> TL</div>
-                    <div class="stat-label">En Yüksek Kredi</div>
-                    <small class="text-muted">Maksimum bakiye</small>
+                    <div class="stat-number text-warning"><?php echo number_format($creditStats['total_used'] ?? 0, 2); ?> TL</div>
+                    <div class="stat-label">Kullanılan Krediler</div>
+                    <small class="text-muted"><?php echo number_format($creditStats['total_quota'] > 0 ? ($creditStats['total_used'] / $creditStats['total_quota']) * 100 : 0, 1); ?>% kullanım</small>
                 </div>
                 <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-crown text-warning fa-lg"></i>
+                    <i class="fas fa-chart-line text-warning fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -325,12 +328,27 @@ include '../includes/admin_sidebar.php';
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <div class="stat-number text-info"><?php echo number_format($creditStats['users_with_credits'] ?? 0); ?></div>
-                    <div class="stat-label">Kredili Kullanıcı</div>
-                    <small class="text-muted">Bakiyesi olan</small>
+                    <div class="stat-number text-info"><?php echo number_format($creditStats['total_available'] ?? 0, 2); ?> TL</div>
+                    <div class="stat-label">Kullanılabilir Krediler</div>
+                    <small class="text-muted"><?php echo number_format($creditStats['users_with_available_credits'] ?? 0); ?> aktif kullanıcı</small>
                 </div>
                 <div class="bg-info bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-users text-info fa-lg"></i>
+                    <i class="fas fa-wallet text-info fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-widget">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-primary"><?php echo number_format($creditStats['users_with_available_credits'] ?? 0); ?></div>
+                    <div class="stat-label">Aktif Kullanıcılar</div>
+                    <small class="text-muted">Kullanılabilir kredisi olan</small>
+                </div>
+                <div class="bg-primary bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-users text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -390,55 +408,77 @@ include '../includes/admin_sidebar.php';
                         <tr>
                             <th>Kullanıcı</th>
                             <th>İletişim</th>
-                            <th>Mevcut Kredi</th>
+                            <th>Kredi Durumu</th>
                             <th>Kayıt Tarihi</th>
                             <th>Son Giriş</th>
                             <th>İşlemler</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($users as $userData): ?>
+                        <?php foreach ($users as $userItem): ?>
                             <tr>
                                 <td>
                                     <div>
                                         <strong>
-                                            <a href="user-details.php?id=<?php echo $userData['id']; ?>" class="text-decoration-none">
-                                                <?php echo htmlspecialchars($userData['first_name'] . ' ' . $userData['last_name']); ?>
+                                            <a href="user-details.php?id=<?php echo $userItem['id']; ?>" class="text-decoration-none">
+                                                <?php echo htmlspecialchars($userItem['first_name'] . ' ' . $userItem['last_name']); ?>
                                             </a>
                                         </strong><br>
-                                        <small class="text-muted">@<?php echo htmlspecialchars($userData['username']); ?></small>
+                                        <small class="text-muted">@<?php echo htmlspecialchars($userItem['username']); ?></small>
                                     </div>
                                 </td>
                                 <td>
                                     <div>
                                         <i class="fas fa-envelope me-1"></i>
-                                        <small><?php echo htmlspecialchars($userData['email']); ?></small>
+                                        <small><?php echo htmlspecialchars($userItem['email']); ?></small>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="badge bg-<?php echo $userData['credits'] > 0 ? 'success' : 'secondary'; ?> fs-6">
-                                        <?php echo number_format($userData['credits'], 2); ?> TL
-                                    </span>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <small class="text-muted">Kota:</small>
+                                            <strong class="text-primary"><?php echo number_format($userItem['credit_quota'], 2); ?> TL</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <small class="text-muted">Kullanılan:</small>
+                                            <span class="text-warning"><?php echo number_format($userItem['credit_used'], 2); ?> TL</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <small class="text-muted">Kullanılabilir:</small>
+                                            <strong class="text-success"><?php echo number_format($userItem['available_credits'], 2); ?> TL</strong>
+                                        </div>
+                                        <?php if ($userItem['credit_quota'] > 0): ?>
+                                            <div class="progress mt-2" style="height: 5px;">
+                                                <div class="progress-bar bg-warning" 
+                                                     style="width: <?php echo min(100, ($userItem['credit_used'] / $userItem['credit_quota']) * 100); ?>%"></div>
+                                            </div>
+                                            <small class="text-muted"><?php echo number_format(($userItem['credit_used'] / $userItem['credit_quota']) * 100, 1); ?>% kullanım</small>
+                                        <?php else: ?>
+                                            <small class="text-muted">Kota belirlenmemiş</small>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                                 <td>
-                                    <small><?php echo date('d.m.Y', strtotime($userData['created_at'])); ?></small>
+                                    <small><?php echo date('d.m.Y', strtotime($userItem['created_at'])); ?></small>
                                 </td>
                                 <td>
                                     <small>
-                                        <?php echo $userData['last_login'] ? date('d.m.Y H:i', strtotime($userData['last_login'])) : 'Hiç giriş yapmamış'; ?>
+                                        <?php echo $userItem['last_login'] ? date('d.m.Y H:i', strtotime($userItem['last_login'])) : 'Hiç giriş yapmamış'; ?>
                                     </small>
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-success" 
-                                                onclick="openCreditModal('add', '<?php echo $userData['id']; ?>', '<?php echo htmlspecialchars($userData['first_name'] . ' ' . $userData['last_name']); ?>', <?php echo $userData['credits']; ?>)">
-                                            <i class="fas fa-plus me-1"></i>Ekle
+                                                onclick="openCreditModal('add', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['available_credits']; ?>')"
+                                                title="Kredi Kotası Artır">
+                                            <i class="fas fa-plus me-1"></i>Kota +
                                         </button>
                                         <button type="button" class="btn btn-danger" 
-                                                onclick="openCreditModal('deduct', '<?php echo $userData['id']; ?>', '<?php echo htmlspecialchars($userData['first_name'] . ' ' . $userData['last_name']); ?>', <?php echo $userData['credits']; ?>)">
-                                            <i class="fas fa-minus me-1"></i>Düş
+                                                onclick="openCreditModal('deduct', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['credit_used']; ?>')"
+                                                title="Kredi İadesi">
+                                            <i class="fas fa-undo me-1"></i>İade
                                         </button>
-                                        <a href="user-details.php?id=<?php echo $userData['id']; ?>" class="btn btn-outline-primary">
+                                        <a href="user-details.php?id=<?php echo $userItem['id']; ?>" class="btn btn-outline-primary" title="Detaylar">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </div>
@@ -506,7 +546,7 @@ include '../includes/admin_sidebar.php';
                     
                     <div class="alert alert-info alert-permanent">
                         <strong>Kullanıcı:</strong> <span id="selectedUserName"></span><br>
-                        <strong>Mevcut Kredi:</strong> <span id="currentCredits"></span> TL
+                        <strong>Mevcut Durum:</strong> <span id="currentCredits"></span> TL
                     </div>
                     
                     <div class="mb-3">
@@ -560,12 +600,12 @@ function openCreditModal(operation, userId, userName, credits) {
     document.getElementById('deduct_credits').value = '';
     
     if (operation === 'add') {
-        modalTitle.textContent = 'Kredi Ekle';
-        submitBtn.textContent = 'Kredi Ekle';
+        modalTitle.textContent = 'Kredi Kotası Artır';
+        submitBtn.textContent = 'Kota Artır';
         submitBtn.className = 'btn btn-success';
     } else {
-        modalTitle.textContent = 'Kredi Düş';
-        submitBtn.textContent = 'Kredi Düş';
+        modalTitle.textContent = 'Kredi İadesi';
+        submitBtn.textContent = 'Kredi İade Et';
         submitBtn.className = 'btn btn-danger';
     }
     
@@ -621,9 +661,9 @@ function updatePreview() {
     previewText.innerHTML = 
         'Mevcut: <strong>' + userCurrentCredits.toFixed(2) + ' TL</strong><br>' +
         'İşlem: <strong class="' + color + '">' + operation + amount.toFixed(2) + ' TL</strong><br>' +
-        'Yeni Bakiye: <strong class="' + (newBalance >= 0 ? 'text-primary' : 'text-danger') + '">' + 
+        'Yeni Durum: <strong class="' + (newBalance >= 0 ? 'text-primary' : 'text-danger') + '">' + 
         newBalance.toFixed(2) + ' TL</strong>' +
-        (newBalance < 0 ? '<br><span class="text-danger">⚠️ Bakiye negatif olacak!</span>' : '');
+        (newBalance < 0 ? '<br><span class="text-danger">⚠️ Negatif değer!</span>' : '');
 }
 
 // Sayfa yüklendiğinde event listener'ları ekle
@@ -675,7 +715,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (currentOperation === 'deduct' && amount > userCurrentCredits) {
                 e.preventDefault();
-                alert('Yetersiz kredi! Mevcut: ' + userCurrentCredits.toFixed(2) + ' TL');
+                alert('Yetersiz kullanılan kredi! Mevcut: ' + userCurrentCredits.toFixed(2) + ' TL');
                 return false;
             }
             
@@ -686,10 +726,10 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const confirmMessage = 
                 username + ' kullanıcısı için kredi işlemi:\n\n' +
-                'İşlem: ' + (currentOperation === 'add' ? 'Kredi Ekleme' : 'Kredi Düşme') + '\n' +
+                'İşlem: ' + (currentOperation === 'add' ? 'Kredi Kotası Artırma' : 'Kredi İadesi') + '\n' +
                 'Miktar: ' + amount.toFixed(2) + ' TL\n' +
-                'Mevcut Bakiye: ' + userCurrentCredits.toFixed(2) + ' TL\n' +
-                'Yeni Bakiye: ' + newBalance.toFixed(2) + ' TL\n\n' +
+                'Mevcut Durum: ' + userCurrentCredits.toFixed(2) + ' TL\n' +
+                'Yeni Durum: ' + newBalance.toFixed(2) + ' TL\n\n' +
                 'İşlemi onaylıyor musunuz?';
             
             if (!confirm(confirmMessage)) {

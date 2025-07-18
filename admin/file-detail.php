@@ -296,105 +296,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log("Revision file upload request started");
             $revisionId = sanitize($_POST['revision_id']);
             $adminNotes = sanitize($_POST['revision_notes'] ?? '');
+            $revisionCredits = floatval($_POST['revision_credits'] ?? 0);
             
             if (!isValidUUID($revisionId)) {
                 $error = 'Geçersiz revizyon ID formatı.';
                 error_log("Invalid revision ID format: " . $revisionId);
             } else {
-                // Dosya yükleme hatası kontrolü
-                if (!isset($_FILES['revision_file']) || $_FILES['revision_file']['error'] !== UPLOAD_ERR_OK) {
-                    $errorMessages = [
-                        UPLOAD_ERR_INI_SIZE => 'Dosya çok büyük (php.ini limit)',
-                        UPLOAD_ERR_FORM_SIZE => 'Dosya çok büyük (form limit)',
-                        UPLOAD_ERR_PARTIAL => 'Dosya kısmen yüklendi',
-                        UPLOAD_ERR_NO_FILE => 'Dosya seçilmedi',
-                        UPLOAD_ERR_NO_TMP_DIR => 'Geçici dizin yok',
-                        UPLOAD_ERR_CANT_WRITE => 'Diske yazılamadı',
-                        UPLOAD_ERR_EXTENSION => 'Uzantı yüklemeyi durdurdu'
-                    ];
-                    
-                    $fileError = $_FILES['revision_file']['error'] ?? UPLOAD_ERR_NO_FILE;
-                    $error = 'Revizyon dosyası yükleme hatası: ' . ($errorMessages[$fileError] ?? 'Bilinmeyen hata (' . $fileError . ')');
-                    error_log("Revision file upload error: " . $error);
+                if ($revisionCredits < 0) {
+                    $error = 'Revizyon ücreti negatif olamaz.';
+                    error_log("Negative revision credits error");
                 } else {
-                    error_log("Processing revision file upload - Notes: " . $adminNotes);
-                    
-                    // Session kontrolü
-                    if (!isset($_SESSION['user_id'])) {
-                        throw new Exception("User session not found");
-                    }
-                    
-                    $result = $fileManager->uploadRevisionFile($revisionId, $_FILES['revision_file'], $adminNotes);
-                    
-                    error_log("Revision upload result: " . print_r($result, true));
-                    
-                    if ($result['success']) {
-                        $success = $result['message'];
-                        $user->logAction($_SESSION['user_id'], 'revision_file_upload', "Revizyon dosyası yüklendi: {$revisionId}");
+                    // Dosya yükleme hatası kontrolü
+                    if (!isset($_FILES['revision_file']) || $_FILES['revision_file']['error'] !== UPLOAD_ERR_OK) {
+                        $errorMessages = [
+                            UPLOAD_ERR_INI_SIZE => 'Dosya çok büyük (php.ini limit)',
+                            UPLOAD_ERR_FORM_SIZE => 'Dosya çok büyük (form limit)',
+                            UPLOAD_ERR_PARTIAL => 'Dosya kısmen yüklendi',
+                            UPLOAD_ERR_NO_FILE => 'Dosya seçilmedi',
+                            UPLOAD_ERR_NO_TMP_DIR => 'Geçici dizin yok',
+                            UPLOAD_ERR_CANT_WRITE => 'Diske yazılamadı',
+                            UPLOAD_ERR_EXTENSION => 'Uzantı yüklemeyi durdurdu'
+                        ];
                         
-                        // Başarılı yükleme sonrası redirect
-                        header("Location: file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
-                        exit;
+                        $fileError = $_FILES['revision_file']['error'] ?? UPLOAD_ERR_NO_FILE;
+                        $error = 'Revizyon dosyası yükleme hatası: ' . ($errorMessages[$fileError] ?? 'Bilinmeyen hata (' . $fileError . ')');
+                        error_log("Revision file upload error: " . $error);
                     } else {
-                        $error = $result['message'];
-                        error_log("Revision upload failed: " . $error);
+                        error_log("Processing revision file upload - Notes: " . $adminNotes . ", Credits: " . $revisionCredits);
+                        
+                        // Session kontrolü
+                        if (!isset($_SESSION['user_id'])) {
+                            throw new Exception("User session not found");
+                        }
+                        
+                        $result = $fileManager->uploadRevisionFile($revisionId, $_FILES['revision_file'], $adminNotes, $revisionCredits);
+                        
+                        error_log("Revision upload result: " . print_r($result, true));
+                        
+                        if ($result['success']) {
+                            $success = $result['message'];
+                            $user->logAction($_SESSION['user_id'], 'revision_file_upload', "Revizyon dosyası yüklendi: {$revisionId}, Kredi: {$revisionCredits}");
+                            
+                            // Başarılı yükleme sonrası redirect
+                            header("Location: file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
+                            exit;
+                        } else {
+                            $error = $result['message'];
+                            error_log("Revision upload failed: " . $error);
+                        }
                     }
                 }
             }
         }
-        
-    
-// Revizyon dosyası yükleme (yeni eklenen)
-if (isset($_FILES['revision_file']) && isset($_POST['upload_revision'])) {
-    error_log("Revision file upload request started");
-    $revisionId = sanitize($_POST['revision_id']);
-    $adminNotes = sanitize($_POST['revision_notes'] ?? '');
-    
-    if (!isValidUUID($revisionId)) {
-        $error = 'Geçersiz revizyon ID formatı.';
-        error_log("Invalid revision ID format: " . $revisionId);
-    } else {
-        // Dosya yükleme hatası kontrolü
-        if (!isset($_FILES['revision_file']) || $_FILES['revision_file']['error'] !== UPLOAD_ERR_OK) {
-            $errorMessages = [
-                UPLOAD_ERR_INI_SIZE => 'Dosya çok büyük (php.ini limit)',
-                UPLOAD_ERR_FORM_SIZE => 'Dosya çok büyük (form limit)',
-                UPLOAD_ERR_PARTIAL => 'Dosya kısmen yüklendi',
-                UPLOAD_ERR_NO_FILE => 'Dosya seçilmedi',
-                UPLOAD_ERR_NO_TMP_DIR => 'Geçici dizin yok',
-                UPLOAD_ERR_CANT_WRITE => 'Diske yazılamadı',
-                UPLOAD_ERR_EXTENSION => 'Uzantı yüklemeyi durdurdu'
-            ];
-            
-            $fileError = $_FILES['revision_file']['error'] ?? UPLOAD_ERR_NO_FILE;
-            $error = 'Revizyon dosyası yükleme hatası: ' . ($errorMessages[$fileError] ?? 'Bilinmeyen hata (' . $fileError . ')');
-            error_log("Revision file upload error: " . $error);
-        } else {
-            error_log("Processing revision file upload - Notes: " . $adminNotes);
-            
-            // Session kontrolü
-            if (!isset($_SESSION['user_id'])) {
-                throw new Exception("User session not found");
-            }
-            
-            $result = $fileManager->uploadRevisionFile($revisionId, $_FILES['revision_file'], $adminNotes);
-            
-            error_log("Revision upload result: " . print_r($result, true));
-            
-            if ($result['success']) {
-                $success = $result['message'];
-                $user->logAction($_SESSION['user_id'], 'revision_file_upload', "Revizyon dosyası yüklendi: {$revisionId}");
-                
-                // Başarılı yükleme sonrası redirect
-                header("Location: file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
-                exit;
-            } else {
-                $error = $result['message'];
-                error_log("Revision upload failed: " . $error);
-            }
-        }
-    }
-}
         
         } catch (Exception $e) {
         $error = 'İşlem sırasında hata oluştu: ' . $e->getMessage();
@@ -989,7 +942,7 @@ try {
                                 </div>
                             </div>
                             
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="revision_notes_<?php echo $revision['id']; ?>" class="form-label">
                                     <i class="fas fa-sticky-note me-1"></i>
                                     Admin Notları
@@ -999,6 +952,21 @@ try {
                                           name="revision_notes" rows="3"
                                           placeholder="Revizyon hakkında notlarınızı buraya yazın..."></textarea>
                                 <div class="form-text">Yapılan değişiklikler ve açıklamalar</div>
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <label for="revision_credits_<?php echo $revision['id']; ?>" class="form-label">
+                                    <i class="fas fa-coins me-1"></i>
+                                    Revizyon Ücreti <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" 
+                                       id="revision_credits_<?php echo $revision['id']; ?>" 
+                                       name="revision_credits" 
+                                       min="0" 
+                                       step="0.5" 
+                                       value="0" 
+                                       required>
+                                <div class="form-text">Kredi miktarı</div>
                             </div>
                             
                             <div class="col-12">
@@ -2700,6 +2668,46 @@ try {
 }
 
 </style>
+
+<!-- Reject Revision Modal -->
+<div class="modal fade" id="rejectRevisionModal" tabindex="-1" aria-labelledby="rejectRevisionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectRevisionModalLabel">
+                    <i class="fas fa-times-circle text-danger me-2"></i>Revizyon Talebini Reddet
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <input type="hidden" id="rejectRevisionId" name="revision_id" value="">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Dikkat!</strong> Bu revizyon talebi reddedilecek ve kullanıcıya bildirilecek.
+                    </div>
+                    <div class="mb-3">
+                        <label for="admin_notes" class="form-label">
+                            <i class="fas fa-comment me-1"></i>
+                            Ret Nedeni <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="admin_notes" name="admin_notes" rows="3" required
+                                  placeholder="Revizyon talebinin ret nedenini açıklayın..."></textarea>
+                        <div class="form-text">Bu mesaj kullanıcıya gösterilecek.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Vazgeç
+                    </button>
+                    <button type="submit" name="reject_revision_direct" class="btn btn-danger">
+                        <i class="fas fa-times me-1"></i>Talebi Reddet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <script>
 function showRejectModal(revisionId) {

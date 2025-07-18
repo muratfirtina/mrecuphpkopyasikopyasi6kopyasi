@@ -84,17 +84,62 @@ try {
     exit;
 }
 
-// Session'daki kredi bilgisini güncelle
+// TERS KREDİ SİSTEMİ: Kredi durumunu güncelle
 try {
-    $_SESSION['credits'] = $user->getUserCredits($_SESSION['user_id']);
-    echo '<!-- DEBUG: User credits güncellendi: ' . $_SESSION['credits'] . ' -->';
+    $userCreditDetails = $user->getUserCreditDetails($_SESSION['user_id']);
+    $_SESSION['credits'] = $userCreditDetails['available_credits'];
+    $_SESSION['credit_quota'] = $userCreditDetails['credit_quota'];
+    $_SESSION['credit_used'] = $userCreditDetails['credit_used'];
+    
+    echo '<!-- DEBUG: TERS KREDİ SİSTEMİ - Kota: ' . $userCreditDetails['credit_quota'] . ', Kullanılan: ' . $userCreditDetails['credit_used'] . ', Kullanılabilir: ' . $userCreditDetails['available_credits'] . ' -->';
 } catch (Exception $e) {
     echo '<!-- DEBUG: Credits güncelleme hatası: ' . $e->getMessage() . ' -->';
     $_SESSION['credits'] = 0;
+    $_SESSION['credit_quota'] = 0;
+    $_SESSION['credit_used'] = 0;
 }
 
 $error = '';
 $success = '';
+
+// TERS KREDİ SİSTEMİ: Dosya yükleme kredi kontrolü
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file_upload'])) {
+    error_log('User file upload attempt started');
+    
+    try {
+        // Kullanıcının kredi durumunu kontrol et
+        $creditCheck = $user->canUserUploadFile($_SESSION['user_id']);
+        
+        if (!$creditCheck['can_upload']) {
+            $error = $creditCheck['message'];
+            error_log('Upload rejected due to credit limit: ' . $error);
+        } else {
+            // Dosya yükleme işlemine devam et
+            $uploadResult = $fileManager->uploadUserFile($_SESSION['user_id'], $_FILES['file_upload'], $_POST);
+            
+            if ($uploadResult['success']) {
+                $success = $uploadResult['message'];
+                error_log('File upload successful: ' . $uploadResult['upload_id'] ?? 'unknown');
+                
+                // Session kredi bilgisini güncelle
+                $userCreditDetails = $user->getUserCreditDetails($_SESSION['user_id']);
+                $_SESSION['credits'] = $userCreditDetails['available_credits'];
+                $_SESSION['credit_quota'] = $userCreditDetails['credit_quota'];
+                $_SESSION['credit_used'] = $userCreditDetails['credit_used'];
+                
+                // Başarılı yükleme sonrası redirect (isteğe bağlı)
+                header('Location: uploads.php?success=' . urlencode($success));
+                exit;
+            } else {
+                $error = $uploadResult['message'];
+                error_log('File upload failed: ' . $error);
+            }
+        }
+    } catch (Exception $e) {
+        $error = 'Dosya yükleme sırasında hata oluştu: ' . $e->getMessage();
+        error_log('Upload processing error: ' . $e->getMessage());
+    }
+}
 
 // Araç markalarını getir
 try {
