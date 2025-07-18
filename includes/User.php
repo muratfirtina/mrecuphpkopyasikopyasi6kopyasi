@@ -130,7 +130,7 @@ class User {
         }
     }
     
-    // Kredi ekle/çıkar (basit versiyon) - MAIN METHOD
+    // Kredi ekle/çıkar (basit versiyon) - MAIN METHOD - TERS KREDİ SİSTEMİ
     public function addCreditDirectSimple($userId, $amount, $type = 'deposit', $description = '', $referenceId = null, $referenceType = null, $adminId = null) {
         try {
             if (!isValidUUID($userId)) {
@@ -145,22 +145,40 @@ class User {
                 return false;
             }
             
-            // Kullanıcının mevcut kredi bakiyesini güncelle
+            // TERS KREDİ SİSTEMİ: Kullanıcının mevcut kredi durumunu güncelle
             if ($type === 'withdraw' || $type === 'file_charge') {
+                // Ters kredi sisteminde kredi düşürme = credit_used artırma
                 $currentCredits = $this->getUserCredits($userId);
                 
                 if ($currentCredits < $amount) {
+                    error_log("Yetersiz kredi: Mevcut=$currentCredits, Gerekli=$amount");
                     return false;
                 }
                 
-                $stmt = $this->pdo->prepare("UPDATE users SET credits = credits - ? WHERE id = ?");
+                // Kullanılan krediyi artır (ters kredi sistemi)
+                $stmt = $this->pdo->prepare("UPDATE users SET credit_used = credit_used + ? WHERE id = ?");
                 $result = $stmt->execute([$amount, $userId]);
                 
                 if (!$result) {
+                    error_log("Kredi düşürme başarısız: userID=$userId, amount=$amount");
                     return false;
                 }
+                
+                error_log("Kredi başarıyla düşürüldü: userID=$userId, amount=$amount, type=$type");
+                
+            } else if ($type === 'quota_increase') {
+                // Kredi kotası artırma
+                $stmt = $this->pdo->prepare("UPDATE users SET credit_quota = credit_quota + ? WHERE id = ?");
+                $result = $stmt->execute([$amount, $userId]);
+                
+            } else if ($type === 'usage_remove') {
+                // Kullanılan krediden düşürme (iade)
+                $stmt = $this->pdo->prepare("UPDATE users SET credit_used = GREATEST(0, credit_used - ?) WHERE id = ?");
+                $result = $stmt->execute([$amount, $userId]);
+                
             } else {
-                $stmt = $this->pdo->prepare("UPDATE users SET credits = credits + ? WHERE id = ?");
+                // Eski sistem uyumluluğu için kredi kotası artırma
+                $stmt = $this->pdo->prepare("UPDATE users SET credit_quota = credit_quota + ? WHERE id = ?");
                 $stmt->execute([$amount, $userId]);
             }
             

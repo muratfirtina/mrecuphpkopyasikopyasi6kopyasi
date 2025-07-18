@@ -1206,9 +1206,10 @@ class FileManager {
      * @param string $revisionId - Revizyon talebi ID
      * @param array $file - Yüklenen dosya bilgileri
      * @param string $adminNotes - Admin notları
+     * @param float $creditsCharged - Düşürülecek kredi miktarı
      * @return array - Başarı durumu ve mesaj
      */
-    public function uploadRevisionFile($revisionId, $file, $adminNotes = '') {
+    public function uploadRevisionFile($revisionId, $file, $adminNotes = '', $creditsCharged = 0) {
         try {
             if (!isValidUUID($revisionId)) {
                 return ['success' => false, 'message' => 'Geçersiz revizyon ID formatı.'];
@@ -1285,13 +1286,26 @@ class FileManager {
             ]);
             
             if ($result) {
+                // Kredi düşür (eğer belirtilmişse)
+                if ($creditsCharged > 0) {
+                    $userClass = new User($this->pdo);
+                    $creditResult = $userClass->deductCredits($revision['user_id'], $creditsCharged, "Revizyon dosyası için kredi düşüldü: " . $revisionId);
+                    
+                    if (!$creditResult['success']) {
+                        // Kredi düşürülemezse dosyayı ve kayda sil
+                        unlink($filePath);
+                        $this->pdo->prepare("DELETE FROM revision_files WHERE id = ?")->execute([$revisionFileId]);
+                        return ['success' => false, 'message' => 'Kredi düşürülemedi: ' . $creditResult['message']];
+                    }
+                }
+                
                 // Revizyon durumunu 'completed' yap
                 $updateResult = $this->updateRevisionStatus(
                     $revisionId, 
                     $_SESSION['user_id'], 
                     'completed', 
                     'Revizyon dosyası yüklendi: ' . $adminNotes,
-                    0
+                    $creditsCharged
                 );
                 
                 if ($updateResult['success']) {
