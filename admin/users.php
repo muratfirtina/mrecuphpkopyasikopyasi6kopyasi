@@ -150,7 +150,13 @@ $sortOrder = isset($_GET['order']) && $_GET['order'] === 'asc' ? 'ASC' : 'DESC';
 
 // Sayfalama
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$limit = 20;
+$per_page = isset($_GET['per_page']) ? intval($_GET['per_page']) : 20;
+// Geçerli per_page değerleri
+$allowed_per_page = [10, 20, 25, 50, 100];
+if (!in_array($per_page, $allowed_per_page)) {
+    $per_page = 20;
+}
+$limit = $per_page;
 $offset = ($page - 1) * $limit;
 
 // Kullanıcıları getir
@@ -568,50 +574,169 @@ include '../includes/admin_sidebar.php';
                 </table>
             </div>
             
-            <!-- Pagination -->
-            <?php if ($totalPages > 1): ?>
-                <div class="card-footer">
-                    <nav aria-label="Kullanıcı sayfalama">
-                        <ul class="pagination pagination-sm justify-content-center mb-0">
-                            <!-- Önceki sayfa -->
-                            <?php if ($page > 1): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $role ? '&role=' . $role : ''; ?><?php echo $status !== '' ? '&status=' . $status : ''; ?><?php echo $sortBy !== 'created_at' ? '&sort=' . $sortBy : ''; ?><?php echo $sortOrder !== 'DESC' ? '&order=asc' : ''; ?>">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                            
-                            <!-- Sayfa numaraları -->
-                            <?php 
-                            $start = max(1, $page - 2);
-                            $end = min($totalPages, $page + 2);
-                            ?>
-                            
-                            <?php for ($i = $start; $i <= $end; $i++): ?>
-                                <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                    <a class="page-link" href="?page=<?php echo $i; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $role ? '&role=' . $role : ''; ?><?php echo $status !== '' ? '&status=' . $status : ''; ?><?php echo $sortBy !== 'created_at' ? '&sort=' . $sortBy : ''; ?><?php echo $sortOrder !== 'DESC' ? '&order=asc' : ''; ?>">
-                                        <?php echo $i; ?>
-                                    </a>
-                                </li>
-                            <?php endfor; ?>
-                            
-                            <!-- Sonraki sayfa -->
-                            <?php if ($page < $totalPages): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $role ? '&role=' . $role : ''; ?><?php echo $status !== '' ? '&status=' . $status : ''; ?><?php echo $sortBy !== 'created_at' ? '&sort=' . $sortBy : ''; ?><?php echo $sortOrder !== 'DESC' ? '&order=asc' : ''; ?>">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-                        </ul>
-                    </nav>
+            <!-- Advanced Pagination Navigation -->
+            <?php if ($totalUsers > 0): ?>
+                <div class="pagination-wrapper bg-light border-top p-4">
+                    <!-- Sayfa Bilgileri ve Kontroller -->
+                    <div class="row align-items-center">
+                        <!-- Sol taraf - Bilgi ve Hızlı Atlama -->
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <div class="row align-items-center g-3">
+                                <div class="col-auto">
+                                    <div class="pagination-info">
+                                        <span class="badge bg-primary fs-6 px-3 py-2">
+                                            <i class="fas fa-list-ol me-2"></i>
+                                            <?php 
+                                            $start = $offset + 1;
+                                            $end = min($offset + $limit, $totalUsers);
+                                            echo "$start - $end / " . number_format($totalUsers);
+                                            ?>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hızlı Sayfa Atlama -->
+                                <?php if ($totalPages > 5): ?>
+                                <div class="col-auto">
+                                    <div class="quick-jump-container">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-white border-end-0">
+                                                <i class="fas fa-search text-muted"></i>
+                                            </span>
+                                            <input type="number" class="form-control border-start-0" 
+                                                   id="quickJump" 
+                                                   min="1" 
+                                                   max="<?php echo $totalPages; ?>" 
+                                                   value="<?php echo $page; ?>"
+                                                   placeholder="Sayfa"
+                                                   style="width: 80px;"
+                                                   onkeypress="if(event.key==='Enter') quickJumpToPage()"
+                                                   title="Sayfa numarası girin ve Enter'a basın">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                    onclick="quickJumpToPage()" 
+                                                    title="Sayfaya git">
+                                                <i class="fas fa-arrow-right"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted d-block mt-1">/ <?php echo $totalPages; ?> sayfa</small>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
+                        <!-- Sağ taraf - Pagination Kontrolleri -->
+                        <div class="col-md-6">
+                            <nav aria-label="Sayfa navigasyonu" class="d-flex justify-content-md-end justify-content-center">
+                                <ul class="pagination pagination-lg mb-0 shadow-sm">
+                                    <!-- İlk Sayfa -->
+                                    <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                                        <a class="page-link rounded-start" 
+                                           href="<?php echo $page > 1 ? buildPaginationUrl(1) : '#'; ?>" 
+                                           title="İlk Sayfa" 
+                                           <?php echo $page <= 1 ? 'tabindex="-1"' : ''; ?>>
+                                            <i class="fas fa-angle-double-left"></i>
+                                            <span class="d-none d-sm-inline ms-1">İlk</span>
+                                        </a>
+                                    </li>
+                                    
+                                    <!-- Önceki Sayfa -->
+                                    <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                                        <a class="page-link" 
+                                           href="<?php echo $page > 1 ? buildPaginationUrl($page - 1) : '#'; ?>" 
+                                           title="Önceki Sayfa"
+                                           <?php echo $page <= 1 ? 'tabindex="-1"' : ''; ?>>
+                                            <i class="fas fa-angle-left"></i>
+                                            <span class="d-none d-sm-inline ms-1">Önceki</span>
+                                        </a>
+                                    </li>
+                                    
+                                    <!-- Sayfa Numaraları -->
+                                    <?php
+                                    $start_page = max(1, $page - 2);
+                                    $end_page = min($totalPages, $page + 2);
+                                    
+                                    // Mobilde daha az sayfa göster
+                                    if ($totalPages > 7) {
+                                        $start_page = max(1, $page - 1);
+                                        $end_page = min($totalPages, $page + 1);
+                                    }
+                                    
+                                    // İlk sayfa elipsisi
+                                    if ($start_page > 1): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="<?php echo buildPaginationUrl(1); ?>">1</a>
+                                        </li>
+                                        <?php if ($start_page > 2): ?>
+                                            <li class="page-item disabled d-none d-md-block">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Sayfa numaraları -->
+                                    <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                                        <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                                            <a class="page-link <?php echo $i === $page ? 'bg-primary border-primary' : ''; ?>" 
+                                               href="<?php echo buildPaginationUrl($i); ?>">
+                                                <?php echo $i; ?>
+                                            </a>
+                                        </li>
+                                    <?php endfor; ?>
+                                    
+                                    <!-- Son sayfa elipsisi -->
+                                    <?php if ($end_page < $totalPages): ?>
+                                        <?php if ($end_page < $totalPages - 1): ?>
+                                            <li class="page-item disabled d-none d-md-block">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        <?php endif; ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="<?php echo buildPaginationUrl($totalPages); ?>"><?php echo $totalPages; ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Sonraki Sayfa -->
+                                    <li class="page-item <?php echo $page >= $totalPages ? 'disabled' : ''; ?>">
+                                        <a class="page-link" 
+                                           href="<?php echo $page < $totalPages ? buildPaginationUrl($page + 1) : '#'; ?>" 
+                                           title="Sonraki Sayfa"
+                                           <?php echo $page >= $totalPages ? 'tabindex="-1"' : ''; ?>>
+                                            <span class="d-none d-sm-inline me-1">Sonraki</span>
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                    
+                                    <!-- Son Sayfa -->
+                                    <li class="page-item <?php echo $page >= $totalPages ? 'disabled' : ''; ?>">
+                                        <a class="page-link rounded-end" 
+                                           href="<?php echo $page < $totalPages ? buildPaginationUrl($totalPages) : '#'; ?>" 
+                                           title="Son Sayfa"
+                                           <?php echo $page >= $totalPages ? 'tabindex="-1"' : ''; ?>>
+                                            <span class="d-none d-sm-inline me-1">Son</span>
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
                     
-                    <div class="text-center mt-2">
-                        <small class="text-muted">
-                            Sayfa <?php echo $page; ?> / <?php echo $totalPages; ?> 
-                            (Toplam <?php echo $totalUsers; ?> kullanıcı)
-                        </small>
+                    <!-- Alt bilgi çubuğu -->
+                    <div class="row mt-3 pt-3 border-top">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Sayfa <strong><?php echo $page; ?></strong> / <strong><?php echo $totalPages; ?></strong> - 
+                                Sayfa başına <strong><?php echo $limit; ?></strong> kayıt gösteriliyor
+                            </small>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <small class="text-muted">
+                                <i class="fas fa-database me-1"></i>
+                                Toplam <strong><?php echo number_format($totalUsers); ?></strong> kullanıcı bulundu
+                            </small>
+                        </div>
                     </div>
                 </div>
             <?php endif; ?>
@@ -757,6 +882,15 @@ include '../includes/admin_sidebar.php';
 </form>
 
 <?php
+// Pagination URL oluşturma fonksiyonu
+function buildPaginationUrl($page_num) {
+    $params = $_GET;
+    $params['page'] = $page_num;
+    return 'users.php?' . http_build_query($params);
+}
+?>
+
+<?php
 // Sayfa özel JavaScript
 $pageJS = "
 // Toggle all checkboxes
@@ -860,8 +994,316 @@ function exportUsers() {
     const params = new URLSearchParams(window.location.search);
     window.open('export-users.php?' + params.toString(), '_blank');
 }
+
+// Enhanced quick jump to page function
+function quickJumpToPage() {
+    var input = document.getElementById('quickJump');
+    var page = parseInt(input.value);
+    var maxPage = <?php echo $totalPages; ?>;
+    var container = input.closest('.quick-jump-container');
+    
+    if (isNaN(page) || page < 1 || page > maxPage) {
+        // Show error animation
+        input.classList.add('is-invalid');
+        input.style.borderColor = '#dc3545';
+        
+        // Show tooltip-like error
+        showQuickJumpError('Lütfen 1 ile ' + maxPage + ' arasında bir sayfa numarası girin.');
+        
+        // Reset after 3 seconds
+        setTimeout(function() {
+            input.classList.remove('is-invalid');
+            input.style.borderColor = '';
+        }, 3000);
+        
+        input.focus();
+        input.select();
+        return;
+    }
+    
+    if (page === <?php echo $page; ?>) {
+        showQuickJumpError('Zaten bu sayfadasınız!');
+        return;
+    }
+    
+    // Show loading state
+    container.classList.add('loading');
+    var button = container.querySelector('.btn');
+    var originalIcon = button.innerHTML;
+    button.innerHTML = '<i class=\"fas fa-spinner fa-spin\"></i>';
+    
+    // Build URL with current parameters but new page
+    var url = new URL(window.location);
+    url.searchParams.set('page', page);
+    
+    // Add smooth transition effect
+    document.body.style.opacity = '0.8';
+    
+    setTimeout(function() {
+        window.location.href = url.toString();
+    }, 300);
+}
+
+// Show error message for quick jump
+function showQuickJumpError(message) {
+    var input = document.getElementById('quickJump');
+    var container = input.closest('.quick-jump-container');
+    
+    // Remove existing error
+    var existingError = container.querySelector('.quick-jump-error');
+    if (existingError) {
+        existingError.remove();
+    }
+    
+    // Create error element
+    var errorEl = document.createElement('div');
+    errorEl.className = 'quick-jump-error alert alert-danger alert-sm mt-1 mb-0 py-1 px-2';
+    errorEl.style.fontSize = '0.75rem';
+    errorEl.innerHTML = '<i class=\"fas fa-exclamation-triangle me-1\"></i>' + message;
+    
+    container.appendChild(errorEl);
+    
+    // Auto remove after 3 seconds
+    setTimeout(function() {
+        if (errorEl && errorEl.parentNode) {
+            errorEl.style.opacity = '0';
+            setTimeout(function() {
+                errorEl.remove();
+            }, 300);
+        }
+    }, 3000);
+}
+
+// Enhanced keyboard navigation
+document.addEventListener('keydown', function(e) {
+    // Don't interfere if user is typing in an input
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+        return;
+    }
+    
+    var currentPage = <?php echo $page; ?>;
+    var totalPages = <?php echo $totalPages; ?>;
+    
+    switch(e.key) {
+        case 'ArrowLeft':
+        case 'h':
+            if (currentPage > 1) {
+                window.location.href = '<?php echo isset($page) && $page > 1 ? buildPaginationUrl($page - 1) : '#'; ?>';
+            }
+            break;
+        case 'ArrowRight':
+        case 'l':
+            if (currentPage < totalPages) {
+                window.location.href = '<?php echo isset($page) && $page < $totalPages ? buildPaginationUrl($page + 1) : '#'; ?>';
+            }
+            break;
+        case 'Home':
+            if (currentPage > 1) {
+                window.location.href = '<?php echo buildPaginationUrl(1); ?>';
+            }
+            break;
+        case 'End':
+            if (currentPage < totalPages) {
+                window.location.href = '<?php echo buildPaginationUrl($totalPages); ?>';
+            }
+            break;
+        case 'g':
+            var quickJumpInput = document.getElementById('quickJump');
+            if (quickJumpInput) {
+                quickJumpInput.focus();
+            }
+            break;
+    }
+});
+
+// Add smooth page transition
+document.addEventListener('DOMContentLoaded', function() {
+    // Add fade-in effect
+    document.body.style.opacity = '0';
+    setTimeout(function() {
+        document.body.style.transition = 'opacity 0.3s';
+        document.body.style.opacity = '1';
+    }, 50);
+    
+    // Add hover effects to pagination
+    var pageLinks = document.querySelectorAll('.pagination .page-link');
+    pageLinks.forEach(function(link) {
+        link.addEventListener('mouseenter', function() {
+            if (!this.closest('.page-item').classList.contains('active') && 
+                !this.closest('.page-item').classList.contains('disabled')) {
+                this.style.transform = 'translateY(-2px)';
+            }
+        });
+        
+        link.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+        });
+    });
+});
 ";
 
 // Footer include
 include '../includes/admin_footer.php';
 ?>
+
+<style>
+/* Advanced Pagination Styling */
+.pagination-wrapper {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.pagination-info .badge {
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.quick-jump-container .input-group {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.quick-jump-container .form-control {
+    border: 2px solid #e9ecef;
+    transition: all 0.15s ease-in-out;
+}
+
+.quick-jump-container .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Enhanced Pagination Controls */
+.pagination-lg .page-link {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 2px solid #dee2e6;
+    color: #495057;
+    margin: 0 3px;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.pagination-lg .page-link:hover {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+    border-color: #0d6efd;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+}
+
+.pagination-lg .page-item.active .page-link {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+    border-color: #0d6efd;
+    color: white;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+    transform: scale(1.05);
+}
+
+.pagination-lg .page-item.disabled .page-link {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #6c757d;
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.pagination-lg .page-link i {
+    font-size: 0.9rem;
+}
+
+/* Per page selector enhanced styling */
+.form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease-in-out;
+    font-weight: 500;
+}
+
+.form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Badge enhancements */
+.badge.bg-light {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+    border: 2px solid #e9ecef;
+    color: #495057 !important;
+    font-weight: 500;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .pagination-lg .page-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+        margin: 0 1px;
+    }
+    
+    .pagination-wrapper {
+        padding: 1rem !important;
+    }
+    
+    .quick-jump-container {
+        display: none;
+    }
+    
+    .pagination-info .badge {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .pagination-lg .page-link {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+    
+    .pagination-lg .page-link span {
+        display: none !important;
+    }
+}
+
+/* Animation for page changes */
+.pagination-lg .page-link {
+    position: relative;
+    overflow: hidden;
+}
+
+.pagination-lg .page-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.pagination-lg .page-link:hover::before {
+    left: 100%;
+}
+
+/* Loading state for quick jump */
+.quick-jump-container.loading .btn {
+    pointer-events: none;
+}
+
+.quick-jump-container.loading .btn i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>

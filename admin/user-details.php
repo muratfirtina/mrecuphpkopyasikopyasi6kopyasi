@@ -40,9 +40,6 @@ $userUploads = $fileManager->getUserUploads($userId, $uploadsPage, $perPage);
 $totalUploads = $fileManager->getUserUploadCount($userId);
 $totalUploadsPages = ceil($totalUploads / $perPage);
 
-// DEBUG: Pagination değerlerini kontrol et
-error_log("DEBUG - Total Uploads: $totalUploads, PerPage: $perPage, Total Pages: $totalUploadsPages, Current Page: $uploadsPage");
-
 // Kullanıcı kredi işlemlerini getir - Pagination ile
 $creditsOffset = ($creditsPage - 1) * $perPage;
 try {
@@ -383,16 +380,11 @@ include '../includes/admin_sidebar.php';
                         </table>
                     </div>
                     
-                    <!-- Pagination - TEST İÇİN GEÇİCİ OLARAK HER ZAMAN GÖSTERİLİYOR -->
-                    <?php if ($totalUploadsPages >= 1): // DEBUG: Geçici olarak >= 1 yapıldı ?>
+                    <!-- Pagination -->
+                    <?php if ($totalUploadsPages > 1): ?>
                         <div class="d-flex justify-content-center mt-3">
                             <nav>
                                 <ul class="pagination pagination-sm">
-                                    <!-- DEBUG Info -->
-                                    <li class="page-item disabled">
-                                        <span class="page-link">Sayfa <?php echo $uploadsPage; ?>/<?php echo $totalUploadsPages; ?> (Toplam: <?php echo $totalUploads; ?>)</span>
-                                    </li>
-                                    
                                     <!-- Önceki sayfa -->
                                     <?php if ($uploadsPage > 1): ?>
                                         <li class="page-item">

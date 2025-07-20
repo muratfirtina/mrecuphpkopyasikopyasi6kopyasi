@@ -187,7 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Kullanıcıları arama
 $search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$limit = isset($_GET['limit']) ? max(10, min(100, intval($_GET['limit']))) : 20; // 10-100 arası limit
+$limit = isset($_GET['limit']) ? max(10, min(50, intval($_GET['limit']))) : 10; // 10-50 arası limit, default 10
 $offset = ($page - 1) * $limit;
 
 try {
@@ -367,16 +367,6 @@ include '../includes/admin_sidebar.php';
             </div>
             
             <div class="col-md-2">
-                <label for="limit" class="form-label">Sayfa Başı</label>
-                <select class="form-select" id="limit" name="limit">
-                    <option value="10" <?php echo $limit === 10 ? 'selected' : ''; ?>>10</option>
-                    <option value="20" <?php echo $limit === 20 ? 'selected' : ''; ?>>20</option>
-                    <option value="50" <?php echo $limit === 50 ? 'selected' : ''; ?>>50</option>
-                    <option value="100" <?php echo $limit === 100 ? 'selected' : ''; ?>>100</option>
-                </select>
-            </div>
-            
-            <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="fas fa-search me-1"></i>Ara
                 </button>
@@ -499,15 +489,31 @@ include '../includes/admin_sidebar.php';
                 </table>
             </div>
             
-            <!-- Sayfalama -->
-            <?php if ($totalPages > 1): ?>
-                <div class="card-footer">
+            <!-- Sayfalama - Her zaman göster, fakat sayfa butonlarını sadece 1'den fazla sayfa varsa göster -->
+            <div class="card-footer bg-light">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="text-muted">
+                        Sayfa <?php echo $page; ?> / <?php echo $totalPages; ?> 
+                        (Toplam <?php echo number_format($totalUsers); ?> kullanıcı)
+                    </small>
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="limitSelect" class="form-label-sm mb-0 text-muted">Sayfa başına:</label>
+                        <select id="limitSelect" class="form-select form-select-sm" style="width: auto;" onchange="changePagination(this.value)">
+                            <option value="10" <?php echo $limit == 10 ? 'selected' : ''; ?>>10 kayıt</option>
+                            <option value="20" <?php echo $limit == 20 ? 'selected' : ''; ?>>20 kayıt</option>
+                            <option value="50" <?php echo $limit == 50 ? 'selected' : ''; ?>>50 kayıt</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Sayfa navigasyonu - sadece 1'den fazla sayfa varsa göster -->
+                <?php if ($totalPages > 1): ?>
                     <nav aria-label="Sayfalama">
                         <ul class="pagination justify-content-center mb-0">
                             <?php if ($page > 1): ?>
                                 <li class="page-item">
                                     <a class="page-link" href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&limit=<?php echo $limit; ?>">
-                                        <i class="fas fa-chevron-left"></i>
+                                        <i class="fas fa-chevron-left"></i> Önceki
                                     </a>
                                 </li>
                             <?php endif; ?>
@@ -516,7 +522,19 @@ include '../includes/admin_sidebar.php';
                             $startPage = max(1, $page - 2);
                             $endPage = min($totalPages, $page + 2);
                             
-                            for ($i = $startPage; $i <= $endPage; $i++): ?>
+                            if ($startPage > 1):
+                            ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1&search=<?php echo urlencode($search); ?>&limit=<?php echo $limit; ?>">1</a>
+                                </li>
+                                <?php if ($startPage > 2): ?>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                            
+                            <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
                                 <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
                                     <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&limit=<?php echo $limit; ?>">
                                         <?php echo $i; ?>
@@ -524,17 +542,33 @@ include '../includes/admin_sidebar.php';
                                 </li>
                             <?php endfor; ?>
                             
+                            <?php if ($endPage < $totalPages): ?>
+                                <?php if ($endPage < $totalPages - 1): ?>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                <?php endif; ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?php echo $totalPages; ?>&search=<?php echo urlencode($search); ?>&limit=<?php echo $limit; ?>"><?php echo $totalPages; ?></a>
+                                </li>
+                            <?php endif; ?>
+                            
                             <?php if ($page < $totalPages): ?>
                                 <li class="page-item">
                                     <a class="page-link" href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&limit=<?php echo $limit; ?>">
-                                        <i class="fas fa-chevron-right"></i>
+                                        Sonraki <i class="fas fa-chevron-right"></i>
                                     </a>
                                 </li>
                             <?php endif; ?>
                         </ul>
                     </nav>
-                </div>
-            <?php endif; ?>
+                <?php else: ?>
+                    <!-- Tek sayfa iken bilgi mesajı -->
+                    <div class="text-center">
+                        <small class="text-muted">Tüm veriler tek sayfada gösteriliyor</small>
+                    </div>
+                <?php endif; ?>
+            </div>
         <?php endif; ?>
     </div>
 </div>
@@ -587,6 +621,29 @@ include '../includes/admin_sidebar.php';
 </div>
 
 <script>
+// Modern pagination stil ve fonksiyonları
+function changePagination(newLimit) {
+    // Loading gösterimi
+    const selectElement = document.getElementById('limitSelect');
+    selectElement.disabled = true;
+    selectElement.style.opacity = '0.6';
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('limit', newLimit);
+    urlParams.set('page', '1'); // Yeni limit seçildiğinde 1. sayfaya dön
+    
+    // Mevcut arama parametresini koru
+    const search = urlParams.get('search') || '';
+    
+    // Yeni URL oluştur
+    let newUrl = window.location.pathname + '?page=1&limit=' + newLimit;
+    if (search) {
+        newUrl += '&search=' + encodeURIComponent(search);
+    }
+    
+    window.location.href = newUrl;
+}
+
 // Tüm değişkenler ve fonksiyonlar
 let currentOperation = '';
 let userCurrentCredits = 0;
