@@ -649,7 +649,6 @@ include '../includes/user_header.php';
                                     <select class="form-select form-select-sm" id="type_filter" name="type">
                                         <option value="">Tüm İşlemler</option>
                                         <option value="add" <?php echo $type === 'add' ? 'selected' : ''; ?>>Kredi Yükleme (Add)</option>
-                                        <option value="deduct" <?php echo $type === 'deduct' ? 'selected' : ''; ?>>Kredi Kullanımı (Deduct)</option>
                                         <option value="withdraw" <?php echo $type === 'withdraw' ? 'selected' : ''; ?>>Kredi Kullanımı (Withdraw)</option>
                                         <option value="file_charge" <?php echo $type === 'file_charge' ? 'selected' : ''; ?>>Dosya Ücreti</option>
                                     </select>

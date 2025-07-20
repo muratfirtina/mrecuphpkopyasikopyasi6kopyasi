@@ -148,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $transactionId = generateUUID();
                 $stmt = $pdo->prepare("
                     INSERT INTO credit_transactions (id, user_id, admin_id, transaction_type, type, amount, description, created_at) 
-                    VALUES (?, ?, ?, 'deduct', 'refund', ?, ?, NOW())
+                    VALUES (?, ?, ?, 'withdraw', 'refund', ?, ?, NOW())
                 ");
                 $stmt->execute([$transactionId, $user_id, $_SESSION['user_id'], $amount, $description]);
                 
