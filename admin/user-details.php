@@ -15,6 +15,11 @@ $success = '';
 // Kullanıcı ID'sini al
 $userId = isset($_GET['id']) ? sanitize($_GET['id']) : '';
 
+// Pagination parametreleri
+$uploadsPage = isset($_GET['uploads_page']) ? max(1, (int)$_GET['uploads_page']) : 1;
+$creditsPage = isset($_GET['credits_page']) ? max(1, (int)$_GET['credits_page']) : 1;
+$perPage = 10; // Sayfa başına kayıt sayısı
+
 if (!$userId || !isValidUUID($userId)) {
     header('Location: users.php?error=invalid_user_id');
     exit;
@@ -28,21 +33,43 @@ if (!$userDetails) {
     exit;
 }
 
-// Kullanıcı dosyalarını getir
-$userUploads = $fileManager->getUserUploads($userId, 1, 20);
+// Kullanıcı dosyalarını getir - Pagination ile
+$userUploads = $fileManager->getUserUploads($userId, $uploadsPage, $perPage);
 
-// Kullanıcı kredi işlemlerini getir
+// Toplam dosya sayısını getir (pagination için)
+$totalUploads = $fileManager->getUserUploadCount($userId);
+$totalUploadsPages = ceil($totalUploads / $perPage);
+
+// DEBUG: Pagination değerlerini kontrol et
+error_log("DEBUG - Total Uploads: $totalUploads, PerPage: $perPage, Total Pages: $totalUploadsPages, Current Page: $uploadsPage");
+
+// Kullanıcı kredi işlemlerini getir - Pagination ile
+$creditsOffset = ($creditsPage - 1) * $perPage;
 try {
     $stmt = $pdo->prepare("
         SELECT * FROM credit_transactions 
         WHERE user_id = ? 
         ORDER BY created_at DESC 
-        LIMIT 20
+        LIMIT ? OFFSET ?
     ");
-    $stmt->execute([$userId]);
+    $stmt->bindValue(1, $userId, PDO::PARAM_STR);
+    $stmt->bindValue(2, $perPage, PDO::PARAM_INT);
+    $stmt->bindValue(3, $creditsOffset, PDO::PARAM_INT);
+    $stmt->execute();
     $creditTransactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch(PDOException $e) {
     $creditTransactions = [];
+}
+
+// Toplam kredi işlemi sayısını getir (pagination için)
+try {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM credit_transactions WHERE user_id = ?");
+    $stmt->execute([$userId]);
+    $totalCredits = $stmt->fetchColumn();
+    $totalCreditsPages = ceil($totalCredits / $perPage);
+} catch(PDOException $e) {
+    $totalCredits = 0;
+    $totalCreditsPages = 0;
 }
 
 // Kullanıcı istatistikleri
@@ -355,6 +382,47 @@ include '../includes/admin_sidebar.php';
                             </tbody>
                         </table>
                     </div>
+                    
+                    <!-- Pagination - TEST İÇİN GEÇİCİ OLARAK HER ZAMAN GÖSTERİLİYOR -->
+                    <?php if ($totalUploadsPages >= 1): // DEBUG: Geçici olarak >= 1 yapıldı ?>
+                        <div class="d-flex justify-content-center mt-3">
+                            <nav>
+                                <ul class="pagination pagination-sm">
+                                    <!-- DEBUG Info -->
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Sayfa <?php echo $uploadsPage; ?>/<?php echo $totalUploadsPages; ?> (Toplam: <?php echo $totalUploads; ?>)</span>
+                                    </li>
+                                    
+                                    <!-- Önceki sayfa -->
+                                    <?php if ($uploadsPage > 1): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?id=<?php echo $userId; ?>&uploads_page=<?php echo $uploadsPage - 1; ?>&credits_page=<?php echo $creditsPage; ?>">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Sayfa numaraları -->
+                                    <?php for ($i = 1; $i <= $totalUploadsPages; $i++): ?>
+                                        <li class="page-item <?php echo $i == $uploadsPage ? 'active' : ''; ?>">
+                                            <a class="page-link" href="?id=<?php echo $userId; ?>&uploads_page=<?php echo $i; ?>&credits_page=<?php echo $creditsPage; ?>">
+                                                <?php echo $i; ?>
+                                            </a>
+                                        </li>
+                                    <?php endfor; ?>
+                                    
+                                    <!-- Sonraki sayfa -->
+                                    <?php if ($uploadsPage < $totalUploadsPages): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?id=<?php echo $userId; ?>&uploads_page=<?php echo $uploadsPage + 1; ?>&credits_page=<?php echo $creditsPage; ?>">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
+                                </ul>
+                            </nav>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>
@@ -417,6 +485,42 @@ include '../includes/admin_sidebar.php';
                             </tbody>
                         </table>
                     </div>
+                    
+                    <!-- Pagination -->
+                    <?php if ($totalCreditsPages > 1): ?>
+                        <div class="d-flex justify-content-center mt-3">
+                            <nav>
+                                <ul class="pagination pagination-sm">
+                                    <!-- Önceki sayfa -->
+                                    <?php if ($creditsPage > 1): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?id=<?php echo $userId; ?>&uploads_page=<?php echo $uploadsPage; ?>&credits_page=<?php echo $creditsPage - 1; ?>">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Sayfa numaraları -->
+                                    <?php for ($i = 1; $i <= $totalCreditsPages; $i++): ?>
+                                        <li class="page-item <?php echo $i == $creditsPage ? 'active' : ''; ?>">
+                                            <a class="page-link" href="?id=<?php echo $userId; ?>&uploads_page=<?php echo $uploadsPage; ?>&credits_page=<?php echo $i; ?>">
+                                                <?php echo $i; ?>
+                                            </a>
+                                        </li>
+                                    <?php endfor; ?>
+                                    
+                                    <!-- Sonraki sayfa -->
+                                    <?php if ($creditsPage < $totalCreditsPages): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?id=<?php echo $userId; ?>&uploads_page=<?php echo $uploadsPage; ?>&credits_page=<?php echo $creditsPage + 1; ?>">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
+                                </ul>
+                            </nav>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>

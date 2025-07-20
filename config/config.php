@@ -193,22 +193,7 @@ function formatDate($date) {
     return date('d.m.Y H:i', strtotime($date));
 }
 
-if (!function_exists('formatFileSize')) {
-    function formatFileSize($bytes) {
-        if ($bytes <= 0) {
-            return '0 B';
-        }
-        
-        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        $bytes = max($bytes, 0);
-        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
-        $pow = min($pow, count($units) - 1);
-        
-        $bytes /= (1 << (10 * $pow));
-        
-        return round($bytes, 2) . ' ' . $units[$pow];
-    }
-}
+// formatFileSize fonksiyonu dosyanın sonunda tanımlandı
 
 function generateToken() {
     return bin2hex(random_bytes(32));
@@ -408,7 +393,10 @@ function includeSecurityScript() {
 
 // Dosya boyutu formatlama fonksiyonu
 function formatFileSize($bytes) {
-    if ($bytes === 0) return '0 B';
+    if ($bytes === 0 || $bytes === null) return '0 B';
+    
+    $bytes = (float) $bytes;
+    if ($bytes <= 0) return '0 B';
     
     $k = 1024;
     $sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
