@@ -69,7 +69,7 @@ $dateTo = isset($_GET['date_to']) ? sanitize($_GET['date_to']) : '';
 
 // Sayfalama
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$limit = 5; // Credits sayfasında az gösterelim
+$limit = 5; // TEST: Sayfalamayı görmek için küçük limit
 
 // Debug için (geliştirme aşamasında)
 if (isset($_GET['debug']) || !empty($type) || !empty($dateFrom) || !empty($dateTo)) {
@@ -80,6 +80,7 @@ if (isset($_GET['debug']) || !empty($type) || !empty($dateFrom) || !empty($dateT
     echo "Date From: '" . htmlspecialchars($dateFrom) . "'<br>";
     echo "Date To: '" . htmlspecialchars($dateTo) . "'<br>";
     echo "Page: $page<br>";
+    echo "Limit: $limit | Offset: " . (($page - 1) * $limit) . "<br>";
     echo "</div>";
 }
 
@@ -109,7 +110,11 @@ try {
     // Sayfalama
     $offset = ($page - 1) * $limit;
     
-    // Ana sorgu
+    // LIMIT ve OFFSET değerlerini integer'a çevir ve doğrula
+    $limit = (int)$limit;
+    $offset = (int)$offset;
+    
+    // Ana sorgu - LIMIT ve OFFSET'i direkt sorguya ekle (PDO parametresi olarak değil)
     $query = "
         SELECT ct.*, u.username as admin_username,
                CASE 
@@ -121,12 +126,20 @@ try {
         LEFT JOIN users u ON ct.admin_id = u.id
         {$whereClause}
         ORDER BY ct.created_at DESC
-        LIMIT ? OFFSET ?
+        LIMIT {$limit} OFFSET {$offset}
     ";
     
-    $queryParams = array_merge($params, [$limit, $offset]);
+    // Debug sorguyu da göster
+    if (isset($_GET['debug']) || !empty($type) || !empty($dateFrom) || !empty($dateTo)) {
+        echo "<div style='background: #e7f3ff; padding: 10px; margin: 10px 0; border-radius: 5px; border: 2px solid #007bff;'>";
+        echo "<strong>SQL QUERY DEBUG:</strong><br>";
+        echo "<code>" . htmlspecialchars($query) . "</code><br>";
+        echo "Parameters: " . json_encode($params) . "<br>";
+        echo "</div>";
+    }
+    
     $stmt = $pdo->prepare($query);
-    $stmt->execute($queryParams);
+    $stmt->execute($params); // Sadece WHERE clause parametreleri
     $recentTransactions = $stmt->fetchAll();
     
     // Toplam sayı
@@ -141,6 +154,22 @@ try {
     $filteredTransactions = $countStmt->fetchColumn();
     $totalPages = ceil($filteredTransactions / $limit);
     
+    // Debug sonuç bilgilerini de göster
+    if (isset($_GET['debug']) || !empty($type) || !empty($dateFrom) || !empty($dateTo)) {
+        echo "<div style='background: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; border: 2px solid #ffc107;'>";
+        echo "<strong>RESULTS DEBUG:</strong><br>";
+        echo "Filtered Transactions: $filteredTransactions<br>";
+        echo "Returned Transactions: " . count($recentTransactions) . "<br>";
+        echo "Total Pages: $totalPages<br>";
+        echo "Current Page: $page<br>";
+        echo "Limit: $limit | Offset: $offset<br>";
+        echo "<strong>PAGINATION LOGIC:</strong><br>";
+        echo "- totalPages > 1? " . ($totalPages > 1 ? 'YES' : 'NO') . "<br>";
+        echo "- filteredTransactions > 5? " . ($filteredTransactions > 5 ? 'YES' : 'NO') . "<br>";
+        echo "- Should show pagination? " . (($totalPages > 1 || $filteredTransactions > 5) ? 'YES' : 'NO') . "<br>";
+        echo "</div>";
+    }
+    
 } catch(PDOException $e) {
     // Hata durumunda eski basit sorguyu kullan
     error_log('Credits transactions error: ' . $e->getMessage());
@@ -153,12 +182,21 @@ try {
             LEFT JOIN users u ON ct.admin_id = u.id
             WHERE ct.user_id = ?
             ORDER BY ct.created_at DESC
-            LIMIT 10
+            LIMIT {$limit}
         ");
         $stmt->execute([$userId]);
         $recentTransactions = $stmt->fetchAll();
         $filteredTransactions = count($recentTransactions);
         $totalPages = 1;
+        
+        // Debug hata durumunu da göster
+        if (isset($_GET['debug']) || !empty($type) || !empty($dateFrom) || !empty($dateTo)) {
+            echo "<div style='background: #f8d7da; padding: 10px; margin: 10px 0; border-radius: 5px; border: 2px solid #dc3545;'>";
+            echo "<strong>FALLBACK QUERY USED (LIMIT $limit):</strong><br>";
+            echo "Error: " . htmlspecialchars($e->getMessage()) . "<br>";
+            echo "Returned: " . count($recentTransactions) . " transactions<br>";
+            echo "</div>";
+        }
         
         // Reset filters on error
         $type = '';
@@ -588,6 +626,11 @@ include '../includes/user_header.php';
                                 <a href="transactions.php" class="btn btn-outline-primary btn-sm">
                                     <i class="fas fa-list me-1"></i>Detaylı Görünüm
                                 </a>
+                                <?php if ($filteredTransactions > $limit): ?>
+                                <span class="btn btn-outline-info btn-sm disabled">
+                                    <i class="fas fa-layers me-1"></i><?php echo $filteredTransactions - $limit; ?> daha
+                                </span>
+                                <?php endif; ?>
                             </div>
                         </div>
                         
@@ -605,8 +648,9 @@ include '../includes/user_header.php';
                                     </label>
                                     <select class="form-select form-select-sm" id="type_filter" name="type">
                                         <option value="">Tüm İşlemler</option>
-                                        <option value="add" <?php echo $type === 'add' ? 'selected' : ''; ?>>Kredi Yükleme</option>
-                                        <option value="deduct" <?php echo $type === 'deduct' ? 'selected' : ''; ?>>Kredi Kullanımı</option>
+                                        <option value="add" <?php echo $type === 'add' ? 'selected' : ''; ?>>Kredi Yükleme (Add)</option>
+                                        <option value="deduct" <?php echo $type === 'deduct' ? 'selected' : ''; ?>>Kredi Kullanımı (Deduct)</option>
+                                        <option value="withdraw" <?php echo $type === 'withdraw' ? 'selected' : ''; ?>>Kredi Kullanımı (Withdraw)</option>
                                         <option value="file_charge" <?php echo $type === 'file_charge' ? 'selected' : ''; ?>>Dosya Ücreti</option>
                                     </select>
                                 </div>
@@ -635,9 +679,11 @@ include '../includes/user_header.php';
                                         <a href="credits.php" class="btn btn-outline-secondary btn-sm">
                                             <i class="fas fa-undo me-1"></i>Temizle
                                         </a>
+                                        <?php if (isset($_GET['show_debug']) || (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin')): ?>
                                         <a href="credits.php?debug=1<?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" class="btn btn-outline-info btn-sm" title="Debug">
                                             <i class="fas fa-bug"></i>
                                         </a>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </form>
@@ -683,14 +729,12 @@ include '../includes/user_header.php';
                                             $effectiveType = $transaction['effective_type'] ?? $transaction['transaction_type'] ?? $transaction['type'] ?? 'unknown';
                                             switch ($effectiveType) {
                                                 case 'add':
-                                                case 'deposit':
                                                     $iconClass = 'fas fa-plus-circle';
                                                     $iconColor = 'success';
                                                     break;
                                                 case 'deduct':
                                                 case 'withdraw':
                                                 case 'file_charge':
-                                                case 'purchase':
                                                     $iconClass = 'fas fa-minus-circle';
                                                     $iconColor = 'danger';
                                                     break;
@@ -709,14 +753,17 @@ include '../includes/user_header.php';
                                                 $title = 'Bilinmeyen İşlem';
                                                 switch ($effectiveType) {
                                                     case 'add':
-                                                    case 'deposit':
                                                         $title = 'Kredi Yükleme';
                                                         break;
                                                     case 'deduct':
                                                     case 'withdraw':
-                                                    case 'file_charge':
-                                                    case 'purchase':
                                                         $title = 'Kredi Kullanımı';
+                                                        break;
+                                                    case 'file_charge':
+                                                        $title = 'Dosya Ücreti';
+                                                        break;
+                                                    default:
+                                                        $title = $effectiveType ? ucfirst($effectiveType) : 'Bilinmeyen İşlem';
                                                         break;
                                                 }
                                                 echo $title;
@@ -738,29 +785,53 @@ include '../includes/user_header.php';
                                         </div>
                                         
                                         <div class="transaction-amount">
-                                            <span class="amount text-<?php echo in_array($effectiveType, ['add', 'deposit']) ? 'success' : 'danger'; ?>">
-                                                <?php echo in_array($effectiveType, ['add', 'deposit']) ? '+' : '-'; ?>
+                                            <?php 
+                                            $isPositive = ($effectiveType === 'add');
+                                            $amountPrefix = $isPositive ? '+' : '-';
+                                            $amountColorClass = $isPositive ? 'success' : 'danger';
+                                            ?>
+                                            <span class="amount text-<?php echo $amountColorClass; ?>">
+                                                <?php echo $amountPrefix; ?>
                                                 <?php echo number_format($transaction['amount'], 2); ?> TL
                                             </span>
                                             <span class="badge bg-<?php echo $iconColor; ?> badge-sm">
-                                                <?php echo in_array($effectiveType, ['add', 'deposit']) ? 'Yüklendi' : 'Kullanıldı'; ?>
+                                                <?php 
+                                                switch ($effectiveType) {
+                                                    case 'add':
+                                                        echo 'Yüklendi';
+                                                        break;
+                                                    case 'deduct':
+                                                    case 'withdraw':
+                                                    case 'file_charge':
+                                                        echo 'Kullanıldı';
+                                                        break;
+                                                    default:
+                                                        echo 'İşlem';
+                                                        break;
+                                                }
+                                                ?>
                                             </span>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
                             
-                            <!-- Sayfalama -->
-                            <?php if ($totalPages > 1): ?>
+                            <!-- Sayfalama - TEST İÇİN ZORLA GÖSTERİM -->
+                            <?php if ($filteredTransactions > 5): // Test için 5'ten büyükse göster ?>
                                 <div class="pagination-compact mt-3">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <div class="pagination-info">
-                                            <small class="text-muted">
-                                                <i class="fas fa-info-circle me-1"></i>
-                                                Sayfa <?php echo $page; ?> / <?php echo $totalPages; ?> 
-                                                (Toplam <?php echo $filteredTransactions; ?> işlem)
-                                            </small>
-                                        </div>
+                                        <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        <strong>PAGINATION TEST:</strong> 
+                                        <?php 
+                                        $startRecord = (($page - 1) * $limit) + 1;
+                                            $endRecord = min($page * $limit, $filteredTransactions);
+                                                echo "Gösterilen: $startRecord-$endRecord / $filteredTransactions işlem";
+                                        echo " | Total Pages: $totalPages | Current: $page";
+                                        ?>
+                                    </small>
+                                </div>
                                         <div class="pagination-jump">
                                             <form method="GET" class="d-flex align-items-center gap-2" style="margin: 0;">
                                                 <!-- Preserve filters -->
@@ -780,61 +851,27 @@ include '../includes/user_header.php';
                                         </div>
                                     </div>
                                     
-                                    <nav aria-label="İşlem sayfalama" class="pagination-nav">
+                                    <!-- TEST PAGINATION - ZORLA GÖSTER -->
+                                    <nav aria-label="Test Sayfalama" class="pagination-nav">
                                         <ul class="pagination pagination-sm mb-0 justify-content-center">
-                                            <!-- First Page -->
-                                            <?php if ($page > 1): ?>
-                                                <li class="page-item">
-                                                    <a class="page-link" href="?page=1<?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" title="İlk sayfa">
-                                                        <i class="fas fa-angle-double-left"></i>
-                                                    </a>
-                                                </li>
-                                            <?php endif; ?>
+                                            <!-- Test Previous -->
+                                            <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                                                <a class="page-link" href="?page=<?php echo max(1, $page - 1); ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" title="Önceki sayfa">
+                                                    <i class="fas fa-chevron-left"></i> Önceki
+                                                </a>
+                                            </li>
                                             
-                                            <!-- Previous Page -->
-                                            <?php if ($page > 1): ?>
-                                                <li class="page-item">
-                                                    <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" title="Önceki sayfa">
-                                                        <i class="fas fa-chevron-left"></i>
-                                                    </a>
-                                                </li>
-                                            <?php endif; ?>
+                                            <!-- Test Current Page -->
+                                            <li class="page-item active">
+                                                <span class="page-link bg-primary text-white">Sayfa <?php echo $page; ?></span>
+                                            </li>
                                             
-                                            <!-- Page Numbers -->
-                                            <?php 
-                                            $start = max(1, $page - 2);
-                                            $end = min($totalPages, $page + 2);
-                                            ?>
-                                            
-                                            <?php for ($i = $start; $i <= $end; $i++): ?>
-                                                <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                                    <?php if ($i === $page): ?>
-                                                        <span class="page-link bg-primary text-white"><?php echo $i; ?></span>
-                                                    <?php else: ?>
-                                                        <a class="page-link" href="?page=<?php echo $i; ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>">
-                                                            <?php echo $i; ?>
-                                                        </a>
-                                                    <?php endif; ?>
-                                                </li>
-                                            <?php endfor; ?>
-                                            
-                                            <!-- Next Page -->
-                                            <?php if ($page < $totalPages): ?>
-                                                <li class="page-item">
-                                                    <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" title="Sonraki sayfa">
-                                                        <i class="fas fa-chevron-right"></i>
-                                                    </a>
-                                                </li>
-                                            <?php endif; ?>
-                                            
-                                            <!-- Last Page -->
-                                            <?php if ($page < $totalPages): ?>
-                                                <li class="page-item">
-                                                    <a class="page-link" href="?page=<?php echo $totalPages; ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" title="Son sayfa">
-                                                        <i class="fas fa-angle-double-right"></i>
-                                                    </a>
-                                                </li>
-                                            <?php endif; ?>
+                                            <!-- Test Next -->
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" title="Sonraki sayfa">
+                                                    Sonraki <i class="fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
                                         </ul>
                                     </nav>
                                 </div>
@@ -842,8 +879,16 @@ include '../includes/user_header.php';
                                 <div class="pagination-compact mt-3">
                                     <div class="text-center">
                                         <small class="text-muted">
+                                            <?php if ($filteredTransactions <= $limit): ?>
                                             <i class="fas fa-check-circle text-success me-1"></i>
                                             Tüm işlemler gösteriliyor (<?php echo $filteredTransactions; ?> işlem)
+                                            <?php else: ?>
+                                            <i class="fas fa-info-circle text-primary me-1"></i>
+                                            Sadece son <?php echo $limit; ?> işlem gösteriliyor. 
+                                            <a href="transactions.php" class="text-primary text-decoration-none">
+                                                Tüm <?php echo $filteredTransactions; ?> işlemi gör
+                                            </a>
+                                            <?php endif; ?>
                                         </small>
                                     </div>
                                 </div>
@@ -2091,7 +2136,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 500 + (index * 200));
         });
     }
-    // Filtre formu AJAX handling
+    // Filtre formu AJAX handling - DEVREDIŞItedBIRAKILDI
+    // Normal form submit kullanılıyor
+    /*
     const filterForm = document.getElementById('filterForm');
     if (filterForm) {
         filterForm.addEventListener('submit', function(e) {
@@ -2126,6 +2173,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
+    */
     
     // AJAX Filtreleme Fonksiyonu
     function performAjaxFilterInternal() {

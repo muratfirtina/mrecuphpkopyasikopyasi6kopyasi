@@ -31,6 +31,10 @@ $limit = 15;
 try {
     $offset = ($page - 1) * $limit;
     
+    // LIMIT ve OFFSET değerlerini integer'a çevir
+    $limit = (int)$limit;
+    $offset = (int)$offset;
+    
     $whereClause = 'WHERE ct.user_id = ?';
     $params = [$userId];
     
@@ -56,13 +60,10 @@ try {
         LEFT JOIN users u ON ct.admin_id = u.id
         {$whereClause}
         ORDER BY ct.created_at DESC
-        LIMIT ? OFFSET ?
+        LIMIT {$limit} OFFSET {$offset}
     ");
     
-    $params[] = $limit;
-    $params[] = $offset;
-    
-    $stmt->execute($params);
+    $stmt->execute($params); // Sadece WHERE clause parametreleri
     $creditTransactions = $stmt->fetchAll();
     
     // Toplam sayı
@@ -71,7 +72,7 @@ try {
         FROM credit_transactions ct
         {$whereClause}
     ");
-    $countStmt->execute(array_slice($params, 0, -2));
+    $countStmt->execute($params); // Sadece WHERE clause parametreleri
     $totalTransactions = $countStmt->fetchColumn();
     $totalPages = ceil($totalTransactions / $limit);
     
@@ -259,8 +260,10 @@ include '../includes/user_header.php';
                             </label>
                             <select class="form-select form-control-modern" id="type" name="type">
                                 <option value="">Tüm İşlemler</option>
-                                <option value="add" <?php echo $type === 'add' ? 'selected' : ''; ?>>Kredi Yükleme</option>
-                                <option value="deduct" <?php echo $type === 'deduct' ? 'selected' : ''; ?>>Kredi Kullanımı</option>
+                                <option value="add" <?php echo $type === 'add' ? 'selected' : ''; ?>>Kredi Yükleme (Add)</option>
+                                <option value="deduct" <?php echo $type === 'deduct' ? 'selected' : ''; ?>>Kredi Kullanımı (Deduct)</option>
+                                <option value="withdraw" <?php echo $type === 'withdraw' ? 'selected' : ''; ?>>Kredi Kullanımı (Withdraw)</option>
+                                <option value="file_charge" <?php echo $type === 'file_charge' ? 'selected' : ''; ?>>Dosya Ücreti</option>
                             </select>
                         </div>
                         

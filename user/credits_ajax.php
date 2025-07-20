@@ -35,7 +35,7 @@ try {
     $dateFrom = isset($_POST['date_from']) ? trim($_POST['date_from']) : '';
     $dateTo = isset($_POST['date_to']) ? trim($_POST['date_to']) : '';
     $page = isset($_POST['page']) ? max(1, intval($_POST['page'])) : 1;
-    $limit = 5;
+    $limit = 20;
     
     // WHERE clause oluştur
     $whereClause = 'WHERE ct.user_id = ?';
@@ -65,7 +65,7 @@ try {
     $limit = (int)$limit;
     $offset = (int)$offset;
     
-    // Ana sorgu
+    // Ana sorgu - LIMIT ve OFFSET'i direkt sorguya ekle
     $query = "
         SELECT ct.*, u.username as admin_username,
                CASE 
