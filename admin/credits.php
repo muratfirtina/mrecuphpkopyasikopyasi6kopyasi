@@ -187,7 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Kullanıcıları arama
 $search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$limit = 20;
+$limit = isset($_GET['limit']) ? max(10, min(100, intval($_GET['limit']))) : 20; // 10-100 arası limit
 $offset = ($page - 1) * $limit;
 
 try {
@@ -359,11 +359,21 @@ include '../includes/admin_sidebar.php';
 <div class="card admin-card mb-4">
     <div class="card-body">
         <form method="GET" class="row g-3 align-items-end">
-            <div class="col-md-8">
+            <div class="col-md-6">
                 <label for="search" class="form-label">Kullanıcı Ara</label>
                 <input type="text" class="form-control" id="search" name="search" 
                        value="<?php echo htmlspecialchars($search); ?>" 
                        placeholder="Kullanıcı adı, e-posta, ad veya soyad...">
+            </div>
+            
+            <div class="col-md-2">
+                <label for="limit" class="form-label">Sayfa Başı</label>
+                <select class="form-select" id="limit" name="limit">
+                    <option value="10" <?php echo $limit === 10 ? 'selected' : ''; ?>>10</option>
+                    <option value="20" <?php echo $limit === 20 ? 'selected' : ''; ?>>20</option>
+                    <option value="50" <?php echo $limit === 50 ? 'selected' : ''; ?>>50</option>
+                    <option value="100" <?php echo $limit === 100 ? 'selected' : ''; ?>>100</option>
+                </select>
             </div>
             
             <div class="col-md-2">
@@ -496,7 +506,7 @@ include '../includes/admin_sidebar.php';
                         <ul class="pagination justify-content-center mb-0">
                             <?php if ($page > 1): ?>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>">
+                                    <a class="page-link" href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&limit=<?php echo $limit; ?>">
                                         <i class="fas fa-chevron-left"></i>
                                     </a>
                                 </li>
@@ -508,7 +518,7 @@ include '../includes/admin_sidebar.php';
                             
                             for ($i = $startPage; $i <= $endPage; $i++): ?>
                                 <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                    <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>">
+                                    <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&limit=<?php echo $limit; ?>">
                                         <?php echo $i; ?>
                                     </a>
                                 </li>
@@ -516,7 +526,7 @@ include '../includes/admin_sidebar.php';
                             
                             <?php if ($page < $totalPages): ?>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>">
+                                    <a class="page-link" href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&limit=<?php echo $limit; ?>">
                                         <i class="fas fa-chevron-right"></i>
                                     </a>
                                 </li>

@@ -69,20 +69,8 @@ $dateTo = isset($_GET['date_to']) ? sanitize($_GET['date_to']) : '';
 
 // Sayfalama
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$limit = 5; // TEST: Sayfalamayı görmek için küçük limit
+$limit = isset($_GET['limit']) ? max(5, min(100, intval($_GET['limit']))) : 10; // 5-100 arası limit
 
-// Debug için (geliştirme aşamasında)
-if (isset($_GET['debug']) || !empty($type) || !empty($dateFrom) || !empty($dateTo)) {
-    echo "<div style='background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; border: 2px solid #333;'>";
-    echo "<strong>DEBUG - Filtreleme Durumu:</strong><br>";
-    echo "GET Parameters: " . json_encode($_GET) . "<br>";
-    echo "Type: '" . htmlspecialchars($type) . "' (Length: " . strlen($type) . ")<br>";
-    echo "Date From: '" . htmlspecialchars($dateFrom) . "'<br>";
-    echo "Date To: '" . htmlspecialchars($dateTo) . "'<br>";
-    echo "Page: $page<br>";
-    echo "Limit: $limit | Offset: " . (($page - 1) * $limit) . "<br>";
-    echo "</div>";
-}
 
 // Son kredi işlemlerini getir (filtreleme ile)
 try {
@@ -129,14 +117,6 @@ try {
         LIMIT {$limit} OFFSET {$offset}
     ";
     
-    // Debug sorguyu da göster
-    if (isset($_GET['debug']) || !empty($type) || !empty($dateFrom) || !empty($dateTo)) {
-        echo "<div style='background: #e7f3ff; padding: 10px; margin: 10px 0; border-radius: 5px; border: 2px solid #007bff;'>";
-        echo "<strong>SQL QUERY DEBUG:</strong><br>";
-        echo "<code>" . htmlspecialchars($query) . "</code><br>";
-        echo "Parameters: " . json_encode($params) . "<br>";
-        echo "</div>";
-    }
     
     $stmt = $pdo->prepare($query);
     $stmt->execute($params); // Sadece WHERE clause parametreleri
@@ -154,21 +134,6 @@ try {
     $filteredTransactions = $countStmt->fetchColumn();
     $totalPages = ceil($filteredTransactions / $limit);
     
-    // Debug sonuç bilgilerini de göster
-    if (isset($_GET['debug']) || !empty($type) || !empty($dateFrom) || !empty($dateTo)) {
-        echo "<div style='background: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; border: 2px solid #ffc107;'>";
-        echo "<strong>RESULTS DEBUG:</strong><br>";
-        echo "Filtered Transactions: $filteredTransactions<br>";
-        echo "Returned Transactions: " . count($recentTransactions) . "<br>";
-        echo "Total Pages: $totalPages<br>";
-        echo "Current Page: $page<br>";
-        echo "Limit: $limit | Offset: $offset<br>";
-        echo "<strong>PAGINATION LOGIC:</strong><br>";
-        echo "- totalPages > 1? " . ($totalPages > 1 ? 'YES' : 'NO') . "<br>";
-        echo "- filteredTransactions > 5? " . ($filteredTransactions > 5 ? 'YES' : 'NO') . "<br>";
-        echo "- Should show pagination? " . (($totalPages > 1 || $filteredTransactions > 5) ? 'YES' : 'NO') . "<br>";
-        echo "</div>";
-    }
     
 } catch(PDOException $e) {
     // Hata durumunda eski basit sorguyu kullan
@@ -619,19 +584,14 @@ include '../includes/user_header.php';
                             <h4 class="mb-2">
                                 <i class="fas fa-clock me-2 text-secondary"></i>Kredi İşlem Geçmişi
                                 <?php if ($filteredTransactions > 0): ?>
-                                    <span class="badge bg-primary ms-2"><?php echo $filteredTransactions; ?></span>
+                                    <span class="badge bg-primary ms-2"> Toplam <?php echo $filteredTransactions; ?></span>
                                 <?php endif; ?>
-                            </h4>
-                            <div class="d-flex gap-2">
-                                <a href="transactions.php" class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-list me-1"></i>Detaylı Görünüm
-                                </a>
                                 <?php if ($filteredTransactions > $limit): ?>
                                 <span class="btn btn-outline-info btn-sm disabled">
                                     <i class="fas fa-layers me-1"></i><?php echo $filteredTransactions - $limit; ?> daha
                                 </span>
                                 <?php endif; ?>
-                            </div>
+                            </h4>                       
                         </div>
                         
                         <!-- Filtre Formu -->
@@ -670,7 +630,20 @@ include '../includes/user_header.php';
                                            value="<?php echo htmlspecialchars($dateTo); ?>">
                                 </div>
                                 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
+                                    <label for="limit_filter" class="form-label form-label-sm">
+                                        <i class="fas fa-list me-1"></i>Sayfa Başı
+                                    </label>
+                                    <select class="form-select form-select-sm" id="limit_filter" name="limit">
+                                        <option value="5" <?php echo $limit === 5 ? 'selected' : ''; ?>>5</option>
+                                        <option value="10" <?php echo $limit === 10 ? 'selected' : ''; ?>>10</option>
+                                        <option value="20" <?php echo $limit === 20 ? 'selected' : ''; ?>>20</option>
+                                        <option value="50" <?php echo $limit === 50 ? 'selected' : ''; ?>>50</option>
+                                        <option value="100" <?php echo $limit === 100 ? 'selected' : ''; ?>>100</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-2">
                                     <div class="d-flex gap-1">
                                         <button type="submit" class="btn btn-primary btn-sm">
                                             <i class="fas fa-search me-1"></i>Filtrele
@@ -679,7 +652,7 @@ include '../includes/user_header.php';
                                             <i class="fas fa-undo me-1"></i>Temizle
                                         </a>
                                         <?php if (isset($_GET['show_debug']) || (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin')): ?>
-                                        <a href="credits.php?debug=1<?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" class="btn btn-outline-info btn-sm" title="Debug">
+                                        <a href="credits.php?debug=1<?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>&limit=<?php echo $limit; ?>" class="btn btn-outline-info btn-sm" title="Debug">
                                             <i class="fas fa-bug"></i>
                                         </a>
                                         <?php endif; ?>
@@ -837,6 +810,7 @@ include '../includes/user_header.php';
                                                 <?php if ($type): ?><input type="hidden" name="type" value="<?php echo htmlspecialchars($type); ?>"><?php endif; ?>
                                                 <?php if ($dateFrom): ?><input type="hidden" name="date_from" value="<?php echo htmlspecialchars($dateFrom); ?>"><?php endif; ?>
                                                 <?php if ($dateTo): ?><input type="hidden" name="date_to" value="<?php echo htmlspecialchars($dateTo); ?>"><?php endif; ?>
+                                                <input type="hidden" name="limit" value="<?php echo $limit; ?>">
                                                 
                                                 <small class="text-muted">Sayfa:</small>
                                                 <input type="number" name="page" value="<?php echo $page; ?>" 
@@ -855,7 +829,7 @@ include '../includes/user_header.php';
                                         <ul class="pagination pagination-sm mb-0 justify-content-center">
                                             <!-- Test Previous -->
                                             <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
-                                                <a class="page-link" href="?page=<?php echo max(1, $page - 1); ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" title="Önceki sayfa">
+                                                <a class="page-link" href="?page=<?php echo max(1, $page - 1); ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>&limit=<?php echo $limit; ?>" title="Önceki sayfa">
                                                     <i class="fas fa-chevron-left"></i> Önceki
                                                 </a>
                                             </li>
@@ -867,7 +841,7 @@ include '../includes/user_header.php';
                                             
                                             <!-- Test Next -->
                                             <li class="page-item">
-                                                <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>" title="Sonraki sayfa">
+                                                <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>&limit=<?php echo $limit; ?>" title="Sonraki sayfa">
                                                     Sonraki <i class="fas fa-chevron-right"></i>
                                                 </a>
                                             </li>

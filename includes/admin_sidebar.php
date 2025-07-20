@@ -69,9 +69,6 @@
                             <i class="fas fa-coins"></i>Kredi Yönetimi
                         </a>
                         
-                        <a class="nav-link <?php echo ($pageTitle == 'İşlemler') ? 'active' : ''; ?>" href="transactions.php">
-                            <i class="fas fa-receipt"></i>İşlemler
-                        </a>
                         
                         <!-- Ürün Yönetimi -->
                         <div class="nav-section">Ürün Yönetimi</div>
