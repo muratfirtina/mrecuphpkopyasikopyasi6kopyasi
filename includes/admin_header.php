@@ -216,6 +216,150 @@ $cssPath = '../assets/css/style.css';
             border-left-color: #28a745;
             background-color: rgba(40, 167, 69, 0.1);
         }
+        
+        /* Admin Dropdown Güzelleştirmeleri - User Header'dan Uyarlanmış */
+        .admin-avatar {
+            width: 35px;
+            height: 35px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .admin-info {
+            text-align: left;
+        }
+        
+        .text-white-75 {
+            color: rgba(255,255,255,0.75) !important;
+        }
+        
+        .dropdown-menu {
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            border: none;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(2px);
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-item {
+            padding: 0.7rem 1rem;
+            border-radius: 6px;
+            margin: 0 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-header {
+            font-weight: 600;
+            padding: 1rem 1rem 0.5rem;
+            color: #495057;
+        }
+        
+        .dropdown-divider {
+            margin: 0.5rem 0;
+            border-color: #e9ecef;
+        }
+        
+        /* Bildirim Dropdown Özel Stilleri */
+        .dropdown-item.py-3 {
+            padding: 1rem !important;
+            margin: 0;
+            border-radius: 0;
+        }
+        
+        .dropdown-item.py-3:hover {
+            background-color: #f8f9fa;
+            transform: none;
+        }
+        
+        .dropdown-item.bg-light {
+            background-color: #f8f9fa !important;
+            border-left: 3px solid #007bff;
+        }
+        
+        /* Icon Stilleri */
+        .dropdown-item i {
+            width: 1.2rem;
+            text-align: center;
+        }
+        
+        /* Badge Stilleri */
+        .badge {
+            font-size: 0.7rem;
+        }
+        
+        /* Notification Icon Containers */
+        .bg-opacity-10 {
+            background-color: rgba(var(--bs-success-rgb), 0.1) !important;
+        }
+        
+        .bg-success.bg-opacity-10 {
+            background-color: rgba(25, 135, 84, 0.1) !important;
+        }
+        
+        .bg-warning.bg-opacity-10 {
+            background-color: rgba(255, 193, 7, 0.1) !important;
+        }
+        
+        .bg-danger.bg-opacity-10 {
+            background-color: rgba(220, 53, 69, 0.1) !important;
+        }
+        
+        .bg-info.bg-opacity-10 {
+            background-color: rgba(13, 202, 240, 0.1) !important;
+        }
+        
+        /* Responsive İyileştirmeler */
+        @media (max-width: 991.98px) {
+            .dropdown-menu {
+                min-width: 250px !important;
+                max-width: 90vw;
+            }
+            
+            .admin-info {
+                display: none;
+            }
+            
+            .admin-avatar {
+                margin-right: 0 !important;
+            }
+        }
+        
+        @media (max-width: 575.98px) {
+            .dropdown-menu {
+                min-width: 220px !important;
+            }
+            
+            .dropdown-item {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.9rem;
+            }
+            
+            .dropdown-header {
+                padding: 0.75rem 0.75rem 0.5rem;
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* Animasyon İyileştirmeleri */
+        .dropdown-toggle::after {
+            transition: transform 0.2s ease;
+        }
+        
+        .dropdown-toggle[aria-expanded="true"]::after {
+            transform: rotate(180deg);
+        }
+        
+        /* Navbar Toggler Focus Düzeltmesi */
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
     </style>
     
     <!-- Ek CSS dosyaları için -->
@@ -258,58 +402,179 @@ $cssPath = '../assets/css/style.css';
                 
                 <!-- Kullanıcı Menüsü -->
                 <ul class="navbar-nav">
-                    <!-- Bildirimler -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-bell"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
-                                3
+                    <!-- Gelişmiş Bildirim Sistemi -->
+                    <?php
+                    // Admin bildirimleri için basit veriler (gerçek sistemde veritabanından gelecek)
+                    $adminNotifications = [
+                        ['type' => 'user_registration', 'title' => 'Yeni Kullanıcı Kaydı', 'message' => 'Yeni bir kullanıcı sisteme kayıt oldu', 'time' => '5 dakika önce', 'read' => false],
+                        ['type' => 'file_upload', 'title' => 'Bekleyen Dosya', 'message' => '3 dosya onay bekliyor', 'time' => '15 dakika önce', 'read' => false],
+                        ['type' => 'system_warning', 'title' => 'Sistem Uyarısı', 'message' => 'Disk kullanımı %85 seviyesinde', 'time' => '1 saat önce', 'read' => true]
+                    ];
+                    $unreadCount = array_reduce($adminNotifications, function($count, $notif) { return $count + (!$notif['read'] ? 1 : 0); }, 0);
+                    ?>
+                    
+                    <li class="nav-item dropdown me-2">
+                        <a class="nav-link position-relative p-2" href="#" id="adminNotificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-bell fa-lg text-white"></i>
+                            <?php if ($unreadCount > 0): ?>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                <?php echo $unreadCount; ?>
                             </span>
+                            <?php endif; ?>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><h6 class="dropdown-header">Bildirimler</h6></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-info-circle me-2 text-info"></i>Yeni kullanıcı kaydı</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-upload me-2 text-warning"></i>Bekleyen dosya var</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-exclamation-triangle me-2 text-danger"></i>Sistem uyarısı</a></li>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 350px; max-height: 400px; overflow-y: auto;">
+                            <li class="dropdown-header d-flex justify-content-between align-items-center">
+                                <span>Admin Bildirimleri</span>
+                                <span class="badge bg-primary"><?php echo count($adminNotifications); ?></span>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-center" href="#">Tümünü gör</a></li>
+                            
+                            <?php foreach ($adminNotifications as $notification): ?>
+                            <li>
+                                <a class="dropdown-item py-3 <?php echo $notification['read'] ? '' : 'bg-light'; ?>" href="#">
+                                    <div class="d-flex align-items-start">
+                                        <div class="me-3">
+                                            <div class="<?php 
+                                                switch($notification['type']) {
+                                                    case 'user_registration':
+                                                        echo 'bg-success bg-opacity-10 p-2 rounded-circle';
+                                                        break;
+                                                    case 'file_upload':
+                                                        echo 'bg-warning bg-opacity-10 p-2 rounded-circle';
+                                                        break;
+                                                    case 'system_warning':
+                                                        echo 'bg-danger bg-opacity-10 p-2 rounded-circle';
+                                                        break;
+                                                    default:
+                                                        echo 'bg-info bg-opacity-10 p-2 rounded-circle';
+                                                }
+                                            ?>">
+                                                <i class="<?php 
+                                                    switch($notification['type']) {
+                                                        case 'user_registration':
+                                                            echo 'fas fa-user-plus text-success';
+                                                            break;
+                                                        case 'file_upload':
+                                                            echo 'fas fa-upload text-warning';
+                                                            break;
+                                                        case 'system_warning':
+                                                            echo 'fas fa-exclamation-triangle text-danger';
+                                                            break;
+                                                        default:
+                                                            echo 'fas fa-info-circle text-info';
+                                                    }
+                                                ?>"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold"><?php echo htmlspecialchars($notification['title']); ?></div>
+                                            <div class="text-muted small"><?php echo htmlspecialchars($notification['message']); ?></div>
+                                            <div class="text-muted small mt-1">
+                                                <i class="fas fa-clock me-1"></i>
+                                                <?php echo $notification['time']; ?>
+                                            </div>
+                                        </div>
+                                        <?php if (!$notification['read']): ?>
+                                        <div class="ms-2">
+                                            <span class="bg-primary rounded-circle" style="width: 8px; height: 8px; display: inline-block;"></span>
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </a>
+                            </li>
+                            <?php endforeach; ?>
+                            
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <div class="d-flex justify-content-between px-3 py-2">
+                                    <a href="#" class="btn btn-sm btn-outline-secondary">Tümünü Okundu İşaretle</a>
+                                    <a href="notifications.php" class="small text-muted">Tüm bildirimleri gör</a>
+                                </div>
+                            </li>
                         </ul>
                     </li>
                     
-                    <!-- Admin Menu -->
+                    <!-- Admin Kullanıcı Menüsü -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-shield me-1"></i>
-                            <?php echo isset($_SESSION['username']) ? $_SESSION['username'] : 'Admin'; ?>
-                            <span class="badge bg-warning text-dark ms-1">Admin</span>
+                        <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="admin-avatar me-2">
+                                <i class="fas fa-user-shield fa-lg"></i>
+                            </div>
+                            <div class="admin-info">
+                                <span class="fw-semibold"><?php echo isset($_SESSION['username']) ? $_SESSION['username'] : 'Admin'; ?></span>
+                                <small class="d-block text-white-75">Administrator</small>
+                            </div>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><h6 class="dropdown-header">Admin İşlemleri</h6></li>
-                            <li>
-                                <a class="dropdown-item" href="settings.php">
-                                    <i class="fas fa-cog me-2"></i>Sistem Ayarları
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="security-dashboard.php">
-                                    <i class="fas fa-shield-alt me-2"></i>Güvenlik
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="logs.php">
-                                    <i class="fas fa-clipboard-list me-2"></i>Sistem Logları
-                                </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 280px;">
+                            <li class="dropdown-header">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-shield fa-2x text-muted me-2"></i>
+                                    <div>
+                                        <div class="fw-semibold"><?php echo isset($_SESSION['username']) ? $_SESSION['username'] : 'Admin'; ?></div>
+                                        <small class="text-muted"><?php echo isset($_SESSION['email']) ? $_SESSION['email'] : 'admin@system.com'; ?></small>
+                                        <div><span class="badge bg-warning text-dark small">Administrator</span></div>
+                                    </div>
+                                </div>
                             </li>
                             <li><hr class="dropdown-divider"></li>
+                            
+                            <li class="dropdown-header small text-uppercase text-muted">Sistem Yönetimi</li>
                             <li>
-                                <a class="dropdown-item" href="../user/profile.php">
-                                    <i class="fas fa-user me-2"></i>Profil Ayarları
+                                <a class="dropdown-item d-flex align-items-center py-2" href="index.php">
+                                    <i class="fas fa-tachometer-alt me-3 text-primary"></i>Dashboard
                                 </a>
                             </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center py-2" href="users.php">
+                                    <i class="fas fa-users me-3 text-info"></i>Kullanıcı Yönetimi
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center py-2" href="files.php">
+                                    <i class="fas fa-folder me-3 text-warning"></i>Dosya Yönetimi
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center py-2" href="settings.php">
+                                    <i class="fas fa-cog me-3 text-secondary"></i>Sistem Ayarları
+                                </a>
+                            </li>
+                            
+                            <li><hr class="dropdown-divider"></li>
+                            <li class="dropdown-header small text-uppercase text-muted">Güvenlik & Raporlar</li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center py-2" href="security-dashboard.php">
+                                    <i class="fas fa-shield-alt me-3 text-success"></i>Güvenlik Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center py-2" href="logs.php">
+                                    <i class="fas fa-clipboard-list me-3 text-dark"></i>Sistem Logları
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center py-2" href="analytics.php">
+                                    <i class="fas fa-chart-bar me-3 text-info"></i>Analitik Raporlar
+                                </a>
+                            </li>
+                            
+                            <li><hr class="dropdown-divider"></li>
+                            <li class="dropdown-header small text-uppercase text-muted">Hesap İşlemleri</li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center py-2" href="../user/profile.php">
+                                    <i class="fas fa-user me-3 text-primary"></i>Profil Ayarları
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center py-2" href="../user/">
+                                    <i class="fas fa-user-circle me-3 text-secondary"></i>Kullanıcı Paneli
+                                </a>
+                            </li>
+                            
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item text-danger" href="../logout.php">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Çıkış Yap
+                                <a class="dropdown-item d-flex align-items-center py-2 text-danger" href="../logout.php">
+                                    <i class="fas fa-sign-out-alt me-3"></i>Güvenli Çıkış
                                 </a>
                             </li>
                         </ul>
@@ -322,3 +587,87 @@ $cssPath = '../assets/css/style.css';
     <!-- Ana içerik başlangıcı -->
     <div class="container-fluid">
         <div class="row">
+
+<!-- Admin Dropdown JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tooltip'leri aktifleştir (eğer varsa)
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    if (typeof bootstrap !== 'undefined') {
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+    
+    // Dropdown animasyonları
+    const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+    dropdownToggles.forEach(toggle => {
+        toggle.addEventListener('show.bs.dropdown', function() {
+            this.style.transform = 'scale(1.05)';
+        });
+        
+        toggle.addEventListener('hide.bs.dropdown', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Bildirim işaretleme fonksiyonları
+    window.markNotificationRead = function(notificationId) {
+        // Gerçek sistemde AJAX ile sunucuya gönderilecek
+        console.log('Bildirim okundu işaretlendi: ' + notificationId);
+    };
+    
+    window.markAllNotificationsRead = function() {
+        // Tüm bildirimleri okundu işaretle
+        const unreadItems = document.querySelectorAll('.dropdown-item.bg-light');
+        unreadItems.forEach(item => {
+            item.classList.remove('bg-light');
+        });
+        
+        // Bildirim sayısını sıfırla
+        const badge = document.querySelector('#adminNotificationDropdown .badge');
+        if (badge) {
+            badge.style.display = 'none';
+        }
+        
+        console.log('Tüm bildirimler okundu işaretlendi');
+        return false;
+    };
+    
+    // Dropdown hover efektleri
+    const dropdownItems = document.querySelectorAll('.dropdown-item');
+    dropdownItems.forEach(item => {
+        if (!item.classList.contains('py-3')) {
+            item.addEventListener('mouseenter', function() {
+                this.style.paddingLeft = '1.5rem';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.paddingLeft = '1rem';
+            });
+        }
+    });
+    
+    // Navbar responsive özellikler
+    const navbarToggler = document.querySelector('.navbar-toggler');
+    if (navbarToggler) {
+        navbarToggler.addEventListener('click', function() {
+            this.classList.toggle('active');
+        });
+    }
+});
+
+// Admin Dashboard fonksiyonları
+function refreshNotifications() {
+    // Gerçek sistemde AJAX ile sunucudan yeni bildirimler çekilecek
+    console.log('Bildirimler yenileniyor...');
+    
+    // Simulated notification refresh
+    setTimeout(() => {
+        console.log('Bildirimler yenilendi');
+    }, 1000);
+}
+
+// Auto-refresh notifications every 30 seconds
+setInterval(refreshNotifications, 30000);
+</script>
