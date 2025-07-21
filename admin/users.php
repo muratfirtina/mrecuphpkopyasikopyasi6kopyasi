@@ -169,11 +169,11 @@ $safeSortBy = $allowedSortFields[$sortBy];
 
 // Sayfalama
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$per_page = isset($_GET['per_page']) ? intval($_GET['per_page']) : 20;
+$per_page = isset($_GET['per_page']) ? intval($_GET['per_page']) : 25;
 // Geçerli per_page değerleri
 $allowed_per_page = [10, 20, 25, 50, 100];
 if (!in_array($per_page, $allowed_per_page)) {
-    $per_page = 20;
+    $per_page = 25;
 }
 $limit = $per_page;
 $offset = ($page - 1) * $limit;

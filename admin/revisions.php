@@ -161,11 +161,35 @@ $dateTo = isset($_GET['date_to']) ? sanitize($_GET['date_to']) : '';
 
 // Sayfalama
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$limit = 20;
+$per_page = isset($_GET['per_page']) ? max(10, min(100, intval($_GET['per_page']))) : 25; // 10-100 arası limit, default 20
+$limit = $per_page; // Backward compatibility
+
+// Pagination URL builder fonksiyonu  
+function buildPaginationUrl($pageNum, $search = '', $status = '', $dateFrom = '', $dateTo = '', $per_page = 25) {
+    $params = array(
+        'page' => $pageNum,
+        'per_page' => $per_page
+    );
+    
+    if (!empty($search)) {
+        $params['search'] = $search;
+    }
+    if (!empty($status)) {
+        $params['status'] = $status;
+    }
+    if (!empty($dateFrom)) {
+        $params['date_from'] = $dateFrom;
+    }
+    if (!empty($dateTo)) {
+        $params['date_to'] = $dateTo;
+    }
+    
+    return 'revisions.php?' . http_build_query($params);
+}
 
 // Revize taleplerini getir (FileManager metodu ile)
 /** @var array $revisions Array of revision data */
-$revisions = $fileManager->getAllRevisions($page, $limit, $status, $dateFrom, $dateTo, $search);
+$revisions = $fileManager->getAllRevisions($page, $per_page, $status, $dateFrom, $dateTo, $search);
 
 // Toplam revize sayısı için ayrı sorgu
 try {
@@ -199,7 +223,7 @@ try {
     $stmt = $pdo->prepare($countQuery);
     $stmt->execute($countParams);
     $totalRevisions = $stmt->fetchColumn();
-    $totalPages = ceil($totalRevisions / $limit);
+    $totalPages = ceil($totalRevisions / $per_page);
     
 } catch(PDOException $e) {
     $totalRevisions = count($revisions);
@@ -342,7 +366,7 @@ include '../includes/admin_sidebar.php';
     </div>
 </div>
 
-<!-- Filtre -->
+<!-- Filtre ve Arama -->
 <div class="card admin-card mb-4">
     <div class="card-body">
         <form method="GET" class="row g-3 align-items-end">
@@ -378,7 +402,7 @@ include '../includes/admin_sidebar.php';
                        value="<?php echo htmlspecialchars($dateTo); ?>">
             </div>
             
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-search me-1"></i>Filtrele
@@ -386,6 +410,31 @@ include '../includes/admin_sidebar.php';
                     <a href="revisions.php" class="btn btn-outline-secondary">
                         <i class="fas fa-undo me-1"></i>Temizle
                     </a>
+                </div>
+            </div>
+
+            <!-- Per Page Seçimi -->
+            <div class="col-md-12">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center gap-2">
+                            <label for="per_page" class="form-label mb-0 fw-bold">
+                                <i class="fas fa-list me-1 text-primary"></i>Sayfa başına:
+                            </label>
+                            <select class="form-select form-select-sm px-3 py-2" id="per_page" name="per_page" style="width: 120px; border: 2px solid #e9ecef;" onchange="this.form.submit()">
+                                <option value="10" <?php echo $per_page === 10 ? 'selected' : ''; ?>>10 kayıt</option>
+                                <option value="25" <?php echo $per_page === 25 ? 'selected' : ''; ?>>25 kayıt</option>
+                                <option value="50" <?php echo $per_page === 50 ? 'selected' : ''; ?>>50 kayıt</option>
+                                <option value="100" <?php echo $per_page === 100 ? 'selected' : ''; ?>>100 kayıt</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <span class="badge bg-light text-dark px-3 py-2">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Toplam <?php echo number_format($totalRevisions); ?> kayıt bulundu
+                        </span>
+                    </div>
                 </div>
             </div>
         </form>
@@ -588,22 +637,171 @@ include '../includes/admin_sidebar.php';
                 </table>
             </div>
             
-            <!-- Sayfalama -->
-            <?php if ($totalPages > 1): ?>
-                <div class="card-footer">
-                    <nav aria-label="Sayfalama">
-                        <ul class="pagination justify-content-center mb-0">
-                            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                                <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                    <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&date_from=<?php echo urlencode($dateFrom); ?>&date_to=<?php echo urlencode($dateTo); ?>">
-                                        <?php echo $i; ?>
+            <!-- Advanced Pagination Navigation -->
+            <div class="pagination-wrapper bg-light border-top p-4">
+                <!-- Sayfa Bilgileri ve Kontroller -->
+                <div class="row align-items-center">
+                    <!-- Sol taraf - Bilgi ve Hızlı Atlama -->
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <div class="row align-items-center g-3">
+                            <div class="col-auto">
+                                <div class="pagination-info">
+                                    <span class="badge bg-primary fs-6 px-3 py-2">
+                                        <i class="fas fa-list-ol me-2"></i>
+                                        <?php 
+                                        $offset = ($page - 1) * $per_page;
+                                        $start = $offset + 1;
+                                        $end = min($offset + $per_page, $totalRevisions);
+                                        echo "$start - $end / " . number_format($totalRevisions);
+                                        ?>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Hızlı Sayfa Atlama -->
+                            <?php if ($totalPages > 5): ?>
+                            <div class="col-auto">
+                                <div class="quick-jump-container">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="fas fa-search text-muted"></i>
+                                        </span>
+                                        <input type="number" class="form-control border-start-0" 
+                                               id="quickJump" 
+                                               min="1" 
+                                               max="<?php echo $totalPages; ?>" 
+                                               value="<?php echo $page; ?>"
+                                               placeholder="Sayfa"
+                                               style="width: 80px;"
+                                               onkeypress="if(event.key==='Enter') quickJumpToPage()"
+                                               title="Sayfa numarası girin ve Enter'a basın">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                onclick="quickJumpToPage()" 
+                                                title="Sayfaya git">
+                                            <i class="fas fa-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">/ <?php echo $totalPages; ?> sayfa</small>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
+                    <!-- Sağ taraf - Pagination Kontrolleri -->
+                    <div class="col-md-6">
+                        <nav aria-label="Sayfa navigasyonu" class="d-flex justify-content-md-end justify-content-center">
+                            <ul class="pagination pagination-lg mb-0 shadow-sm">
+                                <!-- İlk Sayfa -->
+                                <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                                    <a class="page-link rounded-start" 
+                                       href="<?php echo $page > 1 ? buildPaginationUrl(1, $search, $status, $dateFrom, $dateTo, $per_page) : '#'; ?>" 
+                                       title="İlk Sayfa" 
+                                       <?php echo $page <= 1 ? 'tabindex="-1"' : ''; ?>>
+                                        <i class="fas fa-angle-double-left"></i>
+                                        <span class="d-none d-sm-inline ms-1">İlk</span>
                                     </a>
                                 </li>
-                            <?php endfor; ?>
-                        </ul>
-                    </nav>
+                                
+                                <!-- Önceki Sayfa -->
+                                <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                                    <a class="page-link" 
+                                       href="<?php echo $page > 1 ? buildPaginationUrl($page - 1, $search, $status, $dateFrom, $dateTo, $per_page) : '#'; ?>" 
+                                       title="Önceki Sayfa"
+                                       <?php echo $page <= 1 ? 'tabindex="-1"' : ''; ?>>
+                                        <i class="fas fa-angle-left"></i>
+                                        <span class="d-none d-sm-inline ms-1">Önceki</span>
+                                    </a>
+                                </li>
+                                
+                                <!-- Sayfa Numaraları -->
+                                <?php
+                                $start_page = max(1, $page - 2);
+                                $end_page = min($totalPages, $page + 2);
+                                
+                                // Mobilde daha az sayfa göster
+                                if ($totalPages > 7) {
+                                    $start_page = max(1, $page - 1);
+                                    $end_page = min($totalPages, $page + 1);
+                                }
+                                
+                                // İlk sayfa elipsisi
+                                if ($start_page > 1): ?>
+                                    <li class="page-item">
+                                        <a class="page-link" href="<?php echo buildPaginationUrl(1, $search, $status, $dateFrom, $dateTo, $per_page); ?>">1</a>
+                                    </li>
+                                    <?php if ($start_page > 2): ?>
+                                        <li class="page-item disabled d-none d-md-block">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                                
+                                <!-- Sayfa numaraları -->
+                                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                                    <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                                        <a class="page-link <?php echo $i === $page ? 'bg-primary border-primary' : ''; ?>" 
+                                           href="<?php echo buildPaginationUrl($i, $search, $status, $dateFrom, $dateTo, $per_page); ?>">
+                                            <?php echo $i; ?>
+                                        </a>
+                                    </li>
+                                <?php endfor; ?>
+                                
+                                <!-- Son sayfa elipsisi -->
+                                <?php if ($end_page < $totalPages): ?>
+                                    <?php if ($end_page < $totalPages - 1): ?>
+                                        <li class="page-item disabled d-none d-md-block">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    <?php endif; ?>
+                                    <li class="page-item">
+                                        <a class="page-link" href="<?php echo buildPaginationUrl($totalPages, $search, $status, $dateFrom, $dateTo, $per_page); ?>"><?php echo $totalPages; ?></a>
+                                    </li>
+                                <?php endif; ?>
+                                
+                                <!-- Sonraki Sayfa -->
+                                <li class="page-item <?php echo $page >= $totalPages ? 'disabled' : ''; ?>">
+                                    <a class="page-link" 
+                                       href="<?php echo $page < $totalPages ? buildPaginationUrl($page + 1, $search, $status, $dateFrom, $dateTo, $per_page) : '#'; ?>" 
+                                       title="Sonraki Sayfa"
+                                       <?php echo $page >= $totalPages ? 'tabindex="-1"' : ''; ?>>
+                                        <span class="d-none d-sm-inline me-1">Sonraki</span>
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                
+                                <!-- Son Sayfa -->
+                                <li class="page-item <?php echo $page >= $totalPages ? 'disabled' : ''; ?>">
+                                    <a class="page-link rounded-end" 
+                                       href="<?php echo $page < $totalPages ? buildPaginationUrl($totalPages, $search, $status, $dateFrom, $dateTo, $per_page) : '#'; ?>" 
+                                       title="Son Sayfa"
+                                       <?php echo $page >= $totalPages ? 'tabindex="-1"' : ''; ?>>
+                                        <span class="d-none d-sm-inline me-1">Son</span>
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
-            <?php endif; ?>
+                
+                <!-- Alt bilgi çubuğu -->
+                <div class="row mt-3 pt-3 border-top">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Sayfa <strong><?php echo $page; ?></strong> / <strong><?php echo $totalPages; ?></strong> - 
+                            Sayfa başına <strong><?php echo $per_page; ?></strong> kayıt gösteriliyor
+                        </small>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <small class="text-muted">
+                            <i class="fas fa-database me-1"></i>
+                            Toplam <strong><?php echo number_format($totalRevisions); ?></strong> revize talebi bulundu
+                        </small>
+                    </div>
+                </div>
+            </div>
         <?php endif; ?>
     </div>
 </div>
@@ -694,6 +892,23 @@ include '../includes/admin_sidebar.php';
 <?php
 // Sayfa özel JavaScript
 $pageJS = "
+// Hızlı sayfa atlama fonksiyonu
+function quickJumpToPage() {
+    const pageInput = document.getElementById('quickJump');
+    const targetPage = parseInt(pageInput.value);
+    const maxPage = parseInt(pageInput.getAttribute('max'));
+    
+    if (targetPage && targetPage >= 1 && targetPage <= maxPage) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('page', targetPage);
+        
+        window.location.href = '?' + urlParams.toString();
+    } else {
+        alert('Lütfen 1 ile ' + maxPage + ' arasında geçerli bir sayfa numarası girin.');
+        pageInput.focus();
+    }
+}
+
 // Global değişken - beforeunload'u geçici olarak devre dışı bırakmak için
 let allowPageUnload = false;
 
