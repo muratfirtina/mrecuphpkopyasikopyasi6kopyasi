@@ -17,6 +17,26 @@ if (!function_exists('generateUUID')) {
     }
 }
 
+// String sanitization fonksiyonu
+if (!function_exists('sanitize')) {
+    function sanitize($str) {
+        return trim(htmlspecialchars(strip_tags($str), ENT_QUOTES, 'UTF-8'));
+    }
+}
+
+// Session kontrol fonksiyonları
+if (!function_exists('isLoggedIn')) {
+    function isLoggedIn() {
+        return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+    }
+}
+
+if (!function_exists('isAdmin')) {
+    function isAdmin() {
+        return isLoggedIn() && isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+    }
+}
+
 // UUID doğrulama fonksiyonu
 if (!function_exists('isValidUUID')) {
     function isValidUUID($uuid) {

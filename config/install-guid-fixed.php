@@ -104,7 +104,7 @@ try {
         user_id CHAR(36) NOT NULL,
         brand_id CHAR(36) NULL,
         model_id CHAR(36) NULL,
-        original_filename VARCHAR(255) NOT NULL,
+        original_name VARCHAR(255) NOT NULL,
         filename VARCHAR(255) NOT NULL,
         file_size BIGINT NOT NULL,
         file_path VARCHAR(500) NULL,
@@ -137,7 +137,7 @@ try {
         upload_id CHAR(36) NOT NULL,
         admin_id CHAR(36) NOT NULL,
         filename VARCHAR(255) NOT NULL,
-        original_filename VARCHAR(255) NOT NULL,
+        original_name VARCHAR(255) NOT NULL,
         file_size BIGINT NOT NULL,
         file_path VARCHAR(500) NULL,
         credits_charged DECIMAL(10,2) NOT NULL DEFAULT 0.00,
@@ -268,7 +268,7 @@ try {
     echo "<div class='step'><strong>14. Test dosyası oluşturuluyor...</strong><br>";
     $uploadId = bin2hex(random_bytes(4)) . '-' . bin2hex(random_bytes(2)) . '-4' . bin2hex(random_bytes(2)) . '-' . bin2hex(random_bytes(2)) . '-' . bin2hex(random_bytes(6));
     $stmt = $pdo->prepare("
-        INSERT INTO file_uploads (id, user_id, brand_id, original_filename, filename, file_size, status, notes) 
+        INSERT INTO file_uploads (id, user_id, brand_id, original_name, filename, file_size, status, notes) 
         VALUES (?, ?, ?, 'test_file.bin', 'test_file_stored.bin', 1024, 'completed', 'Test dosyası')
     ");
     $stmt->execute([$uploadId, $testUserId, $brandIds['Audi']]);

@@ -84,7 +84,7 @@ try {
     echo "<div class='success'>✅ file_uploads tablosunda $count kayıt var</div>";
     
     if ($count > 0) {
-        $stmt = $pdo->query("SELECT id, user_id, original_filename, status, upload_date FROM file_uploads ORDER BY upload_date DESC LIMIT 3");
+        $stmt = $pdo->query("SELECT id, user_id, original_name, status, upload_date FROM file_uploads ORDER BY upload_date DESC LIMIT 3");
         $files = $stmt->fetchAll();
         
         echo "<h4>Son yüklenen dosyalar:</h4>";
@@ -94,7 +94,7 @@ try {
             echo "<tr>";
             echo "<td>" . substr($file['id'], 0, 8) . "...</td>";
             echo "<td>" . substr($file['user_id'], 0, 8) . "...</td>";
-            echo "<td>{$file['original_filename']}</td>";
+            echo "<td>{$file['original_name']}</td>";
             echo "<td>{$file['status']}</td>";
             echo "<td>{$file['upload_date']}</td>";
             echo "</tr>";

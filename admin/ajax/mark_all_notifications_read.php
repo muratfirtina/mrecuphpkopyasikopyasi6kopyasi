@@ -4,8 +4,18 @@
  * Tüm Bildirimleri Okundu Olarak İşaretle
  */
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once '../../config/config.php';
 require_once '../../config/database.php';
+require_once '../../includes/functions.php';
+
+// NotificationManager'ı dahil et
+if (!class_exists('NotificationManager')) {
+    require_once '../../includes/NotificationManager.php';
+}
 
 // JSON response header
 header('Content-Type: application/json');
@@ -29,7 +39,18 @@ try {
     $notificationManager = new NotificationManager($pdo);
     $result = $notificationManager->markAllAsRead($userId);
     
-    if ($result) {
+    // Tüm statik bildirimleri de işaretlе
+    $staticNotifications = ['pending_files', 'pending_revisions', 'system_status', 'low_credits'];
+    
+    if (!isset($_SESSION['dismissed_static_notifications'])) {
+        $_SESSION['dismissed_static_notifications'] = [];
+    }
+    
+    foreach ($staticNotifications as $staticId) {
+        $_SESSION['dismissed_static_notifications'][$staticId] = time();
+    }
+    
+    if ($result || count($staticNotifications) > 0) {
         echo json_encode(['success' => true, 'message' => 'Tüm bildirimler okundu olarak işaretlendi.']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Bildirimler işaretlenemedi.']);

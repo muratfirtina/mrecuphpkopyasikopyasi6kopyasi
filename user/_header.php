@@ -110,6 +110,11 @@ if (isset($_SESSION['user_id'])) {
                 <!-- Gelişmiş Bildirim Sistemi -->
                 <?php
                 try {
+                    // NotificationManager'ı dahil et
+                    if (!class_exists('NotificationManager')) {
+                        require_once __DIR__ . '/../includes/NotificationManager.php';
+                    }
+                    
                     // Kullanıcının bekleyen revize talepleri
                     $stmt = $pdo->prepare("SELECT COUNT(*) FROM revisions WHERE user_id = ? AND status = 'pending'");
                     $stmt->execute([$_SESSION['user_id']]);
@@ -126,10 +131,11 @@ if (isset($_SESSION['user_id'])) {
                     
                     if (isset($_SESSION['user_id'])) {
                         $notificationManager = new NotificationManager($pdo);
-                        $userNotifications = $notificationManager->getUserNotifications($_SESSION['user_id'], 5, true);
+                        $userNotifications = $notificationManager->getUserNotifications($_SESSION['user_id'], 5, false);
                         $unreadNotificationCount = $notificationManager->getUnreadCount($_SESSION['user_id']);
                     }
-                } catch(PDOException $e) {
+                } catch(Exception $e) {
+                    error_log('User notification error: ' . $e->getMessage());
                     $pendingUserRevisions = 0;
                     $completedFiles = 0;
                     $userNotifications = [];

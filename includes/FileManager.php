@@ -385,6 +385,19 @@ class FileManager {
             ]);
             
             if ($result) {
+                // Bildirim sistemi entegrasyonu
+                try {
+                    if (!class_exists('NotificationManager')) {
+                        require_once __DIR__ . '/NotificationManager.php';
+                    }
+                    
+                    $notificationManager = new NotificationManager($this->pdo);
+                    $notificationManager->notifyFileUpload($uploadId, $userId, $fileData['name'], $vehicleData);
+                } catch(Exception $e) {
+                    error_log('Notification send error after file upload: ' . $e->getMessage());
+                    // Bildirim hatası dosya yükleme işlemini etkilemesin
+                }
+                
                 return [
                     'success' => true, 
                     'message' => 'Dosya başarıyla yüklendi! Admin ekibimiz en kısa sürede inceleyecektir.',
@@ -454,6 +467,19 @@ class FileManager {
             $result = $stmt->execute([$revisionId, $uploadId, $userId, $revisionNotes]);
             
             if ($result) {
+                // Bildirim sistemi entegrasyonu
+                try {
+                    if (!class_exists('NotificationManager')) {
+                        require_once __DIR__ . '/NotificationManager.php';
+                    }
+                    
+                    $notificationManager = new NotificationManager($this->pdo);
+                    $notificationManager->notifyRevisionRequest($revisionId, $userId, $uploadId, $upload['original_name'], $revisionNotes);
+                } catch(Exception $e) {
+                    error_log('Notification send error after revision request: ' . $e->getMessage());
+                    // Bildirim hatası revize talep işlemini etkilemesin
+                }
+                
                 return ['success' => true, 'message' => 'Revize talebi başarıyla gönderildi. Admin ekibimiz en kısa sürede inceleyecektir.'];
             } else {
                 return ['success' => false, 'message' => 'Revize talebi oluşturulurken hata oluştu.'];
@@ -966,86 +992,7 @@ class FileManager {
         }
     }
     
-    // Revize durumunu güncelle
-    public function updateRevisionStatus($revisionId, $adminId, $status, $adminNotes = '', $creditsCharged = 0) {
-        try {
-            if (!isValidUUID($revisionId) || !isValidUUID($adminId)) {
-                return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
-            }
-            
-            // Revize talebini getir
-            $stmt = $this->pdo->prepare("SELECT * FROM revisions WHERE id = ?");
-            $stmt->execute([$revisionId]);
-            $revision = $stmt->fetch();
-            
-            if (!$revision) {
-                return ['success' => false, 'message' => 'Revize talebi bulunamadı.'];
-            }
-            
-            // Revize durumunu güncelle - SQL'i düzelt
-            $updateFields = [];
-            $updateParams = [];
-            
-            $updateFields[] = "status = ?";
-            $updateParams[] = $status;
-            
-            $updateFields[] = "admin_id = ?";
-            $updateParams[] = $adminId;
-            
-            if ($adminNotes) {
-                $updateFields[] = "admin_notes = ?";
-                $updateParams[] = $adminNotes;
-            }
-            
-            if ($creditsCharged > 0) {
-                $updateFields[] = "credits_charged = ?";
-                $updateParams[] = $creditsCharged;
-            }
-            
-            if ($status === 'completed') {
-                $updateFields[] = "completed_at = NOW()";
-            }
-            
-            $updateFields[] = "updated_at = NOW()";
-            
-            // WHERE koşulu için revisionId'yi en sona ekle
-            $updateParams[] = $revisionId;
-            
-            $updateQuery = "UPDATE revisions SET " . implode(", ", $updateFields) . " WHERE id = ?";
-            
-            error_log("UpdateRevisionStatus SQL: " . $updateQuery);
-            error_log("UpdateRevisionStatus Params: " . print_r($updateParams, true));
-            
-            $stmt = $this->pdo->prepare($updateQuery);
-            $result = $stmt->execute($updateParams);
-            
-            if ($result) {
-                // Eğer kredi düşürülecekse ve status in_progress ise krediyi düşür
-                if ($creditsCharged > 0 && $status === 'in_progress') {
-                    $userClass = new User($this->pdo);
-                    $creditResult = $userClass->deductCredits($revision['user_id'], $creditsCharged, "Revize talebi için kredi düşüldü: " . $revisionId);
-                    
-                    if (!$creditResult['success']) {
-                        // Kredi düşürülemezse revize durumunu geri al
-                        $stmt = $this->pdo->prepare("UPDATE revisions SET status = 'pending', admin_id = NULL, admin_notes = NULL, credits_charged = 0 WHERE id = ?");
-                        $stmt->execute([$revisionId]);
-                        
-                        return ['success' => false, 'message' => 'Kredi düşürülemedi: ' . $creditResult['message']];
-                    }
-                }
-                
-                return ['success' => true, 'message' => 'Revize durumu başarıyla güncellendi.'];
-            } else {
-                return ['success' => false, 'message' => 'Revize durumu güncellenemedi.'];
-            }
-            
-        } catch(PDOException $e) {
-            error_log('updateRevisionStatus error: ' . $e->getMessage());
-            error_log('updateRevisionStatus SQL: ' . ($updateQuery ?? 'Query not set'));
-            error_log('updateRevisionStatus Params: ' . print_r($updateParams ?? [], true));
-            return ['success' => false, 'message' => 'Veritabanı hatası oluştu: ' . $e->getMessage()];
-        }
-    }
+
     
     // Yanıt dosyası yükleme metodu
     public function uploadResponseFile($uploadId, $file, $creditsCharged = 0, $responseNotes = '') {
@@ -1155,49 +1102,7 @@ class FileManager {
         }
     }
     
-    // Dosya upload durumunu güncelle - Tablo yapısına uygun
-    public function updateUploadStatus($uploadId, $status, $adminNotes = '') {
-        try {
-            if (!isValidUUID($uploadId)) {
-                error_log('updateUploadStatus: Geçersiz UUID - ' . $uploadId);
-                return false;
-            }
-            
-            // İlk olarak mevcut durumu kontrol et
-            $currentStmt = $this->pdo->prepare("SELECT status FROM file_uploads WHERE id = ?");
-            $currentStmt->execute([$uploadId]);
-            $currentData = $currentStmt->fetch();
-            
-            if (!$currentData) {
-                error_log('updateUploadStatus: Dosya bulunamadı - ' . $uploadId);
-                return false;
-            }
-            
-            error_log('updateUploadStatus: Mevcut durum: ' . $currentData['status'] . ' -> Yeni durum: ' . $status);
-            
-            // Tablo yapısına uygun güncelleme (updated_at yok)
-            $stmt = $this->pdo->prepare("
-                UPDATE file_uploads 
-                SET status = ?, admin_notes = ?
-                WHERE id = ?
-            ");
-            
-            $result = $stmt->execute([$status, $adminNotes, $uploadId]);
-            
-            if ($result) {
-                error_log('updateUploadStatus: Başarılı - ' . $uploadId . ' durumu ' . $status . ' olarak güncellendi');
-            } else {
-                error_log('updateUploadStatus: Başarısız - ' . $uploadId . ' durum güncellenemedi');
-            }
-            
-            return $result;
-            
-        } catch (PDOException $e) {
-            error_log('updateUploadStatus error: ' . $e->getMessage());
-            error_log('updateUploadStatus SQL error code: ' . $e->getCode());
-            return false;
-        }
-    }
+
     
     // ============ REVİZYON DOSYASI YÖNETİMİ ============
     
@@ -1556,5 +1461,158 @@ class FileManager {
             ];
         }
     }
+    
+    /**
+     * Dosya upload durumunu güncelle (Bildirim Entegrasyonu ile)
+     * @param string $uploadId - Upload ID
+     * @param string $status - Yeni durum
+     * @param string $adminNotes - Admin notları
+     * @return bool - Başarı durumu
+     */
+    public function updateUploadStatus($uploadId, $status, $adminNotes = '') {
+        try {
+            if (!isValidUUID($uploadId)) {
+                error_log('updateUploadStatus: Geçersiz UUID - ' . $uploadId);
+                return false;
+            }
+            
+            // Önce dosyayı al
+            $upload = $this->getUploadById($uploadId);
+            if (!$upload) {
+                error_log('updateUploadStatus: Dosya bulunamadı - ' . $uploadId);
+                return false;
+            }
+            
+            // Durumu güncelle
+            $stmt = $this->pdo->prepare("
+                UPDATE file_uploads 
+                SET status = ?, admin_notes = ?
+                WHERE id = ?
+            ");
+            
+            $result = $stmt->execute([$status, $adminNotes, $uploadId]);
+            
+            if ($result) {
+                // Bildirim sistemi entegrasyonu
+                try {
+                    if (!class_exists('NotificationManager')) {
+                        require_once __DIR__ . '/NotificationManager.php';
+                    }
+                    
+                    $notificationManager = new NotificationManager($this->pdo);
+                    $notificationManager->notifyFileStatusUpdate($uploadId, $upload['user_id'], $upload['original_name'], $status, $adminNotes);
+                } catch(Exception $e) {
+                    error_log('Notification send error after status update: ' . $e->getMessage());
+                    // Bildirim hatası durum güncelleme işlemini etkilemesin
+                }
+                
+                error_log('updateUploadStatus: Başarılı - ' . $uploadId . ' durumu ' . $status . ' olarak güncellendi');
+                return true;
+            } else {
+                error_log('updateUploadStatus: Başarısız - ' . $uploadId . ' durum güncellenemedi');
+                return false;
+            }
+            
+        } catch(PDOException $e) {
+            error_log('updateUploadStatus error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Revizyon durumunu güncelle (Bildirim Entegrasyonu ile)
+     * @param string $revisionId - Revizyon ID
+     * @param string $adminId - Admin kullanıcı ID
+     * @param string $status - Yeni durum
+     * @param string $adminNotes - Admin notları
+     * @param float $creditsCharged - Düşürülecek kredi miktarı
+     * @return array - Başarı durumu ve mesaj
+     */
+    public function updateRevisionStatus($revisionId, $adminId, $status, $adminNotes = '', $creditsCharged = 0) {
+        try {
+            if (!isValidUUID($revisionId) || !isValidUUID($adminId)) {
+                return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
+            }
+            
+            // Revize talebini getir
+            $stmt = $this->pdo->prepare("SELECT * FROM revisions WHERE id = ?");
+            $stmt->execute([$revisionId]);
+            $revision = $stmt->fetch();
+            
+            if (!$revision) {
+                return ['success' => false, 'message' => 'Revize talebi bulunamadı.'];
+            }
+            
+            // Revize durumunu güncelle
+            $updateFields = [];
+            $updateParams = [];
+            
+            $updateFields[] = "status = ?";
+            $updateParams[] = $status;
+            
+            $updateFields[] = "admin_id = ?";
+            $updateParams[] = $adminId;
+            
+            if ($adminNotes) {
+                $updateFields[] = "admin_notes = ?";
+                $updateParams[] = $adminNotes;
+            }
+            
+            if ($creditsCharged > 0) {
+                $updateFields[] = "credits_charged = ?";
+                $updateParams[] = $creditsCharged;
+            }
+            
+            if ($status === 'completed') {
+                $updateFields[] = "completed_at = NOW()";
+            }
+            
+            // WHERE koşulu için revisionId'yi en sona ekle
+            $updateParams[] = $revisionId;
+            
+            $updateQuery = "UPDATE revisions SET " . implode(", ", $updateFields) . " WHERE id = ?";
+            
+            $stmt = $this->pdo->prepare($updateQuery);
+            $result = $stmt->execute($updateParams);
+            
+            if ($result) {
+                // Eğer kredi düşürülecekse ve status in_progress ise krediyi düşür
+                if ($creditsCharged > 0 && $status === 'in_progress') {
+                    $userClass = new User($this->pdo);
+                    $creditResult = $userClass->deductCredits($revision['user_id'], $creditsCharged, "Revize talebi için kredi düşüldü: " . $revisionId);
+                    
+                    if (!$creditResult['success']) {
+                        // Kredi düşürülemezse revize durumunu geri al
+                        $stmt = $this->pdo->prepare("UPDATE revisions SET status = 'pending', admin_id = NULL, admin_notes = NULL, credits_charged = 0 WHERE id = ?");
+                        $stmt->execute([$revisionId]);
+                        
+                        return ['success' => false, 'message' => 'Kredi düşürülemedi: ' . $creditResult['message']];
+                    }
+                }
+                
+                // Bildirim sistemi entegrasyonu
+                try {
+                    if (!class_exists('NotificationManager')) {
+                        require_once __DIR__ . '/NotificationManager.php';
+                    }
+                    
+                    $notificationManager = new NotificationManager($this->pdo);
+                    $notificationManager->notifyRevisionResponse($revisionId, $revision['user_id'], $revision['upload_id'], $status, $adminNotes);
+                } catch(Exception $e) {
+                    error_log('Notification send error after revision status update: ' . $e->getMessage());
+                    // Bildirim hatası revizyon güncelleme işlemini etkilemesin
+                }
+                
+                return ['success' => true, 'message' => 'Revize durumu başarıyla güncellendi.'];
+            } else {
+                return ['success' => false, 'message' => 'Revize durumu güncellenemedi.'];
+            }
+            
+        } catch(PDOException $e) {
+            error_log('updateRevisionStatus error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Veritabanı hatası oluştu: ' . $e->getMessage()];
+        }
+    }
+    
 }
 ?>

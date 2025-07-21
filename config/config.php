@@ -391,18 +391,33 @@ function includeSecurityScript() {
     }
 }
 
+// UUID doğrulama fonksiyonu
+if (!function_exists('isValidUUID')) {
+    function isValidUUID($uuid) {
+        if (!is_string($uuid) || empty($uuid)) {
+            return false;
+        }
+        
+        // UUID v4 format pattern: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+        $pattern = '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i';
+        return preg_match($pattern, $uuid) === 1;
+    }
+}
+
 // Dosya boyutu formatlama fonksiyonu
-function formatFileSize($bytes) {
-    if ($bytes === 0 || $bytes === null) return '0 B';
-    
-    $bytes = (float) $bytes;
-    if ($bytes <= 0) return '0 B';
-    
-    $k = 1024;
-    $sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    $i = floor(log($bytes) / log($k));
-    
-    return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
+if (!function_exists('formatFileSize')) {
+    function formatFileSize($bytes) {
+        if ($bytes === 0 || $bytes === null) return '0 B';
+        
+        $bytes = (float) $bytes;
+        if ($bytes <= 0) return '0 B';
+        
+        $k = 1024;
+        $sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $i = floor(log($bytes) / log($k));
+        
+        return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
+    }
 }
 
 // Güvenli number_format fonksiyonu (PHP 8.0+ null value fix)

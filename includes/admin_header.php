@@ -360,6 +360,43 @@ $cssPath = '../assets/css/style.css';
         .navbar-toggler:focus {
             box-shadow: none;
         }
+        
+        /* Bildirim Animasyonları */
+        .dropdown-item.py-3 {
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-item.py-3:hover {
+            background-color: #f8f9fa !important;
+        }
+        
+        /* Okundu işaretleme animasyonu */
+        .notification-read {
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .notification-unread {
+            opacity: 1;
+            font-weight: 500;
+        }
+        
+        /* Badge pulse animasyonu */
+        .badge-notification {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
     </style>
     
     <!-- Ek CSS dosyaları için -->
@@ -401,23 +438,84 @@ $cssPath = '../assets/css/style.css';
                 </ul>
                 
                 <!-- Kullanıcı Menüsü -->
-                <ul class="navbar-nav">
+                <ul class="navbar-nav" style="align-items: center;">
                     <!-- Gelişmiş Bildirim Sistemi -->
                     <?php
-                    // Admin bildirimleri için basit veriler (gerçek sistemde veritabanından gelecek)
-                    $adminNotifications = [
-                        ['type' => 'user_registration', 'title' => 'Yeni Kullanıcı Kaydı', 'message' => 'Yeni bir kullanıcı sisteme kayıt oldu', 'time' => '5 dakika önce', 'read' => false],
-                        ['type' => 'file_upload', 'title' => 'Bekleyen Dosya', 'message' => '3 dosya onay bekliyor', 'time' => '15 dakika önce', 'read' => false],
-                        ['type' => 'system_warning', 'title' => 'Sistem Uyarısı', 'message' => 'Disk kullanımı %85 seviyesinde', 'time' => '1 saat önce', 'read' => true]
-                    ];
-                    $unreadCount = array_reduce($adminNotifications, function($count, $notif) { return $count + (!$notif['read'] ? 1 : 0); }, 0);
+                    try {
+                        // NotificationManager'ı dahil et
+                        if (!class_exists('NotificationManager')) {
+                            require_once __DIR__ . '/../includes/NotificationManager.php';
+                        }
+                        
+                        // Admin bildirimleri için gerçek veriler
+                        $adminNotifications = [];
+                        $unreadCount = 0;
+                        
+                        if (isset($_SESSION['user_id']) && isAdmin()) {
+                            $notificationManager = new NotificationManager($pdo);
+                            
+                            // Tüm admin kullanıcılarını al
+                            $stmt = $pdo->prepare("SELECT id FROM users WHERE role = 'admin' AND status = 'active'");
+                            $stmt->execute();
+                            $adminUsers = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                            
+                            // Mevcut admin için bildirimleri al
+                            if (in_array($_SESSION['user_id'], $adminUsers)) {
+                                $adminNotifications = $notificationManager->getUserNotifications($_SESSION['user_id'], 5, false);
+                                $unreadCount = $notificationManager->getUnreadCount($_SESSION['user_id']);
+                            }
+                            
+                            // Ek admin-specific bildirimler
+                            // Bekleyen dosyalar
+                            $stmt = $pdo->prepare("SELECT COUNT(*) FROM file_uploads WHERE status = 'pending'");
+                            $stmt->execute();
+                            $pendingFiles = $stmt->fetchColumn();
+                            
+                            // Bekleyen revize talepleri
+                            $stmt = $pdo->prepare("SELECT COUNT(*) FROM revisions WHERE status = 'pending'");
+                            $stmt->execute();
+                            $pendingRevisions = $stmt->fetchColumn();
+                            
+                            // Eğer statik bildirimler de eklemek istiyorsak
+                            if (empty($adminNotifications)) {
+                                $adminNotifications = [];
+                                if ($pendingFiles > 0) {
+                                    $adminNotifications[] = [
+                                        'id' => 'pending_files',
+                                        'type' => 'file_upload',
+                                        'title' => 'Bekleyen Dosyalar',
+                                        'message' => $pendingFiles . ' dosya onay bekliyor',
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'is_read' => false,
+                                        'action_url' => 'uploads.php?status=pending'
+                                    ];
+                                }
+                                if ($pendingRevisions > 0) {
+                                    $adminNotifications[] = [
+                                        'id' => 'pending_revisions',
+                                        'type' => 'revision_request',
+                                        'title' => 'Bekleyen Revize Talepleri',
+                                        'message' => $pendingRevisions . ' revize talebi bekliyor',
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'is_read' => false,
+                                        'action_url' => 'revisions.php?status=pending'
+                                    ];
+                                }
+                                $unreadCount = $pendingFiles + $pendingRevisions;
+                            }
+                        }
+                    } catch(Exception $e) {
+                        error_log('Admin notification error: ' . $e->getMessage());
+                        $adminNotifications = [];
+                        $unreadCount = 0;
+                    }
                     ?>
                     
                     <li class="nav-item dropdown me-2">
                         <a class="nav-link position-relative p-2" href="#" id="adminNotificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-bell fa-lg text-white"></i>
                             <?php if ($unreadCount > 0): ?>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger badge-notification">
                                 <?php echo $unreadCount; ?>
                             </span>
                             <?php endif; ?>
@@ -431,7 +529,10 @@ $cssPath = '../assets/css/style.css';
                             
                             <?php foreach ($adminNotifications as $notification): ?>
                             <li>
-                                <a class="dropdown-item py-3 <?php echo $notification['read'] ? '' : 'bg-light'; ?>" href="#">
+                                <a class="dropdown-item py-3 <?php echo ($notification['is_read'] ?? false) ? '' : 'bg-light'; ?>" 
+                                   href="<?php echo htmlspecialchars($notification['action_url'] ?? '#'); ?>" 
+                                   onclick="markNotificationRead('<?php echo htmlspecialchars($notification['id']); ?>'); return true;" 
+                                   data-notification-id="<?php echo htmlspecialchars($notification['id']); ?>">
                                     <div class="d-flex align-items-start">
                                         <div class="me-3">
                                             <div class="<?php 
@@ -441,6 +542,9 @@ $cssPath = '../assets/css/style.css';
                                                         break;
                                                     case 'file_upload':
                                                         echo 'bg-warning bg-opacity-10 p-2 rounded-circle';
+                                                        break;
+                                                    case 'revision_request':
+                                                        echo 'bg-info bg-opacity-10 p-2 rounded-circle';
                                                         break;
                                                     case 'system_warning':
                                                         echo 'bg-danger bg-opacity-10 p-2 rounded-circle';
@@ -457,6 +561,9 @@ $cssPath = '../assets/css/style.css';
                                                         case 'file_upload':
                                                             echo 'fas fa-upload text-warning';
                                                             break;
+                                                        case 'revision_request':
+                                                            echo 'fas fa-edit text-info';
+                                                            break;
                                                         case 'system_warning':
                                                             echo 'fas fa-exclamation-triangle text-danger';
                                                             break;
@@ -468,13 +575,13 @@ $cssPath = '../assets/css/style.css';
                                         </div>
                                         <div class="flex-grow-1">
                                             <div class="fw-semibold"><?php echo htmlspecialchars($notification['title']); ?></div>
-                                            <div class="text-muted small"><?php echo htmlspecialchars($notification['message']); ?></div>
+                                            <div class="text-muted small"><?php echo htmlspecialchars(substr($notification['message'], 0, 100)); ?><?php echo strlen($notification['message']) > 100 ? '...' : ''; ?></div>
                                             <div class="text-muted small mt-1">
                                                 <i class="fas fa-clock me-1"></i>
-                                                <?php echo $notification['time']; ?>
+                                                <?php echo isset($notification['created_at']) ? date('d.m.Y H:i', strtotime($notification['created_at'])) : 'Yeni'; ?>
                                             </div>
                                         </div>
-                                        <?php if (!$notification['read']): ?>
+                                        <?php if (!($notification['is_read'] ?? false)): ?>
                                         <div class="ms-2">
                                             <span class="bg-primary rounded-circle" style="width: 8px; height: 8px; display: inline-block;"></span>
                                         </div>
@@ -487,7 +594,7 @@ $cssPath = '../assets/css/style.css';
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <div class="d-flex justify-content-between px-3 py-2">
-                                    <a href="#" class="btn btn-sm btn-outline-secondary">Tümünü Okundu İşaretle</a>
+                                    <a href="#" class="btn btn-sm btn-outline-secondary" onclick="markAllNotificationsRead(); return false;">Tümünü Okundu İşaretle</a>
                                     <a href="notifications.php" class="small text-muted">Tüm bildirimleri gör</a>
                                 </div>
                             </li>
@@ -613,26 +720,115 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Bildirim işaretleme fonksiyonları
     window.markNotificationRead = function(notificationId) {
-        // Gerçek sistemde AJAX ile sunucuya gönderilecek
-        console.log('Bildirim okundu işaretlendi: ' + notificationId);
+        // Bildirimi görsel olarak okundu olarak işaretle
+        const notificationElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
+        if (notificationElement) {
+            notificationElement.classList.remove('bg-light');
+            // Okunmamış işaret noktasını kaldır
+            const unreadDot = notificationElement.querySelector('.bg-primary.rounded-circle');
+            if (unreadDot) {
+                unreadDot.style.display = 'none';
+            }
+        }
+        
+        // AJAX ile bildirimi orundu olarak işaretle
+        fetch('ajax/mark_notification_read.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                notification_id: notificationId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Bildirim sayısını güncelle
+                updateNotificationBadge();
+            } else {
+                console.error('Bildirim okundu olarak işaretlenemedi:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error marking notification as read:', error);
+        });
     };
     
     window.markAllNotificationsRead = function() {
-        // Tüm bildirimleri okundu işaretle
-        const unreadItems = document.querySelectorAll('.dropdown-item.bg-light');
-        unreadItems.forEach(item => {
-            item.classList.remove('bg-light');
+        // Tüm bildirimleri görsel olarak okundu olarak işaretle
+        const unreadNotifications = document.querySelectorAll('.dropdown-item.bg-light');
+        unreadNotifications.forEach(notification => {
+            notification.classList.remove('bg-light');
+            // Okunmamış işaret noktalarını kaldır
+            const unreadDot = notification.querySelector('.bg-primary.rounded-circle');
+            if (unreadDot) {
+                unreadDot.style.display = 'none';
+            }
         });
         
-        // Bildirim sayısını sıfırla
+        // Badge'i sıfırla
         const badge = document.querySelector('#adminNotificationDropdown .badge');
         if (badge) {
             badge.style.display = 'none';
         }
         
-        console.log('Tüm bildirimler okundu işaretlendi');
+        // AJAX ile tüm bildirimleri okundu olarak işaretle
+        fetch('ajax/mark_all_notifications_read.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Tüm bildirimler okundu olarak işaretlendi');
+                // Bildirim sayısını güncelle
+                updateNotificationBadge();
+            } else {
+                console.error('Error marking all notifications as read:', data.message);
+                // Hata durumunda sayfayı yenile
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error marking all notifications as read:', error);
+            // Hata durumunda sayfayı yenile
+            location.reload();
+        });
         return false;
     };
+    
+    function updateNotificationBadge() {
+        // Okunmamış bildirim sayısını güncelle
+        fetch('ajax/get_notification_count.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const badge = document.querySelector('#adminNotificationDropdown .badge');
+                if (badge) {
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+                
+                // Dropdown header'daki sayıyı da güncelle
+                const headerBadge = document.querySelector('.dropdown-header .badge');
+                if (headerBadge) {
+                    headerBadge.textContent = data.count;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error updating notification badge:', error);
+        });
+    }
     
     // Dropdown hover efektleri
     const dropdownItems = document.querySelectorAll('.dropdown-item');
@@ -670,4 +866,7 @@ function refreshNotifications() {
 
 // Auto-refresh notifications every 30 seconds
 setInterval(refreshNotifications, 30000);
+
+// Auto-refresh admin notifications
+setInterval(updateNotificationBadge, 30000);
 </script>

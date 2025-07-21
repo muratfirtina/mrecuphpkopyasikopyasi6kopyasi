@@ -12,6 +12,93 @@ class NotificationManager {
     }
     
     /**
+     * Dosya yükleme durumu güncelle ve bildirim gönder
+     */
+    public function updateUploadStatus($uploadId, $status, $adminNotes = '') {
+        try {
+            // Dosya bilgilerini al
+            $stmt = $this->pdo->prepare("SELECT * FROM file_uploads WHERE id = ?");
+            $stmt->execute([$uploadId]);
+            $upload = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$upload) return false;
+            
+            // Dosya durumunu güncelle
+            $stmt = $this->pdo->prepare("
+                UPDATE file_uploads 
+                SET status = ?, admin_notes = ?, updated_at = NOW() 
+                WHERE id = ?
+            ");
+            $result = $stmt->execute([$status, $adminNotes, $uploadId]);
+            
+            if ($result) {
+                // Kullanıcıya bildirim gönder (original_name kolonu kullan)
+                $fileName = $upload['original_name'] ?? $upload['filename'] ?? 'Bilinmeyen dosya';
+                $this->notifyFileStatusUpdate(
+                    $uploadId, 
+                    $upload['user_id'], 
+                    $fileName, 
+                    $status, 
+                    $adminNotes
+                );
+                
+                return true;
+            }
+            
+            return false;
+        } catch(Exception $e) {
+            error_log('NotificationManager updateUploadStatus error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Revize durumu güncelle ve bildirim gönder
+     */
+    public function updateRevisionStatus($revisionId, $status, $adminResponse = '') {
+        try {
+            // Revize bilgilerini al
+            $stmt = $this->pdo->prepare("SELECT * FROM revisions WHERE id = ?");
+            $stmt->execute([$revisionId]);
+            $revision = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$revision) return false;
+            
+            // Revize durumunu güncelle
+            $stmt = $this->pdo->prepare("
+                UPDATE revisions 
+                SET status = ?, admin_response = ?, updated_at = NOW() 
+                WHERE id = ?
+            ");
+            $result = $stmt->execute([$status, $adminResponse, $revisionId]);
+            
+            if ($result) {
+                // Orijinal dosya bilgisini al
+                $stmt = $this->pdo->prepare("SELECT original_name, filename FROM file_uploads WHERE id = ?");
+                $stmt->execute([$revision['upload_id']]);
+                $upload = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                // Kullanıcıya bildirim gönder (original_name kolonu kullan)
+                $fileName = $upload['original_name'] ?? $upload['filename'] ?? 'Bilinmeyen dosya';
+                $this->notifyRevisionResponse(
+                    $revisionId, 
+                    $revision['user_id'], 
+                    $fileName, 
+                    $status, 
+                    $adminResponse
+                );
+                
+                return true;
+            }
+            
+            return false;
+        } catch(Exception $e) {
+            error_log('NotificationManager updateRevisionStatus error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
      * Bildirim oluştur
      */
     public function createNotification($userId, $type, $title, $message, $relatedId = null, $relatedType = null, $actionUrl = null) {
