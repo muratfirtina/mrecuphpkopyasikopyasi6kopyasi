@@ -148,6 +148,25 @@ $status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
 $sortBy = isset($_GET['sort']) ? sanitize($_GET['sort']) : 'created_at';
 $sortOrder = isset($_GET['order']) && $_GET['order'] === 'asc' ? 'ASC' : 'DESC';
 
+// Geçerli sıralama alanları (SQL Injection korunması)
+$allowedSortFields = [
+    'created_at' => 'created_at',
+    'username' => 'username',
+    'email' => 'email',
+    'credits' => 'credits',
+    'last_login' => 'last_login',
+    'first_name' => 'first_name',
+    'last_name' => 'last_name',
+    'role' => 'role',
+    'status' => 'status'
+];
+
+// Sıralama alanını kontrol et
+if (!isset($allowedSortFields[$sortBy])) {
+    $sortBy = 'created_at';
+}
+$safeSortBy = $allowedSortFields[$sortBy];
+
 // Sayfalama
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $per_page = isset($_GET['per_page']) ? intval($_GET['per_page']) : 20;
@@ -180,11 +199,27 @@ try {
         $params[] = $status === '1' ? 'active' : 'inactive';
     }
     
+    // DEBUG: Parametreleri kontrol et
+    // echo "<script>console.log('Debug: page=$page, per_page=$per_page, limit=$limit, offset=$offset');</script>";
+    // echo "<script>console.log('Debug: whereClause=$whereClause');</script>";
+    // echo "<script>console.log('Debug: sortBy=$sortBy, safeSortBy=$safeSortBy, sortOrder=$sortOrder');</script>";
+    // echo "<script>console.log('Debug params:', " . json_encode($params) . ");</script>";
+    
     // Toplam kullanıcı sayısı
     $countQuery = "SELECT COUNT(*) FROM users $whereClause";
     $stmt = $pdo->prepare($countQuery);
     $stmt->execute($params);
     $totalUsers = $stmt->fetchColumn();
+    
+    // DEBUG: Toplam kullanıcı sayısını kontrol et
+    // echo "<script>console.log('Debug: totalUsers=$totalUsers');</script>";
+    
+    // DEBUG: Veritabanında gerçekten kullanıcı var mı?
+    // $testQuery = "SELECT COUNT(*) FROM users";
+    // $testStmt = $pdo->prepare($testQuery);
+    // $testStmt->execute();
+    // $testTotalUsers = $testStmt->fetchColumn();
+    // echo "<script>console.log('Debug: Total users in DB (no filter)=$testTotalUsers');</script>";
     
     // Kullanıcıları getir
     $query = "
@@ -192,7 +227,7 @@ try {
                status, email_verified, created_at, last_login
         FROM users 
         $whereClause 
-        ORDER BY $sortBy $sortOrder 
+        ORDER BY $safeSortBy $sortOrder 
         LIMIT $limit OFFSET $offset
     ";
     
@@ -200,8 +235,18 @@ try {
     $stmt->execute($params);
     $users = $stmt->fetchAll();
     
+    // DEBUG: Kullanıcı sayısını kontrol et
+    // echo "<script>console.log('Debug: users count=', " . count($users) . ");</script>";
+    
     $totalPages = ceil($totalUsers / $limit);
+    
+    // DEBUG: Pagination bilgilerini kontrol et
+    // echo "<script>console.log('Debug: totalPages=$totalPages');</script>";
+    
 } catch(PDOException $e) {
+    // DEBUG: Hata mesajını göster
+    // echo "<script>console.log('Debug: PDO Error - " . addslashes($e->getMessage()) . "');</script>";
+    $error = 'Veritabanı hatası: ' . $e->getMessage();
     $users = [];
     $totalUsers = 0;
     $totalPages = 0;
@@ -231,7 +276,7 @@ $pageDescription = 'Sistem kullanıcılarını yönetin ve düzenleyin.';
 $pageIcon = 'fas fa-users';
 
 // Sidebar için istatistikler
-$totalUsers = $stats['total_users'];
+$totalUsersForSidebar = $stats['total_users'];
 $totalUploads = 0; // Bu değer başka bir yerden gelecek
 
 // Hızlı eylemler
@@ -400,6 +445,32 @@ include '../includes/admin_sidebar.php';
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
                         <i class="fas fa-plus me-1"></i>Yeni
                     </button>
+                </div>
+            </div>
+            
+            <!-- Per Page Seçimi -->
+            <div class="col-md-12">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center gap-2">
+                            <label for="per_page" class="form-label mb-0 fw-bold">
+                                <i class="fas fa-list me-1 text-primary"></i>Sayfa başına:
+                            </label>
+                            <select class="form-select form-select-sm px-3 py-2" id="per_page" name="per_page" style="width: 120px; border: 2px solid #e9ecef;" onchange="this.form.submit()">
+                                <option value="10" <?php echo $per_page === 10 ? 'selected' : ''; ?>>10 kayıt</option>
+                                <option value="20" <?php echo $per_page === 20 ? 'selected' : ''; ?>>20 kayıt</option>
+                                <option value="25" <?php echo $per_page === 25 ? 'selected' : ''; ?>>25 kayıt</option>
+                                <option value="50" <?php echo $per_page === 50 ? 'selected' : ''; ?>>50 kayıt</option>
+                                <option value="100" <?php echo $per_page === 100 ? 'selected' : ''; ?>>100 kayıt</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <span class="badge bg-light text-dark px-3 py-2">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Toplam <?php echo number_format($totalUsers); ?> kayıt bulundu
+                        </span>
+                    </div>
                 </div>
             </div>
         </form>
@@ -575,7 +646,6 @@ include '../includes/admin_sidebar.php';
             </div>
             
             <!-- Advanced Pagination Navigation -->
-            <?php if ($totalUsers > 0): ?>
                 <div class="pagination-wrapper bg-light border-top p-4">
                     <!-- Sayfa Bilgileri ve Kontroller -->
                     <div class="row align-items-center">
@@ -739,7 +809,6 @@ include '../includes/admin_sidebar.php';
                         </div>
                     </div>
                 </div>
-            <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>
