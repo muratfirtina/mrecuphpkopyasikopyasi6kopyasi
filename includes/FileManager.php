@@ -354,15 +354,15 @@ class FileManager {
             // UUID oluştur
             $uploadId = generateUUID();
             
-            // Veritabanına kaydet - Gerçek tablo yapısına uygun
+            // Veritabanına kaydet - file_path alanı eklendi
             $stmt = $this->pdo->prepare("
                 INSERT INTO file_uploads (
                     id, user_id, brand_id, model_id, year, plate, 
                     ecu_type, engine_code, gearbox_type, fuel_type, 
                     hp_power, nm_torque, original_name, filename, 
-                    file_size, status, upload_notes, upload_date,
+                    file_size, status, upload_notes, upload_date, file_path,
                     credits_charged, revision_count, notified
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, NOW(), 0, 0, 0)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, NOW(), ?, 0, 0, 0)
             ");
             
             $result = $stmt->execute([
@@ -381,7 +381,8 @@ class FileManager {
                 $fileData['name'],
                 $fileName,
                 $fileData['size'],
-                $notes
+                $notes,
+                $uploadPath
             ]);
             
             if ($result) {
