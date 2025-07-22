@@ -41,7 +41,7 @@ if (isset($_SESSION['user_id'])) {
             </div>
         </a>
         
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         
@@ -147,13 +147,13 @@ if (isset($_SESSION['user_id'])) {
                 
                 <?php if ($totalNotifications > 0): ?>
                 <li class="nav-item dropdown me-2">
-                    <a class="nav-link position-relative p-2" href="#" id="userNotificationDropdown" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link position-relative p-2" href="#" id="userNotificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-bell fa-lg text-white"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                             <?php echo $totalNotifications; ?>
                         </span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 350px; max-height: 400px; overflow-y: auto;">
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userNotificationDropdown">
                         <li class="dropdown-header d-flex justify-content-between align-items-center">
                             <span>Bildirimler</span>
                             <span class="badge bg-primary"><?php echo $totalNotifications; ?></span>
@@ -261,7 +261,7 @@ if (isset($_SESSION['user_id'])) {
                 
                 <!-- Kullanıcı Menüsü -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="user-avatar me-2">
                             <i class="fas fa-user-circle fa-lg"></i>
                         </div>
@@ -270,7 +270,7 @@ if (isset($_SESSION['user_id'])) {
                             <small class="d-block text-white-75">Kullanıcı</small>
                         </div>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 250px;">
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdown">
                         <li class="dropdown-header">
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-user-circle fa-2x text-muted me-2"></i>
@@ -514,6 +514,61 @@ if (isset($_SESSION['user_id'])) {
 .dropdown-menu {
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    z-index: 1050;
+    border: 1px solid rgba(0,0,0,0.1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    display: block !important; /* Bootstrap varsayılan display:none'ı ezeriz */
+}
+
+.dropdown-menu.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+}
+
+.dropdown-toggle::after {
+    transition: transform 0.3s ease;
+}
+
+.dropdown-toggle[aria-expanded="true"]::after {
+    transform: rotate(180deg);
+}
+
+/* Dropdown fade-in animasyonu */
+@keyframes dropdownFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-menu.show {
+    animation: dropdownFadeIn 0.3s ease forwards;
+}
+
+/* Bootstrap dropdown default behavior override */
+.dropdown-menu[data-bs-popper] {
+    left: auto !important;
+    right: 0 !important;
+}
+
+/* Notification dropdown özel stilleri */
+#userNotificationDropdown + .dropdown-menu {
+    min-width: 350px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* User menu dropdown özel stilleri */
+#navbarDropdown + .dropdown-menu {
+    min-width: 250px;
 }
 
 .dropdown-item:hover {
@@ -522,12 +577,41 @@ if (isset($_SESSION['user_id'])) {
     transition: all 0.2s ease;
 }
 
+.dropdown-item:active {
+    background-color: #e9ecef;
+}
+
+.dropdown-item.bg-light {
+    background-color: #f8f9fa !important;
+}
+
 .dropdown-header {
     font-weight: 600;
 }
 
 .navbar-toggler:focus {
     box-shadow: none;
+}
+
+/* Dropdown responsive düzenlemeler */
+@media (max-width: 991.98px) {
+    .dropdown-menu {
+        position: static !important;
+        transform: none !important;
+        box-shadow: none;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+    }
+    
+    .dropdown-menu.show {
+        display: block !important;
+    }
+    
+    #userNotificationDropdown + .dropdown-menu,
+    #navbarDropdown + .dropdown-menu {
+        min-width: 100%;
+    }
 }
 
 /* Responsive İyileştirmeler */
@@ -584,10 +668,14 @@ if (isset($_SESSION['user_id'])) {
 
 <!-- Kredi Gösterim Tooltip & Animasyon JavaScript -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+// Bootstrap JavaScript yüklenene kadar bekle
+function initializeHeaderComponents() {
+    console.log('Header components initializing...');
+    
     // Tooltip'leri aktifleştir
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    if (typeof bootstrap !== 'undefined') {
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        console.log('Bootstrap tooltips initializing...');
         tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
@@ -605,7 +693,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 300 + (index * 150));
     });
     
-    // Kredi kartina hover efekti
+    // Kredi kartına hover efekti
     const creditDisplay = document.querySelector('.credit-display-new');
     if (creditDisplay) {
         creditDisplay.addEventListener('mouseenter', function() {
@@ -615,6 +703,106 @@ document.addEventListener('DOMContentLoaded', function() {
         creditDisplay.addEventListener('mouseleave', function() {
             this.style.transform = 'translateY(0)';
         });
+    }
+    
+    // Bootstrap dropdown'larını initialize et
+    if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+        console.log('Bootstrap dropdowns initializing...');
+        const dropdownToggleList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
+        
+        dropdownToggleList.forEach(function(dropdownToggleEl) {
+            // Bootstrap dropdown instance oluştur
+            new bootstrap.Dropdown(dropdownToggleEl, {
+                autoClose: 'outside'
+            });
+        });
+        
+        console.log(`Initialized ${dropdownToggleList.length} dropdowns`);
+    } else {
+        console.warn('Bootstrap JavaScript henüz yüklenmedi, fallback kullanılıyor...');
+        
+        // Fallback için manuel dropdown işlevi - HTML yapısına uygun
+        document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function(dropdownToggle) {
+            dropdownToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log('Fallback dropdown click:', this.id);
+                
+                // Dropdown menüyü bul - aria-labelledby ile ilişkilendirilmiş
+                const dropdownId = this.getAttribute('id');
+                const dropdownMenu = document.querySelector(`[aria-labelledby="${dropdownId}"]`);
+                
+                if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
+                    // Diğer dropdown'ları kapat
+                    document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
+                        if (menu !== dropdownMenu) {
+                            menu.classList.remove('show');
+                        }
+                    });
+                    
+                    // Bu dropdown'ı aç/kapat
+                    dropdownMenu.classList.toggle('show');
+                    this.setAttribute('aria-expanded', dropdownMenu.classList.contains('show'));
+                    
+                    console.log('Dropdown toggled:', dropdownMenu.classList.contains('show'));
+                } else {
+                    console.error('Dropdown menu bulunamadı:', dropdownId);
+                }
+            });
+        });
+    }
+    
+    // Dropdown dışında tıklandığında kapat
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+            document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
+                menu.classList.remove('show');
+                const dropdownId = menu.getAttribute('aria-labelledby');
+                const toggle = document.getElementById(dropdownId);
+                if (toggle) {
+                    toggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+    });
+}
+
+// Birden fazla kere çalıştırmamak için kontrol
+let headerInitialized = false;
+
+// DOMContentLoaded event'inde initialize et
+document.addEventListener('DOMContentLoaded', function() {
+    if (!headerInitialized) {
+        // Bootstrap yüklenmesini bekle (maksimum 3 saniye)
+        let attempts = 0;
+        const maxAttempts = 30;
+        
+        function waitForBootstrap() {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+                console.log('Bootstrap loaded, initializing components...');
+                initializeHeaderComponents();
+                headerInitialized = true;
+            } else if (attempts < maxAttempts) {
+                attempts++;
+                setTimeout(waitForBootstrap, 100);
+            } else {
+                console.warn('Bootstrap timeout, using fallback...');
+                initializeHeaderComponents();
+                headerInitialized = true;
+            }
+        }
+        
+        waitForBootstrap();
+    }
+});
+
+// Sayfa tamamen yüklendiğinde de kontrol et
+window.addEventListener('load', function() {
+    if (!headerInitialized) {
+        console.log('Page loaded, initializing components as fallback...');
+        initializeHeaderComponents();
+        headerInitialized = true;
     }
 });
 </script>
