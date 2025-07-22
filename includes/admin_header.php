@@ -461,7 +461,8 @@ $cssPath = '../assets/css/style.css';
                             
                             // Mevcut admin için bildirimleri al
                             if (in_array($_SESSION['user_id'], $adminUsers)) {
-                                $adminNotifications = $notificationManager->getUserNotifications($_SESSION['user_id'], 5, false);
+                                // Header için son 10 bildirim al (daha fazla göstermek için)
+                                $adminNotifications = $notificationManager->getUserNotifications($_SESSION['user_id'], 10, false);
                                 $unreadCount = $notificationManager->getUnreadCount($_SESSION['user_id']);
                             }
                             
@@ -520,7 +521,7 @@ $cssPath = '../assets/css/style.css';
                             </span>
                             <?php endif; ?>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 350px; max-height: 400px; overflow-y: auto;">
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 380px; max-height: 500px; overflow-y: auto;">
                             <li class="dropdown-header d-flex justify-content-between align-items-center">
                                 <span>Admin Bildirimleri</span>
                                 <span class="badge bg-primary"><?php echo count($adminNotifications); ?></span>
@@ -591,13 +592,13 @@ $cssPath = '../assets/css/style.css';
                             </li>
                             <?php endforeach; ?>
                             
-                            <!-- <li><hr class="dropdown-divider"></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li>
                                 <div class="d-flex justify-content-between px-3 py-2">
                                     <a href="#" class="btn btn-sm btn-outline-secondary" onclick="markAllNotificationsRead(); return false;">Tümünü Okundu İşaretle</a>
                                     <a href="notifications.php" class="small text-muted">Tüm bildirimleri gör</a>
                                 </div>
-                            </li> -->
+                            </li>
                         </ul>
                     </li>
                     
@@ -802,7 +803,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return false;
     };
     
-    function updateNotificationBadge() {
+    // Notification Badge güncelleme fonksiyonunu global scope'a ata
+    window.updateNotificationBadge = function() {
         // Okunmamış bildirim sayısını güncelle
         fetch('ajax/get_notification_count.php')
         .then(response => response.json())
@@ -828,7 +830,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             console.error('Error updating notification badge:', error);
         });
-    }
+    };
     
     // Dropdown hover efektleri
     const dropdownItems = document.querySelectorAll('.dropdown-item');
@@ -851,22 +853,22 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.toggle('active');
         });
     }
-});
-
-// Admin Dashboard fonksiyonları
-function refreshNotifications() {
-    // Gerçek sistemde AJAX ile sunucudan yeni bildirimler çekilecek
-    console.log('Bildirimler yenileniyor...');
     
-    // Simulated notification refresh
-    setTimeout(() => {
-        console.log('Bildirimler yenilendi');
-    }, 1000);
-}
-
-// Auto-refresh notifications every 30 seconds
-setInterval(refreshNotifications, 30000);
-
-// Auto-refresh admin notifications
-setInterval(updateNotificationBadge, 30000);
+    // Admin Dashboard fonksiyonlarını global scope'a ata
+    window.refreshNotifications = function() {
+        // Gerçek sistemde AJAX ile sunucudan yeni bildirimler çekilecek
+        console.log('Bildirimler yenileniyor...');
+        
+        // Simulated notification refresh
+        setTimeout(() => {
+            console.log('Bildirimler yenilendi');
+        }, 1000);
+    };
+    
+    // Auto-refresh notifications every 30 seconds
+    setInterval(window.refreshNotifications, 30000);
+    
+    // Auto-refresh admin notifications
+    setInterval(window.updateNotificationBadge, 30000);
+});
 </script>

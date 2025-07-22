@@ -80,6 +80,7 @@ try {
     // Class includes
     require_once '../includes/FileManager.php';
     require_once '../includes/User.php';
+    require_once '../includes/NotificationManager.php';
     
     // Session kontrolü
     if (session_status() == PHP_SESSION_NONE) {
@@ -99,6 +100,7 @@ try {
 }
 $user = new User($pdo);
 $fileManager = new FileManager($pdo);
+$notificationManager = new NotificationManager($pdo);
 
 // Upload ID kontrolü
 if (!isset($_GET['id']) || !isValidUUID($_GET['id'])) {
@@ -133,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $status = sanitize($_POST['status']);
             $adminNotes = sanitize($_POST['admin_notes']);
             
-            if ($fileManager->updateUploadStatus($uploadId, $status, $adminNotes)) {
+            if ($notificationManager->updateUploadStatus($uploadId, $status, $adminNotes)) {
                 $success = 'Dosya durumu başarıyla güncellendi.';
                 $user->logAction($_SESSION['user_id'], 'status_update', "Dosya #{$uploadId} durumu {$status} olarak güncellendi");
             } else {
@@ -251,7 +253,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Geçersiz revize ID formatı.';
                 error_log("Invalid revision ID format: " . $revisionId);
             } else {
-                $result = $fileManager->updateRevisionStatus($revisionId, $_SESSION['user_id'], 'in_progress', 'Revize talebi işleme alındı.', 0);
+                $result = $notificationManager->updateRevisionStatus($revisionId, 'in_progress', 'Revize talebi işleme alındı.');
                 
                 if ($result['success']) {
                     $success = 'Revize talebi işleme alındı. Şimdi revize edilmiş dosyayı yükleyebilirsiniz.';
@@ -276,7 +278,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Geçersiz revize ID formatı.';
                 error_log("Invalid revision ID format: " . $revisionId);
             } else {
-                $result = $fileManager->updateRevisionStatus($revisionId, $_SESSION['user_id'], 'rejected', $adminNotes, 0);
+                $result = $notificationManager->updateRevisionStatus($revisionId, 'rejected', $adminNotes);
                 
                 if ($result['success']) {
                     $success = 'Revize talebi reddedildi.';

@@ -6,6 +6,7 @@
 
 require_once '../../config/config.php';
 require_once '../../config/database.php';
+require_once '../../includes/NotificationManager.php';
 
 // JSON response header
 header('Content-Type: application/json');

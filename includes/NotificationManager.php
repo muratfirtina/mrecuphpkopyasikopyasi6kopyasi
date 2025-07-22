@@ -128,14 +128,17 @@ class NotificationManager {
                 $whereClause .= " AND is_read = FALSE";
             }
             
-            $stmt = $this->pdo->prepare("
+            // LIMIT için parametre kullanma sorunu çözümü
+            $limit = intval($limit); // Integer'a çevir
+            
+            $sql = "
                 SELECT * FROM notifications 
                 {$whereClause}
                 ORDER BY created_at DESC 
-                LIMIT ?
-            ");
+                LIMIT {$limit}
+            ";
             
-            $params[] = $limit;
+            $stmt = $this->pdo->prepare($sql);
             $stmt->execute($params);
             
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

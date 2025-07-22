@@ -10,6 +10,11 @@ $pageDescription = 'Admin panel bildirimleri ve sistem uyarıları';
 // Gerekli dosyaları dahil et
 require_once '../includes/admin_header.php';
 
+// Bildirim konfigürasyonunu dahil et (eğer admin_header'da dahil edilmemişse)
+if (!defined('NOTIFICATION_PAGE_LIMIT')) {
+    require_once '../config/notification_config.php';
+}
+
 // NotificationManager'ı dahil et
 if (!class_exists('NotificationManager')) {
     require_once '../includes/NotificationManager.php';
@@ -21,7 +26,7 @@ $notificationManager = new NotificationManager($pdo);
 $filter = $_GET['filter'] ?? 'all'; // all, unread, read
 $type = $_GET['type'] ?? 'all'; // all, file_upload, revision_request, user_registration, system_warning
 $page = max(1, intval($_GET['page'] ?? 1));
-$perPage = 20;
+$perPage = NOTIFICATION_PAGE_LIMIT; // Konfigürasyondan sayfa başına bildirim sayısı
 $offset = ($page - 1) * $perPage;
 
 // Bildirim işlemleri

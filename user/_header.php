@@ -142,7 +142,7 @@ if (isset($_SESSION['user_id'])) {
                     $unreadNotificationCount = 0;
                 }
                 
-                $totalNotifications = $pendingUserRevisions + $completedFiles + $unreadNotificationCount;
+                $totalNotifications = $pendingUserRevisions + $completedFiles + count($userNotifications);
                 ?>
                 
                 <?php if ($totalNotifications > 0): ?>
