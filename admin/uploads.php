@@ -75,6 +75,7 @@ $status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
 $brand = isset($_GET['brand']) ? sanitize($_GET['brand']) : '';
 $dateFrom = isset($_GET['date_from']) ? sanitize($_GET['date_from']) : '';
 $dateTo = isset($_GET['date_to']) ? sanitize($_GET['date_to']) : '';
+$uploadId = isset($_GET['id']) ? sanitize($_GET['id']) : ''; // Belirli dosya ID'si için filtreleme
 $sortBy = isset($_GET['sort']) ? sanitize($_GET['sort']) : 'upload_date';
 $sortOrder = isset($_GET['order']) && $_GET['order'] === 'asc' ? 'ASC' : 'DESC';
 
@@ -118,6 +119,12 @@ try {
     if ($dateTo) {
         $whereClause .= " AND DATE(u.upload_date) <= ?";
         $params[] = $dateTo;
+    }
+    
+    // Belirli dosya ID'si için filtreleme
+    if ($uploadId && isValidUUID($uploadId)) {
+        $whereClause .= " AND u.id = ?";
+        $params[] = $uploadId;
     }
     
     // Toplam dosya sayısı
@@ -191,8 +198,13 @@ try {
 }
 
 // Sayfa bilgileri
-$pageTitle = 'Dosya Yüklemeleri';
-$pageDescription = 'Kullanıcı dosya yüklemelerini yönetin ve işleyin.';
+if ($uploadId && isValidUUID($uploadId)) {
+    $pageTitle = 'Dosya Detayı - ' . substr($uploadId, 0, 8) . '...';
+    $pageDescription = 'Belirli dosya görüntüleniyor: ' . $uploadId;
+} else {
+    $pageTitle = 'Dosya Yüklemeleri';
+    $pageDescription = 'Kullanıcı dosya yüklemelerini yönetin ve işleyin.';
+}
 $pageIcon = 'fas fa-upload';
 
 // Header ve Sidebar include
@@ -281,7 +293,21 @@ include '../includes/admin_sidebar.php';
 <!-- Filtre ve Arama -->
 <div class="card admin-card mb-4">
     <div class="card-body">
+        <?php if ($uploadId && isValidUUID($uploadId)): ?>
+            <div class="alert-info mb-3" style=" padding: 1rem; display: flex; align-items: center;">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Belirli dosya görüntüleniyor:</strong> ID: <?php echo htmlspecialchars($uploadId); ?>
+                <a href="uploads.php" class="btn btn-sm btn-outline-primary ms-2">
+                    <i class="fas fa-times me-1"></i>Filtreyi Kaldır
+                </a>
+            </div>
+        <?php endif; ?>
+        
         <form method="GET" class="row g-3 align-items-end">
+            <?php if ($uploadId && isValidUUID($uploadId)): ?>
+                <input type="hidden" name="id" value="<?php echo htmlspecialchars($uploadId); ?>">
+            <?php endif; ?>
+            
             <div class="col-md-3">
                 <label for="search" class="form-label">
                     <i class="fas fa-search me-1"></i>Arama
