@@ -305,7 +305,7 @@ include '../includes/admin_sidebar.php';
 
 <!-- İstatistik Kartları -->
 <div class="row g-4 mb-4">
-    <div class="col-lg-3 col-md-6">
+    <a class="col-lg-3 col-md-6" href="revisions.php" style="text-decoration: none; outline: none;">
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
@@ -318,9 +318,9 @@ include '../includes/admin_sidebar.php';
                 </div>
             </div>
         </div>
-    </div>
+    </a>
     
-    <div class="col-lg-3 col-md-6">
+    <a class="col-lg-3 col-md-6" href="revisions.php?status=pending" style="text-decoration: none; outline: none;">
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
@@ -333,9 +333,9 @@ include '../includes/admin_sidebar.php';
                 </div>
             </div>
         </div>
-    </div>
+    </a>
     
-    <div class="col-lg-3 col-md-6">
+    <a class="col-lg-3 col-md-6" href="revisions.php?status=in_progress" style="text-decoration: none; outline: none;">
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
@@ -348,9 +348,9 @@ include '../includes/admin_sidebar.php';
                 </div>
             </div>
         </div>
-    </div>
+    </a>
     
-    <div class="col-lg-3 col-md-6">
+    <a class="col-lg-3 col-md-6" href="revisions.php?status=completed" style="text-decoration: none; outline: none;">
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
@@ -363,7 +363,7 @@ include '../includes/admin_sidebar.php';
                 </div>
             </div>
         </div>
-    </div>
+    </a>
 </div>
 
 <!-- Filtre ve Arama -->

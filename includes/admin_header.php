@@ -591,13 +591,13 @@ $cssPath = '../assets/css/style.css';
                             </li>
                             <?php endforeach; ?>
                             
-                            <li><hr class="dropdown-divider"></li>
+                            <!-- <li><hr class="dropdown-divider"></li>
                             <li>
                                 <div class="d-flex justify-content-between px-3 py-2">
                                     <a href="#" class="btn btn-sm btn-outline-secondary" onclick="markAllNotificationsRead(); return false;">Tümünü Okundu İşaretle</a>
                                     <a href="notifications.php" class="small text-muted">Tüm bildirimleri gör</a>
                                 </div>
-                            </li>
+                            </li> -->
                         </ul>
                     </li>
                     

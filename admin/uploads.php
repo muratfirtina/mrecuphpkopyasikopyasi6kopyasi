@@ -217,7 +217,7 @@ include '../includes/admin_sidebar.php';
 
 <!-- İstatistik Kartları -->
 <div class="row g-4 mb-4">
-    <div class="col-lg-3 col-md-6">
+    <a class="col-lg-3 col-md-6" href="uploads.php" style="text-decoration: none; outline: none;">
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
@@ -230,11 +230,11 @@ include '../includes/admin_sidebar.php';
                 </div>
             </div>
         </div>
-    </div>
+    </a>
     
-    <div class="col-lg-3 col-md-6">
+    <a class="col-lg-3 col-md-6" href="uploads.php?status=pending" style="text-decoration: none; outline: none;">
         <div class="stat-widget">
-            <div class="d-flex justify-content-between align-items-start">
+            <div class="d-flex justify-content-between align-items-start" >
                 <div>
                     <div class="stat-number text-warning"><?php echo safe_number_format($stats['pending_count']); ?></div>
                     <div class="stat-label">Bekleyen</div>
@@ -245,9 +245,9 @@ include '../includes/admin_sidebar.php';
                 </div>
             </div>
         </div>
-    </div>
+    </a>
     
-    <div class="col-lg-3 col-md-6">
+    <a class="col-lg-3 col-md-6" href="uploads.php?status=processing" style="text-decoration: none; outline: none;">
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
@@ -260,9 +260,9 @@ include '../includes/admin_sidebar.php';
                 </div>
             </div>
         </div>
-    </div>
+    </a>
     
-    <div class="col-lg-3 col-md-6">
+    <a class="col-lg-3 col-md-6" href="uploads.php?status=completed" style="text-decoration: none; outline: none;">
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
@@ -275,7 +275,7 @@ include '../includes/admin_sidebar.php';
                 </div>
             </div>
         </div>
-    </div>
+    </a>
 </div>
 
 <!-- Filtre ve Arama -->
