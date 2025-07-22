@@ -261,13 +261,13 @@ try {
             SUM(CASE WHEN role = 'user' THEN 1 ELSE 0 END) as user_count,
             SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active_count,
             SUM(CASE WHEN status = 'inactive' THEN 1 ELSE 0 END) as inactive_count,
-            SUM(credits) as total_credits,
+            SUM(credit_quota) as total_quota,
             SUM(CASE WHEN created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) THEN 1 ELSE 0 END) as new_users_30d
         FROM users
     ");
     $stats = $stmt->fetch();
 } catch(PDOException $e) {
-    $stats = ['total_users' => 0, 'admin_count' => 0, 'user_count' => 0, 'active_count' => 0, 'inactive_count' => 0, 'total_credits' => 0, 'new_users_30d' => 0];
+    $stats = ['total_users' => 0, 'admin_count' => 0, 'user_count' => 0, 'active_count' => 0, 'inactive_count' => 0, 'total_quota' => 0, 'new_users_30d' => 0];
 }
 
 // Sayfa bilgileri
@@ -374,7 +374,7 @@ include '../includes/admin_sidebar.php';
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <div class="stat-number text-info"><?php echo number_format($stats['total_credits'], 2); ?> TL</div>
+                    <div class="stat-number text-info"><?php echo number_format($stats['total_quota'], 2); ?> TL</div>
                     <div class="stat-label">Toplam Kredi</div>
                     <small class="text-muted">Sistem geneli</small>
                 </div>
@@ -532,7 +532,6 @@ include '../includes/admin_sidebar.php';
                             <th>Kullanıcı Bilgileri</th>
                             <th>İletişim</th>
                             <th>Rol & Durum</th>
-                            <th>Kredi</th>
                             <th>Kayıt Tarihi</th>
                             <th>Son Giriş</th>
                             <th>İşlemler</th>
@@ -589,17 +588,6 @@ include '../includes/admin_sidebar.php';
                                             <i class="fas fa-<?php echo $userData['status'] === 'active' ? 'check' : 'times'; ?> me-1"></i>
                                             <?php echo $userData['status'] === 'active' ? 'Aktif' : 'Pasif'; ?>
                                         </span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="text-center">
-                                        <h6 class="mb-1 text-<?php echo $userData['credits'] > 0 ? 'success' : 'muted'; ?>">
-                                            <?php echo number_format($userData['credits'], 2); ?> TL
-                                        </h6>
-                                        <button class="btn btn-outline-success btn-sm" 
-                                                onclick="addCredit('<?php echo $userData['id']; ?>', '<?php echo htmlspecialchars($userData['username']); ?>')">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
                                     </div>
                                 </td>
                                 <td>

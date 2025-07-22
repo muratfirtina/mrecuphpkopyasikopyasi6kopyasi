@@ -19,7 +19,7 @@ $recentUploads = $fileManager->getAllUploads(1, 10);
 
 // Toplam kredi
 try {
-    $stmt = $pdo->query("SELECT SUM(credits) as total_credits FROM users WHERE role = 'user'");
+    $stmt = $pdo->query("SELECT SUM(credit_quota) as total_credits FROM users WHERE role = 'user'");
     $totalCredits = $stmt->fetch()['total_credits'] ?? 0;
 } catch(PDOException $e) {
     $totalCredits = 0;
