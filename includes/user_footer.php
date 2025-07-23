@@ -1,8 +1,4 @@
-                    <!-- Sayfa İçeriği Sonu -->
-                    
-                </div>
-            </div>
-        </div>
+</div>
     </div>
     <!-- Ana içerik sonu -->
 
@@ -30,7 +26,7 @@
     </footer>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -54,7 +50,7 @@
         // Sidebar aktif link kontrolü
         document.addEventListener('DOMContentLoaded', function() {
             const currentPath = window.location.pathname.split('/').pop();
-            const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
+            const navLinks = document.querySelectorAll('.sidebar-nav .nav-link, .modern-sidebar .nav-link');
             
             navLinks.forEach(link => {
                 const href = link.getAttribute('href');
@@ -177,6 +173,177 @@
                 });
             });
         });
+        
+        // AJAX Loading için global fonksiyonlar
+        window.ajaxRequest = function(url, options = {}) {
+            const defaultOptions = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            };
+            
+            return fetch(url, { ...defaultOptions, ...options })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    console.error('AJAX Error:', error);
+                    showToast('Bir hata oluştu: ' + error.message, 'error');
+                    throw error;
+                });
+        };
+        
+        // Modal işlemleri
+        window.showModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal && typeof bootstrap !== 'undefined') {
+                const bootstrapModal = new bootstrap.Modal(modal);
+                bootstrapModal.show();
+            }
+        };
+        
+        window.hideModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal && typeof bootstrap !== 'undefined') {
+                const bootstrapModal = bootstrap.Modal.getInstance(modal);
+                if (bootstrapModal) {
+                    bootstrapModal.hide();
+                }
+            }
+        };
+        
+        // Notification sistemi için fonksiyonlar
+        window.markNotificationRead = function(notificationId) {
+            ajaxRequest('../ajax/mark-notification-read.php', {
+                method: 'POST',
+                body: JSON.stringify({ notification_id: notificationId })
+            }).then(response => {
+                if (response.success) {
+                    // Bildirim sayısını güncelle
+                    updateNotificationCount();
+                }
+            }).catch(error => {
+                console.error('Notification mark error:', error);
+            });
+        };
+        
+        window.markAllNotificationsRead = function() {
+            ajaxRequest('../ajax/mark-all-notifications-read.php', {
+                method: 'POST'
+            }).then(response => {
+                if (response.success) {
+                    // Sayfayı yenile
+                    window.location.reload();
+                }
+            }).catch(error => {
+                console.error('Mark all notifications error:', error);
+            });
+        };
+        
+        window.updateNotificationCount = function() {
+            ajaxRequest('../ajax/get-notification-count.php', {
+                method: 'GET'
+            }).then(response => {
+                if (response.success) {
+                    const badge = document.querySelector('#userNotificationDropdown .badge');
+                    if (badge) {
+                        if (response.count > 0) {
+                            badge.textContent = response.count;
+                            badge.style.display = 'inline-block';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                }
+            }).catch(error => {
+                console.error('Notification count error:', error);
+            });
+        };
+        
+        // Session timeout uyarısı
+        let sessionWarningShown = false;
+        const SESSION_TIMEOUT = 3600000; // 1 saat (milisaniye)
+        const WARNING_TIME = 300000; // 5 dakika önceden uyar
+        
+        setTimeout(() => {
+            if (!sessionWarningShown) {
+                sessionWarningShown = true;
+                if (confirm('Oturumunuz yakında sona erecek. Devam etmek istiyor musunuz?')) {
+                    // Session'ı yenileme isteği gönder
+                    ajaxRequest('../ajax/refresh-session.php', {
+                        method: 'POST'
+                    }).then(response => {
+                        if (response.success) {
+                            sessionWarningShown = false;
+                            showToast('Oturum yenilendi', 'success');
+                        }
+                    }).catch(error => {
+                        console.error('Session refresh error:', error);
+                    });
+                } else {
+                    window.location.href = '../logout.php';
+                }
+            }
+        }, SESSION_TIMEOUT - WARNING_TIME);
+        
+        // Page visibility API ile sayfa aktifliğini kontrol et
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // Sayfa aktif olduğunda bildirim sayısını güncelle
+                updateNotificationCount();
+            }
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl + / için yardım modalı
+            if (e.ctrlKey && e.key === '/') {
+                e.preventDefault();
+                showModal('helpModal');
+            }
+            
+            // Esc tuşu ile aktif modalı kapat
+            if (e.key === 'Escape') {
+                const activeModal = document.querySelector('.modal.show');
+                if (activeModal) {
+                    const modalId = activeModal.getAttribute('id');
+                    if (modalId) {
+                        hideModal(modalId);
+                    }
+                }
+            }
+        });
+        
+        // Print fonksiyonu
+        window.printPage = function() {
+            window.print();
+        };
+        
+        // Export fonksiyonları
+        window.exportToCSV = function(data, filename = 'export.csv') {
+            const csv = data.map(row => 
+                row.map(field => `"${field}"`).join(',')
+            ).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        };
+        
     </script>
     
     <!-- Ek JavaScript dosyaları için -->
