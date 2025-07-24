@@ -370,7 +370,7 @@ if (isset($_SESSION['user_id'])) {
                 </li>
             </ul>
             
-            <ul class="navbar-nav">
+            <ul class="navbar-nav" style="align-items: center;">
                 <!-- Kredi Durumu - Ters Kredi Sistemi -->
                 <li class="nav-item me-3">
                     <div class="credit-display-new bg-white bg-opacity-15 px-3 py-2 rounded-3" 
