@@ -1080,7 +1080,7 @@ try {
                                         <?php else: ?>
                                             <?php
                                             // Son revizyon dosyasını bul
-                                            $targetFileName = 'Ana Dosya';
+                                            $targetFileName = '';
                                             $targetFileType = 'Orijinal Yüklenen Dosya';
                                             $targetFileColor = 'success';
                                             $targetFileIcon = 'file-alt';
@@ -1104,9 +1104,23 @@ try {
                                                     $targetFileType = 'Revizyon Dosyası';
                                                     $targetFileColor = 'warning';
                                                     $targetFileIcon = 'edit';
+                                                } else {
+                                                    // Ana dosya adını al
+                                                    $stmt = $pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
+                                                    $stmt->execute([$uploadId]);
+                                                    $targetFileName = $stmt->fetchColumn() ?: 'Bilinmeyen Dosya';
+                                                    $targetFileType = 'Orijinal Yüklenen Dosya';
                                                 }
                                             } catch (Exception $e) {
                                                 error_log('Previous revision file query error: ' . $e->getMessage());
+                                                // Hata durumunda ana dosya adını al
+                                                try {
+                                                    $stmt = $pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
+                                                    $stmt->execute([$uploadId]);
+                                                    $targetFileName = $stmt->fetchColumn() ?: 'Bilinmeyen Dosya';
+                                                } catch (Exception $e2) {
+                                                    $targetFileName = 'Bilinmeyen Dosya';
+                                                }
                                             }
                                             ?>
                                             <i class="fas fa-<?php echo $targetFileIcon; ?> text-<?php echo $targetFileColor; ?> me-2"></i>
@@ -1641,7 +1655,7 @@ try {
                         <?php else: ?>
                         <?php
                         // Eğer bu revize talebinden önce başka revizyon dosyaları varsa, son revizyon dosyasını bul
-                        $targetFileName = 'Ana Dosya';
+                        $targetFileName = '';
                         $targetFileType = 'Orijinal Yüklenen Dosya';
                         
                         if (isset($comm['revision_id'])) {
@@ -1667,9 +1681,23 @@ try {
                         if ($previousRevisionFile) {
                             $targetFileName = $previousRevisionFile['original_name'];
                             $targetFileType = 'Revizyon Dosyası';
+                        } else {
+                            // Ana dosya adını al
+                            $stmt = $pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
+                            $stmt->execute([$uploadId]);
+                            $targetFileName = $stmt->fetchColumn() ?: 'Bilinmeyen Dosya';
+                            $targetFileType = 'Orijinal Yüklenen Dosya';
                         }
                     } catch (Exception $e) {
                         error_log('Previous revision file query error: ' . $e->getMessage());
+                        // Hata durumunda ana dosya adını al
+                        try {
+                            $stmt = $pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
+                            $stmt->execute([$uploadId]);
+                            $targetFileName = $stmt->fetchColumn() ?: 'Bilinmeyen Dosya';
+                        } catch (Exception $e2) {
+                            $targetFileName = 'Bilinmeyen Dosya';
+                        }
                     }
                 }
                 ?>
@@ -1683,13 +1711,161 @@ try {
                         <?php else: ?>
                             <i class="fas fa-arrow-right text-success me-2"></i>
                             <strong>Revize edilen dosya:</strong> 
-                            <span class="text-success"><?php echo $targetFileName; ?></span>
+                            <span class="text-success"><?php echo htmlspecialchars($targetFileName); ?></span>
                             <small class="text-muted ms-2">(<?php echo $targetFileType; ?>)</small>
                         <?php endif; ?>
                     </div>
                 </div>
             <?php endif; ?>
         <?php endif; ?>
+                        
+                        <!-- Kullanıcının Revizyon Talep Ettiği Dosya (sadece revizyon talepleri için) -->
+                        <?php if ($comm['type'] === 'user_revision_request'): ?>
+                            <div class="revision-request-file-info mt-3 mb-3 p-3 bg-warning bg-opacity-10 border border-warning rounded">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1 text-warning">
+                                            <i class="fas fa-file-alt me-2"></i>
+                                            Kullanıcının Revizyon Talep Ettiği Dosya
+                                        </h6>
+                                        <div class="file-details">
+                                            <?php if (!empty($comm['response_file_name'])): ?>
+                                                <!-- Yanıt dosyası için revizyon talebi -->
+                                                <strong><?php echo htmlspecialchars($comm['response_file_name']); ?></strong>
+                                                <br>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-reply me-1"></i>Yanıt Dosyası
+                                                </small>
+                                            <?php else: ?>
+                                                <!-- Ana dosya veya önceki revizyon dosyası için talep -->
+                                                <?php
+                                                // Gerçek dosya adlarını al
+                                                $targetFileInfo = ['name' => '', 'type' => 'Orijinal Yüklenen Dosya', 'icon' => 'file-alt'];
+                                                
+                                                if (isset($comm['revision_id'])) {
+                                                    try {
+                                                        // Önce bu revize talebinden önce tamamlanmış revize dosyası var mı kontrol et
+                                                        $stmt = $pdo->prepare("
+                                                            SELECT rf.original_name 
+                                                            FROM revisions r1
+                                                            JOIN revision_files rf ON r1.id = rf.revision_id
+                                                            WHERE r1.upload_id = ? 
+                                                            AND r1.status = 'completed'
+                                                            AND r1.requested_at < (
+                                                                SELECT r2.requested_at 
+                                                                FROM revisions r2 
+                                                                WHERE r2.id = ?
+                                                            )
+                                                            ORDER BY r1.requested_at DESC 
+                                                            LIMIT 1
+                                                        ");
+                                                        $stmt->execute([$uploadId, $comm['revision_id']]);
+                                                        $previousRevisionFile = $stmt->fetch(PDO::FETCH_ASSOC);
+                                                        
+                                                        if ($previousRevisionFile) {
+                                                            // Önceki revizyon dosyası var
+                                                            $targetFileInfo = [
+                                                                'name' => $previousRevisionFile['original_name'],
+                                                                'type' => 'Revizyon Dosyası',
+                                                                'icon' => 'edit'
+                                                            ];
+                                                        } else {
+                                                            // Ana dosya için talep, ana dosya adını al
+                                                            $stmt = $pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
+                                                            $stmt->execute([$uploadId]);
+                                                            $originalFileName = $stmt->fetchColumn();
+                                                            
+                                                            $targetFileInfo = [
+                                                                'name' => $originalFileName ?: 'Bilinmeyen Dosya',
+                                                                'type' => 'Orijinal Yüklenen Dosya',
+                                                                'icon' => 'file-alt'
+                                                            ];
+                                                        }
+                                                    } catch (Exception $e) {
+                                                        error_log('Previous revision file query error: ' . $e->getMessage());
+                                                        // Hata durumunda ana dosya adını al
+                                                        try {
+                                                            $stmt = $pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
+                                                            $stmt->execute([$uploadId]);
+                                                            $originalFileName = $stmt->fetchColumn();
+                                                            
+                                                            $targetFileInfo['name'] = $originalFileName ?: 'Bilinmeyen Dosya';
+                                                        } catch (Exception $e2) {
+                                                            $targetFileInfo['name'] = 'Bilinmeyen Dosya';
+                                                        }
+                                                    }
+                                                }
+                                                ?>
+                                                <strong><?php echo htmlspecialchars($targetFileInfo['name']); ?></strong>
+                                                <br>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-<?php echo $targetFileInfo['icon']; ?> me-1"></i><?php echo $targetFileInfo['type']; ?>
+                                                </small>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <?php if (!empty($comm['response_file_name'])): ?>
+                                            <!-- Yanıt dosyasını indir -->
+                                            <?php
+                                            try {
+                                                $stmt = $pdo->prepare("SELECT id FROM file_responses WHERE upload_id = ? AND original_name = ? ORDER BY upload_date DESC LIMIT 1");
+                                                $stmt->execute([$uploadId, $comm['response_file_name']]);
+                                                $responseFileId = $stmt->fetchColumn();
+                                            } catch (Exception $e) {
+                                                $responseFileId = null;
+                                            }
+                                            ?>
+                                            <?php if ($responseFileId): ?>
+                                                <a href="download-file.php?id=<?php echo $responseFileId; ?>&type=response" 
+                                                   class="btn btn-warning btn-sm" title="Revizyon talep edilen yanıt dosyasını indir">
+                                                    <i class="fas fa-download me-1"></i>İndir
+                                                </a>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <!-- Ana dosya veya revizyon dosyasını indir -->
+                                            <?php
+                                            $downloadFileId = $uploadId;
+                                            $downloadType = 'upload';
+                                            
+                                            // Son revizyon dosyası varsa onu indir
+                                            if (isset($comm['revision_id'])) {
+                                                try {
+                                                    $stmt = $pdo->prepare("
+                                                        SELECT r.id as revision_id
+                                                        FROM revisions r
+                                                        JOIN revision_files rf ON r.id = rf.revision_id
+                                                        WHERE r.upload_id = ? 
+                                                        AND r.status = 'completed'
+                                                        AND r.requested_at < (
+                                                            SELECT r2.requested_at 
+                                                            FROM revisions r2 
+                                                            WHERE r2.id = ?
+                                                        )
+                                                        ORDER BY r.requested_at DESC 
+                                                        LIMIT 1
+                                                    ");
+                                                    $stmt->execute([$uploadId, $comm['revision_id']]);
+                                                    $latestRevisionId = $stmt->fetchColumn();
+                                                    
+                                                    if ($latestRevisionId) {
+                                                        $downloadFileId = $latestRevisionId;
+                                                        $downloadType = 'revision';
+                                                    }
+                                                } catch (Exception $e) {
+                                                    error_log('Download file query error: ' . $e->getMessage());
+                                                }
+                                            }
+                                            ?>
+                                            <a href="download-file.php?id=<?php echo $downloadFileId; ?>&type=<?php echo $downloadType; ?>" 
+                                               class="btn btn-warning btn-sm" title="Revizyon talep edilen dosyayı indir">
+                                                <i class="fas fa-download me-1"></i>İndir
+                                            </a>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                         
                         <!-- Kullanıcı Notları -->
                         <?php if (!empty($comm['user_notes'])): ?>
@@ -2482,6 +2658,30 @@ try {
     padding: 0.75rem;
     white-space: normal;
     word-wrap: break-word;
+}
+
+/* Kullanıcının Revizyon Talep Ettiği Dosya Stilleri */
+.revision-request-file-info {
+    transition: all 0.3s ease;
+    border-left: 4px solid #ffc107 !important;
+}
+
+.revision-request-file-info:hover {
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+    transform: translateY(-1px);
+}
+
+.revision-request-file-info .file-details {
+    line-height: 1.5;
+}
+
+.revision-request-file-info .btn {
+    transition: all 0.2s ease;
+}
+
+.revision-request-file-info .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(255, 193, 7, 0.3);
 }
 
 .user-note .note-header {
