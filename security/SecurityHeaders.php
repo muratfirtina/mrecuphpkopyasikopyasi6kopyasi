@@ -56,9 +56,9 @@ class SecurityHeaders {
             // Sıkı CSP politikası
             $csp = "default-src 'self'; " .
                    "script-src 'self' 'nonce-$nonce' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " .
-                   "style-src 'self' 'nonce-$nonce' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " .
+                   "style-src 'self' 'nonce-$nonce' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; " .
                    "img-src 'self' data: https:; " .
-                   "font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " .
+                   "font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com; " .
                    "connect-src 'self'; " .
                    "media-src 'self'; " .
                    "object-src 'none'; " .
@@ -69,9 +69,9 @@ class SecurityHeaders {
             // Gevşek CSP politikası (geliştirme için)
             $csp = "default-src 'self'; " .
                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " .
-                   "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " .
+                   "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; " .
                    "img-src 'self' data: https:; " .
-                   "font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " .
+                   "font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com; " .
                    "connect-src 'self'; " .
                    "media-src 'self'; " .
                    "object-src 'none'";

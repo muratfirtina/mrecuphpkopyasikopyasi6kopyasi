@@ -224,6 +224,11 @@
         }
     </script>
     
+    <!-- Notification system for logged in users -->
+    <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
+        <script src="<?php echo isset($basePath) ? $basePath : ''; ?>assets/js/notifications.js"></script>
+    <?php endif; ?>
+    
     <!-- Ek JavaScript dosyaları için -->
     <?php if (isset($additionalJS) && is_array($additionalJS)): ?>
         <?php foreach ($additionalJS as $js): ?>

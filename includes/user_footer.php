@@ -174,6 +174,8 @@
             });
         });
         
+        // Dinamik base path hesapla
+        const basePath = window.location.pathname.includes('/user/') ? '../' : './';
         // AJAX Loading için global fonksiyonlar
         window.ajaxRequest = function(url, options = {}) {
             const defaultOptions = {
@@ -219,7 +221,7 @@
         
         // Notification sistemi için fonksiyonlar
         window.markNotificationRead = function(notificationId) {
-            ajaxRequest('../ajax/mark-notification-read.php', {
+            ajaxRequest(basePath + 'ajax/mark-notification-read.php', {
                 method: 'POST',
                 body: JSON.stringify({ notification_id: notificationId })
             }).then(response => {
@@ -233,7 +235,7 @@
         };
         
         window.markAllNotificationsRead = function() {
-            ajaxRequest('../ajax/mark-all-notifications-read.php', {
+            ajaxRequest(basePath + 'ajax/mark-all-notifications-read.php', {
                 method: 'POST'
             }).then(response => {
                 if (response.success) {
@@ -246,7 +248,7 @@
         };
         
         window.updateNotificationCount = function() {
-            ajaxRequest('../ajax/get-notification-count.php', {
+            ajaxRequest(basePath + 'ajax/get-notification-count.php', {
                 method: 'GET'
             }).then(response => {
                 if (response.success) {
@@ -275,7 +277,7 @@
                 sessionWarningShown = true;
                 if (confirm('Oturumunuz yakında sona erecek. Devam etmek istiyor musunuz?')) {
                     // Session'ı yenileme isteği gönder
-                    ajaxRequest('../ajax/refresh-session.php', {
+                    ajaxRequest(basePath + 'ajax/refresh-session.php', {
                         method: 'POST'
                     }).then(response => {
                         if (response.success) {

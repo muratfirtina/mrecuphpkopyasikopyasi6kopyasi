@@ -95,6 +95,18 @@ if (!isset($pageTitle)) {
                 <!-- Kullanıcı Menüsü -->
                 <ul class="navbar-nav">
                     <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
+                        <!-- Notification icon -->
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-bell"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge" style="display: none;">0</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><h6 class="dropdown-header">Bildirimler</h6></li>
+                                <li><a class="dropdown-item" href="<?php echo isset($basePath) ? $basePath : ''; ?>admin/notifications.php">Tüm Bildirimleri Gör</a></li>
+                            </ul>
+                        </li>
+                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-user me-1"></i>
