@@ -148,7 +148,7 @@ class NotificationManager {
             $message .= " Admin notu: {$adminNotes}";
         }
         
-        $actionUrl = "../user/uploads.php?id={$uploadId}";
+        $actionUrl = "../user/files.php?id={$uploadId}";
         
         return $this->createNotification(
             $userId,

@@ -77,14 +77,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_revision'])) 
 // Filtreleme parametreleri
 $status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
 $search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
+$filterId = isset($_GET['id']) ? sanitize($_GET['id']) : '';
+
+// ID parametresi ile direkt dosya filtreleme
+if ($filterId && isValidUUID($filterId)) {
+    // Bildirimden gelinen dosyayı göster
+    $singleFileMode = true;
+} else {
+    $singleFileMode = false;
+}
 
 // Sayfalama
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $limit = 15;
 
 // Sadece ana dosyaları getir (file_uploads tablosundan)
-$userFiles = $fileManager->getUserUploads($userId, $page, $limit, $status, $search);
-$totalFiles = $fileManager->getUserUploadCount($userId, $status, $search);
+if ($singleFileMode) {
+    // Bildirimden gelen tek dosyayı göster
+    $userFiles = $fileManager->getUserUploads($userId, $page, $limit, $status, $search, $filterId);
+    $totalFiles = $fileManager->getUserUploadCount($userId, $status, $search, $filterId);
+} else {
+    // Normal listeleme
+    $userFiles = $fileManager->getUserUploads($userId, $page, $limit, $status, $search);
+    $totalFiles = $fileManager->getUserUploadCount($userId, $status, $search);
+}
 $totalPages = ceil($totalFiles / $limit);
 
 // İstatistikler
@@ -105,8 +121,17 @@ include '../includes/user_header.php';
                 <div>
                     <h1 class="h2 mb-0">
                         <i class="fas fa-folder me-2 text-primary"></i>Dosyalarım
+                        <?php if ($singleFileMode): ?>
+                            <small class="badge bg-info ms-2">Bildirimden Filtrelendi</small>
+                        <?php endif; ?>
                     </h1>
-                    <p class="text-muted mb-0">Yüklediğiniz ana dosyaları görüntüleyin ve yönetin</p>
+                    <p class="text-muted mb-0">
+                        <?php if ($singleFileMode): ?>
+                            Bildirimden seçilen dosya gösteriliyor. <a href="files.php" class="text-primary">Tüm dosyaları göster</a>
+                        <?php else: ?>
+                            Yüklediğiniz ana dosyaları görüntüleyin ve yönetin
+                        <?php endif; ?>
+                    </p>
                 </div>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
@@ -232,8 +257,25 @@ include '../includes/user_header.php';
                         <i class="fas fa-filter me-2"></i>Filtrele ve Ara
                     </h6>
                 </div>
+                            <!-- Dosya ID Filtresi Uyarısı -->
+            <?php if ($filterId && isValidUUID($filterId)): ?>
+                <div class="alert-info mb-3" style="padding: 1rem; display: flex; align-items: center;background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+    border: 1px solid #81c784;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Belirli dosya görüntüleniyor:</strong> ID: <?php echo htmlspecialchars($filterId); ?>
+                    <a href="files.php" class="btn btn-sm btn-outline-primary ms-2">
+                        <i class="fas fa-times me-1"></i>Filtreyi Kaldır
+                    </a>
+                </div>
+            <?php endif; ?>
                 <div class="filter-body">
                     <form method="GET" class="row g-3 align-items-end">
+                        <?php if ($filterId): ?>
+                            <input type="hidden" name="id" value="<?php echo htmlspecialchars($filterId); ?>">
+                        <?php endif; ?>
                         <div class="col-md-4">
                             <label for="search" class="form-label">
                                 <i class="fas fa-search me-1"></i>Dosya Ara
@@ -262,7 +304,7 @@ include '../includes/user_header.php';
                                     <i class="fas fa-search me-1"></i>Filtrele
                                 </button>
                                 <a href="files.php" class="btn btn-outline-secondary btn-modern">
-                                    <i class="fas fa-undo me-1"></i>Temizle
+                                    <i class="fas fa-undo me-1"></i><?php echo $filterId ? 'Tüm Dosyalar' : 'Temizle'; ?>
                                 </a>
                                 <div class="dropdown">
                                     <button class="btn btn-outline-info btn-modern dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -291,14 +333,18 @@ include '../includes/user_header.php';
                             <i class="fas fa-folder-open"></i>
                         </div>
                         <h4>
-                            <?php if ($search || $status): ?>
+                            <?php if ($filterId): ?>
+                                Aranan dosya bulunamadı
+                            <?php elseif ($search || $status): ?>
                                 Filtreye uygun dosya bulunamadı
                             <?php else: ?>
                                 Henüz dosya yüklenmemiş
                             <?php endif; ?>
                         </h4>
                         <p class="text-muted mb-4">
-                            <?php if ($search || $status): ?>
+                            <?php if ($filterId): ?>
+                                Bildirimden gelen dosya bulunamadı veya size ait değil. <a href="files.php" class="text-primary">Tüm dosyalar</a> sayfasına gidebilirsiniz.
+                            <?php elseif ($search || $status): ?>
                                 Farklı filtre kriterleri deneyebilir veya tüm dosyalarınızı görüntüleyebilirsiniz.
                             <?php else: ?>
                                 İlk ECU dosyanızı yüklemek için butona tıklayın ve işlem sürecini başlatın.
@@ -457,7 +503,7 @@ include '../includes/user_header.php';
                                 <!-- Önceki sayfa -->
                                 <?php if ($page > 1): ?>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
+                                        <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>">
                                             <i class="fas fa-chevron-left"></i>
                                         </a>
                                     </li>
@@ -471,7 +517,7 @@ include '../includes/user_header.php';
                                 
                                 <?php for ($i = $start; $i <= $end; $i++): ?>
                                     <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                        <a class="page-link" href="?page=<?php echo $i; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
+                                        <a class="page-link" href="?page=<?php echo $i; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>">
                                             <?php echo $i; ?>
                                         </a>
                                     </li>
@@ -480,7 +526,7 @@ include '../includes/user_header.php';
                                 <!-- Sonraki sayfa -->
                                 <?php if ($page < $totalPages): ?>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
+                                        <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>">
                                             <i class="fas fa-chevron-right"></i>
                                         </a>
                                     </li>
@@ -824,6 +870,43 @@ include '../includes/user_header.php';
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
 }
 
+/* Dosya ID Filtresi Uyarısı */
+.alert.alert-info {
+    background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+    border: 1px solid #81c784;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.alert.alert-info:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+}
+
+.alert.alert-info strong {
+    color: #1976d2;
+}
+
+.alert.alert-info .fas.fa-info-circle {
+    color: #1976d2;
+    font-size: 1.2rem;
+}
+
+.alert.alert-info .btn-outline-primary {
+    border-color: #1976d2;
+    color: #1976d2;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.alert.alert-info .btn-outline-primary:hover {
+    background-color: #1976d2;
+    border-color: #1976d2;
+    color: white;
+    transform: scale(1.05);
+}
+
 /* Responsive */
 @media (max-width: 767.98px) {
     .files-table {
@@ -850,6 +933,19 @@ include '../includes/user_header.php';
     .empty-actions {
         flex-direction: column;
         align-items: center;
+    }
+    
+    /* Dosya ID Filtresi Uyarısı - Mobile */
+    .alert.alert-info {
+        flex-direction: column;
+        align-items: flex-start !important;
+        text-align: left;
+    }
+    
+    .alert.alert-info .btn {
+        margin-top: 0.5rem;
+        margin-left: 0 !important;
+        width: 100%;
     }
     
     .stat-card-body {

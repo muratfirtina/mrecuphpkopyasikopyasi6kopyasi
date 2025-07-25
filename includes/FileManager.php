@@ -89,7 +89,7 @@ class FileManager {
     }
     
     // Kullanıcının sadece ana dosyalarını getir (yanıt dosyaları hariç)
-    public function getUserUploads($userId, $page = 1, $limit = 15, $status = '', $search = '') {
+    public function getUserUploads($userId, $page = 1, $limit = 15, $status = '', $search = '', $filterId = '') {
         try {
             if (!isValidUUID($userId)) {
                 return [];
@@ -98,6 +98,12 @@ class FileManager {
             $offset = ($page - 1) * $limit;
             $whereClause = "WHERE fu.user_id = ?";
             $params = [$userId];
+            
+            // ID ile filtreleme (bildirimden gelen dosya için)
+            if ($filterId && isValidUUID($filterId)) {
+                $whereClause .= " AND fu.id = ?";
+                $params[] = $filterId;
+            }
             
             if ($status) {
                 $whereClause .= " AND fu.status = ?";
@@ -136,7 +142,7 @@ class FileManager {
     }
     
     // Kullanıcının dosya sayısını getir
-    public function getUserUploadCount($userId, $status = '', $search = '') {
+    public function getUserUploadCount($userId, $status = '', $search = '', $filterId = '') {
         try {
             if (!isValidUUID($userId)) {
                 return 0;
@@ -144,6 +150,12 @@ class FileManager {
             
             $whereClause = "WHERE fu.user_id = ?";
             $params = [$userId];
+            
+            // ID ile filtreleme (bildirimden gelen dosya için)
+            if ($filterId && isValidUUID($filterId)) {
+                $whereClause .= " AND fu.id = ?";
+                $params[] = $filterId;
+            }
             
             if ($status) {
                 $whereClause .= " AND fu.status = ?";
