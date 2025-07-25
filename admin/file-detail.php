@@ -255,7 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $result = $notificationManager->updateRevisionStatus($revisionId, 'in_progress', 'Revize talebi işleme alındı.');
                 
-                if ($result['success']) {
+                if ($result === true) {
                     $success = 'Revize talebi işleme alındı. Şimdi revize edilmiş dosyayı yükleyebilirsiniz.';
                     $user->logAction($_SESSION['user_id'], 'revision_approved', "Revize talebi işleme alındı: {$revisionId}");
                     
@@ -263,7 +263,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     header("Location: file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
                     exit;
                 } else {
-                    $error = $result['message'];
+                    $error = 'Revize talebi işleme alınırken hata oluştu.';
                 }
             }
         }
@@ -280,7 +280,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $result = $notificationManager->updateRevisionStatus($revisionId, 'rejected', $adminNotes);
                 
-                if ($result['success']) {
+                if ($result === true) {
                     $success = 'Revize talebi reddedildi.';
                     $user->logAction($_SESSION['user_id'], 'revision_rejected', "Revize talebi reddedildi: {$revisionId}");
                     
@@ -288,7 +288,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     header("Location: file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
                     exit;
                 } else {
-                    $error = $result['message'];
+                    $error = 'Revize talebi reddedilirken hata oluştu.';
                 }
             }
         }

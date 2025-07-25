@@ -993,7 +993,7 @@ include '../includes/user_header.php';
                                                     </div>
                                                 </div>
                                                 
-                                                <!-- Admin'in yükledıği revizyon dosyaları -->
+                                                <!-- Admin'in yüklediği revizyon dosyaları -->
                                                 <?php if (!empty($comm['revision_files'])): ?>
                                                     <div class="admin-files mt-3">
                                                         <h6 class="text-success mb-2">
@@ -1018,6 +1018,39 @@ include '../includes/user_header.php';
                                                                     </div>
                                                                 </div>
                                                             <?php endforeach; ?>
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
+                                                
+                                                <!-- Admin'in yüklediği response dosyaları -->
+                                                <?php if ($comm['type'] === 'admin_response' && !empty($comm['response_id'])): ?>
+                                                    <div class="admin-files mt-3">
+                                                        <h6 class="text-success mb-2">
+                                                            <i class="fas fa-file-download me-2"></i>
+                                                            Admin'in Yüklediği Yanıt Dosyası:
+                                                        </h6>
+                                                        <div class="admin-files-list">
+                                                            <div class="admin-file-item">
+                                                                <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-2">
+                                                                    <div class="file-info">
+                                                                        <i class="fas fa-file-download text-success me-2"></i>
+                                                                        <strong><?php echo htmlspecialchars($comm['file_name']); ?></strong>
+                                                                        <span class="text-muted ms-2">
+                                                                            (Yanıt Dosyası)
+                                                                        </span>
+                                                                    </div>
+                                                                    <div class="d-flex gap-2">
+                                                                        <a href="file-detail.php?id=<?php echo $comm['response_id']; ?>&type=response" 
+                                                                           class="btn btn-outline-primary btn-sm">
+                                                                            <i class="fas fa-eye me-1"></i>Detay
+                                                                        </a>
+                                                                        <a href="download.php?id=<?php echo $comm['response_id']; ?>&type=response" 
+                                                                           class="btn btn-success btn-sm">
+                                                                            <i class="fas fa-download me-1"></i>İndir
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 <?php endif; ?>
@@ -1055,10 +1088,11 @@ include '../includes/user_header.php';
                                                 <?php endif; ?>
                                                 
                                                 <?php if (isset($comm['revision_id'])): ?>
-                                                    <span class="meta-item text-info">
-                                                        <i class="fas fa-hashtag me-1"></i>
-                                                        Revize #<?php echo substr($comm['revision_id'], 0, 8); ?>
-                                                    </span>
+                                                    <a href="revision-detail.php?id=<?php echo $comm['revision_id']; ?>" 
+                                                       class="meta-item text-info" style="text-decoration: none;">
+                                                        <i class="fas fa-history me-1"></i>
+                                                        Revizyon Detayları
+                                                    </a>
                                                 <?php endif; ?>
                                             </div>
                                         </div>

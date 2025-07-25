@@ -238,20 +238,45 @@ class NotificationManager {
      */
     public function updateRevisionStatus($revisionId, $status, $adminResponse = '') {
         try {
+            error_log("NotificationManager::updateRevisionStatus called with revisionId: $revisionId, status: $status");
+            
             // Revize bilgilerini al
             $stmt = $this->pdo->prepare("SELECT * FROM revisions WHERE id = ?");
             $stmt->execute([$revisionId]);
             $revision = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            if (!$revision) return false;
+            if (!$revision) {
+                error_log("NotificationManager::updateRevisionStatus - Revision not found: $revisionId");
+                return false;
+            }
+            
+            error_log("NotificationManager::updateRevisionStatus - Revision found: " . print_r($revision, true));
+            
+            // Tabloda hangi sütun var kontrol et
+            $stmt = $this->pdo->query("SHOW COLUMNS FROM revisions LIKE 'admin_response'");
+            $hasAdminResponse = $stmt->rowCount() > 0;
+            
+            $stmt = $this->pdo->query("SHOW COLUMNS FROM revisions LIKE 'admin_notes'");
+            $hasAdminNotes = $stmt->rowCount() > 0;
+            
+            // Hangi sütunu kullanacağını belirle
+            if ($hasAdminResponse) {
+                $columnName = 'admin_response';
+                error_log("NotificationManager::updateRevisionStatus - Using admin_response column");
+            } elseif ($hasAdminNotes) {
+                $columnName = 'admin_notes';
+                error_log("NotificationManager::updateRevisionStatus - Using admin_notes column");
+            } else {
+                error_log("NotificationManager::updateRevisionStatus - Neither admin_response nor admin_notes column found");
+                return false;
+            }
             
             // Revize durumunu güncelle
-            $stmt = $this->pdo->prepare("
-                UPDATE revisions 
-                SET status = ?, admin_response = ?, updated_at = NOW() 
-                WHERE id = ?
-            ");
+            $sql = "UPDATE revisions SET status = ?, {$columnName} = ?, updated_at = NOW() WHERE id = ?";
+            $stmt = $this->pdo->prepare($sql);
             $result = $stmt->execute([$status, $adminResponse, $revisionId]);
+            
+            error_log("NotificationManager::updateRevisionStatus - Update query result: " . ($result ? 'true' : 'false'));
             
             if ($result) {
                 // Orijinal dosya bilgisini al
@@ -261,7 +286,7 @@ class NotificationManager {
                 
                 // Kullanıcıya bildirim gönder
                 $fileName = $upload['original_name'] ?? $upload['filename'] ?? 'Bilinmeyen dosya';
-                $this->notifyRevisionResponse(
+                $notificationResult = $this->notifyRevisionResponse(
                     $revisionId, 
                     $revision['user_id'], 
                     $fileName, 
@@ -269,12 +294,15 @@ class NotificationManager {
                     $adminResponse
                 );
                 
+                error_log("NotificationManager::updateRevisionStatus - Notification result: " . ($notificationResult ? 'true' : 'false'));
+                
                 return true;
             }
             
             return false;
         } catch(Exception $e) {
             error_log('NotificationManager updateRevisionStatus error: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
             return false;
         }
     }
