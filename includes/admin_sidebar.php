@@ -57,6 +57,10 @@
                         <a class="nav-link <?php echo ($pageTitle == 'Revizyon İşlemleri') ? 'active' : ''; ?>" href="revisions.php">
                             <i class="fas fa-history"></i>Revizyonlar
                         </a>
+
+                        <a class="nav-link <?php echo ($pageTitle == 'Bildirimler') ? 'active' : ''; ?>" href="notifications.php">
+                            <i class="fas fa-bell fa-lg text-white"></i>Bildirimler
+                        </a>
                         
                         <!-- Kullanıcı Yönetimi -->
                         <div class="nav-section">Kullanıcı Yönetimi</div>

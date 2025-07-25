@@ -447,7 +447,7 @@ if (isset($_SESSION['user_id'])) {
                     
                     if (isset($_SESSION['user_id'])) {
                         $notificationManager = new NotificationManager($pdo);
-                        $userNotifications = $notificationManager->getUserNotifications($_SESSION['user_id'], 5, false);
+                        $userNotifications = $notificationManager->getUserNotifications($_SESSION['user_id'], 10, false);
                         $unreadNotificationCount = $notificationManager->getUnreadCount($_SESSION['user_id']);
                     }
                 } catch(Exception $e) {
@@ -458,6 +458,10 @@ if (isset($_SESSION['user_id'])) {
                     $unreadNotificationCount = 0;
                 }
                 
+                // Badge için sadece okunmamış bildirimleri say
+                $badgeNotificationCount = $unreadNotificationCount + $pendingUserRevisions + $completedFiles;
+                
+                // Dropdown görünürlüğü için toplam bildirim sayısı (herhangi bir bildirim varsa dropdown göster)
                 $totalNotifications = $pendingUserRevisions + $completedFiles + count($userNotifications);
                 ?>
                 
@@ -465,9 +469,11 @@ if (isset($_SESSION['user_id'])) {
                 <li class="nav-item dropdown me-2">
                     <a class="nav-link position-relative p-2" href="#" id="userNotificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-bell fa-lg text-white"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            <?php echo $totalNotifications; ?>
+                        <?php if ($badgeNotificationCount > 0): ?>
+                        <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            <?php echo $badgeNotificationCount; ?>
                         </span>
+                        <?php endif; ?>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userNotificationDropdown">
                         <li class="dropdown-header d-flex justify-content-between align-items-center">

@@ -22,11 +22,24 @@ try {
     
     // NotificationManager kullan
     $notificationManager = new NotificationManager($pdo);
-    $count = $notificationManager->getUnreadCount($userId);
+    $unreadNotificationCount = $notificationManager->getUnreadCount($userId);
+    
+    // Kullanıcının bekleyen revize talepleri
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM revisions WHERE user_id = ? AND status = 'pending'");
+    $stmt->execute([$userId]);
+    $pendingUserRevisions = $stmt->fetchColumn();
+
+    // Tamamlanan dosyalar (henüz bildirilmemiş)
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM file_uploads WHERE user_id = ? AND status = 'completed' AND notified = 0");
+    $stmt->execute([$userId]);
+    $completedFiles = $stmt->fetchColumn();
+    
+    // Badge için sadece okunmamış bildirimleri say
+    $badgeNotificationCount = $unreadNotificationCount + $pendingUserRevisions + $completedFiles;
     
     echo json_encode([
         'success' => true, 
-        'count' => $count
+        'count' => $badgeNotificationCount
     ]);
     
 } catch (Exception $e) {

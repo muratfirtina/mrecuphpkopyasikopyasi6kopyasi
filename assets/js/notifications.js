@@ -6,7 +6,7 @@
 // Bildirim işaretleme fonksiyonları
 function markNotificationRead(notificationId) {
     // AJAX ile bildirimi okundu olarak işaretle
-    fetch('ajax/mark-notification-read.php', {
+    fetch('ajax/mark_notification_read.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -30,7 +30,7 @@ function markNotificationRead(notificationId) {
 
 function markAllNotificationsRead() {
     // AJAX ile tüm bildirimleri okundu olarak işaretle
-    fetch('ajax/mark-all-notifications-read.php', {
+    fetch('ajax/mark_all_notifications_read.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -53,19 +53,19 @@ function markAllNotificationsRead() {
 
 function updateNotificationBadge() {
     // Okunmamış bildirim sayısını güncelle
-    fetch('ajax/get-notification-count.php')
+    fetch('ajax/get_notification_count.php')
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            const badges = document.querySelectorAll('.notification-badge');
-            badges.forEach(badge => {
+            const badge = document.getElementById('notification-badge');
+            if (badge) {
                 if (data.count > 0) {
                     badge.textContent = data.count;
-                    badge.style.display = 'block';
+                    badge.style.display = 'inline';
                 } else {
                     badge.style.display = 'none';
                 }
-            });
+            }
         }
     })
     .catch(error => {
@@ -189,7 +189,7 @@ function playNotificationSound() {
 // Real-time bildirim kontrolü (basit polling)
 function startNotificationPolling() {
     setInterval(function() {
-        fetch('ajax/get-notification-count.php')
+        fetch('ajax/get_notification_count.php')
         .then(response => response.json())
         .then(data => {
             if (data.success && data.count > 0) {
