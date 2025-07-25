@@ -1015,6 +1015,10 @@ include '../includes/user_header.php';
                                                                            class="btn btn-success btn-sm">
                                                                             <i class="fas fa-download me-1"></i>İndir
                                                                         </a>
+                                                                        <button type="button" class="btn btn-outline-warning btn-sm" 
+                                                                                onclick="requestRevision('<?php echo $revFile['id']; ?>', 'revision')">
+                                                                            <i class="fas fa-redo me-1"></i>Revize Talep Et
+                                                                        </button>
                                                                     </div>
                                                                 </div>
                                                             <?php endforeach; ?>
@@ -1048,6 +1052,10 @@ include '../includes/user_header.php';
                                                                            class="btn btn-success btn-sm">
                                                                             <i class="fas fa-download me-1"></i>İndir
                                                                         </a>
+                                                                        <button type="button" class="btn btn-outline-warning btn-sm" 
+                                                                                onclick="requestRevision('<?php echo $comm['response_id']; ?>', 'response')">
+                                                                            <i class="fas fa-redo me-1"></i>Revize Talep Et
+                                                                        </button>
                                                                     </div>
                                                                 </div>
                                                             </div>

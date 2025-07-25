@@ -400,6 +400,44 @@ include '../includes/admin_sidebar.php';
     </div>
 </div>
 
+<!-- Modern Confirmation Modal -->
+<div class="modal fade" id="processConfirmModal" tabindex="-1" aria-labelledby="processConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient-primary text-white border-0">
+                <h5 class="modal-title d-flex align-items-center" id="processConfirmModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Dosya İşleme Onayı
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-4">
+                    <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ff6b6b, #ffa500); border-radius: 50%;">
+                        <i class="fas fa-file-alt text-white fa-2x"></i>
+                    </div>
+                    <h6 class="mb-2 text-dark">Bu dosyayı işleme almak istediğinizden emin misiniz?</h6>
+                    <p class="text-muted mb-0">Bu işlem dosyanın durumunu "İşleniyor" olarak değiştirecek ve dosya detay sayfasına yönlendirecektir.</p>
+                </div>
+                <div class="alert alert-info d-flex align-items-center mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <small>Bu işlem geri alınamaz. Devam etmek istediğinizden emin olun.</small>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-3">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>
+                    İptal
+                </button>
+                <button type="button" class="btn btn-success px-4" id="confirmProcessBtn" style="box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    <i class="fas fa-check me-1"></i>
+                    Evet, İşle
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Dosya Listesi -->
 <div class="card admin-card">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -897,6 +935,106 @@ function buildPaginationUrl($page_num) {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Modern Process Confirmation Modal Styles */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important;
+}
+
+#processConfirmModal .modal-content {
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+#processConfirmModal .modal-header {
+    padding: 1.5rem 2rem 1rem;
+    border-bottom: none;
+}
+
+#processConfirmModal .modal-body {
+    padding: 1rem 2rem 1.5rem;
+}
+
+#processConfirmModal .modal-footer {
+    padding: 0rem 3rem 3rem 0rem;
+    background: #f8f9fa;
+    margin: 0 -2rem -2rem;
+    padding-top: 1.5rem;
+}
+
+#processConfirmModal .btn-lg {
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+#processConfirmModal .btn-success:hover {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border-color: #28a745;
+    transform: translateY(-2px);
+}
+
+#processConfirmModal .btn-secondary:hover {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    border-color: #6c757d;
+    transform: translateY(-2px);
+}
+
+#processConfirmModal .alert-info {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    border: 1px solid #b6d4da;
+    border-radius: 0.5rem;
+}
+
+/* Modal animation enhancements */
+#processConfirmModal.fade .modal-dialog {
+    transition: transform 0.4s ease-out;
+    transform: scale(0.8) translateY(-50px);
+}
+
+#processConfirmModal.show .modal-dialog {
+    transform: scale(1) translateY(0);
+}
+
+/* Icon pulse animation */
+#processConfirmModal .fas.fa-file-alt {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Mobile responsiveness for modal */
+@media (max-width: 576px) {
+    #processConfirmModal .modal-header {
+        padding: 1rem 1.5rem 0.5rem;
+    }
+    
+    #processConfirmModal .modal-body {
+        padding: 0.5rem 1.5rem 1rem;
+    }
+    
+    #processConfirmModal .modal-footer {
+        padding: 1rem 1.5rem 1.5rem;
+        margin: 0 -1.5rem -1.5rem;
+    }
+    
+    #processConfirmModal .btn-lg {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+    }
+}
 </style>
 
 <script>
@@ -979,6 +1117,32 @@ function showQuickJumpError(message) {
     }, 3000);
 }
 
+// Modal styling enhancement
+// Enhanced modal interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Add enter key support for modal
+    document.addEventListener('keydown', function(e) {
+        var modal = document.getElementById('processConfirmModal');
+        if (modal && modal.classList.contains('show')) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('confirmProcessBtn').click();
+            } else if (e.key === 'Escape') {
+                var modalInstance = bootstrap.Modal.getInstance(modal);
+                modalInstance.hide();
+            }
+        }
+    });
+    
+    // Add focus to confirm button when modal opens
+    var processModal = document.getElementById('processConfirmModal');
+    if (processModal) {
+        processModal.addEventListener('shown.bs.modal', function() {
+            document.getElementById('confirmProcessBtn').focus();
+        });
+    }
+});
+
 // Enhanced keyboard navigation
 document.addEventListener('keydown', function(e) {
     // Don't interfere if user is typing in an input
@@ -1056,22 +1220,58 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Process file function
+// Process file function with modern modal
+var currentProcessUploadId = null;
+var currentProcessButton = null;
+
 function processFile(uploadId) {
     console.log('ProcessFile başlatıldı - Upload ID:', uploadId);
     
-    if (confirm('Bu dosyayı işleme almak istediğinizden emin misiniz?')) {
-        console.log('Kullanıcı onayladı, durum güncelleniyor...');
-        
-        // Loading indicator göster
-        var button = event.target;
-        var originalText = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Yükleniyor...';
-        button.disabled = true;
-        
-        updateFileStatus(uploadId, 'processing', 'Dosya işleme alındı', true);
-    }
+    // Store current upload ID and button for later use
+    currentProcessUploadId = uploadId;
+    currentProcessButton = event.target;
+    
+    // Show modern confirmation modal
+    var modal = new bootstrap.Modal(document.getElementById('processConfirmModal'));
+    modal.show();
 }
+
+// Modal confirmation handler
+document.addEventListener('DOMContentLoaded', function() {
+    var confirmBtn = document.getElementById('confirmProcessBtn');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function() {
+            if (currentProcessUploadId && currentProcessButton) {
+                console.log('Kullanıcı modal ile onayladı, durum güncelleniyor...');
+                
+                // Modal'ı kapat
+                var modal = bootstrap.Modal.getInstance(document.getElementById('processConfirmModal'));
+                modal.hide();
+                
+                // Loading indicator göster
+                var originalText = currentProcessButton.innerHTML;
+                currentProcessButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Yükleniyor...';
+                currentProcessButton.disabled = true;
+                
+                // Status güncelle
+                updateFileStatus(currentProcessUploadId, 'processing', 'Dosya işleme alındı', true);
+                
+                // Reset variables
+                currentProcessUploadId = null;
+                currentProcessButton = null;
+            }
+        });
+    }
+    
+    // Modal kapandığında variables'ları temizle
+    var processModal = document.getElementById('processConfirmModal');
+    if (processModal) {
+        processModal.addEventListener('hidden.bs.modal', function() {
+            currentProcessUploadId = null;
+            currentProcessButton = null;
+        });
+    }
+});
 
 // Update file status function
 function updateFileStatus(uploadId, status, notes, redirectToDetail) {
