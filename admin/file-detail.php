@@ -464,6 +464,28 @@ try {
                 $response['response_file'] = $response['filename']; // Uyumluluk için
             }
         }
+        
+        // Bu dosya için revizyon dosyalarını al
+        $stmt = $pdo->prepare("
+            SELECT rf.*, r.requested_at, r.status as revision_status, r.credits_charged,
+                   ru.username, ru.first_name, ru.last_name,
+                   au.username as admin_username, au.first_name as admin_first_name, au.last_name as admin_last_name
+            FROM revision_files rf
+            LEFT JOIN revisions r ON rf.revision_id = r.id
+            LEFT JOIN users ru ON r.user_id = ru.id
+            LEFT JOIN users au ON rf.admin_id = au.id
+            WHERE r.upload_id = ?
+            ORDER BY rf.upload_date DESC
+        ");
+        $stmt->execute([$uploadId]);
+        $revisionFiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Revizyon dosyalarına file_path ekle
+        foreach ($revisionFiles as &$revisionFile) {
+            if (!empty($revisionFile['filename'])) {
+                $revisionFile['file_path'] = '../uploads/revision_files/' . $revisionFile['filename'];
+            }
+        }
     }
     
     // Kullanıcıyla olan tüm iletişim geçmişini topla (kronolojik sırada)
@@ -476,10 +498,12 @@ try {
             // Response dosyası için revize taleplerini al
             $stmt = $pdo->prepare("
                 SELECT r.*, u.username, u.first_name, u.last_name,
-                       a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name
+                       a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
+                       fr.original_name as response_file_name
                 FROM revisions r
                 LEFT JOIN users u ON r.user_id = u.id
                 LEFT JOIN users a ON r.admin_id = a.id
+                LEFT JOIN file_responses fr ON r.response_id = fr.id
                 WHERE r.response_id = ?
                 ORDER BY r.requested_at DESC
             ");
@@ -570,7 +594,9 @@ try {
                 'status' => $revision['status'],
                 'revision_id' => $revision['id'],
                 'revision_status' => $revision['status'],
-                'response_file_name' => $revision['response_file_name'] ?? null // Hangi dosya için revize talebi
+                'response_file_name' => $revision['response_file_name'] ?? null, // Hangi dosya için revize talebi
+                'is_response_mode' => ($fileType === 'response'), // Response dosyası modunda mı?
+                'current_response_file_name' => ($fileType === 'response') ? $upload['original_name'] : null // Mevcut response dosyası adı
             ];
             
             // Admin'in revize cevabı (varsa ve geçerli ise)
@@ -1223,11 +1249,12 @@ try {
                                     </div>
                                     
                                     <!-- İşleme Al Butonu -->
-                                    <form method="POST" class="mb-2">
+                                    <form method="POST" class="mb-2" id="approve-form-<?php echo $revision['id']; ?>">
                                         <input type="hidden" name="revision_id" value="<?php echo $revision['id']; ?>">
-                                        <button type="submit" name="approve_revision_direct" 
+                                        <input type="hidden" name="approve_revision_direct" value="1">
+                                        <button type="button" 
                                                 class="btn btn-success w-100"
-                                                onclick="return confirm('Bu revizyon talebini işleme almak istediğinizden emin misiniz?')">
+                                                onclick="showApprovalModal('<?php echo $revision['id']; ?>', '<?php echo htmlspecialchars($revision['first_name'] . ' ' . $revision['last_name']); ?>', '<?php echo htmlspecialchars(addslashes($revision['request_notes'])); ?>')">
                                             <i class="fas fa-check me-1"></i>İşleme Al
                                         </button>
                                     </form>
@@ -1413,22 +1440,6 @@ try {
                         </div>
                     </div>
                     
-                    <!-- Kullanıcı Notları -->
-                    <?php if (!empty($upload['upload_notes'])): ?>
-                        <div class="col-12">
-                            <label class="form-label">Kullanıcı Notları</label>
-                            <div class="form-control-plaintext">
-                                <div class="alert-light border" style="position: relative;
-    padding: 1rem 1rem;
-    margin-bottom: 1rem;">
-                                    <i class="fas fa-user me-2 text-primary"></i>
-                                    <strong>Kullanıcının yükleme sırasında yaztığı notlar:</strong><br>
-                                    <?php echo nl2br(htmlspecialchars($upload['upload_notes'])); ?>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                    
                     <!-- Admin Notları -->
                     <?php if (!empty($upload['admin_notes'])): ?>
                     <?php endif; ?>
@@ -1552,7 +1563,57 @@ try {
     </div>
 <?php endif; ?>
 
-<!-- İletişim Geçmişi (Tüm Kullanıcı Admin Etkileşimleri) -->  
+<!-- Revize Dosyaları Listesi -->
+<?php if ($fileType !== 'response' && !empty($revisionFiles)): ?>
+<div class="card admin-card mb-4" id="revision-files">
+    <div class="card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-edit me-2"></i>Revize Dosyaları (<?php echo count($revisionFiles); ?>)
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Dosya Adı</th>
+                        <th>Boyut</th>
+                        <th>Yükleme Tarihi</th>
+                        <th>Kullanıcı</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($revisionFiles as $revisionFile): ?>
+                        <tr>
+                            <td>
+                                <strong><?php echo safeHtml($revisionFile['original_name']); ?></strong>
+                            </td>
+                            <td><?php echo formatFileSize($revisionFile['file_size']); ?></td>
+                            <td><?php echo date('d.m.Y H:i', strtotime($revisionFile['upload_date'])); ?></td>
+                            <td><?php echo safeHtml($revisionFile['username']); ?></td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a href="file-detail.php?id=<?php echo $uploadId; ?>&type=revision&revision_id=<?php echo $revisionFile['id']; ?>" 
+                                       class="btn btn-outline-primary btn-sm" title="Detayları Görüntüle">
+                                        <i class="fas fa-eye me-1"></i>Detay
+                                    </a>
+                                    <a href="download-file.php?id=<?php echo $revisionFile['id']; ?>&type=revision" 
+                                       class="btn btn-success btn-sm" title="Dosyayı İndir">
+                                        <i class="fas fa-download me-1"></i>İndir
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- İletişim Geçmişi (Tüm Kullanıcı Admin Etkileşimleri) -->
 <?php if (!empty($communicationHistory)): ?>
 <div class="card admin-card mb-4">
     <div class="card-header">
@@ -1649,7 +1710,11 @@ try {
                         <i class="fas fa-arrow-right text-primary me-2"></i>
                         <strong>Revize talep edilen dosya:</strong> 
                         <span class="text-primary"><?php echo htmlspecialchars($comm['response_file_name']); ?></span>
-                        <small class="text-muted ms-2">(Yanıt Dosyası)</small>
+                        <?php if (isset($comm['is_response_mode']) && $comm['is_response_mode'] && $comm['response_file_name'] === $comm['current_response_file_name']): ?>
+                            <small class="text-muted ms-2">(Bu Yanıt Dosyası)</small>
+                        <?php else: ?>
+                            <small class="text-muted ms-2">(Yanıt Dosyası)</small>
+                        <?php endif; ?>
                         </div>
                         </div>
                         <?php else: ?>
@@ -1883,6 +1948,13 @@ try {
                                 </div>
                                 <div class="note-content">
                                     <?php echo nl2br(htmlspecialchars($comm['user_notes'])); ?>
+                                                                        <?php if ($comm['type'] === 'user_upload' && isset($comm['is_main_file']) && $comm['is_main_file']): ?>
+                                        <a href="download-file.php?id=<?php echo $uploadId; ?>&type=upload" 
+                                           class="btn btn-success btn-sm ms-2" 
+                                           title="Kullanıcının yüklediği dosyayı indir">
+                                            <i class="fas fa-download me-1"></i>Dosyayı İndir
+                                        </a>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         <?php else: ?>
@@ -1909,6 +1981,13 @@ try {
                                 </div>
                                 <div class="note-content">
                                     <?php echo nl2br(htmlspecialchars($comm['admin_notes'])); ?>
+                                    <?php if ($comm['type'] === 'admin_response' && isset($comm['response_id'])): ?>
+                                        <a href="download-file.php?id=<?php echo $comm['response_id']; ?>&type=response" 
+                                           class="btn btn-primary btn-sm ms-2" 
+                                           title="Admin'in yanıt dosyasını indir">
+                                            <i class="fas fa-download me-1"></i>Yanıt Dosyasını İndir
+                                        </a>
+                                    <?php endif; ?>
                                 </div>
                                 
                                 <!-- Admin'in Yüklediği Revizyon Dosyası -->
@@ -1980,7 +2059,7 @@ try {
                                 </span>
                             <?php endif; ?>
                             
-                            <?php if (isset($comm['revision_id']) && $comm['type'] === 'user_revision_request'): ?>
+                            <!-- <?php if (isset($comm['revision_id']) && $comm['type'] === 'user_revision_request'): ?>
                                 <?php if ($comm['revision_status'] === 'pending'): ?>
                                     <div class="meta-item">
                                         <div class="d-flex gap-1">
@@ -1997,7 +2076,7 @@ try {
                                         </div>
                                     </div>
                                 <?php endif; ?>
-                            <?php endif; ?>
+                            <?php endif; ?> -->
                         </div>
                     </div>
                 </div>
@@ -2268,98 +2347,7 @@ try {
     </div>
 <?php endif; ?>
 
-<!-- Revize Yanıt Dosyası Yükleme (response dosyası için) -->
-<?php if ($fileType === 'response'): ?>
-    <?php if ($approvedRevision): ?>
-        <div class="card admin-card mb-4">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">
-                        <i class="fas fa-redo me-2 text-warning"></i>Revize Edilmiş Yanıt Dosyası Yükle
-                    </h6>
-                    <span class="badge bg-info">Revize Talebi İşleme Alındı</span>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-info mb-3">
-                    <div class="d-flex">
-                        <i class="fas fa-info-circle me-3 mt-1"></i>
-                        <div>
-                            <strong>Revize Talebi İşleme Alındı:</strong><br>
-                            <span class="text-muted"><?php echo nl2br(htmlspecialchars($approvedRevision['request_notes'])); ?></span>
-                            <br><small class="text-muted">Tarih: <?php echo formatDate($approvedRevision['requested_at']); ?></small>
-                        </div>
-                    </div>
-                </div>
-                
-                <form method="POST" enctype="multipart/form-data">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="revised_response_file" class="form-label">Revize Edilmiş Yanıt Dosyası <span class="text-danger">*</span></label>
-                            <input type="file" class="form-control" id="revised_response_file" name="revised_response_file" required>
-                            <div class="form-text">Revize edilen yanıt dosyasını seçin</div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <label for="revised_credits_charged" class="form-label">Düşürülecek Kredi</label>
-                            <input type="number" class="form-control" id="revised_credits_charged" name="revised_credits_charged" 
-                                   value="0" min="0" step="0.01">
-                            <div class="form-text">Revize için kullanıcıdan düşürülecek kredi miktarı</div>
-                        </div>
-                        
-                        <div class="col-12">
-                            <label for="revised_response_notes" class="form-label">Revize Notları</label>
-                            <textarea class="form-control" id="revised_response_notes" name="revised_response_notes" rows="3"
-                                      placeholder="Revize edilen dosya ile ilgili notlarınızı buraya yazın..."></textarea>
-                            <div class="form-text">Revize detayları ve değişiklikler hakkında bilgi verin</div>
-                        </div>
-                        
-                        <div class="col-12">
-                            <button type="submit" name="upload_revised_response" class="btn btn-warning btn-lg">
-                                <i class="fas fa-upload me-2"></i>Revize Edilmiş Dosyayı Yükle
-                            </button>
-                            <small class="text-muted d-block mt-2">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Yeni dosya yüklendikten sonra kullanıcı bunu indirebilecek
-                            </small>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    <?php else: ?>
-        <div class="card admin-card mb-4">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="fas fa-info-circle me-2 text-info"></i>Revize Durumu
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-warning">
-                    <div class="d-flex">
-                        <i class="fas fa-exclamation-triangle me-3 mt-1"></i>
-                        <div>
-                            <strong>Bu yanıt dosyası için henüz onaylanmış revize talebi bulunmuyor.</strong><br>
-                            <small class="text-muted">
-                                Kullanıcı bu yanıt dosyası için revize talebi gönderdiyse ve siz onu onaylandıysanız, 
-                                burada revize dosyası yükleme formu görünecektir.
-                            </small>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="d-flex gap-2">
-                    <a href="revisions.php" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-list me-1"></i>Revize Taleplerini Görüntüle
-                    </a>
-                    <a href="file-detail.php?id=<?php echo $uploadId; ?>" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-file-alt me-1"></i>Orijinal Dosyaya Dön
-                    </a>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
-<?php endif; ?>
+
 
 <!-- Revize Reddetme Modal -->
 <div class="modal fade" id="rejectRevisionModal" tabindex="-1" aria-labelledby="rejectRevisionModalLabel" aria-hidden="true">
@@ -2871,6 +2859,70 @@ try {
 
 </style>
 
+<!-- Modern Onay Modalı -->
+<div class="modal fade" id="approvalModal" tabindex="-1" aria-labelledby="approvalModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                <h5 class="modal-title d-flex align-items-center" id="approvalModalLabel">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Revizyon Talebini İşleme Al
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-info d-flex align-items-center mb-4" style="padding: 1rem; border-radius: 0.375rem;">
+                    <i class="fas fa-info-circle me-2 fa-lg"></i>
+                    <div>
+                        <strong>Bu işlem:</strong> Revizyon talebini "İşleme Alındı" durumuna geçirecek ve revize edilmiş dosyayı yükleme formunu aktif hale getirecektir.
+                    </div>
+                </div>
+                
+                <div class="revision-details">
+                    <h6 class="text-primary mb-3">
+                        <i class="fas fa-user me-2"></i>
+                        Talep Eden Kullanıcı
+                    </h6>
+                    <div class="user-info bg-light p-3 rounded mb-4">
+                        <h5 class="mb-2" id="modal-user-name"></h5>
+                        <small class="text-muted">Bu kullanıcının revizyon talebini işleme alacaksınız</small>
+                    </div>
+                    
+                    <h6 class="text-warning mb-3">
+                        <i class="fas fa-comment-dots me-2"></i>
+                        Kullanıcının Revizyon Talebi
+                    </h6>
+                    <div class="request-notes bg-warning bg-opacity-10 p-3 rounded border border-warning mb-4">
+                        <div id="modal-request-notes" class="font-monospace"></div>
+                    </div>
+                    
+                    <div class="alert-success d-flex align-items-center" style="padding: 1rem; border-radius: 0.375rem;">
+                        <i class="fas fa-thumbs-up me-2 fa-lg"></i>
+                        <div>
+                            <strong>Onay verdiğinizde:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Revizyon talebi "İşleniyor" durumuna geçecek</li>
+                                <li>Kullanıcıya bildirim gönderilecek</li>
+                                <li>Revize edilmiş dosyayı yükleme formu aktif olacak</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary d-flex align-items-center" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>
+                    İptal Et
+                </button>
+                <button type="button" class="btn btn-success d-flex align-items-center" id="confirm-approval-btn" onclick="confirmApproval()">
+                    <i class="fas fa-check me-2"></i>
+                    Evet, İşleme Al
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Reject Revision Modal -->
 <div class="modal fade" id="rejectRevisionModal" tabindex="-1" aria-labelledby="rejectRevisionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -2912,6 +2964,65 @@ try {
 </div>
 
 <script>
+// Global değişkenler
+let currentRevisionId = null;
+
+// Modern Onay Modal Fonksiyonları
+function showApprovalModal(revisionId, userName, requestNotes) {
+    currentRevisionId = revisionId;
+    
+    // Modal içeriğini güncelle
+    document.getElementById('modal-user-name').textContent = userName;
+    document.getElementById('modal-request-notes').textContent = requestNotes;
+    
+    // Modal'ı aç
+    const modal = new bootstrap.Modal(document.getElementById('approvalModal'));
+    modal.show();
+}
+
+function confirmApproval() {
+    if (currentRevisionId) {
+        // Loading durumunu göster
+        const confirmBtn = document.getElementById('confirm-approval-btn');
+        const originalText = confirmBtn.innerHTML;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>İşleniyor...';
+        confirmBtn.disabled = true;
+        
+        // Form'u submit et
+        const form = document.getElementById('approve-form-' + currentRevisionId);
+        if (form) {
+            form.submit();
+        } else {
+            // Fallback: Manuel form oluştur ve submit et
+            const fallbackForm = document.createElement('form');
+            fallbackForm.method = 'POST';
+            fallbackForm.innerHTML = `
+                <input type="hidden" name="revision_id" value="${currentRevisionId}">
+                <input type="hidden" name="approve_revision_direct" value="1">
+            `;
+            document.body.appendChild(fallbackForm);
+            fallbackForm.submit();
+        }
+    }
+}
+
+// Modal kapatma events
+document.addEventListener('DOMContentLoaded', function() {
+    // Approval modal kapatıldığında
+    const approvalModal = document.getElementById('approvalModal');
+    if (approvalModal) {
+        approvalModal.addEventListener('hidden.bs.modal', function () {
+            currentRevisionId = null;
+            // Button'u reset et
+            const confirmBtn = document.getElementById('confirm-approval-btn');
+            if (confirmBtn) {
+                confirmBtn.innerHTML = '<i class="fas fa-check me-2"></i>Evet, İşleme Al';
+                confirmBtn.disabled = false;
+            }
+        });
+    }
+});
+
 function showRejectModal(revisionId) {
     document.getElementById('rejectRevisionId').value = revisionId;
     document.getElementById('admin_notes').value = '';

@@ -75,6 +75,79 @@ try {
     $_SESSION['error'] = 'Veritabanı hatası oluştu.';
     redirect('revisions.php');
 }
+// YENİ EKLENEN BLOK: Revize talep edilen doğru dosyayı bul
+$targetFile = [
+    'type' => 'Bilinmiyor',
+    'name' => 'Dosya bilgisi alınamadı',
+    'size' => 0,
+    'date' => null,
+    'is_found' => false
+];
+
+try {
+    // Önce revizyonun bir "yanıt dosyası" için mi yapıldığını kontrol et
+    // Bunun için ana sorguya 'r.response_id' eklememiz gerekiyor.
+    // Eğer ana sorgunuzda 'r.*' varsa bu zaten dahildir.
+    $stmt = $pdo->prepare("SELECT response_id FROM revisions WHERE id = ?");
+    $stmt->execute([$revisionId]);
+    $revisionDetails = $stmt->fetch(PDO::FETCH_ASSOC);
+    $responseId = $revisionDetails['response_id'] ?? null;
+
+    if ($responseId) {
+        // Evet, bu bir yanıt dosyası için revize talebi. Yanıt dosyasının bilgilerini çekelim.
+        $stmt = $pdo->prepare("SELECT original_name, file_size, upload_date FROM file_responses WHERE id = ?");
+        $stmt->execute([$responseId]);
+        $responseFileData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($responseFileData) {
+            $targetFile = [
+                'type' => 'Yanıt Dosyası',
+                'name' => $responseFileData['original_name'],
+                'size' => $responseFileData['file_size'],
+                'date' => $responseFileData['upload_date'],
+                'is_found' => true
+            ];
+        }
+    } else {
+        // Bu, ana dosya veya önceki bir revizyon dosyası için bir talep.
+        // Bu talepten ÖNCE tamamlanmış son revizyon dosyasını bulmaya çalışalım.
+        $stmt = $pdo->prepare("
+            SELECT rf.original_name, rf.file_size, rf.upload_date
+            FROM revisions r
+            JOIN revision_files rf ON r.id = rf.revision_id
+            WHERE r.upload_id = ? AND r.status = 'completed' AND r.requested_at < ?
+            ORDER BY r.completed_at DESC
+            LIMIT 1
+        ");
+        $stmt->execute([$revision['upload_id'], $revision['requested_at']]);
+        $previousRevisionFile = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($previousRevisionFile) {
+            // Önceki bir revizyon dosyası bulundu. Hedefimiz bu.
+            $targetFile = [
+                'type' => 'Önceki Revizyon Dosyası',
+                'name' => $previousRevisionFile['original_name'],
+                'size' => $previousRevisionFile['file_size'],
+                'date' => $previousRevisionFile['upload_date'],
+                'is_found' => true
+            ];
+        } else {
+            // Önceki bir revizyon dosyası yoksa, hedefimiz orijinal dosyadır.
+            // Bu bilgiler zaten ana $revision sorgusunda mevcut.
+            $targetFile = [
+                'type' => 'Orijinal Dosya',
+                'name' => $revision['original_name'],
+                'size' => $revision['file_size'],
+                'date' => $revision['file_uploaded_at'],
+                'is_found' => true
+            ];
+        }
+    }
+} catch (PDOException $e) {
+    // Hata durumunda logla, ama sayfayı bozma.
+    error_log("Hedef dosya belirlenirken hata: " . $e->getMessage());
+}
+// YENİ BLOK SONU
 
 // Revizyon dosyalarını getir (eğer revizyon tamamlanmışsa)
 $revisionFiles = [];
@@ -293,40 +366,52 @@ include '../includes/user_header.php';
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <!-- Orijinal Dosya -->
-                                <div class="col-md-6">
-                                    <h6 class="text-muted mb-3">Orijinal Dosya</h6>
-                                    <div class="file-info">
-                                        <div class="file-icon">
-                                            <i class="fas fa-file-code text-primary"></i>
-                                        </div>
-                                        <div class="file-details">
-                                            <h6 class="file-name"><?php echo htmlspecialchars($revision['original_name'] ?? 'Bilinmeyen dosya'); ?></h6>
-                                            <div class="file-meta">
-                                                <span class="badge bg-light text-dark me-2">
-                                                    <i class="fas fa-hdd me-1"></i>
-                                                    <?php echo formatFileSize($revision['file_size'] ?? 0); ?>
-                                                </span>
-                                                <?php if (($revision['brand_name'] ?? 'Marka bilgisi yok')): ?>
-                                                <span class="badge bg-primary me-2">
-                                                    <i class="fas fa-car me-1"></i>
-                                                    <?php echo htmlspecialchars(($revision['brand_name'] ?? 'Marka bilgisi yok')); ?>
-                                                </span>
-                                                <?php endif; ?>
-                                                <?php if (($revision['category_name'] ?? 'Kategori belirtilmemiş')): ?>
-                                                <span class="badge bg-secondary me-2">
-                                                    <i class="fas fa-tag me-1"></i>
-                                                    <?php echo htmlspecialchars(($revision['category_name'] ?? 'Kategori belirtilmemiş')); ?>
-                                                </span>
-                                                <?php endif; ?>
-                                            </div>
-                                            <small class="text-muted">
-                                                <i class="fas fa-calendar me-1"></i>
-                                                <?php echo $revision['file_uploaded_at'] ? date('d.m.Y H:i', strtotime($revision['file_uploaded_at'])) : 'Bilinmiyor'; ?>
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
+                                <!-- Revize Edilmek İstenen Dosya (Dinamik) -->
+<div class="col-md-6">
+    <h6 class="text-muted mb-3">
+        <?php
+            // Dosya tipine göre ikon ve renk belirleyelim
+            $typeConfig = [
+                'Orijinal Dosya'           => ['icon' => 'fa-file-alt', 'color' => 'primary'],
+                'Yanıt Dosyası'            => ['icon' => 'fa-reply', 'color' => 'info'],
+                'Önceki Revizyon Dosyası' => ['icon' => 'fa-edit', 'color' => 'warning'],
+                'Bilinmiyor'               => ['icon' => 'fa-question-circle', 'color' => 'secondary']
+            ];
+            $currentType = $typeConfig[$targetFile['type']] ?? $typeConfig['Bilinmiyor'];
+        ?>
+        <i class="fas <?php echo $currentType['icon']; ?> text-<?php echo $currentType['color']; ?> me-2"></i>
+        Revize Edilmek İstenen Dosya
+    </h6>
+    
+    <?php if ($targetFile['is_found']): ?>
+        <div class="file-info">
+            <div class="file-icon">
+                <i class="fas fa-file-code text-primary"></i>
+            </div>
+            <div class="file-details">
+                <h6 class="file-name"><?php echo htmlspecialchars($targetFile['name']); ?></h6>
+                <div class="file-meta">
+                    <span class="badge bg-light text-dark me-2">
+                        <i class="fas fa-hdd me-1"></i>
+                        <?php echo formatFileSize($targetFile['size']); ?>
+                    </span>
+                    <span class="badge bg-<?php echo $currentType['color']; ?>">
+                        <i class="fas fa-info-circle me-1"></i>
+                        <?php echo htmlspecialchars($targetFile['type']); ?>
+                    </span>
+                </div>
+                <small class="text-muted">
+                    <i class="fas fa-calendar me-1"></i>
+                    <?php echo $targetFile['date'] ? date('d.m.Y H:i', strtotime($targetFile['date'])) : 'Bilinmiyor'; ?>
+                </small>
+            </div>
+        </div>
+    <?php else: ?>
+        <div class="alert alert-danger">
+            Revize edilecek dosya bilgisi alınamadı.
+        </div>
+    <?php endif; ?>
+</div>
 
                                 <!-- Revize Dosya -->
                                 <div class="col-md-6">
@@ -482,9 +567,9 @@ include '../includes/user_header.php';
                                 </a>
                                 
                                 <?php if ($revision['status'] === 'completed'): ?>
-                                <a href="files.php?status=completed" class="btn btn-outline-warning">
+                                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#newRevisionModal">
                                     <i class="fas fa-plus me-2"></i>Yeni Revize Talebi
-                                </a>
+                                </button>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -548,6 +633,10 @@ include '../includes/user_header.php';
                                                class="btn btn-success btn-sm">
                                                 <i class="fas fa-download me-1"></i>İndir
                                             </a>
+                                            <button type="button" class="btn btn-outline-warning btn-sm ms-2" 
+                                                    onclick="openRevisionFileModal('<?php echo $revFile['id']; ?>', '<?php echo htmlspecialchars($revFile['original_name']); ?>)">
+                                                <i class="fas fa-edit me-1"></i>Revize Talep Et
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -600,6 +689,54 @@ include '../includes/user_header.php';
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Anladım</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Yeni Revize Talebi Modal -->
+<div class="modal fade" id="newRevisionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2 text-warning"></i>Yeni Revize Talebi
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="newRevisionForm">
+                <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Mevcut Dosya:</strong> <?php echo htmlspecialchars($revision['original_name'] ?? 'Dosya bilgisi yok'); ?>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="revisionNotes" class="form-label">
+                            <i class="fas fa-comment me-2"></i>Revize Talebi Açıklaması *
+                        </label>
+                        <textarea class="form-control" id="revisionNotes" name="revision_notes" rows="4" 
+                                  placeholder="Lütfen dosyanızda hangi değişikliklerin yapılmasını istediğinizi detaylı bir şekilde açıklayın..." 
+                                  required></textarea>
+                        <div class="form-text">
+                            Örnek: "Güç artışını 250 HP'ye çıkarın", "Tork limiti 350 Nm olsun", "Launch control ekleyin" gibi...
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Önemli:</strong> Revize talebi gönderildikten sonra admin ekibimiz tarafından değerlendirilecektir. 
+                        Talebin işleme alınması durumunda kredi hesabınızdan düşüm yapılabilir.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>İptal
+                    </button>
+                    <button type="submit" class="btn btn-warning" id="submitRevisionBtn">
+                        <i class="fas fa-paper-plane me-1"></i>Revize Talebi Gönder
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -797,24 +934,248 @@ include '../includes/user_header.php';
 }
 </style>
 
-<script>
-// Formatters
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
+<script type="text/javascript">
+
+// Auto refresh configuration
+var enableAutoRefresh = <?php echo ($revision['status'] === 'pending' || $revision['status'] === 'in_progress') ? 'true' : 'false'; ?>;
+var revisionUploadId = '<?php echo $revision['upload_id']; ?>';
 
 // Auto refresh for pending revisions
-<?php if ($revision['status'] === 'pending' || $revision['status'] === 'in_progress'): ?>
-setTimeout(() => {
-    if (!document.hidden) {
-        location.reload();
+if (enableAutoRefresh) {
+    setTimeout(function() {
+        if (!document.hidden) {
+            location.reload();
+        }
+    }, 60000); // 60 seconds
+}
+
+// DOM yüklendikten sonra çalışacak kodlar
+document.addEventListener('DOMContentLoaded', function() {
+    // Yeni Revize Talebi Form İşlevselliği
+    var newRevisionForm = document.getElementById('newRevisionForm');
+    var submitBtn = document.getElementById('submitRevisionBtn');
+    var revisionNotes = document.getElementById('revisionNotes');
+    
+    if (newRevisionForm) {
+        var newRevisionModal = new bootstrap.Modal(document.getElementById('newRevisionModal'));
+        
+        newRevisionForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var notes = revisionNotes.value.replace(/^\s+|\s+$/g, ''); // trim alternative
+            
+            if (!notes) {
+                showAlert('Revize talebi açıklaması gereklidir.', 'danger');
+                return;
+            }
+            
+            if (notes.length < 10) {
+                showAlert('Revize talebi açıklaması en az 10 karakter olmalıdır.', 'danger');
+                return;
+            }
+            
+            // Buton durumunu değiştir
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Gönderiliyor...';
+            
+            // XMLHttpRequest ile AJAX isteği (eski tarayıcı uyumlu)
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'ajax/create_revision.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    // Buton durumunu eski haline getir
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Revize Talebi Gönder';
+                    
+                    if (xhr.status === 200) {
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            if (data.success) {
+                                // Başarılı
+                                showAlert(data.message, 'success');
+                                newRevisionModal.hide();
+                                
+                                // Formu temizle
+                                revisionNotes.value = '';
+                                
+                                // 2 saniye sonra sayfayı yenile
+                                setTimeout(function() {
+                                    location.reload();
+                                }, 2000);
+                            } else {
+                                // Hata
+                                showAlert(data.message, 'danger');
+                            }
+                        } catch (error) {
+                            console.error('JSON Parse Error:', error);
+                            showAlert('Bir hata oluştu. Lütfen daha sonra tekrar deneyin.', 'danger');
+                        }
+                    } else {
+                        console.error('HTTP Error:', xhr.status);
+                        showAlert('Bir hata oluştu. Lütfen daha sonra tekrar deneyin.', 'danger');
+                    }
+                }
+            };
+            
+            var requestData = JSON.stringify({
+                upload_id: revisionUploadId,
+                revision_notes: notes
+            });
+            
+            xhr.send(requestData);
+        });
+        
+        // Modal temizleme
+        document.getElementById('newRevisionModal').addEventListener('hidden.bs.modal', function() {
+            revisionNotes.value = '';
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Revize Talebi Gönder';
+        });
     }
-}, 60000); // 60 seconds
-<?php endif; ?>
+});
+
+/**
+ * Alert mesajı gösterir
+ * @param {string} message - Gösterilecek mesaj
+ * @param {string} type - Alert tipi (success, danger, warning, info)
+ */
+var showAlert = function(message, type) {
+    // Mevcut alertleri kaldır
+    var existingAlerts = document.querySelectorAll('.alert-dynamic');
+    for (var i = 0; i < existingAlerts.length; i++) {
+        existingAlerts[i].remove();
+    }
+    
+    // Yeni alert oluştur
+    var alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show alert-dynamic';
+    alertDiv.innerHTML = '<div class="d-flex align-items-center">' +
+        '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-triangle') + ' me-3 fa-lg"></i>' +
+        '<div><strong>' + (type === 'success' ? 'Başarılı!' : 'Hata!') + '</strong> ' + message + '</div>' +
+        '</div>' +
+        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+    
+    // Alert'i sayfanın üstüne ekle
+    var main = document.querySelector('main');
+    var firstChild = main.firstElementChild;
+    main.insertBefore(alertDiv, firstChild);
+    
+    // 5 saniye sonra otomatik kapat
+    setTimeout(function() {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+};
+
+/**
+ * Revizyon dosyası için modal açar
+ * @param {string} revisionFileId - Revizyon dosya ID'si
+ * @param {string} fileName - Dosya adı
+ */
+var openRevisionFileModal = function(revisionFileId, fileName) {
+    // Modalı klonla ve revizyon dosyası için özelleştir
+    var originalModal = document.getElementById('newRevisionModal');
+    var revisionFileModal = originalModal.cloneNode(true);
+    
+    // ID'leri değiştir
+    revisionFileModal.id = 'revisionFileModal';
+    revisionFileModal.querySelector('form').id = 'revisionFileForm';
+    revisionFileModal.querySelector('#revisionNotes').id = 'revisionFileNotes';
+    revisionFileModal.querySelector('#submitRevisionBtn').id = 'submitRevisionFileBtn';
+    
+    // Modal başlık ve içeriğini güncelle
+    revisionFileModal.querySelector('.modal-title').innerHTML = '<i class="fas fa-edit me-2 text-warning"></i>Revizyon Dosyası İçin Yeni Talep';
+    revisionFileModal.querySelector('.alert-info').innerHTML = '<i class="fas fa-info-circle me-2"></i><strong>Revizyon Dosyası:</strong> ' + fileName;
+    
+    // Modalı DOM'a ekle
+    document.body.appendChild(revisionFileModal);
+    
+    // Bootstrap modalı başlat
+    var modal = new bootstrap.Modal(revisionFileModal);
+    
+    // Form event listener'ı ekle
+    var form = revisionFileModal.querySelector('#revisionFileForm');
+    var submitBtn = revisionFileModal.querySelector('#submitRevisionFileBtn');
+    var notesField = revisionFileModal.querySelector('#revisionFileNotes');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var notes = notesField.value.replace(/^\s+|\s+$/g, ''); // trim alternative
+        
+        if (!notes) {
+            showAlert('Revize talebi açıklaması gereklidir.', 'danger');
+            return;
+        }
+        
+        if (notes.length < 10) {
+            showAlert('Revize talebi açıklaması en az 10 karakter olmalıdır.', 'danger');
+            return;
+        }
+        
+        // Buton durumunu değiştir
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Gönderiliyor...';
+        
+        // XMLHttpRequest ile AJAX isteği (eski tarayıcı uyumlu)
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'ajax/create_revision_file.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                // Buton durumunu eski haline getir
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Revize Talebi Gönder';
+                
+                if (xhr.status === 200) {
+                    try {
+                        var data = JSON.parse(xhr.responseText);
+                        if (data.success) {
+                            // Başarılı
+                            showAlert(data.message, 'success');
+                            modal.hide();
+                            
+                            // 2 saniye sonra sayfayı yenile
+                            setTimeout(function() {
+                                location.reload();
+                            }, 2000);
+                        } else {
+                            // Hata
+                            showAlert(data.message, 'danger');
+                        }
+                    } catch (error) {
+                        console.error('JSON Parse Error:', error);
+                        showAlert('Bir hata oluştu. Lütfen daha sonra tekrar deneyin.', 'danger');
+                    }
+                } else {
+                    console.error('HTTP Error:', xhr.status);
+                    showAlert('Bir hata oluştu. Lütfen daha sonra tekrar deneyin.', 'danger');
+                }
+            }
+        };
+        
+        var requestData = JSON.stringify({
+            revision_file_id: revisionFileId,
+            revision_notes: notes
+        });
+        
+        xhr.send(requestData);
+    });
+    
+    // Modal kapandığında DOM'dan kaldır
+    revisionFileModal.addEventListener('hidden.bs.modal', function() {
+        revisionFileModal.remove();
+    });
+    
+    // Modalı göster
+    modal.show();
+};
 </script>
 
 <?php

@@ -663,14 +663,14 @@ include '../includes/user_header.php';
                     <?php endif; ?>
                     
                     <!-- İşlem Butonları -->
-                    <div class="mt-4 text-center">
+                    <!-- <div class="mt-4 text-center">
                         <?php if ($fileType === 'response' || ($fileType === 'upload' && $fileDetail['status'] === 'completed')): ?>
                             <button type="button" class="btn btn-warning me-2" 
                                     onclick="requestRevision('<?php echo $fileDetail['id']; ?>', '<?php echo $fileType; ?>')">
                                 <i class="fas fa-redo me-2"></i>Revize Talep Et
                             </button>
                         <?php endif; ?>
-                    </div>
+                    </div> -->
                 </div>
             </div>
 
@@ -1011,6 +1011,11 @@ include '../includes/user_header.php';
                                                                                 (<?php echo formatFileSize($revFile['file_size']); ?>)
                                                                             </span>
                                                                         </div>
+                                                                        <div class="d-flex gap-2">
+                                                                            <a href="revision-detail.php?id=<?php echo $revFile['revision_id']; ?>" 
+                                                                               class="btn btn-outline-primary btn-sm">
+                                                                                <i class="fas fa-eye me-1"></i>Detay
+                                                                            </a>
                                                                         <a href="download-revision.php?id=<?php echo $revFile['id']; ?>" 
                                                                            class="btn btn-success btn-sm">
                                                                             <i class="fas fa-download me-1"></i>İndir
@@ -1111,7 +1116,9 @@ include '../includes/user_header.php';
                                 <?php endforeach; ?>
                             </div>
                             
-                            <!-- İletişim Özeti -->
+                            
+                        </div>
+                        <!-- İletişim Özeti -->
                             <div class="communication-summary mt-4 p-3 bg-light rounded">
                                 <h6 class="mb-2">
                                     <i class="fas fa-chart-line me-2 text-info"></i>İletişim Özeti
@@ -1138,7 +1145,6 @@ include '../includes/user_header.php';
                                     </div>
                                 </div>
                             </div>
-                        </div>
                     </div>
                 <?php endif; ?>
             <?php endif; ?>
