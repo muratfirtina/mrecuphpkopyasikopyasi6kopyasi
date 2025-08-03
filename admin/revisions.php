@@ -615,20 +615,11 @@ include '../includes/admin_sidebar.php';
                                             <span class="text-muted small">İşlenmiş</span>
                                         <?php endif; ?>
                                         
-                                        <!-- Dosyayı Gör Butonu -->
-                                        <?php if ($revision['response_id']): ?>
-                                            <!-- Yanıt dosyası revize talebi -->
-                                            <a href="file-detail.php?id=<?php echo $revision['upload_id']; ?>&type=response" 
-                                               class="btn btn-outline-info btn-sm w-100">
-                                                <i class="fas fa-eye me-1"></i>Yanıt Dosyasını Gör
-                                            </a>
-                                        <?php else: ?>
-                                            <!-- Normal upload dosyası revize talebi -->
-                                            <a href="file-detail.php?id=<?php echo $revision['upload_id']; ?>" 
-                                               class="btn btn-outline-info btn-sm w-100">
-                                                <i class="fas fa-eye me-1"></i>Dosyayı Gör
-                                            </a>
-                                        <?php endif; ?>
+                                        <!-- Dosya Detayı Butonu -->
+                                        <a href="revision-detail.php?id=<?php echo $revision['id']; ?>" 
+                                           class="btn btn-outline-primary btn-sm w-100">
+                                            <i class="fas fa-info-circle me-1"></i>Detay Gör
+                                        </a>
                                     </div>
                                 </td>
                             </tr>

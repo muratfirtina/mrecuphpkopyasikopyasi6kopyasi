@@ -366,7 +366,7 @@ include '../includes/user_header.php';
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <!-- Revize Edilmek İstenen Dosya (Dinamik) -->
+                                <!-- Revize Edilmesi İstenen Dosya (Dinamik) -->
 <div class="col-md-6">
     <h6 class="text-muted mb-3">
         <?php
@@ -380,7 +380,7 @@ include '../includes/user_header.php';
             $currentType = $typeConfig[$targetFile['type']] ?? $typeConfig['Bilinmiyor'];
         ?>
         <i class="fas <?php echo $currentType['icon']; ?> text-<?php echo $currentType['color']; ?> me-2"></i>
-        Revize Edilmek İstenen Dosya
+        Revize Edilmesi İstenen Dosya
     </h6>
     
     <?php if ($targetFile['is_found']): ?>
@@ -413,9 +413,9 @@ include '../includes/user_header.php';
     <?php endif; ?>
 </div>
 
-                                <!-- Revize Dosya -->
+                                <!-- Revize Edilmiş Dosya -->
                                 <div class="col-md-6">
-                                    <h6 class="text-muted mb-3">Revize Dosya</h6>
+                                    <h6 class="text-muted mb-3">Revize Edilmiş Dosya</h6>
                                     <?php if ($revision['status'] === 'completed' && !empty($revisionFiles)): ?>
                                         <?php $firstRevisionFile = $revisionFiles[0]; // İlk revizyon dosyasını göster ?>
                                         <div class="file-info">

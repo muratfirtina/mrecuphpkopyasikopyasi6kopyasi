@@ -82,6 +82,27 @@ try {
         
         $fileName = $upload['original_name'];
         
+    } elseif (!empty($uploadId) && $type === 'revision') {
+        // Revision file download
+        if (!isValidUUID($uploadId)) {
+            exit('Invalid revision file ID');
+        }
+        
+        $stmt = $pdo->prepare("SELECT * FROM revision_files WHERE id = ?");
+        $stmt->execute([$uploadId]);
+        $revisionFile = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$revisionFile) {
+            exit('Revision file not found');
+        }
+        
+        $fullPath = $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/revision_files/' . $revisionFile['filename'];
+        $fileName = 'revision_' . ($revisionFile['original_name'] ?? $revisionFile['filename']);
+        
+        if (!file_exists($fullPath)) {
+            exit('Revision file not found on disk');
+        }
+        
     } elseif (!empty($fileId)) {
         // Response file download
         if (!isValidUUID($fileId)) {

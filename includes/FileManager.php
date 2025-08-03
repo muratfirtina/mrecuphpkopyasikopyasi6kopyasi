@@ -1123,11 +1123,12 @@ class FileManager {
      * Admin tarafından revizyon dosyası yükleme
      * @param string $revisionId - Revizyon talebi ID
      * @param array $file - Yüklenen dosya bilgileri
-     * @param string $adminNotes - Admin notları
+     * @param string $adminId - Admin kullanıcı ID
      * @param float $creditsCharged - Düşürülecek kredi miktarı
+     * @param string $adminNotes - Admin notları
      * @return array - Başarı durumu ve mesaj
      */
-    public function uploadRevisionFile($revisionId, $file, $adminNotes = '', $creditsCharged = 0) {
+    public function uploadRevisionFile($revisionId, $file, $adminId, $creditsCharged = 0, $adminNotes = '') {
         try {
             if (!isValidUUID($revisionId)) {
                 return ['success' => false, 'message' => 'Geçersiz revizyon ID formatı.'];
@@ -1195,7 +1196,7 @@ class FileManager {
                 $revisionFileId,
                 $revisionId,
                 $revision['upload_id'],
-                $_SESSION['user_id'],
+                $adminId,
                 $file['name'],
                 $filename,
                 $file['size'],
@@ -1220,7 +1221,7 @@ class FileManager {
                 // Revizyon durumunu 'completed' yap
                 $updateResult = $this->updateRevisionStatus(
                     $revisionId, 
-                    $_SESSION['user_id'], 
+                    $adminId, 
                     'completed', 
                     'Revizyon dosyası yüklendi: ' . $adminNotes,
                     $creditsCharged
