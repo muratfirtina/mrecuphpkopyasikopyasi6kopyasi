@@ -543,12 +543,6 @@ include '../includes/user_header.php';
                                         <span class="value"><?php echo htmlspecialchars($fileDetail['admin_username']); ?></span>
                                     </div>
                                 <?php endif; ?>
-                                <?php if (!empty($fileDetail['credits_charged'])): ?>
-                                    <div class="detail-item">
-                                        <span class="label">Ücret:</span>
-                                        <span class="value"><?php echo $fileDetail['credits_charged']; ?> kredi</span>
-                                    </div>
-                                <?php endif; ?>
                             </div>
                         </div>
                         
@@ -635,31 +629,7 @@ include '../includes/user_header.php';
                                     <?php echo displayAdminNotes($fileDetail['admin_notes']); ?>
                                 </div>
                             </div>
-                        <?php endif; ?>
-                    <?php else: ?>
-                        <!-- Ana dosya için yükleme notları -->
-                        <?php if (!empty($fileDetail['upload_notes'])): ?>
-                            <div class="mt-4">
-                                <h6 class="text-muted mb-3">
-                                    <i class="fas fa-comment me-2"></i>Yükleme Notları
-                                </h6>
-                                <div class="notes-content">
-                                    <?php echo nl2br(htmlspecialchars($fileDetail['upload_notes'])); ?>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <!-- Admin notları (ana dosya için - yanıt dosyasından alınır) -->
-                        <?php if (!empty($mainFileAdminNotes)): ?>
-                            <div class="mt-4">
-                                <h6 class="text-muted mb-3">
-                                    <i class="fas fa-user-cog me-2"></i>Admin Notları
-                                </h6>
-                                <div class="admin-notes-content">
-                                    <?php echo displayAdminNotes($mainFileAdminNotes); ?>
-                                </div>
-                            </div>
-                        <?php endif; ?>
+                        <?php endif; ?>       
                     <?php endif; ?>
                     
                     <!-- İşlem Butonları -->
@@ -1482,12 +1452,14 @@ include '../includes/user_header.php';
 
 .communication-timeline .timeline-item {
     position: relative;
-    display: flex;
+    display: block;
     margin-bottom: 2rem;
+    width: 100%;
+    clear: both;
 }
 
 .communication-timeline .timeline-marker {
-    flex: 0 0 40px;
+    width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
@@ -1495,8 +1467,10 @@ include '../includes/user_header.php';
     background: white;
     border: 3px solid #e9ecef;
     border-radius: 50%;
+    float: left;
     margin-right: 1rem;
     z-index: 2;
+    position: relative;
 }
 
 .communication-timeline .timeline-item.pending .timeline-marker {
@@ -1520,12 +1494,13 @@ include '../includes/user_header.php';
 }
 
 .communication-timeline .timeline-content {
-    flex: 1;
     background: #f8f9fa;
     border: 1px solid #e9ecef;
     border-radius: 0.5rem;
     padding: 1.25rem;
     position: relative;
+    margin-left: 56px;
+    overflow: hidden;
 }
 
 .communication-timeline .timeline-content::before {
@@ -1553,13 +1528,12 @@ include '../includes/user_header.php';
 }
 
 .communication-timeline .timeline-divider {
-    position: absolute;
-    left: 19px;
     width: 2px;
     height: 2rem;
     background: #e9ecef;
-    margin-top: -2rem;
-    margin-bottom: 0;
+    margin-left: 19px;
+    margin-top: -1rem;
+    margin-bottom: -1rem;
 }
 
 .communication-timeline .revision-note {
@@ -1632,14 +1606,14 @@ include '../includes/user_header.php';
 }
 
 @media (max-width: 768px) {
-    .communication-timeline .timeline-item {
-        flex-direction: column;
+    .communication-timeline .timeline-marker {
+        float: none;
+        display: block;
+        margin: 0 auto 0.5rem auto;
     }
     
-    .communication-timeline .timeline-marker {
-        margin-right: 0;
-        margin-bottom: 0.5rem;
-        align-self: flex-start;
+    .communication-timeline .timeline-content {
+        margin-left: 0;
     }
     
     .communication-timeline .timeline-content::before,
