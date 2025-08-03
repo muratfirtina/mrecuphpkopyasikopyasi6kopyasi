@@ -638,7 +638,7 @@ $cssPath = '../assets/css/style.css';
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item d-flex align-items-center py-2" href="files.php">
+                                <a class="dropdown-item d-flex align-items-center py-2" href="uploads.php">
                                     <i class="fas fa-folder me-3 text-warning"></i>Dosya Yönetimi
                                 </a>
                             </li>
@@ -660,11 +660,11 @@ $cssPath = '../assets/css/style.css';
                                     <i class="fas fa-clipboard-list me-3 text-dark"></i>Sistem Logları
                                 </a>
                             </li>
-                            <li>
+                            <!-- <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="analytics.php">
                                     <i class="fas fa-chart-bar me-3 text-info"></i>Analitik Raporlar
                                 </a>
-                            </li>
+                            </li> -->
                             
                             <li><hr class="dropdown-divider"></li>
                             <li class="dropdown-header small text-uppercase text-muted">Hesap İşlemleri</li>

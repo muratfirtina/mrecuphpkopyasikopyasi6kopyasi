@@ -171,14 +171,14 @@ if (isset($_SESSION['user_id'])) {
                     <span>Kredi İşlemleri</span>
                 </a>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'transactions.php' ? 'active' : ''; ?>" href="transactions.php">
                     <div class="nav-icon bg-info">
                         <i class="fas fa-history"></i>
                     </div>
                     <span>İşlem Geçmişi</span>
                 </a>
-            </li>
+            </li> -->
         </ul>
 
         <!-- Kredi Durumu Widget - Ters Kredi Sistemi -->

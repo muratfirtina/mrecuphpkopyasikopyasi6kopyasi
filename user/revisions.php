@@ -30,9 +30,71 @@ $dateTo = isset($_GET['date_to']) ? sanitize($_GET['date_to']) : '';
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $limit = 10;
 
-// Kullanıcının revize taleplerini getir
-$revisions = $fileManager->getUserRevisions($userId, $page, $limit, $dateFrom, $dateTo, $status, $search);
-$totalRevisions = $fileManager->getUserRevisionCount($userId, $dateFrom, $dateTo, $status, $search);
+// Kullanıcının revize taleplerini getir - Araç bilgileri dahil
+try {
+    $whereClause = "WHERE r.user_id = ?";
+    $params = [$userId];
+    
+    // Filtreleme koşulları
+    if ($status) {
+        $whereClause .= " AND r.status = ?";
+        $params[] = $status;
+    }
+    
+    if ($search) {
+        $whereClause .= " AND (fu.original_name LIKE ? OR r.request_notes LIKE ? OR fu.plate LIKE ?)";
+        $searchParam = "%$search%";
+        $params[] = $searchParam;
+        $params[] = $searchParam;
+        $params[] = $searchParam;
+    }
+    
+    if ($dateFrom) {
+        $whereClause .= " AND DATE(r.requested_at) >= ?";
+        $params[] = $dateFrom;
+    }
+    
+    if ($dateTo) {
+        $whereClause .= " AND DATE(r.requested_at) <= ?";
+        $params[] = $dateTo;
+    }
+    
+    $offset = ($page - 1) * $limit;
+    
+    // Ana sorgu - araç bilgileri dahil
+    $stmt = $pdo->prepare("
+        SELECT r.*, 
+               fu.original_name, fu.filename, fu.file_size, fu.plate,
+               b.name as brand_name, m.name as model_name, fu.year,
+               a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name
+        FROM revisions r
+        LEFT JOIN file_uploads fu ON r.upload_id = fu.id
+        LEFT JOIN brands b ON fu.brand_id = b.id
+        LEFT JOIN models m ON fu.model_id = m.id
+        LEFT JOIN users a ON r.admin_id = a.id
+        $whereClause
+        ORDER BY r.requested_at DESC
+        LIMIT $limit OFFSET $offset
+    ");
+    
+    $stmt->execute($params);
+    $revisions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Toplam kayıt sayısını al
+    $countStmt = $pdo->prepare("
+        SELECT COUNT(*) 
+        FROM revisions r
+        LEFT JOIN file_uploads fu ON r.upload_id = fu.id
+        $whereClause
+    ");
+    $countStmt->execute($params);
+    $totalRevisions = $countStmt->fetchColumn();
+    
+} catch(PDOException $e) {
+    error_log('Revisions query error: ' . $e->getMessage());
+    $revisions = [];
+    $totalRevisions = 0;
+}
 $totalPages = ceil($totalRevisions / $limit);
 
 // Her revizyon için dosyalarını al
@@ -304,6 +366,7 @@ include '../includes/user_header.php';
                                     <tr>
                                         <th width="100">ID</th>
                                         <th>Dosya Adı</th>
+                                        <th width="180">Araç Bilgileri</th>
                                         <th width="120">Durum</th>
                                         <th width="150">Talep Tarihi</th>
                                         <th width="150">Tamamlanma</th>
@@ -349,6 +412,32 @@ include '../includes/user_header.php';
                                                             </small>
                                                         <?php endif; ?>
                                                     </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="vehicle-info">
+                                                    <div class="brand-model">
+                                                        <strong><?php echo htmlspecialchars($revision['brand_name'] ?? 'Bilinmiyor'); ?></strong>
+                                                        <?php if (!empty($revision['model_name'])): ?>
+                                                            - <?php echo htmlspecialchars($revision['model_name']); ?>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($revision['year'])): ?>
+                                                            (<?php echo $revision['year']; ?>)
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <?php if (!empty($revision['plate'])): ?>
+                                                        <div class="mt-1">
+                                                            <span class="badge bg-dark text-white">
+                                                                <i class="fas fa-id-card me-1"></i>
+                                                                <?php echo strtoupper(htmlspecialchars($revision['plate'])); ?>
+                                                            </span>
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <small class="text-muted d-block mt-1">
+                                                            <i class="fas fa-minus-circle me-1"></i>
+                                                            Plaka belirtilmemiş
+                                                        </small>
+                                                    <?php endif; ?>
                                                 </div>
                                             </td>
                                             <td>

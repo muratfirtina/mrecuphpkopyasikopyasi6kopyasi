@@ -529,8 +529,16 @@ include '../includes/admin_sidebar.php';
                                             ?>
                                         </small>
                                         <?php if (!empty($upload['plate'])): ?>
-                                            <br><small class="text-primary">
-                                                <i class="fas fa-id-card me-1"></i><?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
+                                            <div class="mt-1">
+                                                <span class="badge bg-dark text-white">
+                                                    <i class="fas fa-id-card me-1"></i>
+                                                    <?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
+                                                </span>
+                                            </div>
+                                        <?php else: ?>
+                                            <br><small class="text-muted">
+                                                <i class="fas fa-minus-circle me-1"></i>
+                                                Plaka belirtilmemiş
                                             </small>
                                         <?php endif; ?>
                                     </div>

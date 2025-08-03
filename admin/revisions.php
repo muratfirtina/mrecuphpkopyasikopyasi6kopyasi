@@ -468,6 +468,7 @@ include '../includes/admin_sidebar.php';
                         <tr>
                             <th>Kullanıcı</th>
                             <th>Dosya</th>
+                            <th width="180">Araç Bilgileri</th>
                             <th>Talep Notları</th>
                             <th>Durum</th>
                             <th>Tarih</th>
@@ -545,24 +546,34 @@ include '../includes/admin_sidebar.php';
                                                 <strong>Ana Proje:</strong> <?php echo htmlspecialchars($revision['original_name'] ?? 'Bilinmiyor'); ?>
                                             </div>
                                         <?php endif; ?>
-                                        
-                                        <!-- Araç Bilgisi -->
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="vehicle-info">
                                         <?php if (!empty($revision['brand_name']) || !empty($revision['model_name'])): ?>
-                                            <div class="text-muted small mt-1">
-                                                <i class="fas fa-car me-1"></i>
-                                                <?php echo htmlspecialchars($revision['brand_name'] . ' ' . $revision['model_name']); ?>
+                                            <div class="brand-model mb-1">
+                                                <strong><?php echo htmlspecialchars($revision['brand_name'] ?? 'Bilinmiyor'); ?></strong>
+                                                <?php if (!empty($revision['model_name'])): ?>
+                                                    - <?php echo htmlspecialchars($revision['model_name']); ?>
+                                                <?php endif; ?>
                                                 <?php if (!empty($revision['year'])): ?>
                                                     (<?php echo $revision['year']; ?>)
                                                 <?php endif; ?>
                                             </div>
                                         <?php endif; ?>
                                         
-                                        <!-- Plaka Bilgisi -->
                                         <?php if (!empty($revision['plate'])): ?>
-                                            <div class="text-muted small">
-                                                <i class="fas fa-id-card me-1"></i>
-                                                <?php echo strtoupper(htmlspecialchars($revision['plate'])); ?>
+                                            <div class="mt-1">
+                                                <span class="badge bg-dark text-white">
+                                                    <i class="fas fa-id-card me-1"></i>
+                                                    <?php echo strtoupper(htmlspecialchars($revision['plate'])); ?>
+                                                </span>
                                             </div>
+                                        <?php else: ?>
+                                            <small class="text-muted mt-1">
+                                                <i class="fas fa-minus-circle me-1"></i>
+                                                Plaka belirtilmemiş
+                                            </small>
                                         <?php endif; ?>
                                     </div>
                                 </td>
@@ -796,6 +807,268 @@ include '../includes/admin_sidebar.php';
         <?php endif; ?>
     </div>
 </div>
+
+<style>
+/* Advanced Pagination Styling */
+.pagination-wrapper {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.pagination-info .badge {
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.quick-jump-container .input-group {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.quick-jump-container .form-control {
+    border: 2px solid #e9ecef;
+    transition: all 0.15s ease-in-out;
+}
+
+.quick-jump-container .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Enhanced Pagination Controls */
+.pagination-lg .page-link {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 2px solid #dee2e6;
+    color: #495057;
+    margin: 0 3px;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.pagination-lg .page-link:hover {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+    border-color: #0d6efd;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+}
+
+.pagination-lg .page-item.active .page-link {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+    border-color: #0d6efd;
+    color: white;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+    transform: scale(1.05);
+}
+
+.pagination-lg .page-item.disabled .page-link {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #6c757d;
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.pagination-lg .page-link i {
+    font-size: 0.9rem;
+}
+
+/* Per page selector enhanced styling */
+.form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease-in-out;
+    font-weight: 500;
+}
+
+.form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Badge enhancements */
+.badge.bg-light {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+    border: 2px solid #e9ecef;
+    color: #495057 !important;
+    font-weight: 500;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .pagination-lg .page-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+        margin: 0 1px;
+    }
+    
+    .pagination-wrapper {
+        padding: 1rem !important;
+    }
+    
+    .quick-jump-container {
+        display: none;
+    }
+    
+    .pagination-info .badge {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .pagination-lg .page-link {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+    
+    .pagination-lg .page-link span {
+        display: none !important;
+    }
+}
+
+/* Animation for page changes */
+.pagination-lg .page-link {
+    position: relative;
+    overflow: hidden;
+}
+
+.pagination-lg .page-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.pagination-lg .page-link:hover::before {
+    left: 100%;
+}
+
+/* Loading state for quick jump */
+.quick-jump-container.loading .btn {
+    pointer-events: none;
+}
+
+.quick-jump-container.loading .btn i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Modern Process Confirmation Modal Styles */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important;
+}
+
+#processConfirmModal .modal-content {
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+#processConfirmModal .modal-header {
+    padding: 1.5rem 2rem 1rem;
+    border-bottom: none;
+}
+
+#processConfirmModal .modal-body {
+    padding: 1rem 2rem 1.5rem;
+}
+
+#processConfirmModal .modal-footer {
+    padding: 0rem 3rem 3rem 0rem;
+    background: #f8f9fa;
+    margin: 0 -2rem -2rem;
+    padding-top: 1.5rem;
+}
+
+#processConfirmModal .btn-lg {
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+#processConfirmModal .btn-success:hover {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border-color: #28a745;
+    transform: translateY(-2px);
+}
+
+#processConfirmModal .btn-secondary:hover {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    border-color: #6c757d;
+    transform: translateY(-2px);
+}
+
+#processConfirmModal .alert-info {
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+    border: 1px solid #b6d4da;
+    border-radius: 0.5rem;
+}
+
+/* Modal animation enhancements */
+#processConfirmModal.fade .modal-dialog {
+    transition: transform 0.4s ease-out;
+    transform: scale(0.8) translateY(-50px);
+}
+
+#processConfirmModal.show .modal-dialog {
+    transform: scale(1) translateY(0);
+}
+
+/* Icon pulse animation */
+#processConfirmModal .fas.fa-file-alt {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Mobile responsiveness for modal */
+@media (max-width: 576px) {
+    #processConfirmModal .modal-header {
+        padding: 1rem 1.5rem 0.5rem;
+    }
+    
+    #processConfirmModal .modal-body {
+        padding: 0.5rem 1.5rem 1rem;
+    }
+    
+    #processConfirmModal .modal-footer {
+        padding: 1rem 1.5rem 1.5rem;
+        margin: 0 -1.5rem -1.5rem;
+    }
+    
+    #processConfirmModal .btn-lg {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+    }
+}
+</style>
 
 <!-- Revize Onaylama Modal -->
 <div class="modal fade" id="approveRevisionModal" tabindex="-1" aria-labelledby="approveRevisionModalLabel" aria-hidden="true">

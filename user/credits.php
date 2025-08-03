@@ -235,17 +235,17 @@ include '../includes/user_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="fas fa-coins me-2 text-warning"></i>Kredi Yükle
+                        <i class="fas fa-coins me-2 text-warning"></i>Kredi İşlemleri
                     </h1>
                     <p class="text-muted mb-0">Hesabınıza kredi yükleyin ve dosya işlemlerinizi gerçekleştirin</p>
                 </div>
-                <div class="btn-toolbar mb-2 mb-md-0">
+                <!-- <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
                         <a href="transactions.php" class="btn btn-outline-primary">
                             <i class="fas fa-history me-1"></i>Tüm İşlemler
                         </a>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <!-- Hata/Başarı Mesajları -->
@@ -894,10 +894,10 @@ include '../includes/user_header.php';
                                     <span>Telefon Desteği</span>
                                 </a>
                                 
-                                <button class="support-option" onclick="openWhatsApp()">
+                                <!-- <button class="support-option" onclick="openWhatsApp()">
                                     <i class="fab fa-whatsapp"></i>
                                     <span>WhatsApp</span>
-                                </button>
+                                </button> -->
                                 
                                 <a href="#" class="support-option" onclick="openLiveChat()">
                                     <i class="fas fa-comments"></i>
