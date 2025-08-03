@@ -101,11 +101,29 @@ if (isset($_SESSION['user_id'])) {
                     <span>İşlenen Dosyalar</span>
                     <?php
                     try {
+                        // Normal processing dosyaları
                         $stmt = $pdo->prepare("SELECT COUNT(*) FROM file_uploads WHERE user_id = ? AND status = 'processing'");
                         $stmt->execute([$_SESSION['user_id']]);
                         $processingFiles = $stmt->fetchColumn();
-                        if ($processingFiles > 0) {
-                            echo '<span class="badge bg-info ms-auto">' . $processingFiles . '</span>';
+                        
+                        // Revize işlenen dosyalar
+                        $stmt = $pdo->prepare("
+                            SELECT COUNT(DISTINCT fu.id) 
+                            FROM file_uploads fu
+                            INNER JOIN revisions r ON fu.id = r.upload_id
+                            WHERE fu.user_id = ? 
+                            AND fu.status = 'completed' 
+                            AND r.status = 'in_progress'
+                            AND r.user_id = ?
+                        ");
+                        $stmt->execute([$_SESSION['user_id'], $_SESSION['user_id']]);
+                        $revisionProcessingFiles = $stmt->fetchColumn();
+                        
+                        // Toplam işlenen dosya sayısı
+                        $totalProcessingFiles = $processingFiles + $revisionProcessingFiles;
+                        
+                        if ($totalProcessingFiles > 0) {
+                            echo '<span class="badge bg-info ms-auto">' . $totalProcessingFiles . '</span>';
                         }
                     } catch(PDOException $e) {}
                     ?>
