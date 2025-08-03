@@ -97,14 +97,219 @@ if ($singleFileMode) {
     $userFiles = $fileManager->getUserUploads($userId, $page, $limit, $status, $search, $filterId);
     $totalFiles = $fileManager->getUserUploadCount($userId, $status, $search, $filterId);
 } else {
-    // Normal listeleme
-    $userFiles = $fileManager->getUserUploads($userId, $page, $limit, $status, $search);
-    $totalFiles = $fileManager->getUserUploadCount($userId, $status, $search);
+    // Normal listeleme - Revize durumunu da göz önünde bulundur
+    if ($status === 'processing') {
+        // Processing filtresi: Basit yaklaşım - her iki tür dosyayı da getir
+        try {
+            // 1. Normal processing dosyaları getir
+            $normalFiles = $fileManager->getUserUploads($userId, $page, $limit, 'processing', $search);
+            $normalCount = $fileManager->getUserUploadCount($userId, 'processing', $search);
+            
+            // 2. Revize işlenen dosyaları kontrol et
+            $revisionCheckStmt = $pdo->prepare("
+                SELECT COUNT(DISTINCT fu.id) as count, GROUP_CONCAT(fu.original_name) as file_names
+                FROM file_uploads fu
+                INNER JOIN revisions r ON fu.id = r.upload_id
+                WHERE fu.user_id = ? 
+                AND fu.status = 'completed' 
+                AND r.status = 'in_progress'
+                AND r.user_id = ?
+            ");
+            $revisionCheckStmt->execute([$userId, $userId]);
+            $revisionCheck = $revisionCheckStmt->fetch(PDO::FETCH_ASSOC);
+            
+            // 3. Revize işlenen dosyaları getir (limit dahilinde)
+            $revisionFiles = [];
+            $revisionCount = 0;
+            
+            if ($revisionCheck['count'] > 0) {
+                $stmt = $pdo->prepare("
+                    SELECT DISTINCT fu.*, b.name as brand_name, m.name as model_name,
+                           r.response_id, r.request_notes, r.requested_at as revision_date, r.id as revision_id,
+                           rf.original_name as revision_filename
+                    FROM file_uploads fu
+                    LEFT JOIN brands b ON fu.brand_id = b.id
+                    LEFT JOIN models m ON fu.model_id = m.id
+                    INNER JOIN revisions r ON fu.id = r.upload_id
+                    LEFT JOIN revision_files rf ON r.response_id = rf.id
+                    WHERE fu.user_id = ? 
+                    AND fu.status = 'completed' 
+                    AND r.status = 'in_progress'
+                    AND r.user_id = ?
+                    " . ($search ? "AND (fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ? OR fu.plate LIKE ?)" : "") . "
+                    ORDER BY fu.upload_date DESC
+                    LIMIT " . intval($limit)
+                );
+                
+                $params = [$userId, $userId];
+                if ($search) {
+                    $searchParam = "%$search%";
+                    $params = array_merge($params, [$searchParam, $searchParam, $searchParam, $searchParam]);
+                }
+                
+                $stmt->execute($params);
+                $revisionFiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                // Revize dosya sayısını hesapla
+                $countStmt = $pdo->prepare("
+                    SELECT COUNT(DISTINCT fu.id) as count
+                    FROM file_uploads fu
+                    INNER JOIN revisions r ON fu.id = r.upload_id
+                    WHERE fu.user_id = ? 
+                    AND fu.status = 'completed' 
+                    AND r.status = 'in_progress'
+                    AND r.user_id = ?
+                    " . ($search ? "AND (fu.original_name LIKE ? OR fu.plate LIKE ?)" : "") . "
+                ");
+                
+                $countParams = [$userId, $userId];
+                if ($search) {
+                    $searchParam = "%$search%";
+                    $countParams = array_merge($countParams, [$searchParam, $searchParam]);
+                }
+                
+                $countStmt->execute($countParams);
+                $revisionCount = $countStmt->fetch(PDO::FETCH_ASSOC)['count'];
+            }
+            
+            // 4. İki listeyi birleştir (tarih sırasına göre)
+            $allFiles = array_merge($normalFiles, $revisionFiles);
+            
+            // Revize dosyalarını işaretle ve hedef dosyayı bul
+            foreach ($allFiles as &$file) {
+                if (isset($file['response_id']) || isset($file['revision_filename']) || isset($file['revision_id'])) {
+                    $file['processing_type'] = 'revision';
+                    
+                    // Hedef dosyayı bul (revision-detail.php mantığı)
+                    $file['target_file_name'] = $file['original_name']; // Varsayılan: ana dosya
+                    $file['target_file_type'] = 'Orijinal Dosya';
+                    
+                    if (isset($file['revision_id']) && isset($file['revision_date'])) {
+                        try {
+                            // Önceki tamamlanmış revizyon dosyasını ara
+                            $targetStmt = $pdo->prepare("
+                                SELECT rf.original_name
+                                FROM revisions r
+                                JOIN revision_files rf ON r.id = rf.revision_id
+                                WHERE r.upload_id = ? AND r.status = 'completed' AND r.requested_at < ?
+                                ORDER BY r.completed_at DESC
+                                LIMIT 1
+                            ");
+                            $targetStmt->execute([$file['id'], $file['revision_date']]);
+                            $previousRevisionFile = $targetStmt->fetch(PDO::FETCH_ASSOC);
+                            
+                            if ($previousRevisionFile) {
+                                $file['target_file_name'] = $previousRevisionFile['original_name'];
+                                $file['target_file_type'] = 'Önceki Revizyon Dosyası';
+                            }
+                        } catch (Exception $e) {
+                            error_log('Hedef dosya bulma hatası: ' . $e->getMessage());
+                        }
+                    }
+                }
+            }
+            
+            // 5. Tarihe göre sırala
+            usort($allFiles, function($a, $b) {
+                return strtotime($b['upload_date']) - strtotime($a['upload_date']);
+            });
+            
+            // 6. Sadece limit kadar al
+            $userFiles = array_slice($allFiles, 0, $limit);
+            $totalFiles = $normalCount + $revisionCount;
+            
+        } catch (Exception $e) {
+            error_log('Processing dosyaları getirme hatası: ' . $e->getMessage());
+            // Hata durumunda sadece normal processing
+            $userFiles = $fileManager->getUserUploads($userId, $page, $limit, 'processing', $search);
+            $totalFiles = $fileManager->getUserUploadCount($userId, 'processing', $search);
+        }
+    } else {
+        // Diğer durumlar için normal listeleme
+        $userFiles = $fileManager->getUserUploads($userId, $page, $limit, $status, $search);
+        $totalFiles = $fileManager->getUserUploadCount($userId, $status, $search);
+    }
 }
 $totalPages = ceil($totalFiles / $limit);
 
-// İstatistikler
-$stats = $fileManager->getUserFileStats($userId);
+// Processing filtresi için sayfalama özel durumu
+if ($status === 'processing' && !$singleFileMode) {
+    // Processing durumunda sadece ilk sayfa düzgün çalışır, çok sayıda dosya varsa daha basit yaklaşım
+    // Bu durumda sayfalamayı sınırlayalım
+    if ($totalFiles > $limit * 3) {
+        $totalPages = 3; // Maksimum 3 sayfa
+        if ($page > 3) {
+            $page = 1;
+        }
+    }
+}
+
+// Her dosya için revize taleplerini getir
+foreach ($userFiles as &$file) {
+    try {
+        // Bu dosya için revize taleplerini getir
+        $stmt = $pdo->prepare("
+            SELECT * FROM revisions 
+            WHERE upload_id = ? AND user_id = ? 
+            ORDER BY requested_at DESC 
+            LIMIT 1
+        ");
+        $stmt->execute([$file['id'], $userId]);
+        $latestRevision = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $file['latest_revision'] = $latestRevision;
+        
+        // Aktif revize durumu varsa ekle
+        if ($latestRevision && in_array($latestRevision['status'], ['pending', 'in_progress'])) {
+            $file['has_active_revision'] = true;
+            $file['revision_status'] = $latestRevision['status'];
+            $file['revision_id'] = $latestRevision['id'];
+            
+            // Eğer bu dosya processing filtresinde ve revize işleniyorsa, dosya durumunu güncelle
+            if ($status === 'processing' && $latestRevision['status'] === 'in_progress' && $file['status'] === 'completed') {
+                $file['display_status'] = 'revision_processing';
+                $file['processing_type'] = 'revision';
+            }
+        } else {
+            $file['has_active_revision'] = false;
+        }
+    } catch (Exception $e) {
+        error_log('Revize talebi getirme hatası: ' . $e->getMessage());
+        $file['latest_revision'] = null;
+        $file['has_active_revision'] = false;
+    }
+}
+
+// İstatistikler - Revize durumunu da dahil et
+if ($singleFileMode) {
+    // Bildirimden gelen dosya için normal istatistikler
+    $stats = $fileManager->getUserFileStats($userId);
+} else {
+    // Normal istatistikler + revize işlenen dosyalar
+    $stats = $fileManager->getUserFileStats($userId);
+    
+    // Revize işlenen dosya sayısını processing'e ekle
+    try {
+        $stmt = $pdo->prepare("
+            SELECT COUNT(DISTINCT fu.id) as revision_processing_count
+            FROM file_uploads fu
+            LEFT JOIN revisions r ON fu.id = r.upload_id
+            WHERE fu.user_id = ? 
+            AND fu.status = 'completed' 
+            AND r.status = 'in_progress'
+            AND r.user_id = ?
+        ");
+        $stmt->execute([$userId, $userId]);
+        $revisionProcessingCount = $stmt->fetch(PDO::FETCH_ASSOC)['revision_processing_count'];
+        
+        // Processing sayısına ekle
+        $stats['processing'] += $revisionProcessingCount;
+        $stats['total'] += 0; // Total zaten hesaplanmış, sadece processing güncelledik
+        
+    } catch (Exception $e) {
+        error_log('Revize istatistik hesaplama hatası: ' . $e->getMessage());
+    }
+}
 
 $pageTitle = 'Dosyalarım';
 
@@ -390,9 +595,59 @@ include '../includes/user_header.php';
                                         </td>
                                         <td>
                                             <div class="file-info">
-                                                <h6 class="file-name mb-1" title="<?php echo htmlspecialchars($file['original_name']); ?>">
-                                                    <?php echo htmlspecialchars($file['original_name']); ?>
-                                                </h6>
+                                                <?php if (isset($file['processing_type']) && $file['processing_type'] === 'revision'): ?>
+                                                    <!-- Revize İşlenen Dosya Görünümü -->
+                                                    <h6 class="file-name mb-1">
+                                                        <i class="fas fa-file-alt text-primary me-1"></i>
+                                                        <strong>Ana Dosya:</strong> <?php echo htmlspecialchars($file['original_name']); ?>
+                                                        <span class="badge bg-info ms-2">
+                                                            <i class="fas fa-sync-alt me-1"></i>Revize İşleniyor
+                                                        </span>
+                                                    </h6>
+                                                    
+                                                    <!-- Revize Edilmesi İstenen Dosya -->
+                                                    <div class="mt-2">
+                                                                                                            <?php if (isset($file['target_file_type']) && $file['target_file_type'] !== 'Orijinal Dosya'): ?>
+                                                                <span class="badge bg-warning text-dark ms-1"><?php echo $file['target_file_type']; ?></span>
+                                                            <?php endif; ?>
+                                                        <small class="d-block text-warning">
+                                                            <i class="fas fa-arrow-circle-right me-1"></i>
+                                                            <strong>Revize Edilmesi İstenen:</strong> 
+                                                            <?php echo htmlspecialchars($file['target_file_name'] ?? $file['original_name']); ?>
+                                                            
+                                                        </small>
+                                                    </div>
+                                                    
+                                                    <?php if (isset($file['revision_filename']) && !empty($file['revision_filename'])): ?>
+                                                        <!-- Revize dosyası hazır -->
+                                                        <div class="mt-2">
+                                                            <small class="d-block text-success">
+                                                                <i class="fas fa-check-circle me-1"></i>
+                                                                <strong>Yeni Revize Dosyası:</strong> <?php echo htmlspecialchars($file['revision_filename']); ?>
+                                                            </small>
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <!-- Revize dosyası henüz hazır değil -->
+                                                        <div class="mt-2">
+                                                            <small class="d-block text-info">
+                                                                <i class="fas fa-cogs me-1"></i>
+                                                                <strong>Yeni Revize Dosyası:</strong> <em>Hazırlanıyor...</em>
+                                                            </small>
+                                                            <?php if (isset($file['request_notes']) && !empty($file['request_notes'])): ?>
+                                                                <small class="d-block text-muted mt-1">
+                                                                    <i class="fas fa-comment-dots me-1"></i>
+                                                                    <em>"<?php echo htmlspecialchars(substr($file['request_notes'], 0, 60)) . (strlen($file['request_notes']) > 60 ? '...' : ''); ?>"</em>
+                                                                </small>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                <?php else: ?>
+                                                    <!-- Normal Dosya Görünümü -->
+                                                    <h6 class="file-name mb-1" title="<?php echo htmlspecialchars($file['original_name']); ?>">
+                                                        <?php echo htmlspecialchars($file['original_name']); ?>
+                                                    </h6>
+                                                <?php endif; ?>
+                                                
                                                 <?php if (!empty($file['upload_notes'])): ?>
                                                     <small class="text-muted">
                                                         <i class="fas fa-sticky-note me-1"></i>
@@ -413,9 +668,16 @@ include '../includes/user_header.php';
                                                     <?php endif; ?>
                                                 </div>
                                                 <?php if (!empty($file['plate'])): ?>
-                                                    <small class="text-muted d-block">
-                                                        <i class="fas fa-id-card me-1"></i>
-                                                        <?php echo strtoupper(htmlspecialchars($file['plate'])); ?>
+                                                    <div class="mt-1">
+                                                        <span class="badge bg-dark text-white">
+                                                            <i class="fas fa-id-card me-1"></i>
+                                                            <?php echo strtoupper(htmlspecialchars($file['plate'])); ?>
+                                                        </span>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <small class="text-muted d-block mt-1">
+                                                        <i class="fas fa-minus-circle me-1"></i>
+                                                        Plaka belirtilmemiş
                                                     </small>
                                                 <?php endif; ?>
                                             </div>
@@ -430,10 +692,29 @@ include '../includes/user_header.php';
                                             ];
                                             $config = $statusConfig[$file['status']] ?? ['class' => 'secondary', 'text' => 'Bilinmiyor', 'icon' => 'question'];
                                             ?>
+                                            
+                                            <!-- Ana dosya durumu -->
                                             <span class="badge bg-<?php echo $config['class']; ?> status-badge">
                                                 <i class="fas fa-<?php echo $config['icon']; ?> me-1"></i>
                                                 <?php echo $config['text']; ?>
                                             </span>
+                                            
+                                            <!-- Revize talebi durumu -->
+                                            <?php if ($file['has_active_revision']): ?>
+                                                <?php
+                                                $revisionConfig = [
+                                                    'pending' => ['class' => 'warning', 'text' => 'Revize Bekliyor', 'icon' => 'edit'],
+                                                    'in_progress' => ['class' => 'info', 'text' => 'Revize İşleniyor', 'icon' => 'cogs']
+                                                ];
+                                                $revConfig = $revisionConfig[$file['revision_status']] ?? ['class' => 'secondary', 'text' => 'Revize', 'icon' => 'edit'];
+                                                ?>
+                                                <br>
+                                                <span class="badge bg-<?php echo $revConfig['class']; ?> status-badge mt-1" 
+                                                      title="Bu dosya için revize talebi <?php echo $file['revision_status'] === 'in_progress' ? 'işleme alındı' : 'beklemede'; ?>">
+                                                    <i class="fas fa-<?php echo $revConfig['icon']; ?> me-1"></i>
+                                                    <?php echo $revConfig['text']; ?>
+                                                </span>
+                                            <?php endif; ?>
                                             
                                             <?php if ($file['status'] !== 'pending'): ?>
                                                 <div class="progress progress-sm mt-2">
@@ -453,6 +734,12 @@ include '../includes/user_header.php';
                                                             $progressValue = 100;
                                                             $progressClass = 'bg-danger';
                                                             break;
+                                                    }
+                                                    
+                                                    // Revize durumu varsa progress'i ayarla
+                                                    if ($file['has_active_revision'] && $file['revision_status'] === 'in_progress') {
+                                                        $progressValue = 90; // Revize işleniyor
+                                                        $progressClass = 'bg-warning';
                                                     }
                                                     ?>
                                                     <div class="progress-bar <?php echo $progressClass; ?>" 
@@ -481,10 +768,17 @@ include '../includes/user_header.php';
                                                         <i class="fas fa-download me-1"></i>İndir
                                                     </a>
                                                     
-                                                    <button type="button" class="btn btn-outline-warning btn-sm" 
-                                                            onclick="requestRevision('<?php echo $file['id']; ?>', 'upload')">
-                                                        <i class="fas fa-redo me-1"></i>Revize
-                                                    </button>
+                                                    <?php if (!$file['has_active_revision']): ?>
+                                                        <button type="button" class="btn btn-outline-warning btn-sm" 
+                                                                onclick="requestRevision('<?php echo $file['id']; ?>', 'upload')">
+                                                            <i class="fas fa-redo me-1"></i>Revize
+                                                        </button>
+                                                    <?php else: ?>
+                                                        <a href="revision-detail.php?id=<?php echo $file['revision_id']; ?>" class="btn btn-outline-info btn-sm"
+                                                           title="Revize talebi <?php echo $file['revision_status'] === 'in_progress' ? 'işleme alındı' : 'beklemede'; ?>">
+                                                            <i class="fas fa-eye me-1"></i>Revize Takip
+                                                        </a>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
                                             </div>
                                         </td>
@@ -778,6 +1072,12 @@ include '../includes/user_header.php';
     font-weight: 500;
     padding: 0.5rem 0.75rem;
     border-radius: 8px;
+    display: inline-block;
+    margin: 0.1rem 0;
+}
+
+.status-badge.mt-1 {
+    margin-top: 0.25rem !important;
 }
 
 .progress-sm {
@@ -954,6 +1254,11 @@ include '../includes/user_header.php';
     
     .stat-number {
         font-size: 1.75rem;
+    }
+    
+    .status-badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.5rem;
     }
 }
 
