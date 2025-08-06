@@ -1322,138 +1322,137 @@ try {
     <div class="card-body">
         <div class="row">
             <!-- Dosya Bilgileri -->
-            <div class="col-md-8">
-                <div class="row g-3">
-                    <div class="col-sm-6">
-                        <label class="form-label">Dosya Adı</label>
-                        <div class="form-control-plaintext">
-                            <?php echo safeHtml($upload['original_name']); ?>
+            <div class="col-md-4">
+                <div class="file-meta card border p-3">
+                    <h6 class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-info-circle me-2 text-primary"></i> Dosya Bilgileri
+                    </h6>
+                    <div class="meta-list">
+                        <div class="d-flex justify-content-between border-bottom py-2">
+                            <span class="text-muted">Dosya ID:</span>
+                            <span class="fw-medium">
+                                <?php echo substr($fileType === 'response' ? $responseId : $uploadId, 0, 8); ?>...
+                            </span>
                         </div>
-                    </div>
-
-                    <div class="col-sm-6">
-                        <label class="form-label">Cihaz</label>
-                        <div class="form-control-plaintext">
-                            <?php echo safeHtml($upload['device_name'] ?? 'Bilinmiyor'); ?>
+                        <div class="d-flex justify-content-between border-bottom py-2">
+                            <span class="text-muted">Dosya Adı:</span>
+                            <span class="fw-medium">
+                                <?php echo safeHtml($upload['original_name']); ?>
+                            </span>
                         </div>
-                    </div>
-                    
-                    <div class="col-sm-6">
-                        <label class="form-label">Dosya Boyutu</label>
-                        <div class="form-control-plaintext">
-                            <?php echo formatFileSize($upload['file_size'] ?? 0); ?>
+                        <div class="d-flex justify-content-between border-bottom py-2">
+                            <span class="text-muted">Cihaz Tipi:</span>
+                            <span class="fw-medium">
+                                <?php echo safeHtml($upload['device_name'] ?? 'Belirtilmemiş'); ?>
+                            </span>
                         </div>
-                    </div>
-                    
-                    <div class="col-sm-6">
-                        <label class="form-label">Yükleme Tarihi</label>
-                        <div class="form-control-plaintext">
-                            <?php echo date('d.m.Y H:i', strtotime($upload['upload_date'])); ?>
+                        <div class="d-flex justify-content-between border-bottom py-2">
+                            <span class="text-muted">Dosya Boyutu:</span>
+                            <span class="fw-medium">
+                                <?php echo formatFileSize($upload['file_size'] ?? 0); ?>
+                            </span>
                         </div>
-                    </div>
-                    
-                    <?php if ($fileType === 'response'): ?>
-                        <div class="col-sm-6">
-                            <label class="form-label">Oluşturan Admin</label>
-                            <div class="form-control-plaintext">
-                                <?php echo safeHtml($upload['admin_first_name'] . ' ' . $upload['admin_last_name'] . ' (@' . $upload['admin_username'] . ')'); ?>
-                            </div>
+                        <div class="d-flex justify-content-between border-bottom py-2">
+                            <span class="text-muted">Yükleme Tarihi:</span>
+                            <span class="fw-medium">
+                                <?php echo date('d.m.Y H:i', strtotime($upload['upload_date'])); ?>
+                            </span>
                         </div>
-                        
-                        <div class="col-sm-6">
-                            <label class="form-label">Orijinal Dosya</label>
-                            <div class="form-control-plaintext">
-                                <a href="file-detail.php?id=<?php echo $uploadId; ?>" class="text-primary">
-                                    <?php echo safeHtml($upload['original_upload_name']); ?>
-                                </a>
-                            </div>
-                        </div>
-                    <?php else: ?>
-                        <div class="col-sm-6">
-                            <label class="form-label">Durum</label>
-                            <div class="form-control-plaintext">
-                                <?php
-                                $statusClass = [
-                                    'pending' => 'warning',
-                                    'processing' => 'info',
-                                    'completed' => 'success',
-                                    'rejected' => 'danger'
-                                ];
-                                $statusText = [
-                                    'pending' => 'Bekliyor',
-                                    'processing' => 'İşleniyor',
-                                    'completed' => 'Tamamlandı',
-                                    'rejected' => 'Reddedildi'
-                                ];
-                                ?>
-                                <span class="badge bg-<?php echo $statusClass[$upload['status']] ?? 'secondary'; ?>">
-                                    <?php echo $statusText[$upload['status']] ?? 'Bilinmiyor'; ?>
+                        <?php if ($fileType === 'response'): ?>
+                            <div class="d-flex justify-content-between border-bottom py-2">
+                                <span class="text-muted">Oluşturan Admin:</span>
+                                <span class="fw-medium">
+                                    <?php echo safeHtml($upload['admin_first_name'] . ' ' . $upload['admin_last_name']); ?>
                                 </span>
                             </div>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <!-- Araç Bilgileri -->
-                    <div class="col-12">
-                        <hr>
-                        <h6 class="mb-3">Araç Bilgileri</h6>
+                            <div class="d-flex justify-content-between py-2">
+                                <span class="text-muted">Orijinal Dosya:</span>
+                                <span class="fw-medium">
+                                    <a href="file-detail.php?id=<?php echo $uploadId; ?>" class="text-primary">
+                                        <?php echo safeHtml($upload['original_upload_name']); ?>
+                                    </a>
+                                </span>
+                            </div>
+                        <?php else: ?>
+                            <div class="d-flex justify-content-between py-2">
+                                <span class="text-muted">Durum:</span>
+                                <span class="fw-medium">
+                                    <?php
+                                    $statusClass = [
+                                        'pending' => 'warning',
+                                        'processing' => 'info',
+                                        'completed' => 'success',
+                                        'rejected' => 'danger'
+                                    ];
+                                    $statusText = [
+                                        'pending' => 'Bekliyor',
+                                        'processing' => 'İşleniyor',
+                                        'completed' => 'Tamamlandı',
+                                        'rejected' => 'Reddedildi'
+                                    ];
+                                    ?>
+                                    <span class="badge bg-<?php echo $statusClass[$upload['status']] ?? 'secondary'; ?>">
+                                        <?php echo $statusText[$upload['status']] ?? 'Bilinmiyor'; ?>
+                                    </span>
+                                </span>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                    
-                    <div class="col-sm-6">
-                        <label class="form-label">Marka</label>
-                        <div class="form-control-plaintext">
-                            <?php echo safeHtml($upload['brand_name']); ?>
+                </div>
+            </div>
+            
+            <!-- Araç Bilgileri -->
+            <div class="col-md-4">
+                <div class="file-meta card border p-3">
+                    <h6 class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-car me-2 text-success"></i> Araç Bilgileri
+                    </h6>
+                    <div class="meta-list">
+                        <div class="d-flex justify-content-between border-bottom py-2">
+                            <span class="text-muted">Araç Markası:</span>
+                            <span class="fw-medium">
+                                <?php echo safeHtml($upload['brand_name'] ?? 'Belirtilmemiş'); ?>
+                            </span>
                         </div>
-                    </div>
-                    
-                    <div class="col-sm-6">
-                        <label class="form-label">Model</label>
-                        <div class="form-control-plaintext">
-                            <?php 
-                            $modelDisplay = safeHtml($upload['model_name']);
-                            if (!empty($upload['year'])) {
-                                $modelDisplay = safeHtml($upload['model_name'] . ' (' . $upload['year'] . ')');
-                            }
-                            echo $modelDisplay;
-                            ?>
+                        <div class="d-flex justify-content-between border-bottom py-2">
+                            <span class="text-muted">Araç Modeli:</span>
+                            <span class="fw-medium">
+                                <?php 
+                                $modelDisplay = safeHtml($upload['model_name'] ?? 'Belirtilmemiş');
+                                if (!empty($upload['year'])) {
+                                    $modelDisplay = safeHtml($upload['model_name'] . ' (' . $upload['year'] . ')');
+                                }
+                                echo $modelDisplay;
+                                ?>
+                            </span>
                         </div>
-                    </div>
-
-                    <div class="col-sm-6">
-                        <label class="form-label">Seri</label>
-                        <div class="form-control-plaintext">
-                            <?php echo safeHtml($upload['series_name'] ?? 'Bilinmiyor'); ?>
+                        <div class="d-flex justify-content-between border-bottom py-2">
+                            <span class="text-muted">Motor Tipi:</span>
+                            <span class="fw-medium">
+                                <?php echo safeHtml($upload['engine_name'] ?? 'Belirtilmemiş'); ?>
+                            </span>
                         </div>
-                    </div>
-
-                    <div class="col-sm-6">
-                        <label class="form-label">Motor Tipi</label>
-                        <div class="form-control-plaintext">
-                            <?php echo safeHtml($upload['engine_name'] ?? 'Bilinmiyor'); ?>
+                        <div class="d-flex justify-content-between border-bottom py-2">
+                            <span class="text-muted">KM:</span>
+                            <span class="fw-medium">
+                                <?php echo safeHtml($upload['kilometer'] ?? 'Belirtilmemiş'); ?>
+                            </span>
                         </div>
-                    </div>
-                    
-                    <?php if (!empty($upload['plate'])): ?>
-                        <div class="col-sm-6">
-                            <label class="form-label">Plaka</label>
-                            <div class="form-control-plaintext">
-                                <span class="text-primary fw-bold">
+                        <div class="d-flex justify-content-between py-2">
+                            <span class="text-muted">ECU Tipi:</span>
+                            <span class="fw-medium">
+                                <?php echo safeHtml($upload['ecu_name'] ?? 'Belirtilmemiş'); ?>
+                            </span>
+                        </div>
+                        <?php if (!empty($upload['plate'])): ?>
+                            <div class="d-flex justify-content-between border-top pt-2 mt-2">
+                                <span class="text-muted">Plaka:</span>
+                                <span class="fw-medium text-primary">
                                     <i class="fas fa-id-card me-1"></i><?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
                                 </span>
                             </div>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <div class="col-sm-6">
-                        <label class="form-label">ECU Tipi</label>
-                        <div class="form-control-plaintext">
-                            <?php echo safeHtml($upload['ecu_name']); ?>
-                        </div>
+                        <?php endif; ?>
                     </div>
-                    
-                    <!-- Admin Notları -->
-                    <?php if (!empty($upload['admin_notes'])): ?>
-                    <?php endif; ?>
                 </div>
             </div>
             
@@ -1483,7 +1482,7 @@ try {
                                 <a href="mailto:<?php echo $upload['email'] ?? ''; ?>"><?php echo safeHtml($upload['email'] ?? 'Belirtilmemiş'); ?></a>
                             </div>
                         
-                        <div class="mb-2">
+                        <!-- <div class="mb-2">
                             <small class="text-muted">Dosya Durumu:</small><br>
                             <?php if ($fileType === 'response'): ?>
                                 <span class="badge bg-success fs-6">
@@ -1494,7 +1493,7 @@ try {
                                     <?php echo $statusText[$upload['status']] ?? 'Bilinmiyor'; ?>
                                 </span>
                             <?php endif; ?>
-                        </div>
+                        </div> -->
                         
                         <hr>
                         
