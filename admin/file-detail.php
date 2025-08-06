@@ -884,18 +884,6 @@ include '../includes/admin_sidebar.php';
                         <i class="fas fa-list me-1"></i>Tüm Yanıtları Görüntüle
                     </a>
                 <?php endif; ?>
-                
-                <?php if ($originalFileCheck['exists']): ?>
-                    <?php if ($fileType === 'response'): ?>
-                        <a href="download-file.php?id=<?php echo $responseId; ?>&type=response" class="btn btn-success btn-sm">
-                            <i class="fas fa-download me-1"></i>İndir
-                        </a>
-                    <?php else: ?>
-                        <a href="download-file.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-success btn-sm">
-                            <i class="fas fa-download me-1"></i>İndir
-                        </a>
-                    <?php endif; ?>
-                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -1398,6 +1386,17 @@ try {
                             </div>
                         <?php endif; ?>
                     </div>
+                    <?php if ($originalFileCheck['exists']): ?>
+                    <?php if ($fileType === 'response'): ?>
+                        <a href="download-file.php?id=<?php echo $responseId; ?>&type=response" class="btn btn-success btn-sm">
+                            <i class="fas fa-download me-1"></i>İndir
+                        </a>
+                    <?php else: ?>
+                        <a href="download-file.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-success btn-sm">
+                            <i class="fas fa-download me-1"></i>İndir
+                        </a>
+                    <?php endif; ?>
+                <?php endif; ?>
                 </div>
             </div>
             
