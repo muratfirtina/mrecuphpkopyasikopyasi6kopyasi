@@ -144,11 +144,15 @@ try {
         SELECT u.*, 
                users.username, users.email, users.first_name, users.last_name,
                b.name as brand_name,
-               m.name as model_name
+               m.name as model_name,
+               s.name as series_name,
+               e.name as engine_name
         FROM file_uploads u
         LEFT JOIN users ON u.user_id = users.id
         LEFT JOIN brands b ON u.brand_id = b.id
         LEFT JOIN models m ON u.model_id = m.id
+        LEFT JOIN series s ON u.series_id = s.id
+        LEFT JOIN engines e ON u.engine_id = e.id
         $whereClause 
         ORDER BY u.$sortBy $sortOrder 
         LIMIT $limit OFFSET $offset
@@ -521,11 +525,18 @@ include '../includes/admin_sidebar.php';
                                         <strong><?php echo htmlspecialchars($upload['brand_name'] ?? 'Bilinmiyor'); ?></strong><br>
                                         <small class="text-muted">
                                             <?php 
-                                            $modelDisplay = htmlspecialchars($upload['model_name'] ?? 'Model belirtilmemiş');
-                                            if (!empty($upload['year'])) {
-                                                $modelDisplay .= ' (' . $upload['year'] . ')';
+                                            $vehicleInfo = [];
+                                            if (!empty($upload['model_name'])) {
+                                                $vehicleInfo[] = htmlspecialchars($upload['model_name']);
                                             }
-                                            echo $modelDisplay;
+                                            if (!empty($upload['series_name'])) {
+                                                $vehicleInfo[] = htmlspecialchars($upload['series_name']);
+                                            }
+                                            if (!empty($upload['engine_name'])) {
+                                                $vehicleInfo[] = htmlspecialchars($upload['engine_name']);
+                                            }
+                                            
+                                            echo !empty($vehicleInfo) ? implode(' • ', $vehicleInfo) : 'Model/Seri belirtilmemiş';
                                             ?>
                                         </small>
                                         <?php if (!empty($upload['plate'])): ?>
@@ -534,6 +545,12 @@ include '../includes/admin_sidebar.php';
                                                     <i class="fas fa-id-card me-1"></i>
                                                     <?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
                                                 </span>
+                                                <?php if (!empty($upload['kilometer'])): ?>
+                                                    <span class="badge bg-secondary text-white ms-1">
+                                                        <i class="fas fa-tachometer-alt me-1"></i>
+                                                        <?php echo number_format($upload['kilometer']); ?> km
+                                                    </span>
+                                                <?php endif; ?>
                                             </div>
                                         <?php else: ?>
                                             <br><small class="text-muted">

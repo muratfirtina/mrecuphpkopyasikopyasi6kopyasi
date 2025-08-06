@@ -214,13 +214,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
                 'year' => date('Y'),
                 'plate' => !empty($_POST['plate']) ? strtoupper(sanitize($_POST['plate'])) : null,
                 'ecu_id' => !empty($_POST['ecu_id']) && isValidUUID($_POST['ecu_id']) ? sanitize($_POST['ecu_id']) : null,
-                'ecu_type' => !empty($_POST['ecu_type']) ? sanitize($_POST['ecu_type']) : null,
+
                 'device_id' => !empty($_POST['device_id']) && isValidUUID($_POST['device_id']) ? sanitize($_POST['device_id']) : null,
-                'engine_code' => !empty($_POST['engine_code']) ? sanitize($_POST['engine_code']) : null,
+
                 'gearbox_type' => !empty($_POST['gearbox_type']) ? sanitize($_POST['gearbox_type']) : 'Manual',
                 'fuel_type' => !empty($_POST['fuel_type']) ? sanitize($_POST['fuel_type']) : 'Benzin',
                 'hp_power' => null,
-                'nm_torque' => null
+                'nm_torque' => null,
+                'kilometer' => !empty($_POST['kilometer']) ? intval($_POST['kilometer']) : null
             ];
 
             $notes = !empty($_POST['notes']) ? sanitize($_POST['notes']) : '';
@@ -436,6 +437,16 @@ try {
                                                     <small class="text-muted">Araç plaka numarası</small>
                                                 </div>
                                             </div>
+                                            
+                                            <div class="col-md-3">
+                                                <label for="kilometer" class="form-label fw-semibold">Kilometre</label>
+                                                <input type="number" class="form-control form-control-modern" id="kilometer" name="kilometer" 
+                                                       placeholder="150000" min="0" max="999999"
+                                                       value="<?php echo isset($_POST['kilometer']) ? htmlspecialchars($_POST['kilometer']) : ''; ?>">
+                                                <div class="form-help">
+                                                    <small class="text-muted">Aracın mevcut kilometre değeri (km)</small>
+                                                </div>
+                                            </div>
                                         
                                         
                                             <div class="col-md-3">
@@ -474,33 +485,10 @@ try {
                                                 </div>
                                             </div>
                                             
-                                            <div class="col-md-3">
-                                                <label for="engine_code" class="form-label fw-semibold">Motor Kodu (Opsiyonel)</label>
-                                                <input type="text" class="form-control form-control-modern" id="engine_code" name="engine_code" 
-                                                       placeholder="Örn: AWT, AWP, BKD" 
-                                                       value="<?php echo isset($_POST['engine_code']) ? htmlspecialchars($_POST['engine_code']) : ''; ?>">
-                                                <div class="form-help">
-                                                    <small class="text-muted">Motor bloğundaki kod veya ruhsat bilgisi</small>
-                                                </div>
-                                            </div>
+                                            
                                         </div>
                                         
-                                        <!-- Yedek ECU tipi text alanı -->
-                                        <!-- Eğer listeden Ecu seçimi yapıldıysa burası disable olsun -->
-
-                                        <div class="row g-3 mt-2">
-                                            <div class="col-md-12">
-                                                <label for="ecu_type" class="form-label fw-semibold">ECU Tipi (Manuel Giriş)</label>
-                                                <input type="text" class="form-control form-control-modern" id="ecu_type" name="ecu_type" 
-                                                       placeholder="Listede yoksa manuel olarak girin (Örn: Bosch ME7.5, Siemens PCR2.1)" 
-                                                       value="<?php echo isset($_POST['ecu_type']) ? htmlspecialchars($_POST['ecu_type']) : ''; ?>">
-                                                <div class="form-help">
-                                                    <small class="text-muted">
-                                                        <i class="fas fa-keyboard me-1"></i>ECU tipi listede yoksa burayı kullanabilirsiniz
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
                                         
                                         <div class="row g-3 mt-2">
                                             <div class="col-md-3">
@@ -648,6 +636,10 @@ try {
                                                 <div class="summary-item">
                                                     <span class="label">Plaka:</span>
                                                     <span class="value" id="summary-plate">-</span>
+                                                </div>
+                                                <div class="summary-item">
+                                                    <span class="label">Kilometre:</span>
+                                                    <span class="value" id="summary-kilometer">-</span>
                                                 </div>
                                                 <div class="summary-item">
                                                     <span class="label">ECU Tipi:</span>
@@ -1398,17 +1390,16 @@ function updateSummary() {
     const series = document.getElementById('series_id').options[document.getElementById('series_id').selectedIndex]?.text || 'Seçilmedi';
     const engine = document.getElementById('engine_id').options[document.getElementById('engine_id').selectedIndex]?.text || 'Seçilmedi';
     const plate = document.getElementById('plate').value.toUpperCase() || 'Belirtilmedi';
+    const kilometer = document.getElementById('kilometer').value || 'Belirtilmedi';
     
-    // ECU bilgisi - önce dropdown'dan, yoksa text alanından al
+    // ECU bilgisi - sadece dropdown'dan al
     const ecuDropdown = document.getElementById('ecu_id').selectedOptions[0]?.text || '';
-    const ecuText = document.getElementById('ecu_type').value || '';
-    const ecu = (ecuDropdown && ecuDropdown !== 'ECU Seçin') ? ecuDropdown : (ecuText || 'Belirtilmedi');
+    const ecu = (ecuDropdown && ecuDropdown !== 'ECU Seçin') ? ecuDropdown : 'Belirtilmedi';
     
     // Cihaz bilgisi
     const device = document.getElementById('device_id').selectedOptions[0]?.text || 'Belirtilmedi';
     const deviceFormatted = (device === 'Cihaz Seçin') ? 'Belirtilmedi' : device;
     
-    const engineCode = document.getElementById('engine_code').value || 'Belirtilmedi';
     const gearbox = document.getElementById('gearbox_type').value || 'Manuel';
     const fuel = document.getElementById('fuel_type').value || 'Benzin';
 
@@ -1421,6 +1412,7 @@ function updateSummary() {
             <div class="summary-item"><strong>Seri:</strong> ${series}</div>
             <div class="summary-item"><strong>Motor:</strong> ${engine}</div>
             <div class="summary-item"><strong>Plaka:</strong> ${plate}</div>
+            <div class="summary-item"><strong>Kilometre:</strong> ${kilometer} km</div>
             <div class="summary-item"><strong>ECU:</strong> ${ecu}</div>
             <div class="summary-item"><strong>Cihaz:</strong> ${deviceFormatted}</div>
         `;
@@ -1442,6 +1434,11 @@ function updateSummary() {
         summaryPlate.textContent = plate;
     }
     
+    const summaryKilometer = document.getElementById('summary-kilometer');
+    if (summaryKilometer) {
+        summaryKilometer.textContent = kilometer + ' km';
+    }
+    
     const summaryEcu = document.getElementById('summary-ecu');
     if (summaryEcu) {
         summaryEcu.textContent = ecu;
@@ -1454,7 +1451,7 @@ function updateSummary() {
     
     const summaryEngine = document.getElementById('summary-engine');
     if (summaryEngine) {
-        summaryEngine.textContent = `${engine} (${engineCode})`;
+        summaryEngine.textContent = engine;
     }
     
     const summaryPower = document.getElementById('summary-power');
@@ -1738,9 +1735,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('engine_id').addEventListener('change', updateSummary);
     document.getElementById('ecu_id').addEventListener('change', updateSummary);
     document.getElementById('device_id').addEventListener('change', updateSummary);
-    document.getElementById('ecu_type').addEventListener('input', updateSummary);
     document.getElementById('plate').addEventListener('input', updateSummary);
-    document.getElementById('engine_code').addEventListener('input', updateSummary);
+    document.getElementById('kilometer').addEventListener('input', updateSummary);
     
     // Dosya değişikliği için özel listener
     document.getElementById('file').addEventListener('change', updateSummary);
@@ -1749,35 +1745,9 @@ document.addEventListener('DOMContentLoaded', function() {
     updateSummary();
 });
 
-// ECU dropdown değiştiğinde manuel giriş alanını kontrol et
-document.getElementById('ecu_id').addEventListener('change', function () {
-    const ecuTypeInput = document.getElementById('ecu_type');
-    if (this.value && this.value !== '') {
-        // ECU seçildiyse, manuel giriş alanını temizle ve gizle (disabled yerine)
-        ecuTypeInput.value = '';
-        ecuTypeInput.style.display = 'none';
-        ecuTypeInput.parentElement.style.display = 'none'; // Parent col'u da gizle
-    } else {
-        // Hiçbir ECU seçilmediyse, manuel giriş alanını göster
-        ecuTypeInput.style.display = 'block';
-        ecuTypeInput.parentElement.style.display = 'block';
-    }
-});
 
-// Sayfa yüklendiğinde başlangıç durumunu kontrol et
-document.addEventListener('DOMContentLoaded', function () {
-    const ecuSelect = document.getElementById('ecu_id');
-    const ecuTypeInput = document.getElementById('ecu_type');
-    
-    if (ecuSelect.value && ecuSelect.value !== '') {
-        ecuTypeInput.value = '';
-        ecuTypeInput.style.display = 'none';
-        ecuTypeInput.parentElement.style.display = 'none';
-    } else {
-        ecuTypeInput.style.display = 'block';
-        ecuTypeInput.parentElement.style.display = 'block';
-    }
-});
+
+
 
 // Initialize
 showStep(1);

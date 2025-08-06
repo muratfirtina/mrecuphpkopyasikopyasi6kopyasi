@@ -149,10 +149,16 @@ class FileManager {
             // LIMIT ve OFFSET'i güvenli şekilde string olarak ekle
             $sql = "
                 SELECT fu.*, 
-                       b.name as brand_name, m.name as model_name
+                       b.name as brand_name, m.name as model_name,
+                       s.name as series_name, e.name as engine_name,
+                       d.name as device_name, ecu.name as ecu_name
                 FROM file_uploads fu
                 LEFT JOIN brands b ON fu.brand_id = b.id
                 LEFT JOIN models m ON fu.model_id = m.id
+                LEFT JOIN series s ON fu.series_id = s.id
+                LEFT JOIN engines e ON fu.engine_id = e.id
+                LEFT JOIN devices d ON fu.device_id = d.id
+                LEFT JOIN ecus ecu ON fu.ecu_id = ecu.id
                 {$whereClause}
                 ORDER BY fu.upload_date DESC
                 LIMIT " . intval($limit) . " OFFSET " . intval($offset);
@@ -203,6 +209,10 @@ class FileManager {
                 FROM file_uploads fu
                 LEFT JOIN brands b ON fu.brand_id = b.id
                 LEFT JOIN models m ON fu.model_id = m.id
+                LEFT JOIN series s ON fu.series_id = s.id
+                LEFT JOIN engines e ON fu.engine_id = e.id
+                LEFT JOIN devices d ON fu.device_id = d.id
+                LEFT JOIN ecus ecu ON fu.ecu_id = ecu.id
                 {$whereClause}
             ");
             
@@ -254,10 +264,16 @@ class FileManager {
             
             $stmt = $this->pdo->prepare("
                 SELECT fu.*, 
-                       b.name as brand_name, m.name as model_name
+                       b.name as brand_name, m.name as model_name,
+                       s.name as series_name, e.name as engine_name,
+                       d.name as device_name, ecu.name as ecu_name
                 FROM file_uploads fu
                 LEFT JOIN brands b ON fu.brand_id = b.id
                 LEFT JOIN models m ON fu.model_id = m.id
+                LEFT JOIN series s ON fu.series_id = s.id
+                LEFT JOIN engines e ON fu.engine_id = e.id
+                LEFT JOIN devices d ON fu.device_id = d.id
+                LEFT JOIN ecus ecu ON fu.ecu_id = ecu.id
                 WHERE fu.id = ?
             ");
             
@@ -393,15 +409,15 @@ class FileManager {
             // UUID oluştur
             $uploadId = generateUUID();
             
-            // Veritabanına kaydet - file_path alanı eklendi
+            // Veritabanına kaydet - YENİ GUID ALANLARI İLE
             $stmt = $this->pdo->prepare("
                 INSERT INTO file_uploads (
-                    id, user_id, brand_id, model_id, year, plate, 
-                    ecu_type, engine_code, gearbox_type, fuel_type, 
+                    id, user_id, brand_id, model_id, series_id, engine_id, device_id, ecu_id,
+                    year, plate, kilometer, gearbox_type, fuel_type, 
                     hp_power, nm_torque, original_name, filename, 
                     file_size, status, upload_notes, upload_date, file_path,
                     credits_charged, revision_count, notified
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, NOW(), ?, 0, 0, 0)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, NOW(), ?, 0, 0, 0)
             ");
             
             $result = $stmt->execute([
@@ -409,10 +425,13 @@ class FileManager {
                 $userId,
                 $vehicleData['brand_id'],
                 $vehicleData['model_id'],
+                $vehicleData['series_id'],
+                $vehicleData['engine_id'],
+                $vehicleData['device_id'],
+                $vehicleData['ecu_id'],
                 $vehicleData['year'],
                 $vehicleData['plate'],
-                $vehicleData['ecu_type'],
-                $vehicleData['engine_code'],
+                $vehicleData['kilometer'],
                 $vehicleData['gearbox_type'],
                 $vehicleData['fuel_type'],
                 $vehicleData['hp_power'],
@@ -734,11 +753,17 @@ class FileManager {
             // LIMIT ve OFFSET'i güvenli şekilde string olarak ekle
             $sql = "
                 SELECT fu.*, u.username, u.email, u.first_name, u.last_name,
-                       b.name as brand_name, m.name as model_name
+                       b.name as brand_name, m.name as model_name,
+                       s.name as series_name, e.name as engine_name,
+                       d.name as device_name, ecu.name as ecu_name
                 FROM file_uploads fu
                 LEFT JOIN users u ON fu.user_id = u.id
                 LEFT JOIN brands b ON fu.brand_id = b.id
                 LEFT JOIN models m ON fu.model_id = m.id
+                LEFT JOIN series s ON fu.series_id = s.id
+                LEFT JOIN engines e ON fu.engine_id = e.id
+                LEFT JOIN devices d ON fu.device_id = d.id
+                LEFT JOIN ecus ecu ON fu.ecu_id = ecu.id
                 $whereClause
                 ORDER BY fu.upload_date DESC
                 LIMIT " . intval($limit) . " OFFSET " . intval($offset);
@@ -800,10 +825,16 @@ class FileManager {
             
             // LIMIT ve OFFSET'i güvenli şekilde string olarak ekle
             $sql = "
-                SELECT fu.*, b.name as brand_name, m.name as model_name
+                SELECT fu.*, b.name as brand_name, m.name as model_name,
+                       s.name as series_name, e.name as engine_name,
+                       d.name as device_name, ecu.name as ecu_name
                 FROM file_uploads fu
                 LEFT JOIN brands b ON fu.brand_id = b.id
                 LEFT JOIN models m ON fu.model_id = m.id
+                LEFT JOIN series s ON fu.series_id = s.id
+                LEFT JOIN engines e ON fu.engine_id = e.id
+                LEFT JOIN devices d ON fu.device_id = d.id
+                LEFT JOIN ecus ecu ON fu.ecu_id = ecu.id
                 $whereClause
                 ORDER BY fu.upload_date DESC
                 LIMIT " . intval($limit) . " OFFSET " . intval($offset);

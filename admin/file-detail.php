@@ -370,15 +370,17 @@ try {
             // Spesifik response dosyasını al
             $stmt = $pdo->prepare("
                 SELECT fr.*, fu.user_id, fu.original_name as original_upload_name,
-                       fu.brand_id, fu.model_id, fu.year, fu.plate, fu.ecu_type, fu.engine_code,
+                       fu.brand_id, fu.model_id, fu.series_id, fu.engine_id, fu.year, fu.plate, fu.kilometer, fu.ecu_type, fu.engine_code,
                        fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
-                       b.name as brand_name, m.name as model_name,
+                       b.name as brand_name, m.name as model_name, s.name as series_name, e.name as engine_name,
                        a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
                        u.username, u.email, u.first_name, u.last_name
                 FROM file_responses fr
                 LEFT JOIN file_uploads fu ON fr.upload_id = fu.id
                 LEFT JOIN brands b ON fu.brand_id = b.id
                 LEFT JOIN models m ON fu.model_id = m.id
+                LEFT JOIN series s ON fu.series_id = s.id
+                LEFT JOIN engines e ON fu.engine_id = e.id
                 LEFT JOIN users a ON fr.admin_id = a.id
                 LEFT JOIN users u ON fu.user_id = u.id
                 WHERE fr.id = ? AND fr.upload_id = ?
@@ -388,15 +390,17 @@ try {
             // En son response dosyasını al (eski davranış)
             $stmt = $pdo->prepare("
                 SELECT fr.*, fu.user_id, fu.original_name as original_upload_name,
-                       fu.brand_id, fu.model_id, fu.year, fu.plate, fu.ecu_type, fu.engine_code,
+                       fu.brand_id, fu.model_id, fu.series_id, fu.engine_id, fu.year, fu.plate, fu.kilometer, fu.ecu_type, fu.engine_code,
                        fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
-                       b.name as brand_name, m.name as model_name,
+                       b.name as brand_name, m.name as model_name, s.name as series_name, e.name as engine_name,
                        a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
                        u.username, u.email, u.first_name, u.last_name
                 FROM file_responses fr
                 LEFT JOIN file_uploads fu ON fr.upload_id = fu.id
                 LEFT JOIN brands b ON fu.brand_id = b.id
                 LEFT JOIN models m ON fu.model_id = m.id
+                LEFT JOIN series s ON fu.series_id = s.id
+                LEFT JOIN engines e ON fu.engine_id = e.id
                 LEFT JOIN users a ON fr.admin_id = a.id
                 LEFT JOIN users u ON fu.user_id = u.id
                 WHERE fr.upload_id = ?
@@ -1326,6 +1330,13 @@ try {
                             <?php echo safeHtml($upload['original_name']); ?>
                         </div>
                     </div>
+
+                    <div class="col-sm-6">
+                        <label class="form-label">Cihaz</label>
+                        <div class="form-control-plaintext">
+                            <?php echo safeHtml($upload['device_name'] ?? 'Bilinmiyor'); ?>
+                        </div>
+                    </div>
                     
                     <div class="col-sm-6">
                         <label class="form-label">Dosya Boyutu</label>
@@ -1407,6 +1418,20 @@ try {
                             ?>
                         </div>
                     </div>
+
+                    <div class="col-sm-6">
+                        <label class="form-label">Seri</label>
+                        <div class="form-control-plaintext">
+                            <?php echo safeHtml($upload['series_name'] ?? 'Bilinmiyor'); ?>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label class="form-label">Motor Tipi</label>
+                        <div class="form-control-plaintext">
+                            <?php echo safeHtml($upload['engine_name'] ?? 'Bilinmiyor'); ?>
+                        </div>
+                    </div>
                     
                     <?php if (!empty($upload['plate'])): ?>
                         <div class="col-sm-6">
@@ -1422,21 +1447,7 @@ try {
                     <div class="col-sm-6">
                         <label class="form-label">ECU Tipi</label>
                         <div class="form-control-plaintext">
-                            <?php echo safeHtml($upload['ecu_type']); ?>
-                        </div>
-                    </div>
-                    
-                    <div class="col-sm-6">
-                        <label class="form-label">Motor Kodu</label>
-                        <div class="form-control-plaintext">
-                            <?php echo safeHtml($upload['engine_code']); ?>
-                        </div>
-                    </div>
-                    
-                    <div class="col-sm-6">
-                        <label class="form-label">Güç (HP)</label>
-                        <div class="form-control-plaintext">
-                            <?php echo safeHtml($upload['hp_power']); ?>
+                            <?php echo safeHtml($upload['ecu_name']); ?>
                         </div>
                     </div>
                     
