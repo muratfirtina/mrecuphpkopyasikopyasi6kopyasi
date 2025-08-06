@@ -427,4 +427,55 @@ function safe_number_format($num, $decimals = 0, $decimal_separator = '.', $thou
     }
     return number_format((float)$num, $decimals, $decimal_separator, $thousands_separator);
 }
+
+// Türkçe karakter temizleme fonksiyonu
+if (!function_exists('turkishToEnglish')) {
+    function turkishToEnglish($text) {
+        $search = array('Ğ','Ü','Ş','İ','Ö','Ç','ğ','ü','ş','ı','ö','ç');
+        $replace = array('G','U','S','I','O','C','g','u','s','i','o','c');
+        return str_replace($search, $replace, $text);
+    }
+}
+
+// URL dostu slug oluşturma fonksiyonu
+if (!function_exists('createSlug')) {
+    function createSlug($text) {
+        $text = turkishToEnglish($text);
+        $text = strtolower($text);
+        $text = preg_replace('/[^a-z0-9]+/', '-', $text);
+        $text = trim($text, '-');
+        return $text;
+    }
+}
+
+// Sanitization fonksiyonu
+if (!function_exists('sanitize')) {
+    function sanitize($input) {
+        if (is_array($input)) {
+            return array_map('sanitize', $input);
+        }
+        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+    }
+}
+
+// Redirect fonksiyonu
+if (!function_exists('redirect')) {
+    function redirect($url) {
+        header('Location: ' . $url);
+        exit;
+    }
+}
+
+// Login kontrol fonksiyonları
+if (!function_exists('isLoggedIn')) {
+    function isLoggedIn() {
+        return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+    }
+}
+
+if (!function_exists('isAdmin')) {
+    function isAdmin() {
+        return isLoggedIn() && isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+    }
+}
 ?>

@@ -48,6 +48,13 @@ include 'includes/header.php';
         </div>
     </section>
 
+    <!-- Tuning System Widget -->
+    <section class="py-3">
+        <div class="container">
+            <?php include 'includes/tuning-widget.php'; ?>
+        </div>
+    </section>
+
     <!-- Features Section -->
     <section id="services" class="py-5">
         <div class="container">

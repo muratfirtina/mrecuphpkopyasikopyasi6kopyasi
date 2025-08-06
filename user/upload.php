@@ -51,6 +51,78 @@ if (isset($_GET['get_models']) && isset($_GET['brand_id'])) {
     }
     exit; // AJAX request bitir
 }
+if (isset($_GET['get_series']) && isset($_GET['model_id'])) {
+    try {
+        require_once '../config/config.php';
+        require_once '../config/database.php';
+        
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        
+        header('Content-Type: application/json');
+        
+        if (!isLoggedIn()) {
+            echo json_encode(['error' => 'Giriş gerekli']);
+            exit;
+        }
+        
+        $fileManager = new FileManager($pdo);
+        $modelId = sanitize($_GET['model_id']);
+        
+        if (!isValidUUID($modelId)) {
+            echo json_encode(['error' => 'Geçersiz model ID formatı']);
+            exit;
+        }
+        
+        $series = $fileManager->getSeriesByModel($modelId);
+        echo json_encode($series);
+        
+    } catch (Exception $e) {
+        error_log('AJAX Series Error: ' . $e->getMessage());
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        echo json_encode(['error' => 'Server hatası oluştu']);
+    }
+    exit;
+}
+if (isset($_GET['get_engines']) && isset($_GET['series_id'])) {
+    try {
+        require_once '../config/config.php';
+        require_once '../config/database.php';
+        
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        
+        header('Content-Type: application/json');
+        
+        if (!isLoggedIn()) {
+            echo json_encode(['error' => 'Giriş gerekli']);
+            exit;
+        }
+        
+        $fileManager = new FileManager($pdo);
+        $seriesId = sanitize($_GET['series_id']);
+        
+        if (!isValidUUID($seriesId)) {
+            echo json_encode(['error' => 'Geçersiz seri ID formatı']);
+            exit;
+        }
+        
+        $engines = $fileManager->getEnginesBySeries($seriesId);
+        echo json_encode($engines);
+        
+    } catch (Exception $e) {
+        error_log('AJAX Engine Error: ' . $e->getMessage());
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        echo json_encode(['error' => 'Server hatası oluştu']);
+    }
+    exit;
+}
 
 // Normal sayfa yükleme devam eder
 try {
@@ -78,6 +150,12 @@ if (!isLoggedIn()) {
 try {
     $user = new User($pdo);
     $fileManager = new FileManager($pdo);
+    
+    // ECU ve Device modellerini dahil et
+    require_once '../includes/EcuModel.php';
+    require_once '../includes/DeviceModel.php';
+    $ecuModel = new EcuModel($pdo);
+    $deviceModel = new DeviceModel($pdo);
 } catch (Exception $e) {
     error_log('Class initialization error: ' . $e->getMessage());
     echo "<div class='alert alert-danger'>Sınıf başlatma hatası: " . $e->getMessage() . "</div>";
@@ -114,7 +192,7 @@ if (isset($_SESSION['success'])) {
 }
 
 // TERS KREDİ SİSTEMİ: Dosya yükleme kredi kontrolü
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file_upload'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
     error_log('User file upload attempt started');
     
     try {
@@ -127,8 +205,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file_upload'])) {
             header('Location: upload.php');
             exit;
         } else {
+            // Araç verilerini hazırla
+            $vehicleData = [
+                'brand_id' => sanitize($_POST['brand_id']),
+                'model_id' => sanitize($_POST['model_id']),
+                'series_id' => !empty($_POST['series_id']) ? sanitize($_POST['series_id']) : null,
+                'engine_id' => !empty($_POST['engine_id']) ? sanitize($_POST['engine_id']) : null,
+                'year' => date('Y'),
+                'plate' => !empty($_POST['plate']) ? strtoupper(sanitize($_POST['plate'])) : null,
+                'ecu_id' => !empty($_POST['ecu_id']) && isValidUUID($_POST['ecu_id']) ? sanitize($_POST['ecu_id']) : null,
+                'ecu_type' => !empty($_POST['ecu_type']) ? sanitize($_POST['ecu_type']) : null,
+                'device_id' => !empty($_POST['device_id']) && isValidUUID($_POST['device_id']) ? sanitize($_POST['device_id']) : null,
+                'engine_code' => !empty($_POST['engine_code']) ? sanitize($_POST['engine_code']) : null,
+                'gearbox_type' => !empty($_POST['gearbox_type']) ? sanitize($_POST['gearbox_type']) : 'Manual',
+                'fuel_type' => !empty($_POST['fuel_type']) ? sanitize($_POST['fuel_type']) : 'Benzin',
+                'hp_power' => null,
+                'nm_torque' => null
+            ];
+
+            $notes = !empty($_POST['notes']) ? sanitize($_POST['notes']) : '';
+            
             // Dosya yükleme işlemine devam et
-            $uploadResult = $fileManager->uploadUserFile($_SESSION['user_id'], $_FILES['file_upload'], $_POST);
+            $uploadResult = $fileManager->uploadFile($_SESSION['user_id'], $_FILES['file'], $vehicleData, $notes);
             
             if ($uploadResult['success']) {
                 error_log('File upload successful: ' . $uploadResult['upload_id'] ?? 'unknown');
@@ -167,62 +265,22 @@ try {
     $brands = [];
 }
 
-// Dosya yükleme işlemi
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
-    $brandId = sanitize($_POST['brand_id']);
-    $modelId = sanitize($_POST['model_id']);
-    
-    // GUID format kontrolleri
-    if (!isValidUUID($brandId)) {
-        $_SESSION['error'] = 'Geçersiz marka ID formatı.';
-        header('Location: upload.php');
-        exit;
-    } elseif (!isValidUUID($modelId)) {
-        $_SESSION['error'] = 'Geçersiz model ID formatı.';
-        header('Location: upload.php');
-        exit;
-    } else {
-        $vehicleData = [
-            'brand_id' => $brandId,
-            'model_id' => $modelId,
-            'year' => (int)$_POST['year'],
-            'plate' => !empty($_POST['plate']) ? strtoupper(sanitize($_POST['plate'])) : null,
-            'ecu_type' => sanitize($_POST['ecu_type']),
-            'engine_code' => sanitize($_POST['engine_code']),
-            'gearbox_type' => sanitize($_POST['gearbox_type']),
-            'fuel_type' => sanitize($_POST['fuel_type']),
-            'hp_power' => !empty($_POST['hp_power']) ? (int)$_POST['hp_power'] : null,
-            'nm_torque' => !empty($_POST['nm_torque']) ? (int)$_POST['nm_torque'] : null
-        ];
-        
-        $notes = sanitize($_POST['notes']); // Form'dan notes gelir ama veritabanında upload_notes olarak saklanır
-        
-        // Validation
-        if ($vehicleData['year'] < 1990 || $vehicleData['year'] > date('Y') + 1) {
-            $_SESSION['error'] = 'Geçerli bir model yılı girin.';
-            header('Location: upload.php');
-            exit;
-        } else {
-            // Debug: session user_id kontrol
-            error_log('Upload attempt - User ID: ' . $_SESSION['user_id'] . ', Type: ' . gettype($_SESSION['user_id']));
-            error_log('Vehicle data: ' . print_r($vehicleData, true));
-            
-            $result = $fileManager->uploadFile($_SESSION['user_id'], $_FILES['file'], $vehicleData, $notes);
-            
-            if ($result['success']) {
-                // Form verilerini temizle ve redirect yap - PRG pattern
-                $_SESSION['success'] = $result['message'];
-                header('Location: upload.php');
-                exit;
-            } else {
-                $_SESSION['error'] = $result['message'];
-                // Debug: hata detayı
-                error_log('Upload error: ' . $result['message']);
-                header('Location: upload.php');
-                exit;
-            }
-        }
-    }
+// ECU'ları getir
+try {
+    $ecus = $ecuModel->getAllEcus('name', 'ASC');
+    echo '<!-- DEBUG: ECU\'lar getirildi, adet: ' . count($ecus) . ' -->';
+} catch (Exception $e) {
+    echo '<!-- DEBUG: ECU getirme hatası: ' . $e->getMessage() . ' -->';
+    $ecus = [];
+}
+
+// Device'ları getir
+try {
+    $devices = $deviceModel->getAllDevices('name', 'ASC');
+    echo '<!-- DEBUG: Device\'lar getirildi, adet: ' . count($devices) . ' -->';
+} catch (Exception $e) {
+    echo '<!-- DEBUG: Device getirme hatası: ' . $e->getMessage() . ' -->';
+    $devices = [];
 }
 
 $pageTitle = 'Dosya Yükle';
@@ -333,11 +391,6 @@ try {
                                                     <?php endforeach; ?>
                                                 </select>
                                                 <div class="invalid-feedback">Marka seçimi zorunludur.</div>
-                                                <div class="form-help">
-                                                    <small class="text-muted">
-                                                        <i class="fas fa-shield-alt me-1"></i>GUID ID sistemi kullanılıyor
-                                                    </small>
-                                                </div>
                                             </div>
                                             
                                             <div class="col-md-3">
@@ -346,52 +399,105 @@ try {
                                                     <option value="">Önce marka seçin</option>
                                                 </select>
                                                 <div class="invalid-feedback">Model seçimi zorunludur.</div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label for="series_id" class="form-label fw-semibold">Seri *</label>
+                                                <select class="form-select form-control-modern" id="series_id" name="series_id" required disabled>
+                                                    <option value="">Önce model seçin</option>
+                                                </select>
+                                                <div class="invalid-feedback">Seri seçimi zorunludur.</div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label for="engine_id" class="form-label fw-semibold">Motor *</label>
+                                                <select class="form-select form-control-modern" id="engine_id" name="engine_id" required disabled>
+                                                    <option value="">Önce seri seçin</option>
+                                                </select>
+                                                <div class="invalid-feedback">Motor seçimi zorunludur.</div>
+                                            </div>
+                                            
+                                            <!-- <div class="col-md-3">
+                                                <label for="year" class="form-label fw-semibold">Model Yılı (Opsiyonel)</label>
+                                                <input type="number" class="form-control form-control-modern" id="year" name="year" 
+                                                       min="1990" max="<?php echo date('Y') + 1; ?>" 
+                                                       value="<?php echo isset($_POST['year']) ? $_POST['year'] : ''; ?>" 
+                                                       placeholder="<?php echo date('Y'); ?>">
+                                                <div class="invalid-feedback">Geçerli bir model yılı girin.</div>
+                                            </div> -->
+                                            
+                                            <div class="col-md-3">
+                                                <label for="plate" class="form-label fw-semibold">Plaka *</label>
+                                                <input type="text" class="form-control form-control-modern" id="plate" name="plate" 
+                                                       placeholder="34 ABC 123" 
+                                                       value="<?php echo isset($_POST['plate']) ? htmlspecialchars($_POST['plate']) : ''; ?>" 
+                                                       style="text-transform: uppercase;" required>
+                                                <div class="form-help">
+                                                    <small class="text-muted">Araç plaka numarası</small>
+                                                </div>
+                                            </div>
+                                        
+                                        
+                                            <div class="col-md-3">
+                                                <label for="ecu_id" class="form-label fw-semibold">ECU Tipi *</label>
+                                                <select class="form-select form-control-modern" id="ecu_id" name="ecu_id" required>
+                                                    <option value="">ECU Seçin</option>
+                                                    <?php foreach ($ecus as $ecu): ?>
+                                                        <option value="<?php echo htmlspecialchars($ecu['id']); ?>"
+                                                                <?php echo (isset($_POST['ecu_id']) && $_POST['ecu_id'] == $ecu['id']) ? 'selected' : ''; ?>>
+                                                            <?php echo htmlspecialchars($ecu['name']); ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
                                                 <div class="form-help">
                                                     <small class="text-muted">
-                                                        <i class="fas fa-shield-alt me-1"></i>GUID ID sistemi kullanılıyor
+                                                        <i class="fas fa-microchip me-1"></i>ECU tipi seçin
                                                     </small>
                                                 </div>
                                             </div>
                                             
                                             <div class="col-md-3">
-                                                <label for="year" class="form-label fw-semibold">Model Yılı *</label>
-                                                <input type="number" class="form-control form-control-modern" id="year" name="year" 
-                                                       min="1990" max="<?php echo date('Y') + 1; ?>" 
-                                                       value="<?php echo isset($_POST['year']) ? $_POST['year'] : ''; ?>" 
-                                                       placeholder="<?php echo date('Y'); ?>" required>
-                                                <div class="invalid-feedback">Geçerli bir model yılı girin.</div>
+                                                <label for="device_id" class="form-label fw-semibold">Kullanılan Cihaz *</label>
+                                                <select class="form-select form-control-modern" id="device_id" name="device_id" required>
+                                                    <option value="">Cihaz Seçin</option>
+                                                    <?php foreach ($devices as $device): ?>
+                                                        <option value="<?php echo htmlspecialchars($device['id']); ?>"
+                                                                <?php echo (isset($_POST['device_id']) && $_POST['device_id'] == $device['id']) ? 'selected' : ''; ?>>
+                                                            <?php echo htmlspecialchars($device['name']); ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                                <div class="form-help">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-tools me-1"></i>Tuning cihazı seçin
+                                                    </small>
+                                                </div>
                                             </div>
                                             
                                             <div class="col-md-3">
-                                                <label for="plate" class="form-label fw-semibold">Plaka</label>
-                                                <input type="text" class="form-control form-control-modern" id="plate" name="plate" 
-                                                       placeholder="34 ABC 123" 
-                                                       value="<?php echo isset($_POST['plate']) ? htmlspecialchars($_POST['plate']) : ''; ?>" 
-                                                       style="text-transform: uppercase;">
-                                                <div class="form-help">
-                                                    <small class="text-muted">Araç plaka numarası</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="row g-3 mt-2">
-                                            <div class="col-md-6">
-                                                <label for="ecu_type" class="form-label fw-semibold">ECU Tipi</label>
-                                                <input type="text" class="form-control form-control-modern" id="ecu_type" name="ecu_type" 
-                                                       placeholder="Örn: Bosch ME7.5, Siemens PCR2.1" 
-                                                       value="<?php echo isset($_POST['ecu_type']) ? htmlspecialchars($_POST['ecu_type']) : ''; ?>">
-                                                <div class="form-help">
-                                                    <small class="text-muted">ECU üzerindeki model bilgisini girin</small>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="col-md-6">
-                                                <label for="engine_code" class="form-label fw-semibold">Motor Kodu</label>
+                                                <label for="engine_code" class="form-label fw-semibold">Motor Kodu (Opsiyonel)</label>
                                                 <input type="text" class="form-control form-control-modern" id="engine_code" name="engine_code" 
                                                        placeholder="Örn: AWT, AWP, BKD" 
                                                        value="<?php echo isset($_POST['engine_code']) ? htmlspecialchars($_POST['engine_code']) : ''; ?>">
                                                 <div class="form-help">
                                                     <small class="text-muted">Motor bloğundaki kod veya ruhsat bilgisi</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Yedek ECU tipi text alanı -->
+                                        <!-- Eğer listeden Ecu seçimi yapıldıysa burası disable olsun -->
+
+                                        <div class="row g-3 mt-2">
+                                            <div class="col-md-12">
+                                                <label for="ecu_type" class="form-label fw-semibold">ECU Tipi (Manuel Giriş)</label>
+                                                <input type="text" class="form-control form-control-modern" id="ecu_type" name="ecu_type" 
+                                                       placeholder="Listede yoksa manuel olarak girin (Örn: Bosch ME7.5, Siemens PCR2.1)" 
+                                                       value="<?php echo isset($_POST['ecu_type']) ? htmlspecialchars($_POST['ecu_type']) : ''; ?>">
+                                                <div class="form-help">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-keyboard me-1"></i>ECU tipi listede yoksa burayı kullanabilirsiniz
+                                                    </small>
                                                 </div>
                                             </div>
                                         </div>
@@ -418,7 +524,7 @@ try {
                                                 </select>
                                             </div>
                                             
-                                            <div class="col-md-3">
+                                            <!-- <div class="col-md-3">
                                                 <label for="hp_power" class="form-label fw-semibold">Güç (HP)</label>
                                                 <input type="number" class="form-control form-control-modern" id="hp_power" name="hp_power" 
                                                        min="1" max="2000" placeholder="150" 
@@ -430,7 +536,7 @@ try {
                                                 <input type="number" class="form-control form-control-modern" id="nm_torque" name="nm_torque" 
                                                        min="1" max="5000" placeholder="320" 
                                                        value="<?php echo isset($_POST['nm_torque']) ? $_POST['nm_torque'] : ''; ?>">
-                                            </div>
+                                            </div> -->
                                         </div>
 
                                         <div class="step-actions mt-4">
@@ -532,8 +638,12 @@ try {
                                                     <span class="value" id="summary-brand-model">-</span>
                                                 </div>
                                                 <div class="summary-item">
-                                                    <span class="label">Model Yılı:</span>
-                                                    <span class="value" id="summary-year">-</span>
+                                                    <span class="label">Seri:</span>
+                                                    <span class="value" id="summary-series-year">-</span>
+                                                </div>
+                                                <div class="summary-item">
+                                                    <span class="label">Motor:</span>
+                                                    <span class="value" id="summary-engine">-</span>
                                                 </div>
                                                 <div class="summary-item">
                                                     <span class="label">Plaka:</span>
@@ -544,11 +654,11 @@ try {
                                                     <span class="value" id="summary-ecu">-</span>
                                                 </div>
                                                 <div class="summary-item">
-                                                    <span class="label">Motor Kodu:</span>
-                                                    <span class="value" id="summary-engine">-</span>
+                                                    <span class="label">Kullanılan Cihaz:</span>
+                                                    <span class="value" id="summary-device">-</span>
                                                 </div>
                                                 <div class="summary-item">
-                                                    <span class="label">Güç/Tork:</span>
+                                                    <span class="label">Şanzuman/Yakıt:</span>
                                                     <span class="value" id="summary-power">-</span>
                                                 </div>
                                             </div>
@@ -597,6 +707,23 @@ try {
                 </div>
                 
                 <div class="col-lg-4">
+                    <!-- Özet Paneli -->
+                    <div class="info-card mb-4">
+                        <div class="info-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Bilgi Özeti
+                            </h5>
+                            <div class="info-body">
+                                <div class="info-list">
+                                    <div class="info-item">
+                                        <div id="summary">
+                                            <!-- JavaScript ile doldurulacak -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <!-- Bilgilendirme Kartı -->
                     <div class="info-card mb-4">
                         <div class="info-header">
@@ -1156,7 +1283,7 @@ document.querySelectorAll('.next-step').forEach(btn => {
             if (currentStep < totalSteps) {
                 showStep(currentStep + 1);
                 if (currentStep === 3) {
-                    updateSummary();
+                    updateSummary(); // Adım 3'e geçerken özeti güncelle
                 }
             }
         }
@@ -1172,12 +1299,16 @@ document.querySelectorAll('.prev-step').forEach(btn => {
     });
 });
 
-// Validate Current Step
+// Validate Current Step - GÜNCELLENMIŞ!
 function validateCurrentStep() {
     if (currentStep === 1) {
         const brand = document.getElementById('brand_id').value;
         const model = document.getElementById('model_id').value;
-        const year = document.getElementById('year').value;
+        const series = document.getElementById('series_id').value;
+        const engine = document.getElementById('engine_id').value;
+        const plate = document.getElementById('plate').value.trim();
+        const ecu = document.getElementById('ecu_id').value;
+        const device = document.getElementById('device_id').value;
         
         if (!brand) {
             showError('Marka seçimi zorunludur.');
@@ -1195,8 +1326,40 @@ function validateCurrentStep() {
             showError('Geçersiz model GUID formatı.');
             return false;
         }
-        if (!year || year < 1990 || year > new Date().getFullYear() + 1) {
-            showError('Geçerli bir model yılı girin.');
+        if (!series) {
+            showError('Seri seçimi zorunludur.');
+            return false;
+        }
+        if (!isValidGUID(series)) {
+            showError('Geçersiz seri GUID formatı.');
+            return false;
+        }
+        if (!engine) {
+            showError('Motor seçimi zorunludur.');
+            return false;
+        }
+        if (!isValidGUID(engine)) {
+            showError('Geçersiz motor GUID formatı.');
+            return false;
+        }
+        if (!plate) {
+            showError('Plaka girişi zorunludur.');
+            return false;
+        }
+        if (!ecu) {
+            showError('ECU tipi seçimi zorunludur.');
+            return false;
+        }
+        if (!isValidGUID(ecu)) {
+            showError('Geçersiz ECU GUID formatı.');
+            return false;
+        }
+        if (!device) {
+            showError('Cihaz seçimi zorunludur.');
+            return false;
+        }
+        if (!isValidGUID(device)) {
+            showError('Geçersiz cihaz GUID formatı.');
             return false;
         }
     } else if (currentStep === 2) {
@@ -1227,44 +1390,101 @@ function showError(message) {
     }, 5000);
 }
 
-// Update Summary
+// Özeti güncelle - TAMAMEN YENİ VE GÜNCELLENMIŞ!
 function updateSummary() {
-    const brand = document.getElementById('brand_id').selectedOptions[0]?.text || '-';
-    const model = document.getElementById('model_id').selectedOptions[0]?.text || '-';
-    const year = document.getElementById('year').value || '-';
-    const plate = document.getElementById('plate').value ? document.getElementById('plate').value.toUpperCase() : 'Belirtilmedi';
-    const ecu = document.getElementById('ecu_type').value || 'Belirtilmedi';
-    const engine = document.getElementById('engine_code').value || 'Belirtilmedi';
-    const hp = document.getElementById('hp_power').value;
-    const nm = document.getElementById('nm_torque').value;
+    // Değerleri al
+    const brand = document.getElementById('brand_id').options[document.getElementById('brand_id').selectedIndex]?.text || 'Seçilmedi';
+    const model = document.getElementById('model_id').options[document.getElementById('model_id').selectedIndex]?.text || 'Seçilmedi';
+    const series = document.getElementById('series_id').options[document.getElementById('series_id').selectedIndex]?.text || 'Seçilmedi';
+    const engine = document.getElementById('engine_id').options[document.getElementById('engine_id').selectedIndex]?.text || 'Seçilmedi';
+    const plate = document.getElementById('plate').value.toUpperCase() || 'Belirtilmedi';
     
-    let power = 'Belirtilmedi';
-    if (hp && nm) {
-        power = `${hp} HP / ${nm} Nm`;
-    } else if (hp) {
-        power = `${hp} HP`;
-    } else if (nm) {
-        power = `${nm} Nm`;
+    // ECU bilgisi - önce dropdown'dan, yoksa text alanından al
+    const ecuDropdown = document.getElementById('ecu_id').selectedOptions[0]?.text || '';
+    const ecuText = document.getElementById('ecu_type').value || '';
+    const ecu = (ecuDropdown && ecuDropdown !== 'ECU Seçin') ? ecuDropdown : (ecuText || 'Belirtilmedi');
+    
+    // Cihaz bilgisi
+    const device = document.getElementById('device_id').selectedOptions[0]?.text || 'Belirtilmedi';
+    const deviceFormatted = (device === 'Cihaz Seçin') ? 'Belirtilmedi' : device;
+    
+    const engineCode = document.getElementById('engine_code').value || 'Belirtilmedi';
+    const gearbox = document.getElementById('gearbox_type').value || 'Manuel';
+    const fuel = document.getElementById('fuel_type').value || 'Benzin';
+
+    // Sidebar özeti güncelle
+    const summaryElement = document.getElementById('summary');
+    if (summaryElement) {
+        summaryElement.innerHTML = `
+            <div class="summary-item"><strong>Marka:</strong> ${brand}</div>
+            <div class="summary-item"><strong>Model:</strong> ${model}</div>
+            <div class="summary-item"><strong>Seri:</strong> ${series}</div>
+            <div class="summary-item"><strong>Motor:</strong> ${engine}</div>
+            <div class="summary-item"><strong>Plaka:</strong> ${plate}</div>
+            <div class="summary-item"><strong>ECU:</strong> ${ecu}</div>
+            <div class="summary-item"><strong>Cihaz:</strong> ${deviceFormatted}</div>
+        `;
+    }
+
+    // Step 3 detaylı özetini güncelle
+    const summaryBrandModel = document.getElementById('summary-brand-model');
+    if (summaryBrandModel) {
+        summaryBrandModel.textContent = `${brand} ${model} ${series}`;
     }
     
-    document.getElementById('summary-brand-model').textContent = `${brand} ${model}`;
-    document.getElementById('summary-year').textContent = year;
-    document.getElementById('summary-plate').textContent = plate;
-    document.getElementById('summary-ecu').textContent = ecu;
-    document.getElementById('summary-engine').textContent = engine;
-    document.getElementById('summary-power').textContent = power;
+    const summaryYear = document.getElementById('summary-series-year');
+    if (summaryYear) {
+        summaryYear.textContent = series;
+    }
     
+    const summaryPlate = document.getElementById('summary-plate');
+    if (summaryPlate) {
+        summaryPlate.textContent = plate;
+    }
+    
+    const summaryEcu = document.getElementById('summary-ecu');
+    if (summaryEcu) {
+        summaryEcu.textContent = ecu;
+    }
+    
+    const summaryDevice = document.getElementById('summary-device');
+    if (summaryDevice) {
+        summaryDevice.textContent = deviceFormatted;
+    }
+    
+    const summaryEngine = document.getElementById('summary-engine');
+    if (summaryEngine) {
+        summaryEngine.textContent = `${engine} (${engineCode})`;
+    }
+    
+    const summaryPower = document.getElementById('summary-power');
+    if (summaryPower) {
+        summaryPower.textContent = `${gearbox} / ${fuel}`;
+    }
+
+    // Dosya bilgisi varsa güncelle
     const file = document.getElementById('file').files[0];
-    if (file) {
-        document.getElementById('summary-filename').textContent = file.name;
-        document.getElementById('summary-filesize').textContent = formatFileSize(file.size);
+    const summaryFilename = document.getElementById('summary-filename');
+    const summaryFilesize = document.getElementById('summary-filesize');
+    
+    if (file && summaryFilename && summaryFilesize) {
+        summaryFilename.textContent = file.name;
+        summaryFilesize.textContent = formatFileSize(file.size);
     }
 }
 
-// Marka değiştiğinde modelleri yükle
+// Marka değiştiğinde modelleri yükle ve özet güncelle - GÜNCELLENMIŞ!
 document.getElementById('brand_id').addEventListener('change', function() {
     const brandId = this.value;
     const modelSelect = document.getElementById('model_id');
+    const seriesSelect = document.getElementById('series_id');
+    const engineSelect = document.getElementById('engine_id');
+    
+    // Alt seçimleri sıfırla
+    seriesSelect.innerHTML = '<option value="">Önce model seçin</option>';
+    seriesSelect.disabled = true;
+    engineSelect.innerHTML = '<option value="">Önce seri seçin</option>';
+    engineSelect.disabled = true;
     
     console.log('Brand changed:', brandId);
     
@@ -1309,6 +1529,7 @@ document.getElementById('brand_id').addEventListener('change', function() {
                 });
                 modelSelect.disabled = false;
                 console.log('Models loaded successfully, count:', data.length);
+                updateSummary(); // Özeti güncelle
             })
             .catch(error => {
                 console.error('Fetch error:', error);
@@ -1323,7 +1544,88 @@ document.getElementById('brand_id').addEventListener('change', function() {
         console.log('No brand selected or empty value');
         modelSelect.innerHTML = '<option value="">Önce marka seçin</option>';
         modelSelect.disabled = true;
+        updateSummary(); // Özeti güncelle
     }
+});
+
+// Model değiştiğinde serileri yükle ve özet güncelle - GÜNCELLENMIŞ!
+document.getElementById('model_id').addEventListener('change', function() {
+    const modelId = this.value;
+    const seriesSelect = document.getElementById('series_id');
+    const engineSelect = document.getElementById('engine_id');
+    
+    // Engine seçimini de sıfırla
+    engineSelect.innerHTML = '<option value="">Önce seri seçin</option>';
+    engineSelect.disabled = true;
+    
+    if (modelId && isValidGUID(modelId)) {
+        seriesSelect.innerHTML = '<option value="">Yükleniyor...</option>';
+        seriesSelect.disabled = true;
+        
+        fetch(`?get_series=1&model_id=${encodeURIComponent(modelId)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    seriesSelect.innerHTML = `<option value="">Hata: ${data.error}</option>`;
+                    return;
+                }
+                
+                seriesSelect.innerHTML = '<option value="">Seri Seçin</option>';
+                data.forEach(series => {
+                    seriesSelect.innerHTML += `<option value="${series.id}">${series.name}</option>`;
+                });
+                seriesSelect.disabled = false;
+                updateSummary(); // Özeti güncelle
+            })
+            .catch(error => {
+                seriesSelect.innerHTML = '<option value="">Bağlantı hatası</option>';
+                seriesSelect.disabled = true;
+            });
+    } else {
+        seriesSelect.innerHTML = '<option value="">Önce model seçin</option>';
+        seriesSelect.disabled = true;
+        updateSummary(); // Özeti güncelle
+    }
+});
+
+// Series değiştiğinde motorları yükle ve özet güncelle - GÜNCELLENMIŞ!
+document.getElementById('series_id').addEventListener('change', function() {
+    const seriesId = this.value;
+    const engineSelect = document.getElementById('engine_id');
+    
+    if (seriesId && isValidGUID(seriesId)) {
+        engineSelect.innerHTML = '<option value="">Yükleniyor...</option>';
+        engineSelect.disabled = true;
+        
+        fetch(`?get_engines=1&series_id=${encodeURIComponent(seriesId)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    engineSelect.innerHTML = `<option value="">Hata: ${data.error}</option>`;
+                    return;
+                }
+                
+                engineSelect.innerHTML = '<option value="">Motor Seçin</option>';
+                data.forEach(engine => {
+                    engineSelect.innerHTML += `<option value="${engine.id}">${engine.name}</option>`;
+                });
+                engineSelect.disabled = false;
+                updateSummary(); // Özeti güncelle
+            })
+            .catch(error => {
+                engineSelect.innerHTML = '<option value="">Bağlantı hatası</option>';
+                engineSelect.disabled = true;
+            });
+    } else {
+        engineSelect.innerHTML = '<option value="">Önce seri seçin</option>';
+        engineSelect.disabled = true;
+        updateSummary(); // Özeti güncelle
+    }
+});
+
+// Engine değiştiğinde özeti güncelle - YENİ!
+document.getElementById('engine_id').addEventListener('change', function() {
+    updateSummary();
 });
 
 // Dosya yükleme işlemleri
@@ -1368,11 +1670,13 @@ function showFileInfo(file) {
     fileName.textContent = file.name;
     fileSize.textContent = formatFileSize(file.size);
     fileInfo.style.display = 'block';
+    updateSummary(); // Dosya seçimi değiştiğinde özeti güncelle
 }
 
 function clearFile() {
     fileInput.value = '';
     fileInfo.style.display = 'none';
+    updateSummary(); // Dosya temizlendiğinde özeti güncelle
 }
 
 function formatFileSize(bytes) {
@@ -1417,6 +1721,63 @@ function formatFileSize(bytes) {
         });
     }, false);
 })();
+
+// Form elementlerini dinle - GÜNCELLENMIŞ!
+document.addEventListener('DOMContentLoaded', function() {
+    // Tüm form elementleri için event listener ekle
+    const formInputs = document.querySelectorAll('input, select, textarea');
+    formInputs.forEach(input => {
+        input.addEventListener('input', updateSummary);
+        input.addEventListener('change', updateSummary);
+    });
+    
+    // Özel event listener'lar
+    document.getElementById('brand_id').addEventListener('change', updateSummary);
+    document.getElementById('model_id').addEventListener('change', updateSummary);
+    document.getElementById('series_id').addEventListener('change', updateSummary);
+    document.getElementById('engine_id').addEventListener('change', updateSummary);
+    document.getElementById('ecu_id').addEventListener('change', updateSummary);
+    document.getElementById('device_id').addEventListener('change', updateSummary);
+    document.getElementById('ecu_type').addEventListener('input', updateSummary);
+    document.getElementById('plate').addEventListener('input', updateSummary);
+    document.getElementById('engine_code').addEventListener('input', updateSummary);
+    
+    // Dosya değişikliği için özel listener
+    document.getElementById('file').addEventListener('change', updateSummary);
+    
+    // İlk yükleme özeti
+    updateSummary();
+});
+
+// ECU dropdown değiştiğinde manuel giriş alanını kontrol et
+document.getElementById('ecu_id').addEventListener('change', function () {
+    const ecuTypeInput = document.getElementById('ecu_type');
+    if (this.value && this.value !== '') {
+        // ECU seçildiyse, manuel giriş alanını temizle ve gizle (disabled yerine)
+        ecuTypeInput.value = '';
+        ecuTypeInput.style.display = 'none';
+        ecuTypeInput.parentElement.style.display = 'none'; // Parent col'u da gizle
+    } else {
+        // Hiçbir ECU seçilmediyse, manuel giriş alanını göster
+        ecuTypeInput.style.display = 'block';
+        ecuTypeInput.parentElement.style.display = 'block';
+    }
+});
+
+// Sayfa yüklendiğinde başlangıç durumunu kontrol et
+document.addEventListener('DOMContentLoaded', function () {
+    const ecuSelect = document.getElementById('ecu_id');
+    const ecuTypeInput = document.getElementById('ecu_type');
+    
+    if (ecuSelect.value && ecuSelect.value !== '') {
+        ecuTypeInput.value = '';
+        ecuTypeInput.style.display = 'none';
+        ecuTypeInput.parentElement.style.display = 'none';
+    } else {
+        ecuTypeInput.style.display = 'block';
+        ecuTypeInput.parentElement.style.display = 'block';
+    }
+});
 
 // Initialize
 showStep(1);

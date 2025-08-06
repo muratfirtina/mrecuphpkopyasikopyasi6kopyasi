@@ -27,37 +27,64 @@ class FileManager {
     // Araç markalarını getir
     public function getBrands() {
         try {
-            $stmt = $this->pdo->query("
-                SELECT id, name 
-                FROM brands 
-                ORDER BY name ASC
-            ");
-            
+            $stmt = $this->pdo->query("SELECT * FROM brands ORDER BY name ASC");
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             error_log('getBrands error: ' . $e->getMessage());
             return [];
         }
     }
     
-    // Markaya göre modelleri getir
+    /**
+     * Markaya göre modelleri getir
+     */
     public function getModelsByBrand($brandId) {
         try {
             if (!isValidUUID($brandId)) {
+                error_log("Geçersiz brand_id: " . $brandId);
                 return [];
             }
-            
-            $stmt = $this->pdo->prepare("
-                SELECT id, name, CONCAT(name, ' (', year_start, '-', COALESCE(year_end, 'Devam'), ')') as display_name
-                FROM models 
-                WHERE brand_id = ? 
-                ORDER BY name ASC
-            ");
-            
+            $stmt = $this->pdo->prepare("SELECT * FROM models WHERE brand_id = ? ORDER BY name ASC");
             $stmt->execute([$brandId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch(PDOException $e) {
-            error_log('getModelsByBrand error: ' . $e->getMessage());
+        } catch (Exception $e) {
+            error_log("Modeller alınamadı (brand_id: $brandId): " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Modele göre serileri getir
+     */
+    public function getSeriesByModel($modelId) {
+        try {
+            if (!isValidUUID($modelId)) {
+                error_log("Geçersiz model_id: " . $modelId);
+                return [];
+            }
+            $stmt = $this->pdo->prepare("SELECT * FROM series WHERE model_id = ? ORDER BY name ASC");
+            $stmt->execute([$modelId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Seriler alınamadı (model_id: $modelId): " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Serie göre motorları getir
+     */
+    public function getEnginesBySeries($seriesId) {
+        try {
+            if (!isValidUUID($seriesId)) {
+                error_log("Geçersiz series_id: " . $seriesId);
+                return [];
+            }
+            $stmt = $this->pdo->prepare("SELECT * FROM engines WHERE series_id = ? ORDER BY name ASC");
+            $stmt->execute([$seriesId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log("Motorlar alınamadı (series_id: $seriesId): " . $e->getMessage());
             return [];
         }
     }

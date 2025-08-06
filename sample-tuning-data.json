@@ -1,0 +1,383 @@
+{
+    "Dacia": {
+        "Dokker": {
+            "2013 - 2016": {
+                "1.2 TCE 115HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Dokker 1.2 TCE 115HP",
+                        "original_power": 115,
+                        "tuning_power": 140,
+                        "difference_power": 25,
+                        "original_torque": 200,
+                        "tuning_torque": 250,
+                        "difference_torque": 50,
+                        "fuel": "Benzin",
+                        "ECU": "Siemens/Continental EMS3110 / Siemens/Continental EMS3150"
+                    }
+                },
+                "1.5 DCI 75HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Dokker 1.5 DCI 75HP",
+                        "original_power": 75,
+                        "tuning_power": 95,
+                        "difference_power": 20,
+                        "original_torque": 180,
+                        "tuning_torque": 220,
+                        "difference_torque": 40,
+                        "fuel": "Diesel",
+                        "ECU": "Bosch EDC17C42"
+                    }
+                },
+                "1.5 DCI 90HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Dokker 1.5 DCI 90HP",
+                        "original_power": 90,
+                        "tuning_power": 110,
+                        "difference_power": 20,
+                        "original_torque": 190,
+                        "tuning_torque": 240,
+                        "difference_torque": 50,
+                        "fuel": "Diesel",
+                        "ECU": "Bosch EDC17C42 / Bosch EDC17C84"
+                    }
+                }
+            },
+            "2017 ->": {
+                "1.2 TCE 115HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Dokker 1.2 TCE 115HP",
+                        "original_power": 115,
+                        "tuning_power": 140,
+                        "difference_power": 25,
+                        "original_torque": 190,
+                        "tuning_torque": 230,
+                        "difference_torque": 40,
+                        "fuel": "Benzin",
+                        "ECU": "Siemens/Continental EMS3110 / Siemens/Continental EMS3150"
+                    }
+                },
+                "1.5 DCI 75HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Dokker 1.5 DCI 75HP",
+                        "original_power": 75,
+                        "tuning_power": 115,
+                        "difference_power": 40,
+                        "original_torque": 200,
+                        "tuning_torque": 260,
+                        "difference_torque": 60,
+                        "fuel": "Diesel",
+                        "ECU": "Bosch EDC17C42 / Bosch MD1CS006"
+                    }
+                },
+                "1.5 DCI 90HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Dokker 1.5 DCI 90HP",
+                        "original_power": 90,
+                        "tuning_power": 115,
+                        "difference_power": 25,
+                        "original_torque": 220,
+                        "tuning_torque": 260,
+                        "difference_torque": 40,
+                        "fuel": "Diesel",
+                        "ECU": "Bosch EDC17C42 / Bosch EDC17C84 / Bosch MD1CS006"
+                    }
+                }
+            }
+        },
+        "Duster": {
+            "2010 - 2017": {
+                "1.2 TCE 125HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Duster 1.2 TCE 125HP",
+                        "original_power": 125,
+                        "tuning_power": 140,
+                        "difference_power": 15,
+                        "original_torque": 205,
+                        "tuning_torque": 230,
+                        "difference_torque": 25,
+                        "fuel": "Benzin",
+                        "ECU": "Siemens/Continental EMS3110 / Siemens/Continental EMS3150 / Siemens/Continental EMS3155"
+                    }
+                },
+                "1.5 DCI 105HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Duster 1.5 DCI 105HP",
+                        "original_power": 105,
+                        "tuning_power": 130,
+                        "difference_power": 25,
+                        "original_torque": 240,
+                        "tuning_torque": 300,
+                        "difference_torque": 60,
+                        "fuel": "Diesel",
+                        "ECU": "Siemens/Continental SID305 / Siemens/Continental SID306"
+                    }
+                },
+                "1.5 DCI 110HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Duster 1.5 DCI 110HP",
+                        "original_power": 110,
+                        "tuning_power": 135,
+                        "difference_power": 25,
+                        "original_torque": 240,
+                        "tuning_torque": 300,
+                        "difference_torque": 60,
+                        "fuel": "Diesel",
+                        "ECU": "Siemens/Continental SID305 / Siemens/Continental SID306 / Siemens/Continental SID310"
+                    }
+                },
+                "1.5 DCI 85HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Duster 1.5 DCI 85HP",
+                        "original_power": 85,
+                        "tuning_power": 110,
+                        "difference_power": 25,
+                        "original_torque": 200,
+                        "tuning_torque": 250,
+                        "difference_torque": 50,
+                        "fuel": "Diesel",
+                        "ECU": "Delphi DCM1.2"
+                    }
+                },
+                "1.5 DCI 90HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Duster 1.5 DCI 90HP",
+                        "original_power": 90,
+                        "tuning_power": 110,
+                        "difference_power": 20,
+                        "original_torque": 200,
+                        "tuning_torque": 250,
+                        "difference_torque": 50,
+                        "fuel": "Diesel",
+                        "ECU": "Bosch EDC17C42 / Bosch EDC17C84 / Delphi DCM3.4"
+                    }
+                },
+                "1.6i 16v 105HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Duster 1.6i 16v 105HP",
+                        "original_power": 105,
+                        "tuning_power": 113,
+                        "difference_power": 8,
+                        "original_torque": 148,
+                        "tuning_torque": 164,
+                        "difference_torque": 16,
+                        "fuel": "Benzin",
+                        "ECU": "Siemens/Continental EMS3125 / Siemens/Continental EMS3130 / Valeo V40"
+                    }
+                }
+            },
+            "2018 ->": {
+                "1.2 TCe 125HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Duster 1.2 TCe 125HP",
+                        "original_power": 125,
+                        "tuning_power": 155,
+                        "difference_power": 30,
+                        "original_torque": 205,
+                        "tuning_torque": 265,
+                        "difference_torque": 60,
+                        "fuel": "Benzin",
+                        "ECU": "Siemens/Continental EMS3150 / Siemens/Continental EMS3155"
+                    }
+                },
+                "1.5 dCi 110HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Duster 1.5 dCi 110HP",
+                        "original_power": 110,
+                        "tuning_power": 140,
+                        "difference_power": 30,
+                        "original_torque": 240,
+                        "tuning_torque": 300,
+                        "difference_torque": 60,
+                        "fuel": "Diesel",
+                        "ECU": "Bosch EDC17_C84 / Bosch MD1CS003 / Bosch MD1CS006 / Siemens/Continental SID310"
+                    }
+                },
+                "1.5 dCi 115HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Duster 1.5 dCi 115HP",
+                        "original_power": 115,
+                        "tuning_power": 140,
+                        "difference_power": 25,
+                        "original_torque": 260,
+                        "tuning_torque": 300,
+                        "difference_torque": 40,
+                        "fuel": "Diesel",
+                        "ECU": "Bosch MD1CS006"
+                    }
+                },
+                "1.5 dCi 95HP": {
+                    "Stage1": {
+                        "fullname": "Dacia Duster 1.5 dCi 95HP",
+                        "original_power": 95,
+                        "tuning_power": 140,
+                        "difference_power": 45,
+                        "original_torque": 240,
+                        "tuning_torque": 300,
+                        "difference_torque": 60,
+                        "fuel": "Diesel",
+                        "ECU": "Siemens/Continental SID310"
+                    }
+                }
+            }
+        }
+    },
+    "BMW": {
+        "X5": {
+            "2018 - 2023": {
+                "3.0 xDrive40i": {
+                    "Stage1": {
+                        "fullname": "BMW X5 3.0 xDrive40i",
+                        "original_power": 340,
+                        "tuning_power": 400,
+                        "difference_power": 60,
+                        "original_torque": 450,
+                        "tuning_torque": 520,
+                        "difference_torque": 70,
+                        "fuel": "Benzin",
+                        "ECU": "Bosch MG1CS003"
+                    },
+                    "Stage2": {
+                        "fullname": "BMW X5 3.0 xDrive40i Stage2",
+                        "original_power": 340,
+                        "tuning_power": 450,
+                        "difference_power": 110,
+                        "original_torque": 450,
+                        "tuning_torque": 580,
+                        "difference_torque": 130,
+                        "fuel": "Benzin",
+                        "ECU": "Bosch MG1CS003"
+                    }
+                },
+                "3.0 xDrive30d": {
+                    "Stage1": {
+                        "fullname": "BMW X5 3.0 xDrive30d",
+                        "original_power": 265,
+                        "tuning_power": 320,
+                        "difference_power": 55,
+                        "original_torque": 620,
+                        "tuning_torque": 720,
+                        "difference_torque": 100,
+                        "fuel": "Diesel",
+                        "ECU": "Bosch MG1CS003"
+                    }
+                }
+            }
+        },
+        "3 Series": {
+            "2019 - 2023": {
+                "2.0 320i": {
+                    "Stage1": {
+                        "fullname": "BMW 320i 2.0T",
+                        "original_power": 184,
+                        "tuning_power": 220,
+                        "difference_power": 36,
+                        "original_torque": 300,
+                        "tuning_torque": 370,
+                        "difference_torque": 70,
+                        "fuel": "Benzin",
+                        "ECU": "Bosch MG1CS003"
+                    }
+                },
+                "2.0 320d": {
+                    "Stage1": {
+                        "fullname": "BMW 320d 2.0",
+                        "original_power": 190,
+                        "tuning_power": 230,
+                        "difference_power": 40,
+                        "original_torque": 400,
+                        "tuning_torque": 480,
+                        "difference_torque": 80,
+                        "fuel": "Diesel",
+                        "ECU": "Bosch MG1CS003"
+                    }
+                }
+            }
+        }
+    },
+    "Volkswagen": {
+        "Golf": {
+            "2013 - 2020": {
+                "1.4 TSI 125HP": {
+                    "Stage1": {
+                        "fullname": "Volkswagen Golf 1.4 TSI 125HP",
+                        "original_power": 125,
+                        "tuning_power": 165,
+                        "difference_power": 40,
+                        "original_torque": 200,
+                        "tuning_torque": 260,
+                        "difference_torque": 60,
+                        "fuel": "Benzin",
+                        "ECU": "Bosch MED17.5.5"
+                    }
+                },
+                "2.0 TDI 150HP": {
+                    "Stage1": {
+                        "fullname": "Volkswagen Golf 2.0 TDI 150HP",
+                        "original_power": 150,
+                        "tuning_power": 190,
+                        "difference_power": 40,
+                        "original_torque": 320,
+                        "tuning_torque": 400,
+                        "difference_torque": 80,
+                        "fuel": "Diesel",
+                        "ECU": "Bosch EDC17CP14"
+                    }
+                },
+                "2.0 GTI 230HP": {
+                    "Stage1": {
+                        "fullname": "Volkswagen Golf GTI 2.0 TSI 230HP",
+                        "original_power": 230,
+                        "tuning_power": 290,
+                        "difference_power": 60,
+                        "original_torque": 350,
+                        "tuning_torque": 420,
+                        "difference_torque": 70,
+                        "fuel": "Benzin",
+                        "ECU": "Bosch MED17.5.25"
+                    },
+                    "Stage2": {
+                        "fullname": "Volkswagen Golf GTI 2.0 TSI Stage2",
+                        "original_power": 230,
+                        "tuning_power": 340,
+                        "difference_power": 110,
+                        "original_torque": 350,
+                        "tuning_torque": 480,
+                        "difference_torque": 130,
+                        "fuel": "Benzin",
+                        "ECU": "Bosch MED17.5.25"
+                    }
+                }
+            }
+        },
+        "Passat": {
+            "2015 - 2023": {
+                "2.0 TDI 150HP": {
+                    "Stage1": {
+                        "fullname": "Volkswagen Passat 2.0 TDI 150HP",
+                        "original_power": 150,
+                        "tuning_power": 190,
+                        "difference_power": 40,
+                        "original_torque": 340,
+                        "tuning_torque": 420,
+                        "difference_torque": 80,
+                        "fuel": "Diesel",
+                        "ECU": "Bosch EDC17CP14"
+                    }
+                },
+                "2.0 TSI 190HP": {
+                    "Stage1": {
+                        "fullname": "Volkswagen Passat 2.0 TSI 190HP",
+                        "original_power": 190,
+                        "tuning_power": 240,
+                        "difference_power": 50,
+                        "original_torque": 320,
+                        "tuning_torque": 380,
+                        "difference_torque": 60,
+                        "fuel": "Benzin",
+                        "ECU": "Bosch MED17.5.25"
+                    }
+                }
+            }
+        }
+    }
+}

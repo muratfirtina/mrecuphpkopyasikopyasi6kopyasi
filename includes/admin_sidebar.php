@@ -86,11 +86,19 @@
                         </a>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Markalar') ? 'active' : ''; ?>" href="brands.php">
-                            <i class="fas fa-certificate"></i>Markalar
+                            <i class="fas fa-certificate"></i>Araçlar
                         </a>
                         
                         <!-- Sistem Yönetimi -->
                         <div class="nav-section">Sistem</div>
+                        
+                        <a class="nav-link <?php echo ($pageTitle == 'ECU Yönetimi') ? 'active' : ''; ?>" href="ecus.php">
+                            <i class="fas fa-microchip"></i>ECU Yönetimi
+                        </a>
+                        
+                        <a class="nav-link <?php echo ($pageTitle == 'Device Yönetimi') ? 'active' : ''; ?>" href="devices.php">
+                            <i class="fas fa-tools"></i>Device Yönetimi
+                        </a>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Sistem Ayarları') ? 'active' : ''; ?>" href="settings.php">
                             <i class="fas fa-cog"></i>Ayarlar

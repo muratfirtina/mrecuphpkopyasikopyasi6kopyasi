@@ -467,7 +467,7 @@ if (isset($_SESSION['user_id'])) {
                 
                 <?php if ($totalNotifications > 0): ?>
                 <li class="nav-item dropdown me-2">
-                    <a class="nav-link position-relative p-2" href="#" id="userNotificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link position-relative p-3" href="#" id="userNotificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-bell fa-lg text-white"></i>
                         <?php if ($badgeNotificationCount > 0): ?>
                         <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
