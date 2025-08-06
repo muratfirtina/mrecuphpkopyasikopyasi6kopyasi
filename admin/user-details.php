@@ -233,10 +233,31 @@ include '../includes/admin_sidebar.php';
                 </div>
                 
                 <div class="row mb-3">
-                    <div class="col-sm-6"><strong>Kredi:</strong></div>
+                    <div class="col-sm-6"><strong>Tanımlı Kota:</strong></div>
+                    <div class="col-sm-6">
+                        <span class="badge bg-primary">
+                            <?php echo number_format($userDetails['credit_quota'] ?? 0, 2); ?> TL
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-6"><strong>Mevcut Kullanım:</strong></div>
+                    <div class="col-sm-6">
+                        <span class="badge bg-warning">
+                            <?php echo number_format($userDetails['credit_used'] ?? 0, 2); ?> TL
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-6"><strong>Kalan Kullanım:</strong></div>
                     <div class="col-sm-6">
                         <span class="badge bg-success">
-                            <?php echo number_format($userDetails['credits'], 2); ?> TL
+                            <?php 
+                            $availableCredit = ($userDetails['credit_quota'] ?? 0) - ($userDetails['credit_used'] ?? 0);
+                            echo number_format($availableCredit, 2); 
+                            ?> TL
                         </span>
                     </div>
                 </div>

@@ -440,8 +440,23 @@ try {
         $approvedRevision = $stmt->fetch();
         
     } else {
-        // Normal upload dosyası detaylarını al
-        $upload = $fileManager->getUploadById($uploadId);
+        // Normal upload dosyası detaylarını al - Kullanıcı bilgileri ile birlikte
+        $stmt = $pdo->prepare("
+            SELECT fu.*, 
+                   u.username, u.email, u.first_name, u.last_name,
+                   b.name as brand_name, m.name as model_name, s.name as series_name, e.name as engine_name,
+                   d.name as device_name
+            FROM file_uploads fu
+            LEFT JOIN users u ON fu.user_id = u.id
+            LEFT JOIN brands b ON fu.brand_id = b.id
+            LEFT JOIN models m ON fu.model_id = m.id
+            LEFT JOIN series s ON fu.series_id = s.id
+            LEFT JOIN engines e ON fu.engine_id = e.id
+            LEFT JOIN devices d ON fu.device_id = d.id
+            WHERE fu.id = ?
+        ");
+        $stmt->execute([$uploadId]);
+        $upload = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if (!$upload) {
             redirect('uploads.php');
@@ -1386,17 +1401,21 @@ try {
                             </div>
                         <?php endif; ?>
                     </div>
+                    
+                    <!-- İndir Butonu -->
                     <?php if ($originalFileCheck['exists']): ?>
-                    <?php if ($fileType === 'response'): ?>
-                        <a href="download-file.php?id=<?php echo $responseId; ?>&type=response" class="btn btn-success btn-sm">
-                            <i class="fas fa-download me-1"></i>İndir
-                        </a>
-                    <?php else: ?>
-                        <a href="download-file.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-success btn-sm">
-                            <i class="fas fa-download me-1"></i>İndir
-                        </a>
+                        <div class="mt-3">
+                            <?php if ($fileType === 'response'): ?>
+                                <a href="download-file.php?id=<?php echo $responseId; ?>&type=response" class="btn btn-success btn-sm w-100">
+                                    <i class="fas fa-download me-1"></i>Dosyayı İndir
+                                </a>
+                            <?php else: ?>
+                                <a href="download-file.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-success btn-sm w-100">
+                                    <i class="fas fa-download me-1"></i>Dosyayı İndir
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     <?php endif; ?>
-                <?php endif; ?>
                 </div>
             </div>
             
@@ -1497,7 +1516,7 @@ try {
                         <hr>
                         
                         <div class="d-grid gap-2">
-                            <a href="users.php?user_id=<?php echo $upload['user_id']; ?>" class="btn btn-outline-primary btn-sm">
+                            <a href="user-details.php?id=<?php echo $upload['user_id']; ?>" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-user me-1"></i>Kullanıcı Profili
                             </a>
                             <a href="uploads.php?user_id=<?php echo $upload['user_id']; ?>" class="btn btn-outline-secondary btn-sm">

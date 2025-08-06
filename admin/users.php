@@ -608,15 +608,21 @@ include '../includes/admin_sidebar.php';
                                 </td>
                                 <td>
                                     <div class="btn-group-vertical btn-group-sm" style="width: 120px;">
-                                        <button type="button" class="btn btn-outline-primary btn-sm" 
-                                                onclick="viewUser('<?php echo $userData['id']; ?>')">
+                                        <a href="user-details.php?id=<?php echo $userData['id']; ?>" 
+                                           class="btn btn-outline-primary btn-sm" 
+                                           target="_blank">
                                             <i class="fas fa-eye me-1"></i>Detay
-                                        </button>
+                                        </a>
                                         
                                         <button type="button" class="btn btn-outline-<?php echo $userData['status'] === 'active' ? 'warning' : 'success'; ?> btn-sm" 
                                                 onclick="toggleUserStatus('<?php echo $userData['id']; ?>', '<?php echo $userData['status'] === 'active' ? 'inactive' : 'active'; ?>')">
                                             <i class="fas fa-<?php echo $userData['status'] === 'active' ? 'pause' : 'play'; ?> me-1"></i>
                                             <?php echo $userData['status'] === 'active' ? 'Pasif Yap' : 'Aktif Yap'; ?>
+                                        </button>
+                                        
+                                        <button type="button" class="btn btn-outline-success btn-sm" 
+                                                onclick="addCredit('<?php echo $userData['id']; ?>', '<?php echo htmlspecialchars($userData['username']); ?>')">
+                                            <i class="fas fa-coins me-1"></i>Kredi Yükle
                                         </button>
                                         
                                         <?php if ($userData['role'] !== 'admin'): ?>

@@ -509,12 +509,12 @@ include '../includes/admin_sidebar.php';
                                 <td>
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-success" 
-                                                onclick="openCreditModal('add', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['available_credits']; ?>')"
+                                                onclick="openCreditModal('add', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['credit_quota']; ?>', '<?php echo $userItem['credit_used']; ?>', '<?php echo $userItem['available_credits']; ?>')"
                                                 title="Kredi Kotası Artır">
                                             <i class="fas fa-plus me-1"></i>Kota +
                                         </button>
                                         <button type="button" class="btn btn-danger" 
-                                                onclick="openCreditModal('deduct', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['credit_used']; ?>')"
+                                                onclick="openCreditModal('deduct', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['credit_quota']; ?>', '<?php echo $userItem['credit_used']; ?>', '<?php echo $userItem['available_credits']; ?>')"
                                                 title="Kredi İadesi">
                                             <i class="fas fa-undo me-1"></i>İade
                                         </button>
@@ -714,7 +714,9 @@ include '../includes/admin_sidebar.php';
                     
                     <div class="alert alert-info alert-permanent">
                         <strong>Kullanıcı:</strong> <span id="selectedUserName"></span><br>
-                        <strong>Mevcut Durum:</strong> <span id="currentCredits"></span> TL
+                        <strong>Tanımlı Kota:</strong> <span id="creditQuota"></span> TL<br>
+                        <strong>Mevcut Kullanım:</strong> <span id="creditUsed"></span> TL<br>
+                        <strong>Kalan Kullanım:</strong> <span id="currentCredits"></span> TL
                     </div>
                     
                     <div class="mb-3">
@@ -765,17 +767,23 @@ function quickJumpToPage() {
 // Tüm değişkenler ve fonksiyonlar
 let currentOperation = '';
 let userCurrentCredits = 0;
+let userCreditQuota = 0;
+let userCreditUsed = 0;
 
-function openCreditModal(operation, userId, userName, credits) {
-    console.log('Modal açılıyor:', operation, userId, userName, credits);
+function openCreditModal(operation, userId, userName, creditQuota, creditUsed, availableCredits) {
+    console.log('Modal açılıyor:', operation, userId, userName, creditQuota, creditUsed, availableCredits);
     
     currentOperation = operation;
-    userCurrentCredits = parseFloat(credits);
+    userCurrentCredits = operation === 'add' ? parseFloat(availableCredits) : parseFloat(creditUsed);
+    userCreditQuota = parseFloat(creditQuota);
+    userCreditUsed = parseFloat(creditUsed);
     
     // Modal verilerini ayarla
     document.getElementById('user_id').value = userId;
     document.getElementById('selectedUserName').textContent = userName;
-    document.getElementById('currentCredits').textContent = parseFloat(credits).toFixed(2);
+    document.getElementById('creditQuota').textContent = userCreditQuota.toFixed(2);
+    document.getElementById('creditUsed').textContent = userCreditUsed.toFixed(2);
+    document.getElementById('currentCredits').textContent = parseFloat(availableCredits).toFixed(2);
     
     const modalTitle = document.getElementById('modalTitle');
     const submitBtn = document.getElementById('submitBtn');
@@ -829,26 +837,46 @@ function updatePreview() {
         return;
     }
     
-    let newBalance;
-    let operation;
-    let color;
+    let previewHtml;
     
     if (currentOperation === 'add') {
-        newBalance = userCurrentCredits + amount;
-        operation = '+';
-        color = 'text-success';
+        // Kredi Kotası Artırma İşlemi
+        const newQuota = userCreditQuota + amount;
+        const newAvailableCredits = newQuota - userCreditUsed;
+        
+        previewHtml = 
+            '<strong>Mevcut Durum:</strong><br>' +
+            'Tanımlı Kota: <span class="text-primary">' + userCreditQuota.toFixed(2) + ' TL</span><br>' +
+            'Mevcut Kullanım: <span class="text-warning">' + userCreditUsed.toFixed(2) + ' TL</span><br>' +
+            'Kalan Kullanım: <span class="text-info">' + (userCreditQuota - userCreditUsed).toFixed(2) + ' TL</span><br><br>' +
+            '<strong>İşlem:</strong> <span class="text-success">+' + amount.toFixed(2) + ' TL Kota Artırma</span><br><br>' +
+            '<strong>İşlem Sonrası:</strong><br>' +
+            'Yeni Tanımlı Kota: <span class="text-success">' + newQuota.toFixed(2) + ' TL</span><br>' +
+            'Mevcut Kullanım: <span class="text-warning">' + userCreditUsed.toFixed(2) + ' TL</span><br>' +
+            'Yeni Kalan Kullanım: <span class="text-success">' + newAvailableCredits.toFixed(2) + ' TL</span>';
+            
     } else {
-        newBalance = userCurrentCredits - amount;
-        operation = '-';
-        color = newBalance >= 0 ? 'text-danger' : 'text-warning';
+        // Kredi İadesi İşlemi
+        const newUsedCredits = Math.max(0, userCreditUsed - amount);
+        const newAvailableCredits = userCreditQuota - newUsedCredits;
+        
+        previewHtml = 
+            '<strong>Mevcut Durum:</strong><br>' +
+            'Tanımlı Kota: <span class="text-primary">' + userCreditQuota.toFixed(2) + ' TL</span><br>' +
+            'Mevcut Kullanım: <span class="text-warning">' + userCreditUsed.toFixed(2) + ' TL</span><br>' +
+            'Kalan Kullanım: <span class="text-info">' + (userCreditQuota - userCreditUsed).toFixed(2) + ' TL</span><br><br>' +
+            '<strong>İşlem:</strong> <span class="text-danger">-' + amount.toFixed(2) + ' TL Kredi İadesi</span><br><br>' +
+            '<strong>İşlem Sonrası:</strong><br>' +
+            'Tanımlı Kota: <span class="text-primary">' + userCreditQuota.toFixed(2) + ' TL</span><br>' +
+            'Yeni Mevcut Kullanım: <span class="text-success">' + newUsedCredits.toFixed(2) + ' TL</span><br>' +
+            'Yeni Kalan Kullanım: <span class="text-success">' + newAvailableCredits.toFixed(2) + ' TL</span>';
+            
+        if (amount > userCreditUsed) {
+            previewHtml += '<br><br><span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Uyarı: İade miktarı mevcut kullanımdan fazla!</span>';
+        }
     }
     
-    previewText.innerHTML = 
-        'Mevcut: <strong>' + userCurrentCredits.toFixed(2) + ' TL</strong><br>' +
-        'İşlem: <strong class="' + color + '">' + operation + amount.toFixed(2) + ' TL</strong><br>' +
-        'Yeni Durum: <strong class="' + (newBalance >= 0 ? 'text-primary' : 'text-danger') + '">' + 
-        newBalance.toFixed(2) + ' TL</strong>' +
-        (newBalance < 0 ? '<br><span class="text-danger">⚠️ Negatif değer!</span>' : '');
+    previewText.innerHTML = previewHtml;
 }
 
 // Sayfa yüklendiğinde event listener'ları ekle
