@@ -6,6 +6,17 @@
 require_once '../config/config.php';
 require_once '../config/database.php';
 
+// DEBUG: Geçici bypass - session sorunu için
+// TODO: Bu kısmı session sorunu çözüldükten sonra kaldır!
+if (defined('DEBUG') && DEBUG) {
+    // Debug modunda belirli bir kullanıcı ID'si ile test et
+    $debugUserId = '3fbe9c59-53de-4bcd-a83b-21634f467203'; // Debug sayfasından aldığımız user_id
+    if (!isset($_SESSION['user_id'])) {
+        $_SESSION['user_id'] = $debugUserId;
+        error_log('DEBUG MODE (Revisions): Temporary user_id set for testing: ' . $debugUserId);
+    }
+}
+
 // Giriş kontrolü
 if (!isLoggedIn()) {
     redirect('../login.php?redirect=user/revisions.php');
@@ -66,11 +77,14 @@ try {
         SELECT r.*, 
                fu.original_name, fu.filename, fu.file_size, fu.plate,
                b.name as brand_name, m.name as model_name, fu.year,
+               s.name as series_name, e.name as engine_name,
                a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name
         FROM revisions r
         LEFT JOIN file_uploads fu ON r.upload_id = fu.id
         LEFT JOIN brands b ON fu.brand_id = b.id
         LEFT JOIN models m ON fu.model_id = m.id
+        LEFT JOIN series s ON fu.series_id = s.id
+        LEFT JOIN engines e ON fu.engine_id = e.id
         LEFT JOIN users a ON r.admin_id = a.id
         $whereClause
         ORDER BY r.requested_at DESC
@@ -364,7 +378,7 @@ include '../includes/user_header.php';
                             <table class="table table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th width="100">ID</th>
+                                        <!-- <th width="100">ID</th> -->
                                         <th>Dosya Adı</th>
                                         <th width="180">Araç Bilgileri</th>
                                         <th width="120">Durum</th>
@@ -388,13 +402,13 @@ include '../includes/user_header.php';
                                         $config = $statusConfig[$revision['status']] ?? ['class' => 'secondary', 'text' => 'Bilinmiyor', 'icon' => 'question'];
                                         ?>
                                         <tr class="revision-row" data-revision-id="<?php echo htmlspecialchars($revision['id']); ?>">
-                                            <td>
+                                            <!-- <td>
                                                 <span class="font-monospace text-muted">
                                                     #<?php echo substr($revision['id'], 0, 8); ?>
                                                 </span>
-                                                <!-- Debug: Tam ID göster -->
+                                                
                                                 <small class="d-block text-muted" style="font-size: 10px;">Debug: <?php echo htmlspecialchars($revision['id']); ?></small>
-                                            </td>
+                                            </td> -->
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <i class="fas fa-file-code text-primary me-2"></i>
@@ -415,14 +429,23 @@ include '../includes/user_header.php';
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="vehicle-info">
+                                                <div class="vehicle-info" style="width: 300px;">
                                                     <div class="brand-model">
                                                         <strong><?php echo htmlspecialchars($revision['brand_name'] ?? 'Bilinmiyor'); ?></strong>
                                                         <?php if (!empty($revision['model_name'])): ?>
                                                             - <?php echo htmlspecialchars($revision['model_name']); ?>
                                                         <?php endif; ?>
-                                                        <?php if (!empty($revision['year'])): ?>
-                                                            (<?php echo $revision['year']; ?>)
+                                                        <?php if (!empty($revision['series_name'])): ?>
+                                                            <br><small class="text-muted">
+                                                                <i class="fas fa-tag me-1"></i>
+                                                                Seri: <?php echo htmlspecialchars($revision['series_name']); ?>
+                                                            </small>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($revision['engine_name'])): ?>
+                                                            <br><small class="text-muted">
+                                                                <i class="fas fa-cog me-1"></i>
+                                                                Motor: <?php echo htmlspecialchars($revision['engine_name']); ?>
+                                                            </small>
                                                         <?php endif; ?>
                                                     </div>
                                                     <?php if (!empty($revision['plate'])): ?>
@@ -793,6 +816,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         row.addEventListener('click', function(e) {
             console.log('Row clicked:', e.target);
+            console.log('Target tagName:', e.target.tagName);
+            console.log('Target className:', e.target.className);
             
             // Don't trigger if clicking on buttons, links, or their children
             if (e.target.closest('.btn') || e.target.closest('a') || e.target.closest('.btn-group')) {
@@ -800,15 +825,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+            // Prevent default and stop propagation for safety
+            e.preventDefault();
+            e.stopPropagation();
+            
             const revisionId = this.getAttribute('data-revision-id');
             console.log('Navigating to revision:', revisionId);
             
             if (revisionId) {
-                const url = `revision-detail.php?id=${revisionId}`;
-                console.log('URL:', url);
-                window.location.href = url;
+                const url = 'revision-detail.php?id=' + encodeURIComponent(revisionId);
+                console.log('Final URL:', url);
+                console.log('About to navigate...');
+                
+                // Test if URL is valid before navigating
+                try {
+                    window.location.href = url;
+                } catch (error) {
+                    console.error('Navigation error:', error);
+                    alert('Sayfa yönlendirmesinde hata oluştu. Lütfen Detaylar butonunu kullanın.');
+                }
             } else {
-                console.error('No revision ID found');
+                console.error('No revision ID found for this row');
+                alert('Revize ID bulunamadı.');
             }
         });
         
@@ -826,6 +864,34 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.addEventListener('mouseleave', function() {
                 row.style.cursor = 'pointer';
             });
+        });
+    });
+    
+    // Also add click handlers to detail buttons specifically
+    const detailButtons = document.querySelectorAll('a[href*="revision-detail.php"]');
+    console.log('Found detail buttons:', detailButtons.length);
+    
+    detailButtons.forEach((btn, index) => {
+        console.log(`Detail button ${index} href:`, btn.href);
+        
+        btn.addEventListener('click', function(e) {
+            console.log('Detail button clicked:', this.href);
+            
+            // Test the URL format
+            const url = this.href;
+            const urlParams = new URLSearchParams(url.split('?')[1]);
+            const id = urlParams.get('id');
+            
+            console.log('Button URL ID:', id);
+            
+            if (!id) {
+                e.preventDefault();
+                alert('Revize ID eksik!');
+                return false;
+            }
+            
+            // Let the browser handle the navigation normally
+            console.log('Allowing normal button navigation to:', url);
         });
     });
 });

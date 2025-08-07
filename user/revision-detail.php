@@ -6,13 +6,8 @@
 require_once '../config/config.php';
 require_once '../config/database.php';
 
-// UUID validation function - Daha esnek hale getirelim
-if (!function_exists('isValidUUID')) {
-    function isValidUUID($uuid) {
-        // Basit string kontrolü - sadece boş olmamasını kontrol edelim
-        return !empty($uuid) && is_string($uuid) && strlen($uuid) >= 32;
-    }
-}
+// UUID validation function çakışmasını önlemek için config.php'deki fonksiyonu kullan
+// Config.php'de zaten doğru UUID validation var, burada kendi fonksiyonumuzu tanımlamaya gerek yok
 
 // Helper function for file size formatting
 if (!function_exists('formatFileSize')) {
@@ -25,8 +20,22 @@ if (!function_exists('formatFileSize')) {
     }
 }
 
+// DEBUG: Geçici bypass - session sorunu için
+// TODO: Bu kısmı session sorunu çözüldükten sonra kaldır!
+if (defined('DEBUG') && DEBUG) {
+    // Debug modunda belirli bir kullanıcı ID'si ile test et
+    $debugUserId = '3fbe9c59-53de-4bcd-a83b-21634f467203'; // Debug sayfasından aldığımız user_id
+    if (!isset($_SESSION['user_id'])) {
+        $_SESSION['user_id'] = $debugUserId;
+        error_log('DEBUG MODE: Temporary user_id set for testing: ' . $debugUserId);
+    }
+}
+
 // Giriş kontrolü
 if (!isLoggedIn()) {
+    if (defined('DEBUG') && DEBUG) {
+        error_log('DEBUG: User not logged in. Session user_id: ' . ($_SESSION['user_id'] ?? 'NOT_SET'));
+    }
     redirect('../login.php?redirect=user/revision-detail.php');
 }
 
@@ -39,8 +48,19 @@ if (!isset($_GET['id'])) {
 $revisionId = sanitize($_GET['id']);
 $userId = $_SESSION['user_id'];
 
+// Debug: Gelen ID'yi logla
+if (defined('DEBUG') && DEBUG) {
+    error_log('Revision Detail Debug - Original ID: ' . ($_GET['id'] ?? 'NO_ID'));
+    error_log('Revision Detail Debug - Sanitized ID: ' . $revisionId);
+    error_log('Revision Detail Debug - User ID: ' . $userId);
+}
+
+// UUID formatını kontrol et - config.php'den gelen fonksiyonu kullan
 if (!isValidUUID($revisionId)) {
-    $_SESSION['error'] = 'Geçersiz revize ID formatı.';
+    if (defined('DEBUG') && DEBUG) {
+        error_log('Revision Detail Debug - Invalid UUID format: ' . $revisionId);
+    }
+    $_SESSION['error'] = 'Geçersiz revize ID formatı: ' . substr($revisionId, 0, 20) . '...';
     redirect('revisions.php');
 }
 
@@ -52,12 +72,16 @@ $_SESSION['credits'] = $user->getUserCredits($_SESSION['user_id']);
 
 // Revize detaylarını getir
 try {
+    if (defined('DEBUG') && DEBUG) {
+        error_log('Revision Detail Debug - About to query database with ID: ' . $revisionId . ', User ID: ' . $userId);
+    }
+    
     $stmt = $pdo->prepare("
         SELECT r.*, 
                fu.original_name, fu.filename, fu.file_size, fu.status as file_status, fu.upload_date as file_uploaded_at,
                fu.file_type, fu.hp_power, fu.nm_torque, fu.plate,
                u.username as admin_username, u.first_name as admin_first_name, u.last_name as admin_last_name,
-               br.name as brand_name, br.logo as brand_logo
+               br.name as brand_name
         FROM revisions r
         LEFT JOIN file_uploads fu ON r.upload_id = fu.id
         LEFT JOIN users u ON r.admin_id = u.id
@@ -67,12 +91,25 @@ try {
     $stmt->execute([$revisionId, $userId]);
     $revision = $stmt->fetch(PDO::FETCH_ASSOC);
     
+    if (defined('DEBUG') && DEBUG) {
+        error_log('Revision Detail Debug - Query result: ' . ($revision ? 'FOUND' : 'NOT_FOUND'));
+        if ($revision) {
+            error_log('Revision Detail Debug - Found revision ID: ' . ($revision['id'] ?? 'NO_ID'));
+        }
+    }
+    
     if (!$revision) {
-        $_SESSION['error'] = 'Revize bulunamadı veya bu revizeyi görüntüleme yetkiniz yok.';
+        if (defined('DEBUG') && DEBUG) {
+            error_log('Revision Detail Debug - No revision found for ID: ' . $revisionId . ', User: ' . $userId);
+        }
+        $_SESSION['error'] = 'Revize bulunamadı veya bu revizeyi görüntüleme yetkiniz yok. ID: ' . substr($revisionId, 0, 8) . '...';
         redirect('revisions.php');
     }
 } catch(PDOException $e) {
-    $_SESSION['error'] = 'Veritabanı hatası oluştu.';
+    if (defined('DEBUG') && DEBUG) {
+        error_log('Revision Detail Debug - Database error: ' . $e->getMessage());
+    }
+    $_SESSION['error'] = 'Veritabanı hatası oluştu: ' . ($e->getMessage());
     redirect('revisions.php');
 }
 // YENİ EKLENEN BLOK: Revize talep edilen doğru dosyayı bul

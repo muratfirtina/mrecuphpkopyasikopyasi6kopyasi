@@ -1138,7 +1138,9 @@ include '../includes/user_header.php';
                     <input type="hidden" name="file_type" id="revisionFileType">
                     <input type="hidden" name="request_revision" value="1">
                     
-                    <div class="alert alert-info">
+                    <div class="alert-info" style="padding: 1rem; display: flex; align-items: center; background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+    border: 1px solid #81c784;
+    border-radius: 12px;">
                         <div class="d-flex">
                             <i class="fas fa-info-circle me-3 mt-1"></i>
                             <div>
@@ -1696,35 +1698,88 @@ include '../includes/user_header.php';
 </style>
 
 <script>
-// Request Revision
-function requestRevision(fileId, fileType = 'upload') {
-    document.getElementById('revisionFileId').value = fileId;
-    document.getElementById('revisionFileType').value = fileType;
-    
-    // Modal içeriğini dosya tipine göre ayarla
-    const revisionInfoText = document.getElementById('revisionInfoText');
-    const modalTitle = document.querySelector('#revisionModal .modal-title');
-    
-    if (fileType === 'response') {
-        modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Yanıt Dosyası Revize Talebi';
-        revisionInfoText.innerHTML = 'Yanıt dosyasında bir değişiklik veya düzenleme istiyorsanız bu formu kullanabilirsiniz. Admin ekibimiz dosyanızı yeniden gözden geçirecek ve geliştirilmiş bir sürüm hazırlayacaktır.';
-        document.getElementById('revision_notes').placeholder = 'Yanıt dosyasında hangi değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Daha fazla güç istiyorum", "Yakıt tüketimi daha iyi olsun", "Torku artmalı" gibi...';
-    } else if (fileType === 'revision') {
-        modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Revize Dosyası İçin Yeni Revize Talebi';
-        revisionInfoText.innerHTML = 'Mevcut revize dosyasında ek değişiklikler istiyorsanız bu formu kullanabilirsiniz. Admin ekibimiz dosyanızı tekrar gözden geçirecek ve istekleriniz doğrultusunda düzenleyecektir.';
-        document.getElementById('revision_notes').placeholder = 'Revize dosyasında hangi ek değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Daha fazla performans", "Farklı ayarlar", "Ek özellikler" gibi...';
-    } else {
-        modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Revize Talebi';
-        revisionInfoText.innerHTML = 'Dosyanızda bir değişiklik veya düzenleme istiyorsanız bu formu kullanabilirsiniz. Talep incelendikten sonra size geri dönüş yapılacaktır.';
-        document.getElementById('revision_notes').placeholder = 'Lütfen dosyada hangi değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Güç artırımı", "EGR kapatma", "DPF silme" gibi...';
+// DOM yüklendikten sonra çalıştır
+document.addEventListener('DOMContentLoaded', function() {
+    // Request Revision Function
+    window.requestRevision = function(fileId, fileType = 'upload') {
+        try {
+            // Element kontrolü yap
+            const revisionFileIdElement = document.getElementById('revisionFileId');
+            const revisionFileTypeElement = document.getElementById('revisionFileType');
+            const revisionInfoText = document.getElementById('revisionInfoText');
+            const modalTitle = document.querySelector('#revisionModal .modal-title');
+            const revisionNotesElement = document.getElementById('revision_notes');
+            const revisionModal = document.getElementById('revisionModal');
+            
+            // Elementlerin varlığını kontrol et
+            if (!revisionFileIdElement) {
+                console.error('revisionFileId elementi bulunamadı!');
+                alert('Modal yüklenirken hata oluştu. Lütfen sayfayı yenileyin.');
+                return;
+            }
+            
+            if (!revisionFileTypeElement) {
+                console.error('revisionFileType elementi bulunamadı!');
+                alert('Modal yüklenirken hata oluştu. Lütfen sayfayı yenileyin.');
+                return;
+            }
+            
+            if (!revisionInfoText) {
+                console.error('revisionInfoText elementi bulunamadı!');
+                alert('Modal yüklenirken hata oluştu. Lütfen sayfayı yenileyin.');
+                return;
+            }
+            
+            if (!modalTitle) {
+                console.error('modal title elementi bulunamadı!');
+                alert('Modal yüklenirken hata oluştu. Lütfen sayfayı yenileyin.');
+                return;
+            }
+            
+            if (!revisionNotesElement) {
+                console.error('revision_notes elementi bulunamadı!');
+                alert('Modal yüklenirken hata oluştu. Lütfen sayfayı yenileyin.');
+                return;
+            }
+            
+            if (!revisionModal) {
+                console.error('revisionModal elementi bulunamadı!');
+                alert('Modal yüklenirken hata oluştu. Lütfen sayfayı yenileyin.');
+                return;
+            }
+            
+            // Elementler mevcut, değerleri set et
+            revisionFileIdElement.value = fileId;
+            revisionFileTypeElement.value = fileType;
+            
+            // Modal içeriğini dosya tipine göre ayarla
+            if (fileType === 'response') {
+                modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Yanıt Dosyası Revize Talebi';
+                revisionInfoText.innerHTML = 'Yanıt dosyasında bir değişiklik veya düzenleme istiyorsanız bu formu kullanabilirsiniz. Admin ekibimiz dosyanızı yeniden gözden geçirecek ve geliştirilmiş bir sürüm hazırlayacaktır.';
+                revisionNotesElement.placeholder = 'Yanıt dosyasında hangi değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Daha fazla güç istiyorum", "Yakıt tüketimi daha iyi olsun", "Torku artmalı" gibi...';
+            } else if (fileType === 'revision') {
+                modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Revize Dosyası İçin Yeni Revize Talebi';
+                revisionInfoText.innerHTML = 'Mevcut revize dosyasında ek değişiklikler istiyorsanız bu formu kullanabilirsiniz. Admin ekibimiz dosyanızı tekrar gözden geçirecek ve istekleriniz doğrultusunda düzenleyecektir.';
+                revisionNotesElement.placeholder = 'Revize dosyasında hangi ek değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Daha fazla performans", "Farklı ayarlar", "Ek özellikler" gibi...';
+            } else {
+                modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Revize Talebi';
+                revisionInfoText.innerHTML = 'Dosyanızda bir değişiklik veya düzenleme istiyorsanız bu formu kullanabilirsiniz. Talep incelendikten sonra size geri dönüş yapılacaktır.';
+                revisionNotesElement.placeholder = 'Lütfen dosyada hangi değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Güç artırımı", "EGR kapatma", "DPF silme" gibi...';
+            }
+            
+            // Formu temizle
+            revisionNotesElement.value = '';
+            
+            // Modal'ı göster
+            const modal = new bootstrap.Modal(revisionModal);
+            modal.show();
+            
+        } catch (error) {
+            console.error('requestRevision fonksiyonunda hata:', error);
+            alert('Revize talebi modalı açılırken bir hata oluştu: ' + error.message);
+        }
     }
-    
-    // Formu temizle
-    document.getElementById('revision_notes').value = '';
-    
-    const modal = new bootstrap.Modal(document.getElementById('revisionModal'));
-    modal.show();
-}
+});
 </script>
 
 <?php

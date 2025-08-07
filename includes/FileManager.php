@@ -1041,12 +1041,15 @@ class FileManager {
                 SELECT r.*, fu.original_name, fu.filename, fu.file_size, fu.plate, fu.year,
                        u.username, u.email, u.first_name, u.last_name,
                        b.name as brand_name, m.name as model_name,
+                       s.name as series_name, e.name as engine_name,
                        fr.original_name as response_original_name
                 FROM revisions r
                 LEFT JOIN file_uploads fu ON r.upload_id = fu.id
                 LEFT JOIN users u ON r.user_id = u.id
                 LEFT JOIN brands b ON fu.brand_id = b.id
                 LEFT JOIN models m ON fu.model_id = m.id
+                LEFT JOIN series s ON fu.series_id = s.id
+                LEFT JOIN engines e ON fu.engine_id = e.id
                 LEFT JOIN file_responses fr ON r.response_id = fr.id
                 $whereClause
                 ORDER BY r.requested_at DESC

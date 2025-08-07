@@ -468,7 +468,7 @@ include '../includes/admin_sidebar.php';
                         <tr>
                             <th>Kullanıcı</th>
                             <th>Dosya</th>
-                            <th width="180">Araç Bilgileri</th>
+                            <th>Araç Bilgileri</th>
                             <th>Talep Notları</th>
                             <th>Durum</th>
                             <th>Tarih</th>
@@ -549,15 +549,24 @@ include '../includes/admin_sidebar.php';
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="vehicle-info">
+                                    <div class="vehicle-info" style="width: 300px;">
                                         <?php if (!empty($revision['brand_name']) || !empty($revision['model_name'])): ?>
                                             <div class="brand-model mb-1">
                                                 <strong><?php echo htmlspecialchars($revision['brand_name'] ?? 'Bilinmiyor'); ?></strong>
                                                 <?php if (!empty($revision['model_name'])): ?>
                                                     - <?php echo htmlspecialchars($revision['model_name']); ?>
                                                 <?php endif; ?>
-                                                <?php if (!empty($revision['year'])): ?>
-                                                    (<?php echo $revision['year']; ?>)
+                                                <?php if (!empty($revision['series_name'])): ?>
+                                                    <br><small class="text-muted">
+                                                        <i class="fas fa-tag me-1"></i>
+                                                        Seri: <?php echo htmlspecialchars($revision['series_name']); ?>
+                                                    </small>
+                                                <?php endif; ?>
+                                                <?php if (!empty($revision['engine_name'])): ?>
+                                                    <br><small class="text-muted">
+                                                        <i class="fas fa-cog me-1"></i>
+                                                        Motor: <?php echo htmlspecialchars($revision['engine_name']); ?>
+                                                    </small>
                                                 <?php endif; ?>
                                             </div>
                                         <?php endif; ?>

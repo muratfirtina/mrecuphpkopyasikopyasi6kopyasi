@@ -857,7 +857,9 @@ include '../includes/user_header.php';
                     <input type="hidden" name="file_type" id="revisionFileType">
                     <input type="hidden" name="request_revision" value="1">
                     
-                    <div class="alert alert-info">
+                    <div class="alert-info" style="padding: 1rem; display: flex; align-items: center; background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+    border: 1px solid #81c784;
+    border-radius: 12px;"> 
                         <div class="d-flex">
                             <i class="fas fa-info-circle me-3 mt-1"></i>
                             <div>
