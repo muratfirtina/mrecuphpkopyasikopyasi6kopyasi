@@ -526,21 +526,40 @@ class FileManager {
             $result = $stmt->execute([$revisionId, $uploadId, $userId, $revisionNotes]);
             
             if ($result) {
-                // Bildirim sistemi entegrasyonu
+                error_log("requestRevision: Revize talebi veritabanına kaydedildi - ID: $revisionId");
+                
+                // Bildirim sistemi entegrasyonu - Geliştirilmiş hata kontrolü ile
                 try {
                     if (!class_exists('NotificationManager')) {
                         require_once __DIR__ . '/NotificationManager.php';
                     }
                     
                     $notificationManager = new NotificationManager($this->pdo);
-                    $notificationManager->notifyRevisionRequest($revisionId, $userId, $uploadId, $upload['original_name'], $revisionNotes);
+                    error_log("requestRevision: NotificationManager oluşturuldu");
+                    
+                    $notificationResult = $notificationManager->notifyRevisionRequest(
+                        $revisionId, 
+                        $userId, 
+                        $uploadId, 
+                        $upload['original_name'], 
+                        $revisionNotes
+                    );
+                    
+                    if ($notificationResult) {
+                        error_log("requestRevision: Admin bildirimi başarıyla gönderildi - Revize ID: $revisionId");
+                    } else {
+                        error_log("requestRevision: Admin bildirimi gönderilemedi - Revize ID: $revisionId");
+                    }
+                    
                 } catch(Exception $e) {
-                    error_log('Notification send error after revision request: ' . $e->getMessage());
-                    // Bildirim hatası revize talep işlemini etkilemesin
+                    error_log('requestRevision: Bildirim gönderim hatası: ' . $e->getMessage());
+                    error_log('requestRevision: Stack trace: ' . $e->getTraceAsString());
+                    // Bildirim hatası revize talep işlemini etkilemesin ama loglayalım
                 }
                 
                 return ['success' => true, 'message' => 'Revize talebi başarıyla gönderildi. Admin ekibimiz en kısa sürede inceleyecektir.'];
             } else {
+                error_log("requestRevision: Revize talebi veritabanına kaydedilemedi - Upload ID: $uploadId");
                 return ['success' => false, 'message' => 'Revize talebi oluşturulurken hata oluştu.'];
             }
             

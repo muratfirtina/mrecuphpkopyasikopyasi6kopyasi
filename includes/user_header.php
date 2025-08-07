@@ -485,7 +485,7 @@ if (isset($_SESSION['user_id'])) {
                         <!-- Sistem Bildirimleri -->
                         <?php foreach ($userNotifications as $notification): ?>
                         <li>
-                            <a class="dropdown-item py-3 <?php echo $notification['is_read'] ? '' : 'bg-light'; ?>" 
+                            <a class="dropdown-item py-3 <?php echo $notification['is_read'] ? '' : 'bg-warning'; ?>"
                                href="<?php echo $notification['action_url'] ?: '#'; ?>" 
                                onclick="markNotificationRead('<?php echo htmlspecialchars($notification['id']); ?>')">
                                 <div class="d-flex align-items-start">
@@ -588,7 +588,7 @@ if (isset($_SESSION['user_id'])) {
                             <i class="fas fa-user-circle fa-lg"></i>
                         </div>
                         <div class="user-info">
-                            <span class="fw-semibold"><?php echo $_SESSION['username']; ?></span>
+                            <span class="fw-semibold"><?php echo htmlspecialchars(!empty($_SESSION['username']) ? $_SESSION['username'] : ($_SESSION['email'] ?? 'Kullanıcı')); ?></span>
                             <small class="d-block text-white-75">Kullanıcı</small>
                         </div>
                     </a>
@@ -597,8 +597,8 @@ if (isset($_SESSION['user_id'])) {
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-user-circle fa-2x text-muted me-2"></i>
                                 <div>
-                                    <div class="fw-semibold"><?php echo $_SESSION['username']; ?></div>
-                                    <small class="text-muted"><?php echo $_SESSION['email']; ?></small>
+                                    <div class="fw-semibold"><?php echo htmlspecialchars(!empty($_SESSION['username']) ? $_SESSION['username'] : ($_SESSION['email'] ?? 'Kullanıcı')); ?></div>
+                                    <small class="text-muted"><?php echo htmlspecialchars($_SESSION['email'] ?? ''); ?></small>
                                 </div>
                             </div>
                         </li>

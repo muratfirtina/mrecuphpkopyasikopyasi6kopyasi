@@ -241,12 +241,19 @@ class User {
             $user = $stmt->fetch();
             
             if ($user && password_verify($password, $user['password'])) {
+                // Tüm kullanıcı bilgilerini session'a kaydet
                 $_SESSION['user_id'] = $user['id'];
-                $_SESSION['username'] = $user['username'];
+                $_SESSION['username'] = $user['username']; // Orjinal değer, fallback yok
                 $_SESSION['email'] = $user['email'];
                 $_SESSION['role'] = $user['role'];
                 $_SESSION['is_admin'] = ($user['role'] === 'admin') ? 1 : 0;
-                $_SESSION['credits'] = $user['credits'];
+                $_SESSION['credits'] = $user['credits'] ?? 0;
+                $_SESSION['first_name'] = $user['first_name'] ?? '';
+                $_SESSION['last_name'] = $user['last_name'] ?? '';
+                $_SESSION['phone'] = $user['phone'] ?? '';
+                
+                // Debug log
+                error_log('Login successful for user: ' . $_SESSION['user_id'] . ' - Username: ' . ($_SESSION['username'] ?? 'NULL'));
                 
                 // Son giriş zamanını güncelle
                 $this->updateLastLogin($user['id']);
@@ -256,8 +263,11 @@ class User {
                 
                 return true;
             }
+            
+            error_log('Login failed for email: ' . $email);
             return false;
         } catch(PDOException $e) {
+            error_log('Login error: ' . $e->getMessage());
             return false;
         }
     }

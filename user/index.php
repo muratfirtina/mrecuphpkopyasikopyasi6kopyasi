@@ -85,7 +85,7 @@ include '../includes/user_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">Dashboard</h1>
-                    <p class="text-muted mb-0">Hoşgeldiniz, <?php echo htmlspecialchars($_SESSION['username']); ?>! Hesabınızın genel durumunu buradan takip edebilirsiniz.</p>
+                    <p class="text-muted mb-0">Hoşgeldiniz, <?php echo htmlspecialchars(!empty($_SESSION['username']) ? $_SESSION['username'] : ($_SESSION['email'] ?? 'Kullanıcı')); ?>! Hesabınızın genel durumunu buradan takip edebilirsiniz.</p>
                 </div>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
@@ -101,7 +101,7 @@ include '../includes/user_header.php';
                 <div class="row align-items-center">
                     <div class="col-md-8">
                         <div class="welcome-content">
-                            <h3 class="mb-2">Hoşgeldiniz, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h3>
+                            <h3 class="mb-2">Hoşgeldiniz, <?php echo htmlspecialchars(!empty($_SESSION['username']) ? $_SESSION['username'] : ($_SESSION['email'] ?? 'Kullanıcı')); ?>!</h3>
                             <p class="mb-3">
                                 Hesabınızda <strong><?php echo $totalUploads; ?> dosya</strong> bulunuyor. 
                                 Bu ay <strong><?php echo $monthlyUploads; ?> dosya</strong> yüklediniz ve 

@@ -629,61 +629,7 @@ include '../includes/user_header.php';
                                     <i class="fas fa-info me-2"></i>Revize Hakkında
                                 </button>
                             </div>
-                        
-            <!-- Revizyon Dosyaları Bölümü -->
-            <?php if (!empty($revisionFiles)): ?>
-                <div class="col-12">
-                    <div class="info-card">
-                        <div class="info-header">
-                            <h6 class="mb-0">
-                                <i class="fas fa-download me-2 text-success"></i>
-                                Revizyon Dosyaları (<?php echo count($revisionFiles); ?> adet)
-                            </h6>
                         </div>
-                        <div class="info-content">
-                            <?php foreach ($revisionFiles as $revFile): ?>
-                                <div class="revision-file-item mb-3 p-3 border rounded">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="file-info">
-                                            <h6 class="mb-1">
-                                                <i class="fas fa-file-download me-1 text-success"></i>
-                                                <?php echo htmlspecialchars($revFile['original_name']); ?>
-                                            </h6>
-                                            <div class="file-meta">
-                                                <span class="badge bg-light text-dark me-2">
-                                                    <?php echo formatFileSize($revFile['file_size']); ?>
-                                                </span>
-                                                <span class="text-muted">
-                                                    <?php echo date('d.m.Y H:i', strtotime($revFile['upload_date'])); ?>
-                                                </span>
-                                            </div>
-                                            <?php if ($revFile['admin_notes']): ?>
-                                                <div class="admin-notes mt-2">
-                                                    <small class="text-muted">
-                                                        <strong>Admin Notları:</strong> <?php echo nl2br(htmlspecialchars($revFile['admin_notes'])); ?>
-                                                    </small>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div class="file-actions">
-                                            <a href="download-revision.php?id=<?php echo $revFile['id']; ?>" 
-                                               class="btn btn-success btn-sm">
-                                                <i class="fas fa-download me-1"></i>İndir
-                                            </a>
-                                            <button type="button" class="btn btn-outline-warning btn-sm ms-2" 
-                                                    onclick="openRevisionFileModal('<?php echo $revFile['id']; ?>', '<?php echo htmlspecialchars($revFile['original_name']); ?>)">
-                                                <i class="fas fa-edit me-1"></i>Revize Talep Et
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
-
-        </div>
                     </div>
                 </div>
             </div>

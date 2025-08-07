@@ -28,12 +28,14 @@ class NotificationManager {
         try {
             $notificationId = $this->generateUUID();
             
+            error_log("NotificationManager::createNotification - Başlatılıyor: UserId: $userId, Type: $type, Title: $title");
+            
             $stmt = $this->pdo->prepare("
                 INSERT INTO notifications (id, user_id, type, title, message, related_id, related_type, action_url, created_at) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
             ");
             
-            return $stmt->execute([
+            $result = $stmt->execute([
                 $notificationId,
                 $userId,
                 $type,
@@ -43,8 +45,21 @@ class NotificationManager {
                 $relatedType,
                 $actionUrl
             ]);
+            
+            if ($result) {
+                error_log("NotificationManager::createNotification - Başarılı: NotificationId: $notificationId");
+            } else {
+                error_log("NotificationManager::createNotification - Başarısız: Execute failed");
+                $errorInfo = $stmt->errorInfo();
+                error_log("NotificationManager::createNotification - SQL Error: " . implode(' - ', $errorInfo));
+            }
+            
+            return $result;
+            
         } catch(Exception $e) {
             error_log('NotificationManager createNotification error: ' . $e->getMessage());
+            error_log('SQL State: ' . $e->getCode());
+            error_log('Stack trace: ' . $e->getTraceAsString());
             return false;
         }
     }
@@ -348,18 +363,30 @@ class NotificationManager {
      */
     public function notifyRevisionRequest($revisionId, $userId, $uploadId, $originalFileName, $requestNotes = '') {
         try {
+            error_log("NotificationManager::notifyRevisionRequest başlatıldı - RevisionId: $revisionId, UserId: $userId");
+            
             $user = $this->getUserInfo($userId);
-            if (!$user) return false;
+            if (!$user) {
+                error_log("NotificationManager::notifyRevisionRequest - Kullanıcı bulunamadı: $userId");
+                return false;
+            }
+            error_log("NotificationManager::notifyRevisionRequest - Kullanıcı bulundu: {$user['username']}");
             
             $admins = $this->getAdminUsers();
+            if (empty($admins)) {
+                error_log("NotificationManager::notifyRevisionRequest - Hiç aktif admin kullanıcısı bulunamadı");
+                return false;
+            }
+            error_log("NotificationManager::notifyRevisionRequest - " . count($admins) . " admin kullanıcısı bulundu");
             
+            $successCount = 0;
             foreach ($admins as $admin) {
                 // Bildirim oluştur
                 $title = "Yeni Revize Talebi";
                 $message = "{$user['first_name']} {$user['last_name']} tarafından '{$originalFileName}' için revize talebi oluşturuldu.";
                 $actionUrl = "revisions.php?id={$revisionId}";
                 
-                $this->createNotification(
+                $notificationResult = $this->createNotification(
                     $admin['id'], 
                     'revision_request', 
                     $title, 
@@ -368,11 +395,24 @@ class NotificationManager {
                     'revision', 
                     $actionUrl
                 );
+                
+                if ($notificationResult) {
+                    $successCount++;
+                    error_log("NotificationManager::notifyRevisionRequest - Admin {$admin['username']} için bildirim oluşturuldu");
+                    
+                    // E-posta bildirimi gönder (opsiyonel)
+                    $this->sendRevisionRequestEmail($admin, $user, $originalFileName, $revisionId, $requestNotes);
+                } else {
+                    error_log("NotificationManager::notifyRevisionRequest - Admin {$admin['username']} için bildirim oluşturulamadı");
+                }
             }
             
-            return true;
+            error_log("NotificationManager::notifyRevisionRequest tamamlandı - $successCount/" . count($admins) . " bildirim başarılı");
+            return $successCount > 0;
+            
         } catch(Exception $e) {
             error_log('NotificationManager notifyRevisionRequest error: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
             return false;
         }
     }
@@ -457,6 +497,58 @@ class NotificationManager {
             return $successCount;
         } catch(Exception $e) {
             error_log('NotificationManager notifySystemWarning error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Revizyon talebi e-posta bildirimi gönder
+     */
+    private function sendRevisionRequestEmail($admin, $user, $fileName, $revisionId, $requestNotes) {
+        try {
+            // E-posta gönderiminin aktif olup olmadığını kontrol et
+            if (defined('EMAIL_TEST_MODE') && EMAIL_TEST_MODE) {
+                // Test modunda - sadece log dosyasına yaz
+                $logMessage = "E-posta Test Modu:\n";
+                $logMessage .= "To: {$admin['email']}\n";
+                $logMessage .= "Subject: Yeni Revizyon Talebi - Mr ECU\n";
+                $logMessage .= "Admin: {$admin['first_name']} {$admin['last_name']}\n";
+                $logMessage .= "Kullanıcı: {$user['first_name']} {$user['last_name']}\n";
+                $logMessage .= "Dosya: $fileName\n";
+                $logMessage .= "Revizyon ID: $revisionId\n";
+                $logMessage .= "Not: $requestNotes\n";
+                $logMessage .= "Tarih: " . date('Y-m-d H:i:s') . "\n";
+                $logMessage .= str_repeat('-', 50) . "\n";
+                
+                error_log($logMessage, 3, __DIR__ . '/../logs/email_test.log');
+                return true;
+            }
+            
+            // Gerçek e-posta gönderimi (gelecekte PHPMailer ile geliştirilebilir)
+            $subject = "Yeni Revizyon Talebi - Mr ECU";
+            $message = "<html><body>";
+            $message .= "<h2>Yeni Revizyon Talebi</h2>";
+            $message .= "<p>Sayın {$admin['first_name']} {$admin['last_name']},</p>";
+            $message .= "<p>{$user['first_name']} {$user['last_name']} tarafından yeni bir revizyon talebi oluşturulmuştur.</p>";
+            $message .= "<hr>";
+            $message .= "<p><strong>Dosya:</strong> $fileName</p>";
+            $message .= "<p><strong>Kullanıcı:</strong> {$user['first_name']} {$user['last_name']} ({$user['email']})</p>";
+            $message .= "<p><strong>Talep Notu:</strong></p>";
+            $message .= "<p style='background: #f8f9fa; padding: 10px; border-left: 3px solid #007bff;'>" . nl2br(htmlspecialchars($requestNotes)) . "</p>";
+            $message .= "<hr>";
+            $message .= "<p><a href='" . SITE_URL . "admin/revisions.php?id=$revisionId' style='background: #007bff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;'>Revizyon Talebi Görüntüle</a></p>";
+            $message .= "<p><small>Bu e-posta otomatik olarak oluşturulmuştur. Mr ECU Sistemi</small></p>";
+            $message .= "</body></html>";
+            
+            // Basit mail fonksiyonu (daha sonra PHPMailer ile değiştirilebilir)
+            $headers = "From: " . SITE_EMAIL . "\r\n";
+            $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+            $headers .= "X-Mailer: Mr ECU System\r\n";
+            
+            return mail($admin['email'], $subject, $message, $headers);
+            
+        } catch (Exception $e) {
+            error_log('NotificationManager sendRevisionRequestEmail error: ' . $e->getMessage());
             return false;
         }
     }

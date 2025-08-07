@@ -410,22 +410,81 @@ include '../includes/user_header.php';
                                                 <small class="d-block text-muted" style="font-size: 10px;">Debug: <?php echo htmlspecialchars($revision['id']); ?></small>
                                             </td> -->
                                             <td>
-                                                <div class="d-flex align-items-center">
-                                                    <i class="fas fa-file-code text-primary me-2"></i>
-                                                    <div>
-                                                        <div class="fw-semibold text-truncate" style="max-width: 250px;" 
-                                                             title="<?php echo htmlspecialchars($revision['original_name'] ?? 'Bilinmeyen dosya'); ?>">
-                                                            <?php echo htmlspecialchars($revision['original_name'] ?? 'Bilinmeyen dosya'); ?>
+                                                <div>
+                                                    <?php 
+                                                    // Hangi dosyaya revize talep edildiğini belirle
+                                                    $targetFileName = 'Ana Dosya';
+                                                    $targetFileType = 'Orijinal Yüklenen Dosya';
+                                                    $targetFileColor = 'success';
+                                                    $targetFileIcon = 'file-alt';
+                                                    
+                                                    if ($revision['response_id']): 
+                                                        // Yanıt dosyasına revize talebi
+                                                        $targetFileName = $revision['response_original_name'] ?? 'Yanıt Dosyası';
+                                                        $targetFileType = 'Yanıt Dosyası';
+                                                        $targetFileColor = 'primary';
+                                                        $targetFileIcon = 'reply';
+                                                    else:
+                                                        // Ana dosya veya revizyon dosyasına revize talebi
+                                                        // Önceki revizyon dosyaları var mı kontrol et
+                                                        try {
+                                                            $stmt = $pdo->prepare("
+                                                                SELECT rf.original_name 
+                                                                FROM revisions r1
+                                                                JOIN revision_files rf ON r1.id = rf.revision_id
+                                                                WHERE r1.upload_id = ? 
+                                                                AND r1.status = 'completed'
+                                                                AND r1.requested_at < ?
+                                                                ORDER BY r1.requested_at DESC 
+                                                                LIMIT 1
+                                                            ");
+                                                            $stmt->execute([$revision['upload_id'], $revision['requested_at']]);
+                                                            $previousRevisionFile = $stmt->fetch(PDO::FETCH_ASSOC);
+                                                            
+                                                            if ($previousRevisionFile) {
+                                                                $targetFileName = $previousRevisionFile['original_name'];
+                                                                $targetFileType = 'Revizyon Dosyası';
+                                                                $targetFileColor = 'warning';
+                                                                $targetFileIcon = 'edit';
+                                                            } else {
+                                                                $targetFileName = $revision['original_name'] ?? 'Ana Dosya';
+                                                            }
+                                                        } catch (Exception $e) {
+                                                            error_log('Previous revision file query error: ' . $e->getMessage());
+                                                            $targetFileName = $revision['original_name'] ?? 'Ana Dosya';
+                                                        }
+                                                    endif;
+                                                    ?>
+                                                    
+                                                    <!-- Revize Talep Edilen Dosya -->
+                                                    <div class="mb-2">
+                                                        <i class="fas fa-<?php echo $targetFileIcon; ?> text-<?php echo $targetFileColor; ?> me-2"></i>
+                                                        <strong class="text-<?php echo $targetFileColor; ?>"><?php echo $targetFileType; ?>:</strong><br>
+                                                        <span class="fw-semibold text-truncate d-block" style="max-width: 250px;" 
+                                                              title="<?php echo htmlspecialchars($targetFileName); ?>">
+                                                            <?php echo htmlspecialchars($targetFileName); ?>
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <!-- Ana Proje Dosyası Bilgisi -->
+                                                    <?php if ($revision['response_id'] || $targetFileType === 'Revizyon Dosyası'): ?>
+                                                        <div class="text-muted small">
+                                                            <i class="fas fa-level-up-alt me-1"></i>
+                                                            <strong>Ana Proje:</strong> <?php echo htmlspecialchars($revision['original_name'] ?? 'Bilinmiyor'); ?>
                                                         </div>
-                                                        <?php if ($revision['request_notes']): ?>
+                                                    <?php endif; ?>
+                                                    
+                                                    <!-- Talep Notları -->
+                                                    <?php if ($revision['request_notes']): ?>
+                                                        <div class="mt-2">
                                                             <small class="text-muted text-truncate d-block" style="max-width: 250px;" 
                                                                    title="<?php echo htmlspecialchars($revision['request_notes']); ?>">
                                                                 <i class="fas fa-comment me-1"></i>
                                                                 <?php echo htmlspecialchars(substr($revision['request_notes'], 0, 50)); ?>
                                                                 <?php if (strlen($revision['request_notes']) > 50): ?>..<?php endif; ?>
                                                             </small>
-                                                        <?php endif; ?>
-                                                    </div>
+                                                        </div>
+                                                    <?php endif; ?>
                                                 </div>
                                             </td>
                                             <td>
