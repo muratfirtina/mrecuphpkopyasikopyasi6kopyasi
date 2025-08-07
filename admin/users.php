@@ -47,104 +47,140 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $userId = sanitize($_POST['user_id']);
     $status = sanitize($_POST['status']);
     
-    if (!isValidUUID($userId)) {
+    if (!in_array($status, ['active', 'inactive', 'banned'])) {
+        $error = 'Geçersiz durum değeri.';
+    } else if (!isValidUUID($userId)) {
         $error = 'Geçersiz kullanıcı ID formatı.';
     } else {
         try {
-            $stmt = $pdo->prepare("UPDATE users SET status = ? WHERE id = ?");
-            $result = $stmt->execute([$status, $userId]);
+            // Admin kullanıcılarını pasif yapmaya izin verme
+            $stmt = $pdo->prepare("SELECT role, username FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch();
             
-            if ($result) {
-                $success = 'Kullanıcı durumu güncellendi.';
-                $user->logAction($_SESSION['user_id'], 'user_status_update', "Kullanıcı durumu değiştirildi: $userId");
+            if (!$user) {
+                $error = 'Kullanıcı bulunamadı.';
+            } else if ($user['role'] === 'admin' && $status !== 'active') {
+                $error = 'Admin kullanıcılarının durumu pasif veya banlanamaz.';
+            } else {
+                $stmt = $pdo->prepare("UPDATE users SET status = ? WHERE id = ?");
+                $result = $stmt->execute([$status, $userId]);
+                
+                if ($result) {
+                    $success = 'Kullanıcı durumu güncellendi.';
+                    $user->logAction($_SESSION['user_id'], 'user_status_update', "Kullanıcı durumu değiştirildi: {$userId} ({$user['username']}), Yeni Durum: {$status}");
+                } else {
+                    $error = 'Durum güncelleme sırasında hata oluştu.';
+                }
             }
         } catch(PDOException $e) {
-            $error = 'Durum güncelleme sırasında hata oluştu.';
+            $error = 'Durum güncelleme sırasında veritabanı hatası oluştu.';
+            error_log("Status update error: " . $e->getMessage());
         }
     }
 }
 
-// Kredi yükleme işlemi
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_credit'])) {
-    $userId = sanitize($_POST['user_id']);
-    $amount = floatval($_POST['amount']);
-    $description = sanitize($_POST['description']);
-    
-    if (!isValidUUID($userId)) {
-        $error = 'Geçersiz kullanıcı ID formatı.';
-    } elseif ($amount <= 0) {
-        $error = 'Kredi miktarı 0\'dan büyük olmalıdır.';
-    } else {
-        try {
-            $pdo->beginTransaction();
-            
-            // Kullanıcının mevcut kredisini güncelle
-            $stmt = $pdo->prepare("UPDATE users SET credits = credits + ? WHERE id = ?");
-            $stmt->execute([$amount, $userId]);
-            
-            // İşlem kaydı oluştur
-            $stmt = $pdo->prepare("
-                INSERT INTO credit_transactions (user_id, admin_id, type, amount, description, created_at) 
-                VALUES (?, ?, 'deposit', ?, ?, NOW())
-            ");
-            $stmt->execute([$userId, $_SESSION['user_id'], $amount, $description]);
-            
-            $pdo->commit();
-            $success = number_format($amount, 2) . ' TL kredi başarıyla yüklendi.';
-            
-            $user->logAction($_SESSION['user_id'], 'admin_credit_add', "Kredi eklendi: $amount TL - User: $userId");
-        } catch(PDOException $e) {
-            $pdo->rollback();
-            $error = 'Kredi yükleme sırasında hata oluştu.';
-        }
-    }
-}
 
 // Toplu işlemler
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_action'])) {
     $action = sanitize($_POST['bulk_action']);
     $selectedUsers = $_POST['selected_users'] ?? [];
-    
     if (empty($selectedUsers)) {
         $error = 'Lütfen işlem yapmak için kullanıcı seçin.';
     } else {
         $affectedUsers = 0;
+        $adminUsersSkipped = 0;
         
         foreach ($selectedUsers as $userId) {
             if (!isValidUUID($userId)) continue;
             
             try {
+                // Önce kullanıcının rolünü kontrol et
+                $stmt = $pdo->prepare("SELECT role, username FROM users WHERE id = ?");
+                $stmt->execute([$userId]);
+                $user = $stmt->fetch();
+                
+                if (!$user) {
+                    continue;
+                }
+                
+                // Admin kullanıcılarını işlemeye izin verme
+                if ($user['role'] === 'admin') {
+                    $adminUsersSkipped++;
+                    continue;
+                }
+                
                 switch ($action) {
                     case 'activate':
                         $stmt = $pdo->prepare("UPDATE users SET status = 'active' WHERE id = ?");
                         $stmt->execute([$userId]);
                         $affectedUsers++;
+                        $user->logAction($_SESSION['user_id'], 'user_bulk_activate', "Toplu işlem: Kullanıcı aktif yapıldı: {$userId} ({$user['username']})");
                         break;
                     case 'deactivate':
-                        $stmt = $pdo->prepare("UPDATE users SET status = 'inactive' WHERE id = ?");
+                        $stmt = $pdo->prepare("UPDATE users SET status = 'inactive', deleted_date = NULL WHERE id = ?");
                         $stmt->execute([$userId]);
                         $affectedUsers++;
+                        $user->logAction($_SESSION['user_id'], 'user_bulk_deactivate', "Toplu işlem: Kullanıcı pasif yapıldı: {$userId} ({$user['username']})");
                         break;
                     case 'delete':
-                        // Status'u inactive yap
-                        $stmt = $pdo->prepare("UPDATE users SET status = 'inactive' WHERE id = ? AND role != 'admin'");
+                        $stmt = $pdo->prepare("UPDATE users SET status = 'inactive', deleted_date = NOW() WHERE id = ?");
                         $stmt->execute([$userId]);
                         $affectedUsers++;
+                        $user->logAction($_SESSION['user_id'], 'user_bulk_deactivate', "Toplu işlem: Kullanıcı pasif hale getirildi: {$userId} ({$user['username']})");
                         break;
                 }
             } catch(PDOException $e) {
-                // Hata logla ama devam et
+                error_log("Bulk action error for user $userId: " . $e->getMessage());
             }
         }
         
         $success = "$affectedUsers kullanıcı başarıyla güncellendi.";
+        if ($adminUsersSkipped > 0) {
+            $success .= " ($adminUsersSkipped adet admin kullanıcı işlem dışı bırakıldı.)";
+        }
+    }
+}
+
+// Kullanıcı silme işlemi (soft delete)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
+    $userId = sanitize($_POST['user_id']);
+    if (!isValidUUID($userId)) {
+        $error = 'Geçersiz kullanıcı ID formatı.';
+    } else {
+        try {
+            // Admin kullanıcılarını pasif yapmaya izin verme
+            $stmt = $pdo->prepare("SELECT role, username FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch();
+            
+            if (!$user) {
+                $error = 'Kullanıcı bulunamadı.';
+            } else if ($user['role'] === 'admin') {
+                $error = 'Admin kullanıcıları pasif hale getirilemez.';
+            } else {
+                // Soft delete - status'u inactive yap ve deleted_date'i ayarla
+                $stmt = $pdo->prepare("UPDATE users SET status = 'inactive', deleted_date = NOW() WHERE id = ?");
+                $result = $stmt->execute([$userId]);
+                
+                if ($result) {
+                    $success = 'Kullanıcı başarıyla pasif hale getirildi.';
+                    $user->logAction($_SESSION['user_id'], 'user_deactivated', "Kullanıcı pasif hale getirildi: {$userId} ({$user['username']})");
+                } else {
+                    $error = 'Kullanıcı pasif hale getirilirken bir hata oluştu.';
+                }
+            }
+        } catch(PDOException $e) {
+            $error = 'Kullanıcı pasif hale getirilirken veritabanı hatası oluştu.';
+            error_log("User deactivation error: " . $e->getMessage());
+        }
     }
 }
 
 // Filtreleme ve arama parametreleri
 $search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
 $role = isset($_GET['role']) ? sanitize($_GET['role']) : '';
-$status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
+$status = isset($_GET['status']) ? sanitize($_GET['status']) : '1';
 $sortBy = isset($_GET['sort']) ? sanitize($_GET['sort']) : 'created_at';
 $sortOrder = isset($_GET['order']) && $_GET['order'] === 'asc' ? 'ASC' : 'DESC';
 
@@ -272,7 +308,8 @@ try {
 
 // Sayfa bilgileri
 $pageTitle = 'Kullanıcılar';
-$pageDescription = 'Sistem kullanıcılarını yönetin ve düzenleyin.';
+$pageDescription = $status === '1' ? 'Aktif kullanıcıları yönetin ve düzenleyin' : 
+                 ($status === '0' ? 'Pasif kullanıcıları yönetin ve düzenleyin' : 'Sistem kullanıcılarını yönetin ve düzenleyin');
 $pageIcon = 'fas fa-users';
 
 // Sidebar için istatistikler
@@ -307,6 +344,65 @@ $quickActions = [
 include '../includes/admin_header.php';
 include '../includes/admin_sidebar.php';
 ?>
+
+<script>
+// Kullanıcı durumunu değiştirme fonksiyonu
+function toggleUserStatus(userId, status) {
+    if (confirm('Bu kullanıcının durumunu değiştirmek istediğinize emin misiniz?')) {
+        const formData = new FormData();
+        formData.append('update_status', '1');
+        formData.append('user_id', userId);
+        formData.append('status', status);
+        
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                // Başarılıysa sayfayı yenile
+                window.location.reload();
+            } else {
+                return response.text().then(text => {
+                    throw new Error('Sunucu hatası: ' + text);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Hata:', error);
+            alert('Bir hata oluştu: ' + error.message);
+        });
+    }
+}
+
+// Kullanıcı silme fonksiyonu
+function deleteUser(userId, username) {
+    if (confirm(username + ' kullanıcısını pasif hale getirmek istediğinize emin misiniz? Bu işlem geri alınamaz.')) {
+        const formData = new FormData();
+        formData.append('delete_user', '1');
+        formData.append('user_id', userId);
+        
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                // Başarılıysa sayfayı yenile
+                window.location.reload();
+            } else {
+                return response.text().then(text => {
+                    throw new Error('Sunucu hatası: ' + text);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Hata:', error);
+            alert('Bir hata oluştu: ' + error.message);
+        });
+    }
+}
+</script>
 
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
@@ -620,11 +716,6 @@ include '../includes/admin_sidebar.php';
                                             <?php echo $userData['status'] === 'active' ? 'Pasif Yap' : 'Aktif Yap'; ?>
                                         </button>
                                         
-                                        <button type="button" class="btn btn-outline-success btn-sm" 
-                                                onclick="addCredit('<?php echo $userData['id']; ?>', '<?php echo htmlspecialchars($userData['username']); ?>')">
-                                            <i class="fas fa-coins me-1"></i>Kredi Yükle
-                                        </button>
-                                        
                                         <?php if ($userData['role'] !== 'admin'): ?>
                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                     onclick="deleteUser('<?php echo $userData['id']; ?>', '<?php echo htmlspecialchars($userData['username']); ?>')">
@@ -895,49 +986,6 @@ include '../includes/admin_sidebar.php';
     </div>
 </div>
 
-<!-- Kredi Yükleme Modal -->
-<div class="modal fade" id="addCreditModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-coins me-2"></i>Kredi Yükle
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST" id="addCreditForm">
-                <div class="modal-body">
-                    <input type="hidden" name="add_credit" value="1">
-                    <input type="hidden" name="user_id" id="credit_user_id">
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Kullanıcı</label>
-                        <div class="form-control-plaintext" id="credit_username"></div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="amount" class="form-label">Kredi Miktarı (TL) <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="amount" name="amount" 
-                               min="0" step="0.01" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Açıklama <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="description" name="description" 
-                                  rows="3" required placeholder="Kredi yükleme nedeni..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-plus me-2"></i>Kredi Yükle
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <!-- Toplu İşlemler için Hidden Form -->
 <form method="POST" id="bulkActionForm" style="display: none;">
     <input type="hidden" name="bulk_action" id="bulk_action_type">
@@ -955,255 +1003,7 @@ function buildPaginationUrl($page_num) {
 
 <?php
 // Sayfa özel JavaScript
-$pageJS = "
-// Toggle all checkboxes
-function toggleAllUsers(source) {
-    const checkboxes = document.querySelectorAll('.user-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = source.checked;
-    });
-}
 
-// Add credit modal
-function addCredit(userId, username) {
-    document.getElementById('credit_user_id').value = userId;
-    document.getElementById('credit_username').textContent = username;
-    document.getElementById('amount').value = '';
-    document.getElementById('description').value = '';
-    
-    const modal = new bootstrap.Modal(document.getElementById('addCreditModal'));
-    modal.show();
-}
-
-// Toggle user status
-function toggleUserStatus(userId, newStatus) {
-    const statusText = newStatus ? 'aktif' : 'pasif';
-    
-    if (confirmAdminAction('Kullanıcıyı ' + statusText + ' yapmak istediğinizden emin misiniz?')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.innerHTML = `
-            <input type=\"hidden\" name=\"update_status\" value=\"1\">
-            <input type=\"hidden\" name=\"user_id\" value=\"\${userId}\">
-            <input type=\"hidden\" name=\"status\" value=\"\${newStatus}\">
-        `;
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
-// Delete user
-function deleteUser(userId, username) {
-    if (confirmAdminAction('\"' + username + '\" kullanıcısını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
-        bulkAction('delete', [userId]);
-    }
-}
-
-// View user details
-function viewUser(userId) {
-    window.open('user-details.php?id=' + userId, '_blank');
-}
-
-// Bulk actions
-function bulkAction(action, userIds = null) {
-    if (!userIds) {
-        const checkboxes = document.querySelectorAll('.user-checkbox:checked');
-        if (checkboxes.length === 0) {
-            showAdminNotification('Lütfen işlem yapmak için kullanıcı seçin!', 'warning');
-            return;
-        }
-        userIds = Array.from(checkboxes).map(cb => cb.value);
-    }
-    
-    let confirmMessage = '';
-    switch (action) {
-        case 'activate':
-            confirmMessage = 'Seçili kullanıcıları aktif yapmak istediğinizden emin misiniz?';
-            break;
-        case 'deactivate':
-            confirmMessage = 'Seçili kullanıcıları pasif yapmak istediğinizden emin misiniz?';
-            break;
-        case 'delete':
-            confirmMessage = 'Seçili kullanıcıları silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!';
-            break;
-    }
-    
-    if (confirmAdminAction(confirmMessage)) {
-        document.getElementById('bulk_action_type').value = action;
-        
-        const selectedUsersDiv = document.getElementById('bulk_selected_users');
-        selectedUsersDiv.innerHTML = '';
-        
-        userIds.forEach(userId => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'selected_users[]';
-            input.value = userId;
-            selectedUsersDiv.appendChild(input);
-        });
-        
-        document.getElementById('bulkActionForm').submit();
-    }
-}
-
-// Table search functionality
-function filterTable() {
-    // Bu fonksiyon gerçek zamanlı arama için kullanılabilir
-    // Şimdilik form submit ile çalışıyor
-}
-
-// Export functions
-function exportUsers() {
-    const params = new URLSearchParams(window.location.search);
-    window.open('export-users.php?' + params.toString(), '_blank');
-}
-
-// Enhanced quick jump to page function
-function quickJumpToPage() {
-    var input = document.getElementById('quickJump');
-    var page = parseInt(input.value);
-    var maxPage = <?php echo $totalPages; ?>;
-    var container = input.closest('.quick-jump-container');
-    
-    if (isNaN(page) || page < 1 || page > maxPage) {
-        // Show error animation
-        input.classList.add('is-invalid');
-        input.style.borderColor = '#dc3545';
-        
-        // Show tooltip-like error
-        showQuickJumpError('Lütfen 1 ile ' + maxPage + ' arasında bir sayfa numarası girin.');
-        
-        // Reset after 3 seconds
-        setTimeout(function() {
-            input.classList.remove('is-invalid');
-            input.style.borderColor = '';
-        }, 3000);
-        
-        input.focus();
-        input.select();
-        return;
-    }
-    
-    if (page === <?php echo $page; ?>) {
-        showQuickJumpError('Zaten bu sayfadasınız!');
-        return;
-    }
-    
-    // Show loading state
-    container.classList.add('loading');
-    var button = container.querySelector('.btn');
-    var originalIcon = button.innerHTML;
-    button.innerHTML = '<i class=\"fas fa-spinner fa-spin\"></i>';
-    
-    // Build URL with current parameters but new page
-    var url = new URL(window.location);
-    url.searchParams.set('page', page);
-    
-    // Add smooth transition effect
-    document.body.style.opacity = '0.8';
-    
-    setTimeout(function() {
-        window.location.href = url.toString();
-    }, 300);
-}
-
-// Show error message for quick jump
-function showQuickJumpError(message) {
-    var input = document.getElementById('quickJump');
-    var container = input.closest('.quick-jump-container');
-    
-    // Remove existing error
-    var existingError = container.querySelector('.quick-jump-error');
-    if (existingError) {
-        existingError.remove();
-    }
-    
-    // Create error element
-    var errorEl = document.createElement('div');
-    errorEl.className = 'quick-jump-error alert alert-danger alert-sm mt-1 mb-0 py-1 px-2';
-    errorEl.style.fontSize = '0.75rem';
-    errorEl.innerHTML = '<i class=\"fas fa-exclamation-triangle me-1\"></i>' + message;
-    
-    container.appendChild(errorEl);
-    
-    // Auto remove after 3 seconds
-    setTimeout(function() {
-        if (errorEl && errorEl.parentNode) {
-            errorEl.style.opacity = '0';
-            setTimeout(function() {
-                errorEl.remove();
-            }, 300);
-        }
-    }, 3000);
-}
-
-// Enhanced keyboard navigation
-document.addEventListener('keydown', function(e) {
-    // Don't interfere if user is typing in an input
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
-        return;
-    }
-    
-    var currentPage = <?php echo $page; ?>;
-    var totalPages = <?php echo $totalPages; ?>;
-    
-    switch(e.key) {
-        case 'ArrowLeft':
-        case 'h':
-            if (currentPage > 1) {
-                window.location.href = '<?php echo isset($page) && $page > 1 ? buildPaginationUrl($page - 1) : '#'; ?>';
-            }
-            break;
-        case 'ArrowRight':
-        case 'l':
-            if (currentPage < totalPages) {
-                window.location.href = '<?php echo isset($page) && $page < $totalPages ? buildPaginationUrl($page + 1) : '#'; ?>';
-            }
-            break;
-        case 'Home':
-            if (currentPage > 1) {
-                window.location.href = '<?php echo buildPaginationUrl(1); ?>';
-            }
-            break;
-        case 'End':
-            if (currentPage < totalPages) {
-                window.location.href = '<?php echo buildPaginationUrl($totalPages); ?>';
-            }
-            break;
-        case 'g':
-            var quickJumpInput = document.getElementById('quickJump');
-            if (quickJumpInput) {
-                quickJumpInput.focus();
-            }
-            break;
-    }
-});
-
-// Add smooth page transition
-document.addEventListener('DOMContentLoaded', function() {
-    // Add fade-in effect
-    document.body.style.opacity = '0';
-    setTimeout(function() {
-        document.body.style.transition = 'opacity 0.3s';
-        document.body.style.opacity = '1';
-    }, 50);
-    
-    // Add hover effects to pagination
-    var pageLinks = document.querySelectorAll('.pagination .page-link');
-    pageLinks.forEach(function(link) {
-        link.addEventListener('mouseenter', function() {
-            if (!this.closest('.page-item').classList.contains('active') && 
-                !this.closest('.page-item').classList.contains('disabled')) {
-                this.style.transform = 'translateY(-2px)';
-            }
-        });
-        
-        link.addEventListener('mouseleave', function() {
-            this.style.transform = '';
-        });
-    });
-});
-";
 
 // Footer include
 include '../includes/admin_footer.php';
