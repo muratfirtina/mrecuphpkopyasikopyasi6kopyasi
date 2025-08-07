@@ -610,7 +610,7 @@ include '../includes/admin_sidebar.php';
                                         <?php if ($upload['status'] === 'pending'): ?>
                                             <button type="button" class="btn btn-outline-success btn-sm" 
                                                     onclick="processFile('<?php echo $upload['id']; ?>')">
-                                                <i class="fas fa-play me-1"></i>İşle
+                                                <i class="fas fa-play me-1"></i>İşleme Al
                                             </button>
                                         <?php endif; ?>
                                     </div>

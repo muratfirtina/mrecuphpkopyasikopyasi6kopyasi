@@ -293,6 +293,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
+        // Dosyayı İşleme Al
+        if (isset($_POST['take_file_processing'])) {
+            error_log("File processing request started");
+            
+            if ($notificationManager->updateUploadStatus($uploadId, 'processing', 'Dosya işleme alındı.')) {
+                $success = 'Dosya başarıyla işleme alındı.';
+                $user->logAction($_SESSION['user_id'], 'file_processing', "Dosya #{$uploadId} işleme alındı");
+                
+                // Başarılı işlem sonrası redirect
+                header("Location: file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
+                exit;
+            } else {
+                $error = 'Dosya işleme alınırken hata oluştu.';
+            }
+        }
+        
         // Revizyon dosyası yükleme (yeni eklenen)
         if (isset($_FILES['revision_file']) && isset($_POST['upload_revision'])) {
             error_log("Revision file upload request started");
@@ -1413,6 +1429,15 @@ try {
                                 <a href="download-file.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-success btn-sm w-100">
                                     <i class="fas fa-download me-1"></i>Dosyayı İndir
                                 </a>
+                            <?php endif; ?>
+                            
+                            <!-- Dosyayı İşleme Al Butonu -->
+                            <?php if ($fileType !== 'response' && isset($upload['status']) && $upload['status'] === 'pending'): ?>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-warning btn-sm w-100" onclick="showProcessingConfirmModal()">
+                                        <i class="fas fa-cogs me-1"></i>Dosyayı İşleme Al
+                                    </button>
+                                </div>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
@@ -2951,6 +2976,75 @@ try {
     </div>
 </div>
 
+<!-- Dosya İşleme Al Onay Modalı -->
+<div class="modal fade" id="processingConfirmModal" tabindex="-1" aria-labelledby="processingConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient" style="background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%); color: white;">
+                <h5 class="modal-title d-flex align-items-center" id="processingConfirmModalLabel">
+                    <i class="fas fa-cogs me-2"></i>
+                    Dosyayı İşleme Al
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-warning d-flex align-items-center mb-4" style="padding: 1rem; border-radius: 0.375rem;">
+                    <i class="fas fa-exclamation-triangle me-2 fa-lg"></i>
+                    <div>
+                        <strong>Bu işlem:</strong> Dosyayı "Bekliyor" durumundan "İşleniyor" durumuna geçirecektir.
+                    </div>
+                </div>
+                
+                <div class="file-info bg-light p-3 rounded mb-4">
+                    <h6 class="text-primary mb-3">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Dosya Bilgileri
+                    </h6>
+                    <div class="row">
+                        <div class="col-sm-4"><strong>Dosya Adı:</strong></div>
+                        <div class="col-sm-8"><?php echo htmlspecialchars($upload['original_name'] ?? 'Bilinmeyen'); ?></div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-sm-4"><strong>Kullanıcı:</strong></div>
+                        <div class="col-sm-8"><?php echo htmlspecialchars(($upload['first_name'] ?? '') . ' ' . ($upload['last_name'] ?? '')); ?></div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-sm-4"><strong>Yükleme Tarihi:</strong></div>
+                        <div class="col-sm-8"><?php echo date('d.m.Y H:i', strtotime($upload['upload_date'] ?? 'now')); ?></div>
+                    </div>
+                </div>
+                
+                <div class="alert-info d-flex align-items-center" style="padding: 1rem; border-radius: 0.375rem;">
+                    <i class="fas fa-info-circle me-2 fa-lg"></i>
+                    <div>
+                        <strong>Onay verdiğinizde:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Dosya durumu "İşleniyor" olacak</li>
+                            <li>Kullanıcıya bildirim gönderilecek</li>
+                            <li>Sistem loglarına işlem kaydedilecek</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary d-flex align-items-center" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>
+                    İptal Et
+                </button>
+                <button type="button" class="btn btn-warning d-flex align-items-center" id="confirm-processing-btn" onclick="confirmFileProcessing()">
+                    <i class="fas fa-check me-2"></i>
+                    Evet, İşleme Al
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gizli Form -->
+<form method="POST" id="processing-form" style="display: none;">
+    <input type="hidden" name="take_file_processing" value="1">
+</form>
+
 <!-- Reject Revision Modal -->
 <div class="modal fade" id="rejectRevisionModal" tabindex="-1" aria-labelledby="rejectRevisionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -3055,6 +3149,25 @@ function showRejectModal(revisionId) {
     document.getElementById('rejectRevisionId').value = revisionId;
     document.getElementById('admin_notes').value = '';
     new bootstrap.Modal(document.getElementById('rejectRevisionModal')).show();
+}
+
+// Dosyayı İşleme Al Onay Modalı
+function showProcessingConfirmModal() {
+    new bootstrap.Modal(document.getElementById('processingConfirmModal')).show();
+}
+
+function confirmFileProcessing() {
+    // Loading durumunu göster
+    const confirmBtn = document.getElementById('confirm-processing-btn');
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>İşleniyor...';
+    confirmBtn.disabled = true;
+    
+    // Form'u submit et
+    const form = document.getElementById('processing-form');
+    if (form) {
+        form.submit();
+    }
 }
 </script>
 
