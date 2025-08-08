@@ -59,7 +59,21 @@
                         </a>
 
                         <a class="nav-link <?php echo ($pageTitle == 'Bildirimler') ? 'active' : ''; ?>" href="notifications.php">
-                            <i class="fas fa-bell fa-lg text-white"></i>Bildirimler
+                            <i class="fas fa-bell"></i>Bildirimler
+                            <?php
+                            // Dosyaya işlem yapılmamış bildirimlerin sayısını al
+                            try {
+                                $pendingProcessStmt = $pdo->prepare("SELECT COUNT(*) FROM file_uploads WHERE status = 'pending'");
+                                $pendingProcessStmt->execute();
+                                $pendingProcessCount = $pendingProcessStmt->fetchColumn();
+                                
+                                if ($pendingProcessCount > 0) {
+                                    echo '<span class="badge bg-danger ms-2">' . $pendingProcessCount . '</span>';
+                                }
+                            } catch(Exception $e) {
+                                // Hata durumunda badge gösterme
+                            }
+                            ?>
                         </a>
                         
                         <!-- Kullanıcı Yönetimi -->

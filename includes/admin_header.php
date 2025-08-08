@@ -466,44 +466,7 @@ $cssPath = '../assets/css/style.css';
                                 $unreadCount = $notificationManager->getUnreadCount($_SESSION['user_id']);
                             }
                             
-                            // Ek admin-specific bildirimler
-                            // Bekleyen dosyalar
-                            $stmt = $pdo->prepare("SELECT COUNT(*) FROM file_uploads WHERE status = 'pending'");
-                            $stmt->execute();
-                            $pendingFiles = $stmt->fetchColumn();
                             
-                            // Bekleyen revize talepleri
-                            $stmt = $pdo->prepare("SELECT COUNT(*) FROM revisions WHERE status = 'pending'");
-                            $stmt->execute();
-                            $pendingRevisions = $stmt->fetchColumn();
-                            
-                            // Eğer statik bildirimler de eklemek istiyorsak
-                            if (empty($adminNotifications)) {
-                                $adminNotifications = [];
-                                if ($pendingFiles > 0) {
-                                    $adminNotifications[] = [
-                                        'id' => 'pending_files',
-                                        'type' => 'file_upload',
-                                        'title' => 'Bekleyen Dosyalar',
-                                        'message' => $pendingFiles . ' dosya onay bekliyor',
-                                        'created_at' => date('Y-m-d H:i:s'),
-                                        'is_read' => false,
-                                        'action_url' => 'uploads.php?status=pending'
-                                    ];
-                                }
-                                if ($pendingRevisions > 0) {
-                                    $adminNotifications[] = [
-                                        'id' => 'pending_revisions',
-                                        'type' => 'revision_request',
-                                        'title' => 'Bekleyen Revize Talepleri',
-                                        'message' => $pendingRevisions . ' revize talebi bekliyor',
-                                        'created_at' => date('Y-m-d H:i:s'),
-                                        'is_read' => false,
-                                        'action_url' => 'revisions.php?status=pending'
-                                    ];
-                                }
-                                $unreadCount = $pendingFiles + $pendingRevisions;
-                            }
                         }
                     } catch(Exception $e) {
                         error_log('Admin notification error: ' . $e->getMessage());

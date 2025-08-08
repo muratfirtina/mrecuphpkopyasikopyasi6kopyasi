@@ -40,18 +40,6 @@ try {
     // Statik bildirimler sayısını ekle
     $dismissedStatic = $_SESSION['dismissed_static_notifications'] ?? [];
     
-    // Bekleyen dosyalar kontrol et
-    try {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM file_uploads WHERE status = 'pending'");
-        $stmt->execute();
-        $pendingFiles = $stmt->fetchColumn();
-        if ($pendingFiles > 0 && !isset($dismissedStatic['pending_files'])) {
-            $totalCount++;
-        }
-    } catch(PDOException $e) {
-        error_log('Pending files check error: ' . $e->getMessage());
-    }
-    
     // Bekleyen revize talepleri kontrol et
     try {
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM revisions WHERE status = 'pending'");
@@ -82,7 +70,6 @@ try {
         'count' => $totalCount,
         'debug' => [
             'db_notifications' => $count ?? 0,
-            'pending_files' => $pendingFiles ?? 0,
             'pending_revisions' => $pendingRevisions ?? 0,
             'dismissed_static' => count($dismissedStatic)
         ]
