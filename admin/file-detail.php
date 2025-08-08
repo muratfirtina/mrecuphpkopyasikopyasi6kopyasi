@@ -386,7 +386,7 @@ try {
             // Spesifik response dosyasını al
             $stmt = $pdo->prepare("
                 SELECT fr.*, fu.user_id, fu.original_name as original_upload_name,
-                       fu.brand_id, fu.model_id, fu.series_id, fu.engine_id, fu.year, fu.plate, fu.kilometer, fu.ecu_type, fu.engine_code,
+                       fu.brand_id, fu.model_id, fu.series_id, fu.engine_id, fu.year, fu.plate, fu.kilometer, fu.ecu_id, fu.device_id,
                        fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
                        b.name as brand_name, m.name as model_name, s.name as series_name, e.name as engine_name,
                        a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
@@ -406,7 +406,7 @@ try {
             // En son response dosyasını al (eski davranış)
             $stmt = $pdo->prepare("
                 SELECT fr.*, fu.user_id, fu.original_name as original_upload_name,
-                       fu.brand_id, fu.model_id, fu.series_id, fu.engine_id, fu.year, fu.plate, fu.kilometer, fu.ecu_type, fu.engine_code,
+                       fu.brand_id, fu.model_id, fu.series_id, fu.engine_id, fu.year, fu.plate, fu.kilometer, fu.ecu_id, fu.device_id,
                        fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
                        b.name as brand_name, m.name as model_name, s.name as series_name, e.name as engine_name,
                        a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
@@ -1666,6 +1666,67 @@ try {
 </div>
 <?php endif; ?>
 
+<!-- Yanıt Dosyası Yükleme (sadece normal dosyalar için) -->
+<?php if ($fileType !== 'response' && ($upload['status'] === 'pending' || $upload['status'] === 'processing')): ?>
+    <div class="card admin-card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">
+                    <i class="fas fa-reply me-2"></i>Yanıt Dosyası Yükle
+                </h6>
+                <?php if ($upload['status'] === 'processing'): ?>
+                    <span class="badge bg-info">
+                        <i class="fas fa-cogs me-1"></i>Dosya İşleme Alındı
+                    </span>
+                <?php endif; ?>
+            </div>
+        </div>
+        <div class="card-body">
+            <?php if ($upload['status'] === 'processing'): ?>
+                <div class="alert-info mb-3" style="padding: 1rem; border-radius: 0.375rem;">
+                    <div class="d-flex">
+                        <i class="fas fa-info-circle me-3 mt-1"></i>
+                        <div>
+                            <strong>Dosya işleme alındı!</strong><br>
+                            <small class="text-muted">
+                                Bu dosya indirildi ve düzenleme aşamasında. Düzenleme tamamlandıktan sonra 
+                                buradan yanıt dosyasını yükleyebilirsiniz.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+            
+            <form method="POST" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="response_file" class="form-label">Yanıt Dosyası</label>
+                        <input type="file" class="form-control" id="response_file" name="response_file" required>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="credits_charged" class="form-label">Düşürülecek Kredi</label>
+                        <input type="number" class="form-control" id="credits_charged" name="credits_charged" 
+                               value="0" min="0" step="0.01">
+                    </div>
+                    
+                    <div class="col-12">
+                        <label for="response_notes" class="form-label">Yanıt Notları</label>
+                        <textarea class="form-control" id="response_notes" name="response_notes" rows="3"
+                                  placeholder="Yanıt ile ilgili notlarınızı buraya yazın..."></textarea>
+                    </div>
+                    
+                    <div class="col-12">
+                        <button type="submit" name="upload_response" class="btn btn-primary">
+                            <i class="fas fa-upload me-1"></i>Yanıt Dosyasını Yükle
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+<?php endif; ?>
+
 <!-- İletişim Geçmişi (Tüm Kullanıcı Admin Etkileşimleri) -->
 <?php if (!empty($communicationHistory)): ?>
 <div class="card admin-card mb-4">
@@ -2338,68 +2399,6 @@ try {
     </div>
 </div>
 <?php endif; ?>
-
-<!-- Yanıt Dosyası Yükleme (sadece normal dosyalar için) -->
-<?php if ($fileType !== 'response' && ($upload['status'] === 'pending' || $upload['status'] === 'processing')): ?>
-    <div class="card admin-card mb-4">
-        <div class="card-header">
-            <div class="d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">
-                    <i class="fas fa-reply me-2"></i>Yanıt Dosyası Yükle
-                </h6>
-                <?php if ($upload['status'] === 'processing'): ?>
-                    <span class="badge bg-info">
-                        <i class="fas fa-cogs me-1"></i>Dosya İşleme Alındı
-                    </span>
-                <?php endif; ?>
-            </div>
-        </div>
-        <div class="card-body">
-            <?php if ($upload['status'] === 'processing'): ?>
-                <div class="alert alert-info mb-3">
-                    <div class="d-flex">
-                        <i class="fas fa-info-circle me-3 mt-1"></i>
-                        <div>
-                            <strong>Dosya işleme alındı!</strong><br>
-                            <small class="text-muted">
-                                Bu dosya indirildi ve düzenleme aşamasında. Düzenleme tamamlandıktan sonra 
-                                buradan yanıt dosyasını yükleyebilirsiniz.
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
-            
-            <form method="POST" enctype="multipart/form-data">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label for="response_file" class="form-label">Yanıt Dosyası</label>
-                        <input type="file" class="form-control" id="response_file" name="response_file" required>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label for="credits_charged" class="form-label">Düşürülecek Kredi</label>
-                        <input type="number" class="form-control" id="credits_charged" name="credits_charged" 
-                               value="0" min="0" step="0.01">
-                    </div>
-                    
-                    <div class="col-12">
-                        <label for="response_notes" class="form-label">Yanıt Notları</label>
-                        <textarea class="form-control" id="response_notes" name="response_notes" rows="3"
-                                  placeholder="Yanıt ile ilgili notlarınızı buraya yazın..."></textarea>
-                    </div>
-                    
-                    <div class="col-12">
-                        <button type="submit" name="upload_response" class="btn btn-primary">
-                            <i class="fas fa-upload me-1"></i>Yanıt Dosyasını Yükle
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-<?php endif; ?>
-
 
 
 <!-- Revize Reddetme Modal -->

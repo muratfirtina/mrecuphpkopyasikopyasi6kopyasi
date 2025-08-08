@@ -133,7 +133,7 @@ if ($fileType === 'response') {
     // Yanıt dosyası detayları
     $stmt = $pdo->prepare("
         SELECT fr.*, fu.user_id, fu.original_name as original_upload_name,
-               fu.brand_id, fu.model_id, fu.year, fu.plate, fu.ecu_type, fu.engine_code,
+               fu.brand_id, fu.model_id, fu.series_id, fu.plate, fu.ecu_id, fu.device_id,
                fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
                b.name as brand_name, m.name as model_name,
                a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
@@ -524,6 +524,10 @@ include '../includes/user_header.php';
                                     <span class="value"><?php echo htmlspecialchars($fileDetail['original_name'] ?? 'Belirtilmemiş'); ?></span>
                                 </div>
                                 <div class="detail-item">
+                                    <span class="label">Cihaz Tipi:</span>
+                                    <span class="value"><?php echo htmlspecialchars($fileDetail['device_name'] ?? 'Belirtilmemiş'); ?></span>
+                                </div>
+                                <div class="detail-item">
                                     <span class="label">Dosya Boyutu:</span>
                                     <span class="value"><?php echo formatFileSize($fileDetail['file_size'] ?? 0); ?></span>
                                 </div>
@@ -559,10 +563,16 @@ include '../includes/user_header.php';
                                     <span class="label">Model:</span>
                                     <span class="value"><?php echo htmlspecialchars($fileDetail['model_name'] ?? 'Belirtilmemiş'); ?></span>
                                 </div>
-                                <?php if (!empty($fileDetail['year'])): ?>
+                                <?php if (!empty($fileDetail['series_name'])): ?>
                                     <div class="detail-item">
-                                        <span class="label">Yıl:</span>
-                                        <span class="value"><?php echo $fileDetail['year']; ?></span>
+                                        <span class="label">Seri:</span>
+                                        <span class="value"><?php echo $fileDetail['series_name']; ?></span>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (!empty($fileDetail['engine_name'])): ?>
+                                    <div class="detail-item">
+                                        <span class="label">Motor:</span>
+                                        <span class="value"><?php echo htmlspecialchars($fileDetail['engine_name']); ?></span>
                                     </div>
                                 <?php endif; ?>
                                 <?php if (!empty($fileDetail['plate'])): ?>

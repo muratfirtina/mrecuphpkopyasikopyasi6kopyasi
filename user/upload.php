@@ -1421,7 +1421,7 @@ function updateSummary() {
     // Step 3 detaylı özetini güncelle
     const summaryBrandModel = document.getElementById('summary-brand-model');
     if (summaryBrandModel) {
-        summaryBrandModel.textContent = `${brand} ${model} ${series}`;
+        summaryBrandModel.textContent = `${brand} ${model}`;
     }
     
     const summaryYear = document.getElementById('summary-series-year');
@@ -1736,7 +1736,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('ecu_id').addEventListener('change', updateSummary);
     document.getElementById('device_id').addEventListener('change', updateSummary);
     document.getElementById('plate').addEventListener('input', updateSummary);
-    document.getElementById('kilometer').addEventListener('input', updateSummary);
     
     // Dosya değişikliği için özel listener
     document.getElementById('file').addEventListener('change', updateSummary);

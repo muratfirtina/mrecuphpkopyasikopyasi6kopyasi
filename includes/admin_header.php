@@ -748,6 +748,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 // Bildirim sayısını güncelle
                 updateNotificationBadge();
+                
+                // Eğer hiç okunmamış bildirim kalmadıysa badge'i kaldır
+                setTimeout(() => {
+                    const remainingUnread = document.querySelectorAll('.dropdown-item.bg-light');
+                    if (remainingUnread.length === 0) {
+                        const badges = document.querySelectorAll('#adminNotificationDropdown .badge');
+                        badges.forEach(badge => badge.remove());
+                    }
+                }, 100);
             } else {
                 console.error('Bildirim okundu olarak işaretlenemedi:', data.message);
             }
@@ -769,10 +778,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Badge'i sıfırla
-        const badge = document.querySelector('#adminNotificationDropdown .badge');
-        if (badge) {
-            badge.style.display = 'none';
+        // Badge'i KESIN olarak sıfırla - Tüm olası selektorları kullan
+        const badges = document.querySelectorAll('#adminNotificationDropdown .badge, .badge-notification, .position-absolute.badge');
+        badges.forEach(badge => {
+            if (badge) {
+                badge.remove(); // Elementi tamamen kaldır
+            }
+        });
+        
+        // Ek güvenlik için parent element üzerinden de kontrol et
+        const notificationLink = document.querySelector('#adminNotificationDropdown');
+        if (notificationLink) {
+            const allBadges = notificationLink.querySelectorAll('.badge');
+            allBadges.forEach(badge => badge.remove());
         }
         
         // AJAX ile tüm bildirimleri okundu olarak işaretle
@@ -787,8 +805,25 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 console.log('Tüm bildirimler okundu olarak işaretlendi');
+                
                 // Bildirim sayısını güncelle
                 updateNotificationBadge();
+                
+                // Ek güvenlik: 500ms sonra tekrar kontrol et ve badge varsa kaldır
+                setTimeout(() => {
+                    const remainingBadges = document.querySelectorAll('#adminNotificationDropdown .badge');
+                    remainingBadges.forEach(badge => {
+                        console.log('Kalıcı badge kaldırılıyor:', badge);
+                        badge.remove();
+                    });
+                    
+                    // Dropdown header badge'ini de sıfırla
+                    const headerBadge = document.querySelector('.dropdown-header .badge');
+                    if (headerBadge) {
+                        headerBadge.textContent = '0';
+                    }
+                }, 500);
+                
             } else {
                 console.error('Error marking all notifications as read:', data.message);
                 // Hata durumunda sayfayı yenile
@@ -810,13 +845,18 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const badge = document.querySelector('#adminNotificationDropdown .badge');
-                if (badge) {
-                    if (data.count > 0) {
-                        badge.textContent = data.count;
-                        badge.style.display = 'inline-block';
-                    } else {
-                        badge.style.display = 'none';
+                // Önce mevcut badge'leri tamamen kaldır
+                const existingBadges = document.querySelectorAll('#adminNotificationDropdown .badge');
+                existingBadges.forEach(badge => badge.remove());
+                
+                // Eğer bildirim varsa yeni badge oluştur
+                if (data.count > 0) {
+                    const notificationLink = document.querySelector('#adminNotificationDropdown');
+                    if (notificationLink) {
+                        const newBadge = document.createElement('span');
+                        newBadge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger badge-notification';
+                        newBadge.textContent = data.count;
+                        notificationLink.appendChild(newBadge);
                     }
                 }
                 
@@ -870,5 +910,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Auto-refresh admin notifications
     setInterval(window.updateNotificationBadge, 30000);
+    
+    // Sayfa yüklenirken badge durumunu kontrol et
+    window.updateNotificationBadge();
+    
+    // Badge temizleme güvenlik fonksiyonu
+    window.ensureBadgeCleared = function() {
+        const badges = document.querySelectorAll('#adminNotificationDropdown .badge');
+        badges.forEach(badge => {
+            badge.remove();
+        });
+        console.log('Badge temizleme güvenlik fonksiyonu çalıştı');
+    };
 });
 </script>
