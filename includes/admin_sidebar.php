@@ -52,10 +52,38 @@
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Dosya Yüklemeleri') ? 'active' : ''; ?>" href="uploads.php">
                             <i class="fas fa-upload"></i>Yüklemeler
+                            <?php
+                            // İşleme alınan dosya sayısını al
+                            try {
+                                $processingFilesStmt = $pdo->prepare("SELECT COUNT(*) FROM file_uploads WHERE status = 'processing'");
+                                $processingFilesStmt->execute();
+                                $processingFilesCount = $processingFilesStmt->fetchColumn();
+                                
+                                if ($processingFilesCount > 0) {
+                                    echo '<span class="badge bg-info ms-2">' . $processingFilesCount . '</span>';
+                                }
+                            } catch(Exception $e) {
+                                // Hata durumunda badge gösterme
+                            }
+                            ?>
                         </a>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Revizyon İşlemleri') ? 'active' : ''; ?>" href="revisions.php">
                             <i class="fas fa-history"></i>Revizyonlar
+                            <?php
+                            // İşleme alınan revizyon sayısını al
+                            try {
+                                $processingRevisionsStmt = $pdo->prepare("SELECT COUNT(*) FROM revisions WHERE status = 'processing'");
+                                $processingRevisionsStmt->execute();
+                                $processingRevisionsCount = $processingRevisionsStmt->fetchColumn();
+                                
+                                if ($processingRevisionsCount > 0) {
+                                    echo '<span class="badge bg-info ms-2">' . $processingRevisionsCount . '</span>';
+                                }
+                            } catch(Exception $e) {
+                                // Hata durumunda badge gösterme
+                            }
+                            ?>
                         </a>
 
                         <a class="nav-link <?php echo ($pageTitle == 'Bildirimler') ? 'active' : ''; ?>" href="notifications.php">

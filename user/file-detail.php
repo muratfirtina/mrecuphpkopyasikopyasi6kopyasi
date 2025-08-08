@@ -133,15 +133,23 @@ if ($fileType === 'response') {
     // Yanıt dosyası detayları
     $stmt = $pdo->prepare("
         SELECT fr.*, fu.user_id, fu.original_name as original_upload_name,
-               fu.brand_id, fu.model_id, fu.series_id, fu.plate, fu.ecu_id, fu.device_id,
+               fu.brand_id, fu.model_id, fu.series_id, fu.engine_id, fu.plate, fu.ecu_id, fu.device_id,
                fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
                b.name as brand_name, m.name as model_name,
+               s.name as series_name,
+               eng.name as engine_name,
+               d.name as device_name,
+               e.name as ecu_name,
                a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
                fu.upload_notes as original_notes
         FROM file_responses fr
         LEFT JOIN file_uploads fu ON fr.upload_id = fu.id
         LEFT JOIN brands b ON fu.brand_id = b.id
         LEFT JOIN models m ON fu.model_id = m.id
+        LEFT JOIN series s ON fu.series_id = s.id
+        LEFT JOIN engines eng ON fu.engine_id = eng.id
+        LEFT JOIN devices d ON fu.device_id = d.id
+        LEFT JOIN ecus e ON fu.ecu_id = e.id
         LEFT JOIN users a ON fr.admin_id = a.id
         WHERE fr.id = ? AND fu.user_id = ?
     ");
@@ -424,11 +432,6 @@ include '../includes/user_header.php';
                         <a href="files.php" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-1"></i>Geri Dön
                         </a>
-                        <?php if (($fileType === 'response') || ($fileType === 'upload' && $fileDetail['status'] === 'completed')): ?>
-                            <a href="download.php?id=<?php echo $fileDetail['id']; ?>&type=<?php echo $fileType; ?>" class="btn btn-success">
-                                <i class="fas fa-download me-1"></i>İndir
-                            </a>
-                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -547,6 +550,11 @@ include '../includes/user_header.php';
                                         <span class="value"><?php echo htmlspecialchars($fileDetail['admin_username']); ?></span>
                                     </div>
                                 <?php endif; ?>
+                                <?php if (($fileType === 'response') || ($fileType === 'upload' && $fileDetail['status'] === 'completed')): ?>
+                                    <a href="download.php?id=<?php echo $fileDetail['id']; ?>&type=<?php echo $fileType; ?>" class="btn btn-success">
+                                        <i class="fas fa-download me-1"></i>İndir
+                                    </a>
+                                <?php endif; ?>
                             </div>
                         </div>
                         
@@ -581,18 +589,13 @@ include '../includes/user_header.php';
                                         <span class="value"><?php echo strtoupper(htmlspecialchars($fileDetail['plate'])); ?></span>
                                     </div>
                                 <?php endif; ?>
-                                <?php if (!empty($fileDetail['ecu_type'])): ?>
+                                <?php if (!empty($fileDetail['ecu_name'])): ?>
                                     <div class="detail-item">
-                                        <span class="label">ECU Tipi:</span>
-                                        <span class="value"><?php echo htmlspecialchars($fileDetail['ecu_type']); ?></span>
+                                        <span class="label">ECU:</span>
+                                        <span class="value"><?php echo htmlspecialchars($fileDetail['ecu_name']); ?></span>
                                     </div>
                                 <?php endif; ?>
-                                <?php if (!empty($fileDetail['engine_code'])): ?>
-                                    <div class="detail-item">
-                                        <span class="label">Motor Kodu:</span>
-                                        <span class="value"><?php echo htmlspecialchars($fileDetail['engine_code']); ?></span>
-                                    </div>
-                                <?php endif; ?>
+
                                 <?php if (!empty($fileDetail['fuel_type'])): ?>
                                     <div class="detail-item">
                                         <span class="label">Yakıt Tipi:</span>
