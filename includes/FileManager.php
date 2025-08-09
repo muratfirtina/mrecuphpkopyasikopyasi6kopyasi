@@ -1,4 +1,10 @@
-<?php
+                // completed_at de güncelle
+                $stmt = $this->pdo->prepare("
+                    UPDATE file_uploads 
+                    SET credits_charged = ?, completed_at = NOW() 
+                    WHERE id = ?
+                ");
+                $stmt->execute([$creditsCharged, $uploadId]);<?php
 /**
  * Mr ECU - File Manager Class (GUID System) - CLEAN VERSION
  * GUID tabanlı dosya yönetimi sınıfı - Duplicate metodlar temizlendi
@@ -1087,111 +1093,192 @@ class FileManager {
     
 
     
-    // Yanıt dosyası yükleme metodu
-    public function uploadResponseFile($uploadId, $file, $creditsCharged = 0, $responseNotes = '') {
+    /**
+     * Admin tarafından yanıt dosyası yükle (Gelişmiş Bildirim Sistemi ile)
+     * @param string $uploadId - Ana dosya ID'si
+     * @param array $fileData - $_FILES['response_file'] verisi
+     * @param float $creditsCharged - Düşürülecek kredi miktarı
+     * @param string $responseNotes - Admin yanıt notları
+     * @return array - Başarı durumu ve mesaj
+     */
+    public function uploadResponseFile($uploadId, $fileData, $creditsCharged = 0, $responseNotes = '') {
         try {
+            error_log('uploadResponseFile started - UploadId: ' . $uploadId . ', Credits: ' . $creditsCharged);
+            
             if (!isValidUUID($uploadId)) {
-                return ['success' => false, 'message' => 'Geçersiz upload ID formatı.'];
+                return ['success' => false, 'message' => 'Geçersiz dosya ID formatı.'];
             }
             
-            // Dosya uploadını kontrol et
-            $stmt = $this->pdo->prepare("SELECT * FROM file_uploads WHERE id = ?");
-            $stmt->execute([$uploadId]);
-            $upload = $stmt->fetch();
-            
+            // Ana dosya kontrolü
+            $upload = $this->getUploadById($uploadId);
             if (!$upload) {
                 return ['success' => false, 'message' => 'Ana dosya bulunamadı.'];
             }
             
-            // Dosya kontrolleri
-            if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
-                return ['success' => false, 'message' => 'Geçersiz dosya yüklemesi.'];
+            // Dosya yükleme kontrolü
+            if (!isset($fileData['tmp_name']) || !is_uploaded_file($fileData['tmp_name'])) {
+                return ['success' => false, 'message' => 'Yanıt dosyası yüklenmedi.'];
             }
             
-            if ($file['error'] !== UPLOAD_ERR_OK) {
-                return ['success' => false, 'message' => 'Dosya yükleme hatası: ' . $file['error']];
+            if ($fileData['error'] !== UPLOAD_ERR_OK) {
+                return ['success' => false, 'message' => 'Dosya yükleme hatası: ' . $fileData['error']];
             }
             
-            if ($file['size'] > MAX_FILE_SIZE) {
-                return ['success' => false, 'message' => 'Dosya boyutu çok büyük. Maksimum: ' . formatFileSize(MAX_FILE_SIZE)];
-            }
-            
-            // Dosya uzantısı kontrolü
-            $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            if (!in_array($extension, ALLOWED_EXTENSIONS)) {
-                return ['success' => false, 'message' => 'Desteklenmeyen dosya formatı. İzin verilen: ' . implode(', ', ALLOWED_EXTENSIONS)];
-            }
-            
-            // Yükleme dizinini kontrol et
-            $uploadDir = UPLOAD_PATH . 'response_files/';
-            if (!is_dir($uploadDir)) {
-                if (!mkdir($uploadDir, 0755, true)) {
-                    return ['success' => false, 'message' => 'Yükleme dizini oluşturulamadı.'];
-                }
+            // Dosya boyutu kontrolü
+            if ($fileData['size'] > MAX_FILE_SIZE) {
+                return ['success' => false, 'message' => 'Dosya boyutu çok büyük. Maksimum ' . formatFileSize(MAX_FILE_SIZE) . ' olabilir.'];
             }
             
             // Benzersiz dosya adı oluştur
-            $filename = generateUUID() . '.' . $extension;
-            $filePath = $uploadDir . $filename;
+            $fileExtension = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
+            $fileName = generateUUID() . '_response.' . $fileExtension;
+            $uploadDir = UPLOAD_PATH . 'response_files/';
+            $uploadPath = $uploadDir . $fileName;
             
-            // Dosyayı taşı
-            if (!move_uploaded_file($file['tmp_name'], $filePath)) {
-                return ['success' => false, 'message' => 'Dosya taşınamadı.'];
+            // Upload dizinini oluştur
+            if (!is_dir($uploadDir)) {
+                if (!mkdir($uploadDir, 0755, true)) {
+                    return ['success' => false, 'message' => 'Upload dizini oluşturulamadı.'];
+                }
             }
             
-            // Veritabanına kaydet
-            $responseId = generateUUID();
-            $stmt = $this->pdo->prepare("
-                INSERT INTO file_responses (
-                    id, upload_id, admin_id, original_name, filename, file_size, 
-                    credits_charged, admin_notes, upload_date
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
-            ");
+            // Dosyayı taşı
+            if (!move_uploaded_file($fileData['tmp_name'], $uploadPath)) {
+                return ['success' => false, 'message' => 'Dosya upload edilemedi.'];
+            }
             
-            $result = $stmt->execute([
-                $responseId,
-                $uploadId,
-                $_SESSION['user_id'],
-                $file['name'],
-                $filename,
-                $file['size'],
-                $creditsCharged,
-                $responseNotes
-            ]);
+            error_log('uploadResponseFile: File moved successfully to ' . $uploadPath);
             
-            if ($result) {
-                // Ana dosyanın durumunu 'completed' yap
-                $stmt = $this->pdo->prepare("UPDATE file_uploads SET status = 'completed' WHERE id = ?");
-                $stmt->execute([$uploadId]);
+            // Transaction başlat
+            $this->pdo->beginTransaction();
+            
+            try {
+                // file_responses tablosuna kaydet
+                $responseId = generateUUID();
+                $stmt = $this->pdo->prepare("
+                    INSERT INTO file_responses (
+                        id, upload_id, admin_id, filename, original_name, 
+                        file_size, credits_charged, admin_notes, upload_date
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                ");
                 
-                // Kredi düşür
-                if ($creditsCharged > 0) {
-                    $userClass = new User($this->pdo);
-                    $creditResult = $userClass->deductCredits($upload['user_id'], $creditsCharged, "Yanıt dosyası için kredi düşüldü: " . $uploadId);
-                    
-                    if (!$creditResult['success']) {
-                        error_log('Kredi düşme hatası: ' . $creditResult['message']);
-                    }
+                $result = $stmt->execute([
+                    $responseId,
+                    $uploadId,
+                    $_SESSION['user_id'] ?? null,
+                    $fileName,
+                    $fileData['name'],
+                    $fileData['size'],
+                    $creditsCharged,
+                    $responseNotes
+                ]);
+                
+                if (!$result) {
+                    throw new Exception('Response dosyası kaydı oluşturulamadı.');
                 }
+                
+                error_log('uploadResponseFile: Response record created with ID: ' . $responseId);
+                
+                // Ana dosya durumunu 'completed' olarak güncelle (BİLDİRİM GÖNDERMEDEn)
+                // updateUploadStatus metodu kullan ama sendNotification = false
+                $statusUpdateResult = $this->updateUploadStatus($uploadId, 'completed', $responseNotes, false);
+                
+                if (!$statusUpdateResult) {
+                    throw new Exception('Ana dosya durumu güncellenemedi.');
+                }
+                
+                error_log('uploadResponseFile: Main file status updated to completed');
+                
+                // Kredi düşürme işlemi (eğer belirtilmişse)
+                if ($creditsCharged > 0) {
+                    // User sınıfını dahil et
+                    if (!class_exists('User')) {
+                        require_once __DIR__ . '/User.php';
+                    }
+                    
+                    $user = new User($this->pdo);
+                    
+                    // Ters kredi sistemi - kredi_used'ı artır
+                    $creditResult = $user->addCreditDirectSimple(
+                        $upload['user_id'], 
+                        $creditsCharged, 
+                        'file_charge', 
+                        'Dosya işleme ücreti: ' . $upload['original_name'] . ' (Yanıt: ' . $fileData['name'] . ')'
+                    );
+                    
+                    if (!$creditResult) {
+                        throw new Exception('Kredi düşürme işlemi başarısız.');
+                    }
+                    
+                    error_log('uploadResponseFile: Credits charged successfully: ' . $creditsCharged);
+                }
+                
+                // Bildirim sistemi entegrasyonu
+                try {
+                    if (!class_exists('NotificationManager')) {
+                        require_once __DIR__ . '/NotificationManager.php';
+                    }
+                    
+                    $notificationManager = new NotificationManager($this->pdo);
+                    
+                    // Yanıt dosyası yüklendiği için kullanıcıya bildirim gönder
+                    $notificationTitle = "Dosya yanıtlandı";
+                    $notificationMessage = $upload['original_name'] . " dosyanız için yanıt dosyası yüklendi: " . $fileData['name'];
+                    
+                    if ($responseNotes) {
+                        $notificationMessage .= " Admin notu: " . $responseNotes;
+                    }
+                    
+                    $actionUrl = "files.php?id=" . $uploadId;
+                    
+                    $notificationResult = $notificationManager->createNotification(
+                        $upload['user_id'],
+                        'file_response_uploaded',
+                        $notificationTitle,
+                        $notificationMessage,
+                        $uploadId,
+                        'file_upload',
+                        $actionUrl
+                    );
+                    
+                    if ($notificationResult) {
+                        error_log('uploadResponseFile: Notification sent successfully to user: ' . $upload['user_id']);
+                    } else {
+                        error_log('uploadResponseFile: Notification failed to send to user: ' . $upload['user_id']);
+                    }
+                    
+                } catch(Exception $e) {
+                    error_log('uploadResponseFile: Notification send error: ' . $e->getMessage());
+                    // Bildirim hatası ana işlemi etkilemesin
+                }
+                
+                // Transaction commit
+                $this->pdo->commit();
+                
+                error_log('uploadResponseFile: Transaction committed successfully');
                 
                 return [
                     'success' => true, 
-                    'message' => 'Yanıt dosyası başarıyla yüklendi.',
+                    'message' => 'Yanıt dosyası başarıyla yüklendi ve kullanıcıya bildirim gönderildi.',
                     'response_id' => $responseId
                 ];
-            } else {
-                // Dosyayı sil
-                unlink($filePath);
-                return ['success' => false, 'message' => 'Veritabanı kaydı oluşturulamadı.'];
+                
+            } catch(Exception $e) {
+                // Transaction rollback
+                $this->pdo->rollBack();
+                
+                // Yüklenen dosyayı sil
+                if (file_exists($uploadPath)) {
+                    unlink($uploadPath);
+                }
+                
+                error_log('uploadResponseFile: Transaction rolled back: ' . $e->getMessage());
+                return ['success' => false, 'message' => 'Yanıt dosyası yükleme hatası: ' . $e->getMessage()];
             }
             
-        } catch (Exception $e) {
-            error_log('uploadResponseFile error: ' . $e->getMessage());
-            // Dosyayı sil (eğer oluşturulduysa)
-            if (isset($filePath) && file_exists($filePath)) {
-                unlink($filePath);
-            }
-            return ['success' => false, 'message' => 'Dosya yükleme hatası: ' . $e->getMessage()];
+        } catch(Exception $e) {
+            error_log('uploadResponseFile general error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Sistem hatası: ' . $e->getMessage()];
         }
     }
     
@@ -1561,9 +1648,10 @@ class FileManager {
      * @param string $uploadId - Upload ID
      * @param string $status - Yeni durum
      * @param string $adminNotes - Admin notları
+     * @param bool $sendNotification - Bildirim gönderilsin mi?
      * @return bool - Başarı durumu
      */
-    public function updateUploadStatus($uploadId, $status, $adminNotes = '') {
+    public function updateUploadStatus($uploadId, $status, $adminNotes = '', $sendNotification = true) {
         try {
             if (!isValidUUID($uploadId)) {
                 error_log('updateUploadStatus: Geçersiz UUID - ' . $uploadId);
@@ -1587,17 +1675,19 @@ class FileManager {
             $result = $stmt->execute([$status, $adminNotes, $uploadId]);
             
             if ($result) {
-                // Bildirim sistemi entegrasyonu
-                try {
-                    if (!class_exists('NotificationManager')) {
-                        require_once __DIR__ . '/NotificationManager.php';
+                // Sadece bildirim gönderilmesi isteniyorsa gönder
+                if ($sendNotification) {
+                    try {
+                        if (!class_exists('NotificationManager')) {
+                            require_once __DIR__ . '/NotificationManager.php';
+                        }
+                        
+                        $notificationManager = new NotificationManager($this->pdo);
+                        $notificationManager->notifyFileStatusUpdate($uploadId, $upload['user_id'], $upload['original_name'], $status, $adminNotes);
+                    } catch(Exception $e) {
+                        error_log('Notification send error after status update: ' . $e->getMessage());
+                        // Bildirim hatası durum güncelleme işlemini etkilemesin
                     }
-                    
-                    $notificationManager = new NotificationManager($this->pdo);
-                    $notificationManager->notifyFileStatusUpdate($uploadId, $upload['user_id'], $upload['original_name'], $status, $adminNotes);
-                } catch(Exception $e) {
-                    error_log('Notification send error after status update: ' . $e->getMessage());
-                    // Bildirim hatası durum güncelleme işlemini etkilemesin
                 }
                 
                 error_log('updateUploadStatus: Başarılı - ' . $uploadId . ' durumu ' . $status . ' olarak güncellendi');
@@ -1707,6 +1797,8 @@ class FileManager {
             return ['success' => false, 'message' => 'Veritabanı hatası oluştu: ' . $e->getMessage()];
         }
     }
+    
+
     
 }
 ?>
