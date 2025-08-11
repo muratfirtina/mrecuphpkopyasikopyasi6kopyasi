@@ -657,30 +657,39 @@ include '../includes/user_header.php';
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="vehicle-info">
-                                                <div class="brand-model">
-                                                    <strong><?php echo htmlspecialchars($file['brand_name'] ?? 'Bilinmiyor'); ?></strong>
-                                                    <?php if (!empty($file['model_name'])): ?>
-                                                        - <?php echo htmlspecialchars($file['model_name']); ?>
-                                                    <?php endif; ?>
-                                                    <?php if (!empty($file['year'])): ?>
-                                                        (<?php echo $file['year']; ?>)
+                                            <div class="vehicle-info" style="width: 300px;">
+                                                    <div class="brand-model">
+                                                        <strong><?php echo htmlspecialchars($file['brand_name'] ?? 'Bilinmiyor'); ?></strong>
+                                                        <?php if (!empty($file['model_name'])): ?>
+                                                            - <?php echo htmlspecialchars($file['model_name']); ?>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($file['series_name'])): ?>
+                                                            <br><small class="text-muted">
+                                                                <i class="fas fa-tag me-1"></i>
+                                                                Seri: <?php echo htmlspecialchars($file['series_name']); ?>
+                                                            </small>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($file['engine_name'])): ?>
+                                                            <br><small class="text-muted">
+                                                                <i class="fas fa-cog me-1"></i>
+                                                                Motor: <?php echo htmlspecialchars($file['engine_name']); ?>
+                                                            </small>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <?php if (!empty($file['plate'])): ?>
+                                                        <div class="mt-1">
+                                                            <span class="badge bg-dark text-white">
+                                                                <i class="fas fa-id-card me-1"></i>
+                                                                <?php echo strtoupper(htmlspecialchars($file['plate'])); ?>
+                                                            </span>
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <small class="text-muted d-block mt-1">
+                                                            <i class="fas fa-minus-circle me-1"></i>
+                                                            Plaka belirtilmemiş
+                                                        </small>
                                                     <?php endif; ?>
                                                 </div>
-                                                <?php if (!empty($file['plate'])): ?>
-                                                    <div class="mt-1">
-                                                        <span class="badge bg-dark text-white">
-                                                            <i class="fas fa-id-card me-1"></i>
-                                                            <?php echo strtoupper(htmlspecialchars($file['plate'])); ?>
-                                                        </span>
-                                                    </div>
-                                                <?php else: ?>
-                                                    <small class="text-muted d-block mt-1">
-                                                        <i class="fas fa-minus-circle me-1"></i>
-                                                        Plaka belirtilmemiş
-                                                    </small>
-                                                <?php endif; ?>
-                                            </div>
                                         </td>
                                         <td>
                                             <?php

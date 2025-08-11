@@ -450,6 +450,7 @@ $cssPath = '../assets/css/style.css';
                         // Admin bildirimleri için gerçek veriler
                         $adminNotifications = [];
                         $unreadCount = 0;
+                        $pendingRevisionCount = 0;
                         
                         if (isset($_SESSION['user_id']) && isAdmin()) {
                             $notificationManager = new NotificationManager($pdo);
@@ -464,6 +465,21 @@ $cssPath = '../assets/css/style.css';
                                 // Header için son 10 bildirim al (daha fazla göstermek için)
                                 $adminNotifications = $notificationManager->getUserNotifications($_SESSION['user_id'], 10, false);
                                 $unreadCount = $notificationManager->getUnreadCount($_SESSION['user_id']);
+                                
+                                // Bekleyen revizyon sayısını al
+                                try {
+                                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM revisions WHERE status = 'pending'");
+                                    $stmt->execute();
+                                    $pendingRevisionCount = $stmt->fetchColumn();
+                                    
+                                    // İşleme alınan revizyon sayısını da al (sidebar ile tutarlılık için)
+                                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM revisions WHERE status = 'in_progress'");
+                                    $stmt->execute();
+                                    $inProgressRevisionCount = $stmt->fetchColumn();
+                                } catch(Exception $e) {
+                                    $pendingRevisionCount = 0;
+                                    $inProgressRevisionCount = 0;
+                                }
                             }
                             
                             
@@ -472,6 +488,7 @@ $cssPath = '../assets/css/style.css';
                         error_log('Admin notification error: ' . $e->getMessage());
                         $adminNotifications = [];
                         $unreadCount = 0;
+                        $pendingRevisionCount = 0;
                     }
                     ?>
                     
@@ -508,7 +525,13 @@ $cssPath = '../assets/css/style.css';
                                                         echo 'bg-warning bg-opacity-10 p-2 rounded-circle';
                                                         break;
                                                     case 'revision_request':
-                                                        echo 'bg-info bg-opacity-10 p-2 rounded-circle';
+                                                        echo 'bg-danger bg-opacity-10 p-2 rounded-circle';
+                                                        break;
+                                                    case 'revision_response':
+                                                        echo 'bg-success bg-opacity-10 p-2 rounded-circle';
+                                                        break;
+                                                    case 'file_status_update':
+                                                        echo 'bg-primary bg-opacity-10 p-2 rounded-circle';
                                                         break;
                                                     case 'system_warning':
                                                         echo 'bg-danger bg-opacity-10 p-2 rounded-circle';
@@ -526,7 +549,13 @@ $cssPath = '../assets/css/style.css';
                                                             echo 'fas fa-upload text-warning';
                                                             break;
                                                         case 'revision_request':
-                                                            echo 'fas fa-edit text-info';
+                                                            echo 'fas fa-edit text-danger';
+                                                            break;
+                                                        case 'revision_response':
+                                                            echo 'fas fa-reply text-success';
+                                                            break;
+                                                        case 'file_status_update':
+                                                            echo 'fas fa-sync-alt text-primary';
                                                             break;
                                                         case 'system_warning':
                                                             echo 'fas fa-exclamation-triangle text-danger';

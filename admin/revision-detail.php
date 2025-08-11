@@ -537,7 +537,7 @@ include '../includes/admin_sidebar.php';
                 </div>
 
                 <!-- Yanıt Dosyası Bilgisi (varsa) -->
-                <?php if ($revision['response_id']): ?>
+                <!-- <?php if ($revision['response_id']): ?>
                     <div class="row mt-3">
                         <div class="col-12">
                             <h6 class="text-info"><i class="fas fa-reply me-2"></i>Revize Talep Edilen Yanıt Dosyası</h6>
@@ -548,7 +548,7 @@ include '../includes/admin_sidebar.php';
                             </div>
                         </div>
                     </div>
-                <?php endif; ?>
+                <?php endif; ?> -->
             </div>
         </div>
     </div>

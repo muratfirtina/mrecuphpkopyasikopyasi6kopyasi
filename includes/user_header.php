@@ -382,7 +382,7 @@ if (isset($_SESSION['user_id'])) {
                         <div class="credit-header d-flex align-items-center justify-content-between mb-1">
                             <div class="credit-icon-label d-flex align-items-center">
                                 <i class="fas fa-wallet text-warning me-1"></i>
-                                <span class="credit-label">Kullanılabilir</span>
+                                <span class="credit-label">Kullanılan</span>
                             </div>
                             <div class="credit-status">
                                 <?php if ($availableCredits > 0): ?>
@@ -436,10 +436,9 @@ if (isset($_SESSION['user_id'])) {
                     $stmt->execute([$_SESSION['user_id']]);
                     $pendingUserRevisions = $stmt->fetchColumn();
 
-                    // Tamamlanan dosyalar (henüz bildirilmemiş)
-                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM file_uploads WHERE user_id = ? AND status = 'completed' AND notified = 0");
-                    $stmt->execute([$_SESSION['user_id']]);
-                    $completedFiles = $stmt->fetchColumn();
+                    // Tamamlanan dosyalar bildirimi kaldırıldı - sadece gerçek bildirimler kullanılıyor
+                    // Bu blok kaldırıldı çünkü admin yanıt dosyası yüklediğinde zaten bildirim gönderiliyor
+                    $completedFiles = 0; // Gereksiz bildirim engellenmesi için sıfırlandı
                     
                     // Kullanıcı bildirimlerini al
                     $userNotifications = [];

@@ -71,13 +71,21 @@
                         <a class="nav-link <?php echo ($pageTitle == 'Revizyon İşlemleri') ? 'active' : ''; ?>" href="revisions.php">
                             <i class="fas fa-history"></i>Revizyonlar
                             <?php
-                            // İşleme alınan revizyon sayısını al
+                            // Bekleyen ve işleme alınan revizyon sayılarını al
                             try {
-                                $processingRevisionsStmt = $pdo->prepare("SELECT COUNT(*) FROM revisions WHERE status = 'processing'");
+                                $pendingRevisionsStmt = $pdo->prepare("SELECT COUNT(*) FROM revisions WHERE status = 'pending'");
+                                $pendingRevisionsStmt->execute();
+                                $pendingRevisionsCount = $pendingRevisionsStmt->fetchColumn();
+                                
+                                $processingRevisionsStmt = $pdo->prepare("SELECT COUNT(*) FROM revisions WHERE status = 'in_progress'");
                                 $processingRevisionsStmt->execute();
                                 $processingRevisionsCount = $processingRevisionsStmt->fetchColumn();
                                 
-                                if ($processingRevisionsCount > 0) {
+                                // Bekleyen revizyonlar için kırmızı badge (öncelikli)
+                                if ($pendingRevisionsCount > 0) {
+                                    echo '<span class="badge bg-danger ms-2">' . $pendingRevisionsCount . '</span>';
+                                } elseif ($processingRevisionsCount > 0) {
+                                    // Eğer bekleyen yoksa işlemdeki revizyonları mavi badge ile göster
                                     echo '<span class="badge bg-info ms-2">' . $processingRevisionsCount . '</span>';
                                 }
                             } catch(Exception $e) {

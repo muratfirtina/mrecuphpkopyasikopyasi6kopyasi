@@ -365,11 +365,15 @@ include '../includes/admin_sidebar.php';
                                     <td>
                                         <span class="badge bg-<?php 
                                             switch($notification['type']) {
-                                                case 'file_upload': echo 'primary'; break;
-                                                case 'file_status_update': echo 'info'; break;
-                                                case 'revision_request': echo 'warning'; break;
+                                                case 'file_upload': echo 'warning'; break;
+                                                case 'file_status_update': echo 'primary'; break;
+                                                case 'revision_request': echo 'danger'; break;
                                                 case 'revision_response': echo 'success'; break;
+                                                case 'user_registration': echo 'success'; break;
                                                 case 'system_warning': echo 'danger'; break;
+                                                case 'admin_message': echo 'info'; break;
+                                                case 'credit': echo 'warning'; break;
+                                                case 'credit_update': echo 'info'; break;
                                                 default: echo 'secondary';
                                             }
                                         ?>">

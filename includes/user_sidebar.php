@@ -190,7 +190,7 @@ if (isset($_SESSION['user_id'])) {
                         <i class="fas fa-wallet widget-icon"></i>
                         <div class="header-info">
                             <h6 class="widget-title">Kredi Durumu</h6>
-                            <small class="widget-subtitle">Kullanılabilir Bakiye</small>
+                            <small class="widget-subtitle">Kullanılan Bakiye</small>
                         </div>
                         <div class="credit-status-indicator">
                             <?php if ($sidebarAvailableCredits > 0): ?>
