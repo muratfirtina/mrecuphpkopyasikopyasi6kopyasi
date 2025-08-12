@@ -19,7 +19,7 @@ echo "<style>
 
 try {
     // Tabloları kontrol et
-    $tables = ['brands', 'models', 'series', 'engines', 'devices', 'ecus', 'file_uploads'];
+    $tables = ['file_uploads','users','file_responses', 'revisions', 'revision_files'];
     
     foreach ($tables as $table) {
         echo "<div class='table-name'>TABLO: $table</div>";
@@ -44,30 +44,7 @@ try {
                     echo "</tr>";
                 }
                 echo "</table>";
-                
-                // Örnek veri göster
-                $sampleStmt = $pdo->prepare("SELECT * FROM $table LIMIT 3");
-                $sampleStmt->execute();
-                $samples = $sampleStmt->fetchAll();
-                
-                if ($samples) {
-                    echo "<p><strong>Örnek veriler:</strong></p>";
-                    echo "<table>";
-                    echo "<tr>";
-                    foreach (array_keys($samples[0]) as $key) {
-                        echo "<th>$key</th>";
-                    }
-                    echo "</tr>";
-                    
-                    foreach ($samples as $row) {
-                        echo "<tr>";
-                        foreach ($row as $value) {
-                            echo "<td>" . htmlspecialchars(substr($value ?? '', 0, 50)) . "</td>";
-                        }
-                        echo "</tr>";
-                    }
-                    echo "</table>";
-                }
+            
                 
             } else {
                 echo "<p class='error'>Kolon bilgisi alınamadı</p>";

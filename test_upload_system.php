@@ -26,7 +26,7 @@ try {
     echo "<div class='test'>";
     echo "<h3>Test 1: Database Tabloları</h3>";
     
-    $tables = ['brands', 'models', 'series', 'engines', 'devices', 'ecus', 'file_uploads'];
+    $tables = ['brands', 'models', 'series', 'engines', 'devices', 'ecus', 'file_uploads','users'];
     foreach ($tables as $table) {
         try {
             $stmt = $pdo->query("SELECT COUNT(*) as count FROM $table");

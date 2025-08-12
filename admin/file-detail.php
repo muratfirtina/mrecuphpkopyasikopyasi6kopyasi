@@ -81,6 +81,7 @@ try {
     require_once '../includes/FileManager.php';
     require_once '../includes/User.php';
     require_once '../includes/NotificationManager.php';
+    require_once '../includes/ChatManager.php';
     
     // Session kontrolü
     if (session_status() == PHP_SESSION_NONE) {
@@ -3168,6 +3169,443 @@ function confirmFileProcessing() {
         form.submit();
     }
 }
+</script>
+
+<!-- Chat Penceresi -->
+<div class="chat-container" id="chatContainer">
+    <div class="chat-header">
+        <h5 class="mb-0">
+            <i class="fas fa-comments me-2"></i>Kullanıcı ile Konuş
+        </h5>
+        <span class="badge bg-danger" id="unreadCount" style="display: none;">0</span>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+        <!-- Mesajlar buraya gelecek -->
+        <div class="text-center text-muted py-4">
+            <i class="fas fa-spinner fa-spin me-2"></i>Mesajlar yükleniyor...
+        </div>
+    </div>
+    <div class="chat-input">
+        <form id="chatForm">
+            <div class="input-group">
+                <input type="text" class="form-control" id="chatMessage" placeholder="Mesajınızı yazın..." required>
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Chat Styles -->
+<style>
+.chat-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 380px;
+    height: 500px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    border: 1px solid #e0e0e0;
+}
+
+.chat-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    background: #f8f9fa;
+}
+
+.chat-message {
+    margin-bottom: 1rem;
+    display: flex;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-message.user {
+    justify-content: flex-start;
+}
+
+.chat-message.admin {
+    justify-content: flex-end;
+}
+
+.chat-message-content {
+    max-width: 70%;
+    padding: 0.75rem;
+    border-radius: 12px;
+    position: relative;
+}
+
+.chat-message.user .chat-message-content {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-bottom-left-radius: 4px;
+}
+
+.chat-message.admin .chat-message-content {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.chat-message-header {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+    opacity: 0.8;
+}
+
+.chat-message.user .chat-message-header {
+    color: #6c757d;
+}
+
+.chat-message.admin .chat-message-header {
+    text-align: right;
+    color: rgba(255,255,255,0.9);
+}
+
+.chat-message-text {
+    word-wrap: break-word;
+    line-height: 1.5;
+}
+
+.chat-message-time {
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+    opacity: 0.7;
+}
+
+.chat-message.user .chat-message-time {
+    color: #6c757d;
+}
+
+.chat-message.admin .chat-message-time {
+    text-align: right;
+    color: rgba(255,255,255,0.8);
+}
+
+.chat-input {
+    padding: 1rem;
+    border-top: 1px solid #e0e0e0;
+    background: white;
+    border-radius: 0 0 12px 12px;
+}
+
+.chat-input .form-control {
+    border-radius: 20px;
+    border: 1px solid #e0e0e0;
+    padding: 0.5rem 1rem;
+}
+
+.chat-input .btn {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Mobile Responsive */
+@media (max-width: 576px) {
+    .chat-container {
+        width: calc(100% - 20px);
+        right: 10px;
+        bottom: 10px;
+        height: 400px;
+    }
+}
+
+/* Scroll Styles */
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    background: #e9ecef;
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+    width: fit-content;
+}
+
+.typing-indicator span {
+    height: 8px;
+    width: 8px;
+    background: #6c757d;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 2px;
+    animation: typing 1.4s infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.7;
+    }
+    30% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+}
+</style>
+
+<!-- Chat JavaScript -->
+<script>
+// Chat değişkenleri
+let lastMessageId = null;
+let chatMessages = [];
+const fileId = '<?php echo isset($upload['id']) ? $upload['id'] : ''; ?>';
+const fileType = 'upload'; // Admin her zaman upload dosyasını görür
+const currentUserId = '<?php echo $_SESSION['user_id']; ?>';
+const isAdmin = true;
+
+// Chat fonksiyonları
+function formatChatTime(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000); // saniye farkı
+    
+    if (diff < 60) return 'Az önce';
+    if (diff < 3600) return Math.floor(diff / 60) + ' dk önce';
+    if (diff < 86400) return Math.floor(diff / 3600) + ' saat önce';
+    
+    return date.toLocaleDateString('tr-TR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function renderMessage(message) {
+    const isCurrentUser = message.sender_id === currentUserId;
+    const messageClass = message.sender_type === 'admin' ? 'admin' : 'user';
+    const senderName = message.sender_type === 'admin' ? 'Admin (Ben)' : (message.first_name + ' ' + message.last_name);
+    
+    return `
+        <div class="chat-message ${messageClass}" data-message-id="${message.id}">
+            <div class="chat-message-content">
+                <div class="chat-message-header">
+                    ${senderName}
+                </div>
+                <div class="chat-message-text">
+                    ${escapeHtml(message.message)}
+                </div>
+                <div class="chat-message-time">
+                    ${formatChatTime(message.created_at)}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+function loadMessages() {
+    if (!fileId) return;
+    
+    fetch(`../ajax/chat.php?action=get_messages&file_id=${fileId}&file_type=${fileType}${lastMessageId ? '&last_message_id=' + lastMessageId : ''}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.messages.length > 0) {
+                const messagesContainer = document.getElementById('chatMessages');
+                
+                // İlk yükleme ise temizle
+                if (!lastMessageId) {
+                    messagesContainer.innerHTML = '';
+                }
+                
+                // Mesajları ekle
+                data.messages.forEach(message => {
+                    // Mesaj zaten yoksa ekle
+                    if (!document.querySelector(`[data-message-id="${message.id}"]`)) {
+                        messagesContainer.insertAdjacentHTML('beforeend', renderMessage(message));
+                    }
+                });
+                
+                // Son mesaj ID'sini güncelle
+                if (data.messages.length > 0) {
+                    lastMessageId = data.messages[data.messages.length - 1].id;
+                    
+                    // Otomatik scroll
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+                
+                // Okunmamış sayacını sıfırla
+                document.getElementById('unreadCount').style.display = 'none';
+                document.getElementById('unreadCount').textContent = '0';
+            } else if (!lastMessageId) {
+                // Hiç mesaj yoksa
+                document.getElementById('chatMessages').innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-comment-slash me-2"></i>
+                        Henüz mesaj yok. Kullanıcıya ilk mesajı siz gönderin!
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Mesajlar yüklenirken hata:', error);
+            if (!lastMessageId) {
+                document.getElementById('chatMessages').innerHTML = `
+                    <div class="text-center text-danger py-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Mesajlar yüklenemedi.
+                    </div>
+                `;
+            }
+        });
+}
+
+function sendMessage(message) {
+    if (!fileId) {
+        alert('Dosya ID bulunamadı!');
+        return;
+    }
+    
+    // Typing göstergesi ekle
+    const messagesContainer = document.getElementById('chatMessages');
+    const typingHtml = '<div class="typing-indicator" id="typingIndicator"><span></span><span></span><span></span></div>';
+    messagesContainer.insertAdjacentHTML('beforeend', typingHtml);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    fetch('../ajax/chat.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=send_message&file_id=${fileId}&file_type=${fileType}&message=${encodeURIComponent(message)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Typing göstergesini kaldır
+        const typingIndicator = document.getElementById('typingIndicator');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+        
+        if (data.success && data.data) {
+            // Mesajı ekle
+            messagesContainer.insertAdjacentHTML('beforeend', renderMessage(data.data));
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Son mesaj ID'sini güncelle
+            lastMessageId = data.data.id;
+            
+            // Input'u temizle
+            document.getElementById('chatMessage').value = '';
+        } else {
+            alert('Mesaj gönderilemedi: ' + (data.message || 'Bilinmeyen hata'));
+        }
+    })
+    .catch(error => {
+        // Typing göstergesini kaldır
+        const typingIndicator = document.getElementById('typingIndicator');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+        
+        console.error('Mesaj gönderme hatası:', error);
+        alert('Mesaj gönderilemedi. Lütfen tekrar deneyin.');
+    });
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Eğer fileId varsa chat'ı başlat
+    if (fileId) {
+        // İlk mesajları yükle
+        loadMessages();
+        
+        // Her 3 saniyede bir yeni mesajları kontrol et
+        setInterval(loadMessages, 3000);
+        
+        // Mesaj gönderme formu
+        document.getElementById('chatForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const messageInput = document.getElementById('chatMessage');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                sendMessage(message);
+            }
+        });
+        
+        // Enter tuşu ile gönderme
+        document.getElementById('chatMessage').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+            }
+        });
+    } else {
+        // FileId yoksa chat'ı gizle
+        document.getElementById('chatContainer').style.display = 'none';
+    }
+});
 </script>
 
 <?php

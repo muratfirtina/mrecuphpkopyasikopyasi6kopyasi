@@ -254,6 +254,57 @@ class FileManager {
             return ['total' => 0, 'pending' => 0, 'processing' => 0, 'completed' => 0, 'rejected' => 0];
         }
     }
+
+    public function getUserAllFiles($userId, $page = 1, $limit = 15, $status = '', $search = '') {
+        try {
+            if (!isValidUUID($userId)) {
+                return [];
+            }
+            
+            $offset = ($page - 1) * $limit;
+            $whereClause = "WHERE fu.user_id = ?";
+            $params = [$userId];
+            
+            if ($status) {
+                $whereClause .= " AND fu.status = ?";
+                $params[] = $status;
+            }
+            
+            if ($search) {
+                $whereClause .= " AND (fu.original_name LIKE ? OR b.name LIKE ? OR m.name LIKE ? OR fu.plate LIKE ?)";
+                $searchTerm = "%$search%";
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+            }
+            
+            // LIMIT ve OFFSET'i güvenli şekilde string olarak ekle
+            $sql = "
+                SELECT fu.*, b.name as brand_name, m.name as model_name,
+                       s.name as series_name, e.name as engine_name,
+                       d.name as device_name, ecu.name as ecu_name
+                FROM file_uploads fu
+                LEFT JOIN brands b ON fu.brand_id = b.id
+                LEFT JOIN models m ON fu.model_id = m.id
+                LEFT JOIN series s ON fu.series_id = s.id
+                LEFT JOIN engines e ON fu.engine_id = e.id
+                LEFT JOIN devices d ON fu.device_id = d.id
+                LEFT JOIN ecus ecu ON fu.ecu_id = ecu.id
+                $whereClause
+                ORDER BY fu.upload_date DESC
+                LIMIT " . intval($limit) . " OFFSET " . intval($offset);
+            
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch(PDOException $e) {
+            error_log('getUserAllFiles error: ' . $e->getMessage());
+            return [];
+        }
+    }
     
     // Dosya ID'sine göre upload kaydını getir
     public function getUploadById($uploadId) {
