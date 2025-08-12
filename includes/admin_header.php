@@ -857,11 +857,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (headerBadge) {
                     headerBadge.textContent = data.count;
                 }
+                
+                // Sidebar'daki bildirim badge'ini güncelle
+                updateSidebarNotificationBadge(data.count);
             }
         })
         .catch(error => {
             console.error('Error updating notification badge:', error);
         });
+    };
+    
+    // Sidebar bildirim badge'ini güncelle
+    window.updateSidebarNotificationBadge = function(count) {
+        const sidebarBadge = document.querySelector('.sidebar-notification-badge');
+        
+        if (count > 0) {
+            if (sidebarBadge) {
+                sidebarBadge.textContent = count;
+                sidebarBadge.style.display = 'inline';
+            } else {
+                // Badge yoksa oluştur
+                const bildirimLink = document.querySelector('a[href="notifications.php"]');
+                if (bildirimLink) {
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'badge bg-danger ms-2 sidebar-notification-badge';
+                    newBadge.textContent = count;
+                    bildirimLink.appendChild(newBadge);
+                }
+            }
+        } else {
+            if (sidebarBadge) {
+                sidebarBadge.style.display = 'none';
+            }
+        }
     };
     
     // Dropdown hover efektleri
@@ -903,8 +931,75 @@ document.addEventListener('DOMContentLoaded', function() {
     // Auto-refresh admin notifications
     setInterval(window.updateNotificationBadge, 30000);
     
+    // Chat bildirimleri için otomatik güncelleme
+    window.updateChatNotifications = function() {
+        fetch('ajax/get-chat-notifications.php?action=count')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const chatCount = data.count || 0;
+                
+                // Chat bildirim badge'ini güncelle
+                const chatBadges = document.querySelectorAll('.chat-notification-badge');
+                chatBadges.forEach(badge => {
+                    if (chatCount > 0) {
+                        badge.textContent = chatCount;
+                        badge.style.display = 'inline';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                });
+                
+                // Console log
+                console.log('Chat bildirimleri güncellendi:', chatCount);
+                
+                // Sidebar'daki toplam bildirim sayısını güncelle
+                updateTotalNotificationCount();
+            } else {
+                // Chat bildirim badge'lerini gizle
+                const chatBadges = document.querySelectorAll('.chat-notification-badge');
+                chatBadges.forEach(badge => {
+                    badge.style.display = 'none';
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Chat bildirimleri güncellenirken hata:', error);
+        });
+    };
+    
+    // Toplam bildirim sayısını güncelle (chat + diğer bildirimler)
+    window.updateTotalNotificationCount = function() {
+        Promise.all([
+            fetch('ajax/get-chat-notifications.php?action=count').then(r => r.json()),
+            fetch('ajax/get_notification_count.php').then(r => r.json())
+        ])
+        .then(([chatData, generalData]) => {
+            const chatCount = (chatData.success ? chatData.count : 0) || 0;
+            const generalCount = (generalData.success ? generalData.count : 0) || 0;
+            const totalCount = chatCount + generalCount;
+            
+            // Sidebar badge'ini güncelle
+            updateSidebarNotificationBadge(totalCount);
+            
+            console.log('Toplam bildirim sayısı güncellendi:', {
+                chat: chatCount,
+                general: generalCount,
+                total: totalCount
+            });
+        })
+        .catch(error => {
+            console.error('Toplam bildirim sayısı güncellenirken hata:', error);
+        });
+    };
+    
+    // Chat bildirimlerini otomatik güncelle (her 5 saniyede bir)
+    setInterval(window.updateChatNotifications, 5000);
+    
     // Sayfa yüklenirken badge durumunu kontrol et
     window.updateNotificationBadge();
+    window.updateChatNotifications();
+    window.updateTotalNotificationCount();
     
     // Badge temizleme güvenlik fonksiyonu
     window.ensureBadgeCleared = function() {

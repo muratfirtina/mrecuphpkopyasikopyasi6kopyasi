@@ -6,9 +6,15 @@
 
 class ChatManager {
     private $pdo;
+    private $notificationManager;
     
     public function __construct($pdo) {
         $this->pdo = $pdo;
+        // NotificationManager'ı dahil et
+        if (!class_exists('NotificationManager')) {
+            require_once __DIR__ . '/NotificationManager.php';
+        }
+        $this->notificationManager = new NotificationManager($pdo);
     }
     
     /**
@@ -35,6 +41,10 @@ class ChatManager {
             if ($result) {
                 // Karşı taraf için okunmamış sayacını artır
                 $this->updateUnreadCount($fileId, $senderId, $senderType);
+                
+                // Karşı tarafa bildirim gönder
+                $this->sendChatNotification($fileId, $senderId, $senderType, $message);
+                
                 return $messageId;
             }
             
@@ -299,6 +309,89 @@ class ChatManager {
             return $stmt->execute([':file_id' => $fileId]);
         } catch (Exception $e) {
             error_log('Chat clear history error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Chat mesajı için bildirim gönder
+     */
+    private function sendChatNotification($fileId, $senderId, $senderType, $message) {
+        try {
+            // Dosya bilgilerini al
+            $sql = "SELECT * FROM file_uploads WHERE id = :file_id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':file_id' => $fileId]);
+            $fileInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$fileInfo) {
+                error_log('Chat notification: File not found - ' . $fileId);
+                return false;
+            }
+            
+            // Gönderen kullanıcı bilgilerini al
+            $sql = "SELECT * FROM users WHERE id = :sender_id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':sender_id' => $senderId]);
+            $sender = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$sender) {
+                error_log('Chat notification: Sender not found - ' . $senderId);
+                return false;
+            }
+            
+            $fileName = $fileInfo['original_name'] ?? $fileInfo['filename'] ?? 'Bilinmeyen dosya';
+            $senderName = $sender['first_name'] . ' ' . $sender['last_name'];
+            
+            // Alıcıları belirle
+            if ($senderType === 'admin') {
+                // Admin mesaj göndermiş, dosya sahibine bildirim gönder
+                $recipientId = $fileInfo['user_id'];
+                $title = "Yeni Mesaj - Admin";
+                $notificationMessage = "Adminlerden {$senderName} size '{$fileName}' dosyası için mesaj gönderdi.";
+                $actionUrl = "../user/file-detail.php?id={$fileId}";
+                
+                $this->notificationManager->createNotification(
+                    $recipientId,
+                    'chat_message',
+                    $title,
+                    $notificationMessage,
+                    $fileId,
+                    'file_upload',
+                    $actionUrl
+                );
+                
+                error_log("Chat notification sent: Admin {$senderName} -> User {$recipientId} for file {$fileName}");
+                
+            } else {
+                // Kullanıcı mesaj göndermiş, tüm adminlere bildirim gönder
+                $sql = "SELECT id FROM users WHERE role = 'admin' AND status = 'active'";
+                $stmt = $this->pdo->query($sql);
+                $admins = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                
+                $title = "Yeni Mesaj - Kullanıcı";
+                $notificationMessage = "{$senderName} size '{$fileName}' dosyası için mesaj gönderdi.";
+                $actionUrl = "file-detail.php?id={$fileId}";
+                
+                foreach ($admins as $adminId) {
+                    $this->notificationManager->createNotification(
+                        $adminId,
+                        'chat_message',
+                        $title,
+                        $notificationMessage,
+                        $fileId,
+                        'file_upload',
+                        $actionUrl
+                    );
+                }
+                
+                error_log("Chat notification sent: User {$senderName} -> " . count($admins) . " admins for file {$fileName}");
+            }
+            
+            return true;
+            
+        } catch (Exception $e) {
+            error_log('Chat notification error: ' . $e->getMessage());
             return false;
         }
     }

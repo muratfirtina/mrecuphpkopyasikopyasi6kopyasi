@@ -97,17 +97,38 @@
                         <a class="nav-link <?php echo ($pageTitle == 'Bildirimler') ? 'active' : ''; ?>" href="notifications.php">
                             <i class="fas fa-bell"></i>Bildirimler
                             <?php
-                            // Dosyaya işlem yapılmamış bildirimlerin sayısını al
+                            // Toplam bildirim sayısını hesapla (bekleyen dosyalar + chat bildirimleri)
                             try {
+                                $totalNotificationCount = 0;
+                                
+                                // 1. Bekleyen dosyalar
                                 $pendingProcessStmt = $pdo->prepare("SELECT COUNT(*) FROM file_uploads WHERE status = 'pending'");
                                 $pendingProcessStmt->execute();
                                 $pendingProcessCount = $pendingProcessStmt->fetchColumn();
+                                $totalNotificationCount += $pendingProcessCount;
                                 
-                                if ($pendingProcessCount > 0) {
-                                    echo '<span class="badge bg-danger ms-2">' . $pendingProcessCount . '</span>';
+                                // 2. Chat bildirimleri (okunmamış)
+                                if (isset($_SESSION['user_id'])) {
+                                    $chatNotificationStmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND type = 'chat_message' AND is_read = FALSE");
+                                    $chatNotificationStmt->execute([$_SESSION['user_id']]);
+                                    $chatNotificationCount = $chatNotificationStmt->fetchColumn();
+                                    $totalNotificationCount += $chatNotificationCount;
+                                }
+                                
+                                // 3. Diğer okunmamış bildirimler
+                                if (isset($_SESSION['user_id'])) {
+                                    $otherNotificationStmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND type != 'chat_message' AND is_read = FALSE");
+                                    $otherNotificationStmt->execute([$_SESSION['user_id']]);
+                                    $otherNotificationCount = $otherNotificationStmt->fetchColumn();
+                                    $totalNotificationCount += $otherNotificationCount;
+                                }
+                                
+                                if ($totalNotificationCount > 0) {
+                                    echo '<span class="badge bg-danger ms-2 sidebar-notification-badge">' . $totalNotificationCount . '</span>';
                                 }
                             } catch(Exception $e) {
                                 // Hata durumunda badge gösterme
+                                error_log('Sidebar notification count error: ' . $e->getMessage());
                             }
                             ?>
                         </a>

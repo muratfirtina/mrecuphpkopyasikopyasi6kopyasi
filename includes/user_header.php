@@ -1115,6 +1115,82 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         waitForBootstrap();
+        
+        // Chat bildirimleri için otomatik güncelleme
+        window.updateChatNotifications = function() {
+            fetch('../ajax/get-chat-notifications.php?action=count')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const chatCount = data.count || 0;
+                    
+                    // Chat bildirim badge'ini güncelle
+                    const chatBadges = document.querySelectorAll('.chat-notification-badge');
+                    chatBadges.forEach(badge => {
+                        if (chatCount > 0) {
+                            badge.textContent = chatCount;
+                            badge.style.display = 'inline';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    });
+                    
+                    // Console log
+                    console.log('Kullanıcı chat bildirimleri güncellendi:', chatCount);
+                    
+                    // Toplam bildirim sayısını güncelle (eğer sidebar badge varsa)
+                    updateUserTotalNotifications();
+                } else {
+                    // Chat bildirim badge'lerini gizle
+                    const chatBadges = document.querySelectorAll('.chat-notification-badge');
+                    chatBadges.forEach(badge => {
+                        badge.style.display = 'none';
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Kullanıcı chat bildirimleri güncellenirken hata:', error);
+            });
+        };
+        
+        // Kullanıcı toplam bildirimlerini güncelle
+        window.updateUserTotalNotifications = function() {
+            Promise.all([
+                fetch('../ajax/get-chat-notifications.php?action=count').then(r => r.json()),
+                fetch('../ajax/get_notification_count.php').then(r => r.json())
+            ])
+            .then(([chatData, generalData]) => {
+                const chatCount = (chatData.success ? chatData.count : 0) || 0;
+                const generalCount = (generalData.success ? generalData.count : 0) || 0;
+                const totalCount = chatCount + generalCount;
+                
+                // Eğer user sidebar'da bildirim badge'i varsa güncelle
+                const userNotificationBadge = document.querySelector('.user-notification-badge');
+                if (userNotificationBadge) {
+                    if (totalCount > 0) {
+                        userNotificationBadge.textContent = totalCount;
+                        userNotificationBadge.style.display = 'inline';
+                    } else {
+                        userNotificationBadge.style.display = 'none';
+                    }
+                }
+                
+                console.log('Kullanıcı toplam bildirim sayısı güncellendi:', {
+                    chat: chatCount,
+                    general: generalCount,
+                    total: totalCount
+                });
+            })
+            .catch(error => {
+                console.error('Kullanıcı toplam bildirim sayısı güncellenirken hata:', error);
+            });
+        };
+        
+        // Chat bildirimlerini otomatik güncelle (her 5 saniyede bir)
+        setInterval(window.updateChatNotifications, 5000);
+        
+        // Sayfa yüklenirken chat bildirimlerini de kontrol et
+        setTimeout(window.updateChatNotifications, 1000);
     }
 });
 
