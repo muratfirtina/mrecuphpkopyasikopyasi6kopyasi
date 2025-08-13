@@ -171,6 +171,11 @@ class User {
                 $stmt = $this->pdo->prepare("UPDATE users SET credit_quota = credit_quota + ? WHERE id = ?");
                 $result = $stmt->execute([$amount, $userId]);
                 
+            } else if ($type === 'additional_file_charge') {
+                // Ek dosya ücreti için kredi düşürme (ters kredi sistemi)
+                $stmt = $this->pdo->prepare("UPDATE users SET credit_used = credit_used + ? WHERE id = ?");
+                $result = $stmt->execute([$amount, $userId]);
+                
             } else if ($type === 'usage_remove') {
                 // Kullanılan krediden düşürme (iade)
                 $stmt = $this->pdo->prepare("UPDATE users SET credit_used = GREATEST(0, credit_used - ?) WHERE id = ?");

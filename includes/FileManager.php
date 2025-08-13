@@ -1578,5 +1578,296 @@ class FileManager {
             return ['success' => false, 'message' => 'Veritabanı hatası oluştu: ' . $e->getMessage()];
         }
     }
+    
+    /**
+     * Ek dosya yükleme (Admin veya User tarafından)
+     * @param string $relatedFileId - İlgili dosya ID (upload, response veya revision)
+     * @param string $relatedFileType - İlgili dosya tipi
+     * @param string $senderId - Gönderen ID
+     * @param string $senderType - Gönderen tipi (user/admin)
+     * @param string $receiverId - Alıcı ID
+     * @param string $receiverType - Alıcı tipi (user/admin)
+     * @param array $fileData - Dosya bilgileri ($_FILES['file'])
+     * @param string $notes - Notlar
+     * @param float $credits - Ücret (sadece admin için)
+     * @return array - Başarı durumu ve mesaj
+     */
+    public function uploadAdditionalFile($relatedFileId, $relatedFileType, $senderId, $senderType, $receiverId, $receiverType, $fileData, $notes = '', $credits = 0) {
+        try {
+            // ID kontrolleri
+            if (!isValidUUID($relatedFileId) || !isValidUUID($senderId) || !isValidUUID($receiverId)) {
+                return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
+            }
+            
+            // Dosya kontrolü
+            if (!isset($fileData['tmp_name']) || !is_uploaded_file($fileData['tmp_name'])) {
+                return ['success' => false, 'message' => 'Dosya yükleme hatası.'];
+            }
+            
+            if ($fileData['error'] !== UPLOAD_ERR_OK) {
+                return ['success' => false, 'message' => 'Dosya yükleme hatası: ' . $fileData['error']];
+            }
+            
+            // Dosya boyut kontrolü
+            if ($fileData['size'] > MAX_FILE_SIZE) {
+                return ['success' => false, 'message' => 'Dosya boyutu çok büyük. Maksimum ' . formatFileSize(MAX_FILE_SIZE) . ' olabilir.'];
+            }
+            
+            // Dosya uzantı kontrolü
+            $fileExtension = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
+            if (!in_array($fileExtension, ALLOWED_EXTENSIONS)) {
+                return ['success' => false, 'message' => 'Desteklenmeyen dosya formatı. İzin verilen formatlar: ' . implode(', ', ALLOWED_EXTENSIONS)];
+            }
+            
+            // Benzersiz dosya adı oluştur
+            $fileName = generateUUID() . '_additional.' . $fileExtension;
+            $uploadDir = UPLOAD_PATH . 'additional_files/';
+            $uploadPath = $uploadDir . $fileName;
+            
+            // Upload dizinini oluştur
+            if (!is_dir($uploadDir)) {
+                if (!mkdir($uploadDir, 0755, true)) {
+                    return ['success' => false, 'message' => 'Upload dizini oluşturulamadı.'];
+                }
+            }
+            
+            // Dosyayı taşı
+            if (!move_uploaded_file($fileData['tmp_name'], $uploadPath)) {
+                return ['success' => false, 'message' => 'Dosya yükleme sırasında hata oluştu.'];
+            }
+            
+            // Transaction başlat
+            $this->pdo->beginTransaction();
+            
+            try {
+                // Veritabanına kaydet
+                $additionalFileId = generateUUID();
+                $stmt = $this->pdo->prepare("
+                    INSERT INTO additional_files (
+                        id, related_file_id, related_file_type, sender_id, sender_type,
+                        receiver_id, receiver_type, original_name, file_name, file_path,
+                        file_size, file_type, notes, credits, upload_date, is_read
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 0)
+                ");
+                
+                $result = $stmt->execute([
+                    $additionalFileId,
+                    $relatedFileId,
+                    $relatedFileType,
+                    $senderId,
+                    $senderType,
+                    $receiverId,
+                    $receiverType,
+                    $fileData['name'],
+                    $fileName,
+                    $uploadPath,
+                    $fileData['size'],
+                    $fileExtension,
+                    $notes,
+                    $credits
+                ]);
+                
+                if (!$result) {
+                    throw new Exception('Veritabanı kaydı oluşturulamadı.');
+                }
+                
+                // Eğer admin user'a dosya gönderdiyse ve ücret belirlenmişse kredi düşür
+                if ($senderType === 'admin' && $receiverType === 'user' && $credits > 0) {
+                    if (!class_exists('User')) {
+                        require_once __DIR__ . '/User.php';
+                    }
+                    
+                    $user = new User($this->pdo);
+                    
+                    // Ters kredi sistemi - kredi_used'ı artır
+                    $creditResult = $user->addCreditDirectSimple(
+                        $receiverId,
+                        $credits,
+                        'additional_file_charge',
+                        'Ek dosya ücreti: ' . $fileData['name'] . ($notes ? ' - ' . $notes : '')
+                    );
+                    
+                    if (!$creditResult) {
+                        throw new Exception('Kredi düşürme işlemi başarısız.');
+                    }
+                }
+                
+                // Bildirim gönder
+                try {
+                    if (!class_exists('NotificationManager')) {
+                        require_once __DIR__ . '/NotificationManager.php';
+                    }
+                    
+                    $notificationManager = new NotificationManager($this->pdo);
+                    
+                    $notificationTitle = $senderType === 'admin' ? 'Admin size dosya gönderdi' : 'Kullanıcı size dosya gönderdi';
+                    $notificationMessage = 'Yeni bir dosya aldınız: ' . $fileData['name'];
+                    if ($notes) {
+                        $notificationMessage .= ' - Not: ' . $notes;
+                    }
+                    if ($credits > 0) {
+                        $notificationMessage .= ' (Ücret: ' . $credits . ' kredi)';
+                    }
+                    
+                    $actionUrl = $receiverType === 'admin' ? 
+                        'admin/file-detail.php?id=' . $relatedFileId : 
+                        'user/file-detail.php?id=' . $relatedFileId;
+                    
+                    $notificationManager->createNotification(
+                        $receiverId,
+                        'additional_file_received',
+                        $notificationTitle,
+                        $notificationMessage,
+                        $relatedFileId,
+                        'additional_file',
+                        $actionUrl
+                    );
+                } catch(Exception $e) {
+                    error_log('Additional file notification error: ' . $e->getMessage());
+                }
+                
+                // Transaction commit
+                $this->pdo->commit();
+                
+                return [
+                    'success' => true,
+                    'message' => 'Dosya başarıyla gönderildi.',
+                    'file_id' => $additionalFileId
+                ];
+                
+            } catch(Exception $e) {
+                // Transaction rollback
+                $this->pdo->rollBack();
+                
+                // Yüklenen dosyayı sil
+                if (file_exists($uploadPath)) {
+                    unlink($uploadPath);
+                }
+                
+                return ['success' => false, 'message' => 'Dosya yükleme hatası: ' . $e->getMessage()];
+            }
+            
+        } catch(Exception $e) {
+            error_log('uploadAdditionalFile error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Sistem hatası: ' . $e->getMessage()];
+        }
+    }
+    
+    /**
+     * İlgili dosyaya ait ek dosyaları getir
+     * @param string $relatedFileId - İlgili dosya ID
+     * @param string $userId - Kullanıcı ID (yetki kontrolü için)
+     * @param string $userType - Kullanıcı tipi (user/admin)
+     * @return array - Ek dosyalar listesi
+     */
+    public function getAdditionalFiles($relatedFileId, $userId, $userType = 'user') {
+        try {
+            if (!isValidUUID($relatedFileId) || !isValidUUID($userId)) {
+                return [];
+            }
+            
+            // Hem gönderilen hem alınan dosyaları getir
+            $stmt = $this->pdo->prepare("
+                SELECT af.*, 
+                       sender.username as sender_username, sender.first_name as sender_first_name, sender.last_name as sender_last_name,
+                       receiver.username as receiver_username, receiver.first_name as receiver_first_name, receiver.last_name as receiver_last_name
+                FROM additional_files af
+                LEFT JOIN users sender ON af.sender_id = sender.id
+                LEFT JOIN users receiver ON af.receiver_id = receiver.id
+                WHERE af.related_file_id = ?
+                AND ((af.sender_id = ? AND af.sender_type = ?) OR (af.receiver_id = ? AND af.receiver_type = ?))
+                ORDER BY af.upload_date DESC
+            ");
+            
+            $stmt->execute([$relatedFileId, $userId, $userType, $userId, $userType]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch(PDOException $e) {
+            error_log('getAdditionalFiles error: ' . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Ek dosya indirme
+     * @param string $fileId - Ek dosya ID
+     * @param string $userId - Kullanıcı ID (yetki kontrolü için)
+     * @param string $userType - Kullanıcı tipi (user/admin)
+     * @return array - Dosya bilgileri veya hata
+     */
+    public function downloadAdditionalFile($fileId, $userId, $userType = 'user') {
+        try {
+            if (!isValidUUID($fileId) || !isValidUUID($userId)) {
+                return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
+            }
+            
+            // Dosya bilgilerini ve yetki kontrolünü yap
+            $stmt = $this->pdo->prepare("
+                SELECT * FROM additional_files
+                WHERE id = ?
+                AND ((sender_id = ? AND sender_type = ?) OR (receiver_id = ? AND receiver_type = ?))
+            ");
+            $stmt->execute([$fileId, $userId, $userType, $userId, $userType]);
+            $file = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$file) {
+                return ['success' => false, 'message' => 'Dosya bulunamadı veya yetkiniz yok.'];
+            }
+            
+            // Fiziksel dosya kontrolü
+            if (!file_exists($file['file_path'])) {
+                return ['success' => false, 'message' => 'Fiziksel dosya bulunamadı.'];
+            }
+            
+            // Eğer alıcıysa ve okumadıysa, okundu olarak işaretle
+            if ($file['receiver_id'] === $userId && !$file['is_read']) {
+                $this->pdo->prepare("
+                    UPDATE additional_files 
+                    SET is_read = 1, read_date = NOW() 
+                    WHERE id = ?
+                ")->execute([$fileId]);
+            }
+            
+            return [
+                'success' => true,
+                'file_path' => $file['file_path'],
+                'original_name' => $file['original_name'],
+                'file_size' => $file['file_size'],
+                'file_type' => $file['file_type']
+            ];
+            
+        } catch(PDOException $e) {
+            error_log('downloadAdditionalFile error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Veritabanı hatası oluştu.'];
+        }
+    }
+    
+    /**
+     * Okunmamış ek dosya sayısını getir
+     * @param string $userId - Kullanıcı ID
+     * @param string $userType - Kullanıcı tipi (user/admin)
+     * @return int - Okunmamış dosya sayısı
+     */
+    public function getUnreadAdditionalFilesCount($userId, $userType = 'user') {
+        try {
+            if (!isValidUUID($userId)) {
+                return 0;
+            }
+            
+            $stmt = $this->pdo->prepare("
+                SELECT COUNT(*) as count
+                FROM additional_files
+                WHERE receiver_id = ? AND receiver_type = ? AND is_read = 0
+            ");
+            
+            $stmt->execute([$userId, $userType]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['count'] ?? 0;
+            
+        } catch(PDOException $e) {
+            error_log('getUnreadAdditionalFilesCount error: ' . $e->getMessage());
+            return 0;
+        }
+    }
 }
 ?>

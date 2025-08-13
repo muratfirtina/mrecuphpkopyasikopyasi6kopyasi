@@ -1667,6 +1667,199 @@ try {
 </div>
 <?php endif; ?>
 
+<!-- Ek Dosyalar Bölümü -->
+<?php
+// Ek dosyaları getir
+$additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_id'], 'admin');
+?>
+<div class="card admin-card mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+                <i class="fas fa-paperclip me-2"></i>Ek Dosyalar
+                <?php if (!empty($additionalFiles)): ?>
+                    <span class="badge bg-secondary ms-2"><?php echo count($additionalFiles); ?></span>
+                <?php endif; ?>
+            </h6>
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadAdditionalFileModal">
+                <i class="fas fa-plus me-1"></i>Ek Dosya Gönder
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <?php if (!empty($additionalFiles)): ?>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Dosya Adı</th>
+                            <th>Gönderen</th>
+                            <th>Alıcı</th>
+                            <th>Tarih</th>
+                            <th>Notlar</th>
+                            <th>Ücret</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($additionalFiles as $file): ?>
+                            <tr class="<?php echo $file['is_read'] ? '' : 'table-warning'; ?>">
+                                <td>
+                                    <i class="fas fa-file me-1"></i>
+                                    <?php echo htmlspecialchars($file['original_name']); ?>
+                                    <?php if (!$file['is_read'] && $file['receiver_id'] === $_SESSION['user_id']): ?>
+                                        <span class="badge bg-warning ms-2">Yeni</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($file['sender_type'] === 'admin'): ?>
+                                        <span class="badge bg-primary">Admin</span>
+                                        <?php echo htmlspecialchars($file['sender_first_name'] . ' ' . $file['sender_last_name']); ?>
+                                    <?php else: ?>
+                                        <span class="badge bg-success">Kullanıcı</span>
+                                        <?php echo htmlspecialchars($file['sender_first_name'] . ' ' . $file['sender_last_name']); ?>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($file['receiver_type'] === 'admin'): ?>
+                                        <span class="badge bg-primary">Admin</span>
+                                        <?php echo htmlspecialchars($file['receiver_first_name'] . ' ' . $file['receiver_last_name']); ?>
+                                    <?php else: ?>
+                                        <span class="badge bg-success">Kullanıcı</span>
+                                        <?php echo htmlspecialchars($file['receiver_first_name'] . ' ' . $file['receiver_last_name']); ?>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?php echo date('d.m.Y H:i', strtotime($file['upload_date'])); ?></td>
+                                <td>
+                                    <?php if (!empty($file['notes'])): ?>
+                                        <small class="text-muted"><?php echo htmlspecialchars(substr($file['notes'], 0, 50)); ?>...</small>
+                                    <?php else: ?>
+                                        <small class="text-muted">-</small>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($file['credits'] > 0): ?>
+                                        <span class="badge bg-danger"><?php echo $file['credits']; ?> kredi</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary">Ücretsiz</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm" title="İndir">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                Henüz ek dosya bulunmuyor.
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- Ek Dosya Yükleme Modal -->
+<div class="modal fade" id="uploadAdditionalFileModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="uploadAdditionalFileForm" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-upload me-2"></i>Kullanıcıya Ek Dosya Gönder
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="related_file_id" value="<?php echo $uploadId; ?>">
+                    <input type="hidden" name="related_file_type" value="upload">
+                    <input type="hidden" name="receiver_id" value="<?php echo $upload['user_id']; ?>">
+                    <input type="hidden" name="receiver_type" value="user">
+                    
+                    <div class="mb-3">
+                        <label for="additional_file" class="form-label">Dosya Seç <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="additional_file" name="additional_file" required>
+                        <div class="form-text">Maksimum dosya boyutu: <?php echo ini_get('upload_max_filesize'); ?></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="additional_notes" class="form-label">Notlar</label>
+                        <textarea class="form-control" id="additional_notes" name="notes" rows="3" placeholder="Dosya hakkında açıklama..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="additional_credits" class="form-label">Ücret (Kredi)</label>
+                        <input type="number" class="form-control" id="additional_credits" name="credits" min="0" step="0.01" value="0">
+                        <div class="form-text">Bu dosya için kullanıcıdan düşülecek kredi miktarı</div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Dikkat:</strong> Ücret belirlerseniz, kullanıcının hesabından otomatik olarak kredi düşülecektir.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload me-1"></i>Dosyayı Gönder
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Ek Dosya JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const additionalFileForm = document.getElementById('uploadAdditionalFileForm');
+    if (additionalFileForm) {
+        additionalFileForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            formData.append('action', 'upload_additional_file');
+            
+            // Loading göster
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Yükleniyor...';
+            
+            fetch('../ajax/additional_files.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Modal'ı kapat
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('uploadAdditionalFileModal'));
+                    modal.hide();
+                    
+                    // Sayfayı yenile
+                    location.reload();
+                } else {
+                    alert('Hata: ' + data.message);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Dosya yüklenirken bir hata oluştu.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            });
+        });
+    }
+});
+</script>
+
 <!-- Yanıt Dosyası Yükleme (sadece normal dosyalar için) -->
 <?php if ($fileType !== 'response' && ($upload['status'] === 'pending' || $upload['status'] === 'processing')): ?>
     <div class="card admin-card mb-4">
@@ -3170,6 +3363,7 @@ function confirmFileProcessing() {
     }
 }
 </script>
+
 
 <!-- Chat Penceresi -->
 <div class="chat-container" id="chatContainer">

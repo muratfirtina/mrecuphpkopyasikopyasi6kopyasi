@@ -19,7 +19,7 @@ echo "<style>
 
 try {
     // Tabloları kontrol et
-    $tables = ['file_uploads','users','file_responses', 'revisions', 'revision_files'];
+    $tables = ['file_uploads','users','file_responses', 'revisions', 'revision_files', 'additional_files'];
     
     foreach ($tables as $table) {
         echo "<div class='table-name'>TABLO: $table</div>";
