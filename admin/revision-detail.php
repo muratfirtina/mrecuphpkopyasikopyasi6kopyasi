@@ -86,13 +86,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['upload_revision']) && isset($_FILES['revision_file'])) {
             $creditsUsed = isset($_POST['credits_used']) ? (int)$_POST['credits_used'] : 5;
             $completionNotes = isset($_POST['completion_notes']) ? sanitize($_POST['completion_notes']) : '';
-            
-            // Kredi kontrolü
-            if ($creditsUsed < 0 || $creditsUsed > 100) {
-                $error = 'Kredi miktarı 0-100 arasında olmalıdır.';
+            // Kredi kontrolü - Sadece negatif olmamalı
+            if ($creditsUsed < 0) {
+                $error = 'Kredi miktarı negatif olamaz.';
             } else {
                 $uploadResult = $fileManager->uploadRevisionFile($revisionId, $_FILES['revision_file'], $_SESSION['user_id'], $creditsUsed, $completionNotes);
-
                 if ($uploadResult['success']) {
                     $success = 'Revize dosyası başarıyla yüklendi ve revizyon tamamlandı.';
                     $user->logAction($_SESSION['user_id'], 'revision_file_uploaded', "Revize dosyası yüklendi: {$revisionId}");
@@ -203,7 +201,7 @@ if ($revision['response_id']):
     $targetFileType = 'Yanıt Dosyası';
     $targetFileColor = 'primary';
     $targetFileIcon = 'reply';
-        $targetFileInfo = [
+    $targetFileInfo = [
         'name' => $revision['response_original_name'],
         'size' => $revision['response_file_size'],
         'date' => $revision['response_upload_date'],
@@ -237,7 +235,7 @@ else:
                                    LIMIT 1");
             $stmt2->execute([$revision['upload_id'], $revision['requested_at']]);
             $revisionFileDetail = $stmt2->fetch(PDO::FETCH_ASSOC);
-            
+
             $targetFileName = $previousRevisionFile['original_name'];
             $targetFileType = 'Revizyon Dosyası';
             $targetFileColor = 'warning';
@@ -618,8 +616,8 @@ include '../includes/admin_sidebar.php';
                                     <label for="credits_used" class="form-label">
                                         <i class="fas fa-coins me-1"></i>Kullanılan Kredi Miktarı <span class="text-danger">*</span>
                                     </label>
-                                    <input type="number" class="form-control" id="credits_used" name="credits_used" 
-                                           min="0" max="100" value="<?php echo $revision['credits_charged'] ?: 5; ?>" required>
+                                    <input type="number" class="form-control" id="credits_used" name="credits_used"
+                                        min="0" value="<?php echo $revision['credits_charged'] ?: 5; ?>" required>
                                     <div class="form-text">Bu revizyon için kullanılacak kredi miktarı</div>
                                 </div>
                             </div>
@@ -638,12 +636,12 @@ include '../includes/admin_sidebar.php';
                             <button type="submit" class="btn btn-success btn-lg">
                                 <i class="fas fa-check-circle me-2"></i>Revizyon Dosyasını Yükle ve Tamamla
                             </button>
-                            
+
                             <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#previewNotesModal">
                                 <i class="fas fa-eye me-1"></i>Notları Önizle
                             </button>
                         </div>
-                        
+
                         <div class="mt-3">
                             <div class="alert alert-info mb-0">
                                 <i class="fas fa-info-circle me-2"></i>
@@ -906,15 +904,15 @@ include '../includes/admin_sidebar.php';
                     <i class="fas fa-info-circle me-2"></i>
                     <strong>Bilgi:</strong> Bu önizleme, kullanıcıya gönderilecek e-postanın içeriğini gösterir.
                 </div>
-                
+
                 <div class="border rounded p-3" style="background-color: #f8f9fa;">
                     <h6 class="text-primary">Konu: Revizyon Talebiniz Tamamlandı</h6>
                     <hr>
-                    
+
                     <p><strong>Sayın <?php echo htmlspecialchars($revision['first_name'] . ' ' . $revision['last_name']); ?>,</strong></p>
-                    
+
                     <p>Revizyon talebiniz başarıyla tamamlanmıştır.</p>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <strong>Revizyon Bilgileri:</strong>
@@ -935,7 +933,7 @@ include '../includes/admin_sidebar.php';
                             </ul>
                         </div>
                     </div>
-                    
+
                     <div id="notes-preview-section" style="display: none;">
                         <hr>
                         <strong>Admin Notları:</strong>
@@ -943,7 +941,7 @@ include '../includes/admin_sidebar.php';
                             <div id="preview-notes-content"></div>
                         </div>
                     </div>
-                    
+
                     <hr>
                     <p>Revize edilmiş dosyanızı hesabınızdan indirebilirsiniz.</p>
                     <p class="text-muted"><small>Mr ECU Ekibi</small></p>

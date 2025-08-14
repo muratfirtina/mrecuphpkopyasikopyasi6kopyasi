@@ -403,6 +403,19 @@ try {
 
 $pageTitle = $fileDetail['original_name'] ?? 'Dosya Detayı';
 
+// Admin ID'sini al (dosya gönderme için)
+$adminId = null;
+try {
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE role = 'admin' LIMIT 1");
+    $stmt->execute();
+    $adminUser = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($adminUser) {
+        $adminId = $adminUser['id'];
+    }
+} catch (Exception $e) {
+    error_log('Admin ID alma hatası: ' . $e->getMessage());
+}
+
 // Header include
 include '../includes/user_header.php';
 ?>
@@ -499,7 +512,7 @@ include '../includes/user_header.php';
                             <h6 class="text-muted mb-3">
                                 <i class="fas fa-info-circle me-2"></i>Dosya Bilgileri
                             </h6>
-                            <div class="detail-list">
+                            <div class="detail-list"  style="gap: 0;">
                                 <div class="detail-item">
                                     <span class="label">Dosya ID:</span>
                                     <span class="value font-monospace"><?php echo $fileDetail['id']; ?></span>
@@ -526,18 +539,18 @@ include '../includes/user_header.php';
                                         </span>
                                     </div>
                                 <?php endif; ?>
-                                <div class="detail-item">
+                                <!-- <div class="detail-item">
                                     <span class="label">Orijinal Ad:</span>
                                     <span class="value"><?php echo htmlspecialchars($fileDetail['original_name'] ?? 'Belirtilmemiş'); ?></span>
-                                </div>
+                                </div> -->
                                 <div class="detail-item">
                                     <span class="label">Cihaz Tipi:</span>
                                     <span class="value"><?php echo htmlspecialchars($fileDetail['device_name'] ?? 'Belirtilmemiş'); ?></span>
                                 </div>
-                                <div class="detail-item">
+                                <!-- <div class="detail-item">
                                     <span class="label">Dosya Boyutu:</span>
                                     <span class="value"><?php echo formatFileSize($fileDetail['file_size'] ?? 0); ?></span>
-                                </div>
+                                </div> -->
                                 <div class="detail-item">
                                     <span class="label"><?php echo $fileType === 'response' ? 'Oluşturulma' : 'Yüklenme'; ?> Tarihi:</span>
                                     <span class="value"><?php echo date('d.m.Y H:i', strtotime($fileDetail['upload_date'])); ?></span>
@@ -548,12 +561,12 @@ include '../includes/user_header.php';
                                         <span class="value"><?php echo date('d.m.Y H:i', strtotime($fileDetail['processed_date'])); ?></span>
                                     </div>
                                 <?php endif; ?>
-                                <?php if ($fileType === 'response' && !empty($fileDetail['admin_username'])): ?>
+                                <!-- <?php if ($fileType === 'response' && !empty($fileDetail['admin_username'])): ?>
                                     <div class="detail-item">
                                         <span class="label">Oluşturan Admin:</span>
                                         <span class="value"><?php echo htmlspecialchars($fileDetail['admin_username']); ?></span>
                                     </div>
-                                <?php endif; ?>
+                                <?php endif; ?> -->
                                 <?php if (($fileType === 'response') || ($fileType === 'upload' && $fileDetail['status'] === 'completed')): ?>
                                     <a href="download.php?id=<?php echo $fileDetail['id']; ?>&type=<?php echo $fileType; ?>" class="btn btn-success">
                                         <i class="fas fa-download me-1"></i>İndir
@@ -566,7 +579,7 @@ include '../includes/user_header.php';
                             <h6 class="text-muted mb-3">
                                 <i class="fas fa-car me-2"></i>Araç Bilgileri
                             </h6>
-                            <div class="detail-list">
+                            <div class="detail-list" style="gap: 0;">
                                 <div class="detail-item">
                                     <span class="label">Marka:</span>
                                     <span class="value"><?php echo htmlspecialchars($fileDetail['brand_name'] ?? 'Belirtilmemiş'); ?></span>
@@ -806,189 +819,314 @@ include '../includes/user_header.php';
                     </div>
                 <?php endif; ?>
 
+
                 <!-- Ek Dosyalar Bölümü -->
                 <?php
                 // Ek dosyaları getir  
                 $additionalFiles = $fileManager->getAdditionalFiles($fileId, $userId, 'user');
                 ?>
-                <div class="detail-card mb-4">
-                    <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-0">
-                <i class="fas fa-paperclip me-2"></i>Ek Dosyalar
                 <?php if (!empty($additionalFiles)): ?>
-                    <span class="badge bg-secondary ms-2"><?php echo count($additionalFiles); ?></span>
-                <?php endif; ?>
-            </h6>
-            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadAdditionalFileModal">
-                <i class="fas fa-plus me-1"></i>Ek Dosya Gönder
-            </button>
-        </div>
-                    </div>
-                    <div class="card-body">
-                        <?php if (!empty($additionalFiles)): ?>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Dosya Adı</th>
-                                            <th>Gönderen</th>
-                                            <th>Tarih</th>
-                                            <th>Notlar</th>
-                                            <th>Ücret</th>
-                                            <th>İşlemler</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($additionalFiles as $file): ?>
-                                            <tr class="<?php echo $file['is_read'] ? '' : 'table-warning'; ?>">
-                                                <td>
-                                                    <i class="fas fa-file me-1"></i>
-                                                    <?php echo htmlspecialchars($file['original_name']); ?>
-                                                    <?php if (!$file['is_read'] && $file['receiver_id'] === $userId): ?>
-                                                        <span class="badge bg-warning ms-2">Yeni</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
+                    <div class="detail-card mb-4">
+                        <div class="detail-card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-paperclip me-2"></i>Ek Dosyalar
+                                <span class="badge bg-secondary ms-2"><?php echo count($additionalFiles); ?></span>
+                            </h5>
+                        </div>
+                        <div class="detail-card-body">
+                            <div class="other-files-list">
+                                <?php foreach ($additionalFiles as $file): ?>
+                                    <div class="other-file-item"> <!-- Aynı sınıf isimleriyle tutarlılık -->
+                                        <div class="file-icon">
+                                            <i class="fas fa-paperclip text-info"></i> <!-- Farklı ikon, ama aynı yapı -->
+                                        </div>
+                                        <div class="file-info">
+                                            <h6 class="file-name">
+                                                <?php echo htmlspecialchars($file['original_name']); ?>
+                                                <?php if (!$file['is_read'] && $file['receiver_id'] === $userId): ?>
+                                                    <span class="badge bg-warning ms-2">Yeni</span>
+                                                <?php endif; ?>
+                                            </h6>
+                                            <div class="file-meta">
+                                                <span class="meta-item">
+                                                    <i class="fas fa-user me-1"></i>
                                                     <?php if ($file['sender_type'] === 'admin'): ?>
                                                         <span class="badge bg-primary">Admin</span>
                                                     <?php else: ?>
                                                         <span class="badge bg-success">Kullanıcı</span>
                                                     <?php endif; ?>
                                                     <?php echo htmlspecialchars($file['sender_first_name'] . ' ' . $file['sender_last_name']); ?>
-                                                </td>
-                                                <td><?php echo date('d.m.Y H:i', strtotime($file['upload_date'])); ?></td>
-                                                <td>
-                                                    <?php if (!empty($file['notes'])): ?>
-                                                        <small class="text-muted"><?php echo htmlspecialchars(substr($file['notes'], 0, 50)); ?>...</small>
-                                                    <?php else: ?>
-                                                        <small class="text-muted">-</small>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <?php if ($file['credits'] > 0): ?>
+                                                </span>
+                                                <span class="meta-item">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    <?php echo date('d.m.Y H:i', strtotime($file['upload_date'])); ?>
+                                                </span>
+                                                <span class="meta-item">
+                                                    <i class="fas fa-hdd me-1"></i>
+                                                    <?php echo formatFileSize($file['file_size']); ?>
+                                                </span>
+                                                <?php if ($file['credits'] > 0): ?>
+                                                    <span class="meta-item">
+                                                        <i class="fas fa-coins me-1"></i>
                                                         <span class="badge bg-danger"><?php echo $file['credits']; ?> kredi</span>
-                                                    <?php else: ?>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="meta-item">
+                                                        <i class="fas fa-tag me-1"></i>
                                                         <span class="badge bg-secondary">Ücretsiz</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm" title="İndir">
-                                                        <i class="fas fa-download"></i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <?php if (!empty($file['notes'])): ?>
+                                                <div class="file-notes mt-2">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-comment-dots me-1"></i>
+                                                        <strong>Not:</strong> <?php echo htmlspecialchars(substr($file['notes'], 0, 100)) . (strlen($file['notes']) > 100 ? '...' : ''); ?>
+                                                    </small>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="file-actions">
+                                            <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm">
+                                                <i class="fas fa-download me-1"></i>İndir
+                                            </a>
+                                            <?php if ($file['sender_type'] === 'admin'): ?>
+                                                <button type="button" class="btn btn-outline-warning btn-sm"
+                                                    onclick="requestRevision('<?php echo $file['id']; ?>', 'additional')">
+                                                    <i class="fas fa-redo me-1"></i>Yeniden Revize
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
-                        <?php else: ?>
-                            <div class="alert alert-info mb-0">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Henüz ek dosya bulunmuyor. Yukarıdaki butonu kullanarak admine dosya gönderebilirsiniz.
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+
+
+                <!-- Ana İletişim Bölümü - Dosya Gönderme ve Chat Yan Yana -->
+                <div class="row mb-4">
+                    <!-- Sol Kolon - Dosya Gönderme ve Ek Dosyalar -->
+                    <div class="col-md-6">
+                        <!-- Dosya Gönderme Bölümü -->
+                        <div class="detail-card" style="height: 100%; display: flex; flex-direction: column;">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-upload me-2"></i>Admine Dosya Gönder
+                                </h6>
                             </div>
-                        <?php endif; ?>
+                            <div class="card-body mt-5">
+                                <?php if ($adminId): ?>
+                                    <form id="uploadAdditionalFileForm" enctype="multipart/form-data">
+                                        <input type="hidden" name="related_file_id" value="<?php echo $fileId; ?>">
+                                        <input type="hidden" name="related_file_type" value="upload">
+                                        <input type="hidden" name="sender_id" value="<?php echo $userId; ?>">
+                                        <input type="hidden" name="sender_type" value="user">
+                                        <input type="hidden" name="receiver_id" value="<?php echo $adminId; ?>">
+                                        <input type="hidden" name="receiver_type" value="admin">
+
+                                        <div class="mb-3">
+                                            <label for="additional_file" class="form-label">Dosya Seç <span class="text-danger">*</span></label>
+                                            <input type="file" class="form-control" id="additional_file" name="additional_file" required>
+                                            <div class="form-text">Maksimum dosya boyutu: <?php echo ini_get('upload_max_filesize'); ?></div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="additional_notes" class="form-label">Notlar</label>
+                                            <textarea class="form-control" id="additional_notes" name="notes" rows="3" placeholder="Dosya hakkında açıklama..."></textarea>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary w-100" id="submitAdditionalFileBtn">
+                                            <i class="fas fa-upload me-1"></i>Dosyayı Gönder
+                                        </button>
+                                    </form>
+                                <?php else: ?>
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Admin kullanıcısı bulunamadı. Dosya gönderilemiyor.
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sağ Kolon - Chat Sistemi -->
+                    <div class="col-md-6">
+                        <div class="detail-card" id="chatContainer" style="height: 100%; display: flex; flex-direction: column;">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-comments me-2"></i>Admin ile Mesajlaşma
+                                </h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <!-- Chat Mesajları -->
+                                <div id="chatMessages" class="chat-messages" style="height: 400px; overflow-y: auto; padding: 1rem;">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-spinner fa-spin"></i> Mesajlar yükleniyor...
+                                    </div>
+                                </div>
+
+                                <!-- Mesaj Gönderme Formu -->
+                                <div class="chat-input border-top p-3">
+                                    <form id="chatForm" class="d-flex gap-2">
+                                        <input type="hidden" id="chatFileId" value="<?php echo $fileId; ?>">
+                                        <input type="hidden" id="chatFileType" value="upload">
+                                        <div class="flex-grow-1">
+                                            <textarea id="chatMessage" class="form-control" rows="2"
+                                                placeholder="Admine mesaj yazın..." required></textarea>
+                                        </div>
+                                        <div class="align-self-end">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Ek Dosyalar JavaScript -->
                 <script>
+                    // Global değişkenler - çift submit önlemek için
+                    let isFormSubmitting = false;
+                    let formEventListenerAdded = false;
+
                     // Ek dosyalar için değişkenler
                     let additionalFiles = [];
 
                     // Ek dosyaları yükle
                     function loadAdditionalFiles() {
-                        fetch(`../ajax/additional_files.php?action=get_files&related_file_id=<?php echo $fileId; ?>`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    additionalFiles = data.files;
+                        const listElement = document.getElementById('additionalFilesList');
+                        if (!listElement) {
+                            console.error('additionalFilesList elementi bulunamadı');
+                            return;
+                        }
+
+                        // Debug için log ekleyelim
+                        console.log('Ek dosyalar yükleniyor...');
+                        console.log('File ID:', '<?php echo $fileId; ?>');
+                        console.log('Request URL:', `../ajax/additional_files.php?action=get_additional_files&file_id=<?php echo $fileId; ?>`);
+
+                        fetch(`../ajax/additional_files.php?action=get_additional_files&file_id=<?php echo $fileId; ?>`)
+                            .then(response => {
+                                console.log('Response status:', response.status);
+                                console.log('Response headers:', response.headers);
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+                                return response.text(); // Önce text olarak al
+                            })
+                            .then(text => {
+                                console.log('Raw response text:', text);
+                                try {
+                                    const data = JSON.parse(text);
+                                    console.log('Parsed data:', data);
+
+                                    if (data.success) {
+                                        additionalFiles = data.files || [];
+                                        console.log('Yüklenen dosya sayısı:', additionalFiles.length);
+                                        renderAdditionalFiles();
+                                    } else {
+                                        console.error('API hatası:', data.message);
+                                        // Hata durumunda boş liste göster
+                                        additionalFiles = [];
+                                        renderAdditionalFiles();
+                                    }
+                                } catch (e) {
+                                    console.error('JSON parse error:', e);
+                                    console.error('Invalid response:', text);
+                                    // Parse hatasında boş liste göster
+                                    additionalFiles = [];
                                     renderAdditionalFiles();
                                 }
                             })
                             .catch(error => {
                                 console.error('Ek dosyalar yüklenirken hata:', error);
-                                document.getElementById('additionalFilesList').innerHTML = `
-                <div class="text-center text-danger py-4">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Ek dosyalar yüklenemedi.
-                </div>
-            `;
+                                // Network hatası durumunda özel mesaj göster
+                                if (listElement) {
+                                    if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+                                        listElement.innerHTML = `
+                                            <div class="text-center text-warning py-4">
+                                                <i class="fas fa-wifi fa-2x mb-2"></i>
+                                                <p class="mb-0">Bağlantı hatası. Lütfen sayfayı yenileyin.</p>
+                                            </div>
+                                        `;
+                                    } else {
+                                        // Diğer hatalar için boş liste göster
+                                        additionalFiles = [];
+                                        renderAdditionalFiles();
+                                    }
+                                }
                             });
                     }
 
                     // Ek dosyaları render et
                     function renderAdditionalFiles() {
                         const container = document.getElementById('additionalFilesList');
+                        const countElement = document.getElementById('additionalFilesCount');
 
-                        if (additionalFiles.length === 0) {
+                        if (!container) return;
+
+                        // Sadece "Diğer" kategorisindeki dosyaları filtrele
+                        /* const otherFiles = additionalFiles.filter(file => {
+                            const isResponse = file.notes && (file.notes.includes('Yanıt dosyası') ||
+                                file.original_name.includes('response'));
+                            const isRevision = file.notes && (file.notes.includes('Revize') ||
+                                file.original_name.includes('revision'));
+                            return !isResponse && !isRevision;
+                        }); */
+
+                        // Sayıyı güncelle
+                        if (countElement) {
+                            countElement.textContent = `(${otherFiles.length})`;
+                        }
+
+                        if (otherFiles.length === 0) {
                             container.innerHTML = `
-            <div class="text-center text-muted py-4">
-                <i class="fas fa-inbox me-2"></i>
-                Henüz ek dosya yok.
-            </div>
-        `;
+                                <div class="text-center text-muted py-4">
+                                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                                    <p class="mb-0">Henüz ek dosya bulunmuyor.</p>
+                                </div>
+                            `;
                             return;
                         }
 
-                        let html = '<div class="additional-files-list">';
+                        let html = '<div class="other-files-list">';
 
-                        additionalFiles.forEach(file => {
+                        // Tüm dosyaları göster, limit yok
+                        /* otherFiles.forEach((file, index) => {
                             const isSender = file.sender_id === '<?php echo $userId; ?>';
                             const senderName = isSender ? 'Ben' : (file.sender_type === 'admin' ? 'Admin' : file.sender_first_name + ' ' + file.sender_last_name);
-                            const fileClass = isSender ? 'sent' : 'received';
-                            const badgeClass = file.sender_type === 'admin' ? 'bg-success' : 'bg-primary';
+                            const isUnread = !file.is_read && file.receiver_id === '<?php echo $userId; ?>';
 
                             html += `
-            <div class="additional-file-item ${fileClass} ${!file.is_read && !isSender ? 'unread' : ''}" data-file-id="${file.id}">
-                <div class="file-icon">
-                    <i class="fas fa-paperclip"></i>
-                </div>
-                <div class="file-info">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <h6 class="file-name mb-1">
-                                ${escapeHtml(file.original_name)}
-                            </h6>
-                            <div class="file-meta">
-                                <span class="badge ${badgeClass} me-2">
-                                    <i class="fas fa-${isSender ? 'upload' : 'download'} me-1"></i>
-                                    ${senderName}
-                                </span>
-                                <span class="text-muted">
-                                    <i class="fas fa-calendar me-1"></i>
-                                    ${formatDate(file.upload_date)}
-                                </span>
-                                <span class="text-muted ms-2">
-                                    <i class="fas fa-hdd me-1"></i>
-                                    ${formatFileSize(file.file_size)}
-                                </span>
-                                ${file.credits > 0 ? `
-                                    <span class="text-warning ms-2">
-                                        <i class="fas fa-coins me-1"></i>
-                                        ${file.credits} kredi
-                                    </span>
-                                ` : ''}
-                            </div>
-                        </div>
-                        ${!file.is_read && !isSender ? '<span class="badge bg-danger">Yeni</span>' : ''}
-                    </div>
-                    ${file.notes ? `
-                        <div class="file-notes">
-                            <i class="fas fa-comment me-1 text-muted"></i>
-                            ${escapeHtml(file.notes)}
-                        </div>
-                    ` : ''}
-                </div>
-                <div class="file-actions">
-                    <a href="../download-additional.php?id=${file.id}" class="btn btn-success btn-sm" 
-                       onclick="markAsRead('${file.id}')">
-                        <i class="fas fa-download me-1"></i>İndir
-                    </a>
-                </div>
-            </div>
-        `;
-                        });
+                                <div class="other-file-item ${isUnread ? 'unread' : ''}" data-file-id="${file.id}" style="animation-delay: ${index * 0.05}s">
+                                    <div class="file-icon">
+                                        <i class="fas fa-file text-white"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <strong>${escapeHtml(file.original_name)}</strong>
+                                        ${isUnread ? '<span class="badge bg-warning ms-2">Yeni</span>' : ''}
+                                        <small class="d-block text-muted">
+                                            <strong>Gönderen:</strong> ${senderName}
+                                            - ${formatDate(file.upload_date)}
+                                            ${file.credits > 0 ? `- ${file.credits} kredi` : ''}
+                                        </small>
+                                        ${file.notes ? `
+                                            <small class="d-block text-muted">"${escapeHtml(file.notes.substring(0, 100))}${file.notes.length > 100 ? '...' : ''}"</small>
+                                        ` : ''}
+                                    </div>
+                                    <a href="../download-additional.php?id=${file.id}" class="btn btn-primary btn-sm" 
+                                       onclick="markAsRead('${file.id}')">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                            `;
+                        }); */
 
                         html += '</div>';
                         container.innerHTML = html;
@@ -1018,7 +1156,27 @@ include '../includes/user_header.php';
                                 'Content-Type': 'application/x-www-form-urlencoded',
                             },
                             body: `action=mark_as_read&file_id=${fileId}`
+                        }).then(() => {
+                            // Lokal olarak da güncelle
+                            const file = additionalFiles.find(f => f.id === fileId);
+                            if (file) {
+                                file.is_read = true;
+                                renderAdditionalFiles();
+                            }
                         });
+                    }
+
+                    // Escape HTML helper
+                    function escapeHtml(text) {
+                        if (!text) return '';
+                        const map = {
+                            '&': '&amp;',
+                            '<': '&lt;',
+                            '>': '&gt;',
+                            '"': '&quot;',
+                            "'": '&#039;'
+                        };
+                        return text.toString().replace(/[&<>"']/g, m => map[m]);
                     }
 
                     // Tarih formatla
@@ -1042,54 +1200,177 @@ include '../includes/user_header.php';
                         return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
                     }
 
-                    // Form submit
-                    document.getElementById('additionalFileForm').addEventListener('submit', function(e) {
-                        e.preventDefault();
+                    // Form submit handler'ı sadece bir kez ekle
+                    function initializeFormHandler() {
+                        const uploadFormHandler = document.getElementById('uploadAdditionalFileForm');
 
-                        const formData = new FormData(this);
-                        formData.append('action', 'upload');
+                        if (uploadFormHandler && !formEventListenerAdded) {
+                            // Önce mevcut event listener'ları temizle (varsa)
+                            const newForm = uploadFormHandler.cloneNode(true);
+                            uploadFormHandler.parentNode.replaceChild(newForm, uploadFormHandler);
 
-                        const submitBtn = this.querySelector('button[type="submit"]');
-                        const originalText = submitBtn.innerHTML;
-                        submitBtn.disabled = true;
-                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Yükleniyor...';
+                            const finalForm = document.getElementById('uploadAdditionalFileForm');
 
-                        fetch('../ajax/additional_files.php', {
-                                method: 'POST',
-                                body: formData
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    // Formu temizle
-                                    document.getElementById('additional_file').value = '';
-                                    document.getElementById('additional_notes').value = '';
+                            finalForm.addEventListener('submit', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
 
-                                    // Listeyi yenile
-                                    loadAdditionalFiles();
-
-                                    // Başarı mesajı
-                                    alert('Dosya başarıyla gönderildi!');
-                                } else {
-                                    alert('Hata: ' + data.message);
+                                // Çift submit kontrolü
+                                if (isFormSubmitting) {
+                                    console.log('Form zaten gönderiliyor, ikinci gönderim engellendi');
+                                    return false;
                                 }
-                            })
-                            .catch(error => {
-                                console.error('Dosya yükleme hatası:', error);
-                                alert('Dosya yüklenirken bir hata oluştu.');
-                            })
-                            .finally(() => {
-                                submitBtn.disabled = false;
-                                submitBtn.innerHTML = originalText;
-                            });
-                    });
+
+                                isFormSubmitting = true;
+
+                                const formData = new FormData(this);
+                                formData.append('action', 'upload_additional_file');
+
+                                const submitBtn = this.querySelector('button[type="submit"]');
+                                const originalText = submitBtn.innerHTML;
+                                submitBtn.disabled = true;
+                                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Yüklüyor...';
+
+                                fetch('../ajax/additional_files.php', {
+                                        method: 'POST',
+                                        body: formData
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            // Formu temizle
+                                            document.getElementById('additional_file').value = '';
+                                            document.getElementById('additional_notes').value = '';
+
+                                            // Başarı mesajı göster - ÖNCELİKLE mesajı göster
+                                            showSuccessMessage('Dosya başarıyla gönderildi!');
+
+                                            // Listeyi yenile - Biraz gecikme ile çift yükleme yap
+                                            setTimeout(() => {
+                                                loadAdditionalFiles();
+                                            }, 300);
+
+                                            // Tekrar yükle, veritabanındaki güncellemeyi garantilemek için
+                                            setTimeout(() => {
+                                                loadAdditionalFiles();
+                                            }, 1500);
+                                        } else {
+                                            showErrorMessage('Hata: ' + data.message);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Dosya yükleme hatası:', error);
+                                        showErrorMessage('Dosya yüklenirken bir hata oluştu.');
+                                    })
+                                    .finally(() => {
+                                        // Submit işlemini sıfırla
+                                        setTimeout(() => {
+                                            isFormSubmitting = false;
+                                            submitBtn.disabled = false;
+                                            submitBtn.innerHTML = originalText;
+                                        }, 500);
+                                    });
+                            }, {
+                                once: true
+                            }); // Event listener'ı sadece bir kez çalıştır
+
+                            formEventListenerAdded = true;
+                            console.log('Form event listener eklendi');
+                        }
+                    }
+
+                    // Başarı mesajı göster
+                    function showSuccessMessage(message) {
+                        // Önce mevcut alert'leri temizle
+                        document.querySelectorAll('.upload-alert').forEach(alert => alert.remove());
+
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-success alert-dismissible fade show upload-alert mb-3';
+                        alertDiv.style.cssText = 'animation: slideDown 0.3s ease; position: relative; z-index: 1000;';
+                        alertDiv.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <div class="spinner-grow spinner-grow-sm text-success me-2" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div>
+                                    <strong><i class="fas fa-check-circle me-2"></i>Başarılı!</strong>
+                                    <span class="ms-2">${message}</span>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+
+                        // Forma yakın bir yere ekle
+                        const formContainer = document.querySelector('#uploadAdditionalFileForm')?.parentElement;
+                        if (formContainer) {
+                            formContainer.insertBefore(alertDiv, formContainer.firstChild);
+                        } else {
+                            // Alternatif olarak main'in başına ekle
+                            document.querySelector('main').insertBefore(alertDiv, document.querySelector('main').firstChild);
+                        }
+
+                        // 5 saniye sonra otomatik kaldır
+                        setTimeout(() => {
+                            alertDiv.style.animation = 'slideUp 0.3s ease';
+                            setTimeout(() => alertDiv.remove(), 300);
+                        }, 5000);
+                    }
+
+                    // Hata mesajı göster
+                    function showErrorMessage(message) {
+                        // Önce mevcut alert'leri temizle
+                        document.querySelectorAll('.upload-alert').forEach(alert => alert.remove());
+
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-danger alert-dismissible fade show upload-alert mb-3';
+                        alertDiv.style.cssText = 'animation: shake 0.3s ease; position: relative; z-index: 1000;';
+                        alertDiv.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-exclamation-triangle fa-lg me-2"></i>
+                                <div>
+                                    <strong>Hata!</strong>
+                                    <span class="ms-2">${message}</span>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+
+                        // Forma yakın bir yere ekle
+                        const formContainer = document.querySelector('#uploadAdditionalFileForm')?.parentElement;
+                        if (formContainer) {
+                            formContainer.insertBefore(alertDiv, formContainer.firstChild);
+                        } else {
+                            // Alternatif olarak main'in başına ekle
+                            document.querySelector('main').insertBefore(alertDiv, document.querySelector('main').firstChild);
+                        }
+
+                        // 7 saniye sonra otomatik kaldır
+                        setTimeout(() => {
+                            alertDiv.style.animation = 'slideUp 0.3s ease';
+                            setTimeout(() => alertDiv.remove(), 300);
+                        }, 7000);
+                    }
 
                     // Sayfa yüklendiğinde ek dosyaları yükle
                     document.addEventListener('DOMContentLoaded', function() {
-                        loadAdditionalFiles();
+                        // Form handler'ı başlat (sadece bir kez)
+                        setTimeout(() => {
+                            initializeFormHandler();
+                        }, 100);
 
-                        // Her 10 saniyede bir yenile
-                        setInterval(loadAdditionalFiles, 10000);
+                        // Ek dosyaları yükle - biraz gecikme ile
+                        setTimeout(() => {
+                            console.log('Sayfa yüklendi, ek dosyalar yükleniyor...');
+                            loadAdditionalFiles();
+                        }, 500);
+
+                        // Her 30 saniyede bir yenile (sadece liste, form handler tekrar eklenmez)
+                        setInterval(() => {
+                            if (!isFormSubmitting) { // Form gönderiliyorsa yenileme yapma
+                                console.log('Otomatik yenileme...');
+                                loadAdditionalFiles();
+                            }
+                        }, 30000);
                     });
                 </script>
 
@@ -1605,14 +1886,19 @@ include '../includes/user_header.php';
 
     /* Response Files List */
     .response-files-list,
-    .revision-files-list {
+    .revision-files-list{
         display: flex;
         flex-direction: column;
         gap: 1rem;
     }
+    .other-files-list {
+        display: flex;
+        flex-direction: column;
+    }
 
     .response-file-item,
-    .revision-file-item {
+    .revision-file-item,
+    .other-file-item {
         background: #f8fff9;
         border: 1px solid #d4edda;
         border-radius: 12px;
@@ -1623,13 +1909,19 @@ include '../includes/user_header.php';
         transition: all 0.3s ease;
     }
 
+    .other-file-item {
+        background:#eef7ff !important;
+        border-color: #ced4da;
+    }
+
     .revision-file-item {
         background: #fff3cd;
         border-color: #ffeaa7;
     }
 
     .response-file-item:hover,
-    .revision-file-item:hover {
+    .revision-file-item:hover,
+    .other-file-item:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
     }
@@ -1638,8 +1930,13 @@ include '../includes/user_header.php';
         box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
     }
 
+    .other-file-item:hover {
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.15);
+    }
+
     .response-file-item .file-icon,
-    .revision-file-item .file-icon {
+    .revision-file-item .file-icon,
+    .other-file-item .file-icon {
         width: 48px;
         height: 48px;
         background: #28a745;
@@ -1657,13 +1954,20 @@ include '../includes/user_header.php';
         color: #212529;
     }
 
+    .other-file-item .file-icon {
+        background: #6c757d;
+        color: white;
+    }
+
     .response-file-item .file-info,
-    .revision-file-item .file-info {
+    .revision-file-item .file-info,
+    .other-file-item .file-info {
         flex: 1;
     }
 
     .response-file-item .file-name,
-    .revision-file-item .file-name {
+    .revision-file-item .file-name,
+    .other-file-item .file-name {
         font-weight: 600;
         color: #495057;
         margin-bottom: 0.5rem;
@@ -1985,13 +2289,15 @@ include '../includes/user_header.php';
         }
 
         .response-file-item,
-        .revision-file-item {
+        .revision-file-item,
+        .other-file-item {
             flex-direction: column;
             text-align: center;
         }
 
         .response-file-item .file-info,
-        .revision-file-item .file-info {
+        .revision-file-item .file-info,
+        .other-file-item .file-info {
             text-align: left;
         }
 
@@ -2176,164 +2482,102 @@ include '../includes/user_header.php';
     .additional-file-item .file-actions {
         flex-shrink: 0;
     }
+
+    /* Animasyonlar */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        to {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+    }
+
+    @keyframes shake {
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        10%,
+        30%,
+        50%,
+        70%,
+        90% {
+            transform: translateX(-10px);
+        }
+
+        20%,
+        40%,
+        60%,
+        80% {
+            transform: translateX(10px);
+        }
+    }
+
+    /* Yeni dosya eklendiğinde gösterilen item animasyonu */
+    .other-file-item {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        animation: slideDown 0.5s ease;
+        animation-fill-mode: both;
+        margin-bottom: 1rem;
+    }
+
+    .other-file-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.15);
+    }
+
+    .other-file-item .file-icon {
+        width: 48px;
+        height: 48px;
+        background: #6c757d;
+        color: white;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+    }
+
+    /* Unread dosya stili */
+    .other-file-item.unread {
+        background: #fff3cd;
+        border-color: #ffc107;
+    }
+
+    /* Alert stilleri */
+    .upload-alert {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-radius: 8px;
+    }
 </style>
 
-<!-- Ek Dosya Yükleme Modal -->
-<div class="modal fade" id="uploadAdditionalFileModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form id="uploadAdditionalFileForm" enctype="multipart/form-data">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-upload me-2"></i>Admine Ek Dosya Gönder
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" name="related_file_id" value="<?php echo $fileId; ?>">
-                    <input type="hidden" name="related_file_type" value="<?php echo $fileType; ?>">
-
-                    <?php
-                    // Admin ID\'yi bul
-                    $adminId = null;
-                    if ($fileType === 'response' && isset($fileDetail['admin_id'])) {
-                        $adminId = $fileDetail['admin_id'];
-                    } else {
-                        // Son yanıt dosyasından admin ID\'yi al
-                        try {
-                            $stmt = $pdo->prepare("
-                                SELECT admin_id FROM file_responses 
-                                WHERE upload_id = ? 
-                                ORDER BY upload_date DESC 
-                                LIMIT 1
-                            ");
-                            $stmt->execute([$fileId]);
-                            $result = $stmt->fetch();
-                            if ($result) {
-                                $adminId = $result['admin_id'];
-                            }
-                        } catch (Exception $e) {
-                            error_log('Admin ID query error: ' . $e->getMessage());
-                        }
-                    }
-
-                    // Eğer admin ID bulunamazsa, varsayılan admin\'i al
-                    if (!$adminId) {
-                        try {
-                            $stmt = $pdo->prepare("SELECT id FROM users WHERE role = 'admin' LIMIT 1");
-                            $stmt->execute();
-                            $result = $stmt->fetch();
-                            if ($result) {
-                                $adminId = $result['id'];
-                            }
-                        } catch (Exception $e) {
-                            error_log('Default admin query error: ' . $e->getMessage());
-                        }
-                    }
-                    ?>
-
-                    <input type="hidden" name="receiver_id" value="<?php echo $adminId; ?>">
-                    <input type="hidden" name="receiver_type" value="admin">
-
-                    <div class="mb-3">
-                        <label for="additional_file" class="form-label">Dosya Seç <span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" id="additional_file" name="additional_file" required>
-                        <div class="form-text">Maksimum dosya boyutu: <?php echo ini_get('upload_max_filesize'); ?></div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="additional_notes" class="form-label">Notlar</label>
-                        <textarea class="form-control" id="additional_notes" name="notes" rows="3" placeholder="Dosya hakkında açıklama..."></textarea>
-                    </div>
-
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Dosyanız admin tarafından incelenecektir.
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-upload me-1"></i>Dosyayı Gönder
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Ek Dosya JavaScript -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const additionalFileForm = document.getElementById('uploadAdditionalFileForm');
-        if (additionalFileForm) {
-            additionalFileForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                const formData = new FormData(this);
-                formData.append('action', 'upload_additional_file');
-
-                // Loading göster
-                const submitBtn = this.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Yükleniyor...';
-
-                fetch('../ajax/additional_files.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Modal\'ı kapat
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('uploadAdditionalFileModal'));
-                            modal.hide();
-
-                            // Sayfayı yenile
-                            location.reload();
-                        } else {
-                            alert('Hata: ' + data.message);
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = originalText;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Dosya yüklenirken bir hata oluştu.');
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = originalText;
-                    });
-            });
-        }
-    });
-</script>
-
-<!-- Chat Penceresi -->
-<div class="chat-container" id="chatContainer">
-    <div class="chat-header">
-        <h5 class="mb-0">
-            <i class="fas fa-comments me-2"></i>Dosya Hakkında Konuş
-        </h5>
-        <span class="badge bg-danger" id="unreadCount" style="display: none;">0</span>
-    </div>
-    <div class="chat-messages" id="chatMessages">
-        <!-- Mesajlar buraya gelecek -->
-        <div class="text-center text-muted py-4">
-            <i class="fas fa-spinner fa-spin me-2"></i>Mesajlar yükleniyor...
-        </div>
-    </div>
-    <div class="chat-input">
-        <form id="chatForm">
-            <div class="input-group">
-                <input type="text" class="form-control" id="chatMessage" placeholder="Mesajınızı yazın..." required>
-                <button class="btn btn-primary" type="submit">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+<!-- Ek Dosya JavaScript KALDIRILAN - DUPLICATE HANDLER! -->
 
 <!-- Chat Styles -->
 <style>
@@ -2403,7 +2647,7 @@ include '../includes/user_header.php';
     }
 
     .chat-message.user .chat-message-content {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #36a236;
         color: white;
         border-bottom-right-radius: 4px;
     }
@@ -2716,8 +2960,11 @@ include '../includes/user_header.php';
             });
     }
 
-    // Event listeners
+    // Event listeners - CHAT İÇİN
     document.addEventListener('DOMContentLoaded', function() {
+        // Not: Upload form handler zaten başka yerde başlatıldı
+        // initializeFormHandler() fonksiyonu üstteki script'te çalışıyor
+
         // İlk mesajları yükle
         loadMessages();
 
@@ -2725,25 +2972,99 @@ include '../includes/user_header.php';
         setInterval(loadMessages, 3000);
 
         // Mesaj gönderme formu
-        document.getElementById('chatForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const messageInput = document.getElementById('chatMessage');
-            const message = messageInput.value.trim();
+        const chatForm = document.getElementById('chatForm');
+        if (chatForm) {
+            chatForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const messageInput = document.getElementById('chatMessage');
+                const message = messageInput.value.trim();
 
-            if (message) {
-                sendMessage(message);
-            }
-        });
+                if (message) {
+                    sendMessage(message);
+                }
+            });
+        }
 
         // Enter tuşu ile gönderme
-        document.getElementById('chatMessage').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                document.getElementById('chatForm').dispatchEvent(new Event('submit'));
-            }
-        });
+        const chatMessageInput = document.getElementById('chatMessage');
+        if (chatMessageInput) {
+            chatMessageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    const chatFormElement = document.getElementById('chatForm');
+                    if (chatFormElement) {
+                        chatFormElement.dispatchEvent(new Event('submit'));
+                    }
+                }
+            });
+        }
     });
 </script>
+
+<!-- Chat CSS Stilleri -->
+<style>
+    .chat-messages {
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+    }
+
+    .message-item {
+        margin-bottom: 0.75rem;
+    }
+
+    .message-bubble {
+        border-radius: 1rem !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        word-wrap: break-word;
+    }
+
+    .user-message .message-bubble {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    }
+
+    .admin-message .message-bubble {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+        border: 1px solid #dee2e6;
+    }
+
+    .chat-input {
+        background: white;
+    }
+
+    .chat-input textarea {
+        resize: none;
+        border: 1px solid #ced4da;
+        border-radius: 0.5rem;
+    }
+
+    .chat-input textarea:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+    }
+
+    #chatContainer {
+        position: sticky;
+        top: 20px;
+        max-height: calc(100vh - 40px);
+    }
+
+    .detail-card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .detail-card .card-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 1px solid #dee2e6;
+        padding: 1rem;
+    }
+
+    .detail-card .card-body {
+        padding: 1rem;
+    }
+</style>
 
 <?php
 // Footer include

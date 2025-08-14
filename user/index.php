@@ -103,14 +103,12 @@ include '../includes/user_header.php';
                         <div class="welcome-content">
                             <h3 class="mb-2">Hoşgeldiniz, <?php echo htmlspecialchars(!empty($_SESSION['username']) ? $_SESSION['username'] : ($_SESSION['email'] ?? 'Kullanıcı')); ?>!</h3>
                             <p class="mb-3">
-                                Hesabınızda <strong><?php echo $totalUploads; ?> dosya</strong> bulunuyor. 
-                                Bu ay <strong><?php echo $monthlyUploads; ?> dosya</strong> yüklediniz ve 
-                                <strong><?php echo number_format($monthlySpent, 2); ?> TL</strong> harcadınız.
+                                Hesabınızda <strong><?php echo $totalUploads; ?> dosya</strong> bulunuyor.
                             </p>
                             <div class="welcome-stats">
                                 <div class="stat">
                                     <i class="fas fa-coins text-warning"></i>
-                                    <span>Mevcut Kredi: <strong><?php echo number_format($userCredits, 2); ?> TL</strong></span>
+                                    <span>Mevcut Kalan Kredi: <strong><?php echo number_format($userCredits, 2); ?> TL</strong></span>
                                 </div>
                             </div>
                         </div>
