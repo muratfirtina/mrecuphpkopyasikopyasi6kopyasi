@@ -111,13 +111,87 @@ try {
 }
 $totalPages = ceil($totalRevisions / $limit);
 
-// Her revizyon için dosyalarını al
+// Her revizyon için dosyalarını ve hedef dosya bilgilerini al
 foreach ($revisions as &$revision) {
     if ($revision['status'] === 'completed') {
         $revision['revision_files'] = $fileManager->getRevisionFiles($revision['id'], $userId);
     } else {
         $revision['revision_files'] = [];
     }
+    
+    // Hedef dosya bilgisini belirle - revision-detail.php mantığı
+    $targetFile = [
+        'type' => 'Bilinmiyor',
+        'name' => 'Dosya bilgisi alınamadı',
+        'size' => 0,
+        'date' => null,
+        'is_found' => false
+    ];
+    
+    try {
+        if ($revision['response_id'] && !empty($revision['response_id'])) {
+            // Yanıt dosyası için revize talebi - yanıt dosyasının bilgilerini çek
+            $responseStmt = $pdo->prepare("SELECT original_name, file_size, upload_date FROM file_responses WHERE id = ?");
+            $responseStmt->execute([$revision['response_id']]);
+            $responseFileData = $responseStmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($responseFileData) {
+                $targetFile = [
+                    'type' => 'Yanıt Dosyası',
+                    'name' => $responseFileData['original_name'],
+                    'size' => $responseFileData['file_size'],
+                    'date' => $responseFileData['upload_date'],
+                    'is_found' => true
+                ];
+            }
+        } else {
+            // Ana dosya veya önceki revizyon dosyası için revize talebi
+            // Önceki tamamlanmış revizyon dosyasını ara
+            $prevRevisionStmt = $pdo->prepare("
+                SELECT rf.original_name, rf.file_size, rf.upload_date
+                FROM revisions r
+                JOIN revision_files rf ON r.id = rf.revision_id
+                WHERE r.upload_id = ? AND r.status = 'completed' AND r.requested_at < ?
+                ORDER BY r.completed_at DESC
+                LIMIT 1
+            ");
+            $prevRevisionStmt->execute([$revision['upload_id'], $revision['requested_at']]);
+            $previousRevisionFile = $prevRevisionStmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($previousRevisionFile) {
+                // Önceki bir revizyon dosyası bulundu
+                $targetFile = [
+                    'type' => 'Önceki Revizyon Dosyası',
+                    'name' => $previousRevisionFile['original_name'],
+                    'size' => $previousRevisionFile['file_size'],
+                    'date' => $previousRevisionFile['upload_date'],
+                    'is_found' => true
+                ];
+            } else {
+                // Önceki revizyon dosyası yoksa, hedefimiz orijinal dosyadır
+                $targetFile = [
+                    'type' => 'Orijinal Dosya',
+                    'name' => $revision['original_name'],
+                    'size' => $revision['file_size'],
+                    'date' => $revision['upload_date'] ?? null,
+                    'is_found' => true
+                ];
+            }
+        }
+    } catch (PDOException $e) {
+        // Hata durumunda logla, ama sayfayı bozma
+        error_log("Revisions.php - Hedef dosya belirlenirken hata: " . $e->getMessage());
+        $targetFile = [
+            'type' => 'Orijinal Dosya',
+            'name' => $revision['original_name'] ?? 'Bilinmiyor',
+            'size' => $revision['file_size'] ?? 0,
+            'date' => $revision['upload_date'] ?? null,
+            'is_found' => true
+        ];
+    }
+    
+    // Target file bilgilerini revision'a ekle
+    $revision['target_file'] = $targetFile;
 }
 
 // İstatistikler
@@ -411,63 +485,32 @@ include '../includes/user_header.php';
                                             </td> -->
                                             <td>
                                                 <div>
-                                                    <?php 
-                                                    // Hangi dosyaya revize talep edildiğini belirle
-                                                    $targetFileName = 'Ana Dosya';
-                                                    $targetFileType = 'Orijinal Yüklenen Dosya';
-                                                    $targetFileColor = 'success';
-                                                    $targetFileIcon = 'file-alt';
-                                                    
-                                                    if ($revision['response_id']): 
-                                                        // Yanıt dosyasına revize talebi
-                                                        $targetFileName = $revision['response_original_name'] ?? 'Yanıt Dosyası';
-                                                        $targetFileType = 'Yanıt Dosyası';
-                                                        $targetFileColor = 'primary';
-                                                        $targetFileIcon = 'reply';
-                                                    else:
-                                                        // Ana dosya veya revizyon dosyasına revize talebi
-                                                        // Önceki revizyon dosyaları var mı kontrol et
-                                                        try {
-                                                            $stmt = $pdo->prepare("
-                                                                SELECT rf.original_name 
-                                                                FROM revisions r1
-                                                                JOIN revision_files rf ON r1.id = rf.revision_id
-                                                                WHERE r1.upload_id = ? 
-                                                                AND r1.status = 'completed'
-                                                                AND r1.requested_at < ?
-                                                                ORDER BY r1.requested_at DESC 
-                                                                LIMIT 1
-                                                            ");
-                                                            $stmt->execute([$revision['upload_id'], $revision['requested_at']]);
-                                                            $previousRevisionFile = $stmt->fetch(PDO::FETCH_ASSOC);
-                                                            
-                                                            if ($previousRevisionFile) {
-                                                                $targetFileName = $previousRevisionFile['original_name'];
-                                                                $targetFileType = 'Revizyon Dosyası';
-                                                                $targetFileColor = 'warning';
-                                                                $targetFileIcon = 'edit';
-                                                            } else {
-                                                                $targetFileName = $revision['original_name'] ?? 'Ana Dosya';
-                                                            }
-                                                        } catch (Exception $e) {
-                                                            error_log('Previous revision file query error: ' . $e->getMessage());
-                                                            $targetFileName = $revision['original_name'] ?? 'Ana Dosya';
-                                                        }
-                                                    endif;
-                                                    ?>
-                                                    
-                                                    <!-- Revize Talep Edilen Dosya -->
+                                                    <!-- Revize Talep Edilen Dosya - Yeni mantık -->
                                                     <div class="mb-2">
-                                                        <i class="fas fa-<?php echo $targetFileIcon; ?> text-<?php echo $targetFileColor; ?> me-2"></i>
-                                                        <strong class="text-<?php echo $targetFileColor; ?>"><?php echo $targetFileType; ?>:</strong><br>
+                                                        <i class="fas fa-<?php 
+                                                            $iconMap = [
+                                                                'Orijinal Dosya' => 'file-alt',
+                                                                'Yanıt Dosyası' => 'reply',
+                                                                'Önceki Revizyon Dosyası' => 'edit',
+                                                                'Bilinmiyor' => 'question-circle'
+                                                            ];
+                                                            $colorMap = [
+                                                                'Orijinal Dosya' => 'success',
+                                                                'Yanıt Dosyası' => 'primary',
+                                                                'Önceki Revizyon Dosyası' => 'warning',
+                                                                'Bilinmiyor' => 'secondary'
+                                                            ];
+                                                            echo $iconMap[$revision['target_file']['type']] ?? 'file-alt';
+                                                        ?> text-<?php echo $colorMap[$revision['target_file']['type']] ?? 'secondary'; ?> me-2"></i>
+                                                        <strong class="text-<?php echo $colorMap[$revision['target_file']['type']] ?? 'secondary'; ?>"><?php echo htmlspecialchars($revision['target_file']['type']); ?>:</strong><br>
                                                         <span class="fw-semibold text-truncate d-block" style="max-width: 250px;" 
-                                                              title="<?php echo htmlspecialchars($targetFileName); ?>">
-                                                            <?php echo htmlspecialchars($targetFileName); ?>
+                                                              title="<?php echo htmlspecialchars($revision['target_file']['name']); ?>">
+                                                            <?php echo htmlspecialchars($revision['target_file']['name']); ?>
                                                         </span>
                                                     </div>
                                                     
                                                     <!-- Ana Proje Dosyası Bilgisi -->
-                                                    <?php if ($revision['response_id'] || $targetFileType === 'Revizyon Dosyası'): ?>
+                                                    <?php if ($revision['target_file']['type'] === 'Yanıt Dosyası' || $revision['target_file']['type'] === 'Önceki Revizyon Dosyası'): ?>
                                                         <div class="text-muted small">
                                                             <i class="fas fa-level-up-alt me-1"></i>
                                                             <strong>Ana Proje:</strong> <?php echo htmlspecialchars($revision['original_name'] ?? 'Bilinmiyor'); ?>

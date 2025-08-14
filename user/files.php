@@ -125,13 +125,11 @@ if ($singleFileMode) {
             if ($revisionCheck['count'] > 0) {
                 $stmt = $pdo->prepare("
                     SELECT DISTINCT fu.*, b.name as brand_name, m.name as model_name,
-                           r.response_id, r.request_notes, r.requested_at as revision_date, r.id as revision_id,
-                           rf.original_name as revision_filename
+                           r.response_id, r.request_notes, r.requested_at as revision_date, r.id as revision_id
                     FROM file_uploads fu
                     LEFT JOIN brands b ON fu.brand_id = b.id
                     LEFT JOIN models m ON fu.model_id = m.id
                     INNER JOIN revisions r ON fu.id = r.upload_id
-                    LEFT JOIN revision_files rf ON r.response_id = rf.id
                     WHERE fu.user_id = ? 
                     AND fu.status = 'completed' 
                     AND r.status = 'in_progress'
@@ -175,37 +173,91 @@ if ($singleFileMode) {
             // 4. İki listeyi birleştir (tarih sırasına göre)
             $allFiles = array_merge($normalFiles, $revisionFiles);
             
-            // Revize dosyalarını işaretle ve hedef dosyayı bul
+            // Revize dosyalarını işaretle ve hedef dosyayı bul - revision-detail.php mantığı
             foreach ($allFiles as &$file) {
-                if (isset($file['response_id']) || isset($file['revision_filename']) || isset($file['revision_id'])) {
+                if (isset($file['response_id']) || isset($file['revision_id'])) {
                     $file['processing_type'] = 'revision';
                     
-                    // Hedef dosyayı bul (revision-detail.php mantığı)
-                    $file['target_file_name'] = $file['original_name']; // Varsayılan: ana dosya
-                    $file['target_file_type'] = 'Orijinal Dosya';
+                    // Target file belirleme - revision-detail.php'den direkt kopyalandı
+                    $targetFile = [
+                        'type' => 'Bilinmiyor',
+                        'name' => 'Dosya bilgisi alınamadı',
+                        'size' => 0,
+                        'date' => null,
+                        'is_found' => false
+                    ];
                     
-                    if (isset($file['revision_id']) && isset($file['revision_date'])) {
-                        try {
-                            // Önceki tamamlanmış revizyon dosyasını ara
-                            $targetStmt = $pdo->prepare("
-                                SELECT rf.original_name
+                    try {
+                        // Revision detail kontrolü
+                        $revisionCheckStmt = $pdo->prepare("SELECT response_id FROM revisions WHERE id = ?");
+                        $revisionCheckStmt->execute([$file['revision_id']]);
+                        $revisionDetails = $revisionCheckStmt->fetch(PDO::FETCH_ASSOC);
+                        $responseId = $revisionDetails['response_id'] ?? null;
+                        
+                        if ($responseId) {
+                            // Evet, bu bir yanıt dosyası için revize talebi. Yanıt dosyasının bilgilerini çekelim.
+                            $responseStmt = $pdo->prepare("SELECT original_name, file_size, upload_date FROM file_responses WHERE id = ?");
+                            $responseStmt->execute([$responseId]);
+                            $responseFileData = $responseStmt->fetch(PDO::FETCH_ASSOC);
+                            
+                            if ($responseFileData) {
+                                $targetFile = [
+                                    'type' => 'Yanıt Dosyası',
+                                    'name' => $responseFileData['original_name'],
+                                    'size' => $responseFileData['file_size'],
+                                    'date' => $responseFileData['upload_date'],
+                                    'is_found' => true
+                                ];
+                            }
+                        } else {
+                            // Bu, ana dosya veya önceki bir revizyon dosyası için bir talep.
+                            // Bu talepten ÖNCE tamamlanmış son revizyon dosyasını bulmaya çalışalım.
+                            $prevRevisionStmt = $pdo->prepare("
+                                SELECT rf.original_name, rf.file_size, rf.upload_date
                                 FROM revisions r
                                 JOIN revision_files rf ON r.id = rf.revision_id
                                 WHERE r.upload_id = ? AND r.status = 'completed' AND r.requested_at < ?
                                 ORDER BY r.completed_at DESC
                                 LIMIT 1
                             ");
-                            $targetStmt->execute([$file['id'], $file['revision_date']]);
-                            $previousRevisionFile = $targetStmt->fetch(PDO::FETCH_ASSOC);
+                            $prevRevisionStmt->execute([$file['id'], $file['revision_date']]);
+                            $previousRevisionFile = $prevRevisionStmt->fetch(PDO::FETCH_ASSOC);
                             
                             if ($previousRevisionFile) {
-                                $file['target_file_name'] = $previousRevisionFile['original_name'];
-                                $file['target_file_type'] = 'Önceki Revizyon Dosyası';
+                                // Önceki bir revizyon dosyası bulundu. Hedefimiz bu.
+                                $targetFile = [
+                                    'type' => 'Önceki Revizyon Dosyası',
+                                    'name' => $previousRevisionFile['original_name'],
+                                    'size' => $previousRevisionFile['file_size'],
+                                    'date' => $previousRevisionFile['upload_date'],
+                                    'is_found' => true
+                                ];
+                            } else {
+                                // Önceki bir revizyon dosyası yoksa, hedefimiz orijinal dosyadır.
+                                $targetFile = [
+                                    'type' => 'Orijinal Dosya',
+                                    'name' => $file['original_name'],
+                                    'size' => $file['file_size'],
+                                    'date' => $file['upload_date'],
+                                    'is_found' => true
+                                ];
                             }
-                        } catch (Exception $e) {
-                            error_log('Hedef dosya bulma hatası: ' . $e->getMessage());
                         }
+                    } catch (PDOException $e) {
+                        // Hata durumunda logla, ama sayfayı bozma.
+                        error_log("Files.php - Hedef dosya belirlenirken hata: " . $e->getMessage());
+                        $targetFile = [
+                            'type' => 'Orijinal Dosya',
+                            'name' => $file['original_name'],
+                            'size' => $file['file_size'] ?? 0,
+                            'date' => $file['upload_date'],
+                            'is_found' => true
+                        ];
                     }
+                    
+                    // Dosyaya target file bilgilerini ekle
+                    $file['target_file_name'] = $targetFile['name'];
+                    $file['target_file_type'] = $targetFile['type'];
                 }
             }
             
@@ -618,29 +670,19 @@ include '../includes/user_header.php';
                                                         </small>
                                                     </div>
                                                     
-                                                    <?php if (isset($file['revision_filename']) && !empty($file['revision_filename'])): ?>
-                                                        <!-- Revize dosyası hazır -->
-                                                        <div class="mt-2">
-                                                            <small class="d-block text-success">
-                                                                <i class="fas fa-check-circle me-1"></i>
-                                                                <strong>Yeni Revize Dosyası:</strong> <?php echo htmlspecialchars($file['revision_filename']); ?>
+                                                    <!-- Revize dosyası henüz hazır değil - işleniyor -->
+                                                    <div class="mt-2">
+                                                        <small class="d-block text-info">
+                                                            <i class="fas fa-cogs me-1"></i>
+                                                            <strong>Yeni Revize Dosyası:</strong> <em>Hazırlanıyor...</em>
+                                                        </small>
+                                                        <?php if (isset($file['request_notes']) && !empty($file['request_notes'])): ?>
+                                                            <small class="d-block text-muted mt-1">
+                                                                <i class="fas fa-comment-dots me-1"></i>
+                                                                <em>"<?php echo htmlspecialchars(substr($file['request_notes'], 0, 60)) . (strlen($file['request_notes']) > 60 ? '...' : ''); ?>"</em>
                                                             </small>
-                                                        </div>
-                                                    <?php else: ?>
-                                                        <!-- Revize dosyası henüz hazır değil -->
-                                                        <div class="mt-2">
-                                                            <small class="d-block text-info">
-                                                                <i class="fas fa-cogs me-1"></i>
-                                                                <strong>Yeni Revize Dosyası:</strong> <em>Hazırlanıyor...</em>
-                                                            </small>
-                                                            <?php if (isset($file['request_notes']) && !empty($file['request_notes'])): ?>
-                                                                <small class="d-block text-muted mt-1">
-                                                                    <i class="fas fa-comment-dots me-1"></i>
-                                                                    <em>"<?php echo htmlspecialchars(substr($file['request_notes'], 0, 60)) . (strlen($file['request_notes']) > 60 ? '...' : ''); ?>"</em>
-                                                                </small>
-                                                            <?php endif; ?>
-                                                        </div>
-                                                    <?php endif; ?>
+                                                        <?php endif; ?>
+                                                    </div>
                                                 <?php else: ?>
                                                     <!-- Normal Dosya Görünümü -->
                                                     <h6 class="file-name mb-1" title="<?php echo htmlspecialchars($file['original_name']); ?>">
