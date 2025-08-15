@@ -890,12 +890,12 @@ include '../includes/user_header.php';
                                             <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm">
                                                 <i class="fas fa-download me-1"></i>İndir
                                             </a>
-                                            <?php if ($file['sender_type'] === 'admin'): ?>
+                                            <!-- <?php if ($file['sender_type'] === 'admin'): ?>
                                                 <button type="button" class="btn btn-outline-warning btn-sm"
                                                     onclick="requestRevision('<?php echo $file['id']; ?>', 'additional')">
                                                     <i class="fas fa-redo me-1"></i>Yeniden Revize
                                                 </button>
-                                            <?php endif; ?>
+                                            <?php endif; ?> -->
                                         </div>
                                     </div>
                                 <?php endforeach; ?>

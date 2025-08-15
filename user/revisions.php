@@ -6,17 +6,6 @@
 require_once '../config/config.php';
 require_once '../config/database.php';
 
-// DEBUG: Geçici bypass - session sorunu için
-// TODO: Bu kısmı session sorunu çözüldükten sonra kaldır!
-if (defined('DEBUG') && DEBUG) {
-    // Debug modunda belirli bir kullanıcı ID'si ile test et
-    $debugUserId = '3fbe9c59-53de-4bcd-a83b-21634f467203'; // Debug sayfasından aldığımız user_id
-    if (!isset($_SESSION['user_id'])) {
-        $_SESSION['user_id'] = $debugUserId;
-        error_log('DEBUG MODE (Revisions): Temporary user_id set for testing: ' . $debugUserId);
-    }
-}
-
 // Giriş kontrolü
 if (!isLoggedIn()) {
     redirect('../login.php?redirect=user/revisions.php');
@@ -72,13 +61,14 @@ try {
     
     $offset = ($page - 1) * $limit;
     
-    // Ana sorgu - araç bilgileri dahil
+    // Ana sorgu - araç bilgileri dahil (Admin sayfası ile aynı mantık)
     $stmt = $pdo->prepare("
         SELECT r.*, 
-               fu.original_name, fu.filename, fu.file_size, fu.plate,
-               b.name as brand_name, m.name as model_name, fu.year,
+               fu.original_name, fu.filename, fu.file_size, fu.plate, fu.year, fu.upload_date,
+               b.name as brand_name, m.name as model_name,
                s.name as series_name, e.name as engine_name,
-               a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name
+               a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
+               fr.original_name as response_original_name
         FROM revisions r
         LEFT JOIN file_uploads fu ON r.upload_id = fu.id
         LEFT JOIN brands b ON fu.brand_id = b.id
@@ -86,6 +76,7 @@ try {
         LEFT JOIN series s ON fu.series_id = s.id
         LEFT JOIN engines e ON fu.engine_id = e.id
         LEFT JOIN users a ON r.admin_id = a.id
+        LEFT JOIN file_responses fr ON r.response_id = fr.id
         $whereClause
         ORDER BY r.requested_at DESC
         LIMIT $limit OFFSET $offset
@@ -94,11 +85,17 @@ try {
     $stmt->execute($params);
     $revisions = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Toplam kayıt sayısını al
+    // Toplam kayıt sayısını al (Aynı JOIN'leri kullan)
     $countStmt = $pdo->prepare("
         SELECT COUNT(*) 
         FROM revisions r
         LEFT JOIN file_uploads fu ON r.upload_id = fu.id
+        LEFT JOIN brands b ON fu.brand_id = b.id
+        LEFT JOIN models m ON fu.model_id = m.id
+        LEFT JOIN series s ON fu.series_id = s.id
+        LEFT JOIN engines e ON fu.engine_id = e.id
+        LEFT JOIN users a ON r.admin_id = a.id
+        LEFT JOIN file_responses fr ON r.response_id = fr.id
         $whereClause
     ");
     $countStmt->execute($params);
@@ -111,87 +108,65 @@ try {
 }
 $totalPages = ceil($totalRevisions / $limit);
 
-// Her revizyon için dosyalarını ve hedef dosya bilgilerini al
-foreach ($revisions as &$revision) {
-    if ($revision['status'] === 'completed') {
-        $revision['revision_files'] = $fileManager->getRevisionFiles($revision['id'], $userId);
+// Her revizyon için dosyalarını ve hedef dosya bilgilerini al (Admin sayfası mantığı ile)
+for ($i = 0; $i < count($revisions); $i++) {
+    if ($revisions[$i]['status'] === 'completed') {
+        $revisions[$i]['revision_files'] = $fileManager->getRevisionFiles($revisions[$i]['id'], $userId);
     } else {
-        $revision['revision_files'] = [];
+        $revisions[$i]['revision_files'] = [];
     }
     
-    // Hedef dosya bilgisini belirle - revision-detail.php mantığı
-    $targetFile = [
-        'type' => 'Bilinmiyor',
-        'name' => 'Dosya bilgisi alınamadı',
-        'size' => 0,
-        'date' => null,
-        'is_found' => false
-    ];
+    // Hedef dosya bilgisini belirle (Admin sayfasındaki mantık)
+    $targetFileName = 'Ana Dosya';
+    $targetFileType = 'Orijinal Yüklenen Dosya';
+    $targetFileColor = 'success';
+    $targetFileIcon = 'file-alt';
     
-    try {
-        if ($revision['response_id'] && !empty($revision['response_id'])) {
-            // Yanıt dosyası için revize talebi - yanıt dosyasının bilgilerini çek
-            $responseStmt = $pdo->prepare("SELECT original_name, file_size, upload_date FROM file_responses WHERE id = ?");
-            $responseStmt->execute([$revision['response_id']]);
-            $responseFileData = $responseStmt->fetch(PDO::FETCH_ASSOC);
-            
-            if ($responseFileData) {
-                $targetFile = [
-                    'type' => 'Yanıt Dosyası',
-                    'name' => $responseFileData['original_name'],
-                    'size' => $responseFileData['file_size'],
-                    'date' => $responseFileData['upload_date'],
-                    'is_found' => true
-                ];
-            }
-        } else {
-            // Ana dosya veya önceki revizyon dosyası için revize talebi
-            // Önceki tamamlanmış revizyon dosyasını ara
-            $prevRevisionStmt = $pdo->prepare("
-                SELECT rf.original_name, rf.file_size, rf.upload_date
-                FROM revisions r
-                JOIN revision_files rf ON r.id = rf.revision_id
-                WHERE r.upload_id = ? AND r.status = 'completed' AND r.requested_at < ?
-                ORDER BY r.completed_at DESC
+    if ($revisions[$i]['response_id']) {
+        // Yanıt dosyasına revize talebi
+        $targetFileName = $revisions[$i]['response_original_name'] ?? 'Yanıt Dosyası';
+        $targetFileType = 'Yanıt Dosyası';
+        $targetFileColor = 'primary';
+        $targetFileIcon = 'reply';
+    } else {
+        // Ana dosya veya revizyon dosyasına revize talebi
+        // Önceki revizyon dosyaları var mı kontrol et
+        try {
+            $stmt = $pdo->prepare("
+                SELECT rf.original_name 
+                FROM revisions r1
+                JOIN revision_files rf ON r1.id = rf.revision_id
+                WHERE r1.upload_id = ? 
+                AND r1.status = 'completed'
+                AND r1.requested_at < ?
+                ORDER BY r1.requested_at DESC 
                 LIMIT 1
             ");
-            $prevRevisionStmt->execute([$revision['upload_id'], $revision['requested_at']]);
-            $previousRevisionFile = $prevRevisionStmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->execute([$revisions[$i]['upload_id'], $revisions[$i]['requested_at']]);
+            $previousRevisionFile = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($previousRevisionFile) {
-                // Önceki bir revizyon dosyası bulundu
-                $targetFile = [
-                    'type' => 'Önceki Revizyon Dosyası',
-                    'name' => $previousRevisionFile['original_name'],
-                    'size' => $previousRevisionFile['file_size'],
-                    'date' => $previousRevisionFile['upload_date'],
-                    'is_found' => true
-                ];
+                $targetFileName = $previousRevisionFile['original_name'];
+                $targetFileType = 'Revizyon Dosyası';
+                $targetFileColor = 'warning';
+                $targetFileIcon = 'edit';
             } else {
-                // Önceki revizyon dosyası yoksa, hedefimiz orijinal dosyadır
-                $targetFile = [
-                    'type' => 'Orijinal Dosya',
-                    'name' => $revision['original_name'],
-                    'size' => $revision['file_size'],
-                    'date' => $revision['upload_date'] ?? null,
-                    'is_found' => true
-                ];
+                $targetFileName = $revisions[$i]['original_name'] ?? 'Ana Dosya';
             }
+        } catch (Exception $e) {
+            error_log('Previous revision file query error: ' . $e->getMessage());
+            $targetFileName = $revisions[$i]['original_name'] ?? 'Ana Dosya';
         }
-    } catch (PDOException $e) {
-        // Hata durumunda logla, ama sayfayı bozma
-        error_log("Revisions.php - Hedef dosya belirlenirken hata: " . $e->getMessage());
-        $targetFile = [
-            'type' => 'Orijinal Dosya',
-            'name' => $revision['original_name'] ?? 'Bilinmiyor',
-            'size' => $revision['file_size'] ?? 0,
-            'date' => $revision['upload_date'] ?? null,
-            'is_found' => true
-        ];
     }
     
     // Target file bilgilerini revision'a ekle
-    $revision['target_file'] = $targetFile;
+    $revisions[$i]['target_file'] = [
+        'type' => $targetFileType,
+        'name' => $targetFileName,
+        'color' => $targetFileColor,
+        'icon' => $targetFileIcon,
+        'is_found' => true
+    ];
 }
 
 // İstatistikler
@@ -464,7 +439,7 @@ include '../includes/user_header.php';
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($revisions as $revision): ?>
+                                    <?php foreach ($revisions as $index => $revision): ?>
                                         <?php
                                         $statusConfig = [
                                             'pending' => ['class' => 'warning', 'text' => 'Bekliyor', 'icon' => 'clock'],
@@ -475,7 +450,7 @@ include '../includes/user_header.php';
                                         ];
                                         $config = $statusConfig[$revision['status']] ?? ['class' => 'secondary', 'text' => 'Bilinmiyor', 'icon' => 'question'];
                                         ?>
-                                        <tr class="revision-row" data-revision-id="<?php echo htmlspecialchars($revision['id']); ?>">
+                                        <tr class="revision-row" data-revision-id="<?php echo htmlspecialchars($revision['id']); ?>" data-index="<?php echo $index; ?>">
                                             <!-- <td>
                                                 <span class="font-monospace text-muted">
                                                     #<?php echo substr($revision['id'], 0, 8); ?>
@@ -485,32 +460,18 @@ include '../includes/user_header.php';
                                             </td> -->
                                             <td>
                                                 <div>
-                                                    <!-- Revize Talep Edilen Dosya - Yeni mantık -->
+                                                    <!-- Revize Talep Edilen Dosya - Admin sayfası mantığı -->
                                                     <div class="mb-2">
-                                                        <i class="fas fa-<?php 
-                                                            $iconMap = [
-                                                                'Orijinal Dosya' => 'file-alt',
-                                                                'Yanıt Dosyası' => 'reply',
-                                                                'Önceki Revizyon Dosyası' => 'edit',
-                                                                'Bilinmiyor' => 'question-circle'
-                                                            ];
-                                                            $colorMap = [
-                                                                'Orijinal Dosya' => 'success',
-                                                                'Yanıt Dosyası' => 'primary',
-                                                                'Önceki Revizyon Dosyası' => 'warning',
-                                                                'Bilinmiyor' => 'secondary'
-                                                            ];
-                                                            echo $iconMap[$revision['target_file']['type']] ?? 'file-alt';
-                                                        ?> text-<?php echo $colorMap[$revision['target_file']['type']] ?? 'secondary'; ?> me-2"></i>
-                                                        <strong class="text-<?php echo $colorMap[$revision['target_file']['type']] ?? 'secondary'; ?>"><?php echo htmlspecialchars($revision['target_file']['type']); ?>:</strong><br>
-                                                        <span class="fw-semibold text-truncate d-block" style="max-width: 250px;" 
-                                                              title="<?php echo htmlspecialchars($revision['target_file']['name']); ?>">
-                                                            <?php echo htmlspecialchars($revision['target_file']['name']); ?>
-                                                        </span>
+                                                    <i class="fas fa-<?php echo $revision['target_file']['icon']; ?> text-<?php echo $revision['target_file']['color']; ?> me-2"></i>
+                                                    <strong class="text-<?php echo $revision['target_file']['color']; ?>"><?php echo htmlspecialchars($revision['target_file']['type']); ?>:</strong><br>
+                                                    <span class="fw-semibold text-truncate d-block" style="max-width: 250px;" 
+                                                    title="<?php echo htmlspecialchars($revision['target_file']['name']); ?>">
+                                                    <?php echo htmlspecialchars($revision['target_file']['name']); ?>
+                                                    </span>
                                                     </div>
                                                     
                                                     <!-- Ana Proje Dosyası Bilgisi -->
-                                                    <?php if ($revision['target_file']['type'] === 'Yanıt Dosyası' || $revision['target_file']['type'] === 'Önceki Revizyon Dosyası'): ?>
+                                                    <?php if ($revision['target_file']['type'] === 'Yanıt Dosyası' || $revision['target_file']['type'] === 'Revizyon Dosyası'): ?>
                                                         <div class="text-muted small">
                                                             <i class="fas fa-level-up-alt me-1"></i>
                                                             <strong>Ana Proje:</strong> <?php echo htmlspecialchars($revision['original_name'] ?? 'Bilinmiyor'); ?>
@@ -904,8 +865,24 @@ include '../includes/user_header.php';
 </style>
 
 <script>
+// Cache buster - Tarayıcı cache'ini atlatmak için
+console.log('Revisions page loaded at:', new Date().toISOString());
+console.log('Page version: 3.0 - PHP Reference Bug Fixed!');
+console.log('Foreach reference bug fixed with for loop');
+
 // Table row click handler
 document.addEventListener('DOMContentLoaded', function() {
+    // Debug: Revize satır sayısını göster
+    const revisionRows = document.querySelectorAll('.revision-row');
+    console.log('Revisions page loaded - Total revision rows found:', revisionRows.length);
+    
+    // Her satır için debug bilgisi
+    revisionRows.forEach((row, index) => {
+        const revisionId = row.getAttribute('data-revision-id');
+        const rowIndex = row.getAttribute('data-index');
+        console.log(`Row ${index}: ID=${revisionId}, Index=${rowIndex}`);
+    });
+    
     console.log('Page loaded, setting up click handlers...');
     
     // Add click handler for table rows (but not for buttons)
