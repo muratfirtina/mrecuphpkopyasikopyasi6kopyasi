@@ -174,9 +174,9 @@ if ($singleFileMode) {
             $allFiles = array_merge($normalFiles, $revisionFiles);
             
             // Revize dosyalarını işaretle ve hedef dosyayı bul - revision-detail.php mantığı
-            foreach ($allFiles as &$file) {
-                if (isset($file['response_id']) || isset($file['revision_id'])) {
-                    $file['processing_type'] = 'revision';
+            for ($i = 0; $i < count($allFiles); $i++) {
+                if (isset($allFiles[$i]['response_id']) || isset($allFiles[$i]['revision_id'])) {
+                    $allFiles[$i]['processing_type'] = 'revision';
                     
                     // Target file belirleme - revision-detail.php'den direkt kopyalandı
                     $targetFile = [
@@ -190,7 +190,7 @@ if ($singleFileMode) {
                     try {
                         // Revision detail kontrolü
                         $revisionCheckStmt = $pdo->prepare("SELECT response_id FROM revisions WHERE id = ?");
-                        $revisionCheckStmt->execute([$file['revision_id']]);
+                        $revisionCheckStmt->execute([$allFiles[$i]['revision_id']]);
                         $revisionDetails = $revisionCheckStmt->fetch(PDO::FETCH_ASSOC);
                         $responseId = $revisionDetails['response_id'] ?? null;
                         
@@ -220,7 +220,7 @@ if ($singleFileMode) {
                                 ORDER BY r.completed_at DESC
                                 LIMIT 1
                             ");
-                            $prevRevisionStmt->execute([$file['id'], $file['revision_date']]);
+                            $prevRevisionStmt->execute([$allFiles[$i]['id'], $allFiles[$i]['revision_date']]);
                             $previousRevisionFile = $prevRevisionStmt->fetch(PDO::FETCH_ASSOC);
                             
                             if ($previousRevisionFile) {
@@ -236,9 +236,9 @@ if ($singleFileMode) {
                                 // Önceki bir revizyon dosyası yoksa, hedefimiz orijinal dosyadır.
                                 $targetFile = [
                                     'type' => 'Orijinal Dosya',
-                                    'name' => $file['original_name'],
-                                    'size' => $file['file_size'],
-                                    'date' => $file['upload_date'],
+                                    'name' => $allFiles[$i]['original_name'],
+                                    'size' => $allFiles[$i]['file_size'],
+                                    'date' => $allFiles[$i]['upload_date'],
                                     'is_found' => true
                                 ];
                             }
@@ -248,16 +248,16 @@ if ($singleFileMode) {
                         error_log("Files.php - Hedef dosya belirlenirken hata: " . $e->getMessage());
                         $targetFile = [
                             'type' => 'Orijinal Dosya',
-                            'name' => $file['original_name'],
-                            'size' => $file['file_size'] ?? 0,
-                            'date' => $file['upload_date'],
+                            'name' => $allFiles[$i]['original_name'],
+                            'size' => $allFiles[$i]['file_size'] ?? 0,
+                            'date' => $allFiles[$i]['upload_date'],
                             'is_found' => true
                         ];
                     }
                     
                     // Dosyaya target file bilgilerini ekle
-                    $file['target_file_name'] = $targetFile['name'];
-                    $file['target_file_type'] = $targetFile['type'];
+                    $allFiles[$i]['target_file_name'] = $targetFile['name'];
+                    $allFiles[$i]['target_file_type'] = $targetFile['type'];
                 }
             }
             
@@ -297,7 +297,7 @@ if ($status === 'processing' && !$singleFileMode) {
 }
 
 // Her dosya için revize taleplerini getir
-foreach ($userFiles as &$file) {
+for ($j = 0; $j < count($userFiles); $j++) {
     try {
         // Bu dosya için revize taleplerini getir
         $stmt = $pdo->prepare("
@@ -306,29 +306,29 @@ foreach ($userFiles as &$file) {
             ORDER BY requested_at DESC 
             LIMIT 1
         ");
-        $stmt->execute([$file['id'], $userId]);
+        $stmt->execute([$userFiles[$j]['id'], $userId]);
         $latestRevision = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        $file['latest_revision'] = $latestRevision;
+        $userFiles[$j]['latest_revision'] = $latestRevision;
         
         // Aktif revize durumu varsa ekle
         if ($latestRevision && in_array($latestRevision['status'], ['pending', 'in_progress'])) {
-            $file['has_active_revision'] = true;
-            $file['revision_status'] = $latestRevision['status'];
-            $file['revision_id'] = $latestRevision['id'];
+            $userFiles[$j]['has_active_revision'] = true;
+            $userFiles[$j]['revision_status'] = $latestRevision['status'];
+            $userFiles[$j]['revision_id'] = $latestRevision['id'];
             
             // Eğer bu dosya processing filtresinde ve revize işleniyorsa, dosya durumunu güncelle
-            if ($status === 'processing' && $latestRevision['status'] === 'in_progress' && $file['status'] === 'completed') {
-                $file['display_status'] = 'revision_processing';
-                $file['processing_type'] = 'revision';
+            if ($status === 'processing' && $latestRevision['status'] === 'in_progress' && $userFiles[$j]['status'] === 'completed') {
+                $userFiles[$j]['display_status'] = 'revision_processing';
+                $userFiles[$j]['processing_type'] = 'revision';
             }
         } else {
-            $file['has_active_revision'] = false;
+            $userFiles[$j]['has_active_revision'] = false;
         }
     } catch (Exception $e) {
         error_log('Revize talebi getirme hatası: ' . $e->getMessage());
-        $file['latest_revision'] = null;
-        $file['has_active_revision'] = false;
+        $userFiles[$j]['latest_revision'] = null;
+        $userFiles[$j]['has_active_revision'] = false;
     }
 }
 
@@ -696,6 +696,7 @@ include '../includes/user_header.php';
                                                         <?php echo htmlspecialchars(substr($file['upload_notes'], 0, 50)) . (strlen($file['upload_notes']) > 50 ? '...' : ''); ?>
                                                     </small>
                                                 <?php endif; ?>
+                                                
                                             </div>
                                         </td>
                                         <td>
@@ -831,6 +832,13 @@ include '../includes/user_header.php';
                                                         </a>
                                                     <?php endif; ?>
                                                 <?php endif; ?>
+                                                
+                                                
+                                                <!-- İptal Butonu -->
+                                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                        onclick="requestCancellation('<?php echo $file['id']; ?>', 'upload', '<?php echo htmlspecialchars($file['original_name']); ?>')">
+                                                    <i class="fas fa-times me-1"></i>İptal
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -944,6 +952,68 @@ include '../includes/user_header.php';
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Dosya İptal Modal -->
+<div class="modal fade" id="cancellationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-times-circle me-2 text-danger"></i>Dosya İptal Talebi
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="cancellationFileId">
+                <input type="hidden" id="cancellationFileType">
+                
+                <div class="alert alert-warning">
+                    <div class="d-flex">
+                        <i class="fas fa-exclamation-triangle me-3 mt-1"></i>
+                        <div>
+                            <strong>Dikkat!</strong>
+                            <p class="mb-0 mt-1">
+                                Bu dosya için iptal talebi göndermek üzeresiniz. İptal talebiniz admin tarafından değerlendirildikten sonra:
+                            </p>
+                            <ul class="mt-2 mb-0">
+                                <li>Dosya kalıcı olarak silinecektir</li>
+                                <li>Eğer ücretli bir işlemse kredi iadeniz yapılacaktır</li>
+                                <li>Bu işlem geri alınamaz</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        <i class="fas fa-file me-1"></i>İptal edilecek dosya:
+                    </label>
+                    <div class="form-control-plaintext" id="cancellationFileName" style="background: #f8f9fa; padding: 0.75rem; border-radius: 8px;"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="cancellation_reason" class="form-label fw-semibold">
+                        <i class="fas fa-comment me-1"></i>
+                        İptal Sebebi <span class="text-danger">*</span>
+                    </label>
+                    <textarea class="form-control form-control-modern" id="cancellation_reason" name="cancellation_reason" 
+                              rows="4" required
+                              placeholder="Lütfen dosyayı neden iptal etmek istediğinizi açıklayın. Örneğin: 'Yanlış dosya yükledim', 'Artık ihtiyacım yok', 'Başka seçenek tercih ediyorum' gibi..."></textarea>
+                    <div class="form-text">
+                        <i class="fas fa-lightbulb me-1"></i>
+                        İptal sebebinizi belirtmeniz, gelecekteki hizmet kalitemizi artırmamıza yardımcı olur.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                <button type="button" class="btn btn-danger" onclick="submitCancellation()">
+                    <i class="fas fa-paper-plane me-2"></i>İptal Talebi Gönder
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -1352,6 +1422,96 @@ function requestRevision(fileId, fileType = 'upload') {
     modal.show();
 }
 
+// Request Cancellation
+function requestCancellation(fileId, fileType, fileName) {
+    document.getElementById('cancellationFileId').value = fileId;
+    document.getElementById('cancellationFileType').value = fileType;
+    document.getElementById('cancellationFileName').textContent = fileName;
+    
+    // Formu temizle
+    document.getElementById('cancellation_reason').value = '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('cancellationModal'));
+    modal.show();
+}
+
+// Submit Cancellation
+function submitCancellation() {
+    const fileId = document.getElementById('cancellationFileId').value;
+    const fileType = document.getElementById('cancellationFileType').value;
+    const reason = document.getElementById('cancellation_reason').value.trim();
+    
+    if (!reason) {
+        alert('Lütfen iptal sebebini belirtin.');
+        document.getElementById('cancellation_reason').focus();
+        return;
+    }
+    
+    // Loading state
+    const submitBtn = document.querySelector('#cancellationModal .btn-danger');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Gönderiliyor...';
+    submitBtn.disabled = true;
+    
+    // AJAX request
+    fetch('../ajax/file-cancellation.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            action: 'request_cancellation',
+            file_id: fileId,
+            file_type: fileType,
+            reason: reason
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Success
+            const modal = bootstrap.Modal.getInstance(document.getElementById('cancellationModal'));
+            modal.hide();
+            
+            // Show success message
+            showAlert('success', data.message);
+            
+            // Refresh page after a delay
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        } else {
+            // Error
+            showAlert('danger', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('danger', 'Sistem hatası oluştu. Lütfen tekrar deneyin.');
+    })
+    .finally(() => {
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+// Show Alert
+function showAlert(type, message) {
+    const alertContainer = document.querySelector('.container-fluid .row main');
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="margin-top: 1rem;">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Insert after the page title
+    const pageTitle = alertContainer.querySelector('.border-bottom');
+    pageTitle.insertAdjacentHTML('afterend', alertHtml);
+}
+
 // Export Functions
 function exportToExcel() {
     window.location.href = 'export-files.php?format=excel';
@@ -1363,6 +1523,10 @@ function refreshPage() {
 
 // File row click handler - detay sayfasına gitmek için
 document.addEventListener('DOMContentLoaded', function() {
+    // Cache buster - PHP referans hatası düzeltildi
+    console.log('Files page loaded at:', new Date().toISOString());
+    console.log('Page version: 3.0 - PHP Reference Bugs Fixed!');
+    console.log('Both foreach reference bugs fixed with for loops');
     const fileRows = document.querySelectorAll('.file-row');
     fileRows.forEach(row => {
         row.addEventListener('click', function(e) {

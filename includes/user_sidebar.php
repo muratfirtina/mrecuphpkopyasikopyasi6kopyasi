@@ -147,6 +147,24 @@ if (isset($_SESSION['user_id'])) {
                     ?>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'cancellations.php' ? 'active' : ''; ?>" href="cancellations.php">
+                    <div class="nav-icon bg-danger">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <span>İptal Taleplerim</span>
+                    <?php
+                    try {
+                        $stmt = $pdo->prepare("SELECT COUNT(*) FROM file_cancellations WHERE user_id = ? AND status = 'pending'");
+                        $stmt->execute([$_SESSION['user_id']]);
+                        $pendingCancellations = $stmt->fetchColumn();
+                        if ($pendingCancellations > 0) {
+                            echo '<span class="badge bg-warning ms-auto">' . $pendingCancellations . '</span>';
+                        }
+                    } catch(PDOException $e) {}
+                    ?>
+                </a>
+            </li>
         </ul>
 
         <!-- Hesap Yönetimi -->
