@@ -25,7 +25,7 @@ if (isset($_SESSION['error_message'])) {
     unset($_SESSION['error_message']);
 }
 
-// Kredi ekleme/çıkarma işlemi
+// Kredi işlemleri
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // DEBUG: Form verisini log'la
     error_log('Credits.php POST verisi: ' . print_r($_POST, true));
@@ -36,9 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // POST verilerini kontrol et
     $hasAddCredits = isset($_POST['add_credits']) && !empty($_POST['add_credits']);
     $hasDeductCredits = isset($_POST['deduct_credits']) && !empty($_POST['deduct_credits']);
+    $hasResetQuota = isset($_POST['reset_quota']) && !empty($_POST['reset_quota']);
+    $hasSetQuota = isset($_POST['set_quota']) && !empty($_POST['set_quota']);
     
     error_log('Has add_credits: ' . ($hasAddCredits ? 'true' : 'false'));
     error_log('Has deduct_credits: ' . ($hasDeductCredits ? 'true' : 'false'));
+    error_log('Has reset_quota: ' . ($hasResetQuota ? 'true' : 'false'));
+    error_log('Has set_quota: ' . ($hasSetQuota ? 'true' : 'false'));
     
     if ($hasAddCredits) {
         error_log('Add credits işlemi başlatılıyor...');
@@ -174,8 +178,127 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
+    if ($hasResetQuota) {
+        error_log('Reset quota işlemi başlatılıyor...');
+        $user_id = sanitize($_POST['user_id']);
+        $amount = floatval($_POST['amount']);
+        $description = sanitize($_POST['description']);
+        
+        if (!isValidUUID($user_id)) {
+            $error = 'Geçersiz kullanıcı ID formatı.';
+            $_SESSION['error_message'] = $error;
+            header('Location: credits.php');
+            exit();
+        } elseif ($amount < 0) {
+            $error = 'Kredi miktarı 0 veya daha büyük olmalıdır.';
+            $_SESSION['error_message'] = $error;
+            header('Location: credits.php');
+            exit();
+        } else {
+            try {
+                $pdo->beginTransaction();
+                
+                $currentUser = $user->getUserById($user_id);
+                if (!$currentUser) {
+                    throw new Exception('Kullanıcı bulunamadı.');
+                }
+                
+                // KOTA SIFIRLA: Hem kotayı hem kullanımı sıfırla, yeni kota belirle
+                $stmt = $pdo->prepare("UPDATE users SET credit_quota = ?, credit_used = 0 WHERE id = ?");
+                $stmt->execute([$amount, $user_id]);
+                
+                // Credit transactions tablosuna kaydet
+                $transactionId = generateUUID();
+                $stmt = $pdo->prepare("
+                    INSERT INTO credit_transactions (id, user_id, admin_id, transaction_type, type, amount, description, created_at) 
+                    VALUES (?, ?, ?, 'add', 'quota_reset', ?, ?, NOW())
+                ");
+                $stmt->execute([$transactionId, $user_id, $_SESSION['user_id'], $amount, $description]);
+                
+                // Log kaydı
+                $user->logAction($_SESSION['user_id'], 'credit_quota_reset', "Kullanıcının kredi kotası sıfırlandı ve {$amount} TL yeni kota tanımlandı: {$description}");
+                
+                $pdo->commit();
+                $success = "Kredi kotası başarıyla sıfırlandı ve {$amount} TL yeni kota tanımlandı. Kullanılabilir: " . number_format($amount, 2) . " TL";
+                error_log('Kota sıfırlama başarılı. Redirect yapılıyor...');
+                
+                $_SESSION['success_message'] = $success;
+                header('Location: credits.php');
+                exit();
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                $error = 'Kota sıfırlanırken hata oluştu: ' . $e->getMessage();
+                error_log('Kota sıfırlama hatası: ' . $e->getMessage());
+                $_SESSION['error_message'] = $error;
+                header('Location: credits.php');
+                exit();
+            }
+        }
+    }
+    
+    if ($hasSetQuota) {
+        error_log('Set quota işlemi başlatılıyor...');
+        $user_id = sanitize($_POST['user_id']);
+        $amount = floatval($_POST['amount']);
+        $description = sanitize($_POST['description']);
+        
+        if (!isValidUUID($user_id)) {
+            $error = 'Geçersiz kullanıcı ID formatı.';
+            $_SESSION['error_message'] = $error;
+            header('Location: credits.php');
+            exit();
+        } elseif ($amount < 0) {
+            $error = 'Kredi miktarı 0 veya daha büyük olmalıdır.';
+            $_SESSION['error_message'] = $error;
+            header('Location: credits.php');
+            exit();
+        } else {
+            try {
+                $pdo->beginTransaction();
+                
+                $currentUser = $user->getUserById($user_id);
+                if (!$currentUser) {
+                    throw new Exception('Kullanıcı bulunamadı.');
+                }
+                
+                // KOTA YENİLE: Mevcut kullanımı koru, sadece kotayı değiştir
+                $stmt = $pdo->prepare("UPDATE users SET credit_quota = ? WHERE id = ?");
+                $stmt->execute([$amount, $user_id]);
+                
+                // Kullanılabilir kredi hesapla
+                $availableCredits = $amount - $currentUser['credit_used'];
+                
+                // Credit transactions tablosuna kaydet
+                $transactionId = generateUUID();
+                $stmt = $pdo->prepare("
+                    INSERT INTO credit_transactions (id, user_id, admin_id, transaction_type, type, amount, description, created_at) 
+                    VALUES (?, ?, ?, 'add', 'quota_set', ?, ?, NOW())
+                ");
+                $stmt->execute([$transactionId, $user_id, $_SESSION['user_id'], $amount, $description]);
+                
+                // Log kaydı
+                $user->logAction($_SESSION['user_id'], 'credit_quota_set', "Kullanıcının kredi kotası {$amount} TL olarak belirlendi: {$description}");
+                
+                $pdo->commit();
+                $success = "Kredi kotası {$amount} TL olarak başarıyla belirlendi. Kullanılabilir: " . number_format($availableCredits, 2) . " TL";
+                error_log('Kota belirleme başarılı. Redirect yapılıyor...');
+                
+                $_SESSION['success_message'] = $success;
+                header('Location: credits.php');
+                exit();
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                $error = 'Kota belirlenirken hata oluştu: ' . $e->getMessage();
+                error_log('Kota belirleme hatası: ' . $e->getMessage());
+                $_SESSION['error_message'] = $error;
+                header('Location: credits.php');
+                exit();
+            }
+        }
+    }
+    
     // Hiçbir işlem bulunamadıysa
-    if (!$hasAddCredits && !$hasDeductCredits) {
+    if (!$hasAddCredits && !$hasDeductCredits && !$hasResetQuota && !$hasSetQuota) {
         error_log('POST işlemi geldi ama hiçbir kredi işlemi bulunamadı!');
         error_log('POST keys: ' . implode(', ', array_keys($_POST)));
         $_SESSION['error_message'] = 'Geçersiz işlem tipi.';
@@ -513,6 +636,16 @@ include '../includes/admin_sidebar.php';
                                                 title="Kredi Kotası Artır">
                                             <i class="fas fa-plus me-1"></i>Kota +
                                         </button>
+                                        <button type="button" class="btn btn-warning" 
+                                                onclick="openCreditModal('set', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['credit_quota']; ?>', '<?php echo $userItem['credit_used']; ?>', '<?php echo $userItem['available_credits']; ?>')"
+                                                title="Kota Yenile">
+                                            <i class="fas fa-edit me-1"></i>Yenile
+                                        </button>
+                                        <button type="button" class="btn btn-info" 
+                                                onclick="openCreditModal('reset', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['credit_quota']; ?>', '<?php echo $userItem['credit_used']; ?>', '<?php echo $userItem['available_credits']; ?>')"
+                                                title="Kota Sıfırla">
+                                            <i class="fas fa-sync me-1"></i>Sıfırla
+                                        </button>
                                         <button type="button" class="btn btn-danger" 
                                                 onclick="openCreditModal('deduct', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['credit_quota']; ?>', '<?php echo $userItem['credit_used']; ?>', '<?php echo $userItem['available_credits']; ?>')"
                                                 title="Kredi İadesi">
@@ -711,6 +844,8 @@ include '../includes/admin_sidebar.php';
                     <!-- Işlem türü için ayrı hidden inputlar -->
                     <input type="hidden" name="add_credits" id="add_credits" value="">
                     <input type="hidden" name="deduct_credits" id="deduct_credits" value="">
+                    <input type="hidden" name="reset_quota" id="reset_quota" value="">
+                    <input type="hidden" name="set_quota" id="set_quota" value="">
                     
                     <div class="alert alert-info alert-permanent">
                         <strong>Kullanıcı:</strong> <span id="selectedUserName"></span><br>
@@ -791,11 +926,21 @@ function openCreditModal(operation, userId, userName, creditQuota, creditUsed, a
     // Hidden input'ları sıfırla
     document.getElementById('add_credits').value = '';
     document.getElementById('deduct_credits').value = '';
+    document.getElementById('reset_quota').value = '';
+    document.getElementById('set_quota').value = '';
     
     if (operation === 'add') {
         modalTitle.textContent = 'Kredi Kotası Artır';
         submitBtn.textContent = 'Kota Artır';
         submitBtn.className = 'btn btn-success';
+    } else if (operation === 'set') {
+        modalTitle.textContent = 'Kredi Kotası Yenile';
+        submitBtn.textContent = 'Kota Yenile';
+        submitBtn.className = 'btn btn-warning';
+    } else if (operation === 'reset') {
+        modalTitle.textContent = 'Kredi Kotası Sıfırla';
+        submitBtn.textContent = 'Kota Sıfırla';
+        submitBtn.className = 'btn btn-info';
     } else {
         modalTitle.textContent = 'Kredi İadesi';
         submitBtn.textContent = 'Kredi İade Et';
@@ -854,6 +999,41 @@ function updatePreview() {
             'Yeni Tanımlı Kota: <span class="text-success">' + newQuota.toFixed(2) + ' TL</span><br>' +
             'Mevcut Kullanım: <span class="text-warning">' + userCreditUsed.toFixed(2) + ' TL</span><br>' +
             'Yeni Kalan Kullanım: <span class="text-success">' + newAvailableCredits.toFixed(2) + ' TL</span>';
+            
+    } else if (currentOperation === 'set') {
+        // Kredi Kotası Yenileme İşlemi
+        const newAvailableCredits = amount - userCreditUsed;
+        
+        previewHtml = 
+            '<strong>Mevcut Durum:</strong><br>' +
+            'Tanımlı Kota: <span class="text-primary">' + userCreditQuota.toFixed(2) + ' TL</span><br>' +
+            'Mevcut Kullanım: <span class="text-warning">' + userCreditUsed.toFixed(2) + ' TL</span><br>' +
+            'Kalan Kullanım: <span class="text-info">' + (userCreditQuota - userCreditUsed).toFixed(2) + ' TL</span><br><br>' +
+            '<strong>İşlem:</strong> <span class="text-warning">Kota Yenileme: ' + amount.toFixed(2) + ' TL</span><br>' +
+            '<em>Mevcut kullanım korunacak</em><br><br>' +
+            '<strong>İşlem Sonrası:</strong><br>' +
+            'Yeni Tanımlı Kota: <span class="text-warning">' + amount.toFixed(2) + ' TL</span><br>' +
+            'Mevcut Kullanım: <span class="text-warning">' + userCreditUsed.toFixed(2) + ' TL</span><br>' +
+            'Yeni Kalan Kullanım: <span class="' + (newAvailableCredits >= 0 ? 'text-success' : 'text-danger') + '">' + newAvailableCredits.toFixed(2) + ' TL</span>';
+            
+        if (newAvailableCredits < 0) {
+            previewHtml += '<br><br><span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Uyarı: Yeni kota mevcut kullanımdan az!</span>';
+        }
+        
+    } else if (currentOperation === 'reset') {
+        // Kredi Kotası Sıfırlama İşlemi
+        
+        previewHtml = 
+            '<strong>Mevcut Durum:</strong><br>' +
+            'Tanımlı Kota: <span class="text-primary">' + userCreditQuota.toFixed(2) + ' TL</span><br>' +
+            'Mevcut Kullanım: <span class="text-warning">' + userCreditUsed.toFixed(2) + ' TL</span><br>' +
+            'Kalan Kullanım: <span class="text-info">' + (userCreditQuota - userCreditUsed).toFixed(2) + ' TL</span><br><br>' +
+            '<strong>İşlem:</strong> <span class="text-info">Kota Sıfırlama: ' + amount.toFixed(2) + ' TL</span><br>' +
+            '<em class="text-danger">Mevcut kullanım sıfırlanacak!</em><br><br>' +
+            '<strong>İşlem Sonrası:</strong><br>' +
+            'Yeni Tanımlı Kota: <span class="text-info">' + amount.toFixed(2) + ' TL</span><br>' +
+            'Yeni Mevcut Kullanım: <span class="text-success">0.00 TL</span><br>' +
+            'Yeni Kalan Kullanım: <span class="text-success">' + amount.toFixed(2) + ' TL</span>';
             
     } else {
         // Kredi İadesi İşlemi
@@ -934,13 +1114,28 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Onay mesajı
             const username = document.getElementById('selectedUserName').textContent;
-            const newBalance = currentOperation === 'add' ? 
-                userCurrentCredits + amount : userCurrentCredits - amount;
+            let operationTitle, newBalance, additionalInfo = '';
+            
+            if (currentOperation === 'add') {
+                operationTitle = 'Kredi Kotası Artırma';
+                newBalance = userCurrentCredits + amount;
+            } else if (currentOperation === 'set') {
+                operationTitle = 'Kredi Kotası Yenileme';
+                newBalance = amount - userCreditUsed;
+                additionalInfo = '\nMevcut kullanım korunacak: ' + userCreditUsed.toFixed(2) + ' TL';
+            } else if (currentOperation === 'reset') {
+                operationTitle = 'Kredi Kotası Sıfırlama';
+                newBalance = amount;
+                additionalInfo = '\nMevcut kullanım sıfırlanacak!';
+            } else {
+                operationTitle = 'Kredi İadesi';
+                newBalance = userCurrentCredits - amount;
+            }
             
             const confirmMessage = 
                 username + ' kullanıcısı için kredi işlemi:\n\n' +
-                'İşlem: ' + (currentOperation === 'add' ? 'Kredi Kotası Artırma' : 'Kredi İadesi') + '\n' +
-                'Miktar: ' + amount.toFixed(2) + ' TL\n' +
+                'İşlem: ' + operationTitle + '\n' +
+                'Miktar: ' + amount.toFixed(2) + ' TL' + additionalInfo + '\n' +
                 'Mevcut Durum: ' + userCurrentCredits.toFixed(2) + ' TL\n' +
                 'Yeni Durum: ' + newBalance.toFixed(2) + ' TL\n\n' +
                 'İşlemi onaylıyor musunuz?';
@@ -954,14 +1149,24 @@ document.addEventListener('DOMContentLoaded', function() {
             // Doğru hidden input'u ayarla
             const addCreditsInput = document.getElementById('add_credits');
             const deductCreditsInput = document.getElementById('deduct_credits');
+            const resetQuotaInput = document.getElementById('reset_quota');
+            const setQuotaInput = document.getElementById('set_quota');
             
-            // Önce her ikisini de temizle
+            // Tüm input'ları temizle
             addCreditsInput.value = '';
             deductCreditsInput.value = '';
+            resetQuotaInput.value = '';
+            setQuotaInput.value = '';
             
             if (currentOperation === 'add') {
                 addCreditsInput.value = '1';
                 console.log('Add credits input set to: 1');
+            } else if (currentOperation === 'set') {
+                setQuotaInput.value = '1';
+                console.log('Set quota input set to: 1');
+            } else if (currentOperation === 'reset') {
+                resetQuotaInput.value = '1';
+                console.log('Reset quota input set to: 1');
             } else {
                 deductCreditsInput.value = '1';
                 console.log('Deduct credits input set to: 1');
@@ -991,6 +1196,8 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('creditForm').reset();
             document.getElementById('add_credits').value = '';
             document.getElementById('deduct_credits').value = '';
+            document.getElementById('reset_quota').value = '';
+            document.getElementById('set_quota').value = '';
             document.getElementById('previewText').innerHTML = 'Lütfen miktar girin...';
             currentOperation = ''; // Operation'u da sıfırla
         });
