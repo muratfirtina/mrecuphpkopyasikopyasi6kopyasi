@@ -69,7 +69,79 @@ try {
     $totalCreditsPages = 0;
 }
 
-// Kullanıcı istatistikleri
+// Kullanıcı kredi istatistiklerini getir - Detaylı analiz
+try {
+    // Toplam kredi istatistikleri
+    $stmt = $pdo->prepare("
+        SELECT 
+            SUM(CASE WHEN transaction_type = 'add' AND type IN ('quota_add', 'quota_reset', 'quota_set') THEN amount ELSE 0 END) as total_quota_given,
+            SUM(CASE WHEN transaction_type = 'withdraw' AND type = 'refund' THEN amount ELSE 0 END) as total_refunds,
+            SUM(CASE WHEN transaction_type = 'withdraw' AND type IN ('manual', 'file_charge') THEN amount ELSE 0 END) as total_spent,
+            SUM(CASE WHEN transaction_type = 'file_charge' THEN amount ELSE 0 END) as total_file_charges,
+            COUNT(*) as total_transactions,
+            COUNT(CASE WHEN transaction_type = 'add' AND type IN ('quota_add', 'quota_reset', 'quota_set') THEN 1 END) as quota_transactions,
+            COUNT(CASE WHEN transaction_type = 'withdraw' AND type = 'refund' THEN 1 END) as refund_transactions,
+            MAX(CASE WHEN transaction_type = 'add' AND type IN ('quota_add', 'quota_reset', 'quota_set') THEN amount END) as highest_quota_transaction,
+            MIN(created_at) as first_transaction_date,
+            MAX(created_at) as last_transaction_date
+        FROM credit_transactions 
+        WHERE user_id = ?
+    ");
+    $stmt->execute([$userId]);
+    $creditStats = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // İşlem türlerine göre dağılım
+    $stmt = $pdo->prepare("
+        SELECT 
+            type,
+            transaction_type,
+            COUNT(*) as count,
+            SUM(amount) as total_amount,
+            AVG(amount) as avg_amount,
+            MAX(amount) as max_amount,
+            MIN(amount) as min_amount
+        FROM credit_transactions 
+        WHERE user_id = ?
+        GROUP BY type, transaction_type
+        ORDER BY total_amount DESC
+    ");
+    $stmt->execute([$userId]);
+    $creditBreakdown = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Aylık kredi hareketleri (Son 12 ay)
+    $stmt = $pdo->prepare("
+        SELECT 
+            DATE_FORMAT(created_at, '%Y-%m') as month_year,
+            SUM(CASE WHEN transaction_type = 'add' AND type IN ('quota_add', 'quota_reset', 'quota_set') THEN amount ELSE 0 END) as quota_added,
+            SUM(CASE WHEN transaction_type = 'withdraw' THEN amount ELSE 0 END) as amount_spent,
+            COUNT(*) as transaction_count
+        FROM credit_transactions 
+        WHERE user_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+        GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+        ORDER BY month_year DESC
+        LIMIT 12
+    ");
+    $stmt->execute([$userId]);
+    $monthlyStats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+} catch(PDOException $e) {
+    $creditStats = [
+        'total_quota_given' => 0,
+        'total_refunds' => 0,
+        'total_spent' => 0,
+        'total_file_charges' => 0,
+        'total_transactions' => 0,
+        'quota_transactions' => 0,
+        'refund_transactions' => 0,
+        'highest_quota_transaction' => 0,
+        'first_transaction_date' => null,
+        'last_transaction_date' => null
+    ];
+    $creditBreakdown = [];
+    $monthlyStats = [];
+}
+
+// Kullanıcı dosya istatistikleri
 try {
     $stmt = $pdo->prepare("
         SELECT 
@@ -332,6 +404,180 @@ include '../includes/admin_sidebar.php';
                 </div>
             </div>
         </div>
+        
+        <!-- Kredi İstatistikleri -->
+        <div class="card admin-card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Kredi İstatistikleri
+                </h6>
+            </div>
+            <div class="card-body">
+                <!-- Genel İstatistikler -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <div class="text-center p-2 bg-success bg-opacity-10 rounded">
+                            <h5 class="text-success mb-1"><?php echo number_format($creditStats['total_quota_given'] ?? 0, 2); ?> TL</h5>
+                            <small class="text-muted">Toplam Verilen Kota</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-2 bg-danger bg-opacity-10 rounded">
+                            <h5 class="text-danger mb-1"><?php echo number_format($creditStats['total_spent'] ?? 0, 2); ?> TL</h5>
+                            <small class="text-muted">Toplam Harcama</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <div class="text-center p-2 bg-info bg-opacity-10 rounded">
+                            <h6 class="text-info mb-1"><?php echo number_format($creditStats['total_refunds'] ?? 0, 2); ?> TL</h6>
+                            <small class="text-muted">Toplam İade</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-2 bg-warning bg-opacity-10 rounded">
+                            <h6 class="text-warning mb-1"><?php echo $creditStats['quota_transactions'] ?? 0; ?></h6>
+                            <small class="text-muted">Kota İşlemleri</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- İleri İstatistikler -->
+                <hr class="my-3">
+                <div class="row g-2 text-center">
+                    <div class="col-4">
+                        <h6 class="text-primary"><?php echo number_format($creditStats['highest_quota_transaction'] ?? 0, 2); ?> TL</h6>
+                        <small class="text-muted">En Yüksek Kota</small>
+                    </div>
+                    <div class="col-4">
+                        <h6 class="text-secondary"><?php echo $creditStats['total_transactions'] ?? 0; ?></h6>
+                        <small class="text-muted">Toplam İşlem</small>
+                    </div>
+                    <div class="col-4">
+                        <h6 class="text-info"><?php echo $creditStats['refund_transactions'] ?? 0; ?></h6>
+                        <small class="text-muted">İade İşlemi</small>
+                    </div>
+                </div>
+                
+                <!-- Tarih Bilgileri -->
+                <?php if ($creditStats['first_transaction_date']): ?>
+                <hr class="my-3">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <small class="text-muted">İlk İşlem:</small><br>
+                        <small class="fw-bold"><?php echo date('d.m.Y', strtotime($creditStats['first_transaction_date'])); ?></small>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Son İşlem:</small><br>
+                        <small class="fw-bold"><?php echo date('d.m.Y H:i', strtotime($creditStats['last_transaction_date'])); ?></small>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <!-- İşlem Türleri Analizi -->
+        <?php if (!empty($creditBreakdown)): ?>
+        <div class="card admin-card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-list me-2"></i>İşlem Türleri
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Tür</th>
+                                <th class="text-end">Adet</th>
+                                <th class="text-end">Toplam</th>
+                                <th class="text-end">Ortalama</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($creditBreakdown as $breakdown): ?>
+                            <tr>
+                                <td>
+                                    <span class="badge bg-<?php 
+                                        echo $breakdown['transaction_type'] === 'add' ? 'success' : 
+                                            ($breakdown['type'] === 'refund' ? 'info' : 'warning'); 
+                                    ?> badge-sm">
+                                        <?php 
+                                        $typeLabels = [
+                                            'quota_add' => 'Kota Artırma',
+                                            'quota_reset' => 'Kota Sıfırlama',
+                                            'quota_set' => 'Kota Yenileme',
+                                            'refund' => 'Kredi İadesi',
+                                            'manual' => 'Manuel Kullanım',
+                                            'file_charge' => 'Dosya Ücreti'
+                                        ];
+                                        echo $typeLabels[$breakdown['type']] ?? $breakdown['type'];
+                                        ?>
+                                    </span>
+                                </td>
+                                <td class="text-end"><?php echo $breakdown['count']; ?></td>
+                                <td class="text-end"><?php echo number_format($breakdown['total_amount'], 2); ?> TL</td>
+                                <td class="text-end"><?php echo number_format($breakdown['avg_amount'], 2); ?> TL</td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Aylık Kredi Hareketleri -->
+        <?php if (!empty($monthlyStats)): ?>
+        <div class="card admin-card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-calendar me-2"></i>Aylık Hareketler (Son 12 Ay)
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Ay</th>
+                                <th class="text-end">Verilen Kota</th>
+                                <th class="text-end">Harcama</th>
+                                <th class="text-end">İşlem Sayısı</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($monthlyStats as $monthly): ?>
+                            <tr>
+                                <td>
+                                    <?php 
+                                    $monthNames = [
+                                        '01' => 'Ocak', '02' => 'Şubat', '03' => 'Mart', '04' => 'Nisan',
+                                        '05' => 'Mayıs', '06' => 'Haziran', '07' => 'Temmuz', '08' => 'Ağustos',
+                                        '09' => 'Eylül', '10' => 'Ekim', '11' => 'Kasım', '12' => 'Aralık'
+                                    ];
+                                    $monthParts = explode('-', $monthly['month_year']);
+                                    echo $monthNames[$monthParts[1]] . ' ' . $monthParts[0];
+                                    ?>
+                                </td>
+                                <td class="text-end text-success">
+                                    <?php echo $monthly['quota_added'] > 0 ? '+' . number_format($monthly['quota_added'], 2) . ' TL' : '-'; ?>
+                                </td>
+                                <td class="text-end text-danger">
+                                    <?php echo $monthly['amount_spent'] > 0 ? '-' . number_format($monthly['amount_spent'], 2) . ' TL' : '-'; ?>
+                                </td>
+                                <td class="text-end"><?php echo $monthly['transaction_count']; ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
     
     <div class="col-lg-8">
