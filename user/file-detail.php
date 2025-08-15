@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Mr ECU - Dosya Detay Sayfası
  */
@@ -7,6 +6,9 @@
 require_once '../config/config.php';
 require_once '../config/database.php';
 require_once '../includes/ChatManager.php';
+
+// FileCancellationManager'ı include et
+require_once '../includes/FileCancellationManager.php';
 
 // Admin notlarını filtreleyen fonksiyon - sadece kesin sistem mesajlarını filtreler
 function filterAdminNotes($adminNotes)
@@ -568,9 +570,20 @@ include '../includes/user_header.php';
                                     </div>
                                 <?php endif; ?> -->
                                 <?php if (($fileType === 'response') || ($fileType === 'upload' && $fileDetail['status'] === 'completed')): ?>
-                                    <a href="download.php?id=<?php echo $fileDetail['id']; ?>&type=<?php echo $fileType; ?>" class="btn btn-success">
-                                        <i class="fas fa-download me-1"></i>İndir
-                                    </a>
+                                    <div class="d-flex gap-2">
+                                        <a href="download.php?id=<?php echo $fileDetail['id']; ?>&type=<?php echo $fileType; ?>" class="btn btn-success">
+                                            <i class="fas fa-download me-1"></i>İndir
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" 
+                                            onclick="requestCancellation('<?php echo $fileDetail['id']; ?>', '<?php echo $fileType; ?>', '<?php echo htmlspecialchars($fileDetail['original_name']); ?>')">
+                                            <i class="fas fa-times me-1"></i>İptal
+                                        </button>
+                                    </div>
+                                <?php elseif ($fileType === 'upload'): ?>
+                                    <button type="button" class="btn btn-outline-danger" 
+                                        onclick="requestCancellation('<?php echo $fileDetail['id']; ?>', 'upload', '<?php echo htmlspecialchars($fileDetail['original_name']); ?>')">
+                                        <i class="fas fa-times me-1"></i>İptal Et
+                                    </button>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -736,6 +749,10 @@ include '../includes/user_header.php';
                                                 onclick="requestRevision('<?php echo $response['id']; ?>', 'response')">
                                                 <i class="fas fa-redo me-1"></i>Revize
                                             </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                onclick="requestCancellation('<?php echo $response['id']; ?>', 'response', '<?php echo htmlspecialchars($response['original_name']); ?>')">
+                                                <i class="fas fa-times me-1"></i>İptal
+                                            </button>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -810,6 +827,10 @@ include '../includes/user_header.php';
                                             <button type="button" class="btn btn-outline-warning btn-sm"
                                                 onclick="requestRevision('<?php echo $revFile['id']; ?>', 'revision')">
                                                 <i class="fas fa-redo me-1"></i>Yeniden Revize
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                onclick="requestCancellation('<?php echo $revFile['id']; ?>', 'revision', '<?php echo htmlspecialchars($revFile['original_name']); ?>')">
+                                                <i class="fas fa-times me-1"></i>İptal
                                             </button>
                                         </div>
                                     </div>
@@ -890,12 +911,10 @@ include '../includes/user_header.php';
                                             <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm">
                                                 <i class="fas fa-download me-1"></i>İndir
                                             </a>
-                                            <!-- <?php if ($file['sender_type'] === 'admin'): ?>
-                                                <button type="button" class="btn btn-outline-warning btn-sm"
-                                                    onclick="requestRevision('<?php echo $file['id']; ?>', 'additional')">
-                                                    <i class="fas fa-redo me-1"></i>Yeniden Revize
-                                                </button>
-                                            <?php endif; ?> -->
+                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                onclick="requestCancellation('<?php echo $file['id']; ?>', 'additional', '<?php echo htmlspecialchars($file['original_name']); ?>')">
+                                                <i class="fas fa-times me-1"></i>İptal
+                                            </button>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -1579,6 +1598,10 @@ include '../includes/user_header.php';
                                                                                 onclick="requestRevision('<?php echo $revFile['id']; ?>', 'revision')">
                                                                                 <i class="fas fa-redo me-1"></i>Revize Talep Et
                                                                             </button>
+                                                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                                                onclick="requestCancellation('<?php echo $revFile['id']; ?>', 'revision', '<?php echo htmlspecialchars($revFile['original_name']); ?>')">
+                                                                                <i class="fas fa-times me-1"></i>İptal
+                                                                            </button>
                                                                         </div>
                                                                     </div>
                                                                 <?php endforeach; ?>
@@ -1615,6 +1638,10 @@ include '../includes/user_header.php';
                                                                             <button type="button" class="btn btn-outline-warning btn-sm"
                                                                                 onclick="requestRevision('<?php echo $comm['response_id']; ?>', 'response')">
                                                                                 <i class="fas fa-redo me-1"></i>Revize Talep Et
+                                                                            </button>
+                                                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                                                onclick="requestCancellation('<?php echo $comm['response_id']; ?>', 'response', '<?php echo htmlspecialchars($comm['file_name']); ?>')">
+                                                                                <i class="fas fa-times me-1"></i>İptal
                                                                             </button>
                                                                         </div>
                                                                     </div>
@@ -3064,6 +3091,240 @@ include '../includes/user_header.php';
     .detail-card .card-body {
         padding: 1rem;
     }
+</style>
+
+<!-- Dosya İptal Modalı -->
+<div class="modal fade" id="fileCancellationModal" tabindex="-1" aria-labelledby="fileCancellationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="fileCancellationModalLabel">
+                    <i class="fas fa-times-circle me-2"></i>Dosya İptali
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning border-0 mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle fa-2x text-warning me-3"></i>
+                        <div>
+                            <h6 class="alert-heading mb-1">Dikkat!</h6>
+                            <p class="mb-0">Bu dosyayı iptal etmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="cancellationForm">
+                    <input type="hidden" id="cancelFileId" name="file_id">
+                    <input type="hidden" id="cancelFileType" name="file_type">
+                    
+                    <div class="file-info-box mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-file-alt fa-2x text-primary me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Dosya:</h6>
+                                <p class="mb-0 text-muted" id="cancelFileName">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="cancellationReason" class="form-label">
+                            <i class="fas fa-comment-dots me-1"></i>
+                            İptal Sebebi <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="cancellationReason" name="reason" rows="4" 
+                                  placeholder="Lütfen dosyayı neden iptal etmek istediğinizi açıklayın..." required></textarea>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Minimum 10 karakter gereklidir.
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <button type="button" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-1"></i>Vazgeç
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button type="submit" class="btn btn-danger w-100" id="submitCancellationBtn">
+                                <i class="fas fa-paper-plane me-1"></i>İptal Talebi Gönder
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dosya İptal JavaScript -->
+<script>
+// Dosya iptal fonksiyonu
+function requestCancellation(fileId, fileType, fileName) {
+    console.log('Dosya iptal talebi:', {
+        fileId: fileId,
+        fileType: fileType, 
+        fileName: fileName
+    });
+    
+    // Modal alanlarını doldur
+    document.getElementById('cancelFileId').value = fileId;
+    document.getElementById('cancelFileType').value = fileType;
+    document.getElementById('cancelFileName').textContent = fileName;
+    
+    // Formı temizle
+    document.getElementById('cancellationReason').value = '';
+    
+    // Modalı aç
+    const modal = new bootstrap.Modal(document.getElementById('fileCancellationModal'));
+    modal.show();
+}
+
+// İptal formu submit handler
+document.addEventListener('DOMContentLoaded', function() {
+    const cancellationForm = document.getElementById('cancellationForm');
+    
+    if (cancellationForm) {
+        cancellationForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fileId = document.getElementById('cancelFileId').value;
+            const fileType = document.getElementById('cancelFileType').value;
+            const reason = document.getElementById('cancellationReason').value.trim();
+            
+            // Validasyon
+            if (!reason || reason.length < 10) {
+                alert('İptal sebebi en az 10 karakter olmalıdır.');
+                return;
+            }
+            
+            // Submit butonunu devre dışı bırak
+            const submitBtn = document.getElementById('submitCancellationBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Gönderiliyor...';
+            
+            // AJAX ile iptal talebi gönder
+            fetch('../ajax/file-cancellation.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=create&file_id=${encodeURIComponent(fileId)}&file_type=${encodeURIComponent(fileType)}&reason=${encodeURIComponent(reason)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Modalı kapat
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('fileCancellationModal'));
+                    modal.hide();
+                    
+                    // Başarı mesajı göster
+                    showCancellationSuccessMessage('İptal talebi başarıyla gönderildi! Admin onayı bekleniyor.');
+                    
+                    // Sayfayı yenile (opsiyonel)
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    alert('Hata: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('İptal talebi hatası:', error);
+                alert('İptal talebi gönderilirken bir hata oluştu.');
+            })
+            .finally(() => {
+                // Submit butonunu tekrar aktif et
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            });
+        });
+    }
+});
+
+// Başarı mesajı göster
+function showCancellationSuccessMessage(message) {
+    // Önce mevcut alert'leri temizle
+    document.querySelectorAll('.cancellation-alert').forEach(alert => alert.remove());
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success alert-dismissible fade show cancellation-alert mb-3';
+    alertDiv.style.cssText = 'animation: slideDown 0.3s ease; position: relative; z-index: 1000;';
+    alertDiv.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle fa-lg me-2"></i>
+            <div>
+                <strong>Başarılı!</strong>
+                <span class="ms-2">${message}</span>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Main'in başına ekle
+    document.querySelector('main').insertBefore(alertDiv, document.querySelector('main').firstChild);
+    
+    // 5 saniye sonra otomatik kaldır
+    setTimeout(() => {
+        alertDiv.style.animation = 'slideUp 0.3s ease';
+        setTimeout(() => alertDiv.remove(), 300);
+    }, 5000);
+}
+</script>
+
+<!-- CSS Stilleri -->
+<style>
+.file-info-box {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    border-left: 4px solid #007bff;
+}
+
+.modal-content {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.modal-header {
+    border-bottom: none;
+    padding: 1.5rem;
+}
+
+.modal-body {
+    padding: 0 1.5rem 1.5rem;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+.cancellation-alert {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: none;
+    border-radius: 10px;
+}
 </style>
 
 <?php

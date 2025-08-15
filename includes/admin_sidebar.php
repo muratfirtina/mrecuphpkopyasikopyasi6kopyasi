@@ -93,6 +93,24 @@
                             }
                             ?>
                         </a>
+                        
+                        <a class="nav-link <?php echo ($pageTitle == 'Dosya İptal Talepleri') ? 'active' : ''; ?>" href="file-cancellations.php">
+                            <i class="fas fa-times-circle"></i>İptal Talepleri
+                            <?php
+                            // Bekleyen iptal talep sayısını al
+                            try {
+                                $pendingCancellationsStmt = $pdo->prepare("SELECT COUNT(*) FROM file_cancellations WHERE status = 'pending'");
+                                $pendingCancellationsStmt->execute();
+                                $pendingCancellationsCount = $pendingCancellationsStmt->fetchColumn();
+                                
+                                if ($pendingCancellationsCount > 0) {
+                                    echo '<span class="badge bg-warning ms-2">' . $pendingCancellationsCount . '</span>';
+                                }
+                            } catch(Exception $e) {
+                                // Hata durumunda badge gösterme
+                            }
+                            ?>
+                        </a>
 
                         <a class="nav-link <?php echo ($pageTitle == 'Bildirimler') ? 'active' : ''; ?>" href="notifications.php">
                             <i class="fas fa-bell"></i>Bildirimler

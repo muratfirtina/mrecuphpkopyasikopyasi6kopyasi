@@ -116,7 +116,7 @@ if (!isset($_GET['id']) || !isValidUUID($_GET['id'])) {
 }
 
 $uploadId = $_GET['id'];
-$fileType = isset($_GET['type']) ? sanitize($_GET['type']) : 'upload'; // 'upload' or 'response'
+$fileType = isset($_GET['type']) ? sanitize($_GET['type']) : 'upload'; // 'upload', 'response', 'revision', 'additional'
 $error = '';
 $success = '';
 
@@ -1814,91 +1814,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Ana İletişim Bölümü - Dosya Gönderme ve Chat Yan Yana -->
-<div class="row mb-4">
-    <!-- Sol Kolon - Dosya Gönderme ve Ek Dosyalar -->
-    <div class="col-md-6">
-        <!-- Dosya Gönderme Bölümü -->
-        <div class="card admin-card mb-3">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="fas fa-upload me-2"></i>Kullanıcıya Dosya Gönder
-                </h6>
-            </div>
-            <div class="card-body">
-                <form id="uploadAdditionalFileForm" enctype="multipart/form-data">
-                    <input type="hidden" name="related_file_id" value="<?php echo $uploadId; ?>">
-                    <input type="hidden" name="related_file_type" value="upload">
-                    <input type="hidden" name="receiver_id" value="<?php echo $upload['user_id']; ?>">
-                    <input type="hidden" name="receiver_type" value="user">
-
-                    <div class="mb-3">
-                        <label for="additional_file" class="form-label">Dosya Seç <span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" id="additional_file" name="additional_file" required>
-                        <div class="form-text">Maksimum dosya boyutu: <?php echo ini_get('upload_max_filesize'); ?></div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="additional_notes" class="form-label">Notlar</label>
-                        <textarea class="form-control" id="additional_notes" name="notes" rows="3" placeholder="Dosya hakkında açıklama..."></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="additional_credits" class="form-label">Ücret (Kredi)</label>
-                        <input type="number" class="form-control" id="additional_credits" name="credits" min="0" step="0.01" value="0">
-                        <div class="form-text">Bu dosya için kullanıcıdan düşülecek kredi miktarı</div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-upload me-1"></i>Dosyayı Gönder
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        
-    </div>
-
-    <!-- Sağ Kolon - Chat Sistemi -->
-    <div class="col-md-6">
-        <div class="card admin-card" id="chatContainer">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="fas fa-comments me-2"></i>Mesajlaşma
-                    <span class="badge bg-secondary ms-2" id="messageCount">0</span>
-                </h6>
-            </div>
-            <div class="card-body p-0">
-                <!-- Chat Mesajları -->
-                <div id="chatMessages" class="chat-messages" style="height: 400px; overflow-y: auto; padding: 1rem;">
-                    <div class="text-center text-muted">
-                        <i class="fas fa-spinner fa-spin"></i> Mesajlar yükleniyor...
-                    </div>
-                </div>
-
-                <!-- Mesaj Gönderme Formu -->
-                <div class="chat-input border-top p-3">
-                    <form id="chatForm" class="d-flex gap-2">
-                        <input type="hidden" id="chatFileId" value="<?php echo $uploadId; ?>">
-                        <input type="hidden" id="chatFileType" value="upload">
-                        <div class="flex-grow-1">
-                            <textarea id="chatMessage" class="form-control" rows="2"
-                                placeholder="Kullanıcıya mesaj yazın..." required></textarea>
-                        </div>
-                        <div class="align-self-end">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
 <!-- Yanıt Dosyası Yükleme (sadece normal dosyalar için) -->
 <?php if ($fileType !== 'response' && ($upload['status'] === 'pending' || $upload['status'] === 'processing')): ?>
     <div class="card admin-card mb-4">
@@ -2626,6 +2541,89 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 <?php endif; ?>
+
+<!-- Ana İletişim Bölümü - Dosya Gönderme ve Chat Yan Yana -->
+<div class="row mb-4">
+    <!-- Sol Kolon - Dosya Gönderme ve Ek Dosyalar -->
+    <div class="col-md-6">
+        <!-- Dosya Gönderme Bölümü -->
+        <div class="card admin-card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-upload me-2"></i>Kullanıcıya Dosya Gönder
+                </h6>
+            </div>
+            <div class="card-body">
+                <form id="uploadAdditionalFileForm" enctype="multipart/form-data">
+                    <input type="hidden" name="related_file_id" value="<?php echo $uploadId; ?>">
+                    <input type="hidden" name="related_file_type" value="upload">
+                    <input type="hidden" name="receiver_id" value="<?php echo $upload['user_id']; ?>">
+                    <input type="hidden" name="receiver_type" value="user">
+
+                    <div class="mb-3">
+                        <label for="additional_file" class="form-label">Dosya Seç <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="additional_file" name="additional_file" required>
+                        <div class="form-text">Maksimum dosya boyutu: <?php echo ini_get('upload_max_filesize'); ?></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="additional_notes" class="form-label">Notlar</label>
+                        <textarea class="form-control" id="additional_notes" name="notes" rows="3" placeholder="Dosya hakkında açıklama..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="additional_credits" class="form-label">Ücret (Kredi)</label>
+                        <input type="number" class="form-control" id="additional_credits" name="credits" min="0" step="0.01" value="0">
+                        <div class="form-text">Bu dosya için kullanıcıdan düşülecek kredi miktarı</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-upload me-1"></i>Dosyayı Gönder
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        
+    </div>
+
+    <!-- Sağ Kolon - Chat Sistemi -->
+    <div class="col-md-6">
+        <div class="card admin-card" id="chatContainer">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-comments me-2"></i>Mesajlaşma
+                    <span class="badge bg-secondary ms-2" id="messageCount">0</span>
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <!-- Chat Mesajları -->
+                <div id="chatMessages" class="chat-messages" style="height: 400px; overflow-y: auto; padding: 1rem;">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-spinner fa-spin"></i> Mesajlar yükleniyor...
+                    </div>
+                </div>
+
+                <!-- Mesaj Gönderme Formu -->
+                <div class="chat-input border-top p-3">
+                    <form id="chatForm" class="d-flex gap-2">
+                        <input type="hidden" id="chatFileId" value="<?php echo $uploadId; ?>">
+                        <input type="hidden" id="chatFileType" value="upload">
+                        <div class="flex-grow-1">
+                            <textarea id="chatMessage" class="form-control" rows="2"
+                                placeholder="Kullanıcıya mesaj yazın..." required></textarea>
+                        </div>
+                        <div class="align-self-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <!-- Revize Reddetme Modal -->
