@@ -356,47 +356,103 @@ if ($fileType === 'response') {
     $originalUploadId = $fileId;
 }
 
-// Bu dosya için harcanan tüm kredilerin toplamını hesapla
+// Bu dosya için harcanan tüm kredilerin toplamını hesapla (İPTAL EDİLMİŞ DOSYALAR HARİÇ)
+// DÜZELTME: Tüm ücretleri ayrı ayrı topla - çift sayım yok, eksik sayım da yok
 $totalCreditsSpent = 0;
 try {
     // Ana dosya veya yanıt dosyası için harcanan kredileri al
     if ($fileType === 'response') {
-        // Yanıt dosyası ise, bu yanıt dosyası için harcanan krediyi al
-        $stmt = $pdo->prepare("SELECT COALESCE(credits_charged, 0) as credits FROM file_responses WHERE id = ?");
-        $stmt->execute([$fileId]);
-        $responseCredits = $stmt->fetchColumn() ?: 0;
-        $totalCreditsSpent += $responseCredits;
-
-        // Bu yanıt dosyası için yapılan revizyon talepleri için harcanan kredileri al
-        $stmt = $pdo->prepare("SELECT COALESCE(SUM(credits_charged), 0) as total_credits FROM revisions WHERE response_id = ? AND user_id = ?");
-        $stmt->execute([$fileId, $userId]);
-        $responseRevisionCredits = $stmt->fetchColumn() ?: 0;
-        $totalCreditsSpent += $responseRevisionCredits;
-    } else {
-        // Ana dosya ise, bu ana dosya ile ilgili tüm harcamaları al
-
-        // 1. Ana dosya için yanıt dosyalarında harcanan krediler
-        $stmt = $pdo->prepare("SELECT COALESCE(SUM(credits_charged), 0) as total_credits FROM file_responses WHERE upload_id = ?");
-        $stmt->execute([$fileId]);
-        $responseCredits = $stmt->fetchColumn() ?: 0;
-        $totalCreditsSpent += $responseCredits;
-
-        // 2. Ana dosya için revizyon talepleri ve cevaplarında harcanan krediler
-        $stmt = $pdo->prepare("SELECT COALESCE(SUM(credits_charged), 0) as total_credits FROM revisions WHERE upload_id = ? AND user_id = ?");
-        $stmt->execute([$fileId, $userId]);
-        $revisionCredits = $stmt->fetchColumn() ?: 0;
-        $totalCreditsSpent += $revisionCredits;
-
-        // 3. Ana dosya ile ilgili yanıt dosyalarının revizyon talepleri için harcanan krediler
+        // YANİT DOSYASI SAYİSI (ÖRN: yanıt dosyasının detay sayfasında)
+        
+        // 1. Bu yanıt dosyasının orijinal ücreti (admin yanıt dosyası yüklerken belirlediği üret)
         $stmt = $pdo->prepare("
-            SELECT COALESCE(SUM(r.credits_charged), 0) as total_credits 
-            FROM revisions r 
-            INNER JOIN file_responses fr ON r.response_id = fr.id 
-            WHERE fr.upload_id = ? AND r.user_id = ?
+            SELECT COALESCE(credits_charged, 0) as original_cost
+            FROM file_responses 
+            WHERE id = ? AND (is_cancelled IS NULL OR is_cancelled = 0)
+        ");
+        $stmt->execute([$fileId]);
+        $responseOriginalCost = $stmt->fetchColumn() ?: 0;
+        $totalCreditsSpent += $responseOriginalCost;
+        
+        // 2. Bu yanıt dosyası için yapılan tüm revizyon ücretleri (iptal edilmemiş)
+        $stmt = $pdo->prepare("
+            SELECT COALESCE(SUM(credits_charged), 0) as total_revision_cost
+            FROM revisions 
+            WHERE response_id = ? AND user_id = ? 
+            AND status IN ('completed', 'pending', 'processing')
+            AND (is_cancelled IS NULL OR is_cancelled = 0)
         ");
         $stmt->execute([$fileId, $userId]);
-        $responseRevisionCredits = $stmt->fetchColumn() ?: 0;
-        $totalCreditsSpent += $responseRevisionCredits;
+        $responseRevisionCost = $stmt->fetchColumn() ?: 0;
+        $totalCreditsSpent += $responseRevisionCost;
+        
+        // DEBUG
+        error_log("RESPONSE FILE CREDIT CALCULATION:");
+        error_log("- Response Original Cost: {$responseOriginalCost} TL");
+        error_log("- Response Revision Cost: {$responseRevisionCost} TL");
+        error_log("- Response Total: {$totalCreditsSpent} TL");
+        
+    } else {
+        // ANA DOSYA SAYİSI (ÖRN: ana dosyanın detay sayfasında)
+        
+        // 1. Bu ana dosya için oluşturulan tüm yanıt dosyalarının orijinal ücretleri
+        $stmt = $pdo->prepare("
+            SELECT COALESCE(SUM(credits_charged), 0) as total_response_cost
+            FROM file_responses 
+            WHERE upload_id = ? AND (is_cancelled IS NULL OR is_cancelled = 0)
+        ");
+        $stmt->execute([$fileId]);
+        $allResponseCost = $stmt->fetchColumn() ?: 0;
+        $totalCreditsSpent += $allResponseCost;
+        
+        // 2. Ana dosyaya direkt yapılan revizyon talepleri (ana dosyanın kendisine, iptal edilmemiş)
+        $stmt = $pdo->prepare("
+            SELECT COALESCE(SUM(r.credits_charged), 0) as total_direct_revision_cost
+            FROM revisions r
+            LEFT JOIN revision_files rf ON r.id = rf.revision_id
+            WHERE r.upload_id = ? AND r.response_id IS NULL AND r.user_id = ?
+            AND r.status IN ('completed', 'pending', 'processing')
+            AND (r.is_cancelled IS NULL OR r.is_cancelled = 0)
+            AND (rf.is_cancelled IS NULL OR rf.is_cancelled = 0)
+        ");
+        $stmt->execute([$fileId, $userId]);
+        $directRevisionCost = $stmt->fetchColumn() ?: 0;
+        $totalCreditsSpent += $directRevisionCost;
+        
+        // 3. Yanıt dosyalarına yapılan tüm revizyon talepleri (iptal edilmemiş)
+        // NOT: Yanıt dosyası iptal edilse bile, o yanıtın revizyonları iptal edilmez!
+        $stmt = $pdo->prepare("
+            SELECT COALESCE(SUM(r.credits_charged), 0) as total_response_revision_cost
+            FROM revisions r 
+            INNER JOIN file_responses fr ON r.response_id = fr.id 
+            LEFT JOIN revision_files rf ON r.id = rf.revision_id
+            WHERE fr.upload_id = ? AND r.user_id = ? 
+            AND r.status IN ('completed', 'pending', 'processing')
+            AND (r.is_cancelled IS NULL OR r.is_cancelled = 0)
+            AND (rf.is_cancelled IS NULL OR rf.is_cancelled = 0)
+        ");
+        $stmt->execute([$fileId, $userId]);
+        $responseRevisionCost = $stmt->fetchColumn() ?: 0;
+        $totalCreditsSpent += $responseRevisionCost;
+        
+        // 4. Ek dosyalar için harcanan krediler
+        $stmt = $pdo->prepare("
+            SELECT COALESCE(SUM(credits), 0) as total_additional_cost
+            FROM additional_files 
+            WHERE related_file_id = ? AND related_file_type = 'upload' AND receiver_id = ? 
+            AND (is_cancelled IS NULL OR is_cancelled = 0)
+        ");
+        $stmt->execute([$fileId, $userId]);
+        $additionalCost = $stmt->fetchColumn() ?: 0;
+        $totalCreditsSpent += $additionalCost;
+        
+        // DEBUG
+        error_log("MAIN FILE CREDIT CALCULATION (FIXED RESPONSE REVISION LOGIC):");
+        error_log("- All Response Original Cost: {$allResponseCost} TL");
+        error_log("- Direct Revision Cost (with revision_files cancellation check): {$directRevisionCost} TL");
+        error_log("- Response Revision Cost (revizyonlar yanıt iptal edilince de sayılır): {$responseRevisionCost} TL");
+        error_log("- Additional File Cost: {$additionalCost} TL");
+        error_log("- Main File Total (CORRECTED RESPONSE REVISION LOGIC): {$totalCreditsSpent} TL");
     }
 } catch (PDOException $e) {
     error_log('Total credits calculation error: ' . $e->getMessage());
@@ -533,7 +589,7 @@ include '../includes/user_header.php';
                                                     if ($fileType === 'response') {
                                                         echo '(Dosya + revizyon talepleri)';
                                                     } else {
-                                                        echo '(Yanıt + revizyon talepleri)';
+                                                        echo '(Yanıt + revizyon + ek dosya ücretleri)';
                                                     }
                                                     ?>
                                                 </small>
@@ -3212,7 +3268,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `action=create&file_id=${encodeURIComponent(fileId)}&file_type=${encodeURIComponent(fileType)}&reason=${encodeURIComponent(reason)}`
+                body: `action=request_cancellation&file_id=${encodeURIComponent(fileId)}&file_type=${encodeURIComponent(fileType)}&reason=${encodeURIComponent(reason)}`
             })
             .then(response => response.json())
             .then(data => {

@@ -348,12 +348,12 @@ include '../includes/admin_header.php';
                         <table class="table table-striped table-hover mb-0">
                             <thead class="table-dark">
                                 <tr>
-                                    <th width="180">Kullanıcı</th>
-                                    <th width="300">Dosya Bilgileri</th>
-                                    <th width="250">İptal Sebebi</th>
-                                    <th width="120">Kredi İadesi</th>
-                                    <th width="100">Durum</th>
-                                    <th width="120">Tarih</th>
+                                    <th width="170">Kullanıcı</th>
+                                    <th width="350">İptal Edilen Dosya Bilgileri</th>
+                                    <th width="220">İptal Sebebi</th>
+                                    <th width="110">Kredi İadesi</th>
+                                    <th width="90">Durum</th>
+                                    <th width="110">Tarih</th>
                                     <th width="120" class="text-center">İşlemler</th>
                                 </tr>
                             </thead>
@@ -373,73 +373,139 @@ include '../includes/admin_header.php';
                                         </td>
                                         <td>
                                             <div class="file-info">
-                                                <span class="badge bg-secondary mb-2"><?php echo strtoupper($cancellation['file_type']); ?></span>
-                                                <br>
                                                 <?php
-                                                // Dosya tipi için dosya adını belirle
+                                                // Dosya tipi için dosya adını ve diğer bilgileri belirle
                                                 $fileName = '';
                                                 $mainFileName = '';
                                                 $plate = '';
                                                 $fileDate = '';
+                                                $fileTypeDisplay = '';
+                                                $fileTypeIcon = '';
+                                                $fileTypeColor = '';
                                                 
                                                 switch ($cancellation['file_type']) {
                                                     case 'upload':
                                                         $fileName = $cancellation['upload_file_name'] ?? '';
                                                         $plate = $cancellation['upload_plate'] ?? '';
                                                         $fileDate = $cancellation['upload_date'] ?? '';
+                                                        $fileTypeDisplay = 'ANA DOSYA';
+                                                        $fileTypeIcon = 'fas fa-file-upload';
+                                                        $fileTypeColor = 'bg-primary';
                                                         break;
                                                     case 'response':
                                                         $fileName = $cancellation['response_file_name'] ?? '';
                                                         $mainFileName = $cancellation['response_main_file_name'] ?? '';
                                                         $plate = $cancellation['response_main_plate'] ?? '';
                                                         $fileDate = $cancellation['response_date'] ?? '';
+                                                        $fileTypeDisplay = 'YANIT DOSYASI';
+                                                        $fileTypeIcon = 'fas fa-reply';
+                                                        $fileTypeColor = 'bg-success';
                                                         break;
                                                     case 'revision':
                                                         $fileName = $cancellation['revision_file_name'] ?? '';
                                                         $mainFileName = $cancellation['revision_main_file_name'] ?? '';
                                                         $plate = $cancellation['revision_main_plate'] ?? '';
                                                         $fileDate = $cancellation['revision_date'] ?? '';
+                                                        $fileTypeDisplay = 'REVİZYON DOSYASI';
+                                                        $fileTypeIcon = 'fas fa-edit';
+                                                        $fileTypeColor = 'bg-warning';
                                                         break;
                                                     case 'additional':
                                                         $fileName = $cancellation['additional_file_name'] ?? '';
                                                         $mainFileName = $cancellation['additional_main_file_name'] ?? '';
                                                         $plate = $cancellation['additional_main_plate'] ?? '';
                                                         $fileDate = $cancellation['additional_date'] ?? '';
+                                                        $fileTypeDisplay = 'EK DOSYA';
+                                                        $fileTypeIcon = 'fas fa-paperclip';
+                                                        $fileTypeColor = 'bg-info';
                                                         break;
                                                 }
                                                 ?>
                                                 
+                                                <!-- Dosya Tipi Badge -->
+                                                <div class="file-type-badge mb-2">
+                                                    <span class="badge <?php echo $fileTypeColor; ?> fs-6">
+                                                        <i class="<?php echo $fileTypeIcon; ?> me-1"></i>
+                                                        <?php echo $fileTypeDisplay; ?>
+                                                    </span>
+                                                </div>
+                                                
+                                                <!-- İptal Edilen Dosya Adı -->
                                                 <?php if (!empty($fileName)): ?>
-                                                    <div class="file-name mb-1">
-                                                        <i class="fas fa-file me-1 text-primary"></i>
-                                                        <strong><?php echo htmlspecialchars($fileName); ?></strong>
+                                                    <div class="cancelled-file-name mb-2">
+                                                        <div class="fw-bold text-dark mb-1">
+                                                            <i class="fas fa-times-circle text-danger me-1"></i>
+                                                            İptal Edilen Dosya:
+                                                        </div>
+                                                        <div class="file-name-display p-2 bg-light border-start border-danger border-3">
+                                                            <strong class="text-primary"><?php echo htmlspecialchars($fileName); ?></strong>
+                                                        </div>
                                                     </div>
                                                 <?php endif; ?>
                                                 
+                                                <!-- Bağlı Ana Dosya (Varsa) -->
                                                 <?php if (!empty($mainFileName) && $mainFileName !== $fileName): ?>
-                                                    <div class="main-file-name mb-1">
-                                                        <i class="fas fa-link me-1 text-success"></i>
-                                                        <small>Bağlı: <?php echo htmlspecialchars($mainFileName); ?></small>
+                                                    <div class="linked-file mb-2">
+                                                        <div class="fw-bold text-success mb-1">
+                                                            <i class="fas fa-link me-1"></i>
+                                                            Bağlı Ana Dosya:
+                                                        </div>
+                                                        <div class="linked-file-display p-2 bg-light border-start border-success border-2">
+                                                            <small class="text-success"><?php echo htmlspecialchars($mainFileName); ?></small>
+                                                        </div>
                                                     </div>
                                                 <?php endif; ?>
                                                 
+                                                <!-- Araç Plaka Bilgisi -->
                                                 <?php if (!empty($plate)): ?>
-                                                    <div class="plate-info mb-1">
-                                                        <i class="fas fa-car me-1 text-info"></i>
-                                                        <span class="badge bg-info"><?php echo strtoupper(htmlspecialchars($plate)); ?></span>
+                                                    <div class="vehicle-info mb-2">
+                                                        <div class="fw-bold text-info mb-1">
+                                                            <i class="fas fa-car me-1"></i>
+                                                            Araç Plakası:
+                                                        </div>
+                                                        <div class="plate-display">
+                                                            <span class="badge bg-dark text-white fs-6 px-3 py-2" style="font-family: monospace; letter-spacing: 1px;">
+                                                                <?php echo strtoupper(htmlspecialchars($plate)); ?>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <div class="vehicle-info mb-2">
+                                                        <div class="fw-bold text-muted mb-1">
+                                                            <i class="fas fa-car me-1"></i>
+                                                            Araç Plakası:
+                                                        </div>
+                                                        <div class="plate-display">
+                                                            <span class="badge bg-secondary text-white fs-6 px-3 py-2">
+                                                                Belirtilmemiş
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 <?php endif; ?>
                                                 
-                                                <div class="file-meta">
-                                                    <strong>Dosya ID:</strong> <?php echo htmlspecialchars(substr($cancellation['file_id'], 0, 8)); ?>...
-                                                    <br>
-                                                    <small class="text-muted">Talep ID: <?php echo htmlspecialchars(substr($cancellation['id'], 0, 8)); ?>...</small>
+                                                <!-- Dosya Meta Bilgileri -->
+                                                <div class="file-meta pt-2 border-top">
+                                                    <div class="row g-0">
+                                                        <div class="col-6">
+                                                            <small class="text-muted">
+                                                                <strong>Dosya ID:</strong><br>
+                                                                <code><?php echo htmlspecialchars(substr($cancellation['file_id'], 0, 8)); ?>...</code>
+                                                            </small>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <small class="text-muted">
+                                                                <strong>Talep ID:</strong><br>
+                                                                <code><?php echo htmlspecialchars(substr($cancellation['id'], 0, 8)); ?>...</code>
+                                                            </small>
+                                                        </div>
+                                                    </div>
                                                     <?php if (!empty($fileDate)): ?>
-                                                        <br>
-                                                        <small class="text-muted">
-                                                            <i class="fas fa-calendar me-1"></i>
-                                                            <?php echo date('d.m.Y H:i', strtotime($fileDate)); ?>
-                                                        </small>
+                                                        <div class="mt-2">
+                                                            <small class="text-muted">
+                                                                <i class="fas fa-calendar me-1"></i>
+                                                                <strong>Dosya Tarihi:</strong> <?php echo date('d.m.Y H:i', strtotime($fileDate)); ?>
+                                                            </small>
+                                                        </div>
                                                     <?php endif; ?>
                                                 </div>
                                             </div>
@@ -455,8 +521,17 @@ include '../includes/admin_header.php';
                                                     <i class="fas fa-coins me-1"></i>
                                                     <?php echo number_format($cancellation['credits_to_refund'], 2); ?> kredi
                                                 </span>
+                                                <?php if ($cancellation['status'] === 'approved'): ?>
+                                                    <small class="text-success d-block">
+                                                        <i class="fas fa-check-circle me-1"></i>İade Edildi
+                                                    </small>
+                                                <?php elseif ($cancellation['status'] === 'pending'): ?>
+                                                    <small class="text-warning d-block">
+                                                        <i class="fas fa-clock me-1"></i>İade Bekliyor
+                                                    </small>
+                                                <?php endif; ?>
                                             <?php else: ?>
-                                                <span class="text-muted">-</span>
+                                                <span class="text-muted">Ücretsiz</span>
                                             <?php endif; ?>
                                         </td>
                                         <td>
@@ -666,33 +741,45 @@ include '../includes/admin_header.php';
 }
 
 .file-info {
-    max-width: 280px;
+    max-width: 320px;
 }
 
-.file-info .badge {
-    font-size: 0.7rem;
-}
-
-.file-info .file-name {
-    font-size: 0.9rem;
-    line-height: 1.2;
-}
-
-.file-info .main-file-name {
-    font-size: 0.8rem;
-    color: #28a745;
-}
-
-.file-info .plate-info .badge {
+.file-info .file-type-badge .badge {
     font-size: 0.75rem;
     font-weight: 600;
+    padding: 0.5rem 0.75rem;
+}
+
+.file-info .cancelled-file-name .file-name-display {
+    font-size: 0.9rem;
+    border-radius: 0.375rem;
+}
+
+.file-info .linked-file .linked-file-display {
+    font-size: 0.8rem;
+    border-radius: 0.375rem;
+}
+
+.file-info .vehicle-info .plate-display .badge {
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .file-info .file-meta {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     margin-top: 0.5rem;
     padding-top: 0.5rem;
     border-top: 1px solid #e9ecef;
+}
+
+.file-info .file-meta code {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 0.25rem;
 }
 
 .reason-text {

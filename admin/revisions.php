@@ -66,8 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $success = 'Revize talebi işleme alındı. Dosya detay sayfasında revize edilmiş dosyayı yükleyebilirsiniz.';
                     $user->logAction($_SESSION['user_id'], 'revision_approved', "Revize talebi işleme alındı: {$revisionId}");
                     
-                    // Başarılı işlem sonrası redirect
-                    header("Location: revisions.php?success=" . urlencode($success));
+                    // Başarılı işlem sonrası revize detay sayfasına yönlendir
+                    header("Location: revision-detail.php?id={$revisionId}&success=" . urlencode($success));
                     exit;
                 } else {
                     $error = $result['message'];

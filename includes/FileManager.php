@@ -123,7 +123,7 @@ class FileManager {
             }
             
             $offset = ($page - 1) * $limit;
-            $whereClause = "WHERE fu.user_id = ?";
+            $whereClause = "WHERE fu.user_id = ? AND (fu.is_cancelled IS NULL OR fu.is_cancelled = 0)";
             $params = [$userId];
             
             // ID ile filtreleme (bildirimden gelen dosya için)
@@ -181,7 +181,7 @@ class FileManager {
                 return 0;
             }
             
-            $whereClause = "WHERE fu.user_id = ?";
+            $whereClause = "WHERE fu.user_id = ? AND (fu.is_cancelled IS NULL OR fu.is_cancelled = 0)";
             $params = [$userId];
             
             // ID ile filtreleme (bildirimden gelen dosya için)
@@ -241,7 +241,7 @@ class FileManager {
                     SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
                     SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
                 FROM file_uploads
-                WHERE user_id = ?
+                WHERE user_id = ? AND (is_cancelled IS NULL OR is_cancelled = 0)
             ");
             
             $stmt->execute([$userId]);
@@ -262,7 +262,7 @@ class FileManager {
             }
             
             $offset = ($page - 1) * $limit;
-            $whereClause = "WHERE fu.user_id = ?";
+            $whereClause = "WHERE fu.user_id = ? AND (fu.is_cancelled IS NULL OR fu.is_cancelled = 0)";
             $params = [$userId];
             
             if ($status) {
@@ -351,14 +351,14 @@ class FileManager {
                 return [];
             }
             
-            // Yanıt dosyalarını getir
+            // Yanıt dosyalarını getir (İptal edilmiş dosyaları hariç tut)
             $stmt = $this->pdo->prepare("
                 SELECT fr.*, 
                        a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
                        'response' as file_type
                 FROM file_responses fr
                 LEFT JOIN users a ON fr.admin_id = a.id
-                WHERE fr.upload_id = ?
+                WHERE fr.upload_id = ? AND (fr.is_cancelled IS NULL OR fr.is_cancelled = 0)
                 ORDER BY fr.upload_date DESC
             ");
             
@@ -1229,15 +1229,16 @@ class FileManager {
             }
             
             $stmt = $this->pdo->prepare("
-                SELECT rf.*, 
-                       a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
-                       r.status as revision_status, r.requested_at
-                FROM revision_files rf
-                LEFT JOIN revisions r ON rf.revision_id = r.id
-                LEFT JOIN users a ON rf.admin_id = a.id
-                $whereClause
+            SELECT rf.*, 
+            a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
+            r.status as revision_status, r.requested_at
+            FROM revision_files rf
+            LEFT JOIN revisions r ON rf.revision_id = r.id
+            LEFT JOIN users a ON rf.admin_id = a.id
+            $whereClause
+            AND (rf.is_cancelled IS NULL OR rf.is_cancelled = 0)
                 ORDER BY rf.upload_date DESC
-            ");
+        ");
             
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1280,6 +1281,7 @@ class FileManager {
                 LEFT JOIN revisions r ON rf.revision_id = r.id
                 LEFT JOIN users a ON rf.admin_id = a.id
                 $whereClause
+                AND (rf.is_cancelled IS NULL OR rf.is_cancelled = 0)
                 ORDER BY rf.upload_date DESC
             ");
             
@@ -1304,12 +1306,13 @@ class FileManager {
                 return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
             }
             
-            // Revizyon dosyasını ve yetki kontrolünü yap
+            // Revizyon dosyasını ve yetki kontrolünü yap (iptal edilmemiş dosyalar)
             $stmt = $this->pdo->prepare("
                 SELECT rf.*, r.user_id as revision_user_id, r.status as revision_status
                 FROM revision_files rf
                 LEFT JOIN revisions r ON rf.revision_id = r.id
                 WHERE rf.id = ? AND r.user_id = ?
+                AND (rf.is_cancelled IS NULL OR rf.is_cancelled = 0)
             ");
             $stmt->execute([$revisionFileId, $userId]);
             $revisionFile = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -1766,7 +1769,7 @@ class FileManager {
                 return [];
             }
             
-            // Hem gönderilen hem alınan dosyaları getir
+            // Hem gönderilen hem alınan dosyaları getir (iptal edilmemiş olanlar)
             $stmt = $this->pdo->prepare("
                 SELECT af.*, 
                        sender.username as sender_username, sender.first_name as sender_first_name, sender.last_name as sender_last_name,
@@ -1776,6 +1779,7 @@ class FileManager {
                 LEFT JOIN users receiver ON af.receiver_id = receiver.id
                 WHERE af.related_file_id = ?
                 AND ((af.sender_id = ? AND af.sender_type = ?) OR (af.receiver_id = ? AND af.receiver_type = ?))
+                AND (af.is_cancelled IS NULL OR af.is_cancelled = 0)
                 ORDER BY af.upload_date DESC
             ");
             
@@ -1801,11 +1805,12 @@ class FileManager {
                 return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
             }
             
-            // Dosya bilgilerini ve yetki kontrolünü yap
+            // Dosya bilgilerini ve yetki kontrolünü yap (iptal edilmemiş dosyalar)
             $stmt = $this->pdo->prepare("
                 SELECT * FROM additional_files
                 WHERE id = ?
                 AND ((sender_id = ? AND sender_type = ?) OR (receiver_id = ? AND receiver_type = ?))
+                AND (is_cancelled IS NULL OR is_cancelled = 0)
             ");
             $stmt->execute([$fileId, $userId, $userType, $userId, $userType]);
             $file = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -1858,6 +1863,7 @@ class FileManager {
                 SELECT COUNT(*) as count
                 FROM additional_files
                 WHERE receiver_id = ? AND receiver_type = ? AND is_read = 0
+                AND (is_cancelled IS NULL OR is_cancelled = 0)
             ");
             
             $stmt->execute([$userId, $userType]);

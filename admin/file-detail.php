@@ -499,12 +499,14 @@ try {
         $responseFiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Response dosyalarına file_path ekle
-        foreach ($responseFiles as &$response) {
+        foreach ($responseFiles as $index => $response) {
             if (!empty($response['filename'])) {
-                $response['file_path'] = '../uploads/response_files/' . $response['filename'];
-                $response['response_file'] = $response['filename']; // Uyumluluk için
+                $responseFiles[$index]['file_path'] = '../uploads/response_files/' . $response['filename'];
+                $responseFiles[$index]['response_file'] = $response['filename']; // Uyumluluk için
             }
         }
+        // Reference'ı temizle (PHP by-reference hatası önlemi)
+        unset($response);
 
         // Bu dosya için revizyon dosyalarını al
         $stmt = $pdo->prepare("
@@ -522,11 +524,13 @@ try {
         $revisionFiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Revizyon dosyalarına file_path ekle
-        foreach ($revisionFiles as &$revisionFile) {
+        foreach ($revisionFiles as $index => $revisionFile) {
             if (!empty($revisionFile['filename'])) {
-                $revisionFile['file_path'] = '../uploads/revision_files/' . $revisionFile['filename'];
+                $revisionFiles[$index]['file_path'] = '../uploads/revision_files/' . $revisionFile['filename'];
             }
         }
+        // Reference'ı temizle (PHP by-reference hatası önlemi)
+        unset($revisionFile);
     }
 
     // Kullanıcıyla olan tüm iletişim geçmişini topla (kronolojik sırada)
@@ -1654,8 +1658,8 @@ include '../includes/admin_sidebar.php';
                                 <td><?php echo safeHtml($revisionFile['username']); ?></td>
                                 <td>
                                     <div class="d-flex gap-1">
-                                        <a href="file-detail.php?id=<?php echo $uploadId; ?>&type=revision&revision_id=<?php echo $revisionFile['id']; ?>"
-                                            class="btn btn-outline-primary btn-sm" title="Detayları Görüntüle">
+                                        <a href="revision-detail.php?id=<?php echo $revisionFile['revision_id']; ?>"
+                                            class="btn btn-outline-primary btn-sm" title="Revizyon Detaylarını Görüntüle">
                                             <i class="fas fa-eye me-1"></i>Detay
                                         </a>
                                         <a href="download-file.php?id=<?php echo $revisionFile['id']; ?>&type=revision"
@@ -1677,6 +1681,7 @@ include '../includes/admin_sidebar.php';
 // Ek dosyaları getir
 $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_id'], 'admin');
 ?>
+<?php if (!empty($additionalFiles)): ?>
 <div class="card admin-card mb-4">
     <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
@@ -1764,6 +1769,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
         <?php endif; ?>
     </div>
 </div>
+<?php endif; ?>
 
 <!-- Ek Dosya JavaScript -->
 <script>

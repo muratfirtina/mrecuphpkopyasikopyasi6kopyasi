@@ -151,9 +151,15 @@ try {
 
     if ($revisionFilesTableExists) {
         $stmt = $pdo->prepare("
-            SELECT * FROM revision_files 
-            WHERE revision_id = ? 
-            ORDER BY created_at DESC
+            SELECT rf.*, 
+                   admin_user.username as admin_username, 
+                   admin_user.first_name as admin_first_name, 
+                   admin_user.last_name as admin_last_name,
+                   admin_user.email as admin_email
+            FROM revision_files rf
+            LEFT JOIN users admin_user ON rf.admin_id = admin_user.id
+            WHERE rf.revision_id = ? 
+            ORDER BY rf.created_at DESC
         ");
         $stmt->execute([$revisionId]);
         $revisionFiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -673,6 +679,7 @@ include '../includes/admin_sidebar.php';
                                     <th>Dosya Adı</th>
                                     <th>Boyut</th>
                                     <th>Yüklenme Tarihi</th>
+                                    <th>Yükleyen Admin</th>
                                     <th>İşlemler</th>
                                 </tr>
                             </thead>
@@ -681,10 +688,38 @@ include '../includes/admin_sidebar.php';
                                     <tr>
                                         <td>
                                             <i class="fas fa-file-code text-success me-2"></i>
-                                            <?php echo htmlspecialchars($file['original_name']); ?>
+                                            <div class="fw-medium"><?php echo htmlspecialchars($file['original_name']); ?></div>
+                                            <?php if (!empty($file['admin_notes'])): ?>
+                                                <small class="text-muted d-block mt-1">
+                                                    <i class="fas fa-sticky-note me-1"></i>
+                                                    <?php echo htmlspecialchars(substr($file['admin_notes'], 0, 100)); ?>
+                                                    <?php if (strlen($file['admin_notes']) > 100): ?>...<?php endif; ?>
+                                                </small>
+                                            <?php endif; ?>
+                                            <div class="mt-1">
+                                                <?php if ($file['credits_charged'] > 0): ?>
+                                                    <span class="badge bg-warning"><?php echo $file['credits_charged']; ?> kredi</span>
+                                                <?php endif; ?>
+                                                <span class="badge bg-success">Revizyon Tamamlandı</span>
+                                            </div>
                                         </td>
                                         <td><?php echo formatFileSize($file['file_size']); ?></td>
                                         <td><?php echo formatDate($file['created_at']); ?></td>
+                                        <td>
+                                            <?php if ($file['admin_username']): ?>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-circle avatar-sm me-2 bg-primary text-white">
+                                                        <?php echo strtoupper(substr($file['admin_first_name'], 0, 1) . substr($file['admin_last_name'], 0, 1)); ?>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-medium"><?php echo htmlspecialchars($file['admin_first_name'] . ' ' . $file['admin_last_name']); ?></div>
+                                                        <small class="text-muted">@<?php echo htmlspecialchars($file['admin_username']); ?></small>
+                                                    </div>
+                                                </div>
+                                            <?php else: ?>
+                                                <span class="text-muted">Bilinmiyor</span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td>
                                             <a href="download.php?type=revision&id=<?php echo $file['id']; ?>"
                                                 class="btn btn-outline-primary btn-sm">
@@ -1042,6 +1077,24 @@ include '../includes/admin_sidebar.php';
 
     .alert-success.border-success.border-2 {
         background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    }
+
+    /* Avatar Circle Stilleri */
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .avatar-circle.avatar-sm {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
     }
 </style>
 

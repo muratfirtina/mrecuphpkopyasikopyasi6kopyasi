@@ -4,6 +4,35 @@
  * GUID tabanlı yardımcı fonksiyonlar
  */
 
+// Session başlat (eğer daha önce başlatılmamışsa)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Hata raporlamayı ayarla (geliştirme ortamı için)
+if (!defined('DEBUG')) {
+    define('DEBUG', true);
+}
+
+if (DEBUG) {
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+}
+
+// Global sabitler (config.php'de tanımlanmışsa tekrar tanımlama)
+if (!defined('DEFAULT_CREDITS')) {
+    define('DEFAULT_CREDITS', 1000); // Yeni kullanıcılar için varsayılan kredi miktarı
+}
+
+if (!defined('CREDITS_PER_FILE')) {
+    define('CREDITS_PER_FILE', 50); // Dosya başına ortalama kredi maliyeti
+}
+
+if (!defined('SITE_EMAIL')) {
+    define('SITE_EMAIL', 'info@mrecu.com'); // Fallback email
+}
+
 // UUID/GUID oluşturma fonksiyonu
 if (!function_exists('generateUUID')) {
     function generateUUID() {

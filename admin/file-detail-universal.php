@@ -44,8 +44,10 @@ try {
             ");
             $stmt->execute([$fileId]);
             $fileData = $stmt->fetch(PDO::FETCH_ASSOC);
-            $fileData['file_path'] = '../uploads/' . $fileData['filename'];
-            $fileData['download_url'] = "download-file.php?id={$fileId}&type=upload";
+            if ($fileData) {
+                $fileData['file_path'] = '../uploads/' . $fileData['filename'];
+                $fileData['download_url'] = "download-file.php?id={$fileId}&type=upload";
+            }
             break;
             
         case 'response':
@@ -100,14 +102,24 @@ try {
             
         case 'additional':
             $stmt = $pdo->prepare("
-                SELECT af.*, fu.original_name as main_file_name, fu.plate, fu.user_id,
+                SELECT af.*, 
+                       COALESCE(fu.original_name, fr.original_name, rf.original_name) as main_file_name, 
+                       COALESCE(fu.plate, 
+                               (SELECT fu2.plate FROM file_uploads fu2 WHERE fu2.id = (SELECT fr2.upload_id FROM file_responses fr2 WHERE fr2.id = af.related_file_id)),
+                               (SELECT fu3.plate FROM file_uploads fu3 WHERE fu3.id = (SELECT r.upload_id FROM revisions r LEFT JOIN revision_files rf3 ON r.id = rf3.revision_id WHERE rf3.id = af.related_file_id))
+                       ) as plate,
+                       COALESCE(fu.user_id, af.receiver_id) as user_id,
                        u.username, u.email, u.first_name, u.last_name,
-                       b.name as brand_name, m.name as model_name, s.name as series_name, e.name as engine_name,
-                       a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name
+                       sender.username as sender_username, sender.first_name as sender_first_name, sender.last_name as sender_last_name,
+                       receiver.username as receiver_username, receiver.first_name as receiver_first_name, receiver.last_name as receiver_last_name,
+                       b.name as brand_name, m.name as model_name, s.name as series_name, e.name as engine_name
                 FROM additional_files af
                 LEFT JOIN file_uploads fu ON af.related_file_id = fu.id AND af.related_file_type = 'upload'
-                LEFT JOIN users u ON fu.user_id = u.id
-                LEFT JOIN users a ON af.admin_id = a.id
+                LEFT JOIN file_responses fr ON af.related_file_id = fr.id AND af.related_file_type = 'response'
+                LEFT JOIN revision_files rf ON af.related_file_id = rf.id AND af.related_file_type = 'revision'
+                LEFT JOIN users u ON COALESCE(fu.user_id, af.receiver_id) = u.id
+                LEFT JOIN users sender ON af.sender_id = sender.id
+                LEFT JOIN users receiver ON af.receiver_id = receiver.id
                 LEFT JOIN brands b ON fu.brand_id = b.id
                 LEFT JOIN models m ON fu.model_id = m.id
                 LEFT JOIN series s ON fu.series_id = s.id

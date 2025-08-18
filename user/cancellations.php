@@ -4,8 +4,10 @@
  * User File Cancellation Requests
  */
 
+require_once '../config/config.php';
 require_once '../config/database.php';
 require_once '../includes/functions.php';
+require_once '../includes/User.php';
 
 // Giriş kontrolü
 if (!isLoggedIn()) {
@@ -44,6 +46,27 @@ $limit = 10;
 
 // Kullanıcının iptal taleplerini getir
 $cancellations = $cancellationManager->getUserCancellations($userId, $page, $limit);
+
+// Debug: İptal taleplerini kontrol et
+if (isset($_GET['debug'])) {
+    echo '<!-- DEBUG INFO -->';
+    echo '<!-- User ID: ' . $userId . ' -->';
+    echo '<!-- Page: ' . $page . ', Limit: ' . $limit . ' -->';
+    echo '<!-- Cancellations Count: ' . count($cancellations) . ' -->';
+    if (!empty($cancellations)) {
+        echo '<!-- First Cancellation: ' . json_encode($cancellations[0]) . ' -->';
+    }
+    
+    // Direkt sorgu ile de kontrol edelim
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM file_cancellations WHERE user_id = ?");
+    $stmt->execute([$userId]);
+    $directCount = $stmt->fetchColumn();
+    echo '<!-- Direct DB Count: ' . $directCount . ' -->';
+    
+    // Session bilgilerini kontrol et
+    echo '<!-- Session User ID: ' . ($_SESSION['user_id'] ?? 'Not Set') . ' -->';
+    echo '<!-- Session Username: ' . ($_SESSION['username'] ?? 'Not Set') . ' -->';
+}
 
 $pageTitle = 'İptal Taleplerim';
 
