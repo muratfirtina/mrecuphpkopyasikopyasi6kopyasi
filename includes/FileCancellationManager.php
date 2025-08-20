@@ -99,7 +99,7 @@ class FileCancellationManager {
             }
             
             // Dosya tipi kontrolü
-            $allowedTypes = ['upload', 'response', 'revision', 'additional'];
+            $allowedTypes = ['upload', 'response', 'revision', 'revision_request', 'additional'];
             if (!in_array($fileType, $allowedTypes)) {
                 return ['success' => false, 'message' => 'Geçersiz dosya tipi.'];
             }
@@ -150,6 +150,14 @@ class FileCancellationManager {
                             $owner = $stmt->fetchColumn();
                             $ownershipCheck = ($owner === $userId);
                         }
+                        break;
+                        
+                    case 'revision_request':
+                        // Revizyon talebi sahiplik kontrolü
+                        $stmt = $this->pdo->prepare("SELECT user_id FROM revisions WHERE id = ?");
+                        $stmt->execute([$fileId]);
+                        $owner = $stmt->fetchColumn();
+                        $ownershipCheck = ($owner === $userId);
                         break;
                         
                     case 'additional':
@@ -238,6 +246,20 @@ class FileCancellationManager {
                         $revisionCredits = $stmt->fetchColumn() ?: 0;
                         $creditsToRefund += $revisionCredits;
                     }
+                    
+                } elseif ($fileType === 'revision_request') {
+                    // Revizyon talebi için - direkt revisions tablosundan kredi bilgisini al
+                    $stmt = $this->pdo->prepare("SELECT COALESCE(credits_charged, 0) as credits FROM revisions WHERE id = ? AND user_id = ?");
+                    $stmt->execute([$fileId, $userId]);
+                    $revisionCredits = $stmt->fetchColumn() ?: 0;
+                    $creditsToRefund += $revisionCredits;
+                    
+                } elseif ($fileType === 'revision_request') {
+                    // Revizyon talebi için - direkt revisions tablosundan kredi bilgisini al
+                    $stmt = $this->pdo->prepare("SELECT COALESCE(credits_charged, 0) as credits FROM revisions WHERE id = ? AND user_id = ?");
+                    $stmt->execute([$fileId, $userId]);
+                    $revisionCredits = $stmt->fetchColumn() ?: 0;
+                    $creditsToRefund += $revisionCredits;
                     
                 } elseif ($fileType === 'additional') {
                     // Ek dosya için harcanan kredileri al
@@ -359,6 +381,33 @@ class FileCancellationManager {
                             WHERE id = ?
                         ");
                         $hideStmt->execute([$adminId, $fileId]);
+                        
+                        // Revizyon dosyasına ait revizyon talebini de iptal et
+                        $revisionStmt = $this->pdo->prepare("
+                            UPDATE revisions r
+                            JOIN revision_files rf ON r.id = rf.revision_id
+                            SET r.is_cancelled = 1, r.cancelled_at = NOW(), r.cancelled_by = ?
+                            WHERE rf.id = ?
+                        ");
+                        $revisionStmt->execute([$adminId, $fileId]);
+                        break;
+                        
+                    case 'revision_request':
+                        // Revizyon talebini gizle
+                        $hideStmt = $this->pdo->prepare("
+                            UPDATE revisions 
+                            SET is_cancelled = 1, cancelled_at = NOW(), cancelled_by = ?
+                            WHERE id = ?
+                        ");
+                        $hideStmt->execute([$adminId, $fileId]);
+                        
+                        // Bu talebe ait tüm revizyon dosyalarını da iptal et
+                        $revisionFilesStmt = $this->pdo->prepare("
+                            UPDATE revision_files 
+                            SET is_cancelled = 1, cancelled_at = NOW(), cancelled_by = ?
+                            WHERE revision_id = ?
+                        ");
+                        $revisionFilesStmt->execute([$adminId, $fileId]);
                         break;
                         
                     case 'additional':
@@ -396,7 +445,7 @@ class FileCancellationManager {
                             $transactionId = generateUUID();
                             $transactionStmt = $this->pdo->prepare("
                                 INSERT INTO credit_transactions (id, user_id, admin_id, transaction_type, type, amount, description, created_at) 
-                                VALUES (?, ?, ?, 'withdraw', 'refund', ?, ?, NOW())
+                                VALUES (?, ?, ?, 'deposit', 'refund', ?, ?, NOW())
                             ");
                             $transactionStmt->execute([
                                 $transactionId,
@@ -618,6 +667,406 @@ class FileCancellationManager {
             error_log('getAllCancellations error: ' . $e->getMessage());
             error_log('getAllCancellations trace: ' . $e->getTraceAsString());
             return [];
+        }
+    }
+    
+    /**
+     * Admin tarafından dosyayı doğrudan iptal et (kullanıcı talebi olmadan)
+     * @param string $fileId - Dosya ID
+     * @param string $fileType - Dosya tipi (upload, response, revision, additional)
+     * @param string $adminId - Admin ID
+     * @param string $adminNotes - Admin notu
+     * @return array - Başarı durumu ve mesaj
+     */
+    public function adminDirectCancellation($fileId, $fileType, $adminId, $adminNotes = '') {
+        try {
+            // ID formatı kontrolü
+            if (!isValidUUID($fileId) || !isValidUUID($adminId)) {
+                return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
+            }
+            
+            // Dosya tipi kontrolü
+            $allowedTypes = ['upload', 'response', 'revision', 'revision_request', 'additional'];
+            if (!in_array($fileType, $allowedTypes)) {
+                return ['success' => false, 'message' => 'Geçersiz dosya tipi.'];
+            }
+            
+            // Dosyanın var olup olmadığını ve sahip bilgisini kontrol et
+            $userId = null;
+            $fileExists = false;
+            $isAlreadyCancelled = false;
+            
+            try {
+                switch ($fileType) {
+                    case 'upload':
+                        $stmt = $this->pdo->prepare("SELECT user_id, is_cancelled FROM file_uploads WHERE id = ?");
+                        $stmt->execute([$fileId]);
+                        $fileData = $stmt->fetch(PDO::FETCH_ASSOC);
+                        if ($fileData) {
+                            $userId = $fileData['user_id'];
+                            $fileExists = true;
+                            $isAlreadyCancelled = (bool)$fileData['is_cancelled'];
+                        }
+                        break;
+                        
+                    case 'response':
+                        $stmt = $this->pdo->prepare("
+                            SELECT fu.user_id, fr.is_cancelled 
+                            FROM file_responses fr
+                            LEFT JOIN file_uploads fu ON fr.upload_id = fu.id
+                            WHERE fr.id = ?
+                        ");
+                        $stmt->execute([$fileId]);
+                        $fileData = $stmt->fetch(PDO::FETCH_ASSOC);
+                        if ($fileData) {
+                            $userId = $fileData['user_id'];
+                            $fileExists = true;
+                            $isAlreadyCancelled = (bool)$fileData['is_cancelled'];
+                        }
+                        break;
+                        
+                    case 'revision':
+                        $stmt = $this->pdo->prepare("
+                            SELECT fu.user_id, rf.is_cancelled
+                            FROM revision_files rf
+                            LEFT JOIN revisions r ON rf.revision_id = r.id
+                            LEFT JOIN file_uploads fu ON r.upload_id = fu.id
+                            WHERE rf.id = ?
+                        ");
+                        $stmt->execute([$fileId]);
+                        $fileData = $stmt->fetch(PDO::FETCH_ASSOC);
+                        if ($fileData) {
+                            $userId = $fileData['user_id'];
+                            $fileExists = true;
+                            $isAlreadyCancelled = (bool)$fileData['is_cancelled'];
+                        }
+                        break;
+                        
+                    case 'revision_request':
+                        $stmt = $this->pdo->prepare("SELECT user_id, COALESCE(is_cancelled, 0) as is_cancelled FROM revisions WHERE id = ?");
+                        $stmt->execute([$fileId]);
+                        $fileData = $stmt->fetch(PDO::FETCH_ASSOC);
+                        if ($fileData) {
+                            $userId = $fileData['user_id'];
+                            $fileExists = true;
+                            $isAlreadyCancelled = (bool)$fileData['is_cancelled'];
+                        }
+                        break;
+                        
+                    case 'additional':
+                        $stmt = $this->pdo->prepare("SELECT receiver_id, is_cancelled FROM additional_files WHERE id = ?");
+                        $stmt->execute([$fileId]);
+                        $fileData = $stmt->fetch(PDO::FETCH_ASSOC);
+                        if ($fileData) {
+                            $userId = $fileData['receiver_id'];
+                            $fileExists = true;
+                            $isAlreadyCancelled = (bool)$fileData['is_cancelled'];
+                        }
+                        break;
+                }
+                
+                if (!$fileExists) {
+                    return ['success' => false, 'message' => 'Dosya bulunamadı.'];
+                }
+                
+                if ($isAlreadyCancelled) {
+                    return ['success' => false, 'message' => 'Bu dosya zaten iptal edilmiş.'];
+                }
+                
+                if (!$userId) {
+                    return ['success' => false, 'message' => 'Dosya sahibi bulunamadı.'];
+                }
+                
+            } catch (PDOException $e) {
+                error_log('Dosya kontrol hatası: ' . $e->getMessage());
+                return ['success' => false, 'message' => 'Dosya kontrolü yapılamadı.'];
+            }
+            
+            // Bu dosya için bekleyen iptal talebi var mı kontrol et
+            $stmt = $this->pdo->prepare("
+                SELECT id FROM file_cancellations 
+                WHERE file_id = ? AND file_type = ? AND status = 'pending'
+            ");
+            $stmt->execute([$fileId, $fileType]);
+            $existingRequest = $stmt->fetchColumn();
+            
+            if ($existingRequest) {
+                return ['success' => false, 'message' => 'Bu dosya için zaten bekleyen bir iptal talebi var.'];
+            }
+            
+            // Kredi hesaplaması yap - requestCancellation'daki aynı mantık
+            $creditsToRefund = 0.00;
+            
+            try {
+                if ($fileType === 'upload') {
+                    // Ana dosya için tüm harcamaları hesapla
+                    
+                    // 1. Ana dosya için yanıt dosyalarında harcanan krediler
+                    $stmt = $this->pdo->prepare("SELECT COALESCE(SUM(credits_charged), 0) as total_credits FROM file_responses WHERE upload_id = ?");
+                    $stmt->execute([$fileId]);
+                    $responseCredits = $stmt->fetchColumn() ?: 0;
+                    $creditsToRefund += $responseCredits;
+                    
+                    // 2. Ana dosya için revizyon talepleri ve cevaplarında harcanan krediler
+                    $stmt = $this->pdo->prepare("SELECT COALESCE(SUM(credits_charged), 0) as total_credits FROM revisions WHERE upload_id = ? AND user_id = ?");
+                    $stmt->execute([$fileId, $userId]);
+                    $revisionCredits = $stmt->fetchColumn() ?: 0;
+                    $creditsToRefund += $revisionCredits;
+                    
+                    // 3. Ana dosya ile ilişkili yanıt dosyalarının revizyon talepleri için harcanan krediler
+                    $stmt = $this->pdo->prepare("
+                        SELECT COALESCE(SUM(r.credits_charged), 0) as total_credits 
+                        FROM revisions r 
+                        INNER JOIN file_responses fr ON r.response_id = fr.id 
+                        WHERE fr.upload_id = ? AND r.user_id = ?
+                    ");
+                    $stmt->execute([$fileId, $userId]);
+                    $responseRevisionCredits = $stmt->fetchColumn() ?: 0;
+                    $creditsToRefund += $responseRevisionCredits;
+                    
+                    // 4. Ana dosya ile ilişkili ek dosyalar için harcanan krediler
+                    $stmt = $this->pdo->prepare("
+                        SELECT COALESCE(SUM(credits), 0) as total_credits 
+                        FROM additional_files 
+                        WHERE related_file_id = ? AND related_file_type = 'upload' AND receiver_id = ?
+                    ");
+                    $stmt->execute([$fileId, $userId]);
+                    $additionalFileCredits = $stmt->fetchColumn() ?: 0;
+                    $creditsToRefund += $additionalFileCredits;
+                    
+                } elseif ($fileType === 'response') {
+                    // YANIT DOSYASI İPTALİ: Sadece yanıt dosyasının kendi ücreti iade edilir
+                    $stmt = $this->pdo->prepare("SELECT COALESCE(credits_charged, 0) as credits FROM file_responses WHERE id = ?");
+                    $stmt->execute([$fileId]);
+                    $responseCredits = $stmt->fetchColumn() ?: 0;
+                    $creditsToRefund += $responseCredits;
+                    
+                } elseif ($fileType === 'revision') {
+                    // Revizyon dosyası için - hangi revizyon talebine ait olduğunu bulup kredi bilgisini al
+                    $stmt = $this->pdo->prepare("
+                        SELECT rf.revision_id 
+                        FROM revision_files rf 
+                        WHERE rf.id = ?
+                    ");
+                    $stmt->execute([$fileId]);
+                    $revisionId = $stmt->fetchColumn();
+                    
+                    if ($revisionId) {
+                        // Bu revizyon talebi için harcanan kredileri al
+                        $stmt = $this->pdo->prepare("SELECT COALESCE(credits_charged, 0) as credits FROM revisions WHERE id = ? AND user_id = ?");
+                        $stmt->execute([$revisionId, $userId]);
+                        $revisionCredits = $stmt->fetchColumn() ?: 0;
+                        $creditsToRefund += $revisionCredits;
+                    }
+                    
+                } elseif ($fileType === 'revision_request') {
+                    // Revizyon talebi için - direkt revisions tablosundan kredi bilgisini al
+                    $stmt = $this->pdo->prepare("SELECT COALESCE(credits_charged, 0) as credits FROM revisions WHERE id = ? AND user_id = ?");
+                    $stmt->execute([$fileId, $userId]);
+                    $revisionCredits = $stmt->fetchColumn() ?: 0;
+                    $creditsToRefund += $revisionCredits;
+                    
+                    // Log: Ne kadar kredi iade edilecek?
+                    error_log("Revision request {$fileId} will refund {$revisionCredits} credits to user {$userId}");
+                    
+                } elseif ($fileType === 'additional') {
+                    // Ek dosya için harcanan kredileri al
+                    $stmt = $this->pdo->prepare("SELECT COALESCE(credits, 0) as credits FROM additional_files WHERE id = ? AND receiver_id = ?");
+                    $stmt->execute([$fileId, $userId]);
+                    $additionalCredits = $stmt->fetchColumn() ?: 0;
+                    $creditsToRefund += $additionalCredits;
+                }
+                
+            } catch (PDOException $e) {
+                error_log('FileCancellationManager admin direct cancellation kredi hesaplama hatası: ' . $e->getMessage());
+                $creditsToRefund = 0.00;
+            }
+            
+            $this->pdo->beginTransaction();
+            
+            try {
+                // 1. İptal kaydı oluştur (otomatik olarak onaylanmış durumda)
+                $cancellationId = generateUUID();
+                $stmt = $this->pdo->prepare("
+                    INSERT INTO file_cancellations (
+                        id, user_id, file_id, file_type, reason, 
+                        credits_to_refund, status, admin_id, admin_notes,
+                        requested_at, processed_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, 'approved', ?, ?, NOW(), NOW())
+                ");
+                
+                $reason = 'Admin tarafından doğrudan iptal edildi.';
+                if (empty(trim($adminNotes))) {
+                    $adminNotes = 'Admin tarafından doğrudan iptal edildi.';
+                }
+                
+                $stmt->execute([
+                    $cancellationId,
+                    $userId,
+                    $fileId,
+                    $fileType,
+                    $reason,
+                    $creditsToRefund,
+                    $adminId,
+                    $adminNotes
+                ]);
+                
+                // 2. Dosya tipine göre dosyayı gizle
+                switch ($fileType) {
+                    case 'upload':
+                        $hideStmt = $this->pdo->prepare("
+                            UPDATE file_uploads 
+                            SET is_cancelled = 1, cancelled_at = NOW(), cancelled_by = ?
+                            WHERE id = ?
+                        ");
+                        $hideStmt->execute([$adminId, $fileId]);
+                        break;
+                        
+                    case 'response':
+                        $hideStmt = $this->pdo->prepare("
+                            UPDATE file_responses 
+                            SET is_cancelled = 1, cancelled_at = NOW(), cancelled_by = ?
+                            WHERE id = ?
+                        ");
+                        $hideStmt->execute([$adminId, $fileId]);
+                        break;
+                        
+                    case 'revision':
+                        $hideStmt = $this->pdo->prepare("
+                            UPDATE revision_files 
+                            SET is_cancelled = 1, cancelled_at = NOW(), cancelled_by = ?
+                            WHERE id = ?
+                        ");
+                        $hideStmt->execute([$adminId, $fileId]);
+                        
+                        // Revizyon dosyasına ait revizyon talebini de iptal et
+                        $revisionStmt = $this->pdo->prepare("
+                            UPDATE revisions r
+                            JOIN revision_files rf ON r.id = rf.revision_id
+                            SET r.is_cancelled = 1, r.cancelled_at = NOW(), r.cancelled_by = ?
+                            WHERE rf.id = ?
+                        ");
+                        $revisionStmt->execute([$adminId, $fileId]);
+                        break;
+                        
+                    case 'revision_request':
+                        // Revizyon talebini iptal et
+                        $hideStmt = $this->pdo->prepare("
+                            UPDATE revisions 
+                            SET is_cancelled = 1, cancelled_at = NOW(), cancelled_by = ?
+                            WHERE id = ?
+                        ");
+                        $hideStmt->execute([$adminId, $fileId]);
+                        
+                        // Bu talebe ait tüm revizyon dosyalarını da iptal et (eğer varsa)
+                        $revisionFilesStmt = $this->pdo->prepare("
+                            UPDATE revision_files 
+                            SET is_cancelled = 1, cancelled_at = NOW(), cancelled_by = ?
+                            WHERE revision_id = ?
+                        ");
+                        $revisionFilesStmt->execute([$adminId, $fileId]);
+                        
+                        // Log: Kaç dosya iptal edildi?
+                        $affectedFiles = $revisionFilesStmt->rowCount();
+                        error_log("Revision request {$fileId} cancelled. Also cancelled {$affectedFiles} revision files.");
+                        break;
+                        
+                    case 'additional':
+                        $hideStmt = $this->pdo->prepare("
+                            UPDATE additional_files 
+                            SET is_cancelled = 1, cancelled_at = NOW(), cancelled_by = ?
+                            WHERE id = ?
+                        ");
+                        $hideStmt->execute([$adminId, $fileId]);
+                        break;
+                }
+                
+                // 3. Kredi iadesi yap (eğer ücretli dosya ise) - approveCancellation'daki aynı mantık
+                if ($creditsToRefund > 0 && !empty($userId)) {
+                    try {
+                        // Kullanıcının mevcut kredi durumunu al
+                        $userStmt = $this->pdo->prepare("SELECT credit_quota, credit_used FROM users WHERE id = ?");
+                        $userStmt->execute([$userId]);
+                        $userCredits = $userStmt->fetch(PDO::FETCH_ASSOC);
+                        
+                        if ($userCredits && $userCredits['credit_used'] >= $creditsToRefund) {
+                            // TERS KREDİ SİSTEMİ: Kullanılan krediyi azalt (kredi iadesi)
+                            $newCreditUsed = $userCredits['credit_used'] - $creditsToRefund;
+                            
+                            $creditUpdateStmt = $this->pdo->prepare("
+                                UPDATE users 
+                                SET credit_used = ?
+                                WHERE id = ?
+                            ");
+                            $creditUpdateStmt->execute([$newCreditUsed, $userId]);
+                            
+                            // Credit transactions tablosuna kaydet
+                            $transactionId = generateUUID();
+                            $transactionStmt = $this->pdo->prepare("
+                                INSERT INTO credit_transactions (id, user_id, admin_id, transaction_type, type, amount, description, created_at) 
+                                VALUES (?, ?, ?, 'deposit', 'admin_direct_refund', ?, ?, NOW())
+                            ");
+                            $transactionStmt->execute([
+                                $transactionId,
+                                $userId,
+                                $adminId,
+                                $creditsToRefund,
+                                "Admin doğrudan dosya iptal iadesi: {$fileType} dosyası için kredi iadesi"
+                            ]);
+                            
+                            // Log için güncelle
+                            error_log("Admin direkt kredi iadesi: User ID {$userId} - Eski kullanım: {$userCredits['credit_used']}, Yeni kullanım: {$newCreditUsed}, İade: {$creditsToRefund}");
+                            
+                        } else {
+                            error_log("Admin direkt kredi iadesi yapılamadı: Yetersiz kullanılan kredi. Mevcut: " . ($userCredits['credit_used'] ?? 0) . ", İstenen: {$creditsToRefund}");
+                            // Kredi iadesi yapılamazsa bile iptal işlemini tamamla
+                        }
+                        
+                    } catch (Exception $creditError) {
+                        error_log('Admin direkt kredi iadesi hatası: ' . $creditError->getMessage());
+                        // Kredi iadesi başarısız olsa bile iptal işlemini tamamla
+                    }
+                }
+                
+                // 4. Kullanıcıya bildirim gönder
+                if ($this->notificationManager) {
+                    $notificationTitle = 'Dosyanız İptal Edildi';
+                    $notificationMessage = "Dosyanız admin tarafından iptal edilmiştir.";
+                    
+                    if ($creditsToRefund > 0) {
+                        $notificationMessage .= " {$creditsToRefund} kredi hesabınıza iade edilmiştir.";
+                    }
+                    
+                    if (!empty($adminNotes)) {
+                        $notificationMessage .= " İptal sebebi: {$adminNotes}";
+                    }
+                    
+                    $this->notificationManager->createNotification(
+                        $userId,
+                        $notificationTitle,
+                        $notificationMessage,
+                        'admin_file_cancellation',
+                        $fileId
+                    );
+                }
+                
+                $this->pdo->commit();
+                
+                $message = 'Dosya başarıyla iptal edildi.';
+                if ($creditsToRefund > 0) {
+                    $message .= " {$creditsToRefund} kredi kullanıcıya iade edildi.";
+                }
+                
+                return ['success' => true, 'message' => $message, 'cancellation_id' => $cancellationId];
+                
+            } catch (Exception $e) {
+                $this->pdo->rollBack();
+                throw $e;
+            }
+            
+        } catch (Exception $e) {
+            error_log('FileCancellationManager adminDirectCancellation error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Dosya iptal edilirken hata oluştu: ' . $e->getMessage()];
         }
     }
     

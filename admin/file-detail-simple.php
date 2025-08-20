@@ -1,6 +1,6 @@
 <?php
 /**
- * Mr ECU - Admin Universal File Detail Page
+ * Mr ECU - Admin File Detail Page
  * Tüm dosya tiplerini destekleyen admin dosya detay sayfası
  */
 
@@ -26,6 +26,15 @@ if (isset($_SESSION['success'])) {
     unset($_SESSION['success']);
 }
 
+// Parametreleri al
+$fileId = isset($_GET['id']) ? sanitize($_GET['id']) : '';
+$fileType = isset($_GET['type']) ? sanitize($_GET['type']) : 'upload';
+
+if (!isValidUUID($fileId)) {
+    $_SESSION['error'] = 'Geçersiz dosya ID formatı.';
+    redirect('uploads.php');
+}
+
 // Admin tarafından direkt dosya iptal etme
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_cancel_file'])) {
     $cancelFileId = sanitize($_POST['file_id']);
@@ -49,17 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_cancel_file']))
     }
     
     // Redirect to prevent form resubmission
-    header("Location: file-detail-universal.php?id={$fileId}&type={$fileType}");
+    header("Location: file-detail.php?id={$fileId}&type={$fileType}");
     exit;
-}
-
-// Parametreleri al
-$fileId = isset($_GET['id']) ? sanitize($_GET['id']) : '';
-$fileType = isset($_GET['type']) ? sanitize($_GET['type']) : 'upload';
-
-if (!isValidUUID($fileId)) {
-    $_SESSION['error'] = 'Geçersiz dosya ID formatı.';
-    redirect('file-cancellations.php');
 }
 
 $pageTitle = 'Dosya Detayı';
@@ -177,18 +177,18 @@ try {
             
         default:
             $_SESSION['error'] = 'Geçersiz dosya tipi.';
-            redirect('file-cancellations.php');
+            redirect('uploads.php');
     }
     
     if (!$fileData) {
         $_SESSION['error'] = 'Dosya bulunamadı.';
-        redirect('file-cancellations.php');
+        redirect('uploads.php');
     }
     
 } catch (Exception $e) {
     error_log('File detail error: ' . $e->getMessage());
     $_SESSION['error'] = 'Dosya bilgileri alınırken hata oluştu.';
-    redirect('file-cancellations.php');
+    redirect('uploads.php');
 }
 
 // Header include
@@ -212,7 +212,7 @@ include '../includes/admin_header.php';
                 </div>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
-                        <a href="file-cancellations.php" class="btn btn-outline-secondary">
+                        <a href="uploads.php" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-1"></i>Geri Dön
                         </a>
                         <?php if (!empty($fileData['download_url'])): ?>
@@ -385,10 +385,6 @@ include '../includes/admin_header.php';
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2" role="group">
-                        <a href="file-detail.php?id=<?php echo $fileId; ?>&type=<?php echo $fileType; ?>" class="btn btn-outline-primary">
-                            <i class="fas fa-edit me-1"></i>Detaylı Düzenleme
-                        </a>
-                        
                         <?php if (!empty($fileData['download_url'])): ?>
                             <a href="<?php echo $fileData['download_url']; ?>" class="btn btn-success" target="_blank">
                                 <i class="fas fa-download me-1"></i>Dosyayı İndir
@@ -398,7 +394,7 @@ include '../includes/admin_header.php';
                         <!-- Admin İptal Butonu -->
                         <?php if (!isset($fileData['is_cancelled']) || !$fileData['is_cancelled']): ?>
                             <button type="button" class="btn btn-danger" 
-                                    onclick="showCancelModal('<?php echo $fileId; ?>', '<?php echo $fileType; ?>', '<?php echo htmlspecialchars($fileData['original_name'] ?? $fileData['filename'] ?? 'Bilinmeyen dosya'); ?>')">
+                                    onclick="showCancelModal('<?php echo $fileId; ?>', '<?php echo $fileType; ?>', '<?php echo htmlspecialchars($fileData['original_name'] ?? $fileData['filename'] ?? 'Bilinmeyen dosya', ENT_QUOTES); ?>')">
                                 <i class="fas fa-times me-1"></i>Dosyayı İptal Et
                             </button>
                         <?php else: ?>
@@ -407,8 +403,12 @@ include '../includes/admin_header.php';
                             </span>
                         <?php endif; ?>
                         
-                        <a href="file-cancellations.php" class="btn btn-outline-secondary">
-                            <i class="fas fa-list me-1"></i>İptal Talepleri
+                        <a href="uploads.php" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-1"></i>Dosya Listesi
+                        </a>
+                        
+                        <a href="user-details.php?id=<?php echo $fileData['user_id']; ?>" class="btn btn-outline-primary">
+                            <i class="fas fa-user me-1"></i>Kullanıcı Detayı
                         </a>
                     </div>
                 </div>

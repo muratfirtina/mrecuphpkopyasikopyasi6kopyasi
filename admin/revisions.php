@@ -76,6 +76,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
+        // Admin tarafından direkt dosya iptal etme
+        if (isset($_POST['admin_cancel_file'])) {
+            error_log("Admin direct cancel request on revisions page");
+            $cancelFileId = sanitize($_POST['file_id']);
+            $cancelFileType = sanitize($_POST['file_type']);
+            $adminNotes = sanitize($_POST['admin_notes']);
+            
+            if (!isValidUUID($cancelFileId)) {
+                $error = 'Geçersiz dosya ID formatı.';
+                error_log("Invalid file ID for cancel: {$cancelFileId}");
+            } else {
+                // FileCancellationManager'ı yükle
+                require_once '../includes/FileCancellationManager.php';
+                $cancellationManager = new FileCancellationManager($pdo);
+                
+                $result = $cancellationManager->adminDirectCancellation($cancelFileId, $cancelFileType, $_SESSION['user_id'], $adminNotes);
+                
+                if ($result['success']) {
+                    $_SESSION['success'] = $result['message'];
+                    $user->logAction($_SESSION['user_id'], 'admin_direct_cancel', "Dosya doğrudan iptal edildi: {$cancelFileId} ({$cancelFileType})");
+                } else {
+                    $_SESSION['error'] = $result['message'];
+                    error_log("Admin cancel failed: {$result['message']}");
+                }
+                
+                // Redirect to prevent form resubmission
+                header("Location: revisions.php");
+                exit;
+            }
+        }
+        
         // Revize talebini reddetme
         if (isset($_POST['reject_revision_direct'])) {
             error_log("Direct revision rejection started");
@@ -367,7 +398,12 @@ include '../includes/admin_sidebar.php';
 </div>
 
 <!-- Filtre ve Arama -->
-<div class="card admin-card mb-4">
+<div class="card mb-4">
+        <div class="card-header bg-light">
+            <h6 class="mb-0">
+                <i class="fas fa-filter me-2"></i>Filtreler ve Arama
+            </h6>
+        </div>
     <div class="card-body">
         <form method="GET" class="row g-3 align-items-end">
             <div class="col-md-3">
@@ -635,6 +671,18 @@ include '../includes/admin_sidebar.php';
                                             <span class="text-muted small">İşlenmiş</span>
                                         <?php endif; ?>
                                         
+                                        <!-- İptal Butonu - Tüm durumlar için -->
+                                        <?php if (empty($revision['is_cancelled'])): ?>
+                                            <button type="button" class="btn btn-warning btn-sm w-100 mb-1" 
+                                                    onclick="showCancelModal('<?php echo $revision['id']; ?>', 'revision_request', 'Revize: <?php echo htmlspecialchars($revision['first_name'] . ' ' . $revision['last_name'], ENT_QUOTES); ?>')">
+                                                <i class="fas fa-ban me-1"></i>İptal Et
+                                            </button>
+                                        <?php else: ?>
+                                            <span class="btn btn-secondary btn-sm w-100 mb-1 disabled" title="İptal Edilmiş">
+                                                <i class="fas fa-ban me-1"></i>İptal Edilmiş
+                                            </span>
+                                        <?php endif; ?>
+                                        
                                         <!-- Dosya Detayı Butonu -->
                                         <a href="revision-detail.php?id=<?php echo $revision['id']; ?>" 
                                            class="btn btn-outline-primary btn-sm w-100">
@@ -817,268 +865,6 @@ include '../includes/admin_sidebar.php';
     </div>
 </div>
 
-<style>
-/* Advanced Pagination Styling */
-.pagination-wrapper {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.pagination-info .badge {
-    font-size: 0.9rem;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-}
-
-.quick-jump-container .input-group {
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    border-radius: 0.375rem;
-    overflow: hidden;
-}
-
-.quick-jump-container .form-control {
-    border: 2px solid #e9ecef;
-    transition: all 0.15s ease-in-out;
-}
-
-.quick-jump-container .form-control:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-}
-
-/* Enhanced Pagination Controls */
-.pagination-lg .page-link {
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    border: 2px solid #dee2e6;
-    color: #495057;
-    margin: 0 3px;
-    border-radius: 0.5rem;
-    transition: all 0.2s ease-in-out;
-    font-weight: 500;
-    background: white;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.pagination-lg .page-link:hover {
-    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
-    border-color: #0d6efd;
-    color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
-}
-
-.pagination-lg .page-item.active .page-link {
-    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
-    border-color: #0d6efd;
-    color: white;
-    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
-    transform: scale(1.05);
-}
-
-.pagination-lg .page-item.disabled .page-link {
-    background-color: #f8f9fa;
-    border-color: #dee2e6;
-    color: #6c757d;
-    opacity: 0.6;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-.pagination-lg .page-link i {
-    font-size: 0.9rem;
-}
-
-/* Per page selector enhanced styling */
-.form-select {
-    border: 2px solid #e9ecef;
-    border-radius: 0.5rem;
-    transition: all 0.15s ease-in-out;
-    font-weight: 500;
-}
-
-.form-select:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-}
-
-/* Badge enhancements */
-.badge.bg-light {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
-    border: 2px solid #e9ecef;
-    color: #495057 !important;
-    font-weight: 500;
-}
-
-/* Responsive improvements */
-@media (max-width: 768px) {
-    .pagination-lg .page-link {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.9rem;
-        margin: 0 1px;
-    }
-    
-    .pagination-wrapper {
-        padding: 1rem !important;
-    }
-    
-    .quick-jump-container {
-        display: none;
-    }
-    
-    .pagination-info .badge {
-        font-size: 0.8rem;
-    }
-}
-
-@media (max-width: 576px) {
-    .pagination-lg .page-link {
-        padding: 0.4rem 0.6rem;
-        font-size: 0.85rem;
-    }
-    
-    .pagination-lg .page-link span {
-        display: none !important;
-    }
-}
-
-/* Animation for page changes */
-.pagination-lg .page-link {
-    position: relative;
-    overflow: hidden;
-}
-
-.pagination-lg .page-link::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s;
-}
-
-.pagination-lg .page-link:hover::before {
-    left: 100%;
-}
-
-/* Loading state for quick jump */
-.quick-jump-container.loading .btn {
-    pointer-events: none;
-}
-
-.quick-jump-container.loading .btn i {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Modern Process Confirmation Modal Styles */
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important;
-}
-
-#processConfirmModal .modal-content {
-    border-radius: 1rem;
-    overflow: hidden;
-}
-
-#processConfirmModal .modal-header {
-    padding: 1.5rem 2rem 1rem;
-    border-bottom: none;
-}
-
-#processConfirmModal .modal-body {
-    padding: 1rem 2rem 1.5rem;
-}
-
-#processConfirmModal .modal-footer {
-    padding: 0rem 3rem 3rem 0rem;
-    background: #f8f9fa;
-    margin: 0 -2rem -2rem;
-    padding-top: 1.5rem;
-}
-
-#processConfirmModal .btn-lg {
-    border-radius: 0.5rem;
-    transition: all 0.3s ease;
-}
-
-#processConfirmModal .btn-success:hover {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-    border-color: #28a745;
-    transform: translateY(-2px);
-}
-
-#processConfirmModal .btn-secondary:hover {
-    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-    border-color: #6c757d;
-    transform: translateY(-2px);
-}
-
-#processConfirmModal .alert-info {
-    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
-    border: 1px solid #b6d4da;
-    border-radius: 0.5rem;
-}
-
-/* Modal animation enhancements */
-#processConfirmModal.fade .modal-dialog {
-    transition: transform 0.4s ease-out;
-    transform: scale(0.8) translateY(-50px);
-}
-
-#processConfirmModal.show .modal-dialog {
-    transform: scale(1) translateY(0);
-}
-
-/* Icon pulse animation */
-#processConfirmModal .fas.fa-file-alt {
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.1);
-        opacity: 0.8;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-/* Mobile responsiveness for modal */
-@media (max-width: 576px) {
-    #processConfirmModal .modal-header {
-        padding: 1rem 1.5rem 0.5rem;
-    }
-    
-    #processConfirmModal .modal-body {
-        padding: 0.5rem 1.5rem 1rem;
-    }
-    
-    #processConfirmModal .modal-footer {
-        padding: 1rem 1.5rem 1.5rem;
-        margin: 0 -1.5rem -1.5rem;
-    }
-    
-    #processConfirmModal .btn-lg {
-        padding: 0.6rem 1.5rem;
-        font-size: 0.9rem;
-    }
-}
-</style>
-
 <!-- Revize Onaylama Modal -->
 <div class="modal fade" id="approveRevisionModal" tabindex="-1" aria-labelledby="approveRevisionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -1162,26 +948,61 @@ include '../includes/admin_sidebar.php';
     </div>
 </div>
 
-<?php
-// Sayfa özel JavaScript
-$pageJS = "
-// Hızlı sayfa atlama fonksiyonu
-function quickJumpToPage() {
-    const pageInput = document.getElementById('quickJump');
-    const targetPage = parseInt(pageInput.value);
-    const maxPage = parseInt(pageInput.getAttribute('max'));
-    
-    if (targetPage && targetPage >= 1 && targetPage <= maxPage) {
-        const urlParams = new URLSearchParams(window.location.search);
-        urlParams.set('page', targetPage);
-        
-        window.location.href = '?' + urlParams.toString();
-    } else {
-        alert('Lütfen 1 ile ' + maxPage + ' arasında geçerli bir sayfa numarası girin.');
-        pageInput.focus();
-    }
-}
+<!-- Admin İptal Modal -->
+<div class="modal fade" id="adminCancelModal" tabindex="-1" aria-labelledby="adminCancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient-danger text-white border-0">
+                <h5 class="modal-title d-flex align-items-center" id="adminCancelModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Revize Talebi İptal Onayı
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <form method="POST" id="adminCancelForm">
+                <div class="modal-body py-4">
+                    <input type="hidden" name="admin_cancel_file" value="1">
+                    <input type="hidden" name="file_id" id="cancelFileId">
+                    <input type="hidden" name="file_type" id="cancelFileType">
+                    
+                    <div class="mb-4">
+                        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 50%;">
+                            <i class="fas fa-times text-white fa-2x"></i>
+                        </div>
+                        <h6 class="mb-2 text-dark text-center">Bu revize talebini iptal etmek istediğinizden emin misiniz?</h6>
+                        <p class="text-muted mb-3 text-center">
+                            <strong>Revize:</strong> <span id="cancelFileName"></span>
+                        </p>
+                        <div class="alert alert-warning d-flex align-items-center mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <small>Bu işlem revize talebini iptal edecek ve varsa ücret iadesi yapacaktır.</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="adminNotes" class="form-label">
+                            <i class="fas fa-sticky-note me-1"></i>
+                            İptal Sebebi (Opsiyonel)
+                        </label>
+                        <textarea class="form-control" id="adminNotes" name="admin_notes" rows="3" 
+                                  placeholder="İptal sebebinizi yazabilirsiniz..."></textarea>
+                        <small class="text-muted">Bu not kullanıcıya gönderilecek bildirimde yer alacaktır.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-3">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" data-cancel-operation="true">
+                        <i class="fas fa-times me-1"></i>İptal
+                    </button>
+                    <button type="submit" class="btn btn-danger px-4" data-cancel-operation="true">
+                        <i class="fas fa-check me-1"></i>Evet, İptal Et
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
+<script>
 // Global değişken - beforeunload'u geçici olarak devre dışı bırakmak için
 let allowPageUnload = false;
 
@@ -1221,6 +1042,34 @@ function showRejectModal(revisionId) {
     modal.show();
 }
 
+// Admin iptal modal gösterme
+function showCancelModal(fileId, fileType, fileName) {
+    document.getElementById('cancelFileId').value = fileId;
+    document.getElementById('cancelFileType').value = fileType;
+    document.getElementById('cancelFileName').textContent = fileName;
+    document.getElementById('adminNotes').value = '';
+    
+    var modal = new bootstrap.Modal(document.getElementById('adminCancelModal'));
+    modal.show();
+}
+
+// Hızlı sayfa atlama fonksiyonu
+function quickJumpToPage() {
+    const pageInput = document.getElementById('quickJump');
+    const targetPage = parseInt(pageInput.value);
+    const maxPage = parseInt(pageInput.getAttribute('max'));
+    
+    if (targetPage && targetPage >= 1 && targetPage <= maxPage) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('page', targetPage);
+        
+        window.location.href = '?' + urlParams.toString();
+    } else {
+        alert('Lütfen 1 ile ' + maxPage + ' arasında geçerli bir sayfa numarası girin.');
+        pageInput.focus();
+    }
+}
+
 // Sayfa yüklendiğinde kontroller
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Revisions page loaded - setting up modal event handlers');
@@ -1237,7 +1086,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Submit butonunu disable et
             const submitBtn = document.getElementById('approve-submit-btn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class=\"fas fa-spinner fa-spin me-1\"></i>İşleniyor...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>İşleniyor...';
             
             // Modal'ı kapat
             const modal = bootstrap.Modal.getInstance(document.getElementById('approveRevisionModal'));
@@ -1268,7 +1117,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Submit butonunu disable et
             const submitBtn = document.getElementById('reject-submit-btn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class=\"fas fa-spinner fa-spin me-1\"></i>İşleniyor...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>İşleniyor...';
             
             // Modal'ı kapat
             const modal = bootstrap.Modal.getInstance(document.getElementById('rejectRevisionModal'));
@@ -1277,6 +1126,32 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             console.log('Reject form validation passed, submitting...');
+            return true;
+        });
+    }
+    
+    // İptal formu için event listener
+    const cancelForm = document.getElementById('adminCancelForm');
+    if (cancelForm) {
+        cancelForm.addEventListener('submit', function(e) {
+            console.log('Cancel form submitted');
+            
+            // Sayfa değişikliğine izin ver
+            allowPageUnload = true;
+            
+            // Submit butonunu disable et
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>İptal ediliyor...';
+            }
+            
+            // Modal'ı kapat
+            const modal = bootstrap.Modal.getInstance(document.getElementById('adminCancelModal'));
+            if (modal) {
+                modal.hide();
+            }
+            
             return true;
         });
     }
@@ -1310,8 +1185,14 @@ window.addEventListener('beforeunload', function(e) {
     }
     
     // Sadece disabled butonlar varsa ve form submit edilmemişse uyar
-    const disabledButtons = document.querySelectorAll('button[disabled]:not([data-bs-dismiss])');
+    const disabledButtons = document.querySelectorAll('button[disabled]:not([data-bs-dismiss]):not([data-cancel-operation])');
     const activeModals = document.querySelectorAll('.modal.show');
+    
+    // Önemli: İptal işlemi sırasında uyarma
+    const cancelModal = document.getElementById('adminCancelModal');
+    if (cancelModal && cancelModal.classList.contains('show')) {
+        return; // İptal modalı açıksa uyarma
+    }
     
     // Modal açıksa veya işlem devam ediyorsa uyar
     if ((disabledButtons.length > 0 || activeModals.length > 0) && !allowPageUnload) {
@@ -1325,8 +1206,9 @@ window.addEventListener('beforeunload', function(e) {
 window.addEventListener('unload', function() {
     allowPageUnload = false;
 });
-";
+</script>
 
+<?php
 // Footer include
 include '../includes/admin_footer.php';
 ?>

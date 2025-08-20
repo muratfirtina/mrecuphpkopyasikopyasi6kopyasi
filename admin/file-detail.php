@@ -374,6 +374,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
+        
+        // Admin dosya iptal etme
+        if (isset($_POST['admin_cancel_file'])) {
+            error_log("Admin cancel file request started");
+            
+            $cancelFileId = sanitize($_POST['file_id']);
+            $cancelFileType = sanitize($_POST['file_type']);
+            $adminNotes = sanitize($_POST['admin_notes']);
+            
+            if (!isValidUUID($cancelFileId)) {
+                $error = 'Geçersiz dosya ID formatı.';
+                error_log("Invalid file ID format: " . $cancelFileId);
+            } else {
+                // FileCancellationManager'ı yükle
+                require_once '../includes/FileCancellationManager.php';
+                $cancellationManager = new FileCancellationManager($pdo);
+                
+                $result = $cancellationManager->adminDirectCancellation($cancelFileId, $cancelFileType, $_SESSION['user_id'], $adminNotes);
+                
+                if ($result['success']) {
+                    $success = $result['message'];
+                    $user->logAction($_SESSION['user_id'], 'admin_direct_cancel', "Dosya doğrudan iptal edildi: {$cancelFileId} ({$cancelFileType})");
+                    
+                    // Başarılı işlem sonrası redirect
+                    header("Location: file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
+                    exit;
+                } else {
+                    $error = $result['message'];
+                    error_log("Cancel failed: " . $error);
+                }
+            }
+        }
     } catch (Exception $e) {
         $error = 'İşlem sırasında hata oluştu: ' . $e->getMessage();
         error_log('POST processing error: ' . $e->getMessage());
@@ -926,6 +958,29 @@ include '../includes/admin_sidebar.php';
                     <a href="file-detail.php?id=<?php echo $uploadId; ?>#response-files" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-list me-1"></i>Tüm Yanıtları Görüntüle
                     </a>
+                    <!-- Admin İptal Butonu (Response Dosyası) -->
+                    <?php if (!isset($upload['is_cancelled']) || !$upload['is_cancelled']): ?>
+                        <button type="button" class="btn btn-danger btn-sm" 
+                                onclick="showCancelModal('<?php echo $responseId; ?>', 'response', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')">
+                            <i class="fas fa-times me-1"></i>İptal Et
+                        </button>
+                    <?php else: ?>
+                        <span class="btn btn-secondary btn-sm disabled">
+                            <i class="fas fa-ban me-1"></i>İptal Edilmiş
+                        </span>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <!-- Admin İptal Butonu (Ana Dosya) -->
+                    <?php if (!isset($upload['is_cancelled']) || !$upload['is_cancelled']): ?>
+                        <button type="button" class="btn btn-danger btn-sm" 
+                                onclick="showCancelModal('<?php echo $uploadId; ?>', 'upload', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')">
+                            <i class="fas fa-times me-1"></i>Dosyayı İptal Et
+                        </button>
+                    <?php else: ?>
+                        <span class="btn btn-secondary btn-sm disabled">
+                            <i class="fas fa-ban me-1"></i>İptal Edilmiş
+                        </span>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>
@@ -1616,6 +1671,18 @@ include '../includes/admin_sidebar.php';
                                             class="btn btn-success btn-sm" title="Dosyayı İndir">
                                             <i class="fas fa-download me-1"></i>İndir
                                         </a>
+                                        <!-- Admin İptal Butonu (Yanıt Dosyası) -->
+                                        <?php if (!isset($responseFile['is_cancelled']) || !$responseFile['is_cancelled']): ?>
+                                            <button type="button" class="btn btn-danger btn-sm" 
+                                                    onclick="showCancelModal('<?php echo $responseFile['id']; ?>', 'response', '<?php echo htmlspecialchars($responseFile['original_name'], ENT_QUOTES); ?>')"
+                                                    title="Dosyayı İptal Et">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        <?php else: ?>
+                                            <span class="btn btn-secondary btn-sm disabled" title="İptal Edilmiş">
+                                                <i class="fas fa-ban"></i>
+                                            </span>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                             </tr>
@@ -1666,6 +1733,18 @@ include '../includes/admin_sidebar.php';
                                             class="btn btn-success btn-sm" title="Dosyayı İndir">
                                             <i class="fas fa-download me-1"></i>İndir
                                         </a>
+                                        <!-- Admin İptal Butonu (Revizyon Dosyası) -->
+                                        <?php if (!isset($revisionFile['is_cancelled']) || !$revisionFile['is_cancelled']): ?>
+                                            <button type="button" class="btn btn-danger btn-sm" 
+                                                    onclick="showCancelModal('<?php echo $revisionFile['id']; ?>', 'revision', '<?php echo htmlspecialchars($revisionFile['original_name'], ENT_QUOTES); ?>')"
+                                                    title="Dosyayı İptal Et">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        <?php else: ?>
+                                            <span class="btn btn-secondary btn-sm disabled" title="İptal Edilmiş">
+                                                <i class="fas fa-ban"></i>
+                                            </span>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                             </tr>
@@ -1752,9 +1831,23 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm" title="İndir">
-                                        <i class="fas fa-download"></i>
-                                    </a>
+                                    <div class="d-flex gap-1">
+                                        <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm" title="İndir">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <!-- Admin İptal Butonu (Ek Dosya) -->
+                                        <?php if (!isset($file['is_cancelled']) || !$file['is_cancelled']): ?>
+                                            <button type="button" class="btn btn-danger btn-sm" 
+                                                    onclick="showCancelModal('<?php echo $file['id']; ?>', 'additional', '<?php echo htmlspecialchars($file['original_name'], ENT_QUOTES); ?>')"
+                                                    title="Dosyayı İptal Et">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        <?php else: ?>
+                                            <span class="btn btn-secondary btn-sm disabled" title="İptal Edilmiş">
+                                                <i class="fas fa-ban"></i>
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -3274,6 +3367,81 @@ document.addEventListener('DOMContentLoaded', function() {
     <input type="hidden" name="take_file_processing" value="1">
 </form>
 
+<!-- Admin Dosya İptal Modalı -->
+<div class="modal fade" id="adminCancelModal" tabindex="-1" aria-labelledby="adminCancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title d-flex align-items-center" id="adminCancelModalLabel">
+                    <i class="fas fa-times-circle me-2"></i>
+                    Dosyayı İptal Et
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" id="adminCancelForm">
+                <div class="modal-body">
+                    <input type="hidden" name="admin_cancel_file" value="1">
+                    <input type="hidden" id="cancelFileId" name="file_id" value="">
+                    <input type="hidden" id="cancelFileType" name="file_type" value="">
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Dikkat!</strong> Bu işlem geri alınamaz. Dosya iptal edildikten sonra kullanıcı tarafından erişilemez hale gelecektir.
+                    </div>
+                    
+                    <div class="file-info bg-light p-3 rounded mb-3">
+                        <h6 class="text-danger mb-2">
+                            <i class="fas fa-file-alt me-2"></i>
+                            İptal Edilecek Dosya
+                        </h6>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Dosya Adı:</strong></div>
+                            <div class="col-sm-8" id="cancelFileName">-</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-4"><strong>Dosya Tipi:</strong></div>
+                            <div class="col-sm-8" id="cancelFileTypeText">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="cancelAdminNotes" class="form-label">
+                            <i class="fas fa-comment me-1"></i>
+                            İptal Nedeni <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="cancelAdminNotes" name="admin_notes" rows="4" required
+                            placeholder="Dosyanın neden iptal edildiğini açıklayın..."></textarea>
+                        <div class="form-text">Bu mesaj kullanıcıya bildirim olarak gönderilecektir.</div>
+                    </div>
+                    
+                    <div class="alert-info d-flex align-items-center" style="padding: 1rem; border-radius: 0.375rem;">
+                        <i class="fas fa-info-circle me-2 fa-lg"></i>
+                        <div>
+                            <strong>İptal işlemi sonrası:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Dosya "İptal Edildi" durumuna geçecek</li>
+                                <li>Kullanıcıya e-posta bildirimi gönderilecek</li>
+                                <li>Eğer kredi düşürülmüşse, kredi iade edilecek</li>
+                                <li>Sistem loglarına işlem kaydedilecek</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary d-flex align-items-center" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>
+                        Vazgeç
+                    </button>
+                    <button type="submit" name="admin_cancel_file" class="btn btn-danger d-flex align-items-center" id="confirmCancelBtn">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Dosyayı İptal Et
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Reject Revision Modal -->
 <div class="modal fade" id="rejectRevisionModal" tabindex="-1" aria-labelledby="rejectRevisionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -3398,6 +3566,60 @@ document.addEventListener('DOMContentLoaded', function() {
             form.submit();
         }
     }
+    
+    // Admin dosya iptal fonksiyonları
+    function showCancelModal(fileId, fileType, fileName) {
+        // Modal bilgilerini güncelle
+        document.getElementById('cancelFileId').value = fileId;
+        document.getElementById('cancelFileType').value = fileType;
+        document.getElementById('cancelFileName').textContent = fileName;
+        
+        // Dosya tipi metnini belirle
+        const typeTexts = {
+            'upload': 'Ana Yüklenen Dosya',
+            'response': 'Yanıt Dosyası',
+            'revision': 'Revizyon Dosyası',
+            'additional': 'Ek Dosya'
+        };
+        document.getElementById('cancelFileTypeText').textContent = typeTexts[fileType] || 'Bilinmeyen Tip';
+        
+        // Admin notlarını temizle
+        document.getElementById('cancelAdminNotes').value = '';
+        
+        // Modalı aç
+        const modal = new bootstrap.Modal(document.getElementById('adminCancelModal'));
+        modal.show();
+    }
+    
+    // Admin cancel form submit event
+    document.addEventListener('DOMContentLoaded', function() {
+        const adminCancelForm = document.getElementById('adminCancelForm');
+        if (adminCancelForm) {
+            adminCancelForm.addEventListener('submit', function(e) {
+                const confirmBtn = document.getElementById('confirmCancelBtn');
+                const originalText = confirmBtn.innerHTML;
+                
+                // Loading durumunu göster
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>İptal Ediliyor...';
+                confirmBtn.disabled = true;
+                
+                // Formı normal şekilde submit et (sayfa yenilenir)
+                // return true; // varsayılan davranış
+            });
+        }
+        
+        // Modal kapanınca butonları sıfırla
+        const adminCancelModal = document.getElementById('adminCancelModal');
+        if (adminCancelModal) {
+            adminCancelModal.addEventListener('hidden.bs.modal', function() {
+                const confirmBtn = document.getElementById('confirmCancelBtn');
+                if (confirmBtn) {
+                    confirmBtn.innerHTML = '<i class="fas fa-times-circle me-2"></i>Dosyayı İptal Et';
+                    confirmBtn.disabled = false;
+                }
+            });
+        }
+    });
 </script>
 
 <!-- Chat Styles -->

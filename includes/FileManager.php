@@ -1769,7 +1769,7 @@ class FileManager {
                 return [];
             }
             
-            // Hem gönderilen hem alınan dosyaları getir (iptal edilmemiş olanlar)
+            // Hem gönderilen hem alınan dosyaları getir
             $stmt = $this->pdo->prepare("
                 SELECT af.*, 
                        sender.username as sender_username, sender.first_name as sender_first_name, sender.last_name as sender_last_name,
@@ -1779,7 +1779,6 @@ class FileManager {
                 LEFT JOIN users receiver ON af.receiver_id = receiver.id
                 WHERE af.related_file_id = ?
                 AND ((af.sender_id = ? AND af.sender_type = ?) OR (af.receiver_id = ? AND af.receiver_type = ?))
-                AND (af.is_cancelled IS NULL OR af.is_cancelled = 0)
                 ORDER BY af.upload_date DESC
             ");
             
@@ -1805,12 +1804,11 @@ class FileManager {
                 return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
             }
             
-            // Dosya bilgilerini ve yetki kontrolünü yap (iptal edilmemiş dosyalar)
+            // Dosya bilgilerini ve yetki kontrolünü yap
             $stmt = $this->pdo->prepare("
                 SELECT * FROM additional_files
                 WHERE id = ?
                 AND ((sender_id = ? AND sender_type = ?) OR (receiver_id = ? AND receiver_type = ?))
-                AND (is_cancelled IS NULL OR is_cancelled = 0)
             ");
             $stmt->execute([$fileId, $userId, $userType, $userId, $userType]);
             $file = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -1863,7 +1861,6 @@ class FileManager {
                 SELECT COUNT(*) as count
                 FROM additional_files
                 WHERE receiver_id = ? AND receiver_type = ? AND is_read = 0
-                AND (is_cancelled IS NULL OR is_cancelled = 0)
             ");
             
             $stmt->execute([$userId, $userType]);

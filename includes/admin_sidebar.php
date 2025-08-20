@@ -68,6 +68,42 @@
                             ?>
                         </a>
                         
+                        <a class="nav-link <?php echo ($pageTitle == 'Yanıt Dosyaları Yönetimi') ? 'active' : ''; ?>" href="responses.php">
+                            <i class="fas fa-reply"></i>Yanıt Dosyaları
+                            <?php
+                            // Aktif yanıt dosya sayısını al
+                            try {
+                                $responseFilesStmt = $pdo->prepare("SELECT COUNT(*) FROM file_responses WHERE (is_cancelled = 0 OR is_cancelled IS NULL)");
+                                $responseFilesStmt->execute();
+                                $responseFilesCount = $responseFilesStmt->fetchColumn();
+                                
+                                if ($responseFilesCount > 0) {
+                                    echo '<span class="badge bg-success ms-2">' . $responseFilesCount . '</span>';
+                                }
+                            } catch(Exception $e) {
+                                // Hata durumunda badge gösterme
+                            }
+                            ?>
+                        </a>
+                        
+                        <a class="nav-link <?php echo ($pageTitle == 'Ek Dosyalar Yönetimi') ? 'active' : ''; ?>" href="additional-files.php">
+                            <i class="fas fa-paperclip"></i>Ek Dosyalar
+                            <?php
+                            // Aktif ek dosya sayısını al
+                            try {
+                                $additionalFilesStmt = $pdo->prepare("SELECT COUNT(*) FROM additional_files WHERE (is_cancelled = 0 OR is_cancelled IS NULL)");
+                                $additionalFilesStmt->execute();
+                                $additionalFilesCount = $additionalFilesStmt->fetchColumn();
+                                
+                                if ($additionalFilesCount > 0) {
+                                    echo '<span class="badge bg-info ms-2">' . $additionalFilesCount . '</span>';
+                                }
+                            } catch(Exception $e) {
+                                // Hata durumunda badge gösterme
+                            }
+                            ?>
+                        </a>
+                        
                         <a class="nav-link <?php echo ($pageTitle == 'Revizyon İşlemleri') ? 'active' : ''; ?>" href="revisions.php">
                             <i class="fas fa-history"></i>Revizyonlar
                             <?php

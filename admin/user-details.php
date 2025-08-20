@@ -637,9 +637,22 @@ include '../includes/admin_sidebar.php';
                                         <td><?php echo formatFileSize($upload['file_size']); ?></td>
                                         <td><?php echo date('d.m.Y H:i', strtotime($upload['upload_date'])); ?></td>
                                         <td>
-                                            <a href="uploads.php?view=<?php echo $upload['id']; ?>" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
+                                            <div class="d-flex gap-1">
+                                                <a href="uploads.php?view=<?php echo $upload['id']; ?>" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye me-1"></i>Görüntüle
+                                                </a>
+                                                <?php if (!isset($upload['is_cancelled']) || !$upload['is_cancelled']): ?>
+                                                    <button type="button" class="btn btn-warning btn-sm" 
+                                                            onclick="showCancelModal('<?php echo $upload['id']; ?>', 'upload', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')" 
+                                                            title="Dosyayı İptal Et">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                <?php else: ?>
+                                                    <span class="btn btn-sm btn-secondary disabled">
+                                                        <i class="fas fa-ban"></i>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -821,3 +834,76 @@ include '../includes/admin_sidebar.php';
 // Footer include
 include '../includes/admin_footer.php';
 ?>
+
+<!-- Admin İptal Modal -->
+<div class="modal fade" id="adminCancelModal" tabindex="-1" aria-labelledby="adminCancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient-danger text-white border-0">
+                <h5 class="modal-title d-flex align-items-center" id="adminCancelModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Dosya İptal Onayı
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <form action="uploads.php" method="POST" id="adminCancelForm">
+                <div class="modal-body py-4">
+                    <input type="hidden" name="admin_cancel_file" value="1">
+                    <input type="hidden" name="file_id" id="cancelFileId">
+                    <input type="hidden" name="file_type" id="cancelFileType">
+                    
+                    <div class="mb-4">
+                        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 50%;">
+                            <i class="fas fa-times text-white fa-2x"></i>
+                        </div>
+                        <h6 class="mb-2 text-dark text-center">Bu dosyayı iptal etmek istediğinizden emin misiniz?</h6>
+                        <p class="text-muted mb-3 text-center">
+                            <strong>Dosya:</strong> <span id="cancelFileName"></span>
+                        </p>
+                        <div class="alert alert-warning d-flex align-items-center mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <small>Bu işlem dosyayı gizleyecek ve varsa ücret iadesi yapacaktır.</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="adminCancelNotes" class="form-label">
+                            <i class="fas fa-sticky-note me-1"></i>
+                            İptal Sebebi (Opsiyonel)
+                        </label>
+                        <textarea class="form-control" id="adminCancelNotes" name="admin_notes" rows="3" 
+                                  placeholder="İptal sebebinizi yazabilirsiniz..."></textarea>
+                        <small class="text-muted">Bu not kullanıcıya gönderilecek bildirimde yer alacaktır.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-3">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>İptal
+                    </button>
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="fas fa-check me-1"></i>Evet, İptal Et
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+}
+</style>
+
+<script>
+    // Admin iptal modal gösterme
+    function showCancelModal(fileId, fileType, fileName) {
+        document.getElementById('cancelFileId').value = fileId;
+        document.getElementById('cancelFileType').value = fileType;
+        document.getElementById('cancelFileName').textContent = fileName;
+        document.getElementById('adminCancelNotes').value = '';
+        
+        var modal = new bootstrap.Modal(document.getElementById('adminCancelModal'));
+        modal.show();
+    }
+</script>
