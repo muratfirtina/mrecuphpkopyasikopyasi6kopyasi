@@ -535,7 +535,17 @@ include '../includes/admin_sidebar.php';
                         <table class="table table-sm">
                             <tr>
                                 <td><strong>Dosya Adı:</strong></td>
-                                <td><?php echo htmlspecialchars($revision['original_name']); ?></td>
+                                <td>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span><?php echo htmlspecialchars($revision['original_name']); ?></span>
+                                        <a href="file-detail.php?id=<?php echo $revision['upload_id']; ?>" 
+                                           class="btn btn-outline-primary btn-sm ms-2" 
+                                           title="Ana projeye git">
+                                            <i class="fas fa-external-link-alt me-1"></i>
+                                            Ana Projeye Git
+                                        </a>
+                                    </div>
+                                </td>
                             </tr>
                             <tr>
                                 <td><strong>Dosya Boyutu:</strong></td>

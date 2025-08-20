@@ -68,7 +68,7 @@
                             ?>
                         </a>
                         
-                        <a class="nav-link <?php echo ($pageTitle == 'Yanıt Dosyaları Yönetimi') ? 'active' : ''; ?>" href="responses.php">
+                        <!-- <a class="nav-link <?php echo ($pageTitle == 'Yanıt Dosyaları Yönetimi') ? 'active' : ''; ?>" href="responses.php">
                             <i class="fas fa-reply"></i>Yanıt Dosyaları
                             <?php
                             // Aktif yanıt dosya sayısını al
@@ -84,7 +84,7 @@
                                 // Hata durumunda badge gösterme
                             }
                             ?>
-                        </a>
+                        </a> -->
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Ek Dosyalar Yönetimi') ? 'active' : ''; ?>" href="additional-files.php">
                             <i class="fas fa-paperclip"></i>Ek Dosyalar
@@ -95,9 +95,9 @@
                                 $additionalFilesStmt->execute();
                                 $additionalFilesCount = $additionalFilesStmt->fetchColumn();
                                 
-                                if ($additionalFilesCount > 0) {
+                                /* if ($additionalFilesCount > 0) {
                                     echo '<span class="badge bg-info ms-2">' . $additionalFilesCount . '</span>';
-                                }
+                                } */
                             } catch(Exception $e) {
                                 // Hata durumunda badge gösterme
                             }

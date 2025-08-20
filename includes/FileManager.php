@@ -1769,7 +1769,9 @@ class FileManager {
                 return [];
             }
             
-            // Hem gönderilen hem alınan dosyaları getir
+            // Admin her şeyi görebilir, user sadece iptal edilmemiş dosyaları görür
+            $cancelledCondition = ($userType === 'admin') ? '' : 'AND (af.is_cancelled = 0 OR af.is_cancelled IS NULL)';
+            
             $stmt = $this->pdo->prepare("
                 SELECT af.*, 
                        sender.username as sender_username, sender.first_name as sender_first_name, sender.last_name as sender_last_name,
@@ -1779,6 +1781,7 @@ class FileManager {
                 LEFT JOIN users receiver ON af.receiver_id = receiver.id
                 WHERE af.related_file_id = ?
                 AND ((af.sender_id = ? AND af.sender_type = ?) OR (af.receiver_id = ? AND af.receiver_type = ?))
+                {$cancelledCondition}
                 ORDER BY af.upload_date DESC
             ");
             
@@ -1804,17 +1807,23 @@ class FileManager {
                 return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
             }
             
-            // Dosya bilgilerini ve yetki kontrolünü yap
+            // Admin iptal edilmiş dosyaları da indirebilir, user sadece aktif dosyaları
+            $cancelledCondition = ($userType === 'admin') ? '' : 'AND (is_cancelled = 0 OR is_cancelled IS NULL)';
+            
             $stmt = $this->pdo->prepare("
                 SELECT * FROM additional_files
                 WHERE id = ?
                 AND ((sender_id = ? AND sender_type = ?) OR (receiver_id = ? AND receiver_type = ?))
+                {$cancelledCondition}
             ");
             $stmt->execute([$fileId, $userId, $userType, $userId, $userType]);
             $file = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if (!$file) {
-                return ['success' => false, 'message' => 'Dosya bulunamadı veya yetkiniz yok.'];
+                $errorMessage = ($userType === 'admin') ? 
+                    'Dosya bulunamadı veya yetkiniz yok.' : 
+                    'Dosya bulunamadı, iptal edilmiş veya yetkiniz yok.';
+                return ['success' => false, 'message' => $errorMessage];
             }
             
             // Fiziksel dosya kontrolü
@@ -1836,7 +1845,8 @@ class FileManager {
                 'file_path' => $file['file_path'],
                 'original_name' => $file['original_name'],
                 'file_size' => $file['file_size'],
-                'file_type' => $file['file_type']
+                'file_type' => $file['file_type'],
+                'is_cancelled' => $file['is_cancelled'] ?? 0
             ];
             
         } catch(PDOException $e) {
@@ -1861,6 +1871,7 @@ class FileManager {
                 SELECT COUNT(*) as count
                 FROM additional_files
                 WHERE receiver_id = ? AND receiver_type = ? AND is_read = 0
+                AND (is_cancelled = 0 OR is_cancelled IS NULL)
             ");
             
             $stmt->execute([$userId, $userType]);

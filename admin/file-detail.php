@@ -1710,6 +1710,7 @@ include '../includes/admin_sidebar.php';
                             <th>Dosya Adı</th>
                             <th>Boyut</th>
                             <th>Yükleme Tarihi</th>
+                            <th>Talep Edilen Ücret</th>
                             <th>Kullanıcı</th>
                             <th>İşlemler</th>
                         </tr>
@@ -1722,6 +1723,19 @@ include '../includes/admin_sidebar.php';
                                 </td>
                                 <td><?php echo formatFileSize($revisionFile['file_size']); ?></td>
                                 <td><?php echo date('d.m.Y H:i', strtotime($revisionFile['upload_date'])); ?></td>
+                                <td>
+                                    <?php if (isset($revisionFile['credits_charged']) && $revisionFile['credits_charged'] > 0): ?>
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-coins me-1"></i>
+                                            <?php echo number_format($revisionFile['credits_charged'], 1); ?> kredi
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-gift me-1"></i>
+                                            Ücretsiz
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
                                 <td><?php echo safeHtml($revisionFile['username']); ?></td>
                                 <td>
                                     <div class="d-flex gap-1">
