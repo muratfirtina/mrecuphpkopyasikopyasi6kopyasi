@@ -15,7 +15,7 @@
                         Güvenli, hızlı ve kaliteli çözümler için bizi tercih edin.
                     </p>
                     <div class="social-links">
-                        <a href="#" class="text-white me-3" title="Facebook">
+                        <!-- <a href="#" class="text-white me-3" title="Facebook">
                             <i class="fab fa-facebook fa-lg"></i>
                         </a>
                         <a href="#" class="text-white me-3" title="Twitter">
@@ -29,7 +29,7 @@
                         </a>
                         <a href="#" class="text-white" title="YouTube">
                             <i class="fab fa-youtube fa-lg"></i>
-                        </a>
+                        </a> -->
                     </div>
                 </div>
                 
@@ -133,11 +133,11 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- AOS JS -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- AOS JS - CDN değiştir -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.js"></script>
     
-    <!-- jQuery (isteğe bağlı - gerekirse) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- jQuery - CDN değiştir -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     
     <!-- Main JavaScript -->
     <script src="<?php echo isset($basePath) ? $basePath : ''; ?>assets/js/main.js"></script>
@@ -147,8 +147,16 @@
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                
+                // Eğer sadece # ise işlemi durdur
+                if (href === '#' || href === '' || !href) {
+                    e.preventDefault();
+                    return;
+                }
+                
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
+                const target = document.querySelector(href);
                 if (target) {
                     target.scrollIntoView({
                         behavior: 'smooth',

@@ -478,7 +478,7 @@ if (isset($_SESSION['user_id'])) {
 
                     <?php if ($totalNotifications > 0): ?>
                         <li class="nav-item dropdown me-2">
-                            <a class="nav-link position-relative p-3" href="#" id="userNotificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link position-relative p-3" href="javascript:void(0)" id="userNotificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-bell fa-lg text-white"></i>
                                 <?php if ($badgeNotificationCount > 0): ?>
                                     <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -499,7 +499,7 @@ if (isset($_SESSION['user_id'])) {
                                 <?php foreach ($userNotifications as $notification): ?>
                                     <li>
                                         <a class="dropdown-item py-3 <?php echo $notification['is_read'] ? '' : 'bg-custom-warning'; ?>"
-                                            href="<?php echo $notification['action_url'] ?: '#'; ?>">
+                                            href="<?php echo $notification['action_url'] ? $notification['action_url'] : 'javascript:void(0)'; ?>">
                                             <div class="d-flex align-items-start">
                                                 <div class="me-3">
                                                     <div class="<?php
@@ -587,7 +587,7 @@ if (isset($_SESSION['user_id'])) {
                                 </li>
                                 <li>
                                     <div class="d-flex justify-content-between px-3 py-2">
-                                        <a href="#" class="btn btn-sm btn-outline-secondary" onclick="markAllNotificationsRead()">Tümünü Okundu İşaretle</a>
+                                        <a href="javascript:void(0)" class="btn btn-sm btn-outline-secondary" onclick="markAllNotificationsRead()">Tümünü Okundu İşaretle</a>
                                         <a href="files.php" class="small text-muted">Tüm dosyalarımı gör</a>
                                     </div>
                                 </li>
@@ -597,7 +597,7 @@ if (isset($_SESSION['user_id'])) {
 
                     <!-- Kullanıcı Menüsü -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="javascript:void(0)" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="user-avatar me-2">
                                 <i class="fas fa-user-circle fa-lg"></i>
                             </div>

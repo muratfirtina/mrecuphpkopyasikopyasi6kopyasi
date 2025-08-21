@@ -1,6 +1,6 @@
 <?php
 /**
- * Mr ECU - Ana Sayfa
+ * Mr ECU - Ana Sayfa (Database Temelli)
  */
 
 require_once 'config/config.php';
@@ -10,195 +10,225 @@ $pageTitle = 'Ana Sayfa';
 $pageDescription = 'Profesyonel ECU hizmetleri - Güvenli, hızlı ve kaliteli ECU yazılım çözümleri';
 $pageKeywords = 'ECU, chip tuning, ECU yazılım, immobilizer, TCU, motor kontrol ünitesi';
 
+// Design ayarlarını al
+try {
+    $stmt = $pdo->query("SELECT setting_key, setting_value FROM design_settings WHERE is_active = 1");
+    $designSettings = [];
+    while ($row = $stmt->fetch()) {
+        $designSettings[$row['setting_key']] = $row['setting_value'];
+    }
+} catch (Exception $e) {
+    $designSettings = [];
+}
+
+// Slider verilerini al
+try {
+    $stmt = $pdo->query("
+        SELECT * FROM design_sliders 
+        WHERE is_active = 1 
+        ORDER BY sort_order ASC
+    ");
+    $sliders = $stmt->fetchAll();
+    
+    // Debug: Slider sayısını logla
+    error_log('Index.php - Active sliders found: ' . count($sliders));
+    foreach($sliders as $s) {
+        error_log('Slider: ' . $s['title'] . ' - Image: ' . $s['background_image']);
+    }
+} catch (Exception $e) {
+    $sliders = [];
+    error_log('Index.php - Slider query error: ' . $e->getMessage());
+}
+
+// Typewriter ayarları
+$typewriterEnabled = isset($designSettings['hero_typewriter_enable']) ? (bool)$designSettings['hero_typewriter_enable'] : true;
+$typewriterWords = isset($designSettings['hero_typewriter_words']) ? 
+    explode(',', $designSettings['hero_typewriter_words']) : 
+    ['Optimize Edin', 'Güçlendirin', 'Geliştirin'];
+$animationSpeed = isset($designSettings['hero_animation_speed']) ? (int)$designSettings['hero_animation_speed'] : 3000;
+
+// Calculator Typewriter kelimeleri
+$calculatorTypewriterWords = ['Optimize Edin', 'Güçlendirin', 'Geliştirin'];
+
 // Header include
 include 'includes/header.php';
 ?>
 
     <!-- Hero Section Slider -->
-    <section class="hero-slider">
-        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+    <style>
+    /* Carousel Debug CSS */
+    .carousel-item {
+        display: none !important;
+    }
+    .carousel-item.active {
+        display: block !important;
+    }
+    .carousel-inner {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+    }
+    .hero-slide {
+        width: 100% !important;
+        height: 100vh !important;
+    }
+    </style>
+    <section class="hero-slider" style="position: relative; min-height: 100vh; z-index: 1;">
+        <?php if (!empty($sliders)): ?>
+        <!-- DEBUG: Slider verilerini kontrol et -->
+        <?php 
+        echo "<!-- DEBUG Slider Data: ";
+        foreach($sliders as $s) {
+            echo "ID: {$s['id']}, Background: {$s['background_image']}, Active: {$s['is_active']} | ";
+        }
+        echo " -->";
+        ?>
+        
+        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="<?php echo $animationSpeed; ?>" style="height: 100vh;">
             <!-- Slide Indicators -->
             <div class="carousel-indicators">
-                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
-                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
-                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
-                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3"></button>
-                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="4"></button>
+                <?php foreach ($sliders as $index => $slider): ?>
+                    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="<?php echo $index; ?>" 
+                            class="<?php echo $index === 0 ? 'active' : ''; ?>"></button>
+                <?php endforeach; ?>
             </div>
 
             <!-- Carousel Slides -->
-            <div class="carousel-inner">
-                <!-- Slide 1: ECU Programlama -->
-                <div class="carousel-item active">
-                    <div class="hero-slide" style="background: linear-gradient(rgba(44, 62, 80, 0.8), rgba(142, 68, 173, 0.8)), url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop') center/cover; height: 100vh; position: relative;">
+            <div class="carousel-inner" style="height: 100vh;">
+                <?php foreach ($sliders as $index => $slider): ?>
+                <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>" style="height: 100vh; display: block;">
+                    <!-- DEBUG: Resim yolu kontrolü -->
+                    <?php 
+                    $fullImagePath = __DIR__ . '/' . $slider['background_image'];
+                    $imageExists = file_exists($fullImagePath);
+                    echo "<!-- DEBUG Slide {$index}: Image={$slider['background_image']}, Exists={$imageExists}, FullPath={$fullImagePath} -->";
+                    ?>
+                    
+                    <div class="hero-slide" style="
+                        background: linear-gradient(rgba(44, 62, 80, 0.8), rgba(142, 68, 173, 0.8)), url('/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($slider['background_image']); ?>') center/cover no-repeat;
+                        background-size: cover;
+                        background-position: center;
+                        height: 100vh;
+                        min-height: 600px;
+                        position: relative;
+                        display: flex;
+                        align-items: center;
+                        width: 100%;
+                    ">
                         <div class="container py-5 h-100">
                             <div class="row align-items-center text-white h-100">
-                                <div class="col-lg-8">
-                                    <h1 class="display-3 fw-bold mb-3 slide-title">Profesyonel ECU Programlama</h1>
-                                    <h2 class="display-5 fw-bold mb-4" style="background: linear-gradient(45deg, #e91c1cff, #fd6060ff, #ff5261ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                                        <span id="typewriter-text">Optimize Edin</span><span class="typewriter-cursor">|</span>
-                                    </h2>
-                                    <p class="lead mb-4">
-                                        Magic Motorsport FLEX, Alientech KESS3, AutoTuner ve Launch anza 
-                                        tespit cihazları. Kaliteli yazılım tecrübemiz ve dosya sistemimizle işinizi 
-                                        büyütün.
-                                    </p>
-                                    <div class="d-flex gap-3 mb-5">
-                                        <a href="#devices" class="btn btn-danger btn-lg px-4">
-                                            <i class="fas fa-search me-2"></i>Cihazları İncele
-                                        </a>
-                                        <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
-                                            <a href="user/upload.php" class="btn btn-outline-light btn-lg px-4">
-                                                <i class="fas fa-upload me-2"></i>Dosya Yükle
-                                            </a>
+                                <?php if ($index === 0): ?>
+                                    <!-- İlk Slider: Chip Tuning Calculator -->
+                                    <div class="col-lg-12">
+                                        <div class="text-center mb-4">
+                                            <h1 class="display-4 fw-bold mb-3"><?php echo htmlspecialchars($slider['title']); ?></h1>
+                                            <p class="lead mb-4"><?php echo htmlspecialchars($slider['description']); ?></p>
+                                        </div>
+                                        
+                                        <!-- Chip Tuning Calculator Form -->
+                                        <div class="chip-tuning-calculator">
+                                            <div class="calculator-header text-center mb-4">
+                                                <h3 class="mb-2">1120+ Marka ve Model Hesaplayın</h3>
+                                                <h2 class="mb-4">Chip Tuning ile <span class="text-danger" id="calculator-typewriter">Optimize Edin</span><span class="typewriter-cursor-calc">|</span></h2>
+                                            </div>
+                                            
+                                            <form id="chipTuningForm" class="tuning-form">
+                                                <div class="row g-3 justify-content-center">
+                                                    <div class="col-lg-2 col-md-4 col-sm-6">
+                                                        <select class="form-select tuning-select" id="brand_select" name="brand_id" required>
+                                                            <option value="">Marka Seçiniz</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-lg-2 col-md-4 col-sm-6">
+                                                        <select class="form-select tuning-select" id="model_select" name="model_id" disabled required>
+                                                            <option value="">Model Seçiniz</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-lg-2 col-md-4 col-sm-6">
+                                                        <select class="form-select tuning-select" id="series_select" name="series_id" disabled required>
+                                                            <option value="">Seri Seçiniz</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-lg-2 col-md-4 col-sm-6">
+                                                        <select class="form-select tuning-select" id="engine_select" name="engine_id" disabled required>
+                                                            <option value="">Motor Seçiniz</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-lg-2 col-md-4 col-sm-6">
+                                                        <button type="submit" class="btn btn-danger btn-lg w-100 tuning-calculate-btn" disabled>
+                                                            <i class="fas fa-calculator me-2"></i>Hesapla
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                            
+                                            <!-- Loading Indicator -->
+                                            <div id="calculatorLoading" class="text-center mt-3" style="display: none;">
+                                                <div class="spinner-border text-white" role="status">
+                                                    <span class="visually-hidden">Yükleniyor...</span>
+                                                </div>
+                                                <p class="mt-2">Hesaplanıyor...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <!-- Diğer Slider'lar: Orijinal İçerik -->
+                                    <div class="col-lg-8">
+                                        <h1 class="display-3 fw-bold mb-3 slide-title"><?php echo htmlspecialchars($slider['title']); ?></h1>
+                                        
+                                        <?php if ($index === 0 && $typewriterEnabled): ?>
+                                            <h2 class="display-5 fw-bold mb-4" style="background: linear-gradient(45deg, #e91c1cff, #fd6060ff, #ff5261ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                                                <span id="typewriter-text"><?php echo htmlspecialchars($typewriterWords[0]); ?></span><span class="typewriter-cursor">|</span>
+                                            </h2>
                                         <?php else: ?>
-                                            <a href="register.php" class="btn btn-outline-light btn-lg px-4">
-                                                <i class="fas fa-upload me-2"></i>Dosya Yükle
-                                            </a>
+                                            <h2 class="display-5 fw-bold mb-4" style="color: <?php echo htmlspecialchars($slider['text_color']); ?>;">
+                                                <?php echo htmlspecialchars($slider['subtitle']); ?>
+                                            </h2>
                                         <?php endif; ?>
+                                        
+                                        <p class="lead mb-4">
+                                            <?php echo htmlspecialchars($slider['description']); ?>
+                                        </p>
+                                        
+                                        <div class="d-flex gap-3 mb-5">
+                                            <a href="<?php echo htmlspecialchars($slider['button_link']); ?>" class="btn btn-danger btn-lg px-4">
+                                                <i class="fas fa-search me-2"></i><?php echo htmlspecialchars($slider['button_text']); ?>
+                                            </a>
+                                            <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
+                                                <a href="user/upload.php" class="btn btn-outline-light btn-lg px-4">
+                                                    <i class="fas fa-upload me-2"></i>Dosya Yükle
+                                                </a>
+                                            <?php else: ?>
+                                                <a href="register.php" class="btn btn-outline-light btn-lg px-4">
+                                                    <i class="fas fa-upload me-2"></i>Dosya Yükle
+                                                </a>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="text-center">
-                                        <i class="fas fa-microchip" style="font-size: 10rem; opacity: 0.2;"></i>
+                                    <div class="col-lg-4">
+                                        <div class="text-center">
+                                            <?php
+                                            // Slider'a göre icon belirleme
+                                            $icon = 'fas fa-microchip';
+                                            if (strpos(strtolower($slider['title']), 'performans') !== false) {
+                                                $icon = 'fas fa-tachometer-alt';
+                                            } elseif (strpos(strtolower($slider['title']), 'güvenlik') !== false) {
+                                                $icon = 'fas fa-key';
+                                            } elseif (strpos(strtolower($slider['title']), 'şanzıman') !== false) {
+                                                $icon = 'fas fa-cogs';
+                                            } elseif (strpos(strtolower($slider['title']), 'destek') !== false) {
+                                                $icon = 'fas fa-headset';
+                                            }
+                                            ?>
+                                            <i class="<?php echo $icon; ?>" style="font-size: 10rem; opacity: 0.2;"></i>
+                                        </div>
                                     </div>
-                                </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Slide 2: Chip Tuning -->
-                <div class="carousel-item">
-                    <div class="hero-slide" style="background: linear-gradient(rgba(231, 76, 60, 0.8), rgba(192, 57, 43, 0.8)), url('https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=1920&h=1080&fit=crop') center/cover; height: 100vh; position: relative;">
-                        <div class="container py-5 h-100">
-                            <div class="row align-items-center text-white h-100">
-                                <div class="col-lg-8">
-                                    <h1 class="display-3 fw-bold mb-3 slide-title">Yüksek Performans</h1>
-                                    <h2 class="display-5 fw-bold mb-4" style="background: linear-gradient(45deg, #ff6b35, #f7931e, #ff4757); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                                        Chip Tuning
-                                    </h2>
-                                    <p class="lead mb-4">
-                                        Aracınızın motor performansını maksimuma çıkarın. Güvenli ve profesyonel 
-                                        chip tuning hizmetimizle güç ve tork artışı sağlayın.
-                                    </p>
-                                    <div class="d-flex gap-3 mb-5">
-                                        <a href="#services" class="btn btn-warning btn-lg px-4">
-                                            <i class="fas fa-tachometer-alt me-2"></i>Performans Artışı
-                                        </a>
-                                        <a href="contact.php" class="btn btn-outline-light btn-lg px-4">
-                                            <i class="fas fa-phone me-2"></i>Bilgi Alın
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="text-center">
-                                        <i class="fas fa-tachometer-alt" style="font-size: 10rem; opacity: 0.2;"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slide 3: Immobilizer -->
-                <div class="carousel-item">
-                    <div class="hero-slide" style="background: linear-gradient(rgba(39, 174, 96, 0.8), rgba(22, 160, 133, 0.8)), url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1920&h=1080&fit=crop') center/cover; height: 100vh; position: relative;">
-                        <div class="container py-5 h-100">
-                            <div class="row align-items-center text-white h-100">
-                                <div class="col-lg-8">
-                                    <h1 class="display-3 fw-bold mb-3 slide-title">Güvenlik Sistemleri</h1>
-                                    <h2 class="display-5 fw-bold mb-4" style="background: linear-gradient(45deg, #2ecc71, #27ae60, #16a085); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                                        Immobilizer Çözümleri
-                                    </h2>
-                                    <p class="lead mb-4">
-                                        Anahtar programlama, immobilizer bypass ve güvenlik sistemi 
-                                        çözümleri. Uzman ekibimizle tüm marka ve modeller desteklenir.
-                                    </p>
-                                    <div class="d-flex gap-3 mb-5">
-                                        <a href="#security" class="btn btn-success btn-lg px-4">
-                                            <i class="fas fa-key me-2"></i>Güvenlik Çözümleri
-                                        </a>
-                                        <a href="about.php" class="btn btn-outline-light btn-lg px-4">
-                                            <i class="fas fa-info-circle me-2"></i>Detaylar
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="text-center">
-                                        <i class="fas fa-key" style="font-size: 10rem; opacity: 0.2;"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slide 4: TCU Yazılımları -->
-                <div class="carousel-item">
-                    <div class="hero-slide" style="background: linear-gradient(rgba(155, 89, 182, 0.8), rgba(142, 68, 173, 0.8)), url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1920&h=1080&fit=crop') center/cover; height: 100vh; position: relative;">
-                        <div class="container py-5 h-100">
-                            <div class="row align-items-center text-white h-100">
-                                <div class="col-lg-8">
-                                    <h1 class="display-3 fw-bold mb-3 slide-title">Şanzıman Kontrolü</h1>
-                                    <h2 class="display-5 fw-bold mb-4" style="background: linear-gradient(45deg, #9b59b6, #8e44ad, #663399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                                        TCU Yazılımları
-                                    </h2>
-                                    <p class="lead mb-4">
-                                        Şanzıman kontrol ünitesi yazılımları ile vites geçiş performansını 
-                                        optimize edin. Daha yumuşak ve hızlı vites değişimleri.
-                                    </p>
-                                    <div class="d-flex gap-3 mb-5">
-                                        <a href="#transmission" class="btn btn-info btn-lg px-4">
-                                            <i class="fas fa-cogs me-2"></i>TCU Hizmetleri
-                                        </a>
-                                        <a href="services.php" class="btn btn-outline-light btn-lg px-4">
-                                            <i class="fas fa-list me-2"></i>Tüm Hizmetler
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="text-center">
-                                        <i class="fas fa-cogs" style="font-size: 10rem; opacity: 0.2;"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slide 5: 7/24 Destek -->
-                <div class="carousel-item">
-                    <div class="hero-slide" style="background: linear-gradient(rgba(52, 73, 94, 0.8), rgba(44, 62, 80, 0.8)), url('https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=1920&h=1080&fit=crop') center/cover; height: 100vh; position: relative;">
-                        <div class="container py-5 h-100">
-                            <div class="row align-items-center text-white h-100">
-                                <div class="col-lg-8">
-                                    <h1 class="display-3 fw-bold mb-3 slide-title">Kesintisiz Hizmet</h1>
-                                    <h2 class="display-5 fw-bold mb-4" style="background: linear-gradient(45deg, #3498db, #2980b9, #1f4e79); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                                        7/24 Teknik Destek
-                                    </h2>
-                                    <p class="lead mb-4">
-                                        Uzman ekibimiz 7 gün 24 saat hizmetinizde. Acil durumlarınızda 
-                                        anında çözüm üretiyoruz. Güvenilir ve hızlı destek garantisi.
-                                    </p>
-                                    <div class="d-flex gap-3 mb-5">
-                                        <a href="contact.php" class="btn btn-primary btn-lg px-4">
-                                            <i class="fas fa-headset me-2"></i>Hemen İletişim
-                                        </a>
-                                        <a href="#contact" class="btn btn-outline-light btn-lg px-4">
-                                            <i class="fas fa-clock me-2"></i>7/24 Destek
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="text-center">
-                                        <i class="fas fa-headset" style="font-size: 10rem; opacity: 0.2;"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <?php endforeach; ?>
             </div>
 
             <!-- Carousel Controls -->
@@ -211,13 +241,21 @@ include 'includes/header.php';
                 <span class="visually-hidden">Next</span>
             </button>
         </div>
-    </section>
-
-    <!-- Tuning System Widget -->
-    <section class="py-3">
-        <div class="container">
-            <?php include 'includes/tuning-widget.php'; ?>
+        <?php else: ?>
+        <!-- Fallback eğer slider yoksa -->
+        <div class="hero-slide" style="background: linear-gradient(rgba(44, 62, 80, 0.8), rgba(142, 68, 173, 0.8)), url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop') center/cover; height: 100vh; position: relative;">
+            <div class="container py-5 h-100">
+                <div class="row align-items-center text-white h-100">
+                    <div class="col-lg-8">
+                        <h1 class="display-3 fw-bold mb-3">Profesyonel ECU Hizmetleri</h1>
+                        <h2 class="display-5 fw-bold mb-4">Mr ECU</h2>
+                        <p class="lead mb-4">Güvenli, hızlı ve kaliteli ECU yazılım çözümleri</p>
+                        <a href="#services" class="btn btn-danger btn-lg px-4">Hizmetlerimizi İnceleyin</a>
+                    </div>
+                </div>
+            </div>
         </div>
+        <?php endif; ?>
     </section>
 
     <!-- Features Section -->
@@ -378,16 +416,28 @@ include 'includes/header.php';
                 <div class="col-lg-6">
                     <div class="row g-3">
                         <div class="col-6">
-                            <img src="https://via.placeholder.com/300x200/007bff/ffffff?text=ECU" class="img-fluid rounded shadow" alt="ECU">
+                            <div class="feature-box text-center p-4 bg-primary bg-opacity-10 rounded shadow">
+                                <i class="fas fa-microchip text-primary" style="font-size: 4rem;"></i>
+                                <h6 class="mt-2 mb-0">ECU</h6>
+                            </div>
                         </div>
                         <div class="col-6">
-                            <img src="https://via.placeholder.com/300x200/28a745/ffffff?text=CHIP" class="img-fluid rounded shadow" alt="Chip">
+                            <div class="feature-box text-center p-4 bg-success bg-opacity-10 rounded shadow">
+                                <i class="fas fa-memory text-success" style="font-size: 4rem;"></i>
+                                <h6 class="mt-2 mb-0">CHIP</h6>
+                            </div>
                         </div>
                         <div class="col-6">
-                            <img src="https://via.placeholder.com/300x200/dc3545/ffffff?text=TOOL" class="img-fluid rounded shadow" alt="Tool">
+                            <div class="feature-box text-center p-4 bg-danger bg-opacity-10 rounded shadow">
+                                <i class="fas fa-tools text-danger" style="font-size: 4rem;"></i>
+                                <h6 class="mt-2 mb-0">TOOL</h6>
+                            </div>
                         </div>
                         <div class="col-6">
-                            <img src="https://via.placeholder.com/300x200/ffc107/ffffff?text=CAR" class="img-fluid rounded shadow" alt="Car">
+                            <div class="feature-box text-center p-4 bg-warning bg-opacity-10 rounded shadow">
+                                <i class="fas fa-car text-warning" style="font-size: 4rem;"></i>
+                                <h6 class="mt-2 mb-0">CAR</h6>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -443,6 +493,13 @@ include 'includes/footer.php';
     font-weight: normal;
 }
 
+.typewriter-cursor-calc {
+    color: #dc3545;
+    animation: blink 1s infinite;
+    font-weight: normal;
+    margin-left: 5px;
+}
+
 @keyframes blink {
     0%, 50% { opacity: 1; }
     51%, 100% { opacity: 0; }
@@ -452,6 +509,12 @@ include 'includes/footer.php';
     display: inline-block;
     min-width: 250px;
     text-align: left;
+}
+
+#calculator-typewriter {
+    display: inline-block;
+    min-width: 200px;
+    text-align: center;
 }
 
 /* Hero Slider Styles */
@@ -520,21 +583,6 @@ include 'includes/footer.php';
     transform: scale(1.1);
 }
 
-.device-cards-overlay {
-    max-width: 800px;
-}
-
-.device-card {
-    transition: all 0.3s ease;
-    border-radius: 15px;
-    backdrop-filter: blur(20px);
-}
-
-.device-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-}
-
 .slide-title {
     text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     animation: slideInLeft 1s ease-out;
@@ -551,13 +599,6 @@ include 'includes/footer.php';
     }
 }
 
-.gradient-text {
-    background: linear-gradient(45deg, #e91c1cff, #fd6060ff, #ff5261ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .hero-slide {
@@ -570,12 +611,6 @@ include 'includes/footer.php';
     
     .display-5 {
         font-size: 2rem;
-    }
-    
-    .device-cards-overlay {
-        position: relative !important;
-        transform: none !important;
-        margin-top: 2rem;
     }
     
     .carousel-control-prev-icon,
@@ -596,6 +631,133 @@ include 'includes/footer.php';
 
 .carousel-item.active .btn {
     animation: slideInUp 1s ease-out 0.6s both;
+}
+
+/* Feature boxes for about section */
+.feature-box {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.feature-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
+}
+
+.service-card {
+    background: white;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+}
+
+/* Chip Tuning Calculator Styles */
+.chip-tuning-calculator {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.calculator-header h3 {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 300;
+    font-size: 1.2rem;
+}
+
+.calculator-header h2 {
+    color: white;
+    font-weight: 700;
+    font-size: 2.5rem;
+}
+
+.tuning-select {
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 1rem;
+    font-weight: 500;
+    font-size: 1rem;
+    color: #2c3e50;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.tuning-select:focus {
+    background: white;
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    outline: none;
+}
+
+.tuning-select:disabled {
+    background: rgba(255, 255, 255, 0.4);
+    color: rgba(44, 62, 80, 0.6);
+    cursor: not-allowed;
+}
+
+.tuning-calculate-btn {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    border: none;
+    border-radius: 12px;
+    padding: 1rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+}
+
+.tuning-calculate-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #c82333, #a71e2a);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+}
+
+.tuning-calculate-btn:disabled {
+    background: rgba(108, 117, 125, 0.6);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Responsive için calculator */
+@media (max-width: 768px) {
+    .chip-tuning-calculator {
+        padding: 2rem 1rem;
+        margin: 0 1rem;
+    }
+    
+    .calculator-header h2 {
+        font-size: 2rem;
+    }
+    
+    .tuning-select,
+    .tuning-calculate-btn {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .calculator-header h2 {
+        font-size: 1.8rem;
+    }
+    
+    .calculator-header h3 {
+        font-size: 1rem;
+    }
+    
+    .tuning-select,
+    .tuning-calculate-btn {
+        padding: 0.7rem;
+        font-size: 0.85rem;
+    }
 }
 
 @keyframes slideInRight {
@@ -621,6 +783,7 @@ include 'includes/footer.php';
 }
 </style>
 
+<?php if ($typewriterEnabled && !empty($typewriterWords)): ?>
 <script>
 class TypeWriter {
     constructor(element, words, wait = 3000) {
@@ -667,10 +830,10 @@ class TypeWriter {
 // Initialize typewriter when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     const typeWriterElement = document.querySelector('#typewriter-text');
-    const words = ['Optimize Edin', 'Güçlendirin', 'Geliştirin'];
+    const words = <?php echo json_encode($typewriterWords); ?>;
     
     if (typeWriterElement) {
-        new TypeWriter(typeWriterElement, words, 2000);
+        new TypeWriter(typeWriterElement, words, 500);
     }
     
     // Initialize carousel with custom settings
@@ -692,5 +855,202 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Initialize Calculator Typewriter
+    const calculatorTypewriterElement = document.querySelector('#calculator-typewriter');
+    const calculatorWords = <?php echo json_encode($calculatorTypewriterWords); ?>;
+    
+    if (calculatorTypewriterElement) {
+        new TypeWriter(calculatorTypewriterElement, calculatorWords, 2000);
+    }
+    
+    // Initialize Chip Tuning Calculator
+    initializeChipTuningCalculator();
 });
+
+// Chip Tuning Calculator JavaScript
+function initializeChipTuningCalculator() {
+    const brandSelect = document.getElementById('brand_select');
+    const modelSelect = document.getElementById('model_select');
+    const seriesSelect = document.getElementById('series_select');
+    const engineSelect = document.getElementById('engine_select');
+    const calculateBtn = document.querySelector('.tuning-calculate-btn');
+    const form = document.getElementById('chipTuningForm');
+    const loading = document.getElementById('calculatorLoading');
+    
+    if (!brandSelect || !form) {
+        return; // Calculator not on this page
+    }
+    
+    // Load brands on page load
+    loadBrands();
+    
+    // Event listeners
+    brandSelect.addEventListener('change', function() {
+        const brandId = this.value;
+        resetSelects(['model', 'series', 'engine']);
+        
+        if (brandId) {
+            loadModels(brandId);
+        }
+    });
+    
+    modelSelect.addEventListener('change', function() {
+        const modelId = this.value;
+        resetSelects(['series', 'engine']);
+        
+        if (modelId) {
+            loadSeries(modelId);
+        }
+    });
+    
+    seriesSelect.addEventListener('change', function() {
+        const seriesId = this.value;
+        resetSelects(['engine']);
+        
+        if (seriesId) {
+            loadEngines(seriesId);
+        }
+    });
+    
+    engineSelect.addEventListener('change', function() {
+        calculateBtn.disabled = !this.value;
+    });
+    
+    // Form submit
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const engineId = engineSelect.value;
+        if (!engineId) {
+            alert('Lütfen tüm alanları doldurun!');
+            return;
+        }
+        
+        // Show loading
+        loading.style.display = 'block';
+        calculateBtn.disabled = true;
+        
+        // Redirect to results page
+        window.location.href = `tuning-results.php?engine_id=${engineId}`;
+    });
+    
+    // Helper functions
+    function loadBrands() {
+        fetch('ajax/chip_tuning_calculator.php?action=get_brands')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    populateSelect(brandSelect, data.data, 'id', 'name');
+                } else {
+                    console.error('Brands load error:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Brands fetch error:', error);
+            });
+    }
+    
+    function loadModels(brandId) {
+        showSelectLoading(modelSelect);
+        
+        fetch(`ajax/chip_tuning_calculator.php?action=get_models&brand_id=${brandId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    populateSelect(modelSelect, data.data, 'id', 'name');
+                    modelSelect.disabled = false;
+                } else {
+                    console.error('Models load error:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Models fetch error:', error);
+            });
+    }
+    
+    function loadSeries(modelId) {
+        showSelectLoading(seriesSelect);
+        
+        fetch(`ajax/chip_tuning_calculator.php?action=get_series&model_id=${modelId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    populateSelect(seriesSelect, data.data, 'id', 'name');
+                    seriesSelect.disabled = false;
+                } else {
+                    console.error('Series load error:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Series fetch error:', error);
+            });
+    }
+    
+    function loadEngines(seriesId) {
+        showSelectLoading(engineSelect);
+        
+        fetch(`ajax/chip_tuning_calculator.php?action=get_engines&series_id=${seriesId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    populateSelect(engineSelect, data.data, 'id', 'name');
+                    engineSelect.disabled = false;
+                } else {
+                    console.error('Engines load error:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Engines fetch error:', error);
+            });
+    }
+    
+    function populateSelect(selectElement, data, valueField, textField) {
+        // Clear existing options except first
+        selectElement.innerHTML = selectElement.options[0].outerHTML;
+        
+        // Add new options
+        data.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item[valueField];
+            option.textContent = item[textField];
+            selectElement.appendChild(option);
+        });
+    }
+    
+    function showSelectLoading(selectElement) {
+        selectElement.innerHTML = '<option value="">Yükleniyor...</option>';
+        selectElement.disabled = true;
+    }
+    
+    function resetSelects(selects) {
+        selects.forEach(selectType => {
+            let selectElement;
+            let defaultText;
+            
+            switch(selectType) {
+                case 'model':
+                    selectElement = modelSelect;
+                    defaultText = 'Model Seçiniz';
+                    break;
+                case 'series':
+                    selectElement = seriesSelect;
+                    defaultText = 'Seri Seçiniz';
+                    break;
+                case 'engine':
+                    selectElement = engineSelect;
+                    defaultText = 'Motor Seçiniz';
+                    break;
+            }
+            
+            if (selectElement) {
+                selectElement.innerHTML = `<option value="">${defaultText}</option>`;
+                selectElement.disabled = true;
+            }
+        });
+        
+        calculateBtn.disabled = true;
+    }
+}
 </script>
+<?php endif; ?>

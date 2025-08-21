@@ -35,8 +35,8 @@ if (!isset($pageTitle)) {
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- AOS CSS -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- AOS CSS - CDN değiştir -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.css" rel="stylesheet">
     
     <!-- Custom CSS -->
     <link href="<?php echo isset($cssPath) ? $cssPath : 'assets/css/style.css'; ?>" rel="stylesheet">
@@ -49,7 +49,8 @@ if (!isset($pageTitle)) {
     <?php endif; ?>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    <link rel="shortcut icon" href="assets/images/favicon.svg">
 </head>
 <body class="<?php echo isset($bodyClass) ? $bodyClass : ''; ?>">
     
