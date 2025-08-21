@@ -131,10 +131,16 @@
     </footer>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- AOS JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
     <!-- jQuery (isteğe bağlı - gerekirse) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Main JavaScript -->
+    <script src="<?php echo isset($basePath) ? $basePath : ''; ?>assets/js/main.js"></script>
     
     <!-- Custom JavaScript -->
     <script>
