@@ -73,7 +73,7 @@ include 'includes/header.php';
         height: 100vh !important;
     }
     </style>
-    <section class="hero-slider" style="position: relative; min-height: 100vh; z-index: 1;">
+    <section class="hero-slider" style="position: relative; min-height: 100vh; z-index: 1040;">
         <?php if (!empty($sliders)): ?>
         <!-- DEBUG: Slider verilerini kontrol et -->
         <?php 
@@ -105,7 +105,7 @@ include 'includes/header.php';
                     ?>
                     
                     <div class="hero-slide" style="
-                        background: linear-gradient(rgba(44, 62, 80, 0.8), rgba(142, 68, 173, 0.8)), url('/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($slider['background_image']); ?>') center/cover no-repeat;
+                        background: linear-gradient(rgba(44, 62, 80, 0.5), rgba(3 9 191 / 0.5)), url('/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($slider['background_image']); ?>') center/cover no-repeat;
                         background-size: cover;
                         background-position: center;
                         height: 100vh;
@@ -243,7 +243,7 @@ include 'includes/header.php';
         </div>
         <?php else: ?>
         <!-- Fallback eğer slider yoksa -->
-        <div class="hero-slide" style="background: linear-gradient(rgba(44, 62, 80, 0.8), rgba(142, 68, 173, 0.8)), url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop') center/cover; height: 100vh; position: relative;">
+        <div class="hero-slide" style="background: linear-gradient(rgba(44, 62, 80, 0.8), rgb(3 9 191 / 0.5)), url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop') center/cover; height: 100vh; position: relative;">
             <div class="container py-5 h-100">
                 <div class="row align-items-center text-white h-100">
                     <div class="col-lg-8">
@@ -519,9 +519,14 @@ include 'includes/footer.php';
 
 /* Hero Slider Styles */
 .hero-slider {
-    position: relative;
-    overflow: hidden;
+position: relative;
+overflow: hidden;
 }
+    
+    /* Section spacing after hero */
+    #services {
+        padding-top: 6rem;
+    }
 
 .hero-slide {
     position: relative;
