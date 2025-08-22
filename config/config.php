@@ -19,8 +19,8 @@ define('DEBUG', true); // Production'da false yapın
 // Dosya yükleme ayarları
 define('UPLOAD_DIR', __DIR__ . '/../uploads/');
 define('UPLOAD_PATH', __DIR__ . '/../uploads/'); // FileManager için
-define('MAX_FILE_SIZE', 50 * 1024 * 1024); // 50MB
-define('ALLOWED_EXTENSIONS', ['bin', 'hex', 'ecu', 'ori', 'mod', 'zip', 'rar']);
+define('MAX_FILE_SIZE', 100 * 1024 * 1024); // 100MB
+define('ALLOWED_EXTENSIONS', []); // Tüm dosya türlerine izin ver
 
 // Email ayarları (SMTP) - mrecu@outlook.com
 define('SMTP_HOST', 'smtp-mail.outlook.com');
@@ -277,9 +277,10 @@ function validateFileUpload($file, $allowedTypes = null, $maxSize = null) {
     $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     $allowedTypes = $allowedTypes ?: ALLOWED_EXTENSIONS;
     
-    if (!in_array($extension, $allowedTypes)) {
-        $errors[] = 'Desteklenmeyen dosya formatı.';
-    }
+    // Dosya formatı kontrolü kaldırıldı - Tüm dosya türlerine izin verildi
+    // if (!in_array($extension, $allowedTypes)) {
+    //     $errors[] = 'Desteklenmeyen dosya formatı.';
+    // }
     
     return [
         'valid' => empty($errors),

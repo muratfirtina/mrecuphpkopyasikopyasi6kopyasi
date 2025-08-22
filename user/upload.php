@@ -547,7 +547,7 @@ try {
                                             <label for="file" class="form-label fw-semibold">ECU Dosyası *</label>
                                             <div class="file-upload-area modern" id="fileUploadArea">
                                                 <input type="file" class="form-control" id="file" name="file" 
-                                                       accept=".bin,.hex,.ecu,.ori,.mod,.zip,.rar" required style="display: none;">
+                                                       required style="display: none;">
                                                 <div class="upload-content">
                                                     <div class="upload-icon">
                                                         <i class="fas fa-cloud-upload-alt"></i>
@@ -561,7 +561,7 @@ try {
                                                     <div class="upload-info">
                                                         <div class="info-item">
                                                             <i class="fas fa-file-code me-1"></i>
-                                                            <span>Desteklenen: <?php echo implode(', ', array_map(function($ext) { return '.' . $ext; }, ALLOWED_EXTENSIONS)); ?></span>
+                                                            <span>Desteklenen: Tüm dosya türleri</span>
                                                         </div>
                                                         <div class="info-item">
                                                             <i class="fas fa-weight-hanging me-1"></i>
@@ -773,12 +773,11 @@ try {
                         </div>
                         <div class="info-body">
                             <div class="format-grid">
-                                <?php foreach (ALLOWED_EXTENSIONS as $ext): ?>
-                                    <div class="format-item">
-                                        <i class="fas fa-file-alt"></i>
-                                        <span>.<?php echo $ext; ?></span>
-                                    </div>
-                                <?php endforeach; ?>
+                                <div class="alert alert-success text-center">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <strong>Tüm dosya türleri desteklenmektedir!</strong>
+                                    <br><small class="text-muted">Artık herhangi bir dosya türü kısıtlaması bulunmamaktadır.</small>
+                                </div>
                             </div>
                             <div class="format-note">
                                 <small class="text-muted">

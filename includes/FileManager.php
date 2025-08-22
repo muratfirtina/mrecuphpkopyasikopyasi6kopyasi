@@ -434,11 +434,9 @@ class FileManager {
                 return ['success' => false, 'message' => 'Dosya boyutu çok büyük. Maksimum ' . formatFileSize(MAX_FILE_SIZE) . ' olabilir.'];
             }
             
-            // Dosya uzantı kontrolü
+            // Dosya uzantı kontrolü kaldırıldı - Tüm dosya türlerine izin verildi
             $fileExtension = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
-            if (!in_array($fileExtension, ALLOWED_EXTENSIONS)) {
-                return ['success' => false, 'message' => 'Desteklenmeyen dosya formatı. İzin verilen formatlar: ' . implode(', ', ALLOWED_EXTENSIONS)];
-            }
+            // Artık tüm dosya formatlarına izin veriliyor
             
             // Benzersiz dosya adı oluştur
             $fileName = $this->generateUniqueFileName($fileExtension);
@@ -1108,11 +1106,9 @@ class FileManager {
                 return ['success' => false, 'message' => 'Dosya boyutu çok büyük. Maksimum: ' . formatFileSize(MAX_FILE_SIZE)];
             }
             
-            // Dosya uzantısı kontrolü
+            // Dosya uzantısı kontrolü kaldırıldı - Tüm dosya türlerine izin verildi
             $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            if (!in_array($extension, ALLOWED_EXTENSIONS)) {
-                return ['success' => false, 'message' => 'Desteklenmeyen dosya formatı. İzin verilen: ' . implode(', ', ALLOWED_EXTENSIONS)];
-            }
+            // Artık tüm dosya formatlarına izin veriliyor
             
             // Revizyon dosyaları dizinini kontrol et
             $uploadDir = UPLOAD_PATH . 'revision_files/';
