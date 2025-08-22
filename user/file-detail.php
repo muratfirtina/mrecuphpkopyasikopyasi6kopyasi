@@ -630,6 +630,12 @@ include '../includes/user_header.php';
                                         <a href="download.php?id=<?php echo $fileDetail['id']; ?>&type=<?php echo $fileType; ?>" class="btn btn-success">
                                             <i class="fas fa-download me-1"></i>İndir
                                         </a>
+                                        <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
+                                        <?php if (isImageFile($fileDetail['original_name'])): ?>
+                                            <a href="view-image.php?id=<?php echo $fileDetail['id']; ?>&type=<?php echo $fileType; ?>" class="btn btn-info">
+                                                <i class="fas fa-eye me-1"></i>Dosyayı Görüntüle
+                                            </a>
+                                        <?php endif; ?>
                                         <button type="button" class="btn btn-outline-danger" 
                                             onclick="requestCancellation('<?php echo $fileDetail['id']; ?>', '<?php echo $fileType; ?>', '<?php echo htmlspecialchars($fileDetail['original_name']); ?>')">
                                             <i class="fas fa-times me-1"></i>İptal
@@ -801,6 +807,12 @@ include '../includes/user_header.php';
                                             <a href="download.php?id=<?php echo $response['id']; ?>&type=response" class="btn btn-success btn-sm">
                                                 <i class="fas fa-download me-1"></i>İndir
                                             </a>
+                                            <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
+                                            <?php if (isImageFile($response['original_name'])): ?>
+                                                <a href="view-image.php?id=<?php echo $response['id']; ?>&type=response" class="btn btn-info btn-sm">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            <?php endif; ?>
                                             <button type="button" class="btn btn-outline-warning btn-sm"
                                                 onclick="requestRevision('<?php echo $response['id']; ?>', 'response')">
                                                 <i class="fas fa-redo me-1"></i>Revize
@@ -880,6 +892,12 @@ include '../includes/user_header.php';
                                             <a href="download-revision.php?id=<?php echo $revFile['id']; ?>" class="btn btn-warning btn-sm">
                                                 <i class="fas fa-download me-1"></i>İndir
                                             </a>
+                                            <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
+                                            <?php if (isImageFile($revFile['original_name'])): ?>
+                                                <a href="view-image.php?id=<?php echo $revFile['id']; ?>&type=revision" class="btn btn-info btn-sm">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            <?php endif; ?>
                                             <button type="button" class="btn btn-outline-warning btn-sm"
                                                 onclick="requestRevision('<?php echo $revFile['id']; ?>', 'revision')">
                                                 <i class="fas fa-redo me-1"></i>Yeniden Revize
@@ -967,6 +985,12 @@ include '../includes/user_header.php';
                                             <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm">
                                                 <i class="fas fa-download me-1"></i>İndir
                                             </a>
+                                            <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
+                                            <?php if (isImageFile($file['original_name'])): ?>
+                                                <a href="view-image.php?id=<?php echo $file['id']; ?>&type=additional" class="btn btn-info btn-sm">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            <?php endif; ?>
                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                 onclick="requestCancellation('<?php echo $file['id']; ?>', 'additional', '<?php echo htmlspecialchars($file['original_name']); ?>')">
                                                 <i class="fas fa-times me-1"></i>İptal
@@ -1005,7 +1029,7 @@ include '../includes/user_header.php';
                                         <div class="mb-3">
                                             <label for="additional_file" class="form-label">Dosya Seç <span class="text-danger">*</span></label>
                                             <input type="file" class="form-control" id="additional_file" name="additional_file" required>
-                                            <div class="form-text">Maksimum dosya boyutu: <?php echo ini_get('upload_max_filesize'); ?></div>
+                                            <!-- <div class="form-text">Maksimum dosya boyutu: <?php echo ini_get('upload_max_filesize'); ?></div> -->
                                         </div>
 
                                         <div class="mb-3">

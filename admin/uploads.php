@@ -693,6 +693,15 @@ include '../includes/admin_sidebar.php';
                                             <i class="fas fa-eye me-1"></i>Detay
                                         </button>
                                         
+                                        <!-- Görüntü Dosyası için Görüntüle Butonu -->
+                                        <?php if (isImageFile($upload['original_name'])): ?>
+                                            <button type="button" class="btn btn-outline-info btn-sm" 
+                                                    onclick="window.location.href='view-image.php?id=<?php echo $upload['id']; ?>&type=upload'" 
+                                                    title="Görüntüyü büyük boyutta gör">
+                                                <i class="fas fa-image me-1"></i>Görüntüle
+                                            </button>
+                                        <?php endif; ?>
+                                        
                                         <?php if ($upload['status'] === 'pending'): ?>
                                             <button type="button" class="btn btn-outline-success btn-sm" 
                                                     onclick="processFile('<?php echo $upload['id']; ?>')">

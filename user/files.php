@@ -814,6 +814,15 @@ include '../includes/user_header.php';
                                                     <i class="fas fa-eye me-1"></i>Detay
                                                 </a>
                                                 
+                                                <!-- Görüntü Dosyası için Görüntüle Butonu -->
+                                                <?php if (isImageFile($file['original_name'])): ?>
+                                                    <a href="view-image.php?id=<?php echo $file['id']; ?>&type=upload" 
+                                                       class="btn btn-outline-info btn-sm" 
+                                                       title="Görüntüyü büyük boyutta gör">
+                                                        <i class="fas fa-image me-1"></i>Görüntüle
+                                                    </a>
+                                                <?php endif; ?>
+                                                
                                                 <?php if ($file['status'] === 'completed'): ?>
                                                     <a href="download.php?id=<?php echo $file['id']; ?>&type=upload" 
                                                        class="btn btn-success btn-sm">

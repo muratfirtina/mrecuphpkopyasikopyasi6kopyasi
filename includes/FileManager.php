@@ -1612,11 +1612,9 @@ class FileManager {
                 return ['success' => false, 'message' => 'Dosya boyutu çok büyük. Maksimum ' . formatFileSize(MAX_FILE_SIZE) . ' olabilir.'];
             }
             
-            // Dosya uzantı kontrolü
+            // Dosya uzantı kontrolü kaldırıldı - TÜM DOSYA TÜRLERİNE İZİN VER
             $fileExtension = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
-            if (!in_array($fileExtension, ALLOWED_EXTENSIONS)) {
-                return ['success' => false, 'message' => 'Desteklenmeyen dosya formatı. İzin verilen formatlar: ' . implode(', ', ALLOWED_EXTENSIONS)];
-            }
+            // Artık tüm dosya formatlarına izin veriliyor - kontrol yok
             
             // Benzersiz dosya adı oluştur
             $fileName = generateUUID() . '_additional.' . $fileExtension;

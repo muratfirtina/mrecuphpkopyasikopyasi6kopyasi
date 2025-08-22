@@ -16,6 +16,9 @@ define('SITE_EMAIL', 'info@mrecu.com');
 // Debug modu (geliştirme ortamı için)
 define('DEBUG', true); // Production'da false yapın
 
+// Görüntü dosyası formatları
+define('IMAGE_EXTENSIONS', ['jpeg', 'jpg', 'png', 'avif', 'webp', 'heic', 'gif', 'bmp', 'svg']);
+
 // Dosya yükleme ayarları
 define('UPLOAD_DIR', __DIR__ . '/../uploads/');
 define('UPLOAD_PATH', __DIR__ . '/../uploads/'); // FileManager için
@@ -258,11 +261,10 @@ function logSecurityEvent($eventType, $details) {
 function validateFileUpload($file, $allowedTypes = null, $maxSize = null) {
     global $security;
     
-    if ($security && SECURITY_ENABLED) {
-        return $security->validateFileUpload($file, $allowedTypes ?: ALLOWED_EXTENSIONS, $maxSize ?: MAX_FILE_SIZE);
-    }
+    // TÜM DOSYA TÜRLERİNE İZİN VER - GÜVENLİK SİSTEMİNİ BYPASS ET
+    // Security sistemi aktif olsa bile dosya türü kontrolü yapma!
     
-    // Fallback file validation
+    // Fallback file validation - SADECE TEMEL KONTROLLER
     $errors = [];
     
     if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
@@ -271,16 +273,11 @@ function validateFileUpload($file, $allowedTypes = null, $maxSize = null) {
     
     $maxSize = $maxSize ?: MAX_FILE_SIZE;
     if ($file['size'] > $maxSize) {
-        $errors[] = 'Dosya boyutu çok büyük.';
+        $errors[] = 'Dosya boyutu çok büyük (' . formatFileSize($maxSize) . ' maksimum).';
     }
     
-    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $allowedTypes = $allowedTypes ?: ALLOWED_EXTENSIONS;
-    
-    // Dosya formatı kontrolü kaldırıldı - Tüm dosya türlerine izin verildi
-    // if (!in_array($extension, $allowedTypes)) {
-    //     $errors[] = 'Desteklenmeyen dosya formatı.';
-    // }
+    // DOSYA TÜRÜ KONTROLÜ TAMAMEN KALDIRILDI!
+    // Artık tüm dosya türleri kabul ediliyor
     
     return [
         'valid' => empty($errors),
@@ -446,6 +443,14 @@ if (!function_exists('createSlug')) {
         $text = preg_replace('/[^a-z0-9]+/', '-', $text);
         $text = trim($text, '-');
         return $text;
+    }
+}
+
+// Görüntü dosyası kontrol fonksiyonu
+if (!function_exists('isImageFile')) {
+    function isImageFile($filename) {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        return in_array($extension, IMAGE_EXTENSIONS);
     }
 }
 

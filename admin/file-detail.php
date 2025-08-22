@@ -1491,10 +1491,22 @@ include '../includes/admin_sidebar.php';
                                 <a href="download-file.php?id=<?php echo $responseId; ?>&type=response" class="btn btn-success btn-sm w-100">
                                     <i class="fas fa-download me-1"></i>Dosyayı İndir
                                 </a>
+                                <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
+                                <?php if (isImageFile($upload['original_name'])): ?>
+                                    <a href="view-image.php?id=<?php echo $responseId; ?>&type=response" class="btn btn-info btn-sm w-100 mt-1">
+                                        <i class="fas fa-eye me-1"></i>Dosyayı Görüntüle
+                                    </a>
+                                <?php endif; ?>
                             <?php else: ?>
                                 <a href="download-file.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-success btn-sm w-100">
                                     <i class="fas fa-download me-1"></i>Dosyayı İndir
                                 </a>
+                                <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
+                                <?php if (isImageFile($upload['original_name'])): ?>
+                                    <a href="view-image.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-info btn-sm w-100 mt-1">
+                                        <i class="fas fa-eye me-1"></i>Dosyayı Görüntüle
+                                    </a>
+                                <?php endif; ?>
                             <?php endif; ?>
 
                             <!-- Dosyayı İşleme Al Butonu -->
@@ -1671,6 +1683,13 @@ include '../includes/admin_sidebar.php';
                                             class="btn btn-success btn-sm" title="Dosyayı İndir">
                                             <i class="fas fa-download me-1"></i>İndir
                                         </a>
+                                        <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
+                                        <?php if (isImageFile($responseFile['original_name'])): ?>
+                                            <a href="view-image.php?id=<?php echo $responseFile['id']; ?>&type=response"
+                                                class="btn btn-info btn-sm" title="Dosyayı Görüntüle">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        <?php endif; ?>
                                         <!-- Admin İptal Butonu (Yanıt Dosyası) -->
                                         <?php if (!isset($responseFile['is_cancelled']) || !$responseFile['is_cancelled']): ?>
                                             <button type="button" class="btn btn-danger btn-sm" 
@@ -1747,6 +1766,13 @@ include '../includes/admin_sidebar.php';
                                             class="btn btn-success btn-sm" title="Dosyayı İndir">
                                             <i class="fas fa-download me-1"></i>İndir
                                         </a>
+                                        <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
+                                        <?php if (isImageFile($revisionFile['original_name'])): ?>
+                                            <a href="view-image.php?id=<?php echo $revisionFile['id']; ?>&type=revision"
+                                                class="btn btn-info btn-sm" title="Dosyayı Görüntüle">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        <?php endif; ?>
                                         <!-- Admin İptal Butonu (Revizyon Dosyası) -->
                                         <?php if (!isset($revisionFile['is_cancelled']) || !$revisionFile['is_cancelled']): ?>
                                             <button type="button" class="btn btn-danger btn-sm" 
@@ -1849,6 +1875,12 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
                                         <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm" title="İndir">
                                             <i class="fas fa-download"></i>
                                         </a>
+                                        <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
+                                        <?php if (isImageFile($file['original_name'])): ?>
+                                            <a href="view-image.php?id=<?php echo $file['id']; ?>&type=additional" class="btn btn-info btn-sm" title="Dosyayı Görüntüle">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        <?php endif; ?>
                                         <!-- Admin İptal Butonu (Ek Dosya) -->
                                         <?php if (!isset($file['is_cancelled']) || !$file['is_cancelled']): ?>
                                             <button type="button" class="btn btn-danger btn-sm" 
@@ -2676,7 +2708,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="mb-3">
                         <label for="additional_file" class="form-label">Dosya Seç <span class="text-danger">*</span></label>
                         <input type="file" class="form-control" id="additional_file" name="additional_file" required>
-                        <div class="form-text">Maksimum dosya boyutu: <?php echo ini_get('upload_max_filesize'); ?></div>
+                        <!-- <div class="form-text">Maksimum dosya boyutu: <?php echo ini_get('upload_max_filesize'); ?></div> -->
                     </div>
 
                     <div class="mb-3">
