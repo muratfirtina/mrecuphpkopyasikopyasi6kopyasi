@@ -54,6 +54,22 @@ if ($product) {
     }
 }
 
+// Kategorileri getir (modal için gerekli)
+try {
+    $stmt = $pdo->query("SELECT * FROM categories WHERE is_active = 1 ORDER BY name");
+    $categories = $stmt->fetchAll();
+} catch(PDOException $e) {
+    $categories = [];
+}
+
+// Markaları getir (modal için gerekli)
+try {
+    $stmt = $pdo->query("SELECT * FROM product_brands WHERE is_active = 1 ORDER BY name");
+    $brands = $stmt->fetchAll();
+} catch(PDOException $e) {
+    $brands = [];
+}
+
 $pageTitle = $product ? $product['name'] . ' - Ürün Detay' : 'Ürün Detay';
 $pageDescription = 'Ürün detay bilgileri';
 $pageIcon = 'fas fa-eye';
@@ -115,6 +131,81 @@ include '../includes/admin_sidebar.php';
 .badge-active { background: #28a745; color: white; }
 .badge-inactive { background: #dc3545; color: white; }
 .badge-sale { background: #17a2b8; color: white; }
+
+/* Modal için ek stiller (products.php'den kopyalandı) */
+/* Fotoğraf yönetimi stilleri */
+#current-product-images .card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid transparent;
+}
+
+#current-product-images .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#current-product-images .card img {
+    border-radius: 0.375rem 0.375rem 0 0;
+}
+
+#current-product-images .btn-group-sm .btn {
+    padding: 0.25rem 0.375rem;
+    font-size: 0.75rem;
+}
+
+.image-upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    transition: border-color 0.15s ease-in-out;
+}
+
+.image-upload-area:hover {
+    border-color: #007bff;
+    background-color: #f8f9ff;
+}
+
+.image-upload-area.dragover {
+    border-color: #007bff;
+    background-color: #e7f3ff;
+}
+
+#current-image-count {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Ana resim badge'i */
+.badge.bg-primary {
+    background-color: #007bff !important;
+}
+
+/* Loading durumu */
+.btn.loading {
+    position: relative;
+    color: transparent !important;
+}
+
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 </style>
 
 <?php if ($error): ?>
@@ -323,8 +414,227 @@ include '../includes/admin_sidebar.php';
     </div>
 <?php endif; ?>
 
-<?php
-$pageJS = "
+<!-- Düzenleme Modal (products.php'den kopyalandı) -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Ürün Düzenle
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editProductForm">
+                <div class="modal-body">
+                    <input type="hidden" id="edit_product_id" name="product_id">
+                    
+                    <!-- Temel Bilgiler -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_name" class="form-label">Ürün Adı *</label>
+                                <input type="text" class="form-control" id="edit_name" name="name" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="edit_slug" class="form-label">URL Slug</label>
+                                <input type="text" class="form-control" id="edit_slug" name="slug">
+                                <div class="form-text">URL'de görünecek format (otomatik oluşturulur)</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="edit_sku" class="form-label">SKU (Stok Kodu)</label>
+                                <input type="text" class="form-control" id="edit_sku" name="sku">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="edit_short_description" class="form-label">Kısa Açıklama</label>
+                                <textarea class="form-control" id="edit_short_description" name="short_description" rows="3"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="edit_price" class="form-label">Fiyat (TL) *</label>
+                                        <input type="number" class="form-control" id="edit_price" name="price" step="0.01" min="0" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="edit_sale_price" class="form-label">İndirimli Fiyat (TL)</label>
+                                        <input type="number" class="form-control" id="edit_sale_price" name="sale_price" step="0.01" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="edit_stock_quantity" class="form-label">Stok Miktarı</label>
+                                <input type="number" class="form-control" id="edit_stock_quantity" name="stock_quantity" min="0">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="edit_category_id" class="form-label">Kategori</label>
+                                <select class="form-select" id="edit_category_id" name="category_id">
+                                    <option value="">Kategori Seçin</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="edit_brand_id" class="form-label">Marka</label>
+                                <select class="form-select" id="edit_brand_id" name="brand_id">
+                                    <option value="">Marka Seçin</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Açıklama -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="edit_description" class="form-label">Detaylı Açıklama</label>
+                                <textarea class="form-control" id="edit_description" name="description" rows="8"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ek Bilgiler -->
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_weight" class="form-label">Ağırlık (kg)</label>
+                                <input type="number" class="form-control" id="edit_weight" name="weight" step="0.01" min="0">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="edit_dimensions" class="form-label">Boyutlar</label>
+                                <input type="text" class="form-control" id="edit_dimensions" name="dimensions" placeholder="Örn: 10x20x30 cm">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_sort_order" class="form-label">Sıralama</label>
+                                <input type="number" class="form-control" id="edit_sort_order" name="sort_order" min="0">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Durum Ayarları</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="edit_is_active" name="is_active">
+                                    <label class="form-check-label" for="edit_is_active">Aktif</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="edit_featured" name="featured">
+                                    <label class="form-check-label" for="edit_featured">Öne Çıkan</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mevcut Ürün Resimleri -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6 class="mb-3">
+                                <i class="fas fa-images me-2"></i>Mevcut Resimler
+                                <span class="badge bg-info ms-2" id="current-image-count">0</span>
+                            </h6>
+                            <div id="current-product-images" class="row g-2 mb-3"></div>
+                            
+                            <!-- Yeni Resim Ekleme -->
+                            <div class="mt-3">
+                                <label class="form-label">Yeni Resim Ekle</label>
+                                <div class="input-group">
+                                    <input type="file" class="form-control" id="edit_new_images" 
+                                           accept="image/*" multiple>
+                                    <button type="button" class="btn btn-outline-primary" 
+                                            onclick="addNewProductImages()">
+                                        <i class="fas fa-upload me-1"></i>Yükle
+                                    </button>
+                                </div>
+                                <div class="form-text">Birden fazla resim seçebilirsiniz. Maksimum 10MB per dosya.</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- SEO Bölümü -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6 class="mb-3">SEO Bilgileri</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="edit_meta_title" class="form-label">Meta Başlık</label>
+                                        <input type="text" class="form-control" id="edit_meta_title" name="meta_title" maxlength="255">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="edit_meta_description" class="form-label">Meta Açıklama</label>
+                                        <textarea class="form-control" id="edit_meta_description" name="meta_description" rows="3" maxlength="160"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Güncelle
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript Kodları (products.php'den kopyalandı) -->
+<script>
+// Ürün düzenleme formunu AJAX ile gönder
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('editProductForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Sayfanın yeniden yüklenmesini engelle
+
+        const formData = new FormData(this);
+
+        // update_product parametresini ekle (sunucu tarafı kontrolü için)
+        formData.append('update_product', '1');
+
+        fetch('ajax/update-product.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Ağ hatası: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert(data.message || 'Ürün başarıyla güncellendi.');
+                // Modalı kapat
+                bootstrap.Modal.getInstance(document.getElementById('editProductModal')).hide();
+                // Sayfayı yenile
+                location.reload();
+            } else {
+                alert('Hata: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('AJAX hatası:', error);
+            alert('Bir hata oluştu: ' + error.message);
+        });
+    });
+});
+
+// Global değişkenler
+let currentProductId = null;
+
+// Ürün resmi değiştirme fonksiyonu (mevcut)
 function changeMainImage(imageSrc, thumbnail) {
     document.getElementById('mainProductImage').src = imageSrc;
     
@@ -335,12 +645,226 @@ function changeMainImage(imageSrc, thumbnail) {
     thumbnail.classList.add('active');
 }
 
+// Ürün düzenleme modalını aç
 function editProduct(productId) {
-    // Ürün düzenleme sayfasına yönlendir
-    window.location.href = 'products.php?edit=' + productId;
+    currentProductId = productId;
+    const modal = new bootstrap.Modal(document.getElementById('editProductModal'));
+    
+    fetch('ajax/get-product-details.php?id=' + productId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const product = data.product;
+                
+                document.getElementById('edit_product_id').value = product.id;
+                document.getElementById('edit_name').value = product.name || '';
+                document.getElementById('edit_slug').value = product.slug || '';
+                document.getElementById('edit_sku').value = product.sku || '';
+                document.getElementById('edit_short_description').value = product.short_description || '';
+                document.getElementById('edit_description').value = product.description || '';
+                document.getElementById('edit_price').value = product.price || '';
+                document.getElementById('edit_sale_price').value = product.sale_price || '';
+                document.getElementById('edit_stock_quantity').value = product.stock_quantity || 0;
+                document.getElementById('edit_weight').value = product.weight || '';
+                document.getElementById('edit_dimensions').value = product.dimensions || '';
+                document.getElementById('edit_sort_order').value = product.sort_order || 0;
+                document.getElementById('edit_meta_title').value = product.meta_title || '';
+                document.getElementById('edit_meta_description').value = product.meta_description || '';
+                
+                document.getElementById('edit_is_active').checked = product.is_active == 1;
+                document.getElementById('edit_featured').checked = product.featured == 1;
+                
+                const categorySelect = document.getElementById('edit_category_id');
+                categorySelect.innerHTML = '<option value="">Kategori Seçin</option>';
+                data.categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    option.selected = category.id == product.category_id;
+                    categorySelect.appendChild(option);
+                });
+                
+                const brandSelect = document.getElementById('edit_brand_id');
+                brandSelect.innerHTML = '<option value="">Marka Seçin</option>';
+                data.brands.forEach(brand => {
+                    const option = document.createElement('option');
+                    option.value = brand.id;
+                    option.textContent = brand.name;
+                    option.selected = brand.id == product.brand_id;
+                    brandSelect.appendChild(option);
+                });
+                
+                // Fotoğrafları yükle
+                loadProductImages(data.images);
+                
+                modal.show();
+            } else {
+                alert('Ürün bilgileri alınamadı: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Ürün bilgileri alınamadı:', error);
+            alert('Bir hata oluştu.');
+        });
 }
-";
 
+// Fotoğrafları yükle ve göster
+function loadProductImages(images) {
+    const container = document.getElementById('current-product-images');
+    const countBadge = document.getElementById('current-image-count');
+    
+    if (!container) return;
+    
+    container.innerHTML = '';
+    countBadge.textContent = images.length;
+    
+    if (images.length === 0) {
+        container.innerHTML = '<div class="col-12 text-center py-4"><p class="text-muted mb-0"><i class="fas fa-image fa-2x mb-2"></i><br>Henüz resim eklenmemiş</p></div>';
+        return;
+    }
+    
+    images.forEach(image => {
+        const imageCol = document.createElement('div');
+        imageCol.classList.add('col-md-3', 'col-sm-4', 'col-6');
+        
+        const primaryBadge = image.is_primary == 1 ? '<span class="badge bg-primary position-absolute top-0 start-0 m-1"><i class="fas fa-star"></i> Ana</span>' : '';
+        const primaryButton = image.is_primary != 1 ? 
+            '<button type="button" class="btn btn-outline-warning" onclick="setPrimaryImage(' + image.id + ')" title="Ana Resim Yap"><i class="fas fa-star"></i></button>' : 
+            '<button type="button" class="btn btn-warning" disabled><i class="fas fa-star"></i></button>';
+        
+        imageCol.innerHTML = 
+            '<div class="card position-relative">' +
+                '<img src="../' + image.image_path + '" class="card-img-top" style="height: 120px; object-fit: cover;">' +
+                primaryBadge +
+                '<div class="card-body p-2">' +
+                    '<div class="btn-group btn-group-sm w-100">' +
+                        primaryButton +
+                        '<button type="button" class="btn btn-outline-danger" onclick="deleteProductImage(' + image.id + ')" title="Sil">' +
+                            '<i class="fas fa-trash"></i>' +
+                        '</button>' +
+                    '</div>' +
+                    '<small class="text-muted d-block mt-1">' + (image.alt_text || 'Resim') + '</small>' +
+                '</div>' +
+            '</div>';
+        
+        container.appendChild(imageCol);
+    });
+}
+
+// Yeni fotoğraf ekleme
+function addNewProductImages() {
+    if (!currentProductId) {
+        alert('Geçersiz ürün ID');
+        return;
+    }
+    
+    const fileInput = document.getElementById('edit_new_images');
+    const files = fileInput.files;
+    
+    if (files.length === 0) {
+        alert('Lütfen en az bir resim seçin');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('product_id', currentProductId);
+    
+    for (let i = 0; i < files.length; i++) {
+        formData.append('images[]', files[i]);
+    }
+    
+    fetch('ajax/add-product-images.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            fileInput.value = '';
+            refreshProductImages();
+        } else {
+            alert('Hata: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Resim yükleme hatası:', error);
+        alert('Bir hata oluştu.');
+    });
+}
+
+// Fotoğrafı sil
+function deleteProductImage(imageId) {
+    if (!confirm('Bu resmi silmek istediğinizden emin misiniz?')) {
+        return;
+    }
+    
+    fetch('ajax/delete-product-image.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'image_id=' + imageId
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            refreshProductImages();
+        } else {
+            alert('Hata: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Resim silme hatası:', error);
+        alert('Bir hata oluştu.');
+    });
+}
+
+// Ana resim belirle
+function setPrimaryImage(imageId) {
+    fetch('ajax/set-primary-image.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'image_id=' + imageId
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            refreshProductImages();
+        } else {
+            alert('Hata: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Ana resim belirleme hatası:', error);
+        alert('Bir hata oluştu.');
+    });
+}
+
+// Fotoğrafları yeniden yükle
+function refreshProductImages() {
+    if (!currentProductId) return;
+    
+    fetch('ajax/get-product-details.php?id=' + currentProductId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadProductImages(data.images);
+            }
+        })
+        .catch(error => {
+            console.error('Fotoğraflar yeniden yüklenemedi:', error);
+        });
+}
+
+console.log('Product-detail.js yüklendi - modal fonksiyonları hazır!');
+</script>
+
+<?php
 // Footer include
 include '../includes/admin_footer.php';
 ?>
