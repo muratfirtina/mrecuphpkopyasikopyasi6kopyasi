@@ -33,7 +33,7 @@ if (!isset($pageTitle)) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- AOS CSS - CDN değiştir -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.css" rel="stylesheet">
@@ -45,11 +45,13 @@ if (!isset($pageTitle)) {
     <style>
     /* Modern Navigation Styles */
     .modern-navbar {
-        background: #071e3d !important;
+        background: rgba(7, 30, 61, 0.1) !important;
+        /* backdrop-filter: blur(15px); */
+        -webkit-backdrop-filter: blur(15px);
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         transition: all 0.3s ease;
-        padding: 1.1rem 0;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+        /* padding: 1.1rem 0; */
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
         position: fixed;
         z-index: 9999;
         width: 100%;
@@ -90,6 +92,7 @@ if (!isset($pageTitle)) {
     }
     
     .brand-name {
+        font-family: "Raleway", Sans-serif;
         font-size: 1.5rem;
         font-weight: 700;
         margin: 0;
@@ -97,6 +100,7 @@ if (!isset($pageTitle)) {
     }
     
     .brand-tagline {
+        font-family: "Raleway", Sans-serif;
         font-size: 0.75rem;
         color: rgba(255, 255, 255, 0.7);
         margin: 0;
@@ -147,12 +151,13 @@ if (!isset($pageTitle)) {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.75rem 1rem !important;
+        padding: 0.75rem 0.5rem !important;
         color: rgba(255, 255, 255, 0.8) !important;
         text-decoration: none;
         border-radius: 8px;
         transition: all 0.3s ease;
-        font-weight: 500;
+        font-size: 13px !important;
+        font-weight: 600 !important;
         margin: 0 0.25rem;
     }
     
@@ -258,6 +263,7 @@ if (!isset($pageTitle)) {
     }
     
     .username {
+        font-family: "Raleway", Sans-serif;
         font-weight: 600;
         font-size: 0.9rem;
         line-height: 1;
@@ -265,9 +271,10 @@ if (!isset($pageTitle)) {
     }
     
     .credits {
+        font-family: "Raleway", Sans-serif;
         font-size: 0.75rem;
         color: #28a745;
-        font-weight: 500;
+        font-weight: 600;
         background: rgba(40, 167, 69, 0.1);
         padding: 2px 6px;
         border-radius: 10px;
@@ -306,6 +313,9 @@ if (!isset($pageTitle)) {
     }
     
     .modern-dropdown .dropdown-item {
+        font-family: "Raleway", Sans-serif;
+        font-size: 14px;
+        font-weight: 600;
         color: rgba(255, 255, 255, 0.8);
         padding: 0.75rem 1.5rem;
         border-radius: 8px;
@@ -320,6 +330,7 @@ if (!isset($pageTitle)) {
     }
     
     .modern-dropdown .dropdown-header {
+        font-family: "Raleway", Sans-serif;
         color: rgba(255, 255, 255, 0.6);
         padding: 0.5rem 1.5rem;
         font-size: 0.85rem;
@@ -333,9 +344,9 @@ if (!isset($pageTitle)) {
         margin: 0.5rem 1rem;
     }
     
-    /* Fixed Top Spacing for navbar */
+    /* Fixed Top Spacing for navbar - Reduced for transparent header */
     body {
-        padding-top: 140px;
+        padding-top: 0px;
     }
     
     /* Responsive */
@@ -349,7 +360,7 @@ if (!isset($pageTitle)) {
         }
         
         body {
-            padding-top: 120px;
+            padding-top: 0px;
         }
         
         .brand-text {
@@ -380,7 +391,7 @@ if (!isset($pageTitle)) {
         }
         
         body {
-            padding-top: 100px;
+            padding-top: 0px;
         }
         
         .navbar-collapse {
@@ -430,9 +441,11 @@ if (!isset($pageTitle)) {
         max-width: 1200px !important;
     }
     
-    /* Global Font Size */
+    /* Global Font Settings - Raleway */
     body {
+        font-family: "Raleway", Sans-serif !important;
         font-size: 14px !important;
+        font-weight: 600 !important;
         line-height: 1.6 !important;
     }
     
@@ -638,16 +651,16 @@ if (!isset($pageTitle)) {
                     <li class="nav-item">
                         <a class="nav-link modern-nav-link <?php echo ($pageTitle == 'Ana Sayfa') ? 'active' : ''; ?>" href="/mrecuphpkopyasikopyasi6kopyasi/">
                             <i class="fas fa-home"></i>
-                            <span>Ana Sayfa</span>
+                            <span>ANA SAYFA</span>
                         </a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link modern-nav-link dropdown-toggle" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-shopping-bag"></i>
-                            <span>Ürünler</span>
+                            <span>ÜRÜNLER</span>
                         </a>
                         <ul class="dropdown-menu modern-dropdown dropdown-menu-start" aria-labelledby="productsDropdown">
-                            <li><h6 class="dropdown-header">Kategoriler</h6></li>
+                            <li><h6 class="dropdown-header">KATEGORİLER</h6></li>
                             <?php
                             // Kategorileri getir
                             try {
@@ -691,19 +704,19 @@ if (!isset($pageTitle)) {
                     <li class="nav-item">
                         <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/#services">
                             <i class="fas fa-cogs"></i>
-                            <span>Hizmetler</span>
+                            <span>HİZMETLERİMİZ</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/#about">
                             <i class="fas fa-info-circle"></i>
-                            <span>Hakkımızda</span>
+                            <span>HAKKIMIZDA</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/#contact">
                             <i class="fas fa-envelope"></i>
-                            <span>İletişim</span>
+                            <span>İLETİŞİM</span>
                         </a>
                     </li>
                     
@@ -712,7 +725,7 @@ if (!isset($pageTitle)) {
                         <li class="nav-item">
                             <a class="nav-link modern-nav-link upload-link" href="/mrecuphpkopyasikopyasi6kopyasi/user/upload.php">
                                 <i class="fas fa-upload"></i>
-                                <span>Dosya Yükle</span>
+                                <span>DOSYA YÜKLE</span>
                             </a>
                         </li>
                     <?php endif; ?>

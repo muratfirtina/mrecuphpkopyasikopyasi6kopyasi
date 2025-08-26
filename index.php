@@ -111,10 +111,16 @@ include 'includes/header.php';
     }
     .hero-slide {
         width: 100% !important;
-        height: 600px !important;
+        height: 750px !important;
+    }
+    
+    /* Hero slider genişletme - yukarıya doğru büyütme */
+    .hero-slider {
+        margin-top: -150px !important;
+        padding-top: 150px !important;
     }
     </style>
-    <section class="hero-slider" style="position: relative; min-height: 600px; z-index: 1040;">
+    <section class="hero-slider" style="position: relative; min-height: 750px; z-index: 1040;">
         <?php if (!empty($sliders)): ?>
         <!-- DEBUG: Slider verilerini kontrol et -->
         <?php 
@@ -125,7 +131,7 @@ include 'includes/header.php';
         echo " -->";
         ?>
         
-        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="<?php echo $animationSpeed; ?>" style="height: 600px;">
+        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="<?php echo $animationSpeed; ?>" style="height: 750px;">
             <!-- Slide Indicators -->
             <!-- <div class="carousel-indicators">
                 <?php foreach ($sliders as $index => $slider): ?>
@@ -135,9 +141,9 @@ include 'includes/header.php';
             </div> -->
 
             <!-- Carousel Slides -->
-            <div class="carousel-inner" style="height: 600px;">
+            <div class="carousel-inner" style="height: 730px;">
                 <?php foreach ($sliders as $index => $slider): ?>
-                <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>" style="height: 600px; display: block;">
+                <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>" style="height: 750px; display: block;">
                     <!-- DEBUG: Resim yolu kontrolü -->
                     <?php 
                     $fullImagePath = __DIR__ . '/' . $slider['background_image'];
@@ -146,17 +152,27 @@ include 'includes/header.php';
                     ?>
                     
                     <div class="hero-slide" style="
-                        background: linear-gradient(rgba(44, 62, 80, 0.5), rgba(3 9 191 / 0.5)), url('/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($slider['background_image']); ?>') center/cover no-repeat;
+                        background: linear-gradient(rgba(44, 62, 80, 0.3), rgba(3, 9, 191, 0.4)), url('/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($slider['background_image']); ?>') center/cover no-repeat;
                         background-size: cover;
                         background-position: center;
-                        height: 600px;
-                        min-height: 600px;
+                        height: 750px;
+                        min-height: 750px;
                         position: relative;
                         display: flex;
                         align-items: center;
                         width: 100%;
                     ">
-                        <div class="container py-5 h-100">
+                        <!-- Üstten aşağıya gradient karartma overlay -->
+                        <div style="
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0) 100%);
+                            z-index: 1;
+                        "></div>
+                        <div class="container py-5 h-100" style="position: relative; z-index: 2;">
                             <div class="row align-items-center text-white h-100">
                                 <?php if ($index === 0): ?>
                                     <!-- İlk Slider: Standart İçerik -->
@@ -269,8 +285,18 @@ include 'includes/header.php';
         </div>
         <?php else: ?>
         <!-- Fallback eğer slider yoksa -->
-        <div class="hero-slide" style="background: linear-gradient(rgba(44, 62, 80, 0.8), rgb(3 9 191 / 0.5)), url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop') center/cover; height: 600px; position: relative;">
-            <div class="container py-5 h-100">
+        <div class="hero-slide" style="background: linear-gradient(rgba(44, 62, 80, 0.8), rgb(3 9 191 / 0.5)), url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop') center/cover; height: 750px; position: relative;">
+            <!-- Üstten aşağıya gradient karartma overlay -->
+            <div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0) 100%);
+                z-index: 1;
+            "></div>
+            <div class="container py-5 h-100" style="position: relative; z-index: 2;">
                 <div class="row align-items-center text-white h-100">
                     <div class="col-lg-8">
                         <h1 class="display-3 fw-bold mb-3">Profesyonel ECU Hizmetleri</h1>
@@ -813,7 +839,12 @@ overflow: hidden;
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .hero-slide {
-        height: 500px !important;
+        height: 650px !important;
+    }
+    
+    .hero-slider {
+        margin-top: -120px !important;
+        padding-top: 120px !important;
     }
     
     .display-3 {
@@ -1000,7 +1031,7 @@ overflow: hidden;
     padding: 0;
     position: relative;
     z-index: 1050;
-    margin-top: -150px;
+    margin-top: -200px;
     padding-bottom: 80px;
 }
 
@@ -1054,7 +1085,7 @@ overflow: hidden;
 }
 
 .flip-card-front {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    background: linear-gradient(135deg, #d32734 0%, #c82333 100%);
     color: white;
 }
 
@@ -1165,7 +1196,7 @@ overflow: hidden;
 /* Responsive Styles */
 @media (max-width: 992px) {
     .jet-animated-boxes {
-        margin-top: -100px;
+        margin-top: -150px;
     }
     
     .flip-card {
@@ -1192,7 +1223,7 @@ overflow: hidden;
 
 @media (max-width: 768px) {
     .jet-animated-boxes {
-        margin-top: -80px;
+        margin-top: -120px;
         padding-bottom: 60px;
     }
     

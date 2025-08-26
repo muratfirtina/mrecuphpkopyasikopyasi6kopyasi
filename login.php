@@ -63,7 +63,7 @@ include 'includes/header.php';
 ?>
 
 <section class="py-5" style="min-height: 100vh; display: flex; align-items: center; background: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop') center/cover fixed; position: relative;">
-    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 9, 191, 0.7); z-index: 1;"></div>
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.7); z-index: 1;"></div>
     <div class="container" style="position: relative; z-index: 2;">
         <div class="row justify-content-center">
             <!-- Login Card -->

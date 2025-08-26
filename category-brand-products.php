@@ -127,6 +127,12 @@ include 'includes/header.php';
 <style>
 /* Modern Hero with Background Image */
 .brand-category-hero {
+    background: linear-gradient(180deg, 
+    rgba(0,0,0,0.4) 0%,     /* Üstte %40 karartma */
+    rgba(0,0,0,0.2) 30%,    /* %30'da %20 karartma */
+    rgba(0,0,0,0.1) 60%,    /* %60'da %10 karartma */
+    rgba(0,0,0,0) 100%      /* Altta tamamen şeffaf */
+);
     position: relative;
     background-size: cover;
     background-position: center;
@@ -136,7 +142,7 @@ include 'includes/header.php';
     margin-bottom: 2rem;
     border-radius: 0 0 30px 30px;
     text-shadow: 0 2px 10px rgba(0,0,0,0.7);
-    height: 340px;
+    height: 375px;
     display: flex;
     align-items: center;
 }
@@ -203,11 +209,11 @@ include 'includes/header.php';
 .hero-stat {
     text-align: center;
     background: rgba(255, 255, 255, 0.15);
-    padding: 1.3rem 2.2rem;
+    padding: 1.2rem 2rem;
     border-radius: 18px;
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    min-width: 140px;
+    min-width: 130px;
     transition: all 0.3s ease;
     box-shadow: 0 6px 20px rgba(0,0,0,0.1);
 }
@@ -606,7 +612,7 @@ include 'includes/header.php';
 <section class="brand-category-hero" style="background-image: url('/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($brand['logo'] ?: 'assets/images/default-brand-bg.jpg'); ?>');">
     <div class="overlay"></div> <!-- Karartma katmanı -->
     <div class="container">
-        <div class="hero-content">
+        <div class="hero-content" style="padding-top: 45px;">
             <!-- <?php if ($brand['logo']): ?>
                 <img src="/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($brand['logo']); ?>" 
                      alt="<?php echo htmlspecialchars($brand['name']); ?>" 

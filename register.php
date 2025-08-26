@@ -50,7 +50,7 @@ $bodyClass = 'bg-dark';
 include 'includes/header.php';
 ?>
 
-<section class="py-5" style="min-height: 100vh; display: flex; align-items: center; background: url('https://images.unsplash.com/photo-1593508512255-86ab42a8e620?w=1920&h=1080&fit=crop') center/cover fixed;">
+<section class="py-5" style="min-height: 100vh; display: flex; align-items: center; background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') no-repeat center center/cover; position: relative;">
     <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.7); z-index: 1;"></div>
     <div class="container" style="position: relative; z-index: 2;">
         <div class="row justify-content-center">
