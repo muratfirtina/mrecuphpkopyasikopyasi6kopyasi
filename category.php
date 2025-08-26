@@ -107,7 +107,7 @@ include 'includes/header.php';
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(30, 30, 100, 0.8), rgba(70, 20, 90, 0.7));
+    background: linear-gradient(rgba(44, 62, 80, 0.5), rgba(3 9 191 / 0.5));
     border-radius: 0 0 30px 30px;
     z-index: 1;
 }
@@ -489,8 +489,8 @@ include 'includes/header.php';
             <div class="container">
                 <div class="text-center mb-5">
                     <h2 class="h1 mb-3">
-                        <i class="fas fa-award text-primary me-3"></i>
-                        <?php echo htmlspecialchars($category['name']); ?> Markaları
+                        <i class="text-primary me-3"></i>
+                        <?php echo htmlspecialchars($category['name']); ?>
                     </h2>
                     <p class="lead text-muted">
                         İhtiyacınıza uygun markayı seçerek ürünleri keşfedebilirsiniz

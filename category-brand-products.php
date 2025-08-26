@@ -147,7 +147,7 @@ include 'includes/header.php';
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(30, 30, 100, 0.85), rgba(70, 20, 90, 0.8));
+    background: linear-gradient(rgba(44, 62, 80, 0.5), rgba(3 9 191 / 0.5));
     border-radius: 0 0 30px 30px;
     z-index: 1;
 }

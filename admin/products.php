@@ -919,7 +919,41 @@ include '../includes/admin_sidebar.php';
 <!-- JavaScript Kodları -->
 <script>
 // Mr ECU Admin - Products Page JavaScript
+// Ürün düzenleme formunu AJAX ile gönder
+document.getElementById('editProductForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Sayfanın yeniden yüklenmesini engelle
 
+    const formData = new FormData(this);
+
+    // update_product parametresini ekle (sunucu tarafı kontrolü için)
+    formData.append('update_product', '1');
+
+    fetch('ajax/update-product.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Ağ hatası: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert(data.message || 'Ürün başarıyla güncellendi.');
+            // Modalı kapat
+            bootstrap.Modal.getInstance(document.getElementById('editProductModal')).hide();
+            // Sayfayı yenile
+            location.reload();
+        } else {
+            alert('Hata: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('AJAX hatası:', error);
+        alert('Bir hata oluştu: ' + error.message);
+    });
+});
 // Global değişkenler
 let currentProductId = null;
 
