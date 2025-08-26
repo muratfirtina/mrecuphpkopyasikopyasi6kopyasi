@@ -236,6 +236,13 @@ function generateToken() {
     return bin2hex(random_bytes(32));
 }
 
+// Generate random string with specified length
+if (!function_exists('generateRandomString')) {
+    function generateRandomString($length = 32) {
+        return bin2hex(random_bytes($length / 2));
+    }
+}
+
 // UUID v4 oluşturma fonksiyonu
 function generateUUID() {
     $data = random_bytes(16);

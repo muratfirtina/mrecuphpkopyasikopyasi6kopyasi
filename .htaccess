@@ -3,6 +3,9 @@
 # Enable URL Rewriting
 RewriteEngine On
 
+# Set the base directory for MAMP
+RewriteBase /mrecuphpkopyasikopyasi6kopyasi/
+
 # Prevent directory browsing
 Options -Indexes
 

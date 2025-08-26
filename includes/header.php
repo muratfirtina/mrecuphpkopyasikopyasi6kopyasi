@@ -418,6 +418,86 @@ if (!isset($pageTitle)) {
         padding: 1.5rem 0 !important;
         box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3) !important;
     }
+    
+    /* Global Max Width - Site Wide Container Limitation */
+    .container,
+    .container-lg,
+    .container-md,
+    .container-sm,
+    .container-xl,
+    .container-xxl,
+    .container-fluid {
+        max-width: 1200px !important;
+    }
+    
+    /* Global Font Size */
+    body {
+        font-size: 14px !important;
+        line-height: 1.6 !important;
+    }
+    
+    /* Ensure responsive breakpoints still work properly */
+    @media (max-width: 575.98px) {
+        .container,
+        .container-lg,
+        .container-md,
+        .container-sm,
+        .container-xl,
+        .container-xxl,
+        .container-fluid {
+            max-width: 100% !important;
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+        }
+    }
+    
+    @media (min-width: 576px) and (max-width: 767.98px) {
+        .container,
+        .container-lg,
+        .container-md,
+        .container-sm,
+        .container-xl,
+        .container-xxl,
+        .container-fluid {
+            max-width: 540px !important;
+        }
+    }
+    
+    @media (min-width: 768px) and (max-width: 991.98px) {
+        .container,
+        .container-lg,
+        .container-md,
+        .container-sm,
+        .container-xl,
+        .container-xxl,
+        .container-fluid {
+            max-width: 720px !important;
+        }
+    }
+    
+    @media (min-width: 992px) and (max-width: 1199.98px) {
+        .container,
+        .container-lg,
+        .container-md,
+        .container-sm,
+        .container-xl,
+        .container-xxl,
+        .container-fluid {
+            max-width: 960px !important;
+        }
+    }
+    
+    @media (min-width: 1200px) {
+        .container,
+        .container-lg,
+        .container-md,
+        .container-sm,
+        .container-xl,
+        .container-xxl,
+        .container-fluid {
+            max-width: 1200px !important;
+        }
+    }
     </style>
     
     <!-- Ek CSS dosyaları için -->
@@ -584,13 +664,13 @@ if (!isset($pageTitle)) {
                                 $headerCategories = $stmt->fetchAll();
                                 
                                 if (!empty($headerCategories)):
-                                    foreach ($headerCategories as $category):
+                                    foreach ($headerCategories as $headerCategory):
                             ?>
                             <li>
-                                <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/kategori/<?php echo $category['slug']; ?>">
+                                <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/kategori/<?php echo $headerCategory['slug']; ?>">
                                     <i class="fas fa-tag me-2"></i>
-                                    <?php echo htmlspecialchars($category['name']); ?>
-                                    <span class="badge bg-secondary ms-auto"><?php echo $category['product_count']; ?></span>
+                                    <?php echo htmlspecialchars($headerCategory['name']); ?>
+                                    <span class="badge bg-secondary ms-auto"><?php echo $headerCategory['product_count']; ?></span>
                                 </a>
                             </li>
                             <?php

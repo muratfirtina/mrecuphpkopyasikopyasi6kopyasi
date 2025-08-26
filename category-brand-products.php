@@ -289,6 +289,7 @@ include 'includes/header.php';
     display: flex;
     flex-direction: column;
     position: relative;
+    cursor: pointer;
 }
 
 .product-card:hover {
@@ -700,7 +701,7 @@ include 'includes/header.php';
             <!-- Products Grid -->
             <div class="products-grid">
                 <?php foreach ($products as $product): ?>
-                    <div class="product-card">
+                    <div class="product-card" onclick="window.location.href='/mrecuphpkopyasikopyasi6kopyasi/urun/<?php echo $product['slug']; ?>'" style="cursor: pointer;">
                         <div class="product-image-container">
                             <?php if ($product['primary_image']): ?>
                                 <img src="/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($product['primary_image']); ?>" 
@@ -827,7 +828,7 @@ include 'includes/header.php';
             <section class="related-brands">
                 <div class="text-center mb-4">
                     <h2 class="h3 mb-3">
-                        <i class="fas fa-award text-primary me-2"></i>
+                        <i class="text-primary me-2"></i>
                         <?php echo htmlspecialchars($category['name']); ?> Kategorisindeki Diğer Markalar
                     </h2>
                     <p class="text-muted">
@@ -886,6 +887,13 @@ document.getElementById('sortProducts')?.addEventListener('change', function() {
     url.searchParams.delete('page');
     
     window.location.href = url.toString();
+});
+
+// Prevent button click from triggering card click
+document.querySelectorAll('.btn-detail').forEach(button => {
+    button.addEventListener('click', function(e) {
+        e.stopPropagation(); // Prevent card click from triggering
+    });
 });
 
 // Smooth animations on scroll

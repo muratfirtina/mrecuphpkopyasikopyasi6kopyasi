@@ -567,5 +567,45 @@ class User {
         $stmt = $this->pdo->prepare("UPDATE users SET last_login = NOW(), updated_at = NOW() WHERE id = ?");
         $stmt->execute([$userId]);
     }
+    
+    // Remember token işlemleri
+    public function setRememberToken($userId, $token) {
+        try {
+            if (!isValidUUID($userId)) {
+                return false;
+            }
+            
+            $stmt = $this->pdo->prepare("UPDATE users SET remember_token = ? WHERE id = ?");
+            return $stmt->execute([$token, $userId]);
+        } catch(PDOException $e) {
+            error_log('setRememberToken error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    public function getRememberToken($token) {
+        try {
+            $stmt = $this->pdo->prepare("SELECT * FROM users WHERE remember_token = ? AND status = 'active'");
+            $stmt->execute([$token]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch(PDOException $e) {
+            error_log('getRememberToken error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    public function clearRememberToken($userId) {
+        try {
+            if (!isValidUUID($userId)) {
+                return false;
+            }
+            
+            $stmt = $this->pdo->prepare("UPDATE users SET remember_token = NULL WHERE id = ?");
+            return $stmt->execute([$userId]);
+        } catch(PDOException $e) {
+            error_log('clearRememberToken error: ' . $e->getMessage());
+            return false;
+        }
+    }
 }
 ?>

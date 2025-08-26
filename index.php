@@ -127,12 +127,12 @@ include 'includes/header.php';
         
         <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="<?php echo $animationSpeed; ?>" style="height: 600px;">
             <!-- Slide Indicators -->
-            <div class="carousel-indicators">
+            <!-- <div class="carousel-indicators">
                 <?php foreach ($sliders as $index => $slider): ?>
                     <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="<?php echo $index; ?>" 
                             class="<?php echo $index === 0 ? 'active' : ''; ?>"></button>
                 <?php endforeach; ?>
-            </div>
+            </div> -->
 
             <!-- Carousel Slides -->
             <div class="carousel-inner" style="height: 600px;">
@@ -282,6 +282,124 @@ include 'includes/header.php';
             </div>
         </div>
         <?php endif; ?>
+    </section>
+
+    <!-- Animated Category Boxes Section -->
+    <section class="jet-animated-boxes py-5 bg-gradient-primary">
+        <div class="container">
+            <?php
+            // Tüm aktif kategorileri getir
+            try {
+                $stmt = $pdo->query("
+                    SELECT c.*, COUNT(p.id) as product_count 
+                    FROM categories c 
+                    LEFT JOIN products p ON c.id = p.category_id AND p.is_active = 1
+                    WHERE c.is_active = 1 
+                    GROUP BY c.id 
+                    HAVING product_count > 0
+                    ORDER BY c.sort_order, c.name
+                ");
+                $categories = $stmt->fetchAll();
+            } catch (Exception $e) {
+                $categories = [];
+                error_log('Categories query error: ' . $e->getMessage());
+            }
+            ?>
+            
+            <div class="row g-4 justify-content-center" style="margin: 0px 30px;">
+                <?php 
+                $delay = 0.1;
+                foreach ($categories as $category): 
+                    // Kategori ikonunu belirleme
+                    $icon = 'fas fa-cogs'; // varsayılan ikon
+                    $categoryName = strtolower($category['name']);
+                    
+                    if (strpos($categoryName, 'ecu') !== false || strpos($categoryName, 'motor') !== false) {
+                        $icon = 'fas fa-microchip';
+                    } elseif (strpos($categoryName, 'immobilizer') !== false || strpos($categoryName, 'anahtar') !== false) {
+                        $icon = 'fas fa-key';
+                    } elseif (strpos($categoryName, 'tcu') !== false || strpos($categoryName, 'şanzıman') !== false) {
+                        $icon = 'fas fa-cogs';
+                    } elseif (strpos($categoryName, 'dpf') !== false || strpos($categoryName, 'egr') !== false) {
+                        $icon = 'fas fa-filter';
+                    } elseif (strpos($categoryName, 'adblue') !== false) {
+                        $icon = 'fas fa-tint';
+                    } elseif (strpos($categoryName, 'chip') !== false || strpos($categoryName, 'tuning') !== false) {
+                        $icon = 'fas fa-tachometer-alt';
+                    }
+                ?>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="jet-box" data-animation="fadeInUp" data-delay="<?php echo $delay; ?>">
+                        <div class="flip-card">
+                            <div class="flip-card-inner">
+                                <!-- Front Side (Kırmızı) -->
+                                <div class="flip-card-front">
+                                    <div class="jet-box-icon">
+                                        <i class="<?php echo $icon; ?>"></i>
+                                    </div>
+                                    <h4 class="jet-box-title"><?php echo strtoupper(htmlspecialchars($category['name'])); ?></h4>
+                                    <h5 class="jet-box-subtitle"><?php echo $category['product_count']; ?> ÜRÜN</h5>
+                                </div>
+                                <!-- Back Side (Siyah) -->
+                                <div class="flip-card-back">
+                                    <h4 class="flip-back-title"><?php echo strtoupper(htmlspecialchars($category['name'])); ?></h4>
+                                    <h5 class="flip-back-subtitle"><?php echo $category['product_count']; ?> ÜRÜN MEVCUT</h5>
+                                    <p class="flip-back-description">
+                                        <?php echo !empty($category['description']) 
+                                            ? htmlspecialchars(substr($category['description'], 0, 100)) . '...' 
+                                            : 'Bu kategorideki tüm ürünleri keşfedin ve ihtiyacınıza uygun çözümü bulun.'; ?>
+                                    </p>
+                                    <a href="kategori/<?php echo urlencode($category['slug']); ?>" class="flip-back-link">
+                                        İnceleyin <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <?php 
+                $delay += 0.1;
+                endforeach; 
+                ?>
+
+                <!-- Upload Card (4. kart) -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="jet-box" data-animation="fadeInUp" data-delay="0.4">
+                        <div class="flip-card">
+                            <div class="flip-card-inner">
+                                <!-- Front Side (Kırmızı) -->
+                                <div class="flip-card-front">
+                                    <div class="jet-box-icon">
+                                        <i class="fas fa-upload"></i>
+                                    </div>
+                                    <h4 class="jet-box-title">DOSYA</h4>
+                                    <h5 class="jet-box-subtitle">YÜKLEME</h5>
+                                </div>
+                                <!-- Back Side (Siyah) -->
+                                <div class="flip-card-back">
+                                    <h4 class="flip-back-title">DOSYA</h4>
+                                    <h5 class="flip-back-subtitle">YÜKLEME SİSTEMİ</h5>
+                                    <p class="flip-back-description">
+                                        ECU dosyanızı güvenli şekilde yükleyin ve profesyonel işleme için gönderiniz.
+                                    </p>
+                                    <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
+                                        <a href="user/upload.php" class="flip-back-link">
+                                            Yükleyin <i class="fas fa-cloud-upload-alt"></i>
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="register.php" class="flip-back-link">
+                                            REGISTER & UPLOAD <i class="fas fa-user-plus"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
     <!-- Features Section -->
@@ -875,6 +993,276 @@ overflow: hidden;
         transform: translateY(0);
     }
 }
+
+/* MyTuning Files Style Flip Cards */
+.jet-animated-boxes {
+    background: transparent;
+    padding: 0;
+    position: relative;
+    z-index: 1050;
+    margin-top: -150px;
+    padding-bottom: 80px;
+}
+
+.jet-box {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.6s ease;
+    height: 100%;
+    margin-bottom: 20px;
+}
+
+.jet-box.animate {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.flip-card {
+    background-color: transparent;
+    width: 100%;
+    height: 300px;
+    perspective: 1000px;
+    cursor: pointer;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.flip-card:hover .flip-card-inner {
+    transform: rotateX(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 346px;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    /* border-radius: 8px; */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.flip-card-front {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+}
+
+.flip-card-back {
+    background: linear-gradient(135deg, #002d5b 0%, #003469 100%);
+    color: white;
+    transform: rotateX(180deg);
+    justify-content: flex-start;
+    text-align: left;
+    padding: 40px 30px;
+}
+
+.jet-box-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.jet-box-icon i {
+    font-size: 2.5rem;
+    color: white;
+}
+
+.jet-box-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: white;
+}
+
+.jet-box-subtitle {
+    font-size: 0.7rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.9;
+    color: white;
+}
+
+.flip-back-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: white;
+    align-self: flex-start;
+}
+
+.flip-back-subtitle {
+    font-size: 0.7rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+    opacity: 0.8;
+    color: white;
+    align-self: flex-start;
+}
+
+.flip-back-description {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    opacity: 0.9;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: left;
+}
+
+.flip-back-link {
+    color: #dc3545;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+    padding-bottom: 3px;
+}
+
+.flip-back-link:hover {
+    color: #fff;
+    border-bottom-color: #dc3545;
+}
+
+.flip-back-link i {
+    font-size: 0.7rem;
+    transition: transform 0.3s ease;
+}
+
+.flip-back-link:hover i {
+    transform: translateX(3px);
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+    .jet-animated-boxes {
+        margin-top: -100px;
+    }
+    
+    .flip-card {
+        height: 280px;
+    }
+    
+    .jet-box-icon {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .jet-box-icon i {
+        font-size: 2.2rem;
+    }
+    
+    .jet-box-title {
+        font-size: 1.8rem;
+    }
+    
+    .flip-back-title {
+        font-size: 1.6rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .jet-animated-boxes {
+        margin-top: -80px;
+        padding-bottom: 60px;
+    }
+    
+    .flip-card {
+        height: 260px;
+        margin-bottom: 20px;
+    }
+    
+    .jet-box-icon {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 15px;
+    }
+    
+    .jet-box-icon i {
+        font-size: 2rem;
+    }
+    
+    .jet-box-title {
+        font-size: 1.5rem;
+    }
+    
+    .jet-box-subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .flip-back-title {
+        font-size: 1.4rem;
+    }
+    
+    .flip-back-subtitle {
+        font-size: 0.8rem;
+    }
+    
+    .flip-back-description {
+        font-size: 0.85rem;
+        margin-bottom: 20px;
+    }
+    
+    .flip-card-back {
+        padding: 30px 20px;
+    }
+}
+
+/* Animation Classes */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Mobile Touch Support for Flip Cards */
+@media (hover: none) and (pointer: coarse) {
+    .flip-card:active .flip-card-inner {
+        transform: rotateY(180deg);
+    }
+    
+    .flip-card-inner {
+        transition: transform 0.6s ease;
+    }
+}
 </style>
 
 <?php if ($typewriterEnabled && !empty($typewriterWords)): ?>
@@ -947,6 +1335,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize Chip Tuning Calculator
     initializeChipTuningCalculator();
+    
+    // Initialize Jet Animated Boxes
+    initializeJetBoxes();
 });
 
 // Chip Tuning Calculator JavaScript
@@ -1132,6 +1523,79 @@ function initializeChipTuningCalculator() {
         
         calculateBtn.disabled = true;
     }
+}
+
+// Flip Card Animation System
+function initializeJetBoxes() {
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                const jetBox = entry.target;
+                const delay = parseFloat(jetBox.dataset.delay) * 1000 || 0;
+                
+                setTimeout(() => {
+                    jetBox.classList.add('animate');
+                }, delay);
+                
+                observer.unobserve(jetBox);
+            }
+        });
+    }, observerOptions);
+    
+    // Observe all flip card boxes
+    const jetBoxes = document.querySelectorAll('.jet-box');
+    jetBoxes.forEach((box) => {
+        observer.observe(box);
+    });
+    
+    // Add mobile touch support for flip cards
+    const flipCards = document.querySelectorAll('.flip-card');
+    flipCards.forEach(card => {
+        let isFlipped = false;
+        
+        // Handle click/tap events
+        card.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768) {
+                e.preventDefault();
+                
+                if (!isFlipped) {
+                    this.querySelector('.flip-card-inner').style.transform = 'rotateY(180deg)';
+                    isFlipped = true;
+                } else {
+                    this.querySelector('.flip-card-inner').style.transform = 'rotateY(0deg)';
+                    isFlipped = false;
+                }
+            }
+        });
+        
+        // Handle touch events for better mobile experience
+        card.addEventListener('touchstart', function(e) {
+            if (window.innerWidth <= 768) {
+                this.style.transform = 'scale(0.98)';
+            }
+        });
+        
+        card.addEventListener('touchend', function(e) {
+            if (window.innerWidth <= 768) {
+                this.style.transform = 'scale(1)';
+            }
+        });
+    });
+    
+    // Reset flip states on resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            flipCards.forEach(card => {
+                card.querySelector('.flip-card-inner').style.transform = 'rotateY(0deg)';
+            });
+        }
+    });
 }
 </script>
 <?php endif; ?>

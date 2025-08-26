@@ -1,18 +1,13 @@
 <?php
 /**
- * Mr ECU - Kullanıcı Giriş Sayfası
+ * Mr ECU - Kullanıcı Giriş Sayfası (Geliştirilmiş Tasarım)
  */
-
 require_once 'config/config.php';
 require_once 'config/database.php';
 
 // Zaten giriş yapmışsa yönlendir
 if (isLoggedIn()) {
-    if (isAdmin()) {
-        redirect('admin/');
-    } else {
-        redirect('user/');
-    }
+    redirect(isAdmin() ? 'admin/' : 'user/');
 }
 
 $error = '';
@@ -46,14 +41,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = new User($pdo);
         
         if ($user->login($email, $password)) {
-            // Beni hatırla seçeneği
             if ($remember) {
                 $rememberToken = generateRandomString(32);
                 $user->setRememberToken($_SESSION['user_id'], $rememberToken);
                 setcookie('remember_token', $rememberToken, time() + (30 * 24 * 60 * 60), '/', '', false, true);
             }
             
-            // Yönlendirme kontrolü
             $redirect = isset($_GET['redirect']) ? $_GET['redirect'] : (isAdmin() ? 'admin/' : 'user/');
             redirect($redirect);
         } else {
@@ -65,255 +58,164 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $pageTitle = 'Giriş Yap';
 $pageDescription = 'Mr ECU hesabınızla giriş yapın ve profesyonel ECU hizmetlerimizden faydalanın.';
 $pageKeywords = 'giriş, login, kullanıcı girişi, ECU hizmetleri';
-$bodyClass = 'bg-light';
-
-// Header include
+$bodyClass = 'bg-dark';
 include 'includes/header.php';
 ?>
 
-    <!-- Login Section -->
-    <section class="py-5">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-5 col-md-7">
-                    <div class="card shadow border-0">
-                        <div class="card-header bg-primary text-white text-center py-4">
-                            <h3 class="mb-0">
-                                <i class="fas fa-sign-in-alt me-2"></i>
-                                Giriş Yap
-                            </h3>
-                            <p class="mb-0 mt-2 opacity-75">Hesabınıza giriş yapın</p>
+<section class="py-5" style="min-height: 100vh; display: flex; align-items: center; background: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop') center/cover fixed; position: relative;">
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 9, 191, 0.7); z-index: 1;"></div>
+    <div class="container" style="position: relative; z-index: 2;">
+        <div class="row justify-content-center">
+            <!-- Login Card -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="flip-card" style="width: 100%; height: 500px; perspective: 1000px;">
+                    <div class="flip-card-inner" style="position: relative; width: 100%; height: 100%; transition: transform 0.8s; transform-style: preserve-3d;">
+                        <div class="flip-card-front" style="
+                            position: absolute;
+                            width: 100%;
+                            height: 100%;
+                            backface-visibility: hidden;
+                            background: linear-gradient(135deg, #dc3545, #c82333);
+                            color: white;
+                            padding: 2rem;
+                            border-radius: 16px;
+                            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                            text-align: center;
+                            backdrop-filter: blur(10px);
+                            border: 1px solid rgba(255,255,255,0.2);
+                        ">
+                            <i class="fas fa-sign-in-alt" style="font-size: 5rem; margin-bottom: 1rem; opacity: 0.8;"></i>
+                            <h3 class="fw-bold mb-3">Hoş Geldiniz</h3>
+                            <p style="opacity: 0.9;">Hesabınıza giriş yapın ve ECU hizmetlerinden faydalanmaya başlayın.</p>
+                            <button type="button" class="btn btn-light mt-4" onclick="flipCard(true)" style="align-self: center;">
+                                <i class="fas fa-user-plus me-2"></i> Kayıt Ol
+                            </button>
                         </div>
-                        
-                        <div class="card-body p-4">
-                            <!-- Hata/Başarı Mesajları -->
-                            <?php if ($error): ?>
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    <i class="fas fa-exclamation-triangle me-2"></i>
-                                    <?php echo $error; ?>
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?php if ($success): ?>
-                                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                    <i class="fas fa-check-circle me-2"></i>
-                                    <?php echo $success; ?>
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <!-- Giriş Formu -->
-                            <form method="POST" action="" id="loginForm" data-loading="true">
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">
-                                        <i class="fas fa-envelope me-1"></i>
-                                        E-posta Adresi
-                                    </label>
-                                    <input type="email" 
-                                           class="form-control form-control-lg" 
-                                           id="email" 
-                                           name="email" 
-                                           value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>"
-                                           placeholder="ornek@email.com"
-                                           required>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">
-                                        <i class="fas fa-lock me-1"></i>
-                                        Şifre
-                                    </label>
-                                    <div class="input-group">
-                                        <input type="password" 
-                                               class="form-control form-control-lg" 
-                                               id="password" 
-                                               name="password" 
-                                               placeholder="••••••••"
-                                               required>
-                                        <button type="button" 
-                                                class="btn btn-outline-secondary" 
-                                                onclick="togglePassword()"
-                                                id="togglePasswordBtn">
-                                            <i class="fas fa-eye" id="togglePasswordIcon"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-3 d-flex justify-content-between align-items-center">
-                                    <div class="form-check">
-                                        <input type="checkbox" 
-                                               class="form-check-input" 
-                                               id="remember" 
-                                               name="remember"
-                                               <?php echo isset($_POST['remember']) ? 'checked' : ''; ?>>
-                                        <label class="form-check-label" for="remember">
-                                            Beni hatırla
-                                        </label>
-                                    </div>
-                                    
-                                    <a href="forgot-password.php" class="text-decoration-none">
-                                        Şifremi unuttum
-                                    </a>
-                                </div>
-                                
-                                <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary btn-lg" data-original-text="Giriş Yap">
-                                        <i class="fas fa-sign-in-alt me-2"></i>
-                                        Giriş Yap
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                        
-                        <div class="card-footer bg-light text-center py-3">
-                            <p class="mb-0 text-muted">
-                                Hesabınız yok mu? 
-                                <a href="register.php" class="text-decoration-none fw-bold">
-                                    Hemen kayıt olun
-                                </a>
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <!-- Güvenlik Bilgileri -->
-                    <div class="text-center mt-4">
-                        <div class="row text-muted">
-                            <div class="col-4">
-                                <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
-                                <br>
-                                <small>Güvenli Giriş</small>
-                            </div>
-                            <div class="col-4">
-                                <i class="fas fa-lock fa-2x text-primary mb-2"></i>
-                                <br>
-                                <small>SSL Şifreleme</small>
-                            </div>
-                            <div class="col-4">
-                                <i class="fas fa-user-shield fa-2x text-info mb-2"></i>
-                                <br>
-                                <small>Gizlilik Koruması</small>
-                            </div>
+
+                        <div class="flip-card-back" style="
+                            position: absolute;
+                            width: 100%;
+                            height: 100%;
+                            backface-visibility: hidden;
+                            background: linear-gradient(135deg, #002d5b, #003469);
+                            color: white;
+                            transform: rotateY(180deg);
+                            padding: 2rem;
+                            border-radius: 16px;
+                            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                            text-align: center;
+                            backdrop-filter: blur(10px);
+                            border: 1px solid rgba(255,255,255,0.1);
+                        ">
+                            <i class="fas fa-user-plus" style="font-size: 5rem; margin-bottom: 1rem; opacity: 0.8;"></i>
+                            <h3 class="fw-bold mb-3">Hesap Oluştur</h3>
+                            <p style="opacity: 0.9;">Yeni bir hesapla tüm özelliklerden faydalanın.</p>
+                            <a href="register.php" class="btn btn-outline-light mt-4" style="align-self: center;">
+                                <i class="fas fa-arrow-right me-2"></i> Kayıt Ol
+                            </a>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Bilgi Paneli -->
-                <div class="col-lg-4 col-md-5 mt-4 mt-md-0">
-                    <div class="ms-lg-4">
-                        <h4 class="mb-3">Neden <?php echo SITE_NAME; ?>?</h4>
-                        
-                        <div class="card border-0 shadow-sm mb-3">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start">
-                                    <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
-                                        <i class="fas fa-rocket text-primary"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1">Hızlı İşlem</h6>
-                                        <small class="text-muted">
-                                            Dosyalarınız profesyonel ekibimiz tarafından 
-                                            hızla işlenir.
-                                        </small>
-                                    </div>
+            </div>
+
+            <!-- Login Form -->
+            <div class="col-lg-5 col-md-7">
+                <div class="card border-0 shadow-lg" style="
+                    background: rgba(255, 255, 255, 0.95);
+                    backdrop-filter: blur(12px);
+                    border-radius: 20px;
+                    overflow: hidden;
+                    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+                ">
+                    <div class="card-header text-center py-4" style="background: linear-gradient(45deg, #e91c1c, #fd6060); color: white;">
+                        <h3 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i> Giriş Yap</h3>
+                        <p class="mb-0 mt-1" style="opacity: 0.85;">Hesabınıza güvenli giriş</p>
+                    </div>
+                    <div class="card-body p-5">
+                        <?php if ($error): ?>
+                            <div class="alert alert-danger border-0 rounded-4 text-center" style="background: #f8d7da; color: #721c24;">
+                                <i class="fas fa-exclamation-triangle me-2"></i> <?php echo $error; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <form method="POST" action="" id="loginForm">
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">E-posta</label>
+                                <input type="email" name="email" class="form-control form-control-lg rounded-4" 
+                                       placeholder="ornek@email.com" required
+                                       value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Şifre</label>
+                                <div class="input-group">
+                                    <input type="password" name="password" id="password" class="form-control form-control-lg rounded-4"
+                                           placeholder="••••••••" required>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="togglePassword()">
+                                        <i class="fas fa-eye" id="toggleIcon"></i>
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="card border-0 shadow-sm mb-3">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start">
-                                    <div class="bg-success bg-opacity-10 p-3 rounded me-3">
-                                        <i class="fas fa-shield-alt text-success"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1">Güvenli Platform</h6>
-                                        <small class="text-muted">
-                                            Tüm dosyalarınız SSL şifreleme ile 
-                                            korunur.
-                                        </small>
-                                    </div>
+
+                            <div class="mb-4 d-flex justify-content-between">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                                    <label class="form-check-label" for="remember">Beni hatırla</label>
                                 </div>
+                                <a href="forgot-password.php" class="text-decoration-none text-danger fw-medium">Şifremi unuttum?</a>
                             </div>
-                        </div>
-                        
-                        <div class="card border-0 shadow-sm mb-3">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start">
-                                    <div class="bg-info bg-opacity-10 p-3 rounded me-3">
-                                        <i class="fas fa-headset text-info"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1">7/24 Destek</h6>
-                                        <small class="text-muted">
-                                            Uzman ekibimiz size her zaman 
-                                            yardımcı olmaya hazır.
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>İlk kez mi kullanıyorsunuz?</strong><br>
-                            <small>
-                                Hesap oluşturmak için 
-                                <a href="register.php" class="alert-link">kayıt ol</a> 
-                                sayfasını ziyaret edin.
-                            </small>
+
+                            <button type="submit" class="btn btn-danger btn-lg w-100 rounded-4 py-3 fw-bold"
+                                    style="background: linear-gradient(135deg, #dc3545, #c82333); border: none;">
+                                <i class="fas fa-sign-in-alt me-2"></i> Giriş Yap
+                            </button>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <p class="text-muted small">Hesabınız yok mu? 
+                                <a href="register.php" class="text-danger fw-bold text-decoration-none">Kayıt olun</a>
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-<?php
-// Sayfa özel JavaScript
-$pageJS = "
-    function togglePassword() {
-        const passwordInput = document.getElementById('password');
-        const toggleIcon = document.getElementById('togglePasswordIcon');
-        
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            toggleIcon.className = 'fas fa-eye-slash';
-        } else {
-            passwordInput.type = 'password';
-            toggleIcon.className = 'fas fa-eye';
-        }
+<script>
+function togglePassword() {
+    const input = document.getElementById('password');
+    const icon = document.getElementById('toggleIcon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'fas fa-eye';
     }
-    
-    // Form validation
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        
-        if (!email || !password) {
-            e.preventDefault();
-            alert('Lütfen tüm alanları doldurun.');
-            return false;
-        }
-        
-        if (!isValidEmail(email)) {
-            e.preventDefault();
-            alert('Lütfen geçerli bir e-posta adresi girin.');
-            return false;
-        }
-    });
-    
-    function isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    }
-    
-    // Auto-focus on email field
-    document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('email').focus();
-    });
-";
+}
 
-// Footer include
-include 'includes/footer.php';
-?>
+function flipCard(toBack = false) {
+    const inner = document.querySelector('.flip-card-inner');
+    inner.style.transform = toBack ? 'rotateY(180deg)' : 'rotateY(0deg)';
+}
+</script>
+
+<style>
+    .flip-card:hover .flip-card-inner {
+        transform: rotateY(180deg);
+    }
+    @media (max-width: 768px) {
+        .flip-card { height: 400px !important; }
+        .card-body { padding: 2rem 1.5rem; }
+    }
+</style>
+
+<?php include 'includes/footer.php'; ?>

@@ -12,7 +12,13 @@ $categorySlug = '';
 if (isset($_GET['slug'])) {
     $categorySlug = sanitize($_GET['slug']);
 } else {
-    redirect('/404.php');
+    // Fallback: URL path'den slug çıkar (URL rewrite çalışmıyorsa)
+    $uri = $_SERVER['REQUEST_URI'];
+    if (preg_match('/\/kategori\/([a-zA-Z0-9-]+)/', $uri, $matches)) {
+        $categorySlug = $matches[1];
+    } else {
+        redirect('/404.php');
+    }
 }
 
 // Kategori bilgilerini getir
@@ -435,33 +441,33 @@ include 'includes/header.php';
 
 <main>
     
-
     <!-- Category Hero -->
-<section class="category-hero" style="background-image: url('/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($category['image'] ?: 'assets/images/default-category-bg.jpg'); ?>');">
-    <div class="container">
-        <div class="category-info">
-            <h1 class="category-title"><?php echo htmlspecialchars($category['name']); ?></h1>
-            <?php if ($category['description']): ?>
-                <p class="category-description">
-                    <?php echo htmlspecialchars($category['description']); ?>
-                </p>
-            <?php endif; ?>
-            
-            <div class="category-stats">
-                <div class="stat-item">
-                    <span class="stat-number"><?php echo count($brands); ?></span>
-                    <span class="stat-label">Marka</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number"><?php echo $totalProducts; ?></span>
-                    <span class="stat-label">Ürün</span>
+    <section class="category-hero" style="background-image: url('/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($category['image'] ?: 'assets/images/default-category-bg.jpg'); ?>');">    
+        <div class="overlay"></div>
+        <div class="container">
+            <div class="row justify-content-center text-center">
+                <div class="col-lg-10">
+                    <h1 class="category-title"><?php echo htmlspecialchars($category['name']); ?></h1>
+                    <?php if ($category['description']): ?>
+                        <p class="category-description">
+                            <?php echo htmlspecialchars($category['description']); ?>
+                        </p>
+                    <?php endif; ?>
+                    
+                    <div class="category-stats">
+                        <div class="stat-item">
+                            <span class="stat-number"><?php echo count($brands); ?></span>
+                            <span class="stat-label">Marka</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number"><?php echo $totalProducts; ?></span>
+                            <span class="stat-label">Ürün</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="overlay"></div> <!-- Arka plan karartma -->
-</section>
-
+    </section>
     <!-- Breadcrumb -->
     <div class="container">
         <nav aria-label="breadcrumb" class="mt-3">
