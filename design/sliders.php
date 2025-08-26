@@ -6,6 +6,26 @@
 require_once '../config/config.php';
 require_once '../config/database.php';
 
+// Flash message fonksiyonları
+function setFlashMessage($message, $type = 'success') {
+    $_SESSION['flash_message'] = $message;
+    $_SESSION['flash_type'] = $type;
+}
+
+function getFlashMessage() {
+    if (isset($_SESSION['flash_message'])) {
+        $message = [
+            'message' => $_SESSION['flash_message'],
+            'type' => $_SESSION['flash_type'] ?? 'success'
+        ];
+        // Mesajı göster ve sil
+        unset($_SESSION['flash_message']);
+        unset($_SESSION['flash_type']);
+        return $message;
+    }
+    return null;
+}
+
 // Sayfa bilgileri
 $pageTitle = 'Hero Slider Yönetimi';
 $pageDescription = 'Ana sayfa hero slider\'larını düzenleyin';
@@ -13,6 +33,9 @@ $breadcrumbs = [
     ['title' => 'Design Panel', 'url' => 'index.php'],
     ['title' => 'Hero Slider']
 ];
+
+// Flash message'ı al
+$flashMessage = getFlashMessage();
 
 // Form işlemleri
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -54,7 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         (int)$_POST['sort_order']
                     ]);
                     
-                    header('Location: sliders.php?success=Slider başarıyla eklendi');
+                    setFlashMessage('Slider başarıyla eklendi!', 'success');
+                    header('Location: sliders.php');
                     exit;
                     
                 case 'edit':
@@ -80,26 +104,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_POST['id']
                     ]);
                     
-                    header('Location: sliders.php?success=Slider başarıyla güncellendi');
+                    setFlashMessage('Slider başarıyla güncellendi!', 'success');
+                    header('Location: sliders.php');
                     exit;
                     
                 case 'delete':
                     $stmt = $pdo->prepare("DELETE FROM design_sliders WHERE id = ?");
                     $stmt->execute([$_POST['id']]);
                     
-                    header('Location: sliders.php?success=Slider başarıyla silindi');
+                    setFlashMessage('Slider başarıyla silindi!', 'success');
+                    header('Location: sliders.php');
                     exit;
                     
                 case 'toggle_status':
                     $stmt = $pdo->prepare("UPDATE design_sliders SET is_active = !is_active, updated_at = NOW() WHERE id = ?");
                     $stmt->execute([$_POST['id']]);
                     
-                    header('Location: sliders.php?success=Slider durumu güncellendi');
+                    setFlashMessage('Slider durumu güncellendi!', 'success');
+                    header('Location: sliders.php');
                     exit;
             }
         }
     } catch (Exception $e) {
         $error = $e->getMessage();
+        setFlashMessage('Bir hata oluştu: ' . $e->getMessage(), 'error');
     }
 }
 
@@ -141,6 +169,15 @@ include '../includes/design_header.php';
                 </button>
             </div>
             <div class="card-body">
+                <!-- Flash Messages -->
+                <?php if ($flashMessage): ?>
+                    <div class="alert alert-<?php echo $flashMessage['type'] === 'error' ? 'danger' : $flashMessage['type']; ?> alert-dismissible fade show">
+                        <i class="fas fa-<?php echo $flashMessage['type'] === 'success' ? 'check-circle' : ($flashMessage['type'] === 'error' ? 'exclamation-triangle' : 'info-circle'); ?> me-2"></i>
+                        <?php echo htmlspecialchars($flashMessage['message']); ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+
                 <?php if (isset($error)): ?>
                     <div class="alert alert-danger">
                         <i class="fas fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($error); ?>
@@ -711,6 +748,17 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Kaydediliyor...';
         }
     });
+    
+    // Flash message'ları otomatik kapat (5 saniye sonra)
+    const flashAlert = document.querySelector('.alert-dismissible');
+    if (flashAlert) {
+        setTimeout(() => {
+            const closeBtn = flashAlert.querySelector('.btn-close');
+            if (closeBtn) {
+                closeBtn.click();
+            }
+        }, 5000);
+    }
 });
 
 // Mevcut resmi gösterme (düzenleme için)

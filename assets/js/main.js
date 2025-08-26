@@ -7,7 +7,8 @@
 const MrEcu = {
     baseUrl: window.location.origin + '/',
     currentUser: null,
-    csrf_token: null
+    csrf_token: null,
+    ecuSpinner: null
 };
 
 // Sayfa yüklendiğinde çalışacak fonksiyonlar
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeTooltips();
     initializeModals();
     initializeFormValidation();
+    initializeECUSpinner();
 });
 
 /**
@@ -33,6 +35,9 @@ function initializeGlobalFeatures() {
     
     // CSRF token setup
     setupCSRFProtection();
+    
+    // ECU Spinner setup
+    setupECUSpinner();
 }
 
 /**
@@ -511,6 +516,122 @@ window.addEventListener('error', function(e) {
     showNotification('Beklenmeyen bir hata oluştu.', 'error');
 });
 
+/**
+ * ===== ECU SPINNER FUNCTIONS =====
+ */
+
+/**
+ * ECU Spinner setup
+ */
+function setupECUSpinner() {
+    MrEcu.ecuSpinner = document.getElementById('ecuSpinner');
+    
+    if (!MrEcu.ecuSpinner) {
+        console.warn('ECU Spinner element not found');
+        return;
+    }
+    
+    // Setup page navigation spinner
+    setupPageNavigationSpinner();
+}
+
+/**
+ * Initialize ECU Spinner
+ */
+function initializeECUSpinner() {
+    // ECU Spinner artık inline script ile kontrol ediliyor
+    console.log('ECU Spinner: Controlled by inline script');
+}
+
+/**
+ * Setup page navigation spinner
+ */
+function setupPageNavigationSpinner() {
+    // Navigation links için basit spinner setup
+    const navLinks = document.querySelectorAll('a[href]:not([href^="#"]):not([target="_blank"]):not([data-bs-toggle])');
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            
+            // External links, anchors ve modals için spinner gösterme
+            if (href.startsWith('#') || 
+                href.startsWith('http') && !href.includes(window.location.hostname) ||
+                this.hasAttribute('data-bs-toggle') ||
+                this.hasAttribute('target')) {
+                return;
+            }
+            
+            // Basit spinner göster
+            const spinner = document.getElementById('ecuSpinner');
+            if (spinner) {
+                spinner.style.display = 'flex';
+                spinner.style.opacity = '1';
+                document.body.style.overflow = 'hidden';
+            }
+        });
+    });
+}
+
+/**
+ * Show ECU Spinner - Simplified
+ */
+function showECUSpinner(text = 'Sistem Yükleniyor...') {
+    const spinner = document.getElementById('ecuSpinner');
+    
+    if (spinner) {
+        spinner.style.display = 'flex';
+        spinner.style.opacity = '1';
+        document.body.style.overflow = 'hidden';
+        
+        // Update text if provided
+        const loadingText = spinner.querySelector('.spinner-text p');
+        if (loadingText && text) {
+            loadingText.textContent = text;
+        }
+    }
+}
+
+/**
+ * Hide ECU Spinner - Simplified
+ */
+function hideECUSpinner() {
+    const spinner = document.getElementById('ecuSpinner');
+    
+    if (spinner) {
+        spinner.style.opacity = '0';
+        
+        setTimeout(() => {
+            spinner.style.display = 'none';
+            document.body.style.overflow = '';
+        }, 300);
+    }
+}
+
+/**
+ * Show ECU Spinner for specific duration
+ */
+function showECUSpinnerFor(duration = 2000, text = 'Sistem Yükleniyor...') {
+    showECUSpinner(text);
+    
+    setTimeout(() => {
+        hideECUSpinner();
+    }, duration);
+}
+
+/**
+ * Manual spinner control for specific operations
+ */
+window.ECUSpinner = {
+    show: showECUSpinner,
+    hide: hideECUSpinner,
+    showFor: showECUSpinnerFor
+};
+
+/**
+ * ===== END ECU SPINNER FUNCTIONS =====
+ */
+
 // Export functions for module usage
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
@@ -524,6 +645,9 @@ if (typeof module !== 'undefined' && module.exports) {
         checkPasswordStrength,
         serializeForm,
         getUrlParameter,
-        copyToClipboard
+        copyToClipboard,
+        showECUSpinner,
+        hideECUSpinner,
+        showECUSpinnerFor
     };
 }

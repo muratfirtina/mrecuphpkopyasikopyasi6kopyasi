@@ -307,80 +307,6 @@ include '../includes/admin_sidebar.php';
     max-height: 100px;
     overflow-y: auto;
 }
-
-/* Fotoğraf yönetimi stilleri */
-#current-product-images .card {
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: 2px solid transparent;
-}
-
-#current-product-images .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-#current-product-images .card img {
-    border-radius: 0.375rem 0.375rem 0 0;
-}
-
-#current-product-images .btn-group-sm .btn {
-    padding: 0.25rem 0.375rem;
-    font-size: 0.75rem;
-}
-
-.image-upload-area {
-    border: 2px dashed #dee2e6;
-    border-radius: 0.5rem;
-    padding: 2rem;
-    text-align: center;
-    transition: border-color 0.15s ease-in-out;
-}
-
-.image-upload-area:hover {
-    border-color: #007bff;
-    background-color: #f8f9ff;
-}
-
-.image-upload-area.dragover {
-    border-color: #007bff;
-    background-color: #e7f3ff;
-}
-
-#current-image-count {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-}
-
-/* Ana resim badge'i */
-.badge.bg-primary {
-    background-color: #007bff !important;
-}
-
-/* Loading durumu */
-.btn.loading {
-    position: relative;
-    color: transparent !important;
-}
-
-.btn.loading::after {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    top: 50%;
-    left: 50%;
-    margin-left: -8px;
-    margin-top: -8px;
-    border: 2px solid transparent;
-    border-top-color: #ffffff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
 </style>
 
 <!-- Hata/Başarı Mesajları -->
@@ -556,31 +482,6 @@ include '../includes/admin_sidebar.php';
                                     <input class="form-check-input" type="checkbox" id="edit_featured" name="featured">
                                     <label class="form-check-label" for="edit_featured">Öne Çıkan</label>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Mevcut Ürün Resimleri -->
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <h6 class="mb-3">
-                                <i class="fas fa-images me-2"></i>Mevcut Resimler
-                                <span class="badge bg-info ms-2" id="current-image-count">0</span>
-                            </h6>
-                            <div id="current-product-images" class="row g-2 mb-3"></div>
-                            
-                            <!-- Yeni Resim Ekleme -->
-                            <div class="mt-3">
-                                <label class="form-label">Yeni Resim Ekle</label>
-                                <div class="input-group">
-                                    <input type="file" class="form-control" id="edit_new_images" 
-                                           accept="image/*" multiple>
-                                    <button type="button" class="btn btn-outline-primary" 
-                                            onclick="addNewProductImages()">
-                                        <i class="fas fa-upload me-1"></i>Yükle
-                                    </button>
-                                </div>
-                                <div class="form-text">Birden fazla resim seçebilirsiniz. Maksimum 10MB per dosya.</div>
                             </div>
                         </div>
                     </div>
@@ -913,37 +814,39 @@ include '../includes/admin_sidebar.php';
     </div>
 </div>
 
-<!-- CKEditor Scripts -->
-<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+<?php
+$pageJS = "
+// CKEditor için basit konfigürasyon
+if (typeof ClassicEditor !== 'undefined') {
+    ClassicEditor
+        .create(document.querySelector('#add_description'), {
+            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'outdent', 'indent', '|', 'imageUpload', 'blockQuote', 'insertTable', 'mediaEmbed', '|', 'undo', 'redo'],
+            image: {
+                toolbar: ['imageTextAlternative', 'imageStyle:full', 'imageStyle:side']
+            }
+        })
+        .catch(error => {
+            console.error('CKEditor yüklenemedi:', error);
+        });
+}
 
-<!-- JavaScript Kodları -->
-<script>
-// Mr ECU Admin - Products Page JavaScript
-
-// Global değişkenler
-let currentProductId = null;
-
-// Global fonksiyonları window objesine ata
-window.viewProduct = function(productId) {
-    // Detay sayfasına git (aynı sekmede)
-    window.location.href = 'product-detail.php?id=' + productId;
-};
-
-// Alternatif olarak yeni sekmede açmak isterseniz:
-window.viewProductNewTab = function(productId) {
+function viewProduct(productId) {
+    // Ürün detay sayfasına yönlendir veya modal aç
     window.open('product-detail.php?id=' + productId, '_blank');
-};
+}
 
-window.editProduct = function(productId) {
-    currentProductId = productId;
+function editProduct(productId) {
+    // Loading göster
     const modal = new bootstrap.Modal(document.getElementById('editProductModal'));
     
+    // AJAX ile ürün bilgilerini getir
     fetch('ajax/get-product-details.php?id=' + productId)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 const product = data.product;
                 
+                // Form alanlarını doldur
                 document.getElementById('edit_product_id').value = product.id;
                 document.getElementById('edit_name').value = product.name || '';
                 document.getElementById('edit_slug').value = product.slug || '';
@@ -959,9 +862,11 @@ window.editProduct = function(productId) {
                 document.getElementById('edit_meta_title').value = product.meta_title || '';
                 document.getElementById('edit_meta_description').value = product.meta_description || '';
                 
+                // Checkbox'lar
                 document.getElementById('edit_is_active').checked = product.is_active == 1;
                 document.getElementById('edit_featured').checked = product.featured == 1;
                 
+                // Kategori seçeneklerini doldur
                 const categorySelect = document.getElementById('edit_category_id');
                 categorySelect.innerHTML = '<option value="">Kategori Seçin</option>';
                 data.categories.forEach(category => {
@@ -972,6 +877,7 @@ window.editProduct = function(productId) {
                     categorySelect.appendChild(option);
                 });
                 
+                // Marka seçeneklerini doldur
                 const brandSelect = document.getElementById('edit_brand_id');
                 brandSelect.innerHTML = '<option value="">Marka Seçin</option>';
                 data.brands.forEach(brand => {
@@ -982,9 +888,7 @@ window.editProduct = function(productId) {
                     brandSelect.appendChild(option);
                 });
                 
-                // Fotoğrafları yükle
-                loadProductImages(data.images);
-                
+                // Modal'ı aç
                 modal.show();
             } else {
                 alert('Ürün bilgileri alınamadı: ' + data.message);
@@ -994,176 +898,138 @@ window.editProduct = function(productId) {
             console.error('Ürün bilgileri alınamadı:', error);
             alert('Bir hata oluştu.');
         });
-};
-
-// Fotoğrafları yükle ve göster
-function loadProductImages(images) {
-    const container = document.getElementById('current-product-images');
-    const countBadge = document.getElementById('current-image-count');
-    
-    if (!container) return;
-    
-    container.innerHTML = '';
-    countBadge.textContent = images.length;
-    
-    if (images.length === 0) {
-        container.innerHTML = '<div class="col-12 text-center py-4"><p class="text-muted mb-0"><i class="fas fa-image fa-2x mb-2"></i><br>Henüz resim eklenmemiş</p></div>';
-        return;
-    }
-    
-    images.forEach(image => {
-        const imageCol = document.createElement('div');
-        imageCol.classList.add('col-md-3', 'col-sm-4', 'col-6');
-        
-        const primaryBadge = image.is_primary == 1 ? '<span class="badge bg-primary position-absolute top-0 start-0 m-1"><i class="fas fa-star"></i> Ana</span>' : '';
-        const primaryButton = image.is_primary != 1 ? 
-            '<button type="button" class="btn btn-outline-warning" onclick="setPrimaryImage(' + image.id + ')" title="Ana Resim Yap"><i class="fas fa-star"></i></button>' : 
-            '<button type="button" class="btn btn-warning" disabled><i class="fas fa-star"></i></button>';
-        
-        imageCol.innerHTML = 
-            '<div class="card position-relative">' +
-                '<img src="../' + image.image_path + '" class="card-img-top" style="height: 120px; object-fit: cover;">' +
-                primaryBadge +
-                '<div class="card-body p-2">' +
-                    '<div class="btn-group btn-group-sm w-100">' +
-                        primaryButton +
-                        '<button type="button" class="btn btn-outline-danger" onclick="deleteProductImage(' + image.id + ')" title="Sil">' +
-                            '<i class="fas fa-trash"></i>' +
-                        '</button>' +
-                    '</div>' +
-                    '<small class="text-muted d-block mt-1">' + (image.alt_text || 'Resim') + '</small>' +
-                '</div>' +
-            '</div>';
-        
-        container.appendChild(imageCol);
-    });
 }
 
-// Yeni fotoğraf ekleme
-window.addNewProductImages = function() {
-    if (!currentProductId) {
-        alert('Geçersiz ürün ID');
-        return;
+// Edit form submit
+document.addEventListener('DOMContentLoaded', function() {
+    // URL'de edit parametresi var mı kontrol et
+    const urlParams = new URLSearchParams(window.location.search);
+    const editProductId = urlParams.get('edit');
+    
+    if (editProductId) {
+        // Edit modal'ını aç
+        setTimeout(() => {
+            editProduct(editProductId);
+        }, 500);
+        
+        // URL'den edit parametresini temizle
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
     }
     
-    const fileInput = document.getElementById('edit_new_images');
-    const files = fileInput.files;
-    
-    if (files.length === 0) {
-        alert('Lütfen en az bir resim seçin');
-        return;
-    }
-    
-    const formData = new FormData();
-    formData.append('product_id', currentProductId);
-    
-    for (let i = 0; i < files.length; i++) {
-        formData.append('images[]', files[i]);
-    }
-    
-    fetch('ajax/add-product-images.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            fileInput.value = '';
-            refreshProductImages();
-        } else {
-            alert('Hata: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Resim yükleme hatası:', error);
-        alert('Bir hata oluştu.');
-    });
-};
-
-// Fotoğrafı sil
-window.deleteProductImage = function(imageId) {
-    if (!confirm('Bu resmi silmek istediğinizden emin misiniz?')) {
-        return;
-    }
-    
-    fetch('ajax/delete-product-image.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: 'image_id=' + imageId
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            refreshProductImages();
-        } else {
-            alert('Hata: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Resim silme hatası:', error);
-        alert('Bir hata oluştu.');
-    });
-};
-
-// Ana resim belirle
-window.setPrimaryImage = function(imageId) {
-    fetch('ajax/set-primary-image.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: 'image_id=' + imageId
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            refreshProductImages();
-        } else {
-            alert('Hata: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Ana resim belirleme hatası:', error);
-        alert('Bir hata oluştu.');
-    });
-};
-
-// Fotoğrafları yeniden yükle
-function refreshProductImages() {
-    if (!currentProductId) return;
-    
-    fetch('ajax/get-product-details.php?id=' + currentProductId)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                loadProductImages(data.images);
-            }
-        })
-        .catch(error => {
-            console.error('Fotoğraflar yeniden yüklenemedi:', error);
+    const editForm = document.getElementById('editProductForm');
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(editForm);
+            const submitBtn = editForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            // Loading göster
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Güncelleniyor...';
+            submitBtn.disabled = true;
+            
+            fetch('ajax/update-product.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Success message
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success alert-dismissible fade show';
+                    successAlert.innerHTML = `
+                        <i class="fas fa-check-circle me-2"></i>${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    
+                    // Insert after page title
+                    const pageTitle = document.querySelector('.card-header');
+                    pageTitle.parentNode.insertBefore(successAlert, pageTitle.nextSibling);
+                    
+                    // Modal'ı kapat
+                    bootstrap.Modal.getInstance(document.getElementById('editProductModal')).hide();
+                    
+                    // Sayfayı yenile (ürün listesini güncellemek için)
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    alert('Hata: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Güncelleme hatası:', error);
+                alert('Bir hata oluştu.');
+            })
+            .finally(() => {
+                // Loading'i kaldır
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
         });
-}
+    }
+});
 
-console.log('Products.js yüklendi - tüm fonksiyonlar hazır!');
+// Modal temizleme
+document.getElementById('addProductModal').addEventListener('hidden.bs.modal', function () {
+    this.querySelector('form').reset();
+    // CKEditor içeriğini temizle
+    if (window.addDescriptionEditor) {
+        window.addDescriptionEditor.setData('');
+    }
+});
 
-// CKEditor için basit konfigürasyon
-if (typeof ClassicEditor !== 'undefined') {
-    ClassicEditor
-        .create(document.querySelector('#add_description'), {
-            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'outdent', 'indent', '|', 'imageUpload', 'blockQuote', 'insertTable', 'mediaEmbed', '|', 'undo', 'redo'],
-            image: {
-                toolbar: ['imageTextAlternative', 'imageStyle:full', 'imageStyle:side']
+// Dosya önizleme
+function previewImages(input) {
+    const previewContainer = document.getElementById('image_preview');
+    if (!previewContainer) return;
+    
+    previewContainer.innerHTML = '';
+    
+    if (input.files) {
+        Array.from(input.files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'preview-image';
+                img.style.cssText = 'max-width: 100px; max-height: 100px; object-fit: cover; margin: 5px; border-radius: 4px;';
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'd-inline-block position-relative';
+                wrapper.appendChild(img);
+                
+                if (index === 0) {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-primary position-absolute top-0 start-0';
+                    badge.textContent = 'Ana';
+                    badge.style.fontSize = '10px';
+                    wrapper.appendChild(badge);
+                }
+                
+                previewContainer.appendChild(wrapper);
             }
-        })
-        .catch(error => {
-            console.error('CKEditor yüklenemedi:', error);
+            reader.readAsDataURL(file);
         });
+    }
 }
-</script>
+";
 
-<?php include '../includes/admin_footer.php'; ?>
+$pageExtraHead = "
+<script src='https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js'></script>
+<script src='js/products.js'></script>
+<style>
+.ck-editor__editable_inline {
+    min-height: 200px;
+}
+.preview-image {
+    border: 2px solid #ddd;
+}
+</style>
+";
+
+include '../includes/admin_footer.php';
+?>

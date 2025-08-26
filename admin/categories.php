@@ -14,6 +14,52 @@ if (!isLoggedIn() || !isAdmin()) {
 $error = '';
 $success = '';
 
+// Kategori resim yükleme fonksiyonu
+function uploadCategoryImage($file, $categoryId) {
+    if (empty($file['tmp_name'])) {
+        return null;
+    }
+    
+    $uploadDir = '../uploads/categories/';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+    
+    $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/avif'];
+    $maxSize = 25 * 1024 * 1024; // 5MB
+    
+    $fileType = $file['type'];
+    $fileSize = $file['size'];
+    $fileName = $file['name'];
+    
+    // Dosya türü kontrolü
+    if (!in_array($fileType, $allowedTypes)) {
+        throw new Exception('Sadece JPG, PNG, GIF, AVIF ve WEBP formatları desteklenir.');
+    }
+    
+    // Dosya boyutu kontrolü
+    if ($fileSize > $maxSize) {
+        throw new Exception('Dosya boyutu 5MB\'dan büyük olamaz.');
+    }
+    
+    $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+    $newFileName = 'category_' . $categoryId . '_' . uniqid() . '_' . time() . '.' . $extension;
+    $filePath = $uploadDir . $newFileName;
+    
+    if (move_uploaded_file($file['tmp_name'], $filePath)) {
+        return 'uploads/categories/' . $newFileName;
+    }
+    
+    throw new Exception('Dosya yüklenirken hata oluştu.');
+}
+
+// Eski kategori resmini sil
+function deleteCategoryImage($imagePath) {
+    if (!empty($imagePath) && file_exists('../' . $imagePath)) {
+        unlink('../' . $imagePath);
+    }
+}
+
 // Kategori ekleme
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_category'])) {
     $name = sanitize($_POST['name']);
@@ -26,6 +72,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_category'])) {
         $error = 'Kategori adı zorunludur.';
     } else {
         try {
+            $pdo->beginTransaction();
+            
             // Slug oluştur
             $slug = createSlug($name);
             
@@ -33,9 +81,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_category'])) {
             $result = $stmt->execute([$name, $slug, $description, $parentId, $isActive, $sortOrder]);
             
             if ($result) {
+                $categoryId = $pdo->lastInsertId();
+                
+                // Resim yükleme işlemi
+                $imagePath = null;
+                if (isset($_FILES['category_image']) && !empty($_FILES['category_image']['tmp_name'])) {
+                    $imagePath = uploadCategoryImage($_FILES['category_image'], $categoryId);
+                    
+                    // Resim yolunu veritabanında güncelle
+                    if ($imagePath) {
+                        $stmt = $pdo->prepare("UPDATE categories SET image = ? WHERE id = ?");
+                        $stmt->execute([$imagePath, $categoryId]);
+                    }
+                }
+                
+                $pdo->commit();
                 $success = 'Kategori başarıyla eklendi.';
             }
-        } catch(PDOException $e) {
+        } catch(Exception $e) {
+            $pdo->rollBack();
             $error = 'Kategori eklenirken hata oluştu: ' . $e->getMessage();
         }
     }
@@ -49,18 +113,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_category'])) {
     $parentId = !empty($_POST['parent_id']) ? sanitize($_POST['parent_id']) : null;
     $isActive = isset($_POST['is_active']) ? 1 : 0;
     $sortOrder = (int)$_POST['sort_order'];
+    $deleteImage = isset($_POST['delete_image']) ? 1 : 0;
     
     try {
-        $slug = createSlug($name);
+        $pdo->beginTransaction();
         
-        $stmt = $pdo->prepare("UPDATE categories SET name = ?, slug = ?, description = ?, parent_id = ?, is_active = ?, sort_order = ? WHERE id = ?");
-        $result = $stmt->execute([$name, $slug, $description, $parentId, $isActive, $sortOrder, $categoryId]);
+        // Mevcut kategori bilgilerini al
+        $stmt = $pdo->prepare("SELECT image FROM categories WHERE id = ?");
+        $stmt->execute([$categoryId]);
+        $currentCategory = $stmt->fetch();
+        $currentImagePath = $currentCategory['image'] ?? null;
+        
+        $slug = createSlug($name);
+        $newImagePath = $currentImagePath;
+        
+        // Resim silme işlemi
+        if ($deleteImage && $currentImagePath) {
+            deleteCategoryImage($currentImagePath);
+            $newImagePath = null;
+        }
+        
+        // Yeni resim yükleme işlemi
+        if (isset($_FILES['category_image']) && !empty($_FILES['category_image']['tmp_name'])) {
+            // Eski resmi sil
+            if ($currentImagePath) {
+                deleteCategoryImage($currentImagePath);
+            }
+            $newImagePath = uploadCategoryImage($_FILES['category_image'], $categoryId);
+        }
+        
+        $stmt = $pdo->prepare("UPDATE categories SET name = ?, slug = ?, description = ?, parent_id = ?, is_active = ?, sort_order = ?, image = ? WHERE id = ?");
+        $result = $stmt->execute([$name, $slug, $description, $parentId, $isActive, $sortOrder, $newImagePath, $categoryId]);
         
         if ($result) {
+            $pdo->commit();
             $success = 'Kategori güncellendi.';
         }
-    } catch(PDOException $e) {
-        $error = 'Kategori güncellenirken hata oluştu.';
+    } catch(Exception $e) {
+        $pdo->rollBack();
+        $error = 'Kategori güncellenirken hata oluştu: ' . $e->getMessage();
     }
 }
 
@@ -77,15 +168,30 @@ if (isset($_GET['delete']) && !empty($_GET['delete'])) {
         if ($hasChildren) {
             $error = 'Bu kategorinin alt kategorileri var. Önce alt kategorileri silin.';
         } else {
+            $pdo->beginTransaction();
+            
+            // Kategori resim yolunu al
+            $stmt = $pdo->prepare("SELECT image FROM categories WHERE id = ?");
+            $stmt->execute([$categoryId]);
+            $category = $stmt->fetch();
+            
+            // Kategoriyi sil
             $stmt = $pdo->prepare("DELETE FROM categories WHERE id = ?");
             $result = $stmt->execute([$categoryId]);
             
             if ($result) {
+                // Kategori resmini sil
+                if ($category && !empty($category['image'])) {
+                    deleteCategoryImage($category['image']);
+                }
+                
+                $pdo->commit();
                 $success = 'Kategori başarıyla silindi.';
             }
         }
-    } catch(PDOException $e) {
-        $error = 'Kategori silinirken hata oluştu.';
+    } catch(Exception $e) {
+        $pdo->rollBack();
+        $error = 'Kategori silinirken hata oluştu: ' . $e->getMessage();
     }
 }
 
@@ -178,6 +284,7 @@ include '../includes/admin_sidebar.php';
                     <thead>
                         <tr>
                             <th>Kategori</th>
+                            <th>Resim</th>
                             <th>Üst Kategori</th>
                             <th>Alt Kategoriler</th>
                             <th>Sıra</th>
@@ -198,6 +305,15 @@ include '../includes/admin_sidebar.php';
                                             <small class="text-muted"><?php echo mb_substr(htmlspecialchars($category['description']), 0, 50); ?>...</small>
                                         <?php endif; ?>
                                     </div>
+                                </td>
+                                <td>
+                                    <?php if (!empty($category['image'])): ?>
+                                        <img src="../<?php echo htmlspecialchars($category['image']); ?>" 
+                                             alt="<?php echo htmlspecialchars($category['name']); ?>"
+                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                    <?php else: ?>
+                                        <span class="text-muted">Resim yok</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if ($category['parent_name']): ?>
@@ -221,16 +337,24 @@ include '../includes/admin_sidebar.php';
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-outline-warning" 
-                                                onclick="editCategory('<?php echo $category['id']; ?>', '<?php echo htmlspecialchars($category['name']); ?>', '<?php echo htmlspecialchars($category['description']); ?>', '<?php echo $category['parent_id']; ?>', <?php echo $category['is_active']; ?>, <?php echo $category['sort_order']; ?>)">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <a href="?delete=<?php echo $category['id']; ?>" 
-                                           class="btn btn-outline-danger"
-                                           onclick="return confirm('Bu kategoriyi silmek istediğinizden emin misiniz?')">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </div>
+        <button type="button" class="btn btn-outline-warning" 
+        onclick='editCategory(
+            <?php echo json_encode($category["id"]); ?>,
+            <?php echo json_encode($category["name"]); ?>,
+            <?php echo json_encode($category["description"]); ?>,
+            <?php echo json_encode($category["parent_id"] ?: ""); ?>,
+            <?php echo json_encode((bool)$category["is_active"]); ?>,
+            <?php echo (int)$category["sort_order"]; ?>,
+            <?php echo json_encode($category["image"] ?? ""); ?>
+        )'>
+    <i class="fas fa-edit"></i>
+</button>
+        <a href="?delete=<?php echo $category['id']; ?>" 
+           class="btn btn-outline-danger"
+           onclick="return confirm('Bu kategoriyi silmek istediğinizden emin misiniz?')">
+            <i class="fas fa-trash"></i>
+        </a>
+    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -251,7 +375,7 @@ include '../includes/admin_sidebar.php';
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="name" class="form-label">Kategori Adı <span class="text-danger">*</span></label>
@@ -261,6 +385,12 @@ include '../includes/admin_sidebar.php';
                     <div class="mb-3">
                         <label for="description" class="form-label">Açıklama</label>
                         <textarea class="form-control" name="description" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="category_image" class="form-label">Kategori Resmi</label>
+                        <input type="file" class="form-control" name="category_image" accept="image/*">
+                        <small class="text-muted">Desteklenen formatlar: JPG, PNG, GIF, WEBP (Maksimum: 5MB)</small>
                     </div>
                     
                     <div class="mb-3">
@@ -313,7 +443,7 @@ include '../includes/admin_sidebar.php';
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
                     <input type="hidden" name="category_id" id="edit_category_id">
                     
@@ -325,6 +455,28 @@ include '../includes/admin_sidebar.php';
                     <div class="mb-3">
                         <label for="edit_description" class="form-label">Açıklama</label>
                         <textarea class="form-control" name="description" id="edit_description" rows="3"></textarea>
+                    </div>
+                    
+                    <!-- Mevcut Resim Gösterimi -->
+                    <div class="mb-3" id="current-image-section" style="display: none;">
+                        <label class="form-label">Mevcut Resim</label>
+                        <div>
+                            <img id="current-image" src="" alt="Kategori Resmi" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                            <div class="mt-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="delete_image" id="delete_image">
+                                    <label class="form-check-label text-danger" for="delete_image">
+                                        Mevcut resmi sil
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_category_image" class="form-label">Yeni Kategori Resmi</label>
+                        <input type="file" class="form-control" name="category_image" id="edit_category_image" accept="image/*">
+                        <small class="text-muted">Desteklenen formatlar: JPG, PNG, GIF, WEBP (Maksimum: 5MB)</small>
                     </div>
                     
                     <div class="mb-3">
@@ -368,25 +520,96 @@ include '../includes/admin_sidebar.php';
 </div>
 
 <?php
-$pageJS = "
-function editCategory(id, name, description, parentId, isActive, sortOrder) {
+$pageJS = <<<'JS'
+function editCategory(id, name, description, parentId, isActive, sortOrder, imagePath) {
     document.getElementById('edit_category_id').value = id;
     document.getElementById('edit_name').value = name;
     document.getElementById('edit_description').value = description;
     document.getElementById('edit_parent_id').value = parentId || '';
     document.getElementById('edit_is_active').checked = isActive == 1;
     document.getElementById('edit_sort_order').value = sortOrder;
-    
+
+    const currentImageSection = document.getElementById('current-image-section');
+    const currentImage = document.getElementById('current-image');
+    const deleteImageCheckbox = document.getElementById('delete_image');
+
+    if (imagePath && imagePath.trim() !== '') {
+        currentImage.src = '../' + imagePath;
+        currentImageSection.style.display = 'block';
+        deleteImageCheckbox.checked = false;
+    } else {
+        currentImageSection.style.display = 'none';
+    }
+
+    document.getElementById('edit_category_image').value = '';
+
     const modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
     modal.show();
 }
 
-// Modal temizleme
 document.getElementById('addCategoryModal').addEventListener('hidden.bs.modal', function () {
     this.querySelector('form').reset();
 });
-";
 
-// Footer include
+function previewImage(input, previewId) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById(previewId);
+            if (preview) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const addImageInput = document.querySelector('#addCategoryModal input[name="category_image"]');
+    if (addImageInput) {
+        addImageInput.addEventListener('change', function() {
+            let preview = this.parentNode.querySelector('.image-preview');
+            if (!preview && this.files && this.files[0]) {
+                preview = document.createElement('div');
+                preview.className = 'image-preview mt-2';
+                preview.innerHTML = '<img style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">';
+                this.parentNode.appendChild(preview);
+            }
+            if (preview && this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.querySelector('img').src = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            } else if (preview) {
+                preview.remove();
+            }
+        });
+    }
+
+    const editImageInput = document.getElementById('edit_category_image');
+    if (editImageInput) {
+        editImageInput.addEventListener('change', function() {
+            let preview = this.parentNode.querySelector('.image-preview');
+            if (!preview && this.files && this.files[0]) {
+                preview = document.createElement('div');
+                preview.className = 'image-preview mt-2';
+                preview.innerHTML = '<img style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;"><div class="text-muted small mt-1">Yeni resim önizlemesi</div>';
+                this.parentNode.appendChild(preview);
+            }
+            if (preview && this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.querySelector('img').src = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            } else if (preview) {
+                preview.remove();
+            }
+        });
+    }
+});
+JS;
+
 include '../includes/admin_footer.php';
-?>

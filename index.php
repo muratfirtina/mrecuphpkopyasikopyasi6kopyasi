@@ -40,6 +40,47 @@ try {
     error_log('Index.php - Slider query error: ' . $e->getMessage());
 }
 
+// Öne çıkan ürünleri al
+try {
+    $stmt = $pdo->query("
+        SELECT p.*, 
+               c.name as category_name, c.slug as category_slug,
+               pb.name as brand_name, pb.slug as brand_slug, pb.logo as brand_logo,
+               (SELECT image_path FROM product_images WHERE product_id = p.id AND is_primary = 1 LIMIT 1) as primary_image,
+               (SELECT COUNT(*) FROM product_images WHERE product_id = p.id) as image_count
+        FROM products p 
+        LEFT JOIN categories c ON p.category_id = c.id 
+        LEFT JOIN product_brands pb ON p.brand_id = pb.id
+        WHERE p.is_active = 1 AND p.featured = 1
+        ORDER BY p.sort_order, p.name
+        LIMIT " . FEATURED_PRODUCTS_COUNT . "
+    ");
+    $featuredProducts = $stmt->fetchAll();
+} catch (Exception $e) {
+    $featuredProducts = [];
+    error_log('Index.php - Featured products query error: ' . $e->getMessage());
+}
+
+// En yeni ürünleri al
+try {
+    $stmt = $pdo->query("
+        SELECT p.*, 
+               c.name as category_name, c.slug as category_slug,
+               pb.name as brand_name, pb.slug as brand_slug, pb.logo as brand_logo,
+               (SELECT image_path FROM product_images WHERE product_id = p.id AND is_primary = 1 LIMIT 1) as primary_image
+        FROM products p 
+        LEFT JOIN categories c ON p.category_id = c.id 
+        LEFT JOIN product_brands pb ON p.brand_id = pb.id
+        WHERE p.is_active = 1
+        ORDER BY p.created_at DESC
+        LIMIT 6
+    ");
+    $latestProducts = $stmt->fetchAll();
+} catch (Exception $e) {
+    $latestProducts = [];
+    error_log('Index.php - Latest products query error: ' . $e->getMessage());
+}
+
 // Typewriter ayarları
 $typewriterEnabled = isset($designSettings['hero_typewriter_enable']) ? (bool)$designSettings['hero_typewriter_enable'] : true;
 $typewriterWords = isset($designSettings['hero_typewriter_words']) ? 
@@ -70,10 +111,10 @@ include 'includes/header.php';
     }
     .hero-slide {
         width: 100% !important;
-        height: 100vh !important;
+        height: 600px !important;
     }
     </style>
-    <section class="hero-slider" style="position: relative; min-height: 100vh; z-index: 1040;">
+    <section class="hero-slider" style="position: relative; min-height: 600px; z-index: 1040;">
         <?php if (!empty($sliders)): ?>
         <!-- DEBUG: Slider verilerini kontrol et -->
         <?php 
@@ -84,7 +125,7 @@ include 'includes/header.php';
         echo " -->";
         ?>
         
-        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="<?php echo $animationSpeed; ?>" style="height: 100vh;">
+        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="<?php echo $animationSpeed; ?>" style="height: 600px;">
             <!-- Slide Indicators -->
             <div class="carousel-indicators">
                 <?php foreach ($sliders as $index => $slider): ?>
@@ -94,9 +135,9 @@ include 'includes/header.php';
             </div>
 
             <!-- Carousel Slides -->
-            <div class="carousel-inner" style="height: 100vh;">
+            <div class="carousel-inner" style="height: 600px;">
                 <?php foreach ($sliders as $index => $slider): ?>
-                <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>" style="height: 100vh; display: block;">
+                <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>" style="height: 600px; display: block;">
                     <!-- DEBUG: Resim yolu kontrolü -->
                     <?php 
                     $fullImagePath = __DIR__ . '/' . $slider['background_image'];
@@ -108,7 +149,7 @@ include 'includes/header.php';
                         background: linear-gradient(rgba(44, 62, 80, 0.5), rgba(3 9 191 / 0.5)), url('/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($slider['background_image']); ?>') center/cover no-repeat;
                         background-size: cover;
                         background-position: center;
-                        height: 100vh;
+                        height: 600px;
                         min-height: 600px;
                         position: relative;
                         display: flex;
@@ -118,57 +159,42 @@ include 'includes/header.php';
                         <div class="container py-5 h-100">
                             <div class="row align-items-center text-white h-100">
                                 <?php if ($index === 0): ?>
-                                    <!-- İlk Slider: Chip Tuning Calculator -->
-                                    <div class="col-lg-12">
-                                        <div class="text-center mb-4">
-                                            <h1 class="display-4 fw-bold mb-3"><?php echo htmlspecialchars($slider['title']); ?></h1>
-                                            <p class="lead mb-4"><?php echo htmlspecialchars($slider['description']); ?></p>
-                                        </div>
+                                    <!-- İlk Slider: Standart İçerik -->
+                                    <div class="col-lg-8">
+                                        <h1 class="display-3 fw-bold mb-3 slide-title"><?php echo htmlspecialchars($slider['title']); ?></h1>
                                         
-                                        <!-- Chip Tuning Calculator Form -->
-                                        <div class="chip-tuning-calculator">
-                                            <div class="calculator-header text-center mb-4">
-                                                <h3 class="mb-2">1120+ Marka ve Model Hesaplayın</h3>
-                                                <h2 class="mb-4">Chip Tuning ile <span class="text-danger" id="calculator-typewriter">Optimize Edin</span><span class="typewriter-cursor-calc">|</span></h2>
-                                            </div>
-                                            
-                                            <form id="chipTuningForm" class="tuning-form">
-                                                <div class="row g-3 justify-content-center">
-                                                    <div class="col-lg-2 col-md-4 col-sm-6">
-                                                        <select class="form-select tuning-select" id="brand_select" name="brand_id" required>
-                                                            <option value="">Marka Seçiniz</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-lg-2 col-md-4 col-sm-6">
-                                                        <select class="form-select tuning-select" id="model_select" name="model_id" disabled required>
-                                                            <option value="">Model Seçiniz</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-lg-2 col-md-4 col-sm-6">
-                                                        <select class="form-select tuning-select" id="series_select" name="series_id" disabled required>
-                                                            <option value="">Seri Seçiniz</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-lg-2 col-md-4 col-sm-6">
-                                                        <select class="form-select tuning-select" id="engine_select" name="engine_id" disabled required>
-                                                            <option value="">Motor Seçiniz</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-lg-2 col-md-4 col-sm-6">
-                                                        <button type="submit" class="btn btn-danger btn-lg w-100 tuning-calculate-btn" disabled>
-                                                            <i class="fas fa-calculator me-2"></i>Hesapla
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                            
-                                            <!-- Loading Indicator -->
-                                            <div id="calculatorLoading" class="text-center mt-3" style="display: none;">
-                                                <div class="spinner-border text-white" role="status">
-                                                    <span class="visually-hidden">Yükleniyor...</span>
-                                                </div>
-                                                <p class="mt-2">Hesaplanıyor...</p>
-                                            </div>
+                                        <?php if ($typewriterEnabled): ?>
+                                            <h2 class="display-5 fw-bold mb-4" style="background: linear-gradient(45deg, #e91c1cff, #fd6060ff, #ff5261ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                                                <span id="typewriter-text"><?php echo htmlspecialchars($typewriterWords[0]); ?></span><span class="typewriter-cursor">|</span>
+                                            </h2>
+                                        <?php else: ?>
+                                            <h2 class="display-5 fw-bold mb-4" style="color: <?php echo htmlspecialchars($slider['text_color']); ?>;">
+                                                <?php echo htmlspecialchars($slider['subtitle']); ?>
+                                            </h2>
+                                        <?php endif; ?>
+                                        
+                                        <p class="lead mb-4">
+                                            <?php echo htmlspecialchars($slider['description']); ?>
+                                        </p>
+                                        
+                                        <div class="d-flex gap-3 mb-5">
+                                            <a href="<?php echo htmlspecialchars($slider['button_link']); ?>" class="btn btn-danger btn-lg px-4">
+                                                <i class="fas fa-search me-2"></i><?php echo htmlspecialchars($slider['button_text']); ?>
+                                            </a>
+                                            <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
+                                                <a href="user/upload.php" class="btn btn-outline-light btn-lg px-4">
+                                                    <i class="fas fa-upload me-2"></i>Dosya Yükle
+                                                </a>
+                                            <?php else: ?>
+                                                <a href="register.php" class="btn btn-outline-light btn-lg px-4">
+                                                    <i class="fas fa-upload me-2"></i>Dosya Yükle
+                                                </a>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="text-center">
+                                            <i class="fas fa-microchip" style="font-size: 10rem; opacity: 0.2;"></i>
                                         </div>
                                     </div>
                                 <?php else: ?>
@@ -243,7 +269,7 @@ include 'includes/header.php';
         </div>
         <?php else: ?>
         <!-- Fallback eğer slider yoksa -->
-        <div class="hero-slide" style="background: linear-gradient(rgba(44, 62, 80, 0.8), rgb(3 9 191 / 0.5)), url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop') center/cover; height: 100vh; position: relative;">
+        <div class="hero-slide" style="background: linear-gradient(rgba(44, 62, 80, 0.8), rgb(3 9 191 / 0.5)), url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop') center/cover; height: 600px; position: relative;">
             <div class="container py-5 h-100">
                 <div class="row align-items-center text-white h-100">
                     <div class="col-lg-8">
@@ -310,6 +336,68 @@ include 'includes/header.php';
                                 Alanında uzman teknisyenlerimiz tüm marka ve modeller için 
                                 profesyonel hizmet sunar.
                             </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chip Tuning Calculator Form -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="display-5 fw-bold">Chip Tuning Hesaplayıcı</h2>
+                    <p class="lead text-muted">1120+ Marka ve Model ile Performansınızı Hesaplayın</p>
+                </div>
+            </div>
+            
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <!-- Chip Tuning Calculator Form -->
+                    <div class="chip-tuning-calculator bg-primary bg-opacity-10 rounded">
+                        <div class="calculator-header text-center mb-4">
+                            <h3 class="mb-2 text-primary">1120+ Marka ve Model Hesaplayın</h3>
+                            <h2 class="mb-4">Chip Tuning ile <span class="text-danger" id="calculator-typewriter">Optimize Edin</span><span class="typewriter-cursor-calc">|</span></h2>
+                        </div>
+                        
+                        <form id="chipTuningForm" class="tuning-form">
+                            <div class="row g-3 justify-content-center">
+                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                    <select class="form-select tuning-select" id="brand_select" name="brand_id" required>
+                                        <option value="">Marka Seçiniz</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                    <select class="form-select tuning-select" id="model_select" name="model_id" disabled required>
+                                        <option value="">Model Seçiniz</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                    <select class="form-select tuning-select" id="series_select" name="series_id" disabled required>
+                                        <option value="">Seri Seçiniz</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                    <select class="form-select tuning-select" id="engine_select" name="engine_id" disabled required>
+                                        <option value="">Motor Seçiniz</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                    <button type="submit" class="btn btn-danger btn-lg w-100 tuning-calculate-btn" disabled>
+                                        <i class="fas fa-calculator me-2"></i>Hesapla
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <!-- Loading Indicator -->
+                        <div id="calculatorLoading" class="text-center mt-3" style="display: none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Yükleniyor...</span>
+                            </div>
+                            <p class="mt-2 text-primary">Hesaplanıyor...</p>
                         </div>
                     </div>
                 </div>
@@ -523,9 +611,9 @@ position: relative;
 overflow: hidden;
 }
     
-    /* Section spacing after hero */
+    /* Section spacing after hero - Removed because body has padding-top for fixed navbar */
     #services {
-        padding-top: 6rem;
+        /* padding-top removed - handled by body padding-top */
     }
 
 .hero-slide {
@@ -607,7 +695,7 @@ overflow: hidden;
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .hero-slide {
-        height: 80vh !important;
+        height: 500px !important;
     }
     
     .display-3 {
@@ -663,36 +751,36 @@ overflow: hidden;
 
 /* Chip Tuning Calculator Styles */
 .chip-tuning-calculator {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 3rem 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 123, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .calculator-header h3 {
-    color: rgba(255, 255, 255, 0.9);
+    color: #0d6efd;
     font-weight: 300;
     font-size: 1.2rem;
 }
 
 .calculator-header h2 {
-    color: white;
+    color: #212529;
     font-weight: 700;
     font-size: 2.5rem;
 }
 
 .tuning-select {
-    background: rgba(255, 255, 255, 0.95);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: white;
+    border: 2px solid rgba(0, 123, 255, 0.3);
     border-radius: 12px;
     padding: 1rem;
     font-weight: 500;
     font-size: 1rem;
     color: #2c3e50;
     transition: all 0.3s ease;
-    backdrop-filter: blur(5px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .tuning-select:focus {
@@ -703,9 +791,10 @@ overflow: hidden;
 }
 
 .tuning-select:disabled {
-    background: rgba(255, 255, 255, 0.4);
-    color: rgba(44, 62, 80, 0.6);
+    background: rgba(248, 249, 250, 1);
+    color: rgba(108, 117, 125, 1);
     cursor: not-allowed;
+    border-color: rgba(206, 212, 218, 1);
 }
 
 .tuning-calculate-btn {
@@ -844,21 +933,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize carousel with custom settings
     const heroCarousel = document.querySelector('#heroCarousel');
     if (heroCarousel) {
-        // Show typewriter only on first slide
-        heroCarousel.addEventListener('slid.bs.carousel', function (event) {
-            const typewriterEl = document.querySelector('#typewriter-text');
-            const cursorEl = document.querySelector('.typewriter-cursor');
-            
-            if (event.to === 0) {
-                // First slide - show typewriter
-                if (typewriterEl) typewriterEl.style.display = 'inline-block';
-                if (cursorEl) cursorEl.style.display = 'inline-block';
-            } else {
-                // Other slides - hide typewriter
-                if (typewriterEl) typewriterEl.style.display = 'none';
-                if (cursorEl) cursorEl.style.display = 'none';
-            }
-        });
+        // Hero carousel is ready - no special typewriter handling needed since calculator is now separate
+        console.log('Hero carousel initialized');
     }
     
     // Initialize Calculator Typewriter

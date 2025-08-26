@@ -224,7 +224,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
                 'kilometer' => !empty($_POST['kilometer']) ? intval($_POST['kilometer']) : null
             ];
 
-            $notes = !empty($_POST['notes']) ? sanitize($_POST['notes']) : '';
+            // Notlar alanını kontrol et - zorunlu alan
+            if (empty($_POST['notes']) || trim($_POST['notes']) === '') {
+                $_SESSION['error'] = 'Notlar ve açıklamalar alanı zorunludur!';
+                error_log('Upload rejected: Notes field is required');
+                header('Location: upload.php');
+                exit;
+            }
+            
+            $notes = sanitize($_POST['notes']);
             
             // Dosya yükleme işlemine devam et
             $uploadResult = $fileManager->uploadFile($_SESSION['user_id'], $_FILES['file'], $vehicleData, $notes);
@@ -391,7 +399,6 @@ try {
                                                         </option>
                                                     <?php endforeach; ?>
                                                 </select>
-                                                <div class="invalid-feedback">Marka seçimi zorunludur.</div>
                                             </div>
                                             
                                             <div class="col-md-3">
@@ -399,7 +406,6 @@ try {
                                                 <select class="form-select form-control-modern" id="model_id" name="model_id" required disabled>
                                                     <option value="">Önce marka seçin</option>
                                                 </select>
-                                                <div class="invalid-feedback">Model seçimi zorunludur.</div>
                                             </div>
 
                                             <div class="col-md-3">
@@ -407,7 +413,6 @@ try {
                                                 <select class="form-select form-control-modern" id="series_id" name="series_id" required disabled>
                                                     <option value="">Önce model seçin</option>
                                                 </select>
-                                                <div class="invalid-feedback">Seri seçimi zorunludur.</div>
                                             </div>
 
                                             <div class="col-md-3">
@@ -415,7 +420,6 @@ try {
                                                 <select class="form-select form-control-modern" id="engine_id" name="engine_id" required disabled>
                                                     <option value="">Önce seri seçin</option>
                                                 </select>
-                                                <div class="invalid-feedback">Motor seçimi zorunludur.</div>
                                             </div>
                                             
                                             <!-- <div class="col-md-3">
@@ -589,8 +593,8 @@ try {
                                         </div>
                                         
                                         <div class="mb-4">
-                                            <label for="notes" class="form-label fw-semibold">Notlar ve Açıklamalar</label>
-                                            <textarea class="form-control form-control-modern" id="notes" name="notes" rows="4" 
+                                            <label for="notes" class="form-label fw-semibold">Notlar ve Açıklamalar *</label>
+                                            <textarea class="form-control form-control-modern" id="notes" name="notes" rows="4" required
                                                       placeholder="Dosya hakkında özel notlarınız, istekleriniz veya dikkat edilmesi gereken konular..."><?php echo isset($_POST['notes']) ? htmlspecialchars($_POST['notes']) : ''; ?></textarea>
                                             <div class="form-help">
                                                 <small class="text-muted">Bu bilgiler teknik ekibimize yardımcı olacaktır</small>
@@ -713,77 +717,6 @@ try {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Bilgilendirme Kartı -->
-                    <div class="info-card mb-4">
-                        <div class="info-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-info-circle me-2"></i>Önemli Bilgiler
-                            </h5>
-                        </div>
-                        <div class="info-body">
-                            <div class="info-list">
-                                <div class="info-item">
-                                    <i class="fas fa-shield-alt text-success"></i>
-                                    <div>
-                                        <strong>Güvenli Şifreleme</strong>
-                                        <span>Dosyalarınız SSL ile şifrelenir</span>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <i class="fas fa-clock text-info"></i>
-                                    <div>
-                                        <strong>Hızlı İşlem</strong>
-                                        <span>24-48 saat içinde tamamlanır</span>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <i class="fas fa-bell text-warning"></i>
-                                    <div>
-                                        <strong>Otomatik Bildirim</strong>
-                                        <span>Email ile bilgilendirilirsiniz</span>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <i class="fas fa-user-lock text-primary"></i>
-                                    <div>
-                                        <strong>Gizlilik</strong>
-                                        <span>Sadece siz erişebilirsiniz</span>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <i class="fas fa-code-branch text-secondary"></i>
-                                    <div>
-                                        <strong>GUID Sistem</strong>
-                                        <span>Gelişmiş güvenlik protokolü</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Desteklenen Formatlar -->
-                    <div class="info-card">
-                        <div class="info-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-file-code me-2"></i>Desteklenen Formatlar
-                            </h5>
-                        </div>
-                        <div class="info-body">
-                            <div class="format-grid">
-                                <div class="alert alert-success text-center">
-                                    <i class="fas fa-check-circle me-2"></i>
-                                    <strong>Tüm dosya türleri desteklenmektedir!</strong>
-                                    <br><small class="text-muted">Artık herhangi bir dosya türü kısıtlaması bulunmamaktadır.</small>
-                                </div>
-                            </div>
-                            <div class="format-note">
-                                <small class="text-muted">
-                                    <i class="fas fa-lightbulb me-1"></i>
-                                    Diğer formatlar için bizimle iletişime geçin
-                                </small>
                             </div>
                         </div>
                     </div>
@@ -933,6 +866,15 @@ try {
 .file-upload-area.modern.dragover {
     border-color: #667eea;
     background: rgba(102, 126, 234, 0.05);
+}
+
+.file-upload-area.modern.file-selected {
+    border-color: #28a745;
+    background: rgba(40, 167, 69, 0.05);
+}
+
+.file-upload-area.modern.file-selected .upload-icon {
+    color: #28a745;
 }
 
 .upload-icon {
@@ -1355,8 +1297,14 @@ function validateCurrentStep() {
         }
     } else if (currentStep === 2) {
         const file = document.getElementById('file').files[0];
+        const notes = document.getElementById('notes').value.trim();
+        
         if (!file) {
             showError('Dosya seçimi zorunludur.');
+            return false;
+        }
+        if (!notes) {
+            showError('Notlar ve açıklamalar girilmesi zorunludur.');
             return false;
         }
     }
@@ -1379,6 +1327,106 @@ function showError(message) {
             alert.remove();
         }
     }, 5000);
+}
+
+// Validate Current Step - TAM YENİLENMİŞ VE GELİŞTİRİLMİŞ!
+function validateCurrentStep() {
+    // Önce tüm hata mesajlarını temizle
+    clearAllValidationErrors();
+    
+    if (currentStep === 1) {
+        const fields = [
+            { id: 'brand_id', name: 'Marka', isGuid: true },
+            { id: 'model_id', name: 'Model', isGuid: true },
+            { id: 'series_id', name: 'Seri', isGuid: true },
+            { id: 'engine_id', name: 'Motor', isGuid: true },
+            { id: 'plate', name: 'Plaka', isGuid: false },
+            { id: 'ecu_id', name: 'ECU Tipi', isGuid: true },
+            { id: 'device_id', name: 'Kullanılan Cihaz', isGuid: true }
+        ];
+        
+        let hasError = false;
+        
+        for (let field of fields) {
+            const element = document.getElementById(field.id);
+            const value = element.value.trim();
+            
+            // Boş kontrolü
+            if (!value) {
+                showFieldError(element, `${field.name} seçimi zorunludur.`);
+                if (!hasError) {
+                    element.focus();
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    hasError = true;
+                }
+            } else {
+                // GUID kontrolü (sadece GUID alanı için)
+                if (field.isGuid && !isValidGUID(value)) {
+                    showFieldError(element, `Geçersiz ${field.name} formatı.`);
+                    if (!hasError) {
+                        element.focus();
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        hasError = true;
+                    }
+                } else {
+                    // Alan başarılı ise hata durumunu temizle
+                    clearFieldError(element);
+                }
+            }
+        }
+        
+        if (hasError) {
+            showError('Lütfen tüm zorunlu alanları doldurun.');
+        }
+        
+        return !hasError;
+        
+    } else if (currentStep === 2) {
+        let hasError = false;
+        
+        // Dosya kontrolü
+        const fileInput = document.getElementById('file');
+        if (!fileInput.files || fileInput.files.length === 0) {
+            showFieldError(fileInput, 'Dosya seçimi zorunludur.');
+            hasError = true;
+        } else {
+            clearFieldError(fileInput);
+        }
+        
+        // Notlar kontrolü
+        const notesInput = document.getElementById('notes');
+        const notes = notesInput.value.trim();
+        if (!notes) {
+            showFieldError(notesInput, 'Notlar ve açıklamalar girilmesi zorunludur.');
+            if (!hasError) {
+                notesInput.focus();
+                notesInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            hasError = true;
+        } else {
+            clearFieldError(notesInput);
+        }
+        
+        if (hasError) {
+            showError('Lütfen tüm zorunlu alanları doldurun.');
+        }
+        
+        return !hasError;
+        
+    } else if (currentStep === 3) {
+        const termsCheckbox = document.getElementById('terms');
+        if (!termsCheckbox.checked) {
+            showFieldError(termsCheckbox, 'Şartları kabul etmelisiniz.');
+            termsCheckbox.focus();
+            termsCheckbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showError('Şartları kabul etmelisiniz.');
+            return false;
+        } else {
+            clearFieldError(termsCheckbox);
+        }
+    }
+    
+    return true;
 }
 
 // Özeti güncelle - TAMAMEN YENİ VE GÜNCELLENMIŞ!
@@ -1631,47 +1679,95 @@ const fileInfo = document.getElementById('fileInfo');
 const fileName = document.getElementById('fileName');
 const fileSize = document.getElementById('fileSize');
 
+// Dosya seçim problemini çözmek için event listener'ları düzeltiyoruz
+let isDragOver = false;
+
 // Drag & Drop
 fileUploadArea.addEventListener('dragover', function(e) {
     e.preventDefault();
+    e.stopPropagation();
+    isDragOver = true;
     this.classList.add('dragover');
 });
 
 fileUploadArea.addEventListener('dragleave', function(e) {
     e.preventDefault();
-    this.classList.remove('dragover');
+    e.stopPropagation();
+    
+    // Sadece gerçekten area'dan çıkıldığında class'ı kaldır
+    setTimeout(() => {
+        if (!isDragOver) {
+            this.classList.remove('dragover');
+        }
+    }, 10);
+    isDragOver = false;
 });
 
 fileUploadArea.addEventListener('drop', function(e) {
     e.preventDefault();
+    e.stopPropagation();
+    isDragOver = false;
     this.classList.remove('dragover');
+    
     const files = e.dataTransfer.files;
     if (files.length > 0) {
-        fileInput.files = files;
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(files[0]);
+        fileInput.files = dataTransfer.files;
         showFileInfo(files[0]);
     }
 });
 
-fileUploadArea.addEventListener('click', function() {
-    fileInput.click();
+// Upload area click - tüm alana tıklandığında dosya seçimi aç
+fileUploadArea.addEventListener('click', function(e) {
+    // Remove file button'una tıklanmadığından emin ol
+    if (!e.target.classList.contains('remove-file') && !e.target.closest('.remove-file')) {
+        console.log('Upload area clicked, opening file dialog');
+        document.getElementById('file').click();
+    }
 });
 
-fileInput.addEventListener('change', function() {
-    if (this.files.length > 0) {
-        showFileInfo(this.files[0]);
+// File input change - dosya seçim problemini çözen iyileştirilmiş versiyon
+fileInput.addEventListener('change', function(e) {
+    console.log('File input changed, files count:', this.files.length);
+    
+    if (this.files && this.files.length > 0) {
+        const file = this.files[0];
+        console.log('Selected file:', file.name, 'Size:', file.size);
+        showFileInfo(file);
+    } else {
+        console.log('No file selected or files cleared');
+        hideFileInfo();
     }
 });
 
 function showFileInfo(file) {
-    fileName.textContent = file.name;
-    fileSize.textContent = formatFileSize(file.size);
-    fileInfo.style.display = 'block';
-    updateSummary(); // Dosya seçimi değiştiğinde özeti güncelle
+    if (fileName && fileSize && fileInfo) {
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        fileInfo.style.display = 'block';
+        
+        // Upload area'yı güncelle
+        fileUploadArea.classList.add('file-selected');
+        
+        console.log('File info displayed:', file.name);
+        updateSummary(); // Dosya seçimi değiştiğinde özeti güncelle
+    }
+}
+
+function hideFileInfo() {
+    if (fileInfo) {
+        fileInfo.style.display = 'none';
+        fileUploadArea.classList.remove('file-selected');
+        console.log('File info hidden');
+        updateSummary();
+    }
 }
 
 function clearFile() {
     fileInput.value = '';
-    fileInfo.style.display = 'none';
+    hideFileInfo();
+    console.log('File cleared');
     updateSummary(); // Dosya temizlendiğinde özeti güncelle
 }
 
@@ -1683,40 +1779,151 @@ function formatFileSize(bytes) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// Form validation
+// Form validation - GELİŞTİRİLMİŞ VALIDATION SİSTEMİ
 (function() {
     'use strict';
     window.addEventListener('load', function() {
         const forms = document.getElementsByClassName('needs-validation');
         Array.prototype.filter.call(forms, function(form) {
             form.addEventListener('submit', function(event) {
-                // GUID validations
-                const brandId = document.getElementById('brand_id').value;
-                const modelId = document.getElementById('model_id').value;
+                // Tüm validation hatalarını temizle
+                clearAllValidationErrors();
                 
-                if (brandId && !isValidGUID(brandId)) {
+                let isValid = true;
+                
+                // Manuel validation kontrolleri
+                const requiredFields = [
+                    { id: 'brand_id', name: 'Marka', isGuid: true },
+                    { id: 'model_id', name: 'Model', isGuid: true },
+                    { id: 'series_id', name: 'Seri', isGuid: true },
+                    { id: 'engine_id', name: 'Motor', isGuid: true },
+                    { id: 'plate', name: 'Plaka', isGuid: false },
+                    { id: 'ecu_id', name: 'ECU Tipi', isGuid: true },
+                    { id: 'device_id', name: 'Kullanılan Cihaz', isGuid: true },
+                    { id: 'file', name: 'Dosya', isFile: true },
+                    { id: 'notes', name: 'Notlar ve Açıklamalar', isGuid: false },
+                    { id: 'terms', name: 'Şartları kabul etme', isCheckbox: true }
+                ];
+                
+                requiredFields.forEach(field => {
+                    const element = document.getElementById(field.id);
+                    if (element) {
+                        let value;
+                        
+                        if (field.isFile) {
+                            value = element.files && element.files.length > 0;
+                        } else if (field.isCheckbox) {
+                            value = element.checked;
+                        } else {
+                            value = element.value ? element.value.trim() : '';
+                        }
+                        
+                        // Boş kontrolü
+                        if (!value) {
+                            let message;
+                            if (field.isFile) {
+                                message = `${field.name} seçimi zorunludur.`;
+                            } else if (field.isCheckbox) {
+                                message = `${field.name} zorunludur.`;
+                            } else {
+                                message = `${field.name} alanı zorunludur.`;
+                            }
+                            showFieldError(element, message);
+                            isValid = false;
+                        } else {
+                            // GUID kontrolü
+                            if (field.isGuid && !isValidGUID(value)) {
+                                showFieldError(element, `Geçersiz ${field.name} formatı.`);
+                                isValid = false;
+                            } else {
+                                clearFieldError(element);
+                            }
+                        }
+                    }
+                });
+                
+                // Eğer validation başarısız ise form gönderimini engelle
+                if (!isValid || form.checkValidity() === false) {
                     event.preventDefault();
                     event.stopPropagation();
-                    showError('Geçersiz marka GUID formatı: ' + brandId);
-                    return false;
+                    
+                    // İlk hatalı alanı bul ve focus et
+                    const firstInvalidField = form.querySelector('.is-invalid');
+                    if (firstInvalidField) {
+                        firstInvalidField.focus();
+                        firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    
+                    showError('Lütfen tüm zorunlu alanları doldurun.');
                 }
                 
-                if (modelId && !isValidGUID(modelId)) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    showError('Geçersiz model GUID formatı: ' + modelId);
-                    return false;
-                }
-                
-                if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
                 form.classList.add('was-validated');
             }, false);
         });
     }, false);
 })();
+
+// Alan hatası gösterme fonksiyonu
+function showFieldError(element, message) {
+    // Mevcut hata mesajlarını temizle
+    clearFieldError(element);
+    
+    // Element'i invalid olarak işaretle
+    element.classList.add('is-invalid');
+    element.classList.remove('is-valid');
+    
+    // Hata mesajı oluştur
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'invalid-feedback d-block';
+    errorDiv.textContent = message;
+    errorDiv.setAttribute('data-validation-error', 'true');
+    
+    // Hata mesajını element'in sonrasına ekle
+    if (element.type === 'checkbox') {
+        // Checkbox için parent container'a ekle
+        const parent = element.closest('.form-check') || element.parentNode;
+        parent.appendChild(errorDiv);
+    } else {
+        element.parentNode.appendChild(errorDiv);
+    }
+    
+    console.log('Field error shown:', message);
+}
+
+// Alan hatasını temizleme fonksiyonu
+function clearFieldError(element) {
+    // Invalid class'ını kaldır
+    element.classList.remove('is-invalid');
+    
+    // Valid class ekle (boş değilse)
+    if (element.value && element.value.trim()) {
+        element.classList.add('is-valid');
+    }
+    
+    // Hata mesajlarını kaldır
+    let parent;
+    if (element.type === 'checkbox') {
+        parent = element.closest('.form-check') || element.parentNode;
+    } else {
+        parent = element.parentNode;
+    }
+    
+    const errorMessages = parent.querySelectorAll('[data-validation-error="true"]');
+    errorMessages.forEach(msg => msg.remove());
+}
+
+// Tüm validation hatalarını temizle
+function clearAllValidationErrors() {
+    // Tüm is-invalid class'larını kaldır
+    document.querySelectorAll('.is-invalid').forEach(el => {
+        el.classList.remove('is-invalid');
+    });
+    
+    // Tüm validation error mesajlarını kaldır
+    document.querySelectorAll('[data-validation-error="true"]').forEach(el => {
+        el.remove();
+    });
+}
 
 // Form elementlerini dinle - GÜNCELLENMIŞ!
 document.addEventListener('DOMContentLoaded', function() {
@@ -1735,6 +1942,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('ecu_id').addEventListener('change', updateSummary);
     document.getElementById('device_id').addEventListener('change', updateSummary);
     document.getElementById('plate').addEventListener('input', updateSummary);
+    document.getElementById('notes').addEventListener('input', updateSummary);
+    document.getElementById('notes').addEventListener('change', updateSummary);
     
     // Dosya değişikliği için özel listener
     document.getElementById('file').addEventListener('change', updateSummary);

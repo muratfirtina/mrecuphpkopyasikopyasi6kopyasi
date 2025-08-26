@@ -149,19 +149,24 @@
             anchor.addEventListener('click', function (e) {
                 const href = this.getAttribute('href');
                 
-                // Eğer sadece # ise işlemi durdur
-                if (href === '#' || href === '' || !href) {
-                    e.preventDefault();
+                // Skip if href is just "#", empty, or has dropdown/modal attributes
+                if (href === '#' || href === '' || !href || 
+                    this.hasAttribute('data-bs-toggle') || this.hasAttribute('data-toggle')) {
                     return;
                 }
                 
-                e.preventDefault();
-                const target = document.querySelector(href);
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+                // Validate the selector before using it
+                try {
+                    const target = document.querySelector(href);
+                    if (target) {
+                        e.preventDefault();
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                } catch (error) {
+                    console.warn('Invalid selector:', href);
                 }
             });
         });

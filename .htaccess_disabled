@@ -1,0 +1,25 @@
+# Mr ECU - Step by Step .htaccess Test
+
+# Prevent directory browsing
+Options -Indexes
+
+# Hide sensitive files  
+<FilesMatch "\.(ini|log|conf|sql|md)$">
+    Require all denied
+</FilesMatch>
+
+# Basic security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+</IfModule>
+
+# Enable URL Rewriting (Step 1 Test)
+RewriteEngine On
+
+# Simple test rewrite (Step 2 Test)
+RewriteRule ^test-simple/?$ test-rewrite.php?test=simple [QSA,L]
+
+# Error pages
+ErrorDocument 404 /mrecuphpkopyasikopyasi6kopyasi/404.php
+ErrorDocument 500 /mrecuphpkopyasikopyasi6kopyasi/500.php

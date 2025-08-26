@@ -206,6 +206,10 @@
                             <i class="fas fa-tags"></i>Kategoriler
                         </a>
                         
+                        <a class="nav-link <?php echo ($pageTitle == 'Ürün Markalar') ? 'active' : ''; ?>" href="product-brands.php">
+                            <i class="fas fa-award"></i>Markalar
+                        </a>
+                        
                         <a class="nav-link <?php echo ($pageTitle == 'Ürünler') ? 'active' : ''; ?>" href="products.php">
                             <i class="fas fa-box"></i>Ürünler
                         </a>

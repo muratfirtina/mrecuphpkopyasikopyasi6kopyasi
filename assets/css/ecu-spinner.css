@@ -1,0 +1,169 @@
+/* ===== MINIMAL ECU SPINNER STYLES ===== */
+.ecu-spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #071e3d;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    overflow: hidden;
+}
+
+.ecu-spinner-overlay.show {
+    display: flex !important;
+    opacity: 1;
+    visibility: visible;
+}
+
+.ecu-spinner-overlay.fade-out {
+    opacity: 0;
+}
+
+.ecu-spinner-container {
+    text-align: center;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+}
+
+/* ECU Device Container - Simplified */
+.ecu-device {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ECU Logo/Image - Clean and Simple */
+.ecu-screen {
+    position: relative;
+    z-index: 15;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.ecu-image {
+    max-width: 120px;
+    max-height: 90px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    opacity: 0;
+    animation: imageReveal 2s ease-in-out infinite;
+    filter: grayscale(100%) brightness(0.3);
+}
+
+/* Loading Text - Red Gradient */
+.spinner-text {
+    text-align: center;
+}
+
+.loading-text {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #dc3545, #ff4757, #ff6b7a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 30px rgba(220, 53, 69, 0.5);
+    animation: textPulse 1.5s ease-in-out infinite;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* ===== ANIMATIONS ===== */
+
+@keyframes imageReveal {
+    0% {
+        opacity: 0;
+        filter: grayscale(100%) brightness(0.3);
+        transform: translateY(20px);
+    }
+    50% {
+        opacity: 0.7;
+        filter: grayscale(50%) brightness(0.7);
+        transform: translateY(0px);
+    }
+    100% {
+        opacity: 1;
+        filter: grayscale(0%) brightness(1.2);
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes textPulse {
+    0%, 100% {
+        transform: scale(1);
+        text-shadow: 0 0 30px rgba(220, 53, 69, 0.5);
+    }
+    50% {
+        transform: scale(1.05);
+        text-shadow: 0 0 40px rgba(220, 53, 69, 0.8);
+    }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .ecu-device {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .ecu-image {
+        max-width: 90px;
+        max-height: 70px;
+    }
+    
+    .loading-text {
+        font-size: 1.5rem;
+    }
+    
+    .ecu-screen {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ecu-spinner-container {
+        gap: 2rem;
+    }
+    
+    .ecu-device {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .ecu-image {
+        max-width: 70px;
+        max-height: 50px;
+    }
+    
+    .loading-text {
+        font-size: 1.3rem;
+        letter-spacing: 1px;
+    }
+    
+    .ecu-screen {
+        padding: 10px;
+    }
+}
+
+/* Body scroll control for spinner */
+body.spinner-active {
+    overflow: hidden !important;
+}
+
+/* ===== END MINIMAL ECU SPINNER STYLES ===== */

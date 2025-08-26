@@ -1,4 +1,7 @@
-# Mr ECU - Minimal Apache Configuration for MAMP
+# Mr ECU - Apache Configuration for MAMP
+
+# Enable URL Rewriting
+RewriteEngine On
 
 # Prevent directory browsing
 Options -Indexes
@@ -13,3 +16,23 @@ Options -Indexes
     Header always set X-Content-Type-Options nosniff
     Header always set X-Frame-Options DENY
 </IfModule>
+
+# URL Rewrite Rules for SEO-friendly URLs
+
+# Category page: /kategori/kategori-slug -> category.php?slug=kategori-slug
+RewriteRule ^kategori/([a-zA-Z0-9-]+)/?$ category.php?slug=$1 [L,QSA]
+
+# Category-Brand products: /kategori/kategori-slug/marka/marka-slug -> category-brand-products.php?category=kategori-slug&brand=marka-slug
+RewriteRule ^kategori/([a-zA-Z0-9-]+)/marka/([a-zA-Z0-9-]+)/?$ category-brand-products.php?category=$1&brand=$2 [L,QSA]
+
+# Product detail: /urun/urun-slug -> product-detail.php?slug=urun-slug
+RewriteRule ^urun/([a-zA-Z0-9-]+)/?$ product-detail.php?slug=$1 [L,QSA]
+
+# Products listing: /urunler -> products.php
+RewriteRule ^urunler/?$ products.php [L,QSA]
+
+# Brand products: /marka/marka-slug -> products.php?brand=marka-slug
+RewriteRule ^marka/([a-zA-Z0-9-]+)/?$ products.php?brand=$1 [L,QSA]
+
+# Category products: /kategori-urunleri/kategori-slug -> products.php?category=kategori-slug
+RewriteRule ^kategori-urunleri/([a-zA-Z0-9-]+)/?$ products.php?category=$1 [L,QSA]

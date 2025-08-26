@@ -11,7 +11,41 @@
 // Site ayarları
 define('SITE_NAME', 'Mr ECU');
 define('SITE_URL', 'http://localhost:8888/mrecuphpkopyasikopyasi6kopyasi/');
+define('BASE_URL', 'http://localhost:8888/mrecuphpkopyasikopyasi6kopyasi'); // Trailing slash olmadan
 define('SITE_EMAIL', 'info@mrecu.com');
+
+// SEO ve Meta ayarları
+define('DEFAULT_META_TITLE', 'Mr ECU - Profesyonel ECU Programlama ve Chip Tuning');
+define('DEFAULT_META_DESCRIPTION', 'ECU programlama, chip tuning ve otomotiv yazılım çözümleri. Profesyonel araçlar ve güvenilir hizmet.');
+define('DEFAULT_META_KEYWORDS', 'ecu programlama, chip tuning, autotuner, kess, otomotiv yazılım');
+
+// Ürün sistemi ayarları
+define('PRODUCTS_PER_PAGE', 12); // Sayfa başına ürün sayısı
+define('RELATED_PRODUCTS_COUNT', 6); // İlgili ürün sayısı
+define('FEATURED_PRODUCTS_COUNT', 8); // Öne çıkan ürün sayısı
+define('PRODUCT_IMAGE_MAX_SIZE', 10 * 1024 * 1024); // 10MB
+define('PRODUCT_IMAGES_PER_PRODUCT', 10); // Ürün başına maksimum resim
+define('BRAND_LOGO_MAX_SIZE', 5 * 1024 * 1024); // 5MB
+
+// Resim boyutları (otomatik resize için)
+define('PRODUCT_IMAGE_SIZES', [
+    'thumbnail' => ['width' => 200, 'height' => 200],
+    'medium' => ['width' => 600, 'height' => 600],
+    'large' => ['width' => 1200, 'height' => 1200]
+]);
+
+// İletişim bilgileri
+define('CONTACT_PHONE', '+90 XXX XXX XX XX');
+define('CONTACT_WHATSAPP', '+90XXXXXXXXXX');
+define('CONTACT_ADDRESS', 'İstanbul, Türkiye');
+define('COMPANY_NAME', 'Mr ECU Yazılım ve Teknoloji');
+
+// Sosyal medya hesapları (gelecek için)
+define('SOCIAL_FACEBOOK', '');
+define('SOCIAL_INSTAGRAM', '');
+define('SOCIAL_TWITTER', '');
+define('SOCIAL_YOUTUBE', '');
+define('SOCIAL_LINKEDIN', '');
 
 // Debug modu (geliştirme ortamı için)
 define('DEBUG', true); // Production'da false yapın

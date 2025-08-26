@@ -39,26 +39,29 @@ if (!isset($pageTitle)) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.css" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="<?php echo isset($cssPath) ? $cssPath : 'assets/css/style.css'; ?>" rel="stylesheet">
+    <link href="<?php echo isset($cssPath) ? $cssPath : '/mrecuphpkopyasikopyasi6kopyasi/assets/css/style.css'; ?>" rel="stylesheet">
     
     <!-- Modern Navigation Styles -->
     <style>
     /* Modern Navigation Styles */
     .modern-navbar {
-        background: rgba(0, 0, 0, 0.1) !important;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        background: #071e3d !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         transition: all 0.3s ease;
-        padding: 1rem 0;
-        box-shadow: none;
-        z-index: 1050;
+        padding: 1.1rem 0;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+        position: fixed;
+        z-index: 9999;
+        width: 100%;
+        top: 0;
+        left: 0;
     }
     
+    /* Scroll Effect - Active */
     .modern-navbar.scrolled {
-        background: rgb(13 17 23 / 75%) !important;
-        padding: 0.5rem 0;
-        box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
+        background: #071e3d !important;
+        padding: 0.1rem 0;
+        box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
     }
     
     /* Brand Styles */
@@ -72,20 +75,13 @@ if (!isset($pageTitle)) {
     }
     
     .brand-icon {
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, #dc3545, #fd7e14);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-        transition: all 0.3s ease;
+        width: 110px;
     }
     
-    .brand-icon i {
-        font-size: 1.5rem;
-        color: white;
+    .brand-logo-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
     }
     
     .brand-text {
@@ -105,11 +101,6 @@ if (!isset($pageTitle)) {
         color: rgba(255, 255, 255, 0.7);
         margin: 0;
         font-weight: 400;
-    }
-    
-    .modern-brand:hover .brand-icon {
-        transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
     }
     
     /* Modern Toggler */
@@ -304,13 +295,13 @@ if (!isset($pageTitle)) {
     
     /* Modern Dropdown */
     .modern-dropdown {
-        background: rgba(0, 0, 0, 0.85);
+        background: #071e3d !important;
         backdrop-filter: blur(25px);
         -webkit-backdrop-filter: blur(25px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        padding: 0.5rem 0;
+        padding: 0.5rem 1rem 0.5rem 0rem;
         margin-top: 0.5rem;
     }
     
@@ -342,24 +333,32 @@ if (!isset($pageTitle)) {
         margin: 0.5rem 1rem;
     }
     
-    /* Fixed Top Spacing - Remove for overlay effect */
+    /* Fixed Top Spacing for navbar */
     body {
-        padding-top: 0;
+        padding-top: 140px;
     }
     
     /* Responsive */
     @media (max-width: 991.98px) {
+        .modern-navbar {
+            padding: 2.5rem 0;
+        }
+        
+        .modern-navbar.scrolled {
+            padding: 1.25rem 0;
+        }
+        
+        body {
+            padding-top: 120px;
+        }
+        
         .brand-text {
             display: none;
         }
         
-        .brand-icon {
-            width: 40px;
-            height: 40px;
-        }
-        
-        .brand-icon i {
-            font-size: 1.2rem;
+        .brand-logo-img {
+            width: 100%;
+            height: 100%;
         }
         
         .modern-nav-link span {
@@ -373,7 +372,15 @@ if (!isset($pageTitle)) {
     
     @media (max-width: 767.98px) {
         .modern-navbar {
-            padding: 0.75rem 0;
+            padding: 2rem 0;
+        }
+        
+        .modern-navbar.scrolled {
+            padding: 1rem 0;
+        }
+        
+        body {
+            padding-top: 100px;
         }
         
         .navbar-collapse {
@@ -405,13 +412,11 @@ if (!isset($pageTitle)) {
         }
     }
     
-    /* Scroll Effect */
+    /* Alternative Scroll Effect Class */
     .navbar-scroll-effect {
-        background: rgba(13, 17, 23, 0.95) !important;
-        padding: 0.5rem 0 !important;
+        background: #071e3d !important;
+        padding: 1.5rem 0 !important;
         box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3) !important;
-        backdrop-filter: blur(25px);
-        -webkit-backdrop-filter: blur(25px);
     }
     </style>
     
@@ -423,21 +428,122 @@ if (!isset($pageTitle)) {
     <?php endif; ?>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
-    <link rel="shortcut icon" href="assets/images/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="/mrecuphpkopyasikopyasi6kopyasi/assets/images/favicon.svg">
+    <link rel="shortcut icon" href="/mrecuphpkopyasikopyasi6kopyasi/assets/images/favicon.svg">
 </head>
 <body class="<?php echo isset($bodyClass) ? $bodyClass : ''; ?>">
+    
+    <!-- ECU Spinner Overlay -->
+    <div id="ecuSpinner" class="ecu-spinner-overlay" style="display: none;">
+        <div class="ecu-spinner-container">
+            <div class="ecu-device">
+                <!-- <div class="ecu-chip">
+                    <div class="chip-inner">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <div class="chip-pins chip-pins-left">
+                        <div class="pin"></div>
+                        <div class="pin"></div>
+                        <div class="pin"></div>
+                        <div class="pin"></div>
+                        <div class="pin"></div>
+                    </div>
+                    <div class="chip-pins chip-pins-right">
+                        <div class="pin"></div>
+                        <div class="pin"></div>
+                        <div class="pin"></div>
+                        <div class="pin"></div>
+                        <div class="pin"></div>
+                    </div>
+                </div> -->
+                
+                <!-- Data Files Animation -->
+                <!-- <div class="data-files">
+                    <div class="data-file" style="--delay: 0s">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="data-file" style="--delay: 0.5s">
+                        <i class="fas fa-file-code"></i>
+                    </div>
+                    <div class="data-file" style="--delay: 1s">
+                        <i class="fas fa-file-archive"></i>
+                    </div>
+                    <div class="data-file" style="--delay: 1.5s">
+                        <i class="fas fa-database"></i>
+                    </div>
+                </div> -->
+
+                <!-- ECU Logo -->
+                <div class="ecu-screen">
+                    <img src="/mrecuphpkopyasikopyasi6kopyasi/assets/images/mreculogomini.png" alt="ECU Image" class="ecu-image">
+                </div>
+                
+                <div class="ecu-screen">
+                    <img src="/mrecuphpkopyasikopyasi6kopyasi/assets/images/mreculogomini.png" alt="ECU Image" class="ecu-image">
+                </div>
+                
+                <!-- Progress Bars -->
+                <div class="ecu-progress">
+                    <div class="progress-bar progress-1"></div>
+                    <div class="progress-bar progress-2"></div>
+                    <div class="progress-bar progress-3"></div>
+                </div>
+            </div>
+            
+            <!-- <div class="spinner-text">
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div> -->
+        </div>
+    </div>
+    
+    <!-- ECU Spinner Script - Simple and Reliable -->
+    <script>
+    // Simple ECU Spinner Control
+    (function() {
+        // Show spinner immediately
+        const spinner = document.getElementById('ecuSpinner');
+        
+        if (spinner) {
+            // Show spinner
+            spinner.style.display = 'flex';
+            spinner.style.opacity = '1';
+            document.body.style.overflow = 'hidden';
+            
+            console.log('ECU Spinner: Shown');
+            
+            // Hide after 1 second
+            setTimeout(function() {
+                spinner.style.opacity = '0';
+                
+                setTimeout(function() {
+                    spinner.style.display = 'none';
+                    document.body.style.overflow = '';
+                    console.log('ECU Spinner: Hidden');
+                }, 300);
+            }, 1000);
+            
+            // Emergency click to close
+            spinner.addEventListener('click', function() {
+                this.style.opacity = '0';
+                setTimeout(() => {
+                    this.style.display = 'none';
+                    document.body.style.overflow = '';
+                }, 300);
+            });
+        }
+    })();
+    </script>
     
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark modern-navbar fixed-top">
         <div class="container">
-            <a class="navbar-brand modern-brand" href="<?php echo isset($basePath) ? $basePath : ''; ?>index.php">
+            <a class="navbar-brand modern-brand" href="/mrecuphpkopyasikopyasi6kopyasi/">
                 <div class="brand-icon">
-                    <i class="fas fa-microchip"></i>
-                </div>
-                <div class="brand-text">
-                    <span class="brand-name"><?php echo SITE_NAME; ?></span>
-                    <small class="brand-tagline">Professional ECU Services</small>
+                    <img src="/mrecuphpkopyasikopyasi6kopyasi/assets/images/mreculogomini.png" alt="MR ECU Logo" class="brand-logo-img">
                 </div>
             </a>
             
@@ -450,25 +556,72 @@ if (!isset($pageTitle)) {
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link modern-nav-link <?php echo ($pageTitle == 'Ana Sayfa') ? 'active' : ''; ?>" href="<?php echo isset($basePath) ? $basePath : ''; ?>index.php">
+                        <a class="nav-link modern-nav-link <?php echo ($pageTitle == 'Ana Sayfa') ? 'active' : ''; ?>" href="/mrecuphpkopyasikopyasi6kopyasi/">
                             <i class="fas fa-home"></i>
                             <span>Ana Sayfa</span>
                         </a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link modern-nav-link dropdown-toggle" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>Ürünler</span>
+                        </a>
+                        <ul class="dropdown-menu modern-dropdown dropdown-menu-start" aria-labelledby="productsDropdown">
+                            <li><h6 class="dropdown-header">Kategoriler</h6></li>
+                            <?php
+                            // Kategorileri getir
+                            try {
+                                $stmt = $pdo->query("
+                                    SELECT c.*, COUNT(p.id) as product_count 
+                                    FROM categories c 
+                                    LEFT JOIN products p ON c.id = p.category_id AND p.is_active = 1
+                                    WHERE c.is_active = 1 
+                                    GROUP BY c.id 
+                                    HAVING product_count > 0
+                                    ORDER BY c.sort_order, c.name
+                                    LIMIT 10
+                                ");
+                                $headerCategories = $stmt->fetchAll();
+                                
+                                if (!empty($headerCategories)):
+                                    foreach ($headerCategories as $category):
+                            ?>
+                            <li>
+                                <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/kategori/<?php echo $category['slug']; ?>">
+                                    <i class="fas fa-tag me-2"></i>
+                                    <?php echo htmlspecialchars($category['name']); ?>
+                                    <span class="badge bg-secondary ms-auto"><?php echo $category['product_count']; ?></span>
+                                </a>
+                            </li>
+                            <?php
+                                    endforeach;
+                                else:
+                            ?>
+                            <li><a class="dropdown-item text-muted" href="#">Kategori bulunamadı</a></li>
+                            <?php
+                                endif;
+                            } catch(PDOException $e) {
+                                // Hata durumunda sessizce geç
+                            }
+                            ?>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item fw-bold" href="/mrecuphpkopyasikopyasi6kopyasi/urunler">Tüm Ürünler <i class="fas fa-arrow-right ms-1"></i></a></li>
+                        </ul>
+                    </li>
                     <li class="nav-item">
-                        <a class="nav-link modern-nav-link" href="<?php echo isset($basePath) ? $basePath : ''; ?>index.php#services">
+                        <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/#services">
                             <i class="fas fa-cogs"></i>
                             <span>Hizmetler</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link modern-nav-link" href="<?php echo isset($basePath) ? $basePath : ''; ?>index.php#about">
+                        <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/#about">
                             <i class="fas fa-info-circle"></i>
                             <span>Hakkımızda</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link modern-nav-link" href="<?php echo isset($basePath) ? $basePath : ''; ?>index.php#contact">
+                        <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/#contact">
                             <i class="fas fa-envelope"></i>
                             <span>İletişim</span>
                         </a>
@@ -477,7 +630,7 @@ if (!isset($pageTitle)) {
                     <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
                         <!-- Giriş yapan kullanıcılar için ek menü öğeleri -->
                         <li class="nav-item">
-                            <a class="nav-link modern-nav-link upload-link" href="<?php echo isset($basePath) ? $basePath : ''; ?>user/upload.php">
+                            <a class="nav-link modern-nav-link upload-link" href="/mrecuphpkopyasikopyasi6kopyasi/user/upload.php">
                                 <i class="fas fa-upload"></i>
                                 <span>Dosya Yükle</span>
                             </a>
@@ -496,7 +649,7 @@ if (!isset($pageTitle)) {
                             </a>
                             <ul class="dropdown-menu modern-dropdown dropdown-menu-end">
                                 <li><h6 class="dropdown-header">Bildirimler</h6></li>
-                                <li><a class="dropdown-item" href="<?php echo isset($basePath) ? $basePath : ''; ?>admin/notifications.php">Tüm Bildirimleri Gör</a></li>
+                                <li><a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/admin/notifications.php">Tüm Bildirimleri Gör</a></li>
                             </ul>
                         </li>
                         
@@ -515,35 +668,35 @@ if (!isset($pageTitle)) {
                             <ul class="dropdown-menu modern-dropdown dropdown-menu-end">
                                 <?php if (function_exists('isAdmin') && isAdmin()): ?>
                                     <li>
-                                        <a class="dropdown-item" href="<?php echo isset($basePath) ? $basePath : ''; ?>admin/">
+                                        <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/admin/">
                                             <i class="fas fa-cog me-2"></i>Admin Panel
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="<?php echo isset($basePath) ? $basePath : ''; ?>migration-dashboard.php">
+                                        <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/migration-dashboard.php">
                                             <i class="fas fa-exchange-alt me-2"></i>Migration Dashboard
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
                                 <?php endif; ?>
                                 <li>
-                                    <a class="dropdown-item" href="<?php echo isset($basePath) ? $basePath : ''; ?>user/">
+                                    <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/user/">
                                         <i class="fas fa-dashboard me-2"></i>Panel
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="<?php echo isset($basePath) ? $basePath : ''; ?>user/files.php">
+                                    <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/user/files.php">
                                         <i class="fas fa-file me-2"></i>Dosyalarım
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="<?php echo isset($basePath) ? $basePath : ''; ?>user/profile.php">
+                                    <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/user/profile.php">
                                         <i class="fas fa-user me-2"></i>Profil
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item" href="<?php echo isset($basePath) ? $basePath : ''; ?>logout.php">
+                                    <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/logout.php">
                                         <i class="fas fa-sign-out-alt me-2"></i>Çıkış
                                     </a>
                                 </li>
@@ -551,13 +704,13 @@ if (!isset($pageTitle)) {
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
-                            <a class="nav-link modern-nav-link login-btn" href="<?php echo isset($basePath) ? $basePath : ''; ?>login.php">
+                            <a class="nav-link modern-nav-link login-btn" href="/mrecuphpkopyasikopyasi6kopyasi/login.php">
                                 <i class="fas fa-sign-in-alt"></i>
                                 <span>Giriş</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link modern-nav-link register-btn" href="<?php echo isset($basePath) ? $basePath : ''; ?>register.php">
+                            <a class="nav-link modern-nav-link register-btn" href="/mrecuphpkopyasikopyasi6kopyasi/register.php">
                                 <i class="fas fa-user-plus"></i>
                                 <span>Kayıt</span>
                             </a>
@@ -578,12 +731,12 @@ if (!isset($pageTitle)) {
         const toggler = document.querySelector('.modern-toggler');
         const navbarCollapse = document.querySelector('.navbar-collapse');
         
-        // Scroll Effect
+        // Scroll Effect - Active
         function handleScroll() {
-            if (window.scrollY > 100) {
-                navbar.classList.add('navbar-scroll-effect');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
             } else {
-                navbar.classList.remove('navbar-scroll-effect');
+                navbar.classList.remove('scrolled');
             }
         }
         
@@ -601,10 +754,17 @@ if (!isset($pageTitle)) {
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
-                const target = document.querySelector(this.getAttribute('href'));
+                const href = this.getAttribute('href');
+                
+                // Skip if href is just "#" or has dropdown/modal attributes
+                if (href === '#' || this.hasAttribute('data-bs-toggle') || this.hasAttribute('data-toggle')) {
+                    return;
+                }
+                
+                const target = document.querySelector(href);
                 if (target) {
                     e.preventDefault();
-                    const offsetTop = target.offsetTop - 100; // Account for fixed navbar
+                    const offsetTop = target.offsetTop - 140; // Account for fixed navbar
                     window.scrollTo({
                         top: offsetTop,
                         behavior: 'smooth'
@@ -620,7 +780,7 @@ if (!isset($pageTitle)) {
             
             let current = '';
             sections.forEach(section => {
-                const sectionTop = section.offsetTop - 150;
+                const sectionTop = section.offsetTop - 150; // Account for fixed navbar
                 if (window.scrollY >= sectionTop) {
                     current = section.getAttribute('id');
                 }
@@ -634,7 +794,7 @@ if (!isset($pageTitle)) {
             });
         }
         
-        // Event listeners
+        // Event listeners - Active scroll effects
         window.addEventListener('scroll', function() {
             handleScroll();
             updateActiveNavLink();
