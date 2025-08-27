@@ -142,7 +142,7 @@ include 'includes/header.php';
     margin-bottom: 2rem;
     border-radius: 0 0 30px 30px;
     text-shadow: 0 2px 10px rgba(0,0,0,0.7);
-    height: 375px;
+    height: 340px;
     display: flex;
     align-items: center;
 }
@@ -612,7 +612,7 @@ include 'includes/header.php';
 <section class="brand-category-hero" style="background-image: url('/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($brand['logo'] ?: 'assets/images/default-brand-bg.jpg'); ?>');">
     <div class="overlay"></div> <!-- Karartma katmanı -->
     <div class="container">
-        <div class="hero-content" style="padding-top: 45px;">
+        <div class="hero-content">
             <!-- <?php if ($brand['logo']): ?>
                 <img src="/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($brand['logo']); ?>" 
                      alt="<?php echo htmlspecialchars($brand['name']); ?>" 

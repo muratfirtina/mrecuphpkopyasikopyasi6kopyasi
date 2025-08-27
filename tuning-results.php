@@ -113,6 +113,8 @@ include 'includes/header.php';
     padding: 4rem 0;
     position: relative;
     overflow: hidden;
+    border-radius: 0 0 30px 30px;
+    height: 340px;
 }
 
 .tuning-hero::before {

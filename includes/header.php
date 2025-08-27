@@ -45,13 +45,22 @@ if (!isset($pageTitle)) {
     <style>
     /* Modern Navigation Styles */
     .modern-navbar {
+        <?php 
+        $currentPage = basename($_SERVER['PHP_SELF']);
+        $isHomePage = ($currentPage === 'index.php' || $currentPage === '');
+        
+        if ($isHomePage): ?>
         background: rgba(7, 30, 61, 0.1) !important;
         /* backdrop-filter: blur(15px); */
         -webkit-backdrop-filter: blur(15px);
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        <?php else: ?>
+        background: #071e3d !important;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+        <?php endif; ?>
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         transition: all 0.3s ease;
-        /* padding: 1.1rem 0; */
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        padding: 1.1rem 0;
         position: fixed;
         z-index: 9999;
         width: 100%;
@@ -359,9 +368,15 @@ if (!isset($pageTitle)) {
             padding: 1.25rem 0;
         }
         
+        <?php if (!$isHomePage): ?>
+        body {
+            padding-top: 120px !important;
+        }
+        <?php else: ?>
         body {
             padding-top: 0px;
         }
+        <?php endif; ?>
         
         .brand-text {
             display: none;
@@ -390,9 +405,15 @@ if (!isset($pageTitle)) {
             padding: 1rem 0;
         }
         
+        <?php if (!$isHomePage): ?>
+        body {
+            padding-top: 100px !important;
+        }
+        <?php else: ?>
         body {
             padding-top: 0px;
         }
+        <?php endif; ?>
         
         .navbar-collapse {
             background: rgba(0, 0, 0, 0.9);
@@ -448,6 +469,18 @@ if (!isset($pageTitle)) {
         font-weight: 600 !important;
         line-height: 1.6 !important;
     }
+    
+    /* Ana sayfa değilse normal padding ver */
+    <?php 
+    $currentPage = basename($_SERVER['PHP_SELF']);
+    $isHomePage = ($currentPage === 'index.php' || $currentPage === '');
+    
+    if (!$isHomePage): ?>
+    /* Ana sayfa dışındaki sayfalar için padding */
+    body {
+        padding-top: 140px !important;
+    }
+    <?php endif; ?>
     
     /* Ensure responsive breakpoints still work properly */
     @media (max-width: 575.98px) {

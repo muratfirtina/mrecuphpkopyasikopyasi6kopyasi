@@ -81,6 +81,20 @@ try {
     error_log('Index.php - Latest products query error: ' . $e->getMessage());
 }
 
+// Hizmetlerimizi al
+try {
+    $stmt = $pdo->query("
+        SELECT * FROM services 
+        WHERE status = 'active' 
+        ORDER BY sort_order ASC, name ASC
+        LIMIT 6
+    ");
+    $services = $stmt->fetchAll();
+} catch (Exception $e) {
+    $services = [];
+    error_log('Index.php - Services query error: ' . $e->getMessage());
+}
+
 // Typewriter ayarları
 $typewriterEnabled = isset($designSettings['hero_typewriter_enable']) ? (bool)$designSettings['hero_typewriter_enable'] : true;
 $typewriterWords = isset($designSettings['hero_typewriter_words']) ? 
@@ -344,8 +358,8 @@ include 'includes/header.php';
                         $icon = 'fas fa-microchip';
                     } elseif (strpos($categoryName, 'immobilizer') !== false || strpos($categoryName, 'anahtar') !== false) {
                         $icon = 'fas fa-key';
-                    } elseif (strpos($categoryName, 'tcu') !== false || strpos($categoryName, 'şanzıman') !== false) {
-                        $icon = 'fas fa-cogs';
+                    } elseif (strpos($categoryName, 'emülatör') !== false || strpos($categoryName, 'şanzıman') !== false) {
+                        $icon = 'fas fa-car-rear';
                     } elseif (strpos($categoryName, 'dpf') !== false || strpos($categoryName, 'egr') !== false) {
                         $icon = 'fas fa-filter';
                     } elseif (strpos($categoryName, 'adblue') !== false) {
@@ -400,8 +414,8 @@ include 'includes/header.php';
                                     <div class="jet-box-icon">
                                         <i class="fas fa-upload"></i>
                                     </div>
-                                    <h4 class="jet-box-title">DOSYA</h4>
-                                    <h5 class="jet-box-subtitle">YÜKLEME</h5>
+                                    <h4 class="jet-box-title">DOSYA YÜKLEME</h4>
+                                    <h5 class="jet-box-subtitle"></h5>
                                 </div>
                                 <!-- Back Side (Siyah) -->
                                 <div class="flip-card-back">
@@ -427,6 +441,117 @@ include 'includes/header.php';
             </div>
         </div>
     </section>
+
+    <!-- Featured Products Section -->
+    <?php if (!empty($featuredProducts)): ?>
+    <section class="featured-products-section py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="display-5 fw-bold">Öne Çıkan Ürünlerimiz</h2>
+                    <p class="lead text-muted">En popüler ve kaliteli ECU ürünlerimizi keşfedin</p>
+                </div>
+            </div>
+            
+            <!-- Horizontal Scroll Container -->
+            <div class="featured-products-container">
+                <!-- Scroll Buttons -->
+                <button class="scroll-btn scroll-btn-left" id="scrollLeft" style="display: none;">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="scroll-btn scroll-btn-right" id="scrollRight">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                
+                <div class="featured-products-scroll" id="featuredProductsScroll">
+                    <?php 
+                    $delay = 0.1;
+                    foreach ($featuredProducts as $product): 
+                    ?>
+                    
+                    <div class="featured-product-item">
+                    <div class="featured-product-card" data-animation="fadeInUp" data-delay="<?php echo $delay; ?>">
+                        <div class="product-card-wrapper" onclick="window.location.href='<?php echo BASE_URL; ?>/product-detail.php?id=<?php echo $product['id']; ?>'" style="cursor: pointer;">
+                            <div class="product-image-container">
+                                <?php
+                                // Ürün görselini belirle ve düzelt
+                                $productImage = 'assets/images/default-product.svg'; // Varsayılan görsel
+                                
+                                if ($product['primary_image']) {
+                                    // Eğer görsel varsa path'i düzelt
+                                    $imagePath = $product['primary_image'];
+                                    
+                                    // Eğer path 'uploads/' ile başlamıyorsa ekle
+                                    if (!str_starts_with($imagePath, 'uploads/')) {
+                                        $imagePath = 'uploads/' . ltrim($imagePath, '/');
+                                    }
+                                    
+                                    // Tam URL oluştur
+                                    $productImage = BASE_URL . '/' . $imagePath;
+                                    
+                                    // Dosyanın gerçekten var olup olmadığını kontrol et
+                                    $fullPath = __DIR__ . '/' . $imagePath;
+                                    if (!file_exists($fullPath)) {
+                                        $productImage = BASE_URL . '/assets/images/default-product.svg';
+                                    }
+                                } else {
+                                    $productImage = BASE_URL . '/assets/images/default-product.svg';
+                                }
+                                ?>
+                                
+                                <img src="<?php echo htmlspecialchars($productImage); ?>" 
+                                     alt="<?php echo htmlspecialchars($product['name']); ?>" 
+                                     class="product-image"
+                                     onerror="this.src='<?php echo BASE_URL; ?>/assets/images/default-product.svg'">
+                                
+                                <!-- Product overlay with info -->
+                                <div class="product-overlay">
+                                    <div class="product-info">
+                                        <h5 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h5>
+                                        <?php if ($product['brand_name']): ?>
+                                            <p class="product-brand"><?php echo htmlspecialchars($product['brand_name']); ?></p>
+                                        <?php endif; ?>
+                                        <?php if ($product['category_name']): ?>
+                                            <p class="product-category"><?php echo htmlspecialchars($product['category_name']); ?></p>
+                                        <?php endif; ?>
+                                        
+                                        <!-- View Product Button -->
+                                        <a href="<?php echo BASE_URL; ?>/product-detail.php?id=<?php echo $product['id']; ?>" 
+                                           class="btn btn-light btn-sm product-view-btn"
+                                           onclick="event.stopPropagation();">
+                                            <i class="fas fa-eye me-1"></i>Detaylar
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <!-- Featured Badge -->
+                                <div class="featured-badge">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    
+                    <?php 
+                    $delay += 0.1;
+                    endforeach; 
+                    ?>
+                </div>
+            </div>
+            
+            <!-- View All Products Button -->
+            <div class="row mt-5">
+                <div class="col-12 text-center">
+                    <a href="<?php echo BASE_URL; ?>/products.php" 
+   class="btn btn-primary btn-lg px-5 custom-btn">
+    Tüm Ürünleri İnceleyin
+</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
 
     <!-- Features Section -->
     <section id="services" class="py-5">
@@ -719,6 +844,61 @@ include 'includes/footer.php';
 ?>
 
 <style>
+    
+/* Buton - Normal Durum */
+    .custom-btn {
+        background-color: #071e3d !important;
+        border-color: #071e3d !important;
+        color: white !important;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        box-shadow: 0 4px 12px rgba(7, 30, 61, 0.2);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        display: inline-block;
+    }
+
+    /* Hover - Arka Plan Rengi ve Gölge */
+    .custom-btn:hover:not(:disabled) {
+        background-color: #d32734 !important;
+        border-color: #d32734 !important;
+        color: white !important;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(184, 7, 21, 0.69);
+    }
+
+    /* Ripple Efekti için ::after */
+    .custom-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.7);
+        opacity: 0;
+        border-radius: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        transform-origin: center;
+        pointer-events: none;
+        z-index: -1;
+        transition: width 0.6s ease, height 0.6s ease, opacity 1s ease;
+    }
+
+    /* Hover'da Ripple Büyür */
+    .custom-btn:hover::after {
+        width: 250px;
+        height: 200px;
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    .custom-btn:focus {
+        outline: 2px solid #ff0000ff;
+        outline-offset: 2px;
+    }
 .typewriter-cursor {
     color: #ff6b35;
     animation: blink 1s infinite;
@@ -1087,6 +1267,13 @@ overflow: hidden;
 .flip-card-front {
     background: linear-gradient(135deg, #d32734 0%, #c82333 100%);
     color: white;
+     display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
+        padding: 20px;
+        box-sizing: border-box;
 }
 
 .flip-card-back {
@@ -1106,7 +1293,7 @@ overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
+    margin: 40px 0 20px 0;
     backdrop-filter: blur(10px);
     border: 2px solid rgba(255, 255, 255, 0.3);
 }
@@ -1119,10 +1306,11 @@ overflow: hidden;
 .jet-box-title {
     font-size: 1.2rem;
     font-weight: 800;
-    margin-bottom: 5px;
     text-transform: uppercase;
     letter-spacing: 2px;
     color: white;
+    white-space: normal !important;
+    margin-top: 30px;
 }
 
 .jet-box-subtitle {
@@ -1132,6 +1320,8 @@ overflow: hidden;
     letter-spacing: 1px;
     opacity: 0.9;
     color: white;
+    flex-shrink: 0; /* Alt başlık küçülmesin */
+    margin-top: auto !important;
 }
 
 .flip-back-title {
@@ -1294,6 +1484,399 @@ overflow: hidden;
         transition: transform 0.6s ease;
     }
 }
+
+/* Featured Products Section Styles */
+.featured-products-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.featured-products-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(220, 53, 69, 0.05) 0%, transparent 50%);
+    animation: rotate 20s linear infinite;
+    z-index: 1;
+}
+
+.featured-products-section .container {
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.featured-product-card {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+    height: 100%;
+}
+
+.featured-product-card.animate {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.product-card-wrapper {
+    height: 280px;
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s ease;
+    background: white;
+}
+
+.product-card-wrapper:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+.product-image-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 15px;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.4s ease;
+    background: #f8f9fa;
+}
+
+.product-card-wrapper:hover .product-image {
+    transform: scale(1.1);
+}
+
+.product-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.3) 60%,
+        rgba(0, 0, 0, 0.8) 100%
+    );
+    display: flex;
+    align-items: flex-end;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.product-card-wrapper:hover .product-overlay {
+    opacity: 1;
+}
+
+.product-info {
+    width: 100%;
+    text-align: left;
+    transform: translateY(20px);
+    transition: transform 0.4s ease 0.1s;
+}
+
+.product-card-wrapper:hover .product-info {
+    transform: translateY(0);
+}
+
+.product-title {
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    line-height: 1.2;
+}
+
+.product-brand {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.8rem;
+    margin-bottom: 3px;
+    font-weight: 500;
+}
+
+.product-category {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.7rem;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.product-view-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    color: #212529;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 8px 15px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.product-view-btn:hover {
+    background: white;
+    color: #dc3545;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.featured-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+    box-shadow: 0 3px 10px rgba(220, 53, 69, 0.4);
+    z-index: 3;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
+/* Responsive Featured Products */
+@media (max-width: 1200px) {
+    .product-card-wrapper {
+        height: 260px;
+    }
+    
+    .product-title {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .product-card-wrapper {
+        height: 240px;
+    }
+    
+    .product-overlay {
+        opacity: 1;
+        background: linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0.5) 60%,
+            rgba(0, 0, 0, 0.9) 100%
+        );
+    }
+    
+    .product-info {
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .product-card-wrapper {
+        height: 220px;
+    }
+    
+    .product-info {
+        padding: 0;
+    }
+    
+    .product-title {
+        font-size: 0.85rem;
+    }
+    
+    .product-brand {
+        font-size: 0.75rem;
+    }
+    
+    .product-category {
+        font-size: 0.65rem;
+    }
+    
+    .featured-badge {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .product-card-wrapper {
+        height: 200px;
+        margin-bottom: 20px;
+    }
+    
+    .product-overlay {
+        padding: 15px;
+    }
+    
+    .product-view-btn {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+    }
+}
+
+/* Horizontal Scroll Featured Products Styles */
+.featured-products-container {
+    position: relative;
+    padding: 0 60px;
+}
+
+.featured-products-scroll {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    padding: 10px 18px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.featured-products-scroll::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+}
+
+.featured-product-item {
+    flex: 0 0 240px;
+    height: 320px;
+}
+
+.scroll-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    color: #dc3545;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.scroll-btn:hover {
+    background: #dc3545;
+    color: white;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+}
+
+.scroll-btn:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.scroll-btn-left {
+    left: 10px;
+}
+
+.scroll-btn-right {
+    right: 10px;
+}
+
+/* Mobile adjustments for horizontal scroll */
+@media (max-width: 768px) {
+    .featured-products-container {
+        padding: 0 50px;
+    }
+    
+    .featured-product-item {
+        flex: 0 0 250px;
+        height: 280px;
+    }
+    
+    .scroll-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .scroll-btn-left {
+        left: 5px;
+    }
+    
+    .scroll-btn-right {
+        right: 5px;
+    }
+}
+
+@media (max-width: 576px) {
+    .featured-products-container {
+        padding: 0;
+    }
+    
+    .scroll-btn {
+        display: none !important;
+    }
+    
+    .featured-products-scroll {
+        padding: 10px 15px;
+    }
+    
+    .featured-product-item {
+        flex: 0 0 220px;
+        height: 260px;
+    }
+}
+
+/* Touch scrolling indicators */
+@media (hover: none) and (pointer: coarse) {
+    .featured-products-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(220, 53, 69, 0.5) transparent;
+    }
+    
+    .featured-products-scroll::-webkit-scrollbar {
+        display: block;
+        height: 4px;
+    }
+    
+    .featured-products-scroll::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+    
+    .featured-products-scroll::-webkit-scrollbar-thumb {
+        background: rgba(220, 53, 69, 0.5);
+        border-radius: 10px;
+    }
+}
 </style>
 
 <?php if ($typewriterEnabled && !empty($typewriterWords)): ?>
@@ -1369,6 +1952,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize Jet Animated Boxes
     initializeJetBoxes();
+    
+    // Initialize Featured Products Animation
+    initializeFeaturedProducts();
+    
+    // Initialize Featured Products Horizontal Scroll
+    initializeFeaturedProductsScroll();
 });
 
 // Chip Tuning Calculator JavaScript
@@ -1627,6 +2216,193 @@ function initializeJetBoxes() {
             });
         }
     });
+}
+
+// Featured Products Animation Function
+function initializeFeaturedProducts() {
+    // Intersection Observer for featured products animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                const productCard = entry.target;
+                const delay = parseFloat(productCard.dataset.delay) * 1000 || 0;
+                
+                setTimeout(() => {
+                    productCard.classList.add('animate');
+                }, delay);
+                
+                observer.unobserve(productCard);
+            }
+        });
+    }, observerOptions);
+    
+    // Observe all featured product cards
+    const featuredProductCards = document.querySelectorAll('.featured-product-card');
+    featuredProductCards.forEach((card) => {
+        observer.observe(card);
+    });
+    
+    // Add touch support for mobile devices
+    const productWrappers = document.querySelectorAll('.product-card-wrapper');
+    productWrappers.forEach(wrapper => {
+        // Handle touch events for better mobile experience
+        wrapper.addEventListener('touchstart', function(e) {
+            if (window.innerWidth <= 768) {
+                this.style.transform = 'translateY(-5px) scale(0.98)';
+            }
+        });
+        
+        wrapper.addEventListener('touchend', function(e) {
+            if (window.innerWidth <= 768) {
+                this.style.transform = 'translateY(-10px) scale(1)';
+            }
+        });
+        
+        wrapper.addEventListener('touchcancel', function(e) {
+            if (window.innerWidth <= 768) {
+                this.style.transform = 'translateY(0) scale(1)';
+            }
+        });
+    });
+}
+
+// Featured Products Horizontal Scroll Function
+function initializeFeaturedProductsScroll() {
+    const scrollContainer = document.getElementById('featuredProductsScroll');
+    const leftBtn = document.getElementById('scrollLeft');
+    const rightBtn = document.getElementById('scrollRight');
+    
+    if (!scrollContainer || !leftBtn || !rightBtn) {
+        return; // Elements not found
+    }
+    
+    // Scroll amount per click
+    const scrollAmount = 300;
+    
+    // Update button visibility based on scroll position
+    function updateButtonVisibility() {
+        const scrollLeft = scrollContainer.scrollLeft;
+        const maxScrollLeft = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+        
+        // Left button
+        if (scrollLeft <= 10) {
+            leftBtn.style.display = 'none';
+        } else {
+            leftBtn.style.display = 'block';
+        }
+        
+        // Right button
+        if (scrollLeft >= maxScrollLeft - 10) {
+            rightBtn.style.display = 'none';
+        } else {
+            rightBtn.style.display = 'block';
+        }
+    }
+    
+    // Initial button visibility check
+    updateButtonVisibility();
+    
+    // Scroll left button
+    leftBtn.addEventListener('click', () => {
+        scrollContainer.scrollBy({
+            left: -scrollAmount,
+            behavior: 'smooth'
+        });
+    });
+    
+    // Scroll right button
+    rightBtn.addEventListener('click', () => {
+        scrollContainer.scrollBy({
+            left: scrollAmount,
+            behavior: 'smooth'
+        });
+    });
+    
+    // Update buttons on scroll
+    scrollContainer.addEventListener('scroll', updateButtonVisibility);
+    
+    // Update buttons on resize
+    window.addEventListener('resize', updateButtonVisibility);
+    
+    // Touch/swipe support for mobile
+    let isDown = false;
+    let startX;
+    let scrollLeftStart;
+    
+    scrollContainer.addEventListener('mousedown', (e) => {
+        isDown = true;
+        scrollContainer.style.cursor = 'grabbing';
+        startX = e.pageX - scrollContainer.offsetLeft;
+        scrollLeftStart = scrollContainer.scrollLeft;
+        e.preventDefault();
+    });
+    
+    scrollContainer.addEventListener('mouseleave', () => {
+        isDown = false;
+        scrollContainer.style.cursor = 'grab';
+    });
+    
+    scrollContainer.addEventListener('mouseup', () => {
+        isDown = false;
+        scrollContainer.style.cursor = 'grab';
+    });
+    
+    scrollContainer.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - scrollContainer.offsetLeft;
+        const walk = (x - startX) * 2;
+        scrollContainer.scrollLeft = scrollLeftStart - walk;
+    });
+    
+    // Touch events for mobile
+    let touchStartX = 0;
+    let touchScrollStart = 0;
+    
+    scrollContainer.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchScrollStart = scrollContainer.scrollLeft;
+    }, { passive: true });
+    
+    scrollContainer.addEventListener('touchmove', (e) => {
+        if (!touchStartX) return;
+        
+        const touchCurrentX = e.touches[0].clientX;
+        const touchDiff = touchStartX - touchCurrentX;
+        scrollContainer.scrollLeft = touchScrollStart + touchDiff;
+    }, { passive: true });
+    
+    scrollContainer.addEventListener('touchend', () => {
+        touchStartX = 0;
+        touchScrollStart = 0;
+    }, { passive: true });
+    
+    // Keyboard support
+    scrollContainer.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            scrollContainer.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+            });
+        } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            scrollContainer.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    });
+    
+    // Make container focusable for keyboard navigation
+    scrollContainer.setAttribute('tabindex', '0');
+    scrollContainer.style.outline = 'none';
+    scrollContainer.style.cursor = 'grab';
 }
 </script>
 <?php endif; ?>

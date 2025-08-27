@@ -95,7 +95,7 @@ include 'includes/header.php';
 <style>
 /* Modern Hero Section with Background Image */
 .category-hero {
-    height: 375px;
+    height: 340px;
     position: relative;
     background-size: cover;
     background-position: center;
@@ -446,7 +446,7 @@ include 'includes/header.php';
         <div class="overlay"></div>
         <div class="container">
             <div class="row justify-content-center text-center">
-                <div class="col-lg-10" style="padding-top: 45px;">
+                <div class="col-lg-10">
                     <h1 class="category-title"><?php echo htmlspecialchars($category['name']); ?></h1>
                     <?php if ($category['description']): ?>
                         <p class="category-description">
