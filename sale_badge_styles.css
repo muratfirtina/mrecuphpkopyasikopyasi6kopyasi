@@ -1,0 +1,209 @@
+/* Sale Badge - İndirim Etiketi Styles */
+.sale-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 4;
+}
+
+.sale-ribbon {
+    position: relative;
+    background: linear-gradient(135deg, #d32734 0%, #b71c1c 100%);
+    width: 60px;
+    height: 90px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 8px 8px 0 0
+}
+
+/* Ribbon arrow/tail effect */
+.sale-ribbon::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-left: 30px solid #b71c1c;
+    border-right: 30px solid #b71c1c;
+    border-bottom: 30px solid transparent;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+/* Star icon */
+/* .sale-ribbon::before {
+    content: '★';
+    position: absolute;
+    top: 8px;
+    font-size: 16px;
+    color: white;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+} */
+
+/* Top line */
+.sale-text {
+    position: relative;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: -4px;
+    padding-top: 8px;
+}
+
+.sale-text::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: white;
+    border-radius: 1px;
+}
+
+/* Percentage */
+.sale-percentage {
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1;
+    margin-top: 5px;
+    position: relative;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Bottom line */
+.sale-percentage::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: white;
+    border-radius: 1px;
+}
+
+/* Responsive adjustments for sale badge */
+@media (max-width: 992px) {
+    .sale-badge {
+        width: 100px;
+        height: 120px;
+    }
+    
+    .sale-ribbon {
+        width: 100px;
+        height: 95px;
+    }
+    
+    .sale-ribbon::after {
+        border-left: 50px solid #b71c1c;
+        border-right: 50px solid #b71c1c;
+        border-bottom: 25px solid transparent;
+        bottom: -25px;
+    }
+    
+    .sale-text {
+        font-size: 12px;
+    }
+    
+    .sale-percentage {
+        font-size: 24px;
+    }
+    
+    .sale-text::before {
+        width: 50px;
+    }
+    
+    .sale-percentage::after {
+        width: 60px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sale-badge {
+        width: 85px;
+        height: 105px;
+        top: 10px;
+        left: 10px;
+    }
+    
+    .sale-ribbon {
+        width: 85px;
+        height: 85px;
+    }
+    
+    .sale-ribbon::before {
+        font-size: 14px;
+        top: 6px;
+    }
+    
+    .sale-ribbon::after {
+        border-left: 42.5px solid #b71c1c;
+        border-right: 42.5px solid #b71c1c;
+        border-bottom: 20px solid transparent;
+        bottom: -20px;
+    }
+    
+    .sale-text {
+        font-size: 10px;
+        margin-top: 6px;
+        padding-top: 6px;
+    }
+    
+    .sale-percentage {
+        font-size: 20px;
+    }
+    
+    .sale-text::before {
+        width: 40px;
+        height: 1.5px;
+    }
+    
+    .sale-percentage::after {
+        width: 50px;
+        height: 1.5px;
+    }
+}
+
+@media (max-width: 576px) {
+    .sale-badge {
+        width: 75px;
+        height: 95px;
+    }
+    
+    .sale-ribbon {
+        width: 75px;
+        height: 75px;
+    }
+    
+    .sale-ribbon::after {
+        border-left: 37.5px solid #b71c1c;
+        border-right: 37.5px solid #b71c1c;
+        border-bottom: 18px solid transparent;
+        bottom: -18px;
+    }
+    
+    .sale-text {
+        font-size: 9px;
+    }
+    
+    .sale-percentage {
+        font-size: 18px;
+    }
+}
+
+/* Featured badge position adjustment when sale badge is present */
+.product-image-container:has(.sale-badge) .featured-badge {
+    top: 15px;
+    right: 15px;
+    /* Keep featured badge on the right when sale badge is on the left */
+}

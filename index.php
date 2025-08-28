@@ -134,6 +134,10 @@ include 'includes/header.php';
         padding-top: 150px !important;
     }
     </style>
+    
+    <!-- Sale Badge CSS -->
+    <link rel="stylesheet" href="sale_badge_styles.css">
+    
     <section class="hero-slider" style="position: relative; min-height: 750px; z-index: 1040;">
         <?php if (!empty($sliders)): ?>
         <!-- DEBUG: Slider verilerini kontrol et -->
@@ -523,6 +527,29 @@ include 'includes/header.php';
                                         </a>
                                     </div>
                                 </div>
+                                
+                                <?php
+                                // İndirim hesaplama
+                                $hasDiscount = false;
+                                $discountPercentage = 0;
+                                
+                                if (isset($product['sale_price']) && isset($product['price']) && 
+                                    $product['sale_price'] > 0 && $product['price'] > 0 && 
+                                    $product['sale_price'] < $product['price']) {
+                                    $hasDiscount = true;
+                                    $discountPercentage = round((($product['price'] - $product['sale_price']) / $product['price']) * 100);
+                                }
+                                ?>
+                                
+                                <!-- Sale Badge - İndirim Etiketi -->
+                                <?php if ($hasDiscount): ?>
+                                <div class="sale-badge">
+                                    <div class="sale-ribbon">
+                                        <div class="sale-text">İNDİRİM</div>
+                                        <div class="sale-percentage"><?php echo $discountPercentage; ?>%</div>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
                                 
                                 <!-- Featured Badge -->
                                 <div class="featured-badge">
