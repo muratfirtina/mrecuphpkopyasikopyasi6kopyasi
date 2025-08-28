@@ -191,7 +191,7 @@ include 'includes/header.php';
                                 <?php if ($index === 0): ?>
                                     <!-- İlk Slider: Standart İçerik -->
                                     <div class="col-lg-8">
-                                        <h1 class="display-3 fw-bold mb-3 slide-title"><?php echo htmlspecialchars($slider['title']); ?></h1>
+                                        <h1 class="display-3 fw-bold mb-3 slide-title" style="font-weight: 600 !important;"><?php echo htmlspecialchars($slider['title']); ?></h1>
                                         
                                         <?php if ($typewriterEnabled): ?>
                                             <h2 class="display-5 fw-bold mb-4" style="background: linear-gradient(45deg, #e91c1cff, #fd6060ff, #ff5261ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
@@ -390,7 +390,7 @@ include 'includes/header.php';
                                             ? htmlspecialchars(substr($category['description'], 0, 100)) . '...' 
                                             : 'Bu kategorideki tüm ürünleri keşfedin ve ihtiyacınıza uygun çözümü bulun.'; ?>
                                     </p>
-                                    <a href="kategori/<?php echo urlencode($category['slug']); ?>" class="flip-back-link">
+                                    <a href="<?php echo BASE_URL; ?>/kategori/<?php echo urlencode($category['slug']); ?>" class="flip-back-link">
                                         İnceleyin <i class="fas fa-arrow-right"></i>
                                     </a>
                                 </div>
@@ -445,7 +445,7 @@ include 'includes/header.php';
     <!-- Featured Products Section -->
     <?php if (!empty($featuredProducts)): ?>
     <section class="featured-products-section py-5">
-        <div class="container" style="width: 1600px; margin: 0 230px; display: flex; flex-direction: column; align-items: center;">
+        <div class="container" style="display: flex; flex-direction: column; align-items: center;">
             <div class="row">
                 <div class="col-12 text-center mb-5" style="color: #d32734;">
                     <h2 class="display-5 fw-bold">Öne Çıkan Ürünlerimiz</h2>
@@ -471,7 +471,7 @@ include 'includes/header.php';
                     
                     <div class="featured-product-item">
                     <div class="featured-product-card" data-animation="fadeInUp" data-delay="<?php echo $delay; ?>">
-                        <div class="product-card-wrapper" onclick="window.location.href='<?php echo BASE_URL; ?>/product-detail.php?id=<?php echo $product['id']; ?>'" style="cursor: pointer;">
+                        <div class="product-card-wrapper" onclick="window.location.href='<?php echo BASE_URL; ?>/urun/<?php echo $product['slug']; ?>'" style="cursor: pointer;">
                             <div class="product-image-container">
                                 <?php
                                 // Ürün görselini belirle ve düzelt
@@ -516,7 +516,7 @@ include 'includes/header.php';
                                         <?php endif; ?>
                                         
                                         <!-- View Product Button -->
-                                        <a href="<?php echo BASE_URL; ?>/product-detail.php?id=<?php echo $product['id']; ?>" 
+                                        <a href="<?php echo BASE_URL; ?>/urun/<?php echo $product['slug']; ?>" 
                                            class="btn btn-light btn-sm product-view-btn"
                                            onclick="event.stopPropagation();">
                                             <i class="fas fa-eye me-1"></i>Detaylar
@@ -543,7 +543,7 @@ include 'includes/header.php';
             <!-- View All Products Button -->
             <div class="row mt-5">
                 <div class="col-12 text-center">
-                    <a href="<?php echo BASE_URL; ?>/products.php" 
+                    <a href="<?php echo BASE_URL; ?>/urunler" 
    class="btn btn-primary btn-lg px-5 custom-btn">
     Tüm Ürünleri İnceleyin
 </a>
@@ -1048,7 +1048,7 @@ overflow: hidden;
 }
 
 .slide-title {
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
     animation: slideInLeft 1s ease-out;
 }
 
@@ -1798,6 +1798,7 @@ overflow: hidden;
 .featured-products-container {
     position: relative;
     padding: 0 60px;
+    width: 1420px;
 }
 
 .featured-products-scroll {

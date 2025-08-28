@@ -27,7 +27,7 @@ function uploadProductImages($files, $productId) {
         mkdir($uploadDir, 0755, true);
     }
     
-    $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/avif'];
     $maxSize = 10 * 1024 * 1024; // 10MB
     
     foreach ($files['tmp_name'] as $index => $tmpName) {
@@ -81,12 +81,65 @@ function createSlug($text) {
     return $text;
 }
 
+// Otomatik SKU üretme fonksiyonu
+function generateUniqueSKU($pdo, $productName = '') {
+    // Ürün adından basit bir prefix oluştur
+    $prefix = '';
+    if (!empty($productName)) {
+        $words = explode(' ', $productName);
+        foreach ($words as $word) {
+            if (strlen($word) > 0) {
+                $prefix .= strtoupper(substr($word, 0, 1));
+            }
+            if (strlen($prefix) >= 3) break;
+        }
+    }
+    
+    if (empty($prefix)) {
+        $prefix = 'PRD';
+    }
+    
+    // Benzersiz SKU bulana kadar dene
+    $attempts = 0;
+    do {
+        $randomNumber = str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
+        $sku = $prefix . '-' . $randomNumber;
+        
+        // Bu SKU kullanılıyor mu kontrol et
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM products WHERE sku = ?");
+        $stmt->execute([$sku]);
+        $exists = $stmt->fetchColumn() > 0;
+        
+        $attempts++;
+        if ($attempts > 100) {
+            // Çok fazla deneme yapıldı, timestamp ekle
+            $sku = $prefix . '-' . time() . '-' . mt_rand(100, 999);
+            break;
+        }
+    } while ($exists);
+    
+    return $sku;
+}
+
 // Ürün ekleme
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
     $name = sanitize($_POST['name']);
     $shortDescription = sanitize($_POST['short_description']);
     $description = $_POST['description']; // HTML içerik olabilir
     $sku = sanitize($_POST['sku']);
+    
+    // SKU boşsa otomatik üret
+    if (empty($sku)) {
+        $sku = generateUniqueSKU($pdo, $name);
+    } else {
+        // Kullanıcı SKU girdi, duplicate kontrolu yap
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM products WHERE sku = ?");
+        $stmt->execute([$sku]);
+        if ($stmt->fetchColumn() > 0) {
+            $error = 'Bu SKU zaten kullanılmakta. Lütfen farklı bir SKU girin veya boş bırakın (otomatik üretilir).';
+        }
+    }
+    
     $price = floatval($_POST['price']);
     $salePrice = !empty($_POST['sale_price']) ? floatval($_POST['sale_price']) : null;
     $stockQuantity = intval($_POST['stock_quantity']);
@@ -102,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
     
     if (empty($name)) {
         $error = 'Ürün adı zorunludur.';
-    } else {
+    } elseif (empty($error)) {
         try {
             $pdo->beginTransaction();
             
@@ -143,20 +196,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_product'])) {
     $shortDescription = sanitize($_POST['short_description']);
     $description = $_POST['description']; // HTML içerik olabilir
     $sku = sanitize($_POST['sku']);
-    $price = floatval($_POST['price']);
-    $salePrice = !empty($_POST['sale_price']) ? floatval($_POST['sale_price']) : null;
-    $stockQuantity = intval($_POST['stock_quantity']);
-    $categoryId = !empty($_POST['category_id']) ? sanitize($_POST['category_id']) : null;
-    $brandId = !empty($_POST['brand_id']) ? sanitize($_POST['brand_id']) : null;
-    $weight = !empty($_POST['weight']) ? floatval($_POST['weight']) : null;
-    $dimensions = sanitize($_POST['dimensions']);
-    $metaTitle = sanitize($_POST['meta_title']);
-    $metaDescription = sanitize($_POST['meta_description']);
-    $isFeatured = isset($_POST['featured']) ? 1 : 0;
-    $isActive = isset($_POST['is_active']) ? 1 : 0;
-    $sortOrder = intval($_POST['sort_order']);
     
-    try {
+    // SKU boşsa otomatik üret
+    if (empty($sku)) {
+        $sku = generateUniqueSKU($pdo, $name);
+    } else {
+        // Kullanıcı SKU girdi, duplicate kontrolu yap (mevcut ürün hariç)
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM products WHERE sku = ? AND id != ?");
+        $stmt->execute([$sku, $productId]);
+        if ($stmt->fetchColumn() > 0) {
+            $error = 'Bu SKU zaten başka bir ürün tarafından kullanılmakta. Lütfen farklı bir SKU girin veya boş bırakın (otomatik üretilir).';
+        }
+    }
+    
+    if (empty($error)) {
+        $price = floatval($_POST['price']);
+        $salePrice = !empty($_POST['sale_price']) ? floatval($_POST['sale_price']) : null;
+        $stockQuantity = intval($_POST['stock_quantity']);
+        $categoryId = !empty($_POST['category_id']) ? sanitize($_POST['category_id']) : null;
+        $brandId = !empty($_POST['brand_id']) ? sanitize($_POST['brand_id']) : null;
+        $weight = !empty($_POST['weight']) ? floatval($_POST['weight']) : null;
+        $dimensions = sanitize($_POST['dimensions']);
+        $metaTitle = sanitize($_POST['meta_title']);
+        $metaDescription = sanitize($_POST['meta_description']);
+        $isFeatured = isset($_POST['featured']) ? 1 : 0;
+        $isActive = isset($_POST['is_active']) ? 1 : 0;
+        $sortOrder = intval($_POST['sort_order']);
+        
+        try {
         $pdo->beginTransaction();
         
         $slug = createSlug($name);
@@ -179,9 +246,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_product'])) {
         if ($result) {
             $success = 'Ürün güncellendi.';
         }
-    } catch(Exception $e) {
-        $pdo->rollBack();
-        $error = 'Ürün güncellenirken hata oluştu: ' . $e->getMessage();
+        } catch(Exception $e) {
+            $pdo->rollBack();
+            $error = 'Ürün güncellenirken hata oluştu: ' . $e->getMessage();
+        }
     }
 }
 
@@ -793,10 +861,11 @@ include '../includes/admin_sidebar.php';
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="mb-3">
-                                        <label for="sku" class="form-label">SKU</label>
-                                        <input type="text" class="form-control" name="sku" 
-                                               placeholder="Ürün kodu">
-                                    </div>
+                                    <label for="sku" class="form-label">SKU</label>
+                                    <input type="text" class="form-control" name="sku" 
+                                    placeholder="Boş bırakırsanız otomatik üretilir">
+                                        <div class="form-text">Boş bırakırsanız ürün adına göre otomatik SKU üretilir (Örn: PRD-12345)</div>
+                            </div>
                                 </div>
                             </div>
                             
