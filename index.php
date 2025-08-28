@@ -73,7 +73,6 @@ try {
         LEFT JOIN product_brands pb ON p.brand_id = pb.id
         WHERE p.is_active = 1
         ORDER BY p.created_at DESC
-        LIMIT 6
     ");
     $latestProducts = $stmt->fetchAll();
 } catch (Exception $e) {
@@ -87,7 +86,6 @@ try {
         SELECT * FROM services 
         WHERE status = 'active' 
         ORDER BY sort_order ASC, name ASC
-        LIMIT 6
     ");
     $services = $stmt->fetchAll();
 } catch (Exception $e) {
@@ -803,11 +801,11 @@ include 'includes/header.php';
                 <?php endforeach; ?>
             </div>
             
-            <?php if (count($services) > 6): ?>
+            <?php if (count($services) >= 9): // Çok fazla service varsa ayrı sayfa linki göster ?>
             <div class="row mt-5">
                 <div class="col-12 text-center">
                     <a href="<?php echo BASE_URL; ?>/services.php" class="btn btn-outline-primary btn-lg px-5">
-                        <i class="fas fa-list me-2"></i>Tüm Hizmetlerimizi Görüntüle
+                        <i class="fas fa-list me-2"></i>Detaylı Hizmet Sayfası
                     </a>
                 </div>
             </div>
