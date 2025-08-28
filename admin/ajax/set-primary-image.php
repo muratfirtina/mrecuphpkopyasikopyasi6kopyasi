@@ -1,6 +1,6 @@
 <?php
 /**
- * AJAX - Ana Resim Belirle
+ * AJAX - Ana Resim Belirleme
  */
 
 header('Content-Type: application/json');
@@ -15,21 +15,19 @@ if (!isLoggedIn() || !isAdmin()) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['success' => false, 'message' => 'Geçersiz istek']);
-    exit;
-}
-
-$imageId = isset($_POST['image_id']) ? intval($_POST['image_id']) : 0;
-
-if ($imageId <= 0) {
-    echo json_encode(['success' => false, 'message' => 'Geçersiz resim ID']);
+    echo json_encode(['success' => false, 'message' => 'Sadece POST istekleri kabul edilir']);
     exit;
 }
 
 try {
-    $pdo->beginTransaction();
+    $imageId = intval($_POST['image_id'] ?? 0);
     
-    // Resim bilgilerini getir
+    if ($imageId <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Geçersiz resim ID']);
+        exit;
+    }
+    
+    // Resmin var olduğunu ve ürün ID'sini al
     $stmt = $pdo->prepare("SELECT product_id FROM product_images WHERE id = ?");
     $stmt->execute([$imageId]);
     $image = $stmt->fetch();
@@ -39,9 +37,14 @@ try {
         exit;
     }
     
-    // Önce tüm resimleri ana olmaktan çıkar
+    $productId = $image['product_id'];
+    
+    // Transaction başlat
+    $pdo->beginTransaction();
+    
+    // Bu ürünün tüm resimlerini ana resim olmaktan çıkar
     $stmt = $pdo->prepare("UPDATE product_images SET is_primary = 0 WHERE product_id = ?");
-    $stmt->execute([$image['product_id']]);
+    $stmt->execute([$productId]);
     
     // Seçilen resmi ana resim yap
     $stmt = $pdo->prepare("UPDATE product_images SET is_primary = 1 WHERE id = ?");
@@ -49,13 +52,12 @@ try {
     
     $pdo->commit();
     
-    echo json_encode([
-        'success' => true,
-        'message' => 'Ana resim güncellendi'
-    ]);
+    echo json_encode(['success' => true, 'message' => 'Ana resim başarıyla belirlendi']);
     
 } catch (Exception $e) {
-    $pdo->rollBack();
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     echo json_encode(['success' => false, 'message' => 'Hata: ' . $e->getMessage()]);
 }
 ?>

@@ -81,6 +81,37 @@ function createSlug($text) {
     return $text;
 }
 
+// Benzersiz slug oluşturma fonksiyonu
+function createUniqueSlug($pdo, $text, $excludeId = null) {
+    $baseSlug = createSlug($text);
+    $slug = $baseSlug;
+    $counter = 1;
+    
+    // Benzersiz slug bulana kadar dene
+    while (!isSlugUnique($pdo, $slug, $excludeId)) {
+        $slug = $baseSlug . '-' . $counter;
+        $counter++;
+    }
+    
+    return $slug;
+}
+
+// Slug benzersizlik kontrolü
+function isSlugUnique($pdo, $slug, $excludeId = null) {
+    $sql = "SELECT id FROM products WHERE slug = ?";
+    $params = [$slug];
+    
+    if ($excludeId) {
+        $sql .= " AND id != ?";
+        $params[] = $excludeId;
+    }
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    
+    return $stmt->fetch() === false;
+}
+
 // Otomatik SKU üretme fonksiyonu
 function generateUniqueSKU($pdo, $productName = '') {
     // Ürün adından basit bir prefix oluştur
@@ -159,8 +190,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
         try {
             $pdo->beginTransaction();
             
-            // Slug oluştur
-            $slug = createSlug($name);
+            // Benzersiz slug oluştur
+            $slug = createUniqueSlug($pdo, $name);
             
             // Ürün ekle
             $stmt = $pdo->prepare("INSERT INTO products (name, slug, description, short_description, sku, price, sale_price, stock_quantity, category_id, brand_id, weight, dimensions, featured, is_active, sort_order, meta_title, meta_description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -226,7 +257,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_product'])) {
         try {
         $pdo->beginTransaction();
         
-        $slug = createSlug($name);
+        // Benzersiz slug oluştur (mevcut ürün ID'si hariç)
+        $slug = createUniqueSlug($pdo, $name, $productId);
         
         $stmt = $pdo->prepare("UPDATE products SET name = ?, slug = ?, description = ?, short_description = ?, sku = ?, price = ?, sale_price = ?, stock_quantity = ?, category_id = ?, brand_id = ?, weight = ?, dimensions = ?, featured = ?, is_active = ?, sort_order = ?, meta_title = ?, meta_description = ? WHERE id = ?");
         $result = $stmt->execute([$name, $slug, $description, $shortDescription, $sku, $price, $salePrice, $stockQuantity, $categoryId, $brandId, $weight, $dimensions, $isFeatured, $isActive, $sortOrder, $metaTitle, $metaDescription, $productId]);
@@ -825,73 +857,50 @@ include '../includes/admin_sidebar.php';
             </div>
             <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
+                    <!-- Temel Bilgiler -->
                     <div class="row">
-                        <div class="col-md-8">
-                            <h6 class="mb-3">Ürün Bilgileri</h6>
-                            
+                        <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="name" class="form-label">Ürün Adı <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="name" required>
+                                <label for="add_name" class="form-label">Ürün Adı <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="name" id="add_name" required>
                             </div>
                             
                             <div class="mb-3">
-                                <label for="short_description" class="form-label">Kısa Açıklama</label>
-                                <textarea class="form-control" name="short_description" rows="2" 
-                                          placeholder="Ürün listelerinde gösterilecek kısa açıklama"></textarea>
+                                <label for="add_sku" class="form-label">SKU (Stok Kodu)</label>
+                                <input type="text" class="form-control" name="sku" id="add_sku" placeholder="Boş bırakırsanız otomatik üretilir">
+                                <div class="form-text">Boş bırakırsanız ürün adına göre otomatik SKU üretilir (Örn: PRD-12345)</div>
                             </div>
                             
                             <div class="mb-3">
-                                <label for="description" class="form-label">Detaylı Açıklama</label>
-                                <textarea class="form-control" name="description" id="add_description" rows="8"
-                                          placeholder="Ürün sayfasında gösterilecek detaylı açıklama. HTML kullanabilirsiniz."></textarea>
-                                <div class="form-text">HTML etiketleri kullanabilirsiniz. Resimleri drag & drop ile ekleyebilirsiniz.</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="product_images" class="form-label">Ürün Resimleri</label>
-                                <input type="file" class="form-control" name="product_images[]" 
-                                       multiple accept="image/*">
-                                <div class="form-text">Birden fazla resim seçebilirsiniz. İlk resim ana resim olacaktır. Maksimum 10MB per dosya.</div>
+                                <label for="add_short_description" class="form-label">Kısa Açıklama</label>
+                                <textarea class="form-control" name="short_description" id="add_short_description" rows="3"></textarea>
                             </div>
                         </div>
                         
-                        <div class="col-md-4">
-                            <h6 class="mb-3">Ürün Özellikleri</h6>
-                            
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="mb-3">
-                                    <label for="sku" class="form-label">SKU</label>
-                                    <input type="text" class="form-control" name="sku" 
-                                    placeholder="Boş bırakırsanız otomatik üretilir">
-                                        <div class="form-text">Boş bırakırsanız ürün adına göre otomatik SKU üretilir (Örn: PRD-12345)</div>
-                            </div>
-                                </div>
-                            </div>
-                            
+                        <div class="col-md-6">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="price" class="form-label">Fiyat (TL) <span class="text-danger">*</span></label>
-                                        <input type="number" class="form-control" name="price" step="0.01" min="0" required>
+                                        <label for="add_price" class="form-label">Fiyat (TL) <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" name="price" id="add_price" step="0.01" min="0" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="sale_price" class="form-label">İndirimli Fiyat</label>
-                                        <input type="number" class="form-control" name="sale_price" step="0.01" min="0">
+                                        <label for="add_sale_price" class="form-label">İndirimli Fiyat (TL)</label>
+                                        <input type="number" class="form-control" name="sale_price" id="add_sale_price" step="0.01" min="0">
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="mb-3">
-                                <label for="stock_quantity" class="form-label">Stok Miktarı</label>
-                                <input type="number" class="form-control" name="stock_quantity" value="0" min="0">
+                                <label for="add_stock_quantity" class="form-label">Stok Miktarı</label>
+                                <input type="number" class="form-control" name="stock_quantity" id="add_stock_quantity" value="0" min="0">
                             </div>
                             
                             <div class="mb-3">
-                                <label for="category_id" class="form-label">Kategori</label>
-                                <select class="form-select" name="category_id">
+                                <label for="add_category_id" class="form-label">Kategori</label>
+                                <select class="form-select" name="category_id" id="add_category_id">
                                     <option value="">Kategori Seçin</option>
                                     <?php foreach ($categories as $category): ?>
                                         <option value="<?php echo $category['id']; ?>">
@@ -902,8 +911,8 @@ include '../includes/admin_sidebar.php';
                             </div>
                             
                             <div class="mb-3">
-                                <label for="brand_id" class="form-label">Marka</label>
-                                <select class="form-select" name="brand_id">
+                                <label for="add_brand_id" class="form-label">Marka</label>
+                                <select class="form-select" name="brand_id" id="add_brand_id">
                                     <option value="">Marka Seçin</option>
                                     <?php foreach ($brands as $brand): ?>
                                         <option value="<?php echo $brand['id']; ?>">
@@ -912,38 +921,65 @@ include '../includes/admin_sidebar.php';
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="weight" class="form-label">Ağırlık (kg)</label>
-                                        <input type="number" class="form-control" name="weight" step="0.01" min="0">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="sort_order" class="form-label">Sıralama</label>
-                                        <input type="number" class="form-control" name="sort_order" value="0" min="0">
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Açıklama -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="add_description" class="form-label">Detaylı Açıklama</label>
+                                <textarea class="form-control" name="description" id="add_description" rows="8"></textarea>
+                                <div class="form-text">HTML etiketleri kullanabilirsiniz. Resimleri drag & drop ile ekleyebilirsiniz.</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ek Bilgiler -->
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="add_weight" class="form-label">Ağırlık (kg)</label>
+                                <input type="number" class="form-control" name="weight" id="add_weight" step="0.01" min="0">
                             </div>
                             
                             <div class="mb-3">
-                                <label for="dimensions" class="form-label">Boyutlar</label>
-                                <input type="text" class="form-control" name="dimensions" 
-                                       placeholder="Örn: 10x20x30 cm">
+                                <label for="add_dimensions" class="form-label">Boyutlar</label>
+                                <input type="text" class="form-control" name="dimensions" id="add_dimensions" placeholder="Örn: 10x20x30 cm">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="add_sort_order" class="form-label">Sıralama</label>
+                                <input type="number" class="form-control" name="sort_order" id="add_sort_order" value="0" min="0">
                             </div>
                             
                             <div class="mb-3">
                                 <label class="form-label">Durum Ayarları</label>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="is_active" checked>
-                                    <label class="form-check-label">Aktif</label>
+                                    <input class="form-check-input" type="checkbox" name="is_active" id="add_is_active" checked>
+                                    <label class="form-check-label" for="add_is_active">Aktif</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="featured">
-                                    <label class="form-check-label">Öne Çıkan</label>
+                                    <input class="form-check-input" type="checkbox" name="featured" id="add_featured">
+                                    <label class="form-check-label" for="add_featured">Öne Çıkan</label>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ürün Resimleri -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6 class="mb-3">
+                                <i class="fas fa-images me-2"></i>Ürün Resimleri
+                            </h6>
+                            <div class="mb-3">
+                                <label for="add_product_images" class="form-label">Resim Dosyaları</label>
+                                <input type="file" class="form-control" name="product_images[]" id="add_product_images"
+                                       multiple accept="image/*">
+                                <div class="form-text">Birden fazla resim seçebilirsiniz. İlk resim ana resim olacaktır. Maksimum 10MB per dosya.</div>
                             </div>
                         </div>
                     </div>
@@ -955,15 +991,15 @@ include '../includes/admin_sidebar.php';
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="meta_title" class="form-label">Meta Başlık</label>
-                                        <input type="text" class="form-control" name="meta_title" maxlength="255">
+                                        <label for="add_meta_title" class="form-label">Meta Başlık</label>
+                                        <input type="text" class="form-control" name="meta_title" id="add_meta_title" maxlength="255">
                                         <div class="form-text">Arama motorları için sayfa başlığı</div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="meta_description" class="form-label">Meta Açıklama</label>
-                                        <textarea class="form-control" name="meta_description" rows="3" maxlength="160"></textarea>
+                                        <label for="add_meta_description" class="form-label">Meta Açıklama</label>
+                                        <textarea class="form-control" name="meta_description" id="add_meta_description" rows="3" maxlength="160"></textarea>
                                         <div class="form-text">Arama motorları için sayfa açıklaması (160 karakter)</div>
                                     </div>
                                 </div>
