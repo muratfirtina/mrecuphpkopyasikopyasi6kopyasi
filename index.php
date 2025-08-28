@@ -373,7 +373,7 @@ include 'includes/header.php';
                 
                 <div class="col-lg-3 col-md-6">
                     <div class="jet-box" data-animation="fadeInUp" data-delay="<?php echo $delay; ?>">
-                        <div class="flip-card">
+                        <div class="flip-card" onclick="window.location.href='<?php echo BASE_URL; ?>/kategori/<?php echo urlencode($category['slug']); ?>'" style="cursor: pointer;">
                             <div class="flip-card-inner">
                                 <!-- Front Side (Kırmızı) -->
                                 <div class="flip-card-front">
@@ -392,7 +392,7 @@ include 'includes/header.php';
                                             ? htmlspecialchars(substr($category['description'], 0, 100)) . '...' 
                                             : 'Bu kategorideki tüm ürünleri keşfedin ve ihtiyacınıza uygun çözümü bulun.'; ?>
                                     </p>
-                                    <a href="<?php echo BASE_URL; ?>/kategori/<?php echo urlencode($category['slug']); ?>" class="flip-back-link">
+                                    <a href="<?php echo BASE_URL; ?>/kategori/<?php echo urlencode($category['slug']); ?>" class="flip-back-link" onclick="event.stopPropagation();">
                                         İnceleyin <i class="fas fa-arrow-right"></i>
                                     </a>
                                 </div>
@@ -409,7 +409,10 @@ include 'includes/header.php';
                 <!-- Upload Card (4. kart) -->
                 <div class="col-lg-3 col-md-6">
                     <div class="jet-box" data-animation="fadeInUp" data-delay="0.4">
-                        <div class="flip-card">
+                        <?php 
+                        $uploadUrl = (function_exists('isLoggedIn') && isLoggedIn()) ? 'user/upload.php' : 'register.php';
+                        ?>
+                        <div class="flip-card" onclick="window.location.href='<?php echo $uploadUrl; ?>'" style="cursor: pointer;">
                             <div class="flip-card-inner">
                                 <!-- Front Side (Kırmızı) -->
                                 <div class="flip-card-front">
@@ -427,11 +430,11 @@ include 'includes/header.php';
                                         ECU dosyanızı güvenli şekilde yükleyin ve profesyonel işleme için gönderiniz.
                                     </p>
                                     <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
-                                        <a href="user/upload.php" class="flip-back-link">
+                                        <a href="user/upload.php" class="flip-back-link" onclick="event.stopPropagation();">
                                             Yükleyin <i class="fas fa-cloud-upload-alt"></i>
                                         </a>
                                     <?php else: ?>
-                                        <a href="register.php" class="flip-back-link">
+                                        <a href="register.php" class="flip-back-link" onclick="event.stopPropagation();">
                                             REGISTER & UPLOAD <i class="fas fa-user-plus"></i>
                                         </a>
                                     <?php endif; ?>
@@ -673,7 +676,7 @@ include 'includes/header.php';
                         $serviceImageUrl = htmlspecialchars($service['icon_picture']);
                     }
                 ?>
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <div class="service-card-wrapper h-100 position-relative overflow-hidden rounded shadow-sm">
                         <!-- Background Image -->
                         <?php if ($serviceImageUrl): ?>
@@ -804,8 +807,8 @@ include 'includes/header.php';
             <?php if (count($services) >= 9): // Çok fazla service varsa ayrı sayfa linki göster ?>
             <div class="row mt-5">
                 <div class="col-12 text-center">
-                    <a href="<?php echo BASE_URL; ?>/services.php" class="btn btn-outline-primary btn-lg px-5">
-                        <i class="fas fa-list me-2"></i>Detaylı Hizmet Sayfası
+                    <a href="<?php echo BASE_URL; ?>/services.php" class="btn btn-primary btn-lg px-5 custom-btn">
+                        <i class="fas fa-list me-2"></i>Tüm Hizmetlerimiz
                     </a>
                 </div>
             </div>
