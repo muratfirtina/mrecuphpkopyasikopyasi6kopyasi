@@ -666,56 +666,137 @@ include 'includes/header.php';
                 
                 foreach ($services as $index => $service): 
                     $defaultIcon = $serviceIcons[$index % count($serviceIcons)];
+                    
+                    // Service image'ı belirle
+                    $serviceImageUrl = '';
+                    if (!empty($service['image'])) {
+                        $serviceImageUrl = htmlspecialchars($service['image']);
+                    } elseif (!empty($service['icon_picture'])) {
+                        $serviceImageUrl = htmlspecialchars($service['icon_picture']);
+                    }
                 ?>
-                <div class="col-lg-4 col-md-6">
-                    <div class="service-card h-100 border-0 shadow-sm bg-white rounded transition-all">
-                        <div class="card-body p-4 text-center">
-                            <?php if (!empty($service['image'])): ?>
-                                <div class="service-image-container mb-3">
-                                    <img src="<?php echo htmlspecialchars($service['image']); ?>" 
-                                         alt="<?php echo htmlspecialchars($service['name']); ?>" 
-                                         class="service-image rounded"
-                                         style="max-width: 80px; max-height: 80px; object-fit: cover;">
-                                </div>
-                            <?php elseif (!empty($service['icon_picture'])): ?>
-                                <div class="service-image-container mb-3">
+                <div class="col-lg-3 col-md-6">
+                    <div class="service-card-wrapper h-100 position-relative overflow-hidden rounded shadow-sm">
+                        <!-- Background Image -->
+                        <?php if ($serviceImageUrl): ?>
+                            <div class="service-background-image" 
+                                 style="background-image: url('<?php echo $serviceImageUrl; ?>'); 
+                                        background-size: cover; 
+                                        background-position: center; 
+                                        position: absolute; 
+                                        top: 0; 
+                                        left: 0; 
+                                        width: 100%; 
+                                        height: 100%; 
+                                        z-index: 1;"></div>
+                            <!-- Overlay -->
+                            <div class="service-overlay" 
+                                 style="position: absolute; 
+                                        top: 0; 
+                                        left: 0; 
+                                        width: 100%; 
+                                        height: 100%; 
+                                        background: linear-gradient(45deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.1) 100%); 
+                                        z-index: 2;"></div>
+                        <?php else: ?>
+                            <!-- Default background with icon -->
+                            <div class="service-default-background" 
+                                 style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); 
+                                        position: absolute; 
+                                        top: 0; 
+                                        left: 0; 
+                                        width: 100%; 
+                                        height: 100%; 
+                                        z-index: 1; 
+                                        display: flex; 
+                                        align-items: center; 
+                                        justify-content: center;">
+                                <i class="<?php echo htmlspecialchars($service['icon'] ?? $defaultIcon); ?> text-white" 
+                                   style="font-size: 8rem; opacity: 0.3;"></i>
+                            </div>
+                            <!-- Overlay -->
+                            <div class="service-overlay" 
+                                 style="position: absolute; 
+                                        top: 0; 
+                                        left: 0; 
+                                        width: 100%; 
+                                        height: 100%; 
+                                        background: linear-gradient(45deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 70%, rgba(0,0,0,0) 100%); 
+                                        z-index: 2;"></div>
+                        <?php endif; ?>
+                        
+                        <!-- Content Container -->
+                        <div class="service-content" 
+                             style="position: absolute; 
+                                    bottom: 0; 
+                                    left: 0; 
+                                    right: 0; 
+                                    padding: 20px; 
+                                    z-index: 3; 
+                                    color: white; 
+                                    height: 100%; 
+                                    display: flex; 
+                                    flex-direction: column; 
+                                    justify-content: flex-end;">
+                            
+                            <!-- Service Icon Picture (küçük) -->
+                            <?php if (!empty($service['icon_picture'])): ?>
+                                <div class="service-icon-small mb-2">
                                     <img src="<?php echo htmlspecialchars($service['icon_picture']); ?>" 
                                          alt="<?php echo htmlspecialchars($service['name']); ?>" 
-                                         class="service-image rounded"
-                                         style="max-width: 80px; max-height: 80px; object-fit: cover;">
+                                         style="width: 70px; height: 70px; object-fit: cover;">
                                 </div>
                             <?php elseif (!empty($service['icon'])): ?>
-                                <div class="service-icon-container mb-3">
-                                    <i class="<?php echo htmlspecialchars($service['icon']); ?> text-primary" 
-                                       style="font-size: 3rem;"></i>
+                                <div class="service-icon-small mb-2">
+                                    <i class="<?php echo htmlspecialchars($service['icon']); ?> text-white" 
+                                       style="font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></i>
                                 </div>
                             <?php else: ?>
-                                <div class="service-icon-container mb-3">
-                                    <i class="<?php echo $defaultIcon; ?> text-primary" style="font-size: 3rem;"></i>
+                                <div class="service-icon-small mb-2">
+                                    <i class="<?php echo $defaultIcon; ?> text-white" 
+                                       style="font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></i>
                                 </div>
                             <?php endif; ?>
                             
-                            <h5 class="card-title mb-3">
+                            <!-- Service Name -->
+                            <h5 class="service-title mb-2" 
+                                style="color: white; 
+                                       font-weight: 600; 
+                                       font-size: 1.1rem; 
+                                       text-shadow: 0 2px 4px rgba(0,0,0,0.3); 
+                                       margin: 0;">
                                 <?php echo htmlspecialchars($service['name']); ?>
                             </h5>
                             
-                            <p class="card-text text-muted mb-4">
-                                <?php echo htmlspecialchars(substr($service['description'], 0, 120)) . (strlen($service['description']) > 120 ? '...' : ''); ?>
+                            <!-- Service Description -->
+                            <p class="service-description mb-3" 
+                               style="color: rgba(255,255,255,0.9); 
+                                      font-size: 0.9rem; 
+                                      line-height: 1.4; 
+                                      text-shadow: 0 1px 2px rgba(0,0,0,0.3); 
+                                      margin: 0;">
+                                <?php echo htmlspecialchars(substr($service['description'], 0, 100)) . (strlen($service['description']) > 100 ? '...' : ''); ?>
                             </p>
                             
-                            <?php if (!empty($service['price_from'])): ?>
-                                <div class="service-price mb-3">
-                                    <small class="text-primary fw-bold">
-                                        <i class="fas fa-tag me-1"></i>
-                                        <?php echo number_format($service['price_from'], 0); ?> TL'den başlar
-                                    </small>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <a href="<?php echo BASE_URL; ?>/hizmet/<?php echo urlencode($service['slug']); ?>" 
-                               class="btn btn-primary btn-sm px-4">
-                                <i class="fas fa-info-circle me-2"></i>Detaylar
-                            </a>
+                            <!-- Price and Button Container -->
+                            <div class="service-footer" style="margin-top: auto;">
+                                <?php if (!empty($service['price_from'])): ?>
+                                    <div class="service-price mb-2">
+                                        <small style="color: #ffc107; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
+                                            <i class="fas fa-tag me-1"></i>
+                                            <?php echo number_format($service['price_from'], 0); ?> TL'den başlar
+                                        </small>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <a href="<?php echo BASE_URL; ?>/hizmet/<?php echo urlencode($service['slug']); ?>" 
+                                   class="btn btn-light btn-sm px-3 py-2" 
+                                   style="font-size: 0.85rem; font-weight: 500; border-radius: 20px; transition: all 0.3s ease;" 
+                                   onmouseover="this.style.background='#dc3545'; this.style.color='white'; this.style.transform='translateY(-2px)';" 
+                                   onmouseout="this.style.background='white'; this.style.color='#212529'; this.style.transform='translateY(0)';">
+                                    <i class="fas fa-info-circle me-1"></i>Detaylar
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1140,6 +1221,103 @@ overflow: hidden;
     box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
 }
 
+/* Yeni Service Card Stili */
+.service-card-wrapper {
+    background: white;
+    border-radius: 15px;
+    transition: all 0.4s ease;
+    border: 1px solid rgba(0,0,0,0.1);
+    height: 350px;
+    min-height: 350px;
+    cursor: pointer;
+}
+
+.service-card-wrapper:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+.service-card-wrapper:hover .service-background-image {
+    transform: scale(1.1);
+}
+
+.service-card-wrapper:hover .service-default-background {
+    transform: scale(1.05);
+}
+
+.service-background-image {
+    transition: transform 0.4s ease;
+}
+
+.service-default-background {
+    transition: transform 0.4s ease;
+}
+
+.service-content {
+    transition: all 0.3s ease;
+}
+
+.service-card-wrapper:hover .service-content {
+    padding-bottom: 25px;
+}
+
+/* Responsive için service cards */
+@media (max-width: 992px) {
+    .service-card-wrapper {
+        height: 320px;
+        min-height: 320px;
+    }
+}
+
+@media (max-width: 768px) {
+    .service-card-wrapper {
+        height: 300px;
+        min-height: 300px;
+        margin-bottom: 20px;
+    }
+    
+    .service-content {
+        padding: 15px !important;
+    }
+    
+    .service-title {
+        font-size: 1rem !important;
+    }
+    
+    .service-description {
+        font-size: 0.85rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .service-card-wrapper {
+        height: 280px;
+        min-height: 280px;
+    }
+    
+    .service-content {
+        padding: 12px !important;
+    }
+    
+    .service-title {
+        font-size: 0.95rem !important;
+    }
+    
+    .service-description {
+        font-size: 0.8rem !important;
+    }
+    
+    .service-icon-small img {
+        width: 35px !important;
+        height: 35px !important;
+    }
+    
+    .service-icon-small i {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* Old service card styles - keeping for backward compatibility */
 .service-card {
     background: white;
     border-radius: 10px;
