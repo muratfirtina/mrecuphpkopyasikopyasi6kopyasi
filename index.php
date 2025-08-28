@@ -445,11 +445,11 @@ include 'includes/header.php';
     <!-- Featured Products Section -->
     <?php if (!empty($featuredProducts)): ?>
     <section class="featured-products-section py-5">
-        <div class="container">
+        <div class="container" style="width: 1600px; margin: 0 230px; display: flex; flex-direction: column; align-items: center;">
             <div class="row">
-                <div class="col-12 text-center mb-5">
+                <div class="col-12 text-center mb-5" style="color: #d32734;">
                     <h2 class="display-5 fw-bold">Öne Çıkan Ürünlerimiz</h2>
-                    <p class="lead text-muted">En popüler ve kaliteli ECU ürünlerimizi keşfedin</p>
+                    <p class="lead text-muted" style="color: #fff !important;">En popüler ve kaliteli ECU ürünlerimizi keşfedin</p>
                 </div>
             </div>
             
@@ -553,65 +553,6 @@ include 'includes/header.php';
     </section>
     <?php endif; ?>
 
-    <!-- Features Section -->
-    <section id="services" class="py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center mb-5">
-                    <h2 class="display-5 fw-bold">Neden Bizi Seçmelisiniz?</h2>
-                    <p class="lead text-muted">Profesyonel ECU hizmetleri için güvenilir çözümler</p>
-                </div>
-            </div>
-            
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon mb-3">
-                                <i class="fas fa-shield-alt text-primary" style="font-size: 3rem;"></i>
-                            </div>
-                            <h5 class="card-title">Güvenlik</h5>
-                            <p class="card-text">
-                                Dosyalarınız SSL şifreleme ile korunur. Sadece sizin erişebileceğiniz 
-                                güvenli bir platform.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon mb-3">
-                                <i class="fas fa-clock text-primary" style="font-size: 3rem;"></i>
-                            </div>
-                            <h5 class="card-title">Hızlı İşlem</h5>
-                            <p class="card-text">
-                                Dosyalarınız uzman ekibimiz tarafından en kısa sürede işlenir ve 
-                                hazır hale getirilir.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon mb-3">
-                                <i class="fas fa-users text-primary" style="font-size: 3rem;"></i>
-                            </div>
-                            <h5 class="card-title">Uzman Ekip</h5>
-                            <p class="card-text">
-                                Alanında uzman teknisyenlerimiz tüm marka ve modeller için 
-                                profesyonel hizmet sunar.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Chip Tuning Calculator Form -->
     <section class="py-5">
         <div class="container">
@@ -674,54 +615,160 @@ include 'includes/header.php';
         </div>
     </section>
 
-    <!-- Services Section -->
+    <!-- Services Section - Dynamic -->
+    <?php if (!empty($services)): ?>
     <section class="py-5 bg-light">
         <div class="container">
             <div class="row">
                 <div class="col-12 text-center mb-5">
                     <h2 class="display-5 fw-bold">Hizmetlerimiz</h2>
-                    <p class="lead text-muted">Sunduğumuz ECU hizmetleri</p>
+                    <p class="lead text-muted">Profesyonel ECU çözümleri ve hizmetlerimiz</p>
                 </div>
             </div>
             
             <div class="row g-4">
-                <div class="col-lg-3 col-md-6">
-                    <div class="service-card text-center p-4">
-                        <i class="fas fa-microchip text-primary mb-3" style="font-size: 2.5rem;"></i>
-                        <h5>ECU Yazılımları</h5>
-                        <p class="text-muted">Motor kontrol ünitesi yazılım düzenlemeleri</p>
+                <?php 
+                $serviceIcons = [
+                    'fas fa-microchip',
+                    'fas fa-cogs', 
+                    'fas fa-key',
+                    'fas fa-tachometer-alt',
+                    'fas fa-tools',
+                    'fas fa-shield-alt'
+                ];
+                
+                foreach ($services as $index => $service): 
+                    $defaultIcon = $serviceIcons[$index % count($serviceIcons)];
+                ?>
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card h-100 border-0 shadow-sm bg-white rounded transition-all">
+                        <div class="card-body p-4 text-center">
+                            <?php if (!empty($service['image'])): ?>
+                                <div class="service-image-container mb-3">
+                                    <img src="<?php echo htmlspecialchars($service['image']); ?>" 
+                                         alt="<?php echo htmlspecialchars($service['name']); ?>" 
+                                         class="service-image rounded"
+                                         style="max-width: 80px; max-height: 80px; object-fit: cover;">
+                                </div>
+                            <?php elseif (!empty($service['icon_picture'])): ?>
+                                <div class="service-image-container mb-3">
+                                    <img src="<?php echo htmlspecialchars($service['icon_picture']); ?>" 
+                                         alt="<?php echo htmlspecialchars($service['name']); ?>" 
+                                         class="service-image rounded"
+                                         style="max-width: 80px; max-height: 80px; object-fit: cover;">
+                                </div>
+                            <?php elseif (!empty($service['icon'])): ?>
+                                <div class="service-icon-container mb-3">
+                                    <i class="<?php echo htmlspecialchars($service['icon']); ?> text-primary" 
+                                       style="font-size: 3rem;"></i>
+                                </div>
+                            <?php else: ?>
+                                <div class="service-icon-container mb-3">
+                                    <i class="<?php echo $defaultIcon; ?> text-primary" style="font-size: 3rem;"></i>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <h5 class="card-title mb-3">
+                                <?php echo htmlspecialchars($service['name']); ?>
+                            </h5>
+                            
+                            <p class="card-text text-muted mb-4">
+                                <?php echo htmlspecialchars(substr($service['description'], 0, 120)) . (strlen($service['description']) > 120 ? '...' : ''); ?>
+                            </p>
+                            
+                            <?php if (!empty($service['price_from'])): ?>
+                                <div class="service-price mb-3">
+                                    <small class="text-primary fw-bold">
+                                        <i class="fas fa-tag me-1"></i>
+                                        <?php echo number_format($service['price_from'], 0); ?> TL'den başlar
+                                    </small>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <a href="<?php echo BASE_URL; ?>/hizmet/<?php echo urlencode($service['slug']); ?>" 
+                               class="btn btn-primary btn-sm px-4">
+                                <i class="fas fa-info-circle me-2"></i>Detaylar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            
+            <?php if (count($services) > 6): ?>
+            <div class="row mt-5">
+                <div class="col-12 text-center">
+                    <a href="<?php echo BASE_URL; ?>/services.php" class="btn btn-outline-primary btn-lg px-5">
+                        <i class="fas fa-list me-2"></i>Tüm Hizmetlerimizi Görüntüle
+                    </a>
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Features Section -->
+    <!-- <section id="services" class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="display-5 fw-bold">Neden Bizi Seçmelisiniz?</h2>
+                    <p class="lead text-muted">Profesyonel ECU hizmetleri için güvenilir çözümler</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-shield-alt text-primary" style="font-size: 3rem;"></i>
+                            </div>
+                            <h5 class="card-title">Güvenlik</h5>
+                            <p class="card-text">
+                                Dosyalarınız SSL şifreleme ile korunur. Sadece sizin erişebileceğiniz 
+                                güvenli bir platform.
+                            </p>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="col-lg-3 col-md-6">
-                    <div class="service-card text-center p-4">
-                        <i class="fas fa-cogs text-primary mb-3" style="font-size: 2.5rem;"></i>
-                        <h5>TCU Yazılımları</h5>
-                        <p class="text-muted">Şanzıman kontrol ünitesi düzenlemeleri</p>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-clock text-primary" style="font-size: 3rem;"></i>
+                            </div>
+                            <h5 class="card-title">Hızlı İşlem</h5>
+                            <p class="card-text">
+                                Dosyalarınız uzman ekibimiz tarafından en kısa sürede işlenir ve 
+                                hazır hale getirilir.
+                            </p>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="col-lg-3 col-md-6">
-                    <div class="service-card text-center p-4">
-                        <i class="fas fa-key text-primary mb-3" style="font-size: 2.5rem;"></i>
-                        <h5>Immobilizer</h5>
-                        <p class="text-muted">İmmobilizer ve anahtar programlama</p>
-                    </div>
-                </div>
-                
-                <div class="col-lg-3 col-md-6">
-                    <div class="service-card text-center p-4">
-                        <i class="fas fa-tachometer-alt text-primary mb-3" style="font-size: 2.5rem;"></i>
-                        <h5>Chip Tuning</h5>
-                        <p class="text-muted">Performans artırma ve optimizasyon</p>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-users text-primary" style="font-size: 3rem;"></i>
+                            </div>
+                            <h5 class="card-title">Uzman Ekip</h5>
+                            <p class="card-text">
+                                Alanında uzman teknisyenlerimiz tüm marka ve modeller için 
+                                profesyonel hizmet sunar.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <!-- Statistics Section -->
-    <section class="py-5">
+    <!-- <section class="py-5">
         <div class="container">
             <div class="row text-center">
                 <div class="col-lg-3 col-md-6 mb-4">
@@ -750,7 +797,7 @@ include 'includes/header.php';
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <!-- About Section -->
     <section id="about" class="py-5 bg-light">
@@ -1499,7 +1546,7 @@ overflow: hidden;
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(220, 53, 69, 0.05) 0%, transparent 50%);
+    background: radial-gradient(circle, rgb(0 27 85 / 72%) 0%, transparent 50%);
     animation: rotate 20s linear infinite;
     z-index: 1;
 }

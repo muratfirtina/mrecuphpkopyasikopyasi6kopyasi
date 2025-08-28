@@ -28,6 +28,9 @@ RewriteRule ^kategori/([a-zA-Z0-9-]+)/?$ category.php?slug=$1 [L,QSA]
 # Category-Brand products: /kategori/kategori-slug/marka/marka-slug -> category-brand-products.php?category=kategori-slug&brand=marka-slug
 RewriteRule ^kategori/([a-zA-Z0-9-]+)/marka/([a-zA-Z0-9-]+)/?$ category-brand-products.php?category=$1&brand=$2 [L,QSA]
 
+# Service detail page: /hizmet/service-slug -> hizmet-detay.php?slug=service-slug
+RewriteRule ^hizmet/([a-zA-Z0-9-]+)/?$ hizmet-detay.php?slug=$1 [L,QSA]
+
 # Product detail: /urun/urun-slug -> product-detail.php?slug=urun-slug
 RewriteRule ^urun/([a-zA-Z0-9-]+)/?$ product-detail.php?slug=$1 [L,QSA]
 
@@ -40,5 +43,5 @@ RewriteRule ^marka/([a-zA-Z0-9-]+)/?$ products.php?brand=$1 [L,QSA]
 # Category products: /kategori-urunleri/kategori-slug -> products.php?category=kategori-slug
 RewriteRule ^kategori-urunleri/([a-zA-Z0-9-]+)/?$ products.php?category=$1 [L,QSA]
 
-# Service detail: /hizmet/hizmet-slug -> service-detail.php?slug=hizmet-slug
-RewriteRule ^hizmet/([a-zA-Z0-9-]+)/?$ service-detail.php?slug=$1 [L,QSA]
+# Service detail: /hizmet/hizmet-slug -> hizmet-detay.php?slug=hizmet-slug
+RewriteRule ^hizmet/([a-zA-Z0-9-]+)/?$ hizmet-detay.php?slug=$1 [L,QSA]
