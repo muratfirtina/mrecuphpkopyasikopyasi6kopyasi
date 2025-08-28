@@ -93,6 +93,19 @@ try {
     error_log('Index.php - Services query error: ' . $e->getMessage());
 }
 
+// Markaları al (carousel için)
+try {
+    $stmt = $pdo->query("
+        SELECT * FROM product_brands 
+        WHERE is_active = 1 AND logo IS NOT NULL AND logo != ''
+        ORDER BY sort_order ASC, name ASC
+    ");
+    $brands = $stmt->fetchAll();
+} catch (Exception $e) {
+    $brands = [];
+    error_log('Index.php - Brands query error: ' . $e->getMessage());
+}
+
 // Typewriter ayarları
 $typewriterEnabled = isset($designSettings['hero_typewriter_enable']) ? (bool)$designSettings['hero_typewriter_enable'] : true;
 $typewriterWords = isset($designSettings['hero_typewriter_words']) ? 
@@ -813,6 +826,61 @@ include 'includes/header.php';
                 </div>
             </div>
             <?php endif; ?>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Brands Carousel Section -->
+    <?php if (!empty($brands)): ?>
+    <section class="brands-carousel-section py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="display-5 fw-bold">Güvenilen Markalar</h2>
+                    <p class="lead text-muted">Dünya çapında tanınmış markalarla çalışıyoruz</p>
+                </div>
+            </div>
+            
+            <div class="brands-carousel-container">
+                <div class="brands-carousel-track" id="brandsCarousel">
+                    <?php 
+                    // Brands dizisini 2 kere tekrarlayarak sürekli döngü oluştur
+                    $duplicatedBrands = array_merge($brands, $brands);
+                    foreach ($duplicatedBrands as $brand): 
+                    ?>
+                    <div class="brand-card" data-brand-slug="<?php echo htmlspecialchars($brand['slug']); ?>" data-brand-name="<?php echo htmlspecialchars($brand['name']); ?>">
+                        <div class="brand-image-container">
+                            <?php
+                            // Brand logo path'ini düzelt
+                            $brandLogo = 'assets/images/default-brand.svg';
+                            
+                            if ($brand['logo']) {
+                                $logoPath = $brand['logo'];
+                                
+                                // Path düzeltmeleri
+                                if (!str_starts_with($logoPath, 'uploads/')) {
+                                    $logoPath = 'uploads/' . ltrim($logoPath, '/');
+                                }
+                                
+                                $brandLogo = BASE_URL . '/' . $logoPath;
+                                
+                                // Dosyanın var olup olmadığını kontrol et
+                                $fullPath = __DIR__ . '/' . $logoPath;
+                                if (!file_exists($fullPath)) {
+                                    $brandLogo = BASE_URL . '/assets/images/default-brand.svg';
+                                }
+                            }
+                            ?>
+                            
+                            <img src="<?php echo htmlspecialchars($brandLogo); ?>" 
+                                 alt="<?php echo htmlspecialchars($brand['name']); ?>" 
+                                 class="brand-logo"
+                                 onerror="this.src='<?php echo BASE_URL; ?>/assets/images/default-brand.svg'">
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
         </div>
     </section>
     <?php endif; ?>
@@ -1925,6 +1993,181 @@ overflow: hidden;
     }
 }
 
+/* Brands Carousel Styles */
+.brands-carousel-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    overflow: hidden;
+    position: relative;
+}
+
+.brands-carousel-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(220, 53, 69, 0.05) 50%, transparent 100%);
+    animation: shine 8s linear infinite;
+    z-index: 1;
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.brands-carousel-container {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    z-index: 2;
+}
+
+.brands-carousel-track {
+    display: flex;
+    animation: slide-brands 30s linear infinite;
+    width: fit-content;
+    gap: 30px;
+    padding: 20px 0;
+}
+
+.brands-carousel-track:hover {
+    animation-play-state: paused;
+}
+
+@keyframes slide-brands {
+    0% {
+        transform: translateX(0%);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.brand-card {
+    flex: 0 0 auto;
+    width: 200px;
+    height: 120px;
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.brand-card:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.brand-image-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.brand-logo {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: grayscale(100%);
+    transition: all 0.3s ease;
+}
+
+.brand-card:hover .brand-logo {
+    filter: grayscale(0%);
+    transform: scale(1.1);
+}
+
+/* Responsive Brands Carousel */
+@media (max-width: 1200px) {
+    .brand-card {
+        width: 180px;
+        height: 110px;
+    }
+    
+    .brands-carousel-track {
+        gap: 25px;
+    }
+}
+
+@media (max-width: 992px) {
+    .brand-card {
+        width: 160px;
+        height: 100px;
+        padding: 15px;
+    }
+    
+    .brands-carousel-track {
+        gap: 20px;
+        animation-duration: 25s;
+    }
+}
+
+@media (max-width: 768px) {
+    .brand-card {
+        width: 140px;
+        height: 90px;
+        padding: 12px;
+    }
+    
+    .brands-carousel-track {
+        gap: 15px;
+        animation-duration: 20s;
+    }
+}
+
+@media (max-width: 576px) {
+    .brand-card {
+        width: 120px;
+        height: 80px;
+        padding: 10px;
+    }
+    
+    .brands-carousel-track {
+        gap: 12px;
+        animation-duration: 18s;
+    }
+    
+    .brands-carousel-container {
+        mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .brands-carousel-track {
+        animation-duration: 60s;
+    }
+    
+    .brand-card:hover {
+        transform: translateY(-5px) scale(1.02);
+    }
+    
+    .brand-logo {
+        transition-duration: 0.6s;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .brand-card {
+        border: 2px solid #000;
+    }
+}
+
 /* Responsive Featured Products */
 @media (max-width: 1200px) {
     .product-card-wrapper {
@@ -2212,6 +2455,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize Featured Products Horizontal Scroll
     initializeFeaturedProductsScroll();
+    
+    // Initialize Brands Carousel
+    initializeBrandsCarousel();
 });
 
 // Chip Tuning Calculator JavaScript
@@ -2657,6 +2903,178 @@ function initializeFeaturedProductsScroll() {
     scrollContainer.setAttribute('tabindex', '0');
     scrollContainer.style.outline = 'none';
     scrollContainer.style.cursor = 'grab';
+}
+
+// Brands Carousel Function
+function initializeBrandsCarousel() {
+    const brandsCarousel = document.getElementById('brandsCarousel');
+    
+    if (!brandsCarousel) {
+        return; // Carousel element not found
+    }
+    
+    // Pause animation on hover
+    brandsCarousel.addEventListener('mouseenter', () => {
+        brandsCarousel.style.animationPlayState = 'paused';
+    });
+    
+    brandsCarousel.addEventListener('mouseleave', () => {
+        brandsCarousel.style.animationPlayState = 'running';
+    });
+    
+    // Add click handlers for brand cards
+    const brandCards = brandsCarousel.querySelectorAll('.brand-card');
+    brandCards.forEach(card => {
+        // Add click event to navigate to brand products page
+        card.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Get brand slug from data attribute
+            const brandSlug = card.dataset.brandSlug;
+            const brandName = card.dataset.brandName || 'Brand';
+            
+            if (brandSlug) {
+                // Navigate to brand products page
+                const brandUrl = `<?php echo BASE_URL; ?>/marka/${brandSlug}`;
+                window.location.href = brandUrl;
+                console.log(`Navigating to ${brandName}: ${brandUrl}`);
+            } else {
+                console.warn('Brand slug not found for:', brandName);
+            }
+        });
+        
+        // Add visual feedback on hover for better UX
+        card.addEventListener('mouseenter', () => {
+            card.style.transform = 'translateY(-10px) scale(1.05)';
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'translateY(0) scale(1)';
+        });
+        
+        // Touch support for mobile devices with navigation
+        let touchStartTime = 0;
+        
+        card.addEventListener('touchstart', (e) => {
+            touchStartTime = Date.now();
+            if (window.innerWidth <= 768) {
+                card.style.transform = 'translateY(-5px) scale(0.98)';
+            }
+        });
+        
+        card.addEventListener('touchend', (e) => {
+            const touchEndTime = Date.now();
+            const touchDuration = touchEndTime - touchStartTime;
+            
+            if (window.innerWidth <= 768) {
+                card.style.transform = 'translateY(-10px) scale(1.05)';
+                
+                // If it's a quick tap (less than 200ms), navigate
+                if (touchDuration < 200) {
+                    const brandSlug = card.dataset.brandSlug;
+                    const brandName = card.dataset.brandName || 'Brand';
+                    
+                    if (brandSlug) {
+                        const brandUrl = `<?php echo BASE_URL; ?>/marka/${brandSlug}`;
+                        // Small delay to show the touch feedback
+                        setTimeout(() => {
+                            window.location.href = brandUrl;
+                        }, 100);
+                        console.log(`Touch navigation to ${brandName}: ${brandUrl}`);
+                    }
+                }
+            }
+        });
+        
+        card.addEventListener('touchcancel', (e) => {
+            if (window.innerWidth <= 768) {
+                card.style.transform = 'translateY(0) scale(1)';
+            }
+        });
+    });
+    
+    // Accessibility: Pause animation when focused
+    brandsCarousel.addEventListener('focusin', () => {
+        brandsCarousel.style.animationPlayState = 'paused';
+    });
+    
+    brandsCarousel.addEventListener('focusout', (e) => {
+        // Only resume if focus is leaving the entire carousel
+        if (!brandsCarousel.contains(e.relatedTarget)) {
+            brandsCarousel.style.animationPlayState = 'running';
+        }
+    });
+    
+    // Keyboard navigation support
+    brandCards.forEach((card, index) => {
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `Marka: ${card.dataset.brandName || 'Bilinmeyen Marka'} - Ürünleri görüntülemek için tıklayın`);
+        
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                
+                // Get brand slug and navigate
+                const brandSlug = card.dataset.brandSlug;
+                const brandName = card.dataset.brandName || 'Brand';
+                
+                if (brandSlug) {
+                    const brandUrl = `<?php echo BASE_URL; ?>/marka/${brandSlug}`;
+                    window.location.href = brandUrl;
+                    console.log(`Keyboard navigation to ${brandName}: ${brandUrl}`);
+                } else {
+                    console.warn('Brand slug not found for keyboard navigation:', brandName);
+                }
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                const nextCard = brandCards[index + 1] || brandCards[0];
+                nextCard.focus();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                const prevCard = brandCards[index - 1] || brandCards[brandCards.length - 1];
+                prevCard.focus();
+            }
+        });
+    });
+    
+    // Handle visibility changes (pause when tab is not active)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            brandsCarousel.style.animationPlayState = 'paused';
+        } else {
+            brandsCarousel.style.animationPlayState = 'running';
+        }
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        // Reset any mobile-specific styles when resizing to desktop
+        if (window.innerWidth > 768) {
+            brandCards.forEach(card => {
+                card.style.transform = '';
+            });
+        }
+    });
+    
+    // Intersection Observer to pause/resume animation based on visibility
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.target === brandsCarousel) {
+                if (entry.isIntersecting) {
+                    brandsCarousel.style.animationPlayState = 'running';
+                } else {
+                    brandsCarousel.style.animationPlayState = 'paused';
+                }
+            }
+        });
+    }, {
+        threshold: 0.1
+    });
+    
+    observer.observe(brandsCarousel);
+    
+    console.log('Brands carousel initialized successfully');
 }
 </script>
 <?php endif; ?>
