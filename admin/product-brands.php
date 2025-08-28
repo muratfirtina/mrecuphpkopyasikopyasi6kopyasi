@@ -119,6 +119,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_brand'])) {
         $stmt->execute([$brandId]);
         $currentBrand = $stmt->fetch();
         
+        // Marka bulunamadıysa hata ver
+        if (!$currentBrand) {
+            throw new Exception('Güncellenecek marka bulunamadı.');
+        }
+        
         // Logo yükleme
         $logoPath = $currentBrand['logo'];
         if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
@@ -152,7 +157,7 @@ if (isset($_GET['delete']) && !empty($_GET['delete'])) {
         $stmt->execute([$brandId]);
         $brand = $stmt->fetch();
         
-        if ($brand['logo'] && file_exists('../' . $brand['logo'])) {
+        if ($brand && $brand['logo'] && file_exists('../' . $brand['logo'])) {
             unlink('../' . $brand['logo']);
         }
         
