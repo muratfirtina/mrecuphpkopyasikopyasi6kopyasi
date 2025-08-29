@@ -496,6 +496,10 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
                 <i class="fas fa-concierge-bell"></i>
                 <span>Hizmet Yönetimi</span>
             </a>
+            <a href="about.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'about.php') ? 'active' : ''; ?>">
+                <i class="fas fa-info-circle"></i>
+                <span>Hakkımızda</span>
+            </a>
         </div>
 
         <div class="nav-section">

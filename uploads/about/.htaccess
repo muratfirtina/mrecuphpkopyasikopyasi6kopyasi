@@ -1,0 +1,15 @@
+# About uploads güvenlik ayarları
+Options -Indexes
+DirectoryIndex index.html
+
+# Sadece resim dosyalarına izin ver
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+# Diğer dosyaları engelle  
+<FilesMatch "\.(php|phtml|pl|py|jsp|asp|sh|cgi)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>

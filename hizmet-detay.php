@@ -371,6 +371,14 @@ include 'includes/header.php';
         font-size: 0.9rem;
     }
 }
+.contact-cta {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    padding: 3rem 0;
+    border-radius: 15px;
+    text-align: center;
+    margin: 3rem 0;
+}
 
 /* === Animations === */
 @keyframes slideInLeft {
@@ -661,6 +669,45 @@ try {
     </div>
 </section>
 <?php endif; ?>
+
+<!-- Call to Action -->
+<div class="container">
+    <div class="contact-cta">
+        <h2 class="mb-4">Aracınızın Performansını Artırmaya Hazır mısınız?</h2>
+        <p class="lead mb-4">
+            Profesyonel ekibimiz ile iletişime geçin ve aracınız için en uygun chip tuning çözümünü keşfedin.
+        </p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="tel:+905551234567" class="btn btn-light btn-lg">
+                <i class="fas fa-phone me-2"></i>Hemen Ara
+            </a>
+            <a href="mailto:<?php echo SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-envelope me-2"></i>E-posta Gönder
+            </a>
+            <a href="../register.php" class="btn btn-warning btn-lg">
+                <i class="fas fa-upload me-2"></i>Dosya Yükle
+            </a>
+        </div>
+        
+        <div class="row mt-5 text-center">
+            <div class="col-md-4">
+                <i class="fas fa-shield-alt fa-2x mb-3"></i>
+                <h5>Güvenli İşlem</h5>
+                <p>Aracınızın garantisi bozulmaz</p>
+            </div>
+            <div class="col-md-4">
+                <i class="fas fa-clock fa-2x mb-3"></i>
+                <h5>Hızlı Teslimat</h5>
+                <p>24 saat içinde dosyanız hazır</p>
+            </div>
+            <div class="col-md-4">
+                <i class="fas fa-undo fa-2x mb-3"></i>
+                <h5>Geri Dönüş Garantisi</h5>
+                <p>İstediğiniz zaman eski haline döndürülebilir</p>
+            </div>
+        </div>
+    </div>
+</div>
 
 <?php
 // Footer include

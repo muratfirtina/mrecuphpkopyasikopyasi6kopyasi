@@ -735,19 +735,19 @@ if (!isset($pageTitle)) {
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/#services">
+                        <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/services.php">
                             <i class="fas fa-cogs"></i>
                             <span>HİZMETLERİMİZ</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/#about">
+                        <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/about.php">
                             <i class="fas fa-info-circle"></i>
                             <span>HAKKIMIZDA</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/#contact">
+                        <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/contact.php">
                             <i class="fas fa-envelope"></i>
                             <span>İLETİŞİM</span>
                         </a>
