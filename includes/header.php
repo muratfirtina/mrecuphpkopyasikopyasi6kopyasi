@@ -639,8 +639,6 @@ if (!isset($pageTitle)) {
             spinner.style.opacity = '1';
             document.body.style.overflow = 'hidden';
             
-            console.log('ECU Spinner: Shown');
-            
             // Hide after 1 second
             setTimeout(function() {
                 spinner.style.opacity = '0';
@@ -648,7 +646,6 @@ if (!isset($pageTitle)) {
                 setTimeout(function() {
                     spinner.style.display = 'none';
                     document.body.style.overflow = '';
-                    console.log('ECU Spinner: Hidden');
                 }, 300);
             }, 1000);
             

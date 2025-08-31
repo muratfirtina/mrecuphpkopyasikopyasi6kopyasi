@@ -500,6 +500,10 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
                 <i class="fas fa-info-circle"></i>
                 <span>Hakkımızda</span>
             </a>
+            <a href="contact.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'contact.php') ? 'active' : ''; ?>">
+                <i class="fas fa-phone"></i>
+                <span>İletişim</span>
+            </a>
         </div>
 
         <div class="nav-section">

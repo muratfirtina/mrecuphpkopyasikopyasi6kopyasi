@@ -197,6 +197,24 @@
                         <a class="nav-link <?php echo ($pageTitle == 'Kredi Yönetimi') ? 'active' : ''; ?>" href="credits.php">
                             <i class="fas fa-coins"></i>Kredi Yönetimi
                         </a>
+
+                        <a class="nav-link <?php echo ($pageTitle == 'İletişim Mesajları') ? 'active' : ''; ?>" href="contact-messages.php">
+                            <i class="fas fa-envelope"></i>İletişim Mesajları
+                            <?php
+                            // Yeni mesaj sayısını al
+                            try {
+                                $newContactMessagesStmt = $pdo->prepare("SELECT COUNT(*) FROM contact_messages WHERE status = 'new'");
+                                $newContactMessagesStmt->execute();
+                                $newContactMessagesCount = $newContactMessagesStmt->fetchColumn();
+                                
+                                if ($newContactMessagesCount > 0) {
+                                    echo '<span class="badge bg-danger ms-2">' . $newContactMessagesCount . '</span>';
+                                }
+                            } catch(Exception $e) {
+                                // Hata durumunda badge gösterme
+                            }
+                            ?>
+                        </a>
                         
                         
                         <!-- Ürün Yönetimi -->
@@ -247,6 +265,10 @@
                         
                         <!-- Diğer İşlemler -->
                         <div class="nav-section">Diğer</div>
+                        
+                        <a class="nav-link text-info" href="../design/contact.php">
+                            <i class="fas fa-phone-alt"></i>İletişim Yönetimi
+                        </a>
                         
                         <a class="nav-link text-warning" href="../user/">
                             <i class="fas fa-user"></i>Kullanıcı Paneli

@@ -540,7 +540,6 @@ function setupECUSpinner() {
  */
 function initializeECUSpinner() {
     // ECU Spinner artık inline script ile kontrol ediliyor
-    console.log('ECU Spinner: Controlled by inline script');
 }
 
 /**
