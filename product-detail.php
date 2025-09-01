@@ -793,7 +793,7 @@ include 'includes/header.php';
                 </div>
 
                 <div class="specs-card">
-                    <h3><i class="fas fa-cogs"></i> Teknik Özellikler</h3>
+                    <h3><i class="bi bi-gear-wide-connected"></i> Teknik Özellikler</h3>
                     <table class="spec-table">
                         <?php if ($product['sku']): ?>
                             <tr>

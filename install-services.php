@@ -137,7 +137,7 @@ try {
                 'slug' => 'tcu-yazilim-optimizasyonu',
                 'description' => 'Şanzıman kontrol ünitesi yazılımlarını optimize ediyoruz. Daha yumuşak vites geçişleri ve performans artışı sağlıyoruz.',
                 'features' => json_encode(['Vites geçiş optimizasyonu', 'Şanzıman performansı', 'Yumuşak çalışma', 'Yakıt ekonomisi', 'Uzun ömür']),
-                'icon' => 'fas fa-cogs',
+                'icon' => 'bi bi-gear-wide-connected',
                 'price_from' => 250.00,
                 'is_featured' => 0,
                 'sort_order' => 5

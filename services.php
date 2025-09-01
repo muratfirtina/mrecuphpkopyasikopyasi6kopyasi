@@ -429,7 +429,7 @@ include 'includes/header.php';
                 </nav>
             </div>
             <div class="col-lg-4 text-center">
-                <i class="fas fa-cogs" style="font-size: 8rem; opacity: 0.3;"></i>
+                <i class="bi bi-gear-wide-connected" style="font-size: 8rem; opacity: 0.3;"></i>
             </div>
         </div>
     </div>
@@ -451,7 +451,7 @@ include 'includes/header.php';
                                 <?php elseif (!empty($service['icon'])): ?>
                                     <i class="<?php echo htmlspecialchars($service['icon']); ?> fa-2x"></i>
                                 <?php else: ?>
-                                    <i class="fas fa-cogs fa-2x"></i>
+                                    <i class="bi bi-gear-wide-connected fa-2x"></i>
                                 <?php endif; ?>
                                 <h3><?php echo htmlspecialchars($service['name']); ?></h3>
                             </div>
@@ -543,7 +543,7 @@ include 'includes/header.php';
                     <div class="position-relative">
                         <div class="process-step-icon">
                             <span class="step-number">2</span>
-                            <i class="fas fa-cogs"></i>
+                            <i class="bi bi-gear-wide-connected"></i>
                         </div>
                     </div>
                     <h5>Uzman İncelemesi</h5>

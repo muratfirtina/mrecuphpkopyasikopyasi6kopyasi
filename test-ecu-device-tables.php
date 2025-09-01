@@ -94,7 +94,7 @@ require_once 'config/config.php';
                         <!-- Kurulum Linkleri -->
                         <div class="row">
                             <div class="col-12">
-                                <h5><i class="fas fa-cogs"></i> Kurulum İşlemleri</h5>
+                                <h5><i class="bi bi-gear-wide-connected"></i> Kurulum İşlemleri</h5>
                                 <div class="d-flex gap-2 flex-wrap">
                                     <a href="install-ecu-device-tables.php" class="btn btn-primary">
                                         <i class="fas fa-download"></i> Tabloları Kur

@@ -494,7 +494,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="stat-row">
                                     <div class="stat-icon bg-info">
-                                        <i class="fas fa-cogs"></i>
+                                        <i class="bi bi-gear-wide-connected"></i>
                                     </div>
                                     <div class="stat-details">
                                         <div class="stat-value"><?php echo $stats['processing_uploads']; ?></div>

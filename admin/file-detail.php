@@ -1011,7 +1011,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card mb-4">
             <div class="card-header bg-warning text-dark">
                 <h6 class="mb-0">
-                    <i class="fas fa-cogs me-2"></i>
+                    <i class="bi bi-gear-wide-connected me-2"></i>
                     İşlemdeki Revizyon Talepleri (<?php echo count($activeRevisions); ?> adet)
                 </h6>
             </div>
@@ -1276,7 +1276,7 @@ include '../includes/admin_sidebar.php';
                                     <!-- İşlem Butonları -->
                                     <div class="action-buttons">
                                         <h6 class="mb-3 text-center">
-                                            <i class="fas fa-cogs me-2"></i>İşlemler
+                                            <i class="bi bi-gear-wide-connected me-2"></i>İşlemler
                                         </h6>
 
                                         <!-- Dosyayı İndir -->
@@ -1513,7 +1513,7 @@ include '../includes/admin_sidebar.php';
                             <?php if ($fileType !== 'response' && isset($upload['status']) && $upload['status'] === 'pending'): ?>
                                 <div class="mt-2">
                                     <button type="button" class="btn btn-warning btn-sm w-100" onclick="showProcessingConfirmModal()">
-                                        <i class="fas fa-cogs me-1"></i>Dosyayı İşleme Al
+                                        <i class="bi bi-gear-wide-connected me-1"></i>Dosyayı İşleme Al
                                     </button>
                                 </div>
                             <?php endif; ?>
@@ -1969,7 +1969,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </h6>
                 <?php if ($upload['status'] === 'processing'): ?>
                     <span class="badge bg-info">
-                        <i class="fas fa-cogs me-1"></i>Dosya İşleme Alındı
+                        <i class="bi bi-gear-wide-connected me-1"></i>Dosya İşleme Alındı
                     </span>
                 <?php endif; ?>
             </div>
@@ -2555,7 +2555,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <?php
                                 $iconClass = [
                                     'pending' => 'fas fa-clock text-warning',
-                                    'in_progress' => 'fas fa-cogs text-info',
+                                    'in_progress' => 'bi bi-gear-wide-connected text-info',
                                     'completed' => 'fas fa-check-circle text-success',
                                     'rejected' => 'fas fa-times-circle text-danger'
                                 ];
@@ -2649,7 +2649,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <?php elseif (!empty($revision['admin_notes'])): ?>
                                     <div class="revision-note pending-response mb-2">
                                         <div class="note-header">
-                                            <i class="fas fa-cogs me-2 text-info"></i>
+                                            <i class="bi bi-gear-wide-connected me-2 text-info"></i>
                                             <strong>Durum:</strong>
                                         </div>
                                         <div class="note-content">
@@ -3350,7 +3350,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="modal-content">
             <div class="modal-header bg-gradient" style="background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%); color: white;">
                 <h5 class="modal-title d-flex align-items-center" id="processingConfirmModalLabel">
-                    <i class="fas fa-cogs me-2"></i>
+                    <i class="bi bi-gear-wide-connected me-2"></i>
                     Dosyayı İşleme Al
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>

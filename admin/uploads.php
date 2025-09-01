@@ -297,7 +297,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Aktif işlemde</small>
                 </div>
                 <div class="bg-info bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-cogs text-info fa-lg"></i>
+                    <i class="bi bi-gear-wide-connected text-info fa-lg"></i>
                 </div>
             </div>
         </div>

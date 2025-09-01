@@ -150,7 +150,7 @@ include 'includes/header.php';
                                     </p>
                                     <div class="d-flex gap-3 mb-5">
                                         <a href="#transmission" class="btn btn-info btn-lg px-4">
-                                            <i class="fas fa-cogs me-2"></i>TCU Hizmetleri
+                                            <i class="bi bi-gear-wide-connected me-2"></i>TCU Hizmetleri
                                         </a>
                                         <a href="services.php" class="btn btn-outline-light btn-lg px-4">
                                             <i class="fas fa-list me-2"></i>Tüm Hizmetler
@@ -159,7 +159,7 @@ include 'includes/header.php';
                                 </div>
                                 <div class="col-lg-4">
                                     <div class="text-center">
-                                        <i class="fas fa-cogs" style="font-size: 10rem; opacity: 0.2;"></i>
+                                        <i class="bi bi-gear-wide-connected" style="font-size: 10rem; opacity: 0.2;"></i>
                                     </div>
                                 </div>
                             </div>
@@ -293,7 +293,7 @@ include 'includes/header.php';
                 
                 <div class="col-lg-3 col-md-6">
                     <div class="service-card text-center p-4">
-                        <i class="fas fa-cogs text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <i class="bi bi-gear-wide-connected text-primary mb-3" style="font-size: 2.5rem;"></i>
                         <h5>TCU Yazılımları</h5>
                         <p class="text-muted">Şanzıman kontrol ünitesi düzenlemeleri</p>
                     </div>

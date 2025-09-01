@@ -543,7 +543,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                     <div class="row mt-4">
                         <div class="col-md-3 text-center">
                             <div class="test-category">
-                                <h4><i class="fas fa-cogs me-2"></i>Core Functions</h4>
+                                <h4><i class="bi bi-gear-wide-connected me-2"></i>Core Functions</h4>
                                 <p class="mb-0">UUID generation & validation</p>
                             </div>
                         </div>

@@ -307,7 +307,7 @@ require_once '../includes/design_header.php';
                                     <i id="iconPreview" class="<?= htmlspecialchars($service['icon']) ?> fs-4"></i>
                                 </span>
                                 <input type="text" class="form-control" id="icon" name="icon" 
-                                       value="<?= htmlspecialchars($service['icon']) ?>" required placeholder="fas fa-cogs">
+                                       value="<?= htmlspecialchars($service['icon']) ?>" required placeholder="bi bi-gear-wide-connected">
                             </div>
                             <div class="form-text">Örnek: fas fa-microchip</div>
                         </div>
@@ -444,7 +444,7 @@ require_once '../includes/design_header.php';
 <script>
 // İkon önizleme
 document.getElementById('icon').addEventListener('input', function() {
-    document.getElementById('iconPreview').className = this.value.trim() || 'fas fa-cogs';
+    document.getElementById('iconPreview').className = this.value.trim() || 'bi bi-gear-wide-connected';
 });
 
 // Özellik ekle/sil

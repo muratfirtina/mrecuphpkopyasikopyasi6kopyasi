@@ -290,7 +290,7 @@ include 'includes/header.php';
                                                 } elseif (strpos(strtolower($slider['title']), 'güvenlik') !== false) {
                                                     $icon = 'fas fa-key';
                                                 } elseif (strpos(strtolower($slider['title']), 'şanzıman') !== false) {
-                                                    $icon = 'fas fa-cogs';
+                                                    $icon = 'bi bi-gear-wide-connected';
                                                 } elseif (strpos(strtolower($slider['title']), 'destek') !== false) {
                                                     $icon = 'fas fa-headset';
                                                 }
@@ -370,7 +370,7 @@ include 'includes/header.php';
             $delay = 0.1;
             foreach ($categories as $category):
                 // Kategori ikonunu belirleme
-                $icon = 'fas fa-cogs'; // varsayılan ikon
+                $icon = 'bi bi-gear-wide-connected'; // varsayılan ikon
                 $categoryName = strtolower($category['name']);
 
                 if (strpos($categoryName, 'ecu') !== false || strpos($categoryName, 'motor') !== false) {
@@ -677,7 +677,7 @@ include 'includes/header.php';
                 <?php
                 $serviceIcons = [
                     'fas fa-microchip',
-                    'fas fa-cogs',
+                    'bi bi-gear-wide-connected',
                     'fas fa-key',
                     'fas fa-tachometer-alt',
                     'fas fa-tools',

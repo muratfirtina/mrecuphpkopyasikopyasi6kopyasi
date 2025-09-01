@@ -89,7 +89,7 @@ include 'includes/header.php';
                                         <i class="fas fa-sign-in-alt me-1"></i>Giriş Yap
                                     </a>
                                     <a href="index.php#services" class="btn btn-outline-primary">
-                                        <i class="fas fa-cogs me-1"></i>Hizmetlerimizi İncele
+                                        <i class="bi bi-gear-wide-connected me-1"></i>Hizmetlerimizi İncele
                                     </a>
                                 </div>
                             </div>

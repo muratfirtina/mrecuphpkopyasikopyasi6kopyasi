@@ -368,7 +368,7 @@ include '../includes/admin_sidebar.php';
                 <!-- SEO Bilgileri -->
                 <?php if ($product['meta_title'] || $product['meta_description']): ?>
                     <div class="product-info-card">
-                        <h5 class="mb-3"><i class="fas fa-search me-2"></i>SEO Bilgileri</h5>
+                        <h5 class="mb-3"><i class="bi bi-search me-2"></i>SEO Bilgileri</h5>
                         
                         <?php if ($product['meta_title']): ?>
                             <div class="mb-2">
@@ -398,7 +398,7 @@ include '../includes/admin_sidebar.php';
             <div class="row">
                 <div class="col-12">
                     <div class="product-info-card">
-                        <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Detaylı Açıklama</h5>
+                        <h5 class="mb-3"><i class="bi bi-info-circle me-2"></i>Detaylı Açıklama</h5>
                         <div class="product-description">
                             <?php echo $product['description']; ?>
                         </div>
@@ -409,7 +409,7 @@ include '../includes/admin_sidebar.php';
     </div>
 <?php else: ?>
     <div class="alert alert-admin alert-warning">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         Ürün bulunamadı.
     </div>
 <?php endif; ?>

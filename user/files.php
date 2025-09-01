@@ -474,12 +474,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-info"><?php echo $stats['processing']; ?></div>
                                     <div class="stat-label">İşleniyor</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-cogs text-info"></i>
+                                        <i class="bi bi-gear-wide-connected text-info"></i>
                                         <span class="text-info">Aktif işlem</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon bg-info">
-                                    <i class="fas fa-cogs"></i>
+                                    <i class="bi bi-gear-wide-connected"></i>
                                 </div>
                             </div>
                         </div>
@@ -673,7 +673,7 @@ include '../includes/user_header.php';
                                                     <!-- Revize dosyası henüz hazır değil - işleniyor -->
                                                     <div class="mt-2">
                                                         <small class="d-block text-info">
-                                                            <i class="fas fa-cogs me-1"></i>
+                                                            <i class="bi bi-gear-wide-connected me-1"></i>
                                                             <strong>Yeni Revize Dosyası:</strong> <em>Hazırlanıyor...</em>
                                                         </small>
                                                         <?php if (isset($file['request_notes']) && !empty($file['request_notes'])): ?>

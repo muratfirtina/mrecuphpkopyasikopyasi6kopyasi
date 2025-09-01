@@ -23,7 +23,7 @@ try {
     <div class="card admin-card mb-4">
         <div class="card-header bg-warning text-dark">
             <h6 class="mb-0">
-                <i class="fas fa-cogs me-2"></i>
+                <i class="bi bi-gear-wide-connected me-2"></i>
                 İşlemdeki Revizyon Talepleri (<?php echo count($activeRevisions); ?> adet)
             </h6>
         </div>

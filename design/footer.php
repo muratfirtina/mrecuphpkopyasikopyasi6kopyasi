@@ -257,7 +257,7 @@ include '../includes/design_header.php';
                         <p style="font-size: 0.9rem; opacity: 0.8;">Profesyonel ECU hizmetleri...</p>
                     </div>
                     <div class="col-lg-2 preview-column">
-                        <h6><i class="fas fa-cogs me-2"></i>Hizmetlerimiz</h6>
+                        <h6><i class="bi bi-gear-wide-connected me-2"></i>Hizmetlerimiz</h6>
                         <?php if (!empty($services)): ?>
                             <?php foreach (array_slice($services, 0, 4) as $service): ?>
                                 <div style="font-size: 0.85rem; margin-bottom: 0.5rem;">
@@ -325,7 +325,7 @@ include '../includes/design_header.php';
     <ul class="nav nav-tabs" id="footerTabs" role="tablist" style="border: none; margin: -1rem -1.5rem 0 -1.5rem; padding: 0 1.5rem;">
                 <li class="nav-item" role="presentation">
                 <button class="nav-link active text-white" id="services-tab" data-bs-toggle="tab" data-bs-target="#services" type="button" role="tab">
-                <i class="fas fa-cogs me-2"></i>Hizmetler
+                <i class="bi bi-gear-wide-connected me-2"></i>Hizmetler
                 </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -398,7 +398,7 @@ include '../includes/design_header.php';
                         <?php else: ?>
                             <div class="col-12">
                                 <div class="text-center py-5">
-                                    <i class="fas fa-cogs fa-3x text-muted mb-3"></i>
+                                    <i class="bi bi-gear-wide-connected fa-3x text-muted mb-3"></i>
                                     <p class="text-muted">Henüz hizmet eklenmemiş.</p>
                                     <button class="btn-design-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">
                                         <i class="fas fa-plus me-2"></i>İlk Hizmeti Ekle

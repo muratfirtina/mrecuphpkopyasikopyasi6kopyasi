@@ -97,7 +97,7 @@ function checkSystemStatus($pdo) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MR.ECU Legacy Migration Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body {
             background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
@@ -306,7 +306,7 @@ function checkSystemStatus($pdo) {
                                 <div class="col-md-2">
                                     <div class="stats-card">
                                         <h3><?= $stats['total_models'] ?? 0 ?></h3>
-                                        <p><i class="fas fa-cogs"></i> Modeller</p>
+                                        <p><i class="bi bi-gear-wide-connected"></i> Modeller</p>
                                     </div>
                                 </div>
                             </div>

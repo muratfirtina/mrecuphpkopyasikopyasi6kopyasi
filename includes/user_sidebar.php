@@ -96,7 +96,7 @@ if (isset($_SESSION['user_id'])) {
             <li class="nav-item">
                 <a class="nav-link" href="files.php?status=processing">
                     <div class="nav-icon bg-info">
-                        <i class="fas fa-cogs"></i>
+                        <i class="bi bi-gear-wide-connected"></i>
                     </div>
                     <span>İşlenen Dosyalar</span>
                     <?php

@@ -242,10 +242,10 @@ require_once '../includes/design_header.php';
                             <label for="icon" class="form-label fw-bold">FontAwesome İkon *</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light">
-                                    <i id="iconPreview" class="<?= htmlspecialchars($formData['icon'] ?? 'fas fa-cogs') ?> fs-4"></i>
+                                    <i id="iconPreview" class="<?= htmlspecialchars($formData['icon'] ?? 'bi bi-gear-wide-connected') ?> fs-4"></i>
                                 </span>
                                 <input type="text" class="form-control" id="icon" name="icon" 
-                                       value="<?= htmlspecialchars($formData['icon'] ?? '') ?>" required placeholder="fas fa-cogs">
+                                       value="<?= htmlspecialchars($formData['icon'] ?? '') ?>" required placeholder="bi bi-gear-wide-connected">
                             </div>
                             <div class="form-text">Örnek: fas fa-microchip</div>
                         </div>
@@ -362,7 +362,7 @@ require_once '../includes/design_header.php';
 <script>
 // İkon önizleme
 document.getElementById('icon').addEventListener('input', function() {
-    document.getElementById('iconPreview').className = this.value.trim() || 'fas fa-cogs';
+    document.getElementById('iconPreview').className = this.value.trim() || 'bi bi-gear-wide-connected';
 });
 
 // Özellik ekle/sil

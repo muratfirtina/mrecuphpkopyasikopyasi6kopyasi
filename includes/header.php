@@ -29,8 +29,8 @@ if (!isset($pageTitle)) {
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -43,6 +43,12 @@ if (!isset($pageTitle)) {
     
     <!-- Modern Navigation Styles -->
     <style>
+    /* Bootstrap Icons Styling */
+    .bi {
+        line-height: 1 !important;
+        vertical-align: baseline !important;
+    }
+    
     /* Modern Navigation Styles */
     .modern-navbar {
         <?php 
@@ -680,13 +686,13 @@ if (!isset($pageTitle)) {
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link modern-nav-link <?php echo ($pageTitle == 'Ana Sayfa') ? 'active' : ''; ?>" href="/mrecuphpkopyasikopyasi6kopyasi/">
-                            <i class="fas fa-home"></i>
+                            <i class="bi bi-house-door-fill"></i>
                             <span>ANA SAYFA</span>
                         </a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link modern-nav-link dropdown-toggle" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-shopping-bag"></i>
+                            <i class="bi bi-bag-fill"></i>
                             <span>ÜRÜNLER</span>
                         </a>
                         <ul class="dropdown-menu modern-dropdown dropdown-menu-start" aria-labelledby="productsDropdown">
@@ -711,7 +717,7 @@ if (!isset($pageTitle)) {
                             ?>
                             <li>
                                 <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/kategori/<?php echo $headerCategory['slug']; ?>">
-                                    <i class="fas fa-tag me-2"></i>
+                                    <i class="bi bi-tag-fill me-2"></i>
                                     <?php echo htmlspecialchars($headerCategory['name']); ?>
                                     <span class="badge bg-secondary ms-auto"><?php echo $headerCategory['product_count']; ?></span>
                                 </a>
@@ -728,24 +734,24 @@ if (!isset($pageTitle)) {
                             }
                             ?>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item fw-bold" href="/mrecuphpkopyasikopyasi6kopyasi/urunler">Tüm Ürünler <i class="fas fa-arrow-right ms-1"></i></a></li>
+                            <li><a class="dropdown-item fw-bold" href="/mrecuphpkopyasikopyasi6kopyasi/urunler">Tüm Ürünler <i class="bi bi-arrow-right ms-1"></i></a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/services.php">
-                            <i class="fas fa-cogs"></i>
+                            <i class="bi bi-gear-fill"></i>
                             <span>HİZMETLERİMİZ</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/about.php">
-                            <i class="fas fa-info-circle"></i>
+                            <i class="bi bi-info-circle-fill"></i>
                             <span>HAKKIMIZDA</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/contact.php">
-                            <i class="fas fa-envelope"></i>
+                            <i class="bi bi-envelope-fill"></i>
                             <span>İLETİŞİM</span>
                         </a>
                     </li>
@@ -754,7 +760,7 @@ if (!isset($pageTitle)) {
                         <!-- Giriş yapan kullanıcılar için ek menü öğeleri -->
                         <li class="nav-item">
                             <a class="nav-link modern-nav-link upload-link" href="/mrecuphpkopyasikopyasi6kopyasi/user/upload.php">
-                                <i class="fas fa-upload"></i>
+                                <i class="bi bi-upload"></i>
                                 <span>DOSYA YÜKLE</span>
                             </a>
                         </li>
@@ -767,7 +773,7 @@ if (!isset($pageTitle)) {
                         <!-- Notification icon -->
                         <li class="nav-item">
                             <a class="nav-link modern-nav-link notification-link" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-bell"></i>
+                                <i class="bi bi-bell-fill"></i>
                                 <span class="notification-badge" style="display: none;">0</span>
                             </a>
                             <ul class="dropdown-menu modern-dropdown dropdown-menu-end">
@@ -779,7 +785,7 @@ if (!isset($pageTitle)) {
                         <li class="nav-item dropdown">
                             <a class="nav-link modern-nav-link dropdown-toggle user-dropdown" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <div class="user-avatar">
-                                    <i class="fas fa-user"></i>
+                                    <i class="bi bi-person-fill"></i>
                                 </div>
                                 <div class="user-info">
                                     <span class="username"><?php echo isset($_SESSION['username']) ? $_SESSION['username'] : 'Kullanıcı'; ?></span>
@@ -792,35 +798,35 @@ if (!isset($pageTitle)) {
                                 <?php if (function_exists('isAdmin') && isAdmin()): ?>
                                     <li>
                                         <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/admin/">
-                                            <i class="fas fa-cog me-2"></i>Admin Panel
+                                            <i class="bi bi-gear-fill me-2"></i>Admin Panel
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/migration-dashboard.php">
-                                            <i class="fas fa-exchange-alt me-2"></i>Migration Dashboard
+                                            <i class="bi bi-arrow-left-right me-2"></i>Migration Dashboard
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
                                 <?php endif; ?>
                                 <li>
                                     <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/user/">
-                                        <i class="fas fa-dashboard me-2"></i>Panel
+                                        <i class="bi bi-speedometer2 me-2"></i>Panel
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/user/files.php">
-                                        <i class="fas fa-file me-2"></i>Dosyalarım
+                                        <i class="bi bi-file-earmark-fill me-2"></i>Dosyalarım
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/user/profile.php">
-                                        <i class="fas fa-user me-2"></i>Profil
+                                        <i class="bi bi-person-fill me-2"></i>Profil
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/logout.php">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Çıkış
+                                        <i class="bi bi-box-arrow-right me-2"></i>Çıkış
                                     </a>
                                 </li>
                             </ul>
@@ -828,13 +834,13 @@ if (!isset($pageTitle)) {
                     <?php else: ?>
                         <li class="nav-item">
                             <a class="nav-link modern-nav-link login-btn" href="/mrecuphpkopyasikopyasi6kopyasi/login.php">
-                                <i class="fas fa-sign-in-alt"></i>
+                                <i class="bi bi-box-arrow-in-right"></i>
                                 <span>Panele Giriş</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link modern-nav-link register-btn" href="/mrecuphpkopyasikopyasi6kopyasi/register.php">
-                                <i class="fas fa-user-plus"></i>
+                                <i class="bi bi-person-plus-fill"></i>
                                 <span>Kayıt</span>
                             </a>
                         </li>

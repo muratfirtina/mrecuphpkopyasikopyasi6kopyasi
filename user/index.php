@@ -179,7 +179,7 @@ include '../includes/user_header.php';
                                     <div class="stat-label">İşleniyor</div>
                                     <?php if ($processingUploads > 0): ?>
                                         <div class="stat-change">
-                                            <i class="fas fa-cogs text-info"></i>
+                                            <i class="bi bi-gear-wide-connected text-info"></i>
                                             <span class="text-info">Aktif işlem</span>
                                         </div>
                                     <?php else: ?>
@@ -190,7 +190,7 @@ include '../includes/user_header.php';
                                     <?php endif; ?>
                                 </div>
                                 <div class="stat-icon bg-info">
-                                    <i class="fas fa-cogs"></i>
+                                    <i class="bi bi-gear-wide-connected"></i>
                                 </div>
                             </div>
                         </div>

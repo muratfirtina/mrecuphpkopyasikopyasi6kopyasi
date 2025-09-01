@@ -606,7 +606,7 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card border-warning">
                 <div class="card-header bg-warning text-dark">
                     <h5 class="mb-0">
-                        <i class="fas fa-cogs me-2"></i>Admin İşlemleri
+                        <i class="bi bi-gear-wide-connected me-2"></i>Admin İşlemleri
                     </h5>
                 </div>
                 <div class="card-body">
@@ -1016,7 +1016,7 @@ include '../includes/admin_sidebar.php';
                             <strong>Araç Bilgileri:</strong>
                             <ul class="list-unstyled ms-3">
                                 <li><i class="fas fa-car me-1"></i> Marka: <?php echo htmlspecialchars($revision['brand_name'] ?: 'Belirtilmemiş'); ?></li>
-                                <li><i class="fas fa-cogs me-1"></i> Model: <?php echo htmlspecialchars($revision['model_name'] ?: 'Belirtilmemiş'); ?></li>
+                                <li><i class="bi bi-gear-wide-connected me-1"></i> Model: <?php echo htmlspecialchars($revision['model_name'] ?: 'Belirtilmemiş'); ?></li>
                                 <li><i class="fas fa-calendar-alt me-1"></i> Yıl: <?php echo htmlspecialchars($revision['year'] ?: 'Belirtilmemiş'); ?></li>
                                 <li><i class="fas fa-id-card me-1"></i> Plaka: <?php echo htmlspecialchars($revision['plate'] ?: 'Belirtilmemiş'); ?></li>
                             </ul>
