@@ -234,7 +234,7 @@ if ($uploadId && isValidUUID($uploadId)) {
     $pageTitle = 'Dosya Yüklemeleri';
     $pageDescription = 'Kullanıcı dosya yüklemelerini yönetin ve işleyin.';
 }
-$pageIcon = 'fas fa-upload';
+$pageIcon = 'bi bi-upload';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -244,14 +244,14 @@ include '../includes/admin_sidebar.php';
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
     <div class="alert alert-admin alert-danger" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
     </div>
 <?php endif; ?>
 
 <?php if ($success): ?>
     <div class="alert alert-admin alert-success" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="bi bi-check-circle me-2"></i>
         <?php echo $success; ?>
     </div>
 <?php endif; ?>
@@ -267,7 +267,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-success">+<?php echo $stats['today_uploads']; ?> bugün</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-file text-primary fa-lg"></i>
+                    <i class="bi bi-file text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -282,7 +282,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">İşlem bekliyor</small>
                 </div>
                 <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-clock text-warning fa-lg"></i>
+                    <i class="bi bi-clock text-warning fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -312,7 +312,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-danger"><?php echo safe_number_format($stats['rejected_count']); ?> reddedilen</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-check-circle text-success fa-lg"></i>
+                    <i class="bi bi-check-circle text-success fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -323,16 +323,16 @@ include '../includes/admin_sidebar.php';
 <div class="card mb-4">
         <div class="card-header bg-light">
             <h6 class="mb-0">
-                <i class="fas fa-filter me-2"></i>Filtreler ve Arama
+                <i class="bi bi-filter me-2"></i>Filtreler ve Arama
             </h6>
         </div>
     <div class="card-body">
         <?php if ($uploadId && isValidUUID($uploadId)): ?>
             <div class="alert-info mb-3" style=" padding: 1rem; display: flex; align-items: center;">
-                <i class="fas fa-info-circle me-2"></i>
+                <i class="bi bi-info-circle me-2"></i>
                 <strong>Belirli dosya görüntüleniyor:</strong> ID: <?php echo htmlspecialchars($uploadId); ?>
                 <a href="uploads.php" class="btn btn-sm btn-outline-primary ms-2">
-                    <i class="fas fa-times me-1"></i>Filtreyi Kaldır
+                    <i class="bi bi-times me-1"></i>Filtreyi Kaldır
                 </a>
             </div>
         <?php endif; ?>
@@ -344,7 +344,7 @@ include '../includes/admin_sidebar.php';
             
             <div class="col-md-3">
                 <label for="search" class="form-label">
-                    <i class="fas fa-search me-1"></i>Arama
+                    <i class="bi bi-search me-1"></i>Arama
                 </label>
                 <input type="text" class="form-control" id="search" name="search" 
                        value="<?php echo htmlspecialchars($search); ?>" 
@@ -353,7 +353,7 @@ include '../includes/admin_sidebar.php';
             
             <div class="col-md-2">
                 <label for="status" class="form-label">
-                    <i class="fas fa-filter me-1"></i>Durum
+                    <i class="bi bi-filter me-1"></i>Durum
                 </label>
                 <select class="form-select" id="status" name="status">
                     <option value="">Tüm Durumlar</option>
@@ -366,7 +366,7 @@ include '../includes/admin_sidebar.php';
             
             <div class="col-md-2">
                 <label for="brand" class="form-label">
-                    <i class="fas fa-car me-1"></i>Marka
+                    <i class="bi bi-car me-1"></i>Marka
                 </label>
                 <select class="form-select" id="brand" name="brand">
                     <option value="">Tüm Markalar</option>
@@ -381,7 +381,7 @@ include '../includes/admin_sidebar.php';
             
             <div class="col-md-2">
                 <label for="date_from" class="form-label">
-                    <i class="fas fa-calendar me-1"></i>Başlangıç
+                    <i class="bi bi-calendar me-1"></i>Başlangıç
                 </label>
                 <input type="date" class="form-control" id="date_from" name="date_from" 
                        value="<?php echo htmlspecialchars($dateFrom); ?>">
@@ -389,7 +389,7 @@ include '../includes/admin_sidebar.php';
             
             <div class="col-md-2">
                 <label for="date_to" class="form-label">
-                    <i class="fas fa-calendar me-1"></i>Bitiş
+                    <i class="bi bi-calendar me-1"></i>Bitiş
                 </label>
                 <input type="date" class="form-control" id="date_to" name="date_to" 
                        value="<?php echo htmlspecialchars($dateTo); ?>">
@@ -398,10 +398,10 @@ include '../includes/admin_sidebar.php';
             <div class="col-md-1">
                 <div class="d-flex flex-column gap-2">
                     <button type="submit" class="btn btn-primary btn-sm">
-                        <i class="fas fa-search"></i>
+                        <i class="bi bi-search"></i>
                     </button>
                     <a href="uploads.php" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-undo"></i>
+                        <i class="bi bi-undo"></i>
                     </a>
                 </div>
             </div>
@@ -412,7 +412,7 @@ include '../includes/admin_sidebar.php';
                     <div class="col-auto">
                         <div class="d-flex align-items-center gap-2">
                             <label for="per_page" class="form-label mb-0 fw-bold">
-                                <i class="fas fa-list me-1 text-primary"></i>Sayfa başına:
+                                <i class="bi bi-list me-1 text-primary"></i>Sayfa başına:
                             </label>
                             <select class="form-select form-select-sm px-3 py-2" id="per_page" name="per_page" style="width: 120px; border: 2px solid #e9ecef;" onchange="this.form.submit()">
                                 <option value="10" <?php echo $per_page === 10 ? 'selected' : ''; ?>>10 kayıt</option>
@@ -424,7 +424,7 @@ include '../includes/admin_sidebar.php';
                     </div>
                     <div class="col-auto">
                         <span class="badge bg-light text-dark px-3 py-2">
-                            <i class="fas fa-info-circle me-1"></i>
+                            <i class="bi bi-info-circle me-1"></i>
                             Toplam <?php echo number_format($totalUploads); ?> kayıt bulundu
                         </span>
                     </div>
@@ -440,7 +440,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-gradient-primary text-white border-0">
                 <h5 class="modal-title d-flex align-items-center" id="processConfirmModalLabel">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="bi bi-exclamation-triangle me-2"></i>
                     Dosya İşleme Onayı
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
@@ -448,23 +448,23 @@ include '../includes/admin_sidebar.php';
             <div class="modal-body text-center py-4">
                 <div class="mb-4">
                     <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ff6b6b, #ffa500); border-radius: 50%;">
-                        <i class="fas fa-file-alt text-white fa-2x"></i>
+                        <i class="bi bi-file-alt text-white fa-2x"></i>
                     </div>
                     <h6 class="mb-2 text-dark">Bu dosyayı işleme almak istediğinizden emin misiniz?</h6>
                     <p class="text-muted mb-0">Bu işlem dosyanın durumunu "İşleniyor" olarak değiştirecek ve dosya detay sayfasına yönlendirecektir.</p>
                 </div>
                 <div class="alert alert-info d-flex align-items-center mb-0">
-                    <i class="fas fa-info-circle me-2"></i>
+                    <i class="bi bi-info-circle me-2"></i>
                     <small>Bu işlem geri alınamaz. Devam etmek istediğinizden emin olun.</small>
                 </div>
             </div>
             <div class="modal-footer border-0 pt-3">
                 <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>
+                    <i class="bi bi-times me-1"></i>
                     İptal
                 </button>
                 <button type="button" class="btn btn-success px-4" id="confirmProcessBtn" style="box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                    <i class="fas fa-check me-1"></i>
+                    <i class="bi bi-check me-1"></i>
                     Evet, İşle
                 </button>
             </div>
@@ -478,7 +478,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-gradient-danger text-white border-0">
                 <h5 class="modal-title d-flex align-items-center" id="adminCancelModalLabel">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="bi bi-exclamation-triangle me-2"></i>
                     Dosya İptal Onayı
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
@@ -491,21 +491,21 @@ include '../includes/admin_sidebar.php';
                     
                     <div class="mb-4">
                         <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 50%;">
-                            <i class="fas fa-times text-white fa-2x"></i>
+                            <i class="bi bi-times text-white fa-2x"></i>
                         </div>
                         <h6 class="mb-2 text-dark text-center">Bu dosyayı iptal etmek istediğinizden emin misiniz?</h6>
                         <p class="text-muted mb-3 text-center">
                             <strong>Dosya:</strong> <span id="cancelFileName"></span>
                         </p>
                         <div class="alert alert-warning d-flex align-items-center mb-3">
-                            <i class="fas fa-info-circle me-2"></i>
+                            <i class="bi bi-info-circle me-2"></i>
                             <small>Bu işlem dosyayı gizleyecek ve eğer ücretli ise kullanıcıya kredi iadesi yapacaktır.</small>
                         </div>
                     </div>
                     
                     <div class="mb-3">
                         <label for="adminNotes" class="form-label">
-                            <i class="fas fa-sticky-note me-1"></i>
+                            <i class="bi bi-sticky-note me-1"></i>
                             İptal Sebebi (Opsiyonel)
                         </label>
                         <textarea class="form-control" id="adminNotes" name="admin_notes" rows="3" 
@@ -515,11 +515,11 @@ include '../includes/admin_sidebar.php';
                 </div>
                 <div class="modal-footer border-0 pt-3">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>
+                        <i class="bi bi-times me-1"></i>
                         İptal
                     </button>
                     <button type="submit" class="btn btn-danger px-4" style="box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                        <i class="fas fa-check me-1"></i>
+                        <i class="bi bi-check me-1"></i>
                         Evet, İptal Et
                     </button>
                 </div>
@@ -532,7 +532,7 @@ include '../includes/admin_sidebar.php';
 <div class="card admin-card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
-            <i class="fas fa-file-upload me-2"></i>
+            <i class="bi bi-file-upload me-2"></i>
             Dosya Yüklemeleri
         </h5>
         <div class="text-muted small">
@@ -552,7 +552,7 @@ include '../includes/admin_sidebar.php';
     <div class="card-body p-0">
         <?php if (empty($uploads)): ?>
             <div class="text-center py-5">
-                <i class="fas fa-file-upload fa-3x text-muted mb-3"></i>
+                <i class="bi bi-file-upload fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">
                     <?php if ($search || $status || $brand || $dateFrom || $dateTo): ?>
                         Filtreye uygun dosya bulunamadı
@@ -580,7 +580,7 @@ include '../includes/admin_sidebar.php';
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="file-icon me-3">
-                                            <i class="fas fa-file-alt fa-2x text-primary"></i>
+                                            <i class="bi bi-file-alt fa-2x text-primary"></i>
                                         </div>
                                         <div>
                                             <h6 class="mb-1 text-truncate" style="max-width: 200px;" 
@@ -628,19 +628,19 @@ include '../includes/admin_sidebar.php';
                                         <?php if (!empty($upload['plate'])): ?>
                                             <div class="mt-1">
                                                 <span class="badge bg-dark text-white">
-                                                    <i class="fas fa-id-card me-1"></i>
+                                                    <i class="bi bi-id-card me-1"></i>
                                                     <?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
                                                 </span>
                                                 <?php if (!empty($upload['kilometer'])): ?>
                                                     <span class="badge bg-secondary text-white ms-1">
-                                                        <i class="fas fa-tachometer-alt me-1"></i>
+                                                        <i class="bi bi-tachometer-alt me-1"></i>
                                                         <?php echo number_format($upload['kilometer']); ?> km
                                                     </span>
                                                 <?php endif; ?>
                                             </div>
                                         <?php else: ?>
                                             <br><small class="text-muted">
-                                                <i class="fas fa-minus-circle me-1"></i>
+                                                <i class="bi bi-minus-circle me-1"></i>
                                                 Plaka belirtilmemiş
                                             </small>
                                         <?php endif; ?>
@@ -668,14 +668,14 @@ include '../includes/admin_sidebar.php';
                                     ];
                                     ?>
                                     <span class="badge bg-<?php echo $statusClass[$upload['status']] ?? 'secondary'; ?> d-flex align-items-center" style="width: fit-content;">
-                                        <i class="fas fa-<?php echo $statusIcon[$upload['status']] ?? 'question'; ?> me-1"></i>
+                                        <i class="bi bi-<?php echo $statusIcon[$upload['status']] ?? 'question'; ?> me-1"></i>
                                         <?php echo $statusText[$upload['status']] ?? 'Bilinmiyor'; ?>
                                     </span>
                                     
                                     <?php if (!empty($upload['admin_notes'])): ?>
                                         <div class="mt-1">
                                             <small class="text-muted" title="<?php echo htmlspecialchars($upload['admin_notes']); ?>">
-                                                <i class="fas fa-comment fa-sm"></i> Admin notu
+                                                <i class="bi bi-comment fa-sm"></i> Admin notu
                                             </small>
                                         </div>
                                     <?php endif; ?>
@@ -690,7 +690,7 @@ include '../includes/admin_sidebar.php';
                                     <div class="btn-group-vertical btn-group-sm" style="width: 140px;">
                                         <button type="button" class="btn btn-outline-primary btn-sm" 
                                                 onclick="window.location.href='file-detail.php?id=<?php echo $upload['id']; ?>'">
-                                            <i class="fas fa-eye me-1"></i>Detay
+                                            <i class="bi bi-eye me-1"></i>Detay
                                         </button>
                                         
                                         <!-- Görüntü Dosyası için Görüntüle Butonu -->
@@ -698,14 +698,14 @@ include '../includes/admin_sidebar.php';
                                             <button type="button" class="btn btn-outline-info btn-sm" 
                                                     onclick="window.location.href='view-image.php?id=<?php echo $upload['id']; ?>&type=upload'" 
                                                     title="Görüntüyü büyük boyutta gör">
-                                                <i class="fas fa-image me-1"></i>Görüntüle
+                                                <i class="bi bi-image me-1"></i>Görüntüle
                                             </button>
                                         <?php endif; ?>
                                         
                                         <?php if ($upload['status'] === 'pending'): ?>
                                             <button type="button" class="btn btn-outline-success btn-sm" 
                                                     onclick="processFile('<?php echo $upload['id']; ?>')">
-                                                <i class="fas fa-play me-1"></i>İşleme Al
+                                                <i class="bi bi-play me-1"></i>İşleme Al
                                             </button>
                                         <?php endif; ?>
                                         
@@ -714,11 +714,11 @@ include '../includes/admin_sidebar.php';
                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                     onclick="showCancelModal('<?php echo $upload['id']; ?>', 'upload', '<?php echo htmlspecialchars($upload['original_name']); ?>')" 
                                                     title="Bu dosyayı iptal et">
-                                                <i class="fas fa-times me-1"></i>İptal Et
+                                                <i class="bi bi-times me-1"></i>İptal Et
                                             </button>
                                         <?php else: ?>
                                             <span class="btn btn-secondary btn-sm disabled">
-                                                <i class="fas fa-ban me-1"></i>İptal Edilmiş
+                                                <i class="bi bi-ban me-1"></i>İptal Edilmiş
                                             </span>
                                         <?php endif; ?>
                                     </div>
@@ -740,7 +740,7 @@ include '../includes/admin_sidebar.php';
                                 <div class="col-auto">
                                     <div class="pagination-info">
                                         <span class="badge bg-primary fs-6 px-3 py-2">
-                                            <i class="fas fa-list-ol me-2"></i>
+                                            <i class="bi bi-list-ol me-2"></i>
                                             <?php 
                                             $start = $offset + 1;
                                             $end = min($offset + $per_page, $totalUploads);
@@ -756,7 +756,7 @@ include '../includes/admin_sidebar.php';
                                     <div class="quick-jump-container">
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text bg-white border-end-0">
-                                                <i class="fas fa-search text-muted"></i>
+                                                <i class="bi bi-search text-muted"></i>
                                             </span>
                                             <input type="number" class="form-control border-start-0" 
                                                    id="quickJump" 
@@ -770,7 +770,7 @@ include '../includes/admin_sidebar.php';
                                             <button type="button" class="btn btn-outline-primary btn-sm" 
                                                     onclick="quickJumpToPage()" 
                                                     title="Sayfaya git">
-                                                <i class="fas fa-arrow-right"></i>
+                                                <i class="bi bi-arrow-right"></i>
                                             </button>
                                         </div>
                                         <small class="text-muted d-block mt-1">/ <?php echo $totalPages; ?> sayfa</small>
@@ -790,7 +790,7 @@ include '../includes/admin_sidebar.php';
                                            href="<?php echo $page > 1 ? buildPaginationUrl(1) : '#'; ?>" 
                                            title="İlk Sayfa" 
                                            <?php echo $page <= 1 ? 'tabindex="-1"' : ''; ?>>
-                                            <i class="fas fa-angle-double-left"></i>
+                                            <i class="bi bi-angle-double-left"></i>
                                             <span class="d-none d-sm-inline ms-1">İlk</span>
                                         </a>
                                     </li>
@@ -801,7 +801,7 @@ include '../includes/admin_sidebar.php';
                                            href="<?php echo $page > 1 ? buildPaginationUrl($page - 1) : '#'; ?>" 
                                            title="Önceki Sayfa"
                                            <?php echo $page <= 1 ? 'tabindex="-1"' : ''; ?>>
-                                            <i class="fas fa-angle-left"></i>
+                                            <i class="bi bi-angle-left"></i>
                                             <span class="d-none d-sm-inline ms-1">Önceki</span>
                                         </a>
                                     </li>
@@ -858,7 +858,7 @@ include '../includes/admin_sidebar.php';
                                            title="Sonraki Sayfa"
                                            <?php echo $page >= $totalPages ? 'tabindex="-1"' : ''; ?>>
                                             <span class="d-none d-sm-inline me-1">Sonraki</span>
-                                            <i class="fas fa-angle-right"></i>
+                                            <i class="bi bi-angle-right"></i>
                                         </a>
                                     </li>
                                     
@@ -869,7 +869,7 @@ include '../includes/admin_sidebar.php';
                                            title="Son Sayfa"
                                            <?php echo $page >= $totalPages ? 'tabindex="-1"' : ''; ?>>
                                             <span class="d-none d-sm-inline me-1">Son</span>
-                                            <i class="fas fa-angle-double-right"></i>
+                                            <i class="bi bi-angle-double-right"></i>
                                         </a>
                                     </li>
                                 </ul>
@@ -881,14 +881,14 @@ include '../includes/admin_sidebar.php';
                     <div class="row mt-3 pt-3 border-top">
                         <div class="col-md-6">
                             <small class="text-muted">
-                                <i class="fas fa-info-circle me-1"></i>
+                                <i class="bi bi-info-circle me-1"></i>
                                 Sayfa <strong><?php echo $page; ?></strong> / <strong><?php echo $totalPages; ?></strong> - 
                                 Sayfa başına <strong><?php echo $per_page; ?></strong> kayıt gösteriliyor
                             </small>
                         </div>
                         <div class="col-md-6 text-md-end">
                             <small class="text-muted">
-                                <i class="fas fa-database me-1"></i>
+                                <i class="bi bi-database me-1"></i>
                                 Toplam <strong><?php echo number_format($totalUploads); ?></strong> dosya kayıt bulundu
                             </small>
                         </div>
@@ -1254,7 +1254,7 @@ function quickJumpToPage() {
     container.classList.add('loading');
     var button = container.querySelector('.btn');
     var originalIcon = button.innerHTML;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    button.innerHTML = '<i class="bi bi-spinner fa-spin"></i>';
     
     // Build URL with current parameters but new page
     var url = new URL(window.location);
@@ -1283,7 +1283,7 @@ function showQuickJumpError(message) {
     var errorEl = document.createElement('div');
     errorEl.className = 'quick-jump-error alert alert-danger alert-sm mt-1 mb-0 py-1 px-2';
     errorEl.style.fontSize = '0.75rem';
-    errorEl.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>' + message;
+    errorEl.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>' + message;
     
     container.appendChild(errorEl);
     
@@ -1431,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Loading indicator göster
                 var originalText = currentProcessButton.innerHTML;
-                currentProcessButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Yükleniyor...';
+                currentProcessButton.innerHTML = '<i class="bi bi-spinner fa-spin me-1"></i>Yükleniyor...';
                 currentProcessButton.disabled = true;
                 
                 // Status güncelle
@@ -1513,7 +1513,7 @@ function updateFileStatus(uploadId, status, notes, redirectToDetail) {
         for (var i = 0; i < buttons.length; i++) {
             var btn = buttons[i];
             if (btn.innerHTML.includes('Yükleniyor')) {
-                btn.innerHTML = '<i class="fas fa-play me-1"></i>İşle';
+                btn.innerHTML = '<i class="bi bi-play me-1"></i>İşle';
                 btn.disabled = false;
             }
         }

@@ -101,10 +101,10 @@ Design panelinde şu bölümleri yönetebilirsiniz:
 ### Icon Kullanımı
 FontAwesome iconları kullanabilirsiniz:
 ```
-fas fa-heart
-fas fa-shield-alt
-fas fa-rocket
-fas fa-globe
+bi bi-heart
+bi bi-shield-alt
+bi bi-rocket
+bi bi-globe
 ```
 
 ### Resim URL'leri

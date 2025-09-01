@@ -226,42 +226,42 @@ echo "<h2>⚡ Özellikler</h2>";
 echo "<div class='demo-grid'>";
 
 echo "<div class='feature-card text-center'>";
-echo "<i class='fas fa-sliders-h feature-icon'></i>";
+echo "<i class='bi bi-sliders-h feature-icon'></i>";
 echo "<h5>Hero Slider Yönetimi</h5>";
 echo "<p>Database temelli slider sistemi. Resim, metin, buton ve renkleri kolayca düzenleyin.</p>";
 echo "<a href='design/sliders.php' class='demo-btn'>Slider Panel</a>";
 echo "</div>";
 
 echo "<div class='feature-card text-center'>";
-echo "<i class='fas fa-palette feature-icon'></i>";
+echo "<i class='bi bi-palette feature-icon'></i>";
 echo "<h5>Tema Ayarları</h5>";
 echo "<p>Site renklerini, typewriter efektini ve genel tasarım ayarlarını yönetin.</p>";
 echo "<a href='design/settings.php' class='demo-btn'>Ayarlar</a>";
 echo "</div>";
 
 echo "<div class='feature-card text-center'>";
-echo "<i class='fas fa-edit feature-icon'></i>";
+echo "<i class='bi bi-edit feature-icon'></i>";
 echo "<h5>İçerik Yönetimi</h5>";
 echo "<p>Sayfa içeriklerini, metinleri ve diğer elemanları database üzerinden düzenleyin.</p>";
 echo "<a href='design/content.php' class='demo-btn'>İçerik Panel</a>";
 echo "</div>";
 
 echo "<div class='feature-card text-center'>";
-echo "<i class='fas fa-images feature-icon'></i>";
+echo "<i class='bi bi-images feature-icon'></i>";
 echo "<h5>Medya Yönetimi</h5>";
 echo "<p>Resim yükleme, düzenleme ve organize etme sistemi.</p>";
 echo "<a href='design/media.php' class='demo-btn'>Medya Panel</a>";
 echo "</div>";
 
 echo "<div class='feature-card text-center'>";
-echo "<i class='fas fa-mobile-alt feature-icon'></i>";
+echo "<i class='bi bi-mobile-alt feature-icon'></i>";
 echo "<h5>Responsive Design</h5>";
 echo "<p>Tüm cihazlarda mükemmel görünüm ve kullanıcı deneyimi.</p>";
 echo "<span class='demo-btn' style='background: #27ae60;'>✓ Responsive</span>";
 echo "</div>";
 
 echo "<div class='feature-card text-center'>";
-echo "<i class='fas fa-magic feature-icon'></i>";
+echo "<i class='bi bi-magic feature-icon'></i>";
 echo "<h5>Typewriter Efekti</h5>";
 echo "<p>Dinamik yazma efekti ile hero bölümünde etkileyici animasyonlar.</p>";
 echo "<span class='demo-btn' style='background: #e74c3c;'>✓ Animasyonlu</span>";
@@ -325,28 +325,28 @@ echo "<div class='row text-center'>";
 
 echo "<div class='col-md-3 mb-3'>";
 echo "<a href='design/index.php' class='demo-btn' style='width: 100%; padding: 20px;'>";
-echo "<i class='fas fa-tachometer-alt d-block mb-2' style='font-size: 2rem;'></i>";
+echo "<i class='bi bi-tachometer-alt d-block mb-2' style='font-size: 2rem;'></i>";
 echo "Design Dashboard";
 echo "</a>";
 echo "</div>";
 
 echo "<div class='col-md-3 mb-3'>";
 echo "<a href='index.php' class='demo-btn' style='width: 100%; padding: 20px; background: #27ae60;'>";
-echo "<i class='fas fa-home d-block mb-2' style='font-size: 2rem;'></i>";
+echo "<i class='bi bi-home d-block mb-2' style='font-size: 2rem;'></i>";
 echo "Ana Sayfa";
 echo "</a>";
 echo "</div>";
 
 echo "<div class='col-md-3 mb-3'>";
 echo "<a href='login.php' class='demo-btn' style='width: 100%; padding: 20px; background: #e74c3c;'>";
-echo "<i class='fas fa-sign-in-alt d-block mb-2' style='font-size: 2rem;'></i>";
+echo "<i class='bi bi-sign-in-alt d-block mb-2' style='font-size: 2rem;'></i>";
 echo "Giriş Yap";
 echo "</a>";
 echo "</div>";
 
 echo "<div class='col-md-3 mb-3'>";
 echo "<a href='design_installation_guide.php' class='demo-btn' style='width: 100%; padding: 20px; background: #f39c12;'>";
-echo "<i class='fas fa-wrench d-block mb-2' style='font-size: 2rem;'></i>";
+echo "<i class='bi bi-wrench d-block mb-2' style='font-size: 2rem;'></i>";
 echo "Kurulum Kılavuzu";
 echo "</a>";
 echo "</div>";
@@ -362,7 +362,7 @@ if ($systemStatus['users'] === 'online') {
     
     echo "<div class='col-md-4'>";
     echo "<div class='feature-card text-center'>";
-    echo "<i class='fas fa-crown text-danger' style='font-size: 2rem;'></i>";
+    echo "<i class='bi bi-crown text-danger' style='font-size: 2rem;'></i>";
     echo "<h6 class='mt-2'>Admin</h6>";
     echo "<p><strong>Email:</strong> admin@mrecu.com<br><strong>Şifre:</strong> admin123</p>";
     echo "<span class='badge bg-danger'>Tam Yetki</span>";
@@ -371,7 +371,7 @@ if ($systemStatus['users'] === 'online') {
     
     echo "<div class='col-md-4'>";
     echo "<div class='feature-card text-center'>";
-    echo "<i class='fas fa-paint-brush text-primary' style='font-size: 2rem;'></i>";
+    echo "<i class='bi bi-paint-brush text-primary' style='font-size: 2rem;'></i>";
     echo "<h6 class='mt-2'>Designer</h6>";
     echo "<p><strong>Email:</strong> design@mrecu.com<br><strong>Şifre:</strong> design123</p>";
     echo "<span class='badge bg-primary'>Design Yetkisi</span>";
@@ -380,7 +380,7 @@ if ($systemStatus['users'] === 'online') {
     
     echo "<div class='col-md-4'>";
     echo "<div class='feature-card text-center'>";
-    echo "<i class='fas fa-user text-success' style='font-size: 2rem;'></i>";
+    echo "<i class='bi bi-user text-success' style='font-size: 2rem;'></i>";
     echo "<h6 class='mt-2'>User</h6>";
     echo "<p><strong>Email:</strong> test@mrecu.com<br><strong>Şifre:</strong> test123</p>";
     echo "<span class='badge bg-success'>Normal Kullanıcı</span>";

@@ -439,7 +439,7 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
 <body>
     <!-- Mobile Toggle Button -->
     <button class="mobile-toggle d-lg-none" onclick="toggleSidebar()">
-        <i class="fas fa-bars"></i>
+        <i class="bi bi-bars"></i>
     </button>
 
     <!-- Sidebar -->
@@ -447,15 +447,15 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
         <!-- Sidebar Header -->
         <div class="sidebar-header">
             <button class="sidebar-toggle d-none d-lg-block" onclick="toggleSidebar()">
-                <i class="fas fa-bars"></i>
+                <i class="bi bi-bars"></i>
             </button>
-            <h4><i class="fas fa-paint-brush me-2"></i>Design Panel</h4>
+            <h4><i class="bi bi-paint-brush me-2"></i>Design Panel</h4>
         </div>
 
         <!-- User Info -->
         <div class="user-info">
             <div class="user-avatar">
-                <i class="fas fa-user"></i>
+                <i class="bi bi-user"></i>
             </div>
             <p class="user-name"><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></p>
             <p class="user-role"><?php echo ucfirst($_SESSION['role'] ?? $_SESSION['user_role'] ?? 'admin'); ?></p>
@@ -465,11 +465,11 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
         <div class="nav-section">
             <div class="nav-section-title">Ana Panel</div>
             <a href="index.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : ''; ?>">
-                <i class="fas fa-tachometer-alt"></i>
+                <i class="bi bi-tachometer-alt"></i>
                 <span>Dashboard</span>
             </a>
             <a href="../admin/" class="design-nav-link">
-                <i class="fas fa-cog"></i>
+                <i class="bi bi-cog"></i>
                 <span>Admin Panel</span>
             </a>
         </div>
@@ -477,35 +477,35 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
         <div class="nav-section">
             <div class="nav-section-title">Design Yönetimi</div>
             <a href="sliders.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'sliders.php') ? 'active' : ''; ?>">
-                <i class="fas fa-images"></i>
+                <i class="bi bi-images"></i>
                 <span>Hero Slider</span>
             </a>
             <a href="settings.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'settings.php') ? 'active' : ''; ?>">
-                <i class="fas fa-palette"></i>
+                <i class="bi bi-palette"></i>
                 <span>Site Ayarları</span>
             </a>
             <a href="content.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'content.php') ? 'active' : ''; ?>">
-                <i class="fas fa-edit"></i>
+                <i class="bi bi-edit"></i>
                 <span>İçerik Yönetimi</span>
             </a>
             <a href="media.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'media.php') ? 'active' : ''; ?>">
-                <i class="fas fa-photo-video"></i>
+                <i class="bi bi-photo-video"></i>
                 <span>Medya Yönetimi</span>
             </a>
             <a href="services.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'services.php') ? 'active' : ''; ?>">
-                <i class="fas fa-concierge-bell"></i>
+                <i class="bi bi-concierge-bell"></i>
                 <span>Hizmet Yönetimi</span>
             </a>
             <a href="footer.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'footer.php') ? 'active' : ''; ?>">
-                <i class="fas fa-shoe-prints"></i>
+                <i class="bi bi-shoe-prints"></i>
                 <span>Footer Yönetimi</span>
             </a>
             <a href="about.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'about.php') ? 'active' : ''; ?>">
-                <i class="fas fa-info-circle"></i>
+                <i class="bi bi-info-circle"></i>
                 <span>Hakkımızda</span>
             </a>
             <a href="contact.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'contact.php') ? 'active' : ''; ?>">
-                <i class="fas fa-phone"></i>
+                <i class="bi bi-phone"></i>
                 <span>İletişim</span>
             </a>
         </div>
@@ -513,7 +513,7 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
         <div class="nav-section">
             <div class="nav-section-title">Önizleme</div>
             <a href="../index.php" target="_blank" class="design-nav-link">
-                <i class="fas fa-external-link-alt"></i>
+                <i class="bi bi-external-link-alt"></i>
                 <span>Site Önizleme</span>
             </a>
         </div>
@@ -521,7 +521,7 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
         <div class="nav-section">
             <div class="nav-section-title">Hesap</div>
             <a href="../logout.php" class="design-nav-link">
-                <i class="fas fa-sign-out-alt"></i>
+                <i class="bi bi-sign-out-alt"></i>
                 <span>Çıkış Yap</span>
             </a>
         </div>
@@ -552,10 +552,10 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
                 </div>
                 <div class="d-flex align-items-center gap-3">
                     <button class="btn btn-outline-primary btn-sm" onclick="location.reload()">
-                        <i class="fas fa-sync-alt"></i> Yenile
+                        <i class="bi bi-sync-alt"></i> Yenile
                     </button>
                     <a href="../index.php" target="_blank" class="btn btn-outline-success btn-sm">
-                        <i class="fas fa-eye"></i> Önizleme
+                        <i class="bi bi-eye"></i> Önizleme
                     </a>
                 </div>
             </div>

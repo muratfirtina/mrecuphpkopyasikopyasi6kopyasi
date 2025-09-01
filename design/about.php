@@ -9,7 +9,7 @@ require_once '../config/database.php';
 
 // Sayfa ayarları
 $pageTitle = 'Hakkımızda İçerik Yönetimi';
-$pageIcon = 'fas fa-info-circle';
+$pageIcon = 'bi bi-info-circle';
 $breadcrumbs = [
     ['title' => 'Dashboard', 'url' => 'index.php'],
     ['title' => 'Hakkımızda Yönetimi']
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if (!empty($title)) {
                             $features[] = [
                                 'title' => $title,
-                                'icon' => $_POST['feature_icons'][$i] ?? 'fas fa-check-circle text-success'
+                                'icon' => $_POST['feature_icons'][$i] ?? 'bi bi-check-circle text-success'
                             ];
                         }
                     }
@@ -312,7 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $vision_features[] = [
                                 'title' => $title,
                                 'description' => $_POST['vision_feature_descriptions'][$i] ?? '',
-                                'icon' => $_POST['vision_feature_icons'][$i] ?? 'fas fa-rocket text-primary'
+                                'icon' => $_POST['vision_feature_icons'][$i] ?? 'bi bi-rocket text-primary'
                             ];
                         }
                     }
@@ -512,7 +512,7 @@ include '../includes/design_header.php';
                     </div>
                     <div>
                         <a href="../about.php" target="_blank" class="btn btn-outline-success">
-                            <i class="fas fa-external-link-alt me-2"></i>Sayfayı Görüntüle
+                            <i class="bi bi-external-link-alt me-2"></i>Sayfayı Görüntüle
                         </a>
                     </div>
                 </div>
@@ -521,16 +521,16 @@ include '../includes/design_header.php';
                     <nav>
                         <div class="nav nav-tabs px-3 pt-3" id="nav-tab" role="tablist">
                             <button class="nav-link active" id="nav-main-tab" data-bs-toggle="tab" data-bs-target="#nav-main" type="button">
-                                <i class="fas fa-info-circle me-2"></i>Ana İçerik
+                                <i class="bi bi-info-circle me-2"></i>Ana İçerik
                             </button>
                             <button class="nav-link" id="nav-values-tab" data-bs-toggle="tab" data-bs-target="#nav-values" type="button">
-                                <i class="fas fa-heart me-2"></i>Temel Değerler
+                                <i class="bi bi-heart me-2"></i>Temel Değerler
                             </button>
                             <button class="nav-link" id="nav-features-tab" data-bs-toggle="tab" data-bs-target="#nav-features" type="button">
-                                <i class="fas fa-concierge-bell me-2"></i>Hizmet Özellikleri
+                                <i class="bi bi-concierge-bell me-2"></i>Hizmet Özellikleri
                             </button>
                             <button class="nav-link" id="nav-vision-tab" data-bs-toggle="tab" data-bs-target="#nav-vision" type="button">
-                                <i class="fas fa-eye me-2"></i>Vizyon
+                                <i class="bi bi-eye me-2"></i>Vizyon
                             </button>
                         </div>
                     </nav>
@@ -584,10 +584,10 @@ include '../includes/design_header.php';
                                                             <input type="text" class="form-control" name="feature_titles[]" 
                                                                    placeholder="Özellik adı" value="<?php echo htmlspecialchars($feature['title'] ?? ''); ?>">
                                                             <input type="text" class="form-control" name="feature_icons[]" 
-                                                                   placeholder="Icon (örn: fas fa-check-circle text-success)" 
+                                                                   placeholder="Icon (örn: bi bi-check-circle text-success)" 
                                                                    value="<?php echo htmlspecialchars($feature['icon'] ?? ''); ?>">
                                                             <button type="button" class="btn btn-outline-danger remove-feature">
-                                                                <i class="fas fa-minus"></i>
+                                                                <i class="bi bi-minus"></i>
                                                             </button>
                                                         </div>
                                                     </div>
@@ -597,16 +597,16 @@ include '../includes/design_header.php';
                                                         <div class="input-group">
                                                             <input type="text" class="form-control" name="feature_titles[]" placeholder="Özellik adı">
                                                             <input type="text" class="form-control" name="feature_icons[]" 
-                                                                   placeholder="Icon (örn: fas fa-check-circle text-success)">
+                                                                   placeholder="Icon (örn: bi bi-check-circle text-success)">
                                                             <button type="button" class="btn btn-outline-danger remove-feature" style="display:none;">
-                                                                <i class="fas fa-minus"></i>
+                                                                <i class="bi bi-minus"></i>
                                                             </button>
                                                         </div>
                                                     </div>
                                                 <?php endif; ?>
                                             </div>
                                             <button type="button" class="btn btn-sm btn-outline-primary" id="addMainFeature">
-                                                <i class="fas fa-plus me-1"></i>Özellik Ekle
+                                                <i class="bi bi-plus me-1"></i>Özellik Ekle
                                             </button>
                                         </div>
                                     </div>
@@ -615,14 +615,14 @@ include '../includes/design_header.php';
                                         <!-- Yayınlama Ayarları -->
                                         <div class="card shadow-sm mb-4">
                                             <div class="card-header">
-                                                <h6 class="mb-0"><i class="fas fa-cog me-2"></i>Ayarlar</h6>
+                                                <h6 class="mb-0"><i class="bi bi-cog me-2"></i>Ayarlar</h6>
                                             </div>
                                             <div class="card-body">
                                                 <div class="form-check mb-3">
                                                     <input class="form-check-input" type="checkbox" name="about_is_active" 
                                                            <?php echo (!isset($about_content['is_active']) || $about_content['is_active']) ? 'checked' : ''; ?>>
                                                     <label class="form-check-label">
-                                                        <i class="fas fa-eye text-success me-1"></i>Aktif
+                                                        <i class="bi bi-eye text-success me-1"></i>Aktif
                                                     </label>
                                                 </div>
                                             </div>
@@ -631,7 +631,7 @@ include '../includes/design_header.php';
                                         <!-- Ana Resim -->
                                         <div class="card shadow-sm mb-4">
                                             <div class="card-header">
-                                                <h6 class="mb-0"><i class="fas fa-image me-2"></i>Ana Resim</h6>
+                                                <h6 class="mb-0"><i class="bi bi-image me-2"></i>Ana Resim</h6>
                                             </div>
                                             <div class="card-body">
                                                 <?php if (!empty($about_content['image_url'])): ?>
@@ -649,7 +649,7 @@ include '../includes/design_header.php';
                                                 <?php endif; ?>
                                                 
                                                 <div class="image-upload-area" onclick="document.getElementById('about_image').click();">
-                                                    <i class="fas fa-cloud-upload-alt fa-2x text-primary mb-2"></i>
+                                                    <i class="bi bi-cloud-upload-alt fa-2x text-primary mb-2"></i>
                                                     <p class="mb-0">Resim yüklemek için tıklayın</p>
                                                     <small class="text-muted">JPG, PNG, WebP - max 5MB</small>
                                                 </div>
@@ -663,7 +663,7 @@ include '../includes/design_header.php';
 
                                         <div class="d-grid">
                                             <button type="submit" class="btn btn-design-primary btn-lg">
-                                                <i class="fas fa-save me-2"></i>Ana İçeriği Kaydet
+                                                <i class="bi bi-save me-2"></i>Ana İçeriği Kaydet
                                             </button>
                                         </div>
                                     </div>
@@ -675,7 +675,7 @@ include '../includes/design_header.php';
                         <div class="tab-pane fade" id="nav-values">
                             <div class="row">
                                 <div class="col-lg-8">
-                                    <h5 class="mb-3"><i class="fas fa-heart me-2 text-primary"></i>Mevcut Temel Değerler</h5>
+                                    <h5 class="mb-3"><i class="bi bi-heart me-2 text-primary"></i>Mevcut Temel Değerler</h5>
                                     <div id="coreValuesList">
                                         <?php foreach ($core_values as $value): ?>
                                             <div class="value-card">
@@ -702,14 +702,14 @@ include '../includes/design_header.php';
                                                     <div class="ms-3">
                                                         <button class="btn btn-outline-primary btn-sm me-1" 
                                                                 onclick="editCoreValue(<?php echo htmlspecialchars(json_encode($value)); ?>)">
-                                                            <i class="fas fa-edit"></i>
+                                                            <i class="bi bi-edit"></i>
                                                         </button>
                                                         <form method="POST" class="d-inline" 
                                                               onsubmit="return confirm('Bu değeri silmek istediğinizden emin misiniz?')">
                                                             <input type="hidden" name="action" value="delete_core_value">
                                                             <input type="hidden" name="cv_id" value="<?php echo $value['id']; ?>">
                                                             <button type="submit" class="btn btn-outline-danger btn-sm">
-                                                                <i class="fas fa-trash"></i>
+                                                                <i class="bi bi-trash"></i>
                                                             </button>
                                                         </form>
                                                     </div>
@@ -719,7 +719,7 @@ include '../includes/design_header.php';
                                         
                                         <?php if (empty($core_values)): ?>
                                             <div class="text-center text-muted py-4">
-                                                <i class="fas fa-heart fa-3x mb-3 opacity-25"></i>
+                                                <i class="bi bi-heart fa-3x mb-3 opacity-25"></i>
                                                 <p>Henüz temel değer eklenmemiş.</p>
                                             </div>
                                         <?php endif; ?>
@@ -729,7 +729,7 @@ include '../includes/design_header.php';
                                 <div class="col-lg-4">
                                     <div class="card shadow-sm">
                                         <div class="card-header">
-                                            <h6 class="mb-0"><i class="fas fa-plus me-2"></i>Yeni Değer Ekle</h6>
+                                            <h6 class="mb-0"><i class="bi bi-plus me-2"></i>Yeni Değer Ekle</h6>
                                         </div>
                                         <div class="card-body">
                                             <form method="POST" action="" id="coreValueForm">
@@ -750,10 +750,10 @@ include '../includes/design_header.php';
                                                     <label class="form-label fw-bold">Icon *</label>
                                                     <div class="input-group">
                                                         <span class="input-group-text bg-light">
-                                                            <i id="cvIconPreview" class="fas fa-heart fs-4"></i>
+                                                            <i id="cvIconPreview" class="bi bi-heart fs-4"></i>
                                                         </span>
                                                         <input type="text" class="form-control" name="cv_icon" id="cvIcon" 
-                                                               value="fas fa-heart" required placeholder="fas fa-heart">
+                                                               value="bi bi-heart" required placeholder="bi bi-heart">
                                                     </div>
                                                 </div>
                                                 
@@ -794,7 +794,7 @@ include '../includes/design_header.php';
                                                 
                                                 <div class="d-grid">
                                                     <button type="submit" class="btn btn-design-primary" id="cvSubmitBtn">
-                                                        <i class="fas fa-plus me-2"></i>Değer Ekle
+                                                        <i class="bi bi-plus me-2"></i>Değer Ekle
                                                     </button>
                                                 </div>
                                                 <button type="button" class="btn btn-outline-secondary w-100 mt-2 d-none" id="cvCancelBtn" onclick="resetCoreValueForm()">
@@ -811,7 +811,7 @@ include '../includes/design_header.php';
                         <div class="tab-pane fade" id="nav-features">
                             <div class="row">
                                 <div class="col-lg-8">
-                                    <h5 class="mb-3"><i class="fas fa-concierge-bell me-2 text-primary"></i>Mevcut Hizmet Özellikleri</h5>
+                                    <h5 class="mb-3"><i class="bi bi-concierge-bell me-2 text-primary"></i>Mevcut Hizmet Özellikleri</h5>
                                     <div id="serviceFeaturesList">
                                         <?php foreach ($service_features as $feature): ?>
                                             <div class="feature-card">
@@ -848,14 +848,14 @@ include '../includes/design_header.php';
                                                     <div class="ms-3">
                                                         <button class="btn btn-outline-primary btn-sm me-1" 
                                                                 onclick="editServiceFeature(<?php echo htmlspecialchars(json_encode($feature)); ?>)">
-                                                            <i class="fas fa-edit"></i>
+                                                            <i class="bi bi-edit"></i>
                                                         </button>
                                                         <form method="POST" class="d-inline" 
                                                               onsubmit="return confirm('Bu özelliği silmek istediğinizden emin misiniz?')">
                                                             <input type="hidden" name="action" value="delete_service_feature">
                                                             <input type="hidden" name="sf_id" value="<?php echo $feature['id']; ?>">
                                                             <button type="submit" class="btn btn-outline-danger btn-sm">
-                                                                <i class="fas fa-trash"></i>
+                                                                <i class="bi bi-trash"></i>
                                                             </button>
                                                         </form>
                                                     </div>
@@ -865,7 +865,7 @@ include '../includes/design_header.php';
                                         
                                         <?php if (empty($service_features)): ?>
                                             <div class="text-center text-muted py-4">
-                                                <i class="fas fa-concierge-bell fa-3x mb-3 opacity-25"></i>
+                                                <i class="bi bi-concierge-bell fa-3x mb-3 opacity-25"></i>
                                                 <p>Henüz hizmet özelliği eklenmemiş.</p>
                                             </div>
                                         <?php endif; ?>
@@ -875,7 +875,7 @@ include '../includes/design_header.php';
                                 <div class="col-lg-4">
                                     <div class="card shadow-sm">
                                         <div class="card-header">
-                                            <h6 class="mb-0"><i class="fas fa-plus me-2"></i>Yeni Özellik Ekle</h6>
+                                            <h6 class="mb-0"><i class="bi bi-plus me-2"></i>Yeni Özellik Ekle</h6>
                                         </div>
                                         <div class="card-body">
                                             <form method="POST" enctype="multipart/form-data" id="serviceFeatureForm">
@@ -897,10 +897,10 @@ include '../includes/design_header.php';
                                                     <label class="form-label fw-bold">FontAwesome Icon</label>
                                                     <div class="input-group">
                                                         <span class="input-group-text bg-light">
-                                                            <i id="sfIconPreview" class="fas fa-cog fs-4"></i>
+                                                            <i id="sfIconPreview" class="bi bi-cog fs-4"></i>
                                                         </span>
                                                         <input type="text" class="form-control" name="sf_icon" id="sfIcon" 
-                                                               value="fas fa-cog" placeholder="fas fa-cog">
+                                                               value="bi bi-cog" placeholder="bi bi-cog">
                                                     </div>
                                                     <small class="form-text text-muted">Resim yoksa bu icon kullanılır</small>
                                                 </div>
@@ -917,7 +917,7 @@ include '../includes/design_header.php';
                                                     </div>
                                                     
                                                     <div class="image-upload-area" onclick="document.getElementById('sf_image').click();">
-                                                        <i class="fas fa-cloud-upload-alt fa-2x text-primary mb-2"></i>
+                                                        <i class="bi bi-cloud-upload-alt fa-2x text-primary mb-2"></i>
                                                         <p class="mb-0">Özellik resmi yükle</p>
                                                         <small class="text-muted">PNG, SVG, WebP - max 2MB</small>
                                                     </div>
@@ -940,7 +940,7 @@ include '../includes/design_header.php';
                                                 
                                                 <div class="d-grid">
                                                     <button type="submit" class="btn btn-design-primary" id="sfSubmitBtn">
-                                                        <i class="fas fa-plus me-2"></i>Özellik Ekle
+                                                        <i class="bi bi-plus me-2"></i>Özellik Ekle
                                                     </button>
                                                 </div>
                                                 <button type="button" class="btn btn-outline-secondary w-100 mt-2 d-none" id="sfCancelBtn" onclick="resetServiceFeatureForm()">
@@ -1009,7 +1009,7 @@ include '../includes/design_header.php';
                                                             </div>
                                                             <div class="col-md-1">
                                                                 <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeVisionFeature(this)">
-                                                                    <i class="fas fa-trash"></i>
+                                                                    <i class="bi bi-trash"></i>
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -1026,11 +1026,11 @@ include '../includes/design_header.php';
                                                             </div>
                                                             <div class="col-md-3">
                                                                 <input type="text" class="form-control" name="vision_feature_icons[]" 
-                                                                       placeholder="Icon (örn: fas fa-rocket text-primary)">
+                                                                       placeholder="Icon (örn: bi bi-rocket text-primary)">
                                                             </div>
                                                             <div class="col-md-1">
                                                                 <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeVisionFeature(this)" style="display:none;">
-                                                                    <i class="fas fa-trash"></i>
+                                                                    <i class="bi bi-trash"></i>
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -1038,7 +1038,7 @@ include '../includes/design_header.php';
                                                 <?php endif; ?>
                                             </div>
                                             <button type="button" class="btn btn-sm btn-outline-primary" id="addVisionFeature">
-                                                <i class="fas fa-plus me-1"></i>Özellik Ekle
+                                                <i class="bi bi-plus me-1"></i>Özellik Ekle
                                             </button>
                                         </div>
                                     </div>
@@ -1047,14 +1047,14 @@ include '../includes/design_header.php';
                                         <!-- Yayınlama Ayarları -->
                                         <div class="card shadow-sm mb-4">
                                             <div class="card-header">
-                                                <h6 class="mb-0"><i class="fas fa-cog me-2"></i>Ayarlar</h6>
+                                                <h6 class="mb-0"><i class="bi bi-cog me-2"></i>Ayarlar</h6>
                                             </div>
                                             <div class="card-body">
                                                 <div class="form-check mb-3">
                                                     <input class="form-check-input" type="checkbox" name="vision_is_active" 
                                                            <?php echo (!isset($vision_content['is_active']) || $vision_content['is_active']) ? 'checked' : ''; ?>>
                                                     <label class="form-check-label fw-bold">
-                                                        <i class="fas fa-eye text-success me-1"></i>Aktif
+                                                        <i class="bi bi-eye text-success me-1"></i>Aktif
                                                     </label>
                                                 </div>
                                             </div>
@@ -1063,7 +1063,7 @@ include '../includes/design_header.php';
                                         <!-- Vizyon Resmi -->
                                         <div class="card shadow-sm mb-4">
                                             <div class="card-header">
-                                                <h6 class="mb-0"><i class="fas fa-image me-2"></i>Vizyon Resmi</h6>
+                                                <h6 class="mb-0"><i class="bi bi-image me-2"></i>Vizyon Resmi</h6>
                                             </div>
                                             <div class="card-body">
                                                 <?php if (!empty($vision_content['image_url'])): ?>
@@ -1081,7 +1081,7 @@ include '../includes/design_header.php';
                                                 <?php endif; ?>
                                                 
                                                 <div class="image-upload-area" onclick="document.getElementById('vision_image').click();">
-                                                    <i class="fas fa-cloud-upload-alt fa-2x text-primary mb-2"></i>
+                                                    <i class="bi bi-cloud-upload-alt fa-2x text-primary mb-2"></i>
                                                     <p class="mb-0">Vizyon resmi yükle</p>
                                                     <small class="text-muted">JPG, PNG, WebP - max 5MB</small>
                                                 </div>
@@ -1095,7 +1095,7 @@ include '../includes/design_header.php';
 
                                         <div class="d-grid">
                                             <button type="submit" class="btn btn-design-primary btn-lg">
-                                                <i class="fas fa-save me-2"></i>Vizyon Kaydet
+                                                <i class="bi bi-save me-2"></i>Vizyon Kaydet
                                             </button>
                                         </div>
                                     </div>
@@ -1119,9 +1119,9 @@ document.getElementById('addMainFeature').addEventListener('click', function() {
         <div class="input-group">
             <input type="text" class="form-control" name="feature_titles[]" placeholder="Özellik adı">
             <input type="text" class="form-control" name="feature_icons[]" 
-                   placeholder="Icon (örn: fas fa-check-circle text-success)">
+                   placeholder="Icon (örn: bi bi-check-circle text-success)">
             <button type="button" class="btn btn-outline-danger remove-feature">
-                <i class="fas fa-minus"></i>
+                <i class="bi bi-minus"></i>
             </button>
         </div>
     `;
@@ -1152,11 +1152,11 @@ document.getElementById('addVisionFeature').addEventListener('click', function()
             </div>
             <div class="col-md-3">
                 <input type="text" class="form-control" name="vision_feature_icons[]" 
-                       placeholder="Icon (örn: fas fa-rocket text-primary)">
+                       placeholder="Icon (örn: bi bi-rocket text-primary)">
             </div>
             <div class="col-md-1">
                 <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeVisionFeature(this)">
-                    <i class="fas fa-trash"></i>
+                    <i class="bi bi-trash"></i>
                 </button>
             </div>
         </div>
@@ -1173,11 +1173,11 @@ function removeVisionFeature(button) {
 
 // Icon önizlemeler
 document.getElementById('cvIcon').addEventListener('input', function() {
-    document.getElementById('cvIconPreview').className = this.value.trim() || 'fas fa-heart fs-4';
+    document.getElementById('cvIconPreview').className = this.value.trim() || 'bi bi-heart fs-4';
 });
 
 document.getElementById('sfIcon').addEventListener('input', function() {
-    document.getElementById('sfIconPreview').className = this.value.trim() || 'fas fa-cog fs-4';
+    document.getElementById('sfIconPreview').className = this.value.trim() || 'bi bi-cog fs-4';
 });
 
 // Resim önizlemeleri
@@ -1222,7 +1222,7 @@ function editCoreValue(value) {
     // Icon önizlemesini güncelle
     document.getElementById('cvIconPreview').className = value.icon + ' fs-4';
     
-    document.getElementById('cvSubmitBtn').innerHTML = '<i class="fas fa-save me-2"></i>Güncelle';
+    document.getElementById('cvSubmitBtn').innerHTML = '<i class="bi bi-save me-2"></i>Güncelle';
     document.getElementById('cvCancelBtn').classList.remove('d-none');
     
     // Values tab'ına git
@@ -1234,9 +1234,9 @@ function resetCoreValueForm() {
     document.getElementById('coreValueForm').reset();
     document.getElementById('cvAction').value = 'add_core_value';
     document.getElementById('cvId').value = '';
-    document.getElementById('cvIcon').value = 'fas fa-heart';
-    document.getElementById('cvIconPreview').className = 'fas fa-heart fs-4';
-    document.getElementById('cvSubmitBtn').innerHTML = '<i class="fas fa-plus me-2"></i>Değer Ekle';
+    document.getElementById('cvIcon').value = 'bi bi-heart';
+    document.getElementById('cvIconPreview').className = 'bi bi-heart fs-4';
+    document.getElementById('cvSubmitBtn').innerHTML = '<i class="bi bi-plus me-2"></i>Değer Ekle';
     document.getElementById('cvCancelBtn').classList.add('d-none');
 }
 
@@ -1246,7 +1246,7 @@ function editServiceFeature(feature) {
     document.getElementById('sfId').value = feature.id;
     document.getElementById('sfTitle').value = feature.title;
     document.getElementById('sfDescription').value = feature.description;
-    document.getElementById('sfIcon').value = feature.icon || 'fas fa-cog';
+    document.getElementById('sfIcon').value = feature.icon || 'bi bi-cog';
     document.getElementById('sfOrderNo').value = feature.order_no;
     document.getElementById('sfIsActive').checked = feature.is_active == 1;
     document.getElementById('currentSfImage').value = feature.icon_url || '';
@@ -1262,9 +1262,9 @@ function editServiceFeature(feature) {
     }
     
     // Icon önizlemesini güncelle
-    document.getElementById('sfIconPreview').className = (feature.icon || 'fas fa-cog') + ' fs-4';
+    document.getElementById('sfIconPreview').className = (feature.icon || 'bi bi-cog') + ' fs-4';
     
-    document.getElementById('sfSubmitBtn').innerHTML = '<i class="fas fa-save me-2"></i>Güncelle';
+    document.getElementById('sfSubmitBtn').innerHTML = '<i class="bi bi-save me-2"></i>Güncelle';
     document.getElementById('sfCancelBtn').classList.remove('d-none');
     
     // Features tab'ına git
@@ -1276,12 +1276,12 @@ function resetServiceFeatureForm() {
     document.getElementById('serviceFeatureForm').reset();
     document.getElementById('sfAction').value = 'add_service_feature';
     document.getElementById('sfId').value = '';
-    document.getElementById('sfIcon').value = 'fas fa-cog';
-    document.getElementById('sfIconPreview').className = 'fas fa-cog fs-4';
+    document.getElementById('sfIcon').value = 'bi bi-cog';
+    document.getElementById('sfIconPreview').className = 'bi bi-cog fs-4';
     document.getElementById('currentSfImage').value = '';
     document.getElementById('currentSfImageContainer').style.display = 'none';
     document.getElementById('sfImagePreview').style.display = 'none';
-    document.getElementById('sfSubmitBtn').innerHTML = '<i class="fas fa-plus me-2"></i>Özellik Ekle';
+    document.getElementById('sfSubmitBtn').innerHTML = '<i class="bi bi-plus me-2"></i>Özellik Ekle';
     document.getElementById('sfCancelBtn').classList.add('d-none');
 }
 

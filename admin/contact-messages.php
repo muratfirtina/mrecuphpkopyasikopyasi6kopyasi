@@ -23,7 +23,7 @@ if (!isset($_SESSION['user_id']) || !function_exists('isLoggedIn')) {
 // Sayfa ayarları
 $pageTitle = 'İletişim Mesajları';
 $pageDescription = 'Gelen iletişim mesajlarını görüntüleyin ve yönetin';
-$pageIcon = 'fas fa-envelope';
+$pageIcon = 'bi bi-envelope';
 
 $message = '';
 $messageType = '';
@@ -121,9 +121,9 @@ while ($row = $status_stmt->fetch()) {
 
 // Quick actions
 $quickActions = [
-    ['text' => 'Tüm Mesajları Görüntüle', 'url' => 'contact-messages.php', 'icon' => 'fas fa-list', 'class' => 'outline-primary'],
-    ['text' => 'İletişim Ayarları', 'url' => '../design/contact.php', 'icon' => 'fas fa-cog', 'class' => 'outline-secondary'],
-    ['text' => 'İletişim Sayfası', 'url' => '../contact.php', 'icon' => 'fas fa-external-link-alt', 'class' => 'outline-success']
+    ['text' => 'Tüm Mesajları Görüntüle', 'url' => 'contact-messages.php', 'icon' => 'bi bi-list', 'class' => 'outline-primary'],
+    ['text' => 'İletişim Ayarları', 'url' => '../design/contact.php', 'icon' => 'bi bi-cog', 'class' => 'outline-secondary'],
+    ['text' => 'İletişim Sayfası', 'url' => '../contact.php', 'icon' => 'bi bi-external-link-alt', 'class' => 'outline-success']
 ];
 
 // Admin header include
@@ -274,7 +274,7 @@ include '../includes/admin_sidebar.php';
         <div class="col-xl-3 col-md-6 mb-3">
             <div class="stat-widget" style="background-color: green !important;">
                 <div class="d-flex align-items-center">
-                    <div class="me-3"><i class="fas fa-envelope-open fa-2x"></i></div>
+                    <div class="me-3"><i class="bi bi-envelope-open fa-2x"></i></div>
                     <div><div class="stat-number"><?php echo $status_counts['new'] ?? 0; ?></div><div class="stat-label">Yeni Mesaj</div></div>
                 </div>
             </div>
@@ -282,7 +282,7 @@ include '../includes/admin_sidebar.php';
         <div class="col-xl-3 col-md-6 mb-3">
             <div class="stat-widget" style="background-color: #3498db !important;">
                 <div class="d-flex align-items-center">
-                    <div class="me-3"><i class="fas fa-eye fa-2x"></i></div>
+                    <div class="me-3"><i class="bi bi-eye fa-2x"></i></div>
                     <div><div class="stat-number"><?php echo $status_counts['read'] ?? 0; ?></div><div class="stat-label">Okundu</div></div>
                 </div>
             </div>
@@ -290,7 +290,7 @@ include '../includes/admin_sidebar.php';
         <div class="col-xl-3 col-md-6 mb-3">
             <div class="stat-widget" style="background-color:#ffc107 !important;">
                 <div class="d-flex align-items-center">
-                    <div class="me-3"><i class="fas fa-reply fa-2x"></i></div>
+                    <div class="me-3"><i class="bi bi-reply fa-2x"></i></div>
                     <div><div class="stat-number"><?php echo $status_counts['replied'] ?? 0; ?></div><div class="stat-label">Cevaplandı</div></div>
                 </div>
             </div>
@@ -298,7 +298,7 @@ include '../includes/admin_sidebar.php';
         <div class="col-xl-3 col-md-6 mb-3">
             <div class="stat-widget" style="background-color: gray !important;">
                 <div class="d-flex align-items-center">
-                    <div class="me-3"><i class="fas fa-archive fa-2x"></i></div>
+                    <div class="me-3"><i class="bi bi-archive fa-2x"></i></div>
                     <div><div class="stat-number"><?php echo $status_counts['archived'] ?? 0; ?></div><div class="stat-label">Arşivlendi</div></div>
                 </div>
             </div>
@@ -308,7 +308,7 @@ include '../includes/admin_sidebar.php';
     <!-- Filtreler -->
     <div class="admin-card mb-4">
         <div class="card-header">
-            <i class="fas fa-filter me-2"></i> Filtreler
+            <i class="bi bi-filter me-2"></i> Filtreler
         </div>
         <div class="card-body">
             <form method="GET" class="row g-3">
@@ -328,8 +328,8 @@ include '../includes/admin_sidebar.php';
                            placeholder="Ad, e-posta, konu veya mesajda ara..." value="<?= htmlspecialchars($search) ?>">
                 </div>
                 <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-search me-2"></i>Filtrele</button>
-                    <a href="?" class="btn btn-outline-secondary"><i class="fas fa-times"></i></a>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-search me-2"></i>Filtrele</button>
+                    <a href="?" class="btn btn-outline-secondary"><i class="bi bi-times"></i></a>
                 </div>
             </form>
         </div>
@@ -339,12 +339,12 @@ include '../includes/admin_sidebar.php';
     <div class="admin-card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h6 class="mb-0">
-                <i class="fas fa-envelope me-2"></i>
+                <i class="bi bi-envelope me-2"></i>
                 İletişim Mesajları 
                 <span class="badge bg-primary"><?= $total_messages ?></span>
             </h6>
             <button class="btn btn-outline-primary btn-sm" onclick="location.reload()">
-                <i class="fas fa-sync-alt me-2"></i>Yenile
+                <i class="bi bi-sync-alt me-2"></i>Yenile
             </button>
         </div>
 
@@ -390,10 +390,10 @@ include '../includes/admin_sidebar.php';
                         <?php if (empty($messages)): ?>
                             <tr>
                                 <td colspan="7" class="text-center py-5">
-                                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                    <i class="bi bi-inbox fa-3x text-muted mb-3"></i>
                                     <p class="text-muted">Hiç mesaj bulunmuyor.</p>
                                     <a href="../contact.php" class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-external-link-alt me-2"></i>İletişim Sayfası
+                                        <i class="bi bi-external-link-alt me-2"></i>İletişim Sayfası
                                     </a>
                                 </td>
                             </tr>
@@ -409,7 +409,7 @@ include '../includes/admin_sidebar.php';
                                         <small class="text-muted"><?= htmlspecialchars($msg['email']) ?></small>
                                         <?php if ($msg['phone']): ?>
                                             <br><small class="text-muted">
-                                                <i class="fas fa-phone me-1"></i><?= htmlspecialchars($msg['phone']) ?>
+                                                <i class="bi bi-phone me-1"></i><?= htmlspecialchars($msg['phone']) ?>
                                             </small>
                                         <?php endif; ?>
                                     </td>
@@ -448,16 +448,16 @@ include '../includes/admin_sidebar.php';
                                             <button type="button" class="btn btn-outline-primary btn-sm"
                                                     data-bs-toggle="modal" data-bs-target="#messageModal"
                                                     onclick="viewMessage(<?= htmlspecialchars(json_encode($msg)) ?>)">
-                                                <i class="fas fa-eye"></i>
+                                                <i class="bi bi-eye"></i>
                                             </button>
                                             <div class="btn-group" style="position: relative;">
                                                 <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle"
                                                         data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i class="fas fa-cog"></i>
+                                                    <i class="bi bi-cog"></i>
                                                 </button>
                                                 <ul class="dropdown-menu">
                                                     <li><a class="dropdown-item" href="mailto:<?= htmlspecialchars($msg['email']) ?>">
-                                                        <i class="fas fa-reply me-2"></i>E-posta Gönder</a></li>
+                                                        <i class="bi bi-reply me-2"></i>E-posta Gönder</a></li>
                                                     <li><hr class="dropdown-divider"></li>
                                                     <?php foreach (['new' => 'Yeni', 'read' => 'Okundu', 'replied' => 'Cevaplandı', 'archived' => 'Arşivle'] as $status => $label): ?>
                                                         <li>
@@ -477,7 +477,7 @@ include '../includes/admin_sidebar.php';
                                                             <input type="hidden" name="action" value="delete_message">
                                                             <input type="hidden" name="message_id" value="<?= $msg['id'] ?>">
                                                             <button type="submit" class="dropdown-item text-danger">
-                                                                <i class="fas fa-trash me-2"></i>Sil
+                                                                <i class="bi bi-trash me-2"></i>Sil
                                                             </button>
                                                         </form>
                                                     </li>

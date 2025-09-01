@@ -361,7 +361,7 @@ if (isset($_SESSION['user_id'])) {
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center" href="../index.php">
                 <div class="navbar-brand-icon me-2">
-                    <i class="fas fa-microchip"></i>
+                    <i class="bi bi-microchip"></i>
                 </div>
                 <div>
                     <span class="fw-bold"><?php echo SITE_NAME; ?></span>
@@ -377,7 +377,7 @@ if (isset($_SESSION['user_id'])) {
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link text-white-75 hover-bright" href="../index.php">
-                            <i class="fas fa-home me-1"></i>Ana Sayfa
+                            <i class="bi bi-home me-1"></i>Ana Sayfa
                         </a>
                     </li>
                 </ul>
@@ -393,7 +393,7 @@ if (isset($_SESSION['user_id'])) {
                             <!-- Kredi Başlığı -->
                             <div class="credit-header d-flex align-items-center justify-content-between mb-1">
                                 <div class="credit-icon-label d-flex align-items-center">
-                                    <i class="fas fa-wallet text-warning me-1"></i>
+                                    <i class="bi bi-wallet text-warning me-1"></i>
                                     <span class="credit-label">Kullanılan</span>
                                 </div>
                                 <div class="credit-status">
@@ -420,11 +420,11 @@ if (isset($_SESSION['user_id'])) {
                                 </div>
                                 <div class="progress-labels d-flex justify-content-between">
                                     <small class="usage-label">
-                                        <i class="fas fa-minus-circle text-danger me-1"></i>
+                                        <i class="bi bi-minus-circle text-danger me-1"></i>
                                         <?php echo number_format($creditUsed, 0); ?> TL
                                     </small>
                                     <small class="remaining-label">
-                                        <i class="fas fa-check-circle text-success me-1"></i>
+                                        <i class="bi bi-check-circle text-success me-1"></i>
                                         <?php echo number_format($availableCredits, 0); ?> TL
                                     </small>
                                 </div>
@@ -479,7 +479,7 @@ if (isset($_SESSION['user_id'])) {
                     <?php if ($totalNotifications > 0): ?>
                         <li class="nav-item dropdown me-2">
                             <a class="nav-link position-relative p-3" href="javascript:void(0)" id="userNotificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-bell fa-lg text-white"></i>
+                                <i class="bi bi-bell fa-lg text-white"></i>
                                 <?php if ($badgeNotificationCount > 0): ?>
                                     <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                         <?php echo $badgeNotificationCount; ?>
@@ -517,13 +517,13 @@ if (isset($_SESSION['user_id'])) {
                                                         <i class="<?php
                                                                     switch ($notification['type']) {
                                                                         case 'file_status_update':
-                                                                            echo 'fas fa-check-circle text-success';
+                                                                            echo 'bi bi-check-circle text-success';
                                                                             break;
                                                                         case 'revision_response':
-                                                                            echo 'fas fa-reply text-info';
+                                                                            echo 'bi bi-reply text-info';
                                                                             break;
                                                                         default:
-                                                                            echo 'fas fa-info-circle text-primary';
+                                                                            echo 'bi bi-info-circle text-primary';
                                                                     }
                                                                     ?>"></i>
                                                     </div>
@@ -532,7 +532,7 @@ if (isset($_SESSION['user_id'])) {
                                                     <div class="fw-semibold"><?php echo htmlspecialchars($notification['title']); ?></div>
                                                     <div class="text-muted small"><?php echo htmlspecialchars(substr($notification['message'], 0, 100)); ?><?php echo strlen($notification['message']) > 100 ? '...' : ''; ?></div>
                                                     <div class="text-muted small mt-1">
-                                                        <i class="fas fa-clock me-1"></i>
+                                                        <i class="bi bi-clock me-1"></i>
                                                         <?php echo date('d.m.Y H:i', strtotime($notification['created_at'])); ?>
                                                     </div>
                                                 </div>
@@ -547,7 +547,7 @@ if (isset($_SESSION['user_id'])) {
                                         <a class="dropdown-item d-flex align-items-center py-2" href="files.php?status=completed">
                                             <div class="me-3">
                                                 <div class="bg-success bg-opacity-10 p-2 rounded-circle">
-                                                    <i class="fas fa-check-circle text-success"></i>
+                                                    <i class="bi bi-check-circle text-success"></i>
                                                 </div>
                                             </div>
                                             <div>
@@ -564,7 +564,7 @@ if (isset($_SESSION['user_id'])) {
                                         <a class="dropdown-item d-flex align-items-center py-2" href="revisions.php">
                                             <div class="me-3">
                                                 <div class="bg-warning bg-opacity-10 p-2 rounded-circle">
-                                                    <i class="fas fa-edit text-warning"></i>
+                                                    <i class="bi bi-edit text-warning"></i>
                                                 </div>
                                             </div>
                                             <div>
@@ -577,7 +577,7 @@ if (isset($_SESSION['user_id'])) {
 
                                 <?php if (empty($userNotifications) && $completedFiles == 0 && $pendingUserRevisions == 0): ?>
                                     <li class="dropdown-item text-center text-muted py-3">
-                                        <i class="fas fa-bell-slash fa-2x mb-2"></i><br>
+                                        <i class="bi bi-bell-slash fa-2x mb-2"></i><br>
                                         Henüz bildirim yok
                                     </li>
                                 <?php endif; ?>
@@ -599,7 +599,7 @@ if (isset($_SESSION['user_id'])) {
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="javascript:void(0)" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="user-avatar me-2">
-                                <i class="fas fa-user-circle fa-lg"></i>
+                                <i class="bi bi-user-circle fa-lg"></i>
                             </div>
                             <div class="user-info">
                                 <span class="fw-semibold"><?php echo htmlspecialchars(!empty($_SESSION['username']) ? $_SESSION['username'] : ($_SESSION['email'] ?? 'Kullanıcı')); ?></span>
@@ -609,7 +609,7 @@ if (isset($_SESSION['user_id'])) {
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdown">
                             <li class="dropdown-header">
                                 <div class="d-flex align-items-center">
-                                    <i class="fas fa-user-circle fa-2x text-muted me-2"></i>
+                                    <i class="bi bi-user-circle fa-2x text-muted me-2"></i>
                                     <div>
                                         <div class="fw-semibold"><?php echo htmlspecialchars(!empty($_SESSION['username']) ? $_SESSION['username'] : ($_SESSION['email'] ?? 'Kullanıcı')); ?></div>
                                         <small class="text-muted"><?php echo htmlspecialchars($_SESSION['email'] ?? ''); ?></small>
@@ -623,17 +623,17 @@ if (isset($_SESSION['user_id'])) {
                             <li class="dropdown-header small text-uppercase text-muted">Hesap İşlemleri</li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="profile.php">
-                                    <i class="fas fa-user me-3 text-primary"></i>Profil Ayarları
+                                    <i class="bi bi-user me-3 text-primary"></i>Profil Ayarları
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="credits.php">
-                                    <i class="fas fa-coins me-3 text-warning"></i>Kredi Yükle
+                                    <i class="bi bi-coins me-3 text-warning"></i>Kredi Yükle
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="transactions.php">
-                                    <i class="fas fa-history me-3 text-info"></i>İşlem Geçmişi
+                                    <i class="bi bi-history me-3 text-info"></i>İşlem Geçmişi
                                 </a>
                             </li>
 
@@ -643,17 +643,17 @@ if (isset($_SESSION['user_id'])) {
                             <li class="dropdown-header small text-uppercase text-muted">Dosya İşlemleri</li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="upload.php">
-                                    <i class="fas fa-upload me-3 text-success"></i>Dosya Yükle
+                                    <i class="bi bi-upload me-3 text-success"></i>Dosya Yükle
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="files.php">
-                                    <i class="fas fa-folder me-3 text-secondary"></i>Dosyalarım
+                                    <i class="bi bi-folder me-3 text-secondary"></i>Dosyalarım
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="revisions.php">
-                                    <i class="fas fa-edit me-3 text-warning"></i>
+                                    <i class="bi bi-edit me-3 text-warning"></i>
                                     Revize Taleplerim
                                     <?php if ($pendingUserRevisions > 0): ?>
                                         <span class="badge bg-warning ms-auto"><?php echo $pendingUserRevisions; ?></span>
@@ -668,7 +668,7 @@ if (isset($_SESSION['user_id'])) {
                                 <li class="dropdown-header small text-uppercase text-muted">Yönetim</li>
                                 <li>
                                     <a class="dropdown-item d-flex align-items-center py-2" href="../admin/">
-                                        <i class="fas fa-cog me-3 text-danger"></i>Admin Panel
+                                        <i class="bi bi-cog me-3 text-danger"></i>Admin Panel
                                     </a>
                                 </li>
                             <?php endif; ?>
@@ -678,7 +678,7 @@ if (isset($_SESSION['user_id'])) {
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2 text-danger" href="../logout.php">
-                                    <i class="fas fa-sign-out-alt me-3"></i>Güvenli Çıkış
+                                    <i class="bi bi-sign-out-alt me-3"></i>Güvenli Çıkış
                                 </a>
                             </li>
                         </ul>

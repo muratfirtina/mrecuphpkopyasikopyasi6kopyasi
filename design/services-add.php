@@ -8,7 +8,7 @@ require_once '../config/database.php';
 
 $pageTitle = 'Yeni Hizmet Ekle';
 $pageDescription = 'Yeni hizmet ekle';
-$pageIcon = 'fas fa-plus';
+$pageIcon = 'bi bi-plus';
 
 $breadcrumbs = [
     ['title' => 'Dashboard', 'url' => 'index.php'],
@@ -247,7 +247,7 @@ require_once '../includes/design_header.php';
                                 <input type="text" class="form-control" id="icon" name="icon" 
                                        value="<?= htmlspecialchars($formData['icon'] ?? '') ?>" required placeholder="bi bi-gear-wide-connected">
                             </div>
-                            <div class="form-text">Örnek: fas fa-microchip</div>
+                            <div class="form-text">Örnek: bi bi-microchip</div>
                         </div>
 
                         <!-- Özellikler -->
@@ -264,14 +264,14 @@ require_once '../includes/design_header.php';
                                             <input type="text" class="form-control" name="features[]" 
                                                    value="<?= htmlspecialchars($feature) ?>" placeholder="Özellik...">
                                             <button type="button" class="btn btn-outline-danger remove-feature">
-                                                <i class="fas fa-minus"></i>
+                                                <i class="bi bi-minus"></i>
                                             </button>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary" id="addFeature">
-                                <i class="fas fa-plus me-1"></i>Özellik Ekle
+                                <i class="bi bi-plus me-1"></i>Özellik Ekle
                             </button>
                         </div>
                     </div>
@@ -282,7 +282,7 @@ require_once '../includes/design_header.php';
                 <!-- Yayınlama Ayarları -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-cog me-2"></i>Yayınlama</h6>
+                        <h6 class="mb-0"><i class="bi bi-cog me-2"></i>Yayınlama</h6>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
@@ -296,7 +296,7 @@ require_once '../includes/design_header.php';
                             <input class="form-check-input" type="checkbox" id="is_featured" name="is_featured" 
                                    <?= isset($formData['is_featured']) ? 'checked' : '' ?>>
                             <label class="form-check-label" for="is_featured">
-                                <i class="fas fa-star text-warning me-1"></i>Öne Çıkan
+                                <i class="bi bi-star text-warning me-1"></i>Öne Çıkan
                             </label>
                         </div>
                         <div class="mb-3">
@@ -310,7 +310,7 @@ require_once '../includes/design_header.php';
                 <!-- Fiyat -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-tag me-2"></i>Fiyat</h6>
+                        <h6 class="mb-0"><i class="bi bi-tag me-2"></i>Fiyat</h6>
                     </div>
                     <div class="card-body">
                         <div class="input-group">
@@ -324,7 +324,7 @@ require_once '../includes/design_header.php';
                 <!-- Ana Resim -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-image me-2"></i>Ana Resim</h6>
+                        <h6 class="mb-0"><i class="bi bi-image me-2"></i>Ana Resim</h6>
                     </div>
                     <div class="card-body">
                         <input type="file" class="form-control" id="image" name="image" accept="image/*">
@@ -338,7 +338,7 @@ require_once '../includes/design_header.php';
                 <!-- İkon Resmi (YENİ) -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-icons me-2"></i>İkon Resmi</h6>
+                        <h6 class="mb-0"><i class="bi bi-icons me-2"></i>İkon Resmi</h6>
                     </div>
                     <div class="card-body">
                         <input type="file" class="form-control" id="icon_picture_file" name="icon_picture_file" accept="image/*">
@@ -351,7 +351,7 @@ require_once '../includes/design_header.php';
 
                 <div class="d-grid">
                     <button type="submit" class="btn btn-design-primary btn-lg">
-                        <i class="fas fa-save me-2"></i>Hizmeti Kaydet
+                        <i class="bi bi-save me-2"></i>Hizmeti Kaydet
                     </button>
                 </div>
             </div>
@@ -374,7 +374,7 @@ document.getElementById('addFeature').addEventListener('click', function() {
         <div class="input-group">
             <input type="text" class="form-control" name="features[]" placeholder="Özellik...">
             <button type="button" class="btn btn-outline-danger remove-feature">
-                <i class="fas fa-minus"></i>
+                <i class="bi bi-minus"></i>
             </button>
         </div>
     `;

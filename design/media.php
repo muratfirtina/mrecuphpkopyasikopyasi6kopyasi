@@ -142,7 +142,7 @@ include '../includes/design_header.php';
     <div class="col-12">
         <?php if (isset($error)): ?>
             <div class="alert alert-danger">
-                <i class="fas fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($error); ?>
+                <i class="bi bi-exclamation-triangle me-2"></i><?php echo htmlspecialchars($error); ?>
             </div>
         <?php endif; ?>
     </div>
@@ -155,7 +155,7 @@ include '../includes/design_header.php';
             <div class="d-flex align-items-center">
                 <div class="flex-shrink-0">
                     <div class="stat-icon bg-primary text-white rounded-circle p-3">
-                        <i class="fas fa-images fa-xl"></i>
+                        <i class="bi bi-images fa-xl"></i>
                     </div>
                 </div>
                 <div class="flex-grow-1 ms-3">
@@ -171,7 +171,7 @@ include '../includes/design_header.php';
             <div class="d-flex align-items-center">
                 <div class="flex-shrink-0">
                     <div class="stat-icon bg-info text-white rounded-circle p-3">
-                        <i class="fas fa-hdd fa-xl"></i>
+                        <i class="bi bi-hdd fa-xl"></i>
                     </div>
                 </div>
                 <div class="flex-grow-1 ms-3">
@@ -187,7 +187,7 @@ include '../includes/design_header.php';
             <div class="d-flex align-items-center">
                 <div class="flex-shrink-0">
                     <div class="stat-icon bg-success text-white rounded-circle p-3">
-                        <i class="fas fa-chart-bar fa-xl"></i>
+                        <i class="bi bi-chart-bar fa-xl"></i>
                     </div>
                 </div>
                 <div class="flex-grow-1 ms-3">
@@ -203,7 +203,7 @@ include '../includes/design_header.php';
             <div class="d-flex align-items-center">
                 <div class="flex-shrink-0">
                     <div class="stat-icon bg-warning text-white rounded-circle p-3">
-                        <i class="fas fa-weight fa-xl"></i>
+                        <i class="bi bi-weight fa-xl"></i>
                     </div>
                 </div>
                 <div class="flex-grow-1 ms-3">
@@ -221,20 +221,20 @@ include '../includes/design_header.php';
         <div class="design-card">
             <div class="design-card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="fas fa-photo-video me-2"></i>Medya Yönetimi
+                    <i class="bi bi-photo-video me-2"></i>Medya Yönetimi
                 </h5>
                 <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
-                    <i class="fas fa-upload me-2"></i>Dosya Yükle
+                    <i class="bi bi-upload me-2"></i>Dosya Yükle
                 </button>
             </div>
             <div class="card-body">
                 <?php if (empty($mediaFiles)): ?>
                     <div class="text-center py-5">
-                        <i class="fas fa-photo-video text-muted" style="font-size: 4rem;"></i>
+                        <i class="bi bi-photo-video text-muted" style="font-size: 4rem;"></i>
                         <h4 class="text-muted mt-3">Henüz medya dosyası bulunmuyor</h4>
                         <p class="text-muted">İlk medya dosyanızı yüklemek için "Dosya Yükle" butonuna tıklayın.</p>
                         <button type="button" class="btn btn-design-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
-                            <i class="fas fa-upload me-2"></i>İlk Dosyayı Yükle
+                            <i class="bi bi-upload me-2"></i>İlk Dosyayı Yükle
                         </button>
                     </div>
                 <?php else: ?>
@@ -257,21 +257,21 @@ include '../includes/design_header.php';
                                         <div class="media-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-light btn-sm" onclick="viewMedia(<?php echo $media['id']; ?>)">
-                                                    <i class="fas fa-eye"></i>
+                                                    <i class="bi bi-eye"></i>
                                                 </button>
                                                 <button type="button" class="btn btn-primary btn-sm" onclick="editMedia(<?php echo $media['id']; ?>)"
                                                         data-bs-toggle="modal" data-bs-target="#editModal">
-                                                    <i class="fas fa-edit"></i>
+                                                    <i class="bi bi-edit"></i>
                                                 </button>
                                                 <button type="button" class="btn btn-info btn-sm" onclick="copyUrl('<?php echo '../' . $media['file_path']; ?>')">
-                                                    <i class="fas fa-copy"></i>
+                                                    <i class="bi bi-copy"></i>
                                                 </button>
                                                 <form method="POST" style="display: inline;">
                                                     <input type="hidden" name="action" value="delete">
                                                     <input type="hidden" name="id" value="<?php echo $media['id']; ?>">
                                                     <button type="submit" class="btn btn-danger btn-sm"
                                                             onclick="return confirm('Bu dosyayı silmek istediğinizden emin misiniz?')">
-                                                        <i class="fas fa-trash"></i>
+                                                        <i class="bi bi-trash"></i>
                                                     </button>
                                                 </form>
                                             </div>
@@ -327,7 +327,7 @@ include '../includes/design_header.php';
                     
                     <!-- Drag & Drop Area -->
                     <div class="upload-area" id="uploadArea">
-                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                        <i class="bi bi-cloud-upload-alt fa-3x text-muted mb-3"></i>
                         <h5>Dosyaları sürükleyin veya tıklayın</h5>
                         <p class="text-muted">JPEG, PNG, GIF, WebP formatları desteklenir</p>
                         <p class="small text-muted">Maksimum dosya boyutu: 5MB</p>
@@ -346,7 +346,7 @@ include '../includes/design_header.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-design-primary" id="uploadBtn" disabled>
-                        <i class="fas fa-upload me-2"></i>Yükle
+                        <i class="bi bi-upload me-2"></i>Yükle
                     </button>
                 </div>
             </form>
@@ -386,7 +386,7 @@ include '../includes/design_header.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-design-primary">
-                        <i class="fas fa-save me-2"></i>Kaydet
+                        <i class="bi bi-save me-2"></i>Kaydet
                     </button>
                 </div>
             </form>
@@ -420,7 +420,7 @@ include '../includes/design_header.php';
                         <div class="input-group">
                             <input type="text" class="form-control" id="viewUrl" readonly>
                             <button class="btn btn-outline-secondary" type="button" onclick="copyText('viewUrl')">
-                                <i class="fas fa-copy"></i>
+                                <i class="bi bi-copy"></i>
                             </button>
                         </div>
                     </div>
@@ -547,7 +547,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
     const uploadBtn = document.getElementById('uploadBtn');
     
     uploadBtn.disabled = true;
-    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Yükleniyor...';
+    uploadBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-2"></i>Yükleniyor...';
     
     fetch('media.php', {
         method: 'POST',
@@ -567,7 +567,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
     })
     .finally(() => {
         uploadBtn.disabled = false;
-        uploadBtn.innerHTML = '<i class="fas fa-upload me-2"></i>Yükle';
+        uploadBtn.innerHTML = '<i class="bi bi-upload me-2"></i>Yükle';
     });
 });
 </script>

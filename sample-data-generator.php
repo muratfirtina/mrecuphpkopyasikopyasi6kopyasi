@@ -347,7 +347,7 @@ class SampleDataGenerator {
                 <div class="card">
                     <div class="card-header">
                         <h2 class="mb-0">
-                            <i class="fas fa-database"></i> 
+                            <i class="bi bi-database"></i> 
                             MR.ECU Sample Data Generator
                         </h2>
                         <p class="mb-0 mt-2">Legacy migration test için örnek veriler oluşturur</p>
@@ -379,7 +379,7 @@ class SampleDataGenerator {
                         
                         if ($message): ?>
                             <div class="alert alert-<?= $messageType ?> alert-dismissible fade show" role="alert">
-                                <i class="fas fa-<?= $messageType === 'success' ? 'check-circle' : 'exclamation-triangle' ?>"></i>
+                                <i class="bi bi-<?= $messageType === 'success' ? 'check-circle' : 'exclamation-triangle' ?>"></i>
                                 <?= $message ?>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
@@ -422,20 +422,20 @@ class SampleDataGenerator {
                                 <form method="post" style="display: inline;">
                                     <input type="hidden" name="action" value="generate">
                                     <button type="submit" class="btn btn-primary btn-action">
-                                        <i class="fas fa-plus"></i> Sample Data Oluştur
+                                        <i class="bi bi-plus"></i> Sample Data Oluştur
                                     </button>
                                 </form>
                                 
                                 <form method="post" style="display: inline;">
                                     <input type="hidden" name="action" value="cleanup">
                                     <button type="submit" class="btn btn-warning btn-action">
-                                        <i class="fas fa-trash"></i> Sample Data Temizle
+                                        <i class="bi bi-trash"></i> Sample Data Temizle
                                     </button>
                                 </form>
                             </div>
                             
                             <div class="col-md-6">
-                                <h5><i class="fas fa-files-o"></i> Oluşturulan Dosyalar</h5>
+                                <h5><i class="bi bi-files-o"></i> Oluşturulan Dosyalar</h5>
                                 <div class="file-list">
                                     <?php
                                     $sampleDir = __DIR__ . '/sample_data/';
@@ -445,7 +445,7 @@ class SampleDataGenerator {
                                             foreach ($files as $file) {
                                                 echo '<div class="file-item">';
                                                 echo '<span>';
-                                                echo '<i class="fas fa-file-csv text-success"></i> ';
+                                                echo '<i class="bi bi-file-csv text-success"></i> ';
                                                 echo basename($file);
                                                 echo '</span>';
                                                 echo '<span class="text-muted">';
@@ -455,13 +455,13 @@ class SampleDataGenerator {
                                             }
                                         } else {
                                             echo '<div class="text-center text-muted py-3">';
-                                            echo '<i class="fas fa-folder-open fa-3x mb-3"></i>';
+                                            echo '<i class="bi bi-folder-open fa-3x mb-3"></i>';
                                             echo '<p>Henüz oluşturulmuş dosya yok</p>';
                                             echo '</div>';
                                         }
                                     } else {
                                         echo '<div class="text-center text-muted py-3">';
-                                        echo '<i class="fas fa-folder fa-3x mb-3"></i>';
+                                        echo '<i class="bi bi-folder fa-3x mb-3"></i>';
                                         echo '<p>Sample data klasörü bulunamadı</p>';
                                         echo '</div>';
                                     }
@@ -472,7 +472,7 @@ class SampleDataGenerator {
                         
                         <div class="card mt-4">
                             <div class="card-header bg-info text-white">
-                                <h5><i class="fas fa-info-circle"></i> Sample Data İçeriği</h5>
+                                <h5><i class="bi bi-info-circle"></i> Sample Data İçeriği</h5>
                             </div>
                             <div class="card-body">
                                 <div class="row">
@@ -513,7 +513,7 @@ class SampleDataGenerator {
                         </div>
                         
                         <div class="mt-4">
-                            <h5><i class="fas fa-arrow-right"></i> Sonraki Adımlar</h5>
+                            <h5><i class="bi bi-arrow-right"></i> Sonraki Adımlar</h5>
                             <ol>
                                 <li><strong>Sample Data Oluştur:</strong> Yukarıdaki butona tıklayarak test verilerini oluşturun</li>
                                 <li><strong>Migration Interface:</strong> Legacy Migration arayüzüne geçin</li>
@@ -523,13 +523,13 @@ class SampleDataGenerator {
                             
                             <div class="mt-3">
                                 <a href="legacy-migration-interface.php" class="btn btn-primary btn-action">
-                                    <i class="fas fa-upload"></i> Migration Interface
+                                    <i class="bi bi-upload"></i> Migration Interface
                                 </a>
                                 <a href="legacy-data-converter.php" class="btn btn-info btn-action">
-                                    <i class="fas fa-code"></i> Data Converter
+                                    <i class="bi bi-code"></i> Data Converter
                                 </a>
                                 <a href="final-guid-migration-complete.php" class="btn btn-success btn-action">
-                                    <i class="fas fa-check-circle"></i> System Test
+                                    <i class="bi bi-check-circle"></i> System Test
                                 </a>
                             </div>
                         </div>

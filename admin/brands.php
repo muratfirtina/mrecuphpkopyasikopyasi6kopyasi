@@ -369,7 +369,7 @@ try {
 
 $pageTitle = 'Marka/Model Yönetimi';
 $pageDescription = 'Araç markalarını ve modellerini yönetin';
-$pageIcon = 'fas fa-car';
+$pageIcon = 'bi bi-car';
 
 include '../includes/admin_header.php';
 include '../includes/admin_sidebar.php';

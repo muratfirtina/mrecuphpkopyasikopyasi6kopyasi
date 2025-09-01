@@ -30,7 +30,7 @@ http_response_code(500);
                     </div>
                     
                     <div class="mb-4">
-                        <i class="fas fa-exclamation-triangle text-warning" style="font-size: 5rem;"></i>
+                        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 5rem;"></i>
                     </div>
                     
                     <h2 class="mb-3">Sunucu Hatası</h2>
@@ -41,38 +41,38 @@ http_response_code(500);
                     
                     <div class="d-grid gap-2 d-md-block">
                         <a href="index.php" class="btn btn-primary btn-lg">
-                            <i class="fas fa-home me-2"></i>Ana Sayfaya Dön
+                            <i class="bi bi-home me-2"></i>Ana Sayfaya Dön
                         </a>
                         
                         <button onclick="location.reload()" class="btn btn-outline-secondary btn-lg">
-                            <i class="fas fa-sync-alt me-2"></i>Tekrar Dene
+                            <i class="bi bi-sync-alt me-2"></i>Tekrar Dene
                         </button>
                     </div>
                     
                     <hr class="my-5">
                     
                     <div class="alert alert-warning">
-                        <i class="fas fa-tools me-2"></i>
+                        <i class="bi bi-tools me-2"></i>
                         <strong>Geçici Bakım:</strong> Sistem şu anda bakım altında olabilir. 
                         Lütfen birkaç dakika sonra tekrar deneyin.
                     </div>
                     
                     <div class="row text-center">
                         <div class="col-md-4 mb-3">
-                            <i class="fas fa-clock text-info mb-2" style="font-size: 2rem;"></i>
+                            <i class="bi bi-clock text-info mb-2" style="font-size: 2rem;"></i>
                             <h6>Kısa Sürede</h6>
                             <p class="small text-muted">Sorun en kısa sürede çözülecek</p>
                         </div>
                         
                         <div class="col-md-4 mb-3">
-                            <i class="fas fa-envelope text-primary mb-2" style="font-size: 2rem;"></i>
+                            <i class="bi bi-envelope text-primary mb-2" style="font-size: 2rem;"></i>
                             <h6>Destek</h6>
                             <p class="small text-muted">Acil durumlar için iletişim</p>
                             <a href="mailto:<?php echo SITE_EMAIL; ?>" class="btn btn-sm btn-outline-primary">Email Gönder</a>
                         </div>
                         
                         <div class="col-md-4 mb-3">
-                            <i class="fas fa-chart-line text-success mb-2" style="font-size: 2rem;"></i>
+                            <i class="bi bi-chart-line text-success mb-2" style="font-size: 2rem;"></i>
                             <h6>Durum</h6>
                             <p class="small text-muted">Sistem durumu takibi</p>
                             <span class="badge bg-warning">Bakım</span>
@@ -99,7 +99,7 @@ http_response_code(500);
         setTimeout(function() {
             const reloadBtn = document.querySelector('button[onclick="location.reload()"]');
             if (reloadBtn) {
-                reloadBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin me-2"></i>Otomatik Yenileniyor...';
+                reloadBtn.innerHTML = '<i class="bi bi-sync-alt fa-spin me-2"></i>Otomatik Yenileniyor...';
                 reloadBtn.disabled = true;
                 
                 setTimeout(function() {

@@ -416,7 +416,7 @@ include 'includes/header.php';
                 <nav aria-label="breadcrumb" class="mb-4">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="index.php"><i class="fas fa-home me-1"></i>Ana Sayfa</a>
+                            <a href="index.php"><i class="bi bi-home me-1"></i>Ana Sayfa</a>
                         </li>
                         <li class="breadcrumb-item">
                             <a href="services.php">Hizmetlerimiz</a>
@@ -497,7 +497,7 @@ include 'includes/header.php';
                             <?php foreach ($features as $feature): ?>
                                 <div class="feature-item">
                                     <div class="feature-icon">
-                                        <i class="fas fa-check"></i>
+                                        <i class="bi bi-check"></i>
                                     </div>
                                     <span><?php echo htmlspecialchars($feature); ?></span>
                                 </div>
@@ -540,7 +540,7 @@ include 'includes/header.php';
 
                     <!-- Additional Info -->
                     <div class="alert alert-info">
-                        <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Önemli Notlar</h5>
+                        <h5 class="alert-heading"><i class="bi bi-info-circle me-2"></i>Önemli Notlar</h5>
                         <ul class="mb-0">
                             <li>Tüm işlemlerimiz için %100 memnuniyet garantisi veriyoruz</li>
                             <li>Orijinal dosyanızın yedeğini saklarız</li>
@@ -567,11 +567,11 @@ include 'includes/header.php';
                     <div class="cta-buttons">
                         <?php if (isLoggedIn()): ?>
                             <a href="user/upload.php" class="btn btn-primary btn-lg">
-                                <i class="fas fa-upload me-2"></i>Hizmet Al
+                                <i class="bi bi-upload me-2"></i>Hizmet Al
                             </a>
                         <?php else: ?>
                             <a href="register.php" class="btn btn-primary btn-lg">
-                                <i class="fas fa-user-plus me-2"></i>Kayıt Ol & Hizmet Al
+                                <i class="bi bi-user-plus me-2"></i>Kayıt Ol & Hizmet Al
                             </a>
                         <?php endif; ?>
                     </div>
@@ -580,17 +580,17 @@ include 'includes/header.php';
 
                     <!-- Contact Info -->
                     <div class="contact-info">
-                        <h5 class="mb-3"><i class="fas fa-headset me-2 text-primary"></i>İletişim</h5>
+                        <h5 class="mb-3"><i class="bi bi-headset me-2 text-primary"></i>İletişim</h5>
                         
                         <!-- E-posta - ID: 2 -->
                         <?php if (isset($contactCardsById[2])): ?>
                             <div class="d-flex align-items-center mb-2">
-                                <i class="<?php echo $contactCardsById[2]['icon'] ?: 'fas fa-envelope'; ?> text-primary me-2" style="color: <?php echo $contactCardsById[2]['icon_color'] ?: ''; ?> !important;"></i>
+                                <i class="<?php echo $contactCardsById[2]['icon'] ?: 'bi bi-envelope'; ?> text-primary me-2" style="color: <?php echo $contactCardsById[2]['icon_color'] ?: ''; ?> !important;"></i>
                                 <span><?php echo $contactCardsById[2]['contact_info'] ?: SITE_EMAIL; ?></span>
                             </div>
                         <?php else: ?>
                             <div class="d-flex align-items-center mb-2">
-                                <i class="fas fa-envelope text-primary me-2"></i>
+                                <i class="bi bi-envelope text-primary me-2"></i>
                                 <span><?php echo SITE_EMAIL; ?></span>
                             </div>
                         <?php endif; ?>
@@ -598,12 +598,12 @@ include 'includes/header.php';
                         <!-- Telefon - ID: 1 -->
                         <?php if (isset($contactCardsById[1])): ?>
                             <div class="d-flex align-items-center mb-2">
-                                <i class="<?php echo $contactCardsById[1]['icon'] ?: 'fas fa-phone'; ?> text-primary me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?> !important;"></i>
+                                <i class="<?php echo $contactCardsById[1]['icon'] ?: 'bi bi-phone'; ?> text-primary me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?> !important;"></i>
                                 <span><?php echo $contactCardsById[1]['contact_info'] ?: '+90 (555) 123 45 67'; ?></span>
                             </div>
                         <?php else: ?>
                             <div class="d-flex align-items-center mb-2">
-                                <i class="fas fa-phone text-primary me-2"></i>
+                                <i class="bi bi-phone text-primary me-2"></i>
                                 <span>+90 (555) 123 45 67</span>
                             </div>
                         <?php endif; ?>
@@ -611,12 +611,12 @@ include 'includes/header.php';
                         <!-- WhatsApp - ID: 3 -->
                         <?php if (isset($contactCardsById[3])): ?>
                             <div class="d-flex align-items-center mb-2">
-                                <i class="<?php echo $contactCardsById[3]['icon'] ?: 'fab fa-whatsapp'; ?> text-primary me-2" style="color: <?php echo $contactCardsById[3]['icon_color'] ?: ''; ?> !important;"></i>
+                                <i class="<?php echo $contactCardsById[3]['icon'] ?: 'bi bi-whatsapp'; ?> text-primary me-2" style="color: <?php echo $contactCardsById[3]['icon_color'] ?: ''; ?> !important;"></i>
                                 <span><?php echo $contactCardsById[3]['contact_info'] ?: '+90 (555) 123 45 67'; ?></span>
                             </div>
                         <?php else: ?>
                             <div class="d-flex align-items-center mb-2">
-                                <i class="fab fa-whatsapp text-primary me-2"></i>
+                                <i class="bi bi-whatsapp text-primary me-2"></i>
                                 <span>+90 (555) 123 45 67</span>
                             </div>
                         <?php endif; ?>
@@ -625,18 +625,18 @@ include 'includes/header.php';
 
                     <!-- Quick Links -->
                     <div class="quick-links">
-                        <h5 class="mb-3"><i class="fas fa-external-link-alt me-2 text-primary"></i>Hızlı Erişim</h5>
+                        <h5 class="mb-3"><i class="bi bi-external-link-alt me-2 text-primary"></i>Hızlı Erişim</h5>
                         <div class="d-grid gap-2">
                             <a href="services.php" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>Tüm Hizmetler
+                                <i class="bi bi-arrow-left me-2"></i>Tüm Hizmetler
                             </a>
                             <?php if (isLoggedIn()): ?>
                                 <a href="user/" class="btn btn-outline-secondary">
-                                    <i class="fas fa-tachometer-alt me-2"></i>Panelim
+                                    <i class="bi bi-tachometer-alt me-2"></i>Panelim
                                 </a>
                             <?php else: ?>
                                 <a href="login.php" class="btn btn-outline-secondary">
-                                    <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
+                                    <i class="bi bi-sign-in-alt me-2"></i>Giriş Yap
                                 </a>
                             <?php endif; ?>
                         </div>
@@ -701,7 +701,7 @@ try {
                             </div>
                         <?php endif; ?>
                         <a href="hizmet/<?php echo urlencode($relatedService['slug']); ?>" class="btn btn-outline-danger btn-sm px-4">
-                            <i class="fas fa-eye me-1"></i>İncele
+                            <i class="bi bi-eye me-1"></i>İncele
                         </a>
                     </div>
                 </div>
@@ -723,43 +723,43 @@ try {
             <!-- Telefon Button - ID: 1 -->
             <?php if (isset($contactCardsById[1])): ?>
                 <a href="<?php echo $contactCardsById[1]['contact_link'] ?: 'tel:+905551234567'; ?>" class="btn btn-light btn-lg">
-                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'fas fa-phone'; ?> me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[1]['button_text'] ?: 'Hemen Ara'; ?>
+                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'bi bi-phone'; ?> me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[1]['button_text'] ?: 'Hemen Ara'; ?>
                 </a>
             <?php else: ?>
                 <a href="tel:+905551234567" class="btn btn-light btn-lg">
-                    <i class="fas fa-phone me-2"></i>Hemen Ara
+                    <i class="bi bi-phone me-2"></i>Hemen Ara
                 </a>
             <?php endif; ?>
             
             <!-- E-posta Button - ID: 2 -->
             <?php if (isset($contactCardsById[2])): ?>
                 <a href="<?php echo $contactCardsById[2]['contact_link'] ?: 'mailto:' . SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
-                    <i class="<?php echo $contactCardsById[2]['icon'] ?: 'fas fa-envelope'; ?> me-2" style="color: <?php echo $contactCardsById[2]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[2]['button_text'] ?: 'E-posta Gönder'; ?>
+                    <i class="<?php echo $contactCardsById[2]['icon'] ?: 'bi bi-envelope'; ?> me-2" style="color: <?php echo $contactCardsById[2]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[2]['button_text'] ?: 'E-posta Gönder'; ?>
                 </a>
             <?php else: ?>
                 <a href="mailto:<?php echo SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
-                    <i class="fas fa-envelope me-2"></i>E-posta Gönder
+                    <i class="bi bi-envelope me-2"></i>E-posta Gönder
                 </a>
             <?php endif; ?>
             
             <a href="../register.php" class="btn btn-warning btn-lg">
-                <i class="fas fa-upload me-2"></i>Dosya Yükle
+                <i class="bi bi-upload me-2"></i>Dosya Yükle
             </a>
         </div>
         
         <div class="row mt-5 text-center">
             <div class="col-md-4">
-                <i class="fas fa-shield-alt fa-2x mb-3"></i>
+                <i class="bi bi-shield-alt fa-2x mb-3"></i>
                 <h5>Güvenli İşlem</h5>
                 <p>Aracınızın garantisi bozulmaz</p>
             </div>
             <div class="col-md-4">
-                <i class="fas fa-clock fa-2x mb-3"></i>
+                <i class="bi bi-clock fa-2x mb-3"></i>
                 <h5>Hızlı Teslimat</h5>
                 <p>24 saat içinde dosyanız hazır</p>
             </div>
             <div class="col-md-4">
-                <i class="fas fa-undo fa-2x mb-3"></i>
+                <i class="bi bi-undo fa-2x mb-3"></i>
                 <h5>Geri Dönüş Garantisi</h5>
                 <p>İstediğiniz zaman eski haline döndürülebilir</p>
             </div>

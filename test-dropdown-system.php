@@ -33,7 +33,7 @@ echo "<div class='container'>
 
 echo "<div class='test-card'>
     <h1 class='text-center mb-4'>
-        <i class='fas fa-shopping-bag text-primary me-3'></i>
+        <i class='bi bi-shopping-bag text-primary me-3'></i>
         Ürünler Dropdown Sistemi Test
     </h1>
     <p class='text-center lead text-muted'>
@@ -43,7 +43,7 @@ echo "<div class='test-card'>
 
 // 1. Veritabanı Bağlantı Testi
 echo "<div class='test-card test-info'>
-    <h3><i class='fas fa-database me-2'></i>1. Veritabanı Bağlantısı</h3>";
+    <h3><i class='bi bi-database me-2'></i>1. Veritabanı Bağlantısı</h3>";
 
 try {
     if ($pdo) {
@@ -59,7 +59,7 @@ echo "</div>";
 
 // 2. Tablo Varlık Kontrolü
 echo "<div class='test-card test-info'>
-    <h3><i class='fas fa-table me-2'></i>2. Tablo Varlık Kontrolü</h3>";
+    <h3><i class='bi bi-table me-2'></i>2. Tablo Varlık Kontrolü</h3>";
 
 $requiredTables = ['categories', 'products', 'product_brands', 'product_images'];
 $tablesStatus = [];
@@ -84,7 +84,7 @@ echo "</div>";
 
 // 3. Veri Kontrolü
 echo "<div class='test-card test-info'>
-    <h3><i class='fas fa-chart-bar me-2'></i>3. Veri Kontrolü</h3>";
+    <h3><i class='bi bi-chart-bar me-2'></i>3. Veri Kontrolü</h3>";
 
 $dataCounts = [];
 
@@ -108,23 +108,23 @@ echo "</div>";
 
 // 4. Kurulum Dosyaları
 echo "<div class='test-card test-warning'>
-    <h3><i class='fas fa-tools me-2'></i>4. Kurulum İşlemleri</h3>
+    <h3><i class='bi bi-tools me-2'></i>4. Kurulum İşlemleri</h3>
     <p>Aşağıdaki kurulum dosyalarını çalıştırarak sistemi kurabilirsiniz:</p>";
 
 if (!$tablesStatus['categories'] || $dataCounts['categories'] == 0) {
     echo "<a href='install-categories-system.php' class='btn btn-primary btn-test' target='_blank'>
-        <i class='fas fa-tags me-2'></i>Categories Sistemi Kur
+        <i class='bi bi-tags me-2'></i>Categories Sistemi Kur
     </a>";
 }
 
 if (!$tablesStatus['product_brands'] || $dataCounts['product_brands'] == 0) {
     echo "<a href='install-product-system.php' class='btn btn-success btn-test' target='_blank'>
-        <i class='fas fa-award me-2'></i>Product Brands Sistemi Kur
+        <i class='bi bi-award me-2'></i>Product Brands Sistemi Kur
     </a>";
 }
 
 echo "<p class='mt-3 text-muted'>
-    <i class='fas fa-info-circle me-2'></i>
+    <i class='bi bi-info-circle me-2'></i>
     Kurulum dosyalarını çalıştırdıktan sonra güvenlik için silin.
 </p>";
 
@@ -132,7 +132,7 @@ echo "</div>";
 
 // 5. Sayfa Testleri
 echo "<div class='test-card test-success'>
-    <h3><i class='fas fa-globe me-2'></i>5. Sayfa Testleri</h3>
+    <h3><i class='bi bi-globe me-2'></i>5. Sayfa Testleri</h3>
     <div class='row'>";
 
 $testPages = [
@@ -150,7 +150,7 @@ foreach ($testPages as $page) {
                 <h5 class='card-title'>{$page['name']}</h5>
                 <p class='card-text text-muted'>{$page['desc']}</p>
                 <a href='{$page['url']}' class='btn btn-outline-primary' target='_blank'>
-                    <i class='fas fa-external-link-alt me-2'></i>Test Et
+                    <i class='bi bi-external-link-alt me-2'></i>Test Et
                 </a>
             </div>
         </div>
@@ -162,7 +162,7 @@ echo "</div></div>";
 // 6. Dropdown Test Kodu
 if ($tablesStatus['categories'] && $dataCounts['categories'] > 0) {
     echo "<div class='test-card test-success'>
-        <h3><i class='fas fa-code me-2'></i>6. Header Dropdown Test</h3>
+        <h3><i class='bi bi-code me-2'></i>6. Header Dropdown Test</h3>
         <p>Header'daki dropdown menü şu şekilde çalışıyor:</p>";
     
     try {
@@ -199,7 +199,7 @@ if ($tablesStatus['categories'] && $dataCounts['categories'] > 0) {
 
 // 7. Sistem Durumu Özet
 echo "<div class='test-card test-info'>
-    <h3><i class='fas fa-check-circle me-2'></i>7. Sistem Durumu</h3>";
+    <h3><i class='bi bi-check-circle me-2'></i>7. Sistem Durumu</h3>";
 
 $allTablesOk = array_reduce($tablesStatus, function($carry, $item) { return $carry && $item; }, true);
 $hasData = array_sum($dataCounts) > 0;
@@ -209,7 +209,7 @@ if ($allTablesOk && $hasData) {
         <h4>🎉 Sistem Hazır!</h4>
         <p>Tüm tablolar mevcut ve veriler yüklenmiş. Ana sayfaya gidip header'daki 'Ürünler' dropdown'ını test edebilirsiniz.</p>
         <a href='/' class='btn btn-success btn-lg'>
-            <i class='fas fa-home me-2'></i>Ana Sayfaya Git
+            <i class='bi bi-home me-2'></i>Ana Sayfaya Git
         </a>
     </div>";
 } else if ($allTablesOk && !$hasData) {

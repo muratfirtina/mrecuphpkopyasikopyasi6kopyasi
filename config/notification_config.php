@@ -58,61 +58,61 @@ define('NOTIFICATION_TEMPLATES', [
     'file_upload' => [
         'title' => 'Yeni Dosya Yüklendi',
         'message' => '{filename} dosyası başarıyla yüklendi.',
-        'icon' => 'fas fa-upload',
+        'icon' => 'bi bi-upload',
         'level' => 'success'
     ],
     'file_status_update' => [
         'title' => 'Dosya Durumu Güncellendi',
         'message' => '{filename} dosyasının durumu {status} olarak güncellendi.',
-        'icon' => 'fas fa-file-alt',
+        'icon' => 'bi bi-file-alt',
         'level' => 'info'
     ],
     'revision_request' => [
         'title' => 'Yeni Revizyon Talebi',
         'message' => '{filename} için revizyon talebi oluşturuldu.',
-        'icon' => 'fas fa-edit',
+        'icon' => 'bi bi-edit',
         'level' => 'warning'
     ],
     'revision_approved' => [
         'title' => 'Revizyon Onaylandı',
         'message' => '{filename} revizyonu onaylandı.',
-        'icon' => 'fas fa-check-circle',
+        'icon' => 'bi bi-check-circle',
         'level' => 'success'
     ],
     'revision_rejected' => [
         'title' => 'Revizyon Reddedildi',
         'message' => '{filename} revizyonu reddedildi. Sebep: {reason}',
-        'icon' => 'fas fa-times-circle',
+        'icon' => 'bi bi-times-circle',
         'level' => 'error'
     ],
     'user_registration' => [
         'title' => 'Yeni Kullanıcı Kaydı',
         'message' => '{username} kullanıcısı sisteme kaydoldu.',
-        'icon' => 'fas fa-user-plus',
+        'icon' => 'bi bi-user-plus',
         'level' => 'info'
     ],
     'credit_update' => [
         'title' => 'Kredi Güncelleme',
         'message' => 'Kredi bakiyeniz güncellendi. Yeni bakiye: {amount}',
-        'icon' => 'fas fa-coins',
+        'icon' => 'bi bi-coins',
         'level' => 'info'
     ],
     'system_warning' => [
         'title' => 'Sistem Uyarısı',
         'message' => '{message}',
-        'icon' => 'fas fa-exclamation-triangle',
+        'icon' => 'bi bi-exclamation-triangle',
         'level' => 'warning'
     ],
     'system_maintenance' => [
         'title' => 'Sistem Bakımı',
         'message' => 'Sistem bakımı planlandı: {date}',
-        'icon' => 'fas fa-tools',
+        'icon' => 'bi bi-tools',
         'level' => 'warning'
     ],
     'admin_message' => [
         'title' => 'Admin Mesajı',
         'message' => '{message}',
-        'icon' => 'fas fa-envelope',
+        'icon' => 'bi bi-envelope',
         'level' => 'info'
     ]
 ]);
@@ -161,7 +161,7 @@ function getNotificationTemplate($type) {
     return NOTIFICATION_TEMPLATES[$type] ?? [
         'title' => 'Bildirim',
         'message' => 'Yeni bir bildiriminiz var.',
-        'icon' => 'fas fa-bell',
+        'icon' => 'bi bi-bell',
         'level' => 'info'
     ];
 }

@@ -203,7 +203,7 @@ include '../includes/admin_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="fas fa-file-alt me-2 text-primary"></i>
+                        <i class="bi bi-file-alt me-2 text-primary"></i>
                         <?php echo strtoupper($fileType); ?> Dosya Detayı
                     </h1>
                     <p class="text-muted mb-0">
@@ -213,11 +213,11 @@ include '../includes/admin_header.php';
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
                         <a href="uploads.php" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>Geri Dön
+                            <i class="bi bi-arrow-left me-1"></i>Geri Dön
                         </a>
                         <?php if (!empty($fileData['download_url'])): ?>
                             <a href="<?php echo $fileData['download_url']; ?>" class="btn btn-primary" target="_blank">
-                                <i class="fas fa-download me-1"></i>İndir
+                                <i class="bi bi-download me-1"></i>İndir
                             </a>
                         <?php endif; ?>
                     </div>
@@ -227,7 +227,7 @@ include '../includes/admin_header.php';
             <!-- Hata/Başarı Mesajları -->
             <?php if ($error): ?>
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="bi bi-exclamation-triangle me-2"></i>
                     <strong>Hata!</strong> <?php echo $error; ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -235,7 +235,7 @@ include '../includes/admin_header.php';
 
             <?php if ($success): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>
+                    <i class="bi bi-check-circle me-2"></i>
                     <strong>Başarılı!</strong> <?php echo $success; ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -247,7 +247,7 @@ include '../includes/admin_header.php';
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-info-circle me-2"></i>Dosya Bilgileri
+                                <i class="bi bi-info-circle me-2"></i>Dosya Bilgileri
                             </h5>
                         </div>
                         <div class="card-body">
@@ -255,7 +255,7 @@ include '../includes/admin_header.php';
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted">Dosya Adı</label>
                                     <div class="form-control-plaintext">
-                                        <i class="fas fa-file me-2 text-primary"></i>
+                                        <i class="bi bi-file me-2 text-primary"></i>
                                         <strong><?php echo htmlspecialchars($fileData['original_name'] ?? $fileData['filename'] ?? 'Bilinmeyen'); ?></strong>
                                     </div>
                                 </div>
@@ -264,7 +264,7 @@ include '../includes/admin_header.php';
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted">Ana Dosya</label>
                                     <div class="form-control-plaintext">
-                                        <i class="fas fa-link me-2 text-success"></i>
+                                        <i class="bi bi-link me-2 text-success"></i>
                                         <?php echo htmlspecialchars($fileData['main_file_name']); ?>
                                     </div>
                                 </div>
@@ -280,7 +280,7 @@ include '../includes/admin_header.php';
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted">Dosya Boyutu</label>
                                     <div class="form-control-plaintext">
-                                        <i class="fas fa-hdd me-2 text-info"></i>
+                                        <i class="bi bi-hdd me-2 text-info"></i>
                                         <?php echo formatFileSize($fileData['file_size'] ?? 0); ?>
                                     </div>
                                 </div>
@@ -288,7 +288,7 @@ include '../includes/admin_header.php';
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted">Yüklenme Tarihi</label>
                                     <div class="form-control-plaintext">
-                                        <i class="fas fa-calendar me-2 text-warning"></i>
+                                        <i class="bi bi-calendar me-2 text-warning"></i>
                                         <?php echo formatDate($fileData['upload_date'] ?? $fileData['created_at'] ?? 'Bilinmiyor'); ?>
                                     </div>
                                 </div>
@@ -297,7 +297,7 @@ include '../includes/admin_header.php';
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted">Araç Plakası</label>
                                     <div class="form-control-plaintext">
-                                        <i class="fas fa-car me-2 text-info"></i>
+                                        <i class="bi bi-car me-2 text-info"></i>
                                         <span class="badge bg-info"><?php echo strtoupper(htmlspecialchars($fileData['plate'])); ?></span>
                                     </div>
                                 </div>
@@ -311,7 +311,7 @@ include '../includes/admin_header.php';
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-user me-2"></i>Kullanıcı Bilgileri
+                                <i class="bi bi-user me-2"></i>Kullanıcı Bilgileri
                             </h5>
                         </div>
                         <div class="card-body">
@@ -344,7 +344,7 @@ include '../includes/admin_header.php';
                     <div class="card mt-3">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-car me-2"></i>Araç Bilgileri
+                                <i class="bi bi-car me-2"></i>Araç Bilgileri
                             </h5>
                         </div>
                         <div class="card-body">
@@ -380,14 +380,14 @@ include '../includes/admin_header.php';
             <div class="card mt-3">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-cog me-2"></i>Admin İşlemleri
+                        <i class="bi bi-cog me-2"></i>Admin İşlemleri
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2" role="group">
                         <?php if (!empty($fileData['download_url'])): ?>
                             <a href="<?php echo $fileData['download_url']; ?>" class="btn btn-success" target="_blank">
-                                <i class="fas fa-download me-1"></i>Dosyayı İndir
+                                <i class="bi bi-download me-1"></i>Dosyayı İndir
                             </a>
                         <?php endif; ?>
                         
@@ -395,20 +395,20 @@ include '../includes/admin_header.php';
                         <?php if (!isset($fileData['is_cancelled']) || !$fileData['is_cancelled']): ?>
                             <button type="button" class="btn btn-danger" 
                                     onclick="showCancelModal('<?php echo $fileId; ?>', '<?php echo $fileType; ?>', '<?php echo htmlspecialchars($fileData['original_name'] ?? $fileData['filename'] ?? 'Bilinmeyen dosya', ENT_QUOTES); ?>')">
-                                <i class="fas fa-times me-1"></i>Dosyayı İptal Et
+                                <i class="bi bi-times me-1"></i>Dosyayı İptal Et
                             </button>
                         <?php else: ?>
                             <span class="btn btn-secondary disabled">
-                                <i class="fas fa-ban me-1"></i>İptal Edilmiş
+                                <i class="bi bi-ban me-1"></i>İptal Edilmiş
                             </span>
                         <?php endif; ?>
                         
                         <a href="uploads.php" class="btn btn-outline-secondary">
-                            <i class="fas fa-list me-1"></i>Dosya Listesi
+                            <i class="bi bi-list me-1"></i>Dosya Listesi
                         </a>
                         
                         <a href="user-details.php?id=<?php echo $fileData['user_id']; ?>" class="btn btn-outline-primary">
-                            <i class="fas fa-user me-1"></i>Kullanıcı Detayı
+                            <i class="bi bi-user me-1"></i>Kullanıcı Detayı
                         </a>
                     </div>
                 </div>
@@ -423,7 +423,7 @@ include '../includes/admin_header.php';
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-gradient-danger text-white border-0">
                 <h5 class="modal-title d-flex align-items-center" id="adminCancelModalLabel">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="bi bi-exclamation-triangle me-2"></i>
                     Dosya İptal Onayı
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
@@ -436,21 +436,21 @@ include '../includes/admin_header.php';
                     
                     <div class="mb-4">
                         <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 50%;">
-                            <i class="fas fa-times text-white fa-2x"></i>
+                            <i class="bi bi-times text-white fa-2x"></i>
                         </div>
                         <h6 class="mb-2 text-dark text-center">Bu dosyayı iptal etmek istediğinizden emin misiniz?</h6>
                         <p class="text-muted mb-3 text-center">
                             <strong>Dosya:</strong> <span id="cancelFileName"></span>
                         </p>
                         <div class="alert alert-warning d-flex align-items-center mb-3">
-                            <i class="fas fa-info-circle me-2"></i>
+                            <i class="bi bi-info-circle me-2"></i>
                             <small>Bu işlem dosyayı gizleyecek ve eğer ücretli ise kullanıcıya kredi iadesi yapacaktır.</small>
                         </div>
                     </div>
                     
                     <div class="mb-3">
                         <label for="adminNotes" class="form-label">
-                            <i class="fas fa-sticky-note me-1"></i>
+                            <i class="bi bi-sticky-note me-1"></i>
                             İptal Sebebi (Opsiyonel)
                         </label>
                         <textarea class="form-control" id="adminNotes" name="admin_notes" rows="3" 
@@ -460,11 +460,11 @@ include '../includes/admin_header.php';
                 </div>
                 <div class="modal-footer border-0 pt-3">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>
+                        <i class="bi bi-times me-1"></i>
                         İptal
                     </button>
                     <button type="submit" class="btn btn-danger px-4" style="box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                        <i class="fas fa-check me-1"></i>
+                        <i class="bi bi-check me-1"></i>
                         Evet, İptal Et
                     </button>
                 </div>

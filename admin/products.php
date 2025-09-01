@@ -379,7 +379,7 @@ try {
 
 $pageTitle = 'Ürün Yönetimi';
 $pageDescription = 'Ürünleri yönetin';
-$pageIcon = 'fas fa-box';
+$pageIcon = 'bi bi-box';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -486,7 +486,7 @@ include '../includes/admin_sidebar.php';
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
     <div class="alert alert-admin alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -494,7 +494,7 @@ include '../includes/admin_sidebar.php';
 
 <?php if ($success): ?>
     <div class="alert alert-admin alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="bi bi-check-circle me-2"></i>
         <?php echo $success; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -505,7 +505,7 @@ include '../includes/admin_sidebar.php';
     <div class="col-md-3">
         <div class="card admin-card text-center">
             <div class="card-body">
-                <i class="fas fa-box fa-2x text-primary mb-2"></i>
+                <i class="bi bi-box fa-2x text-primary mb-2"></i>
                 <h4><?php echo count($products); ?></h4>
                 <small class="text-muted">Toplam Ürün</small>
             </div>
@@ -514,7 +514,7 @@ include '../includes/admin_sidebar.php';
     <div class="col-md-3">
         <div class="card admin-card text-center">
             <div class="card-body">
-                <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                <i class="bi bi-star fa-2x text-warning mb-2"></i>
                 <h4><?php echo count(array_filter($products, function($p) { return $p['featured']; })); ?></h4>
                 <small class="text-muted">Öne Çıkan</small>
             </div>
@@ -523,7 +523,7 @@ include '../includes/admin_sidebar.php';
     <div class="col-md-3">
         <div class="card admin-card text-center">
             <div class="card-body">
-                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                <i class="bi bi-check-circle fa-2x text-success mb-2"></i>
                 <h4><?php echo count(array_filter($products, function($p) { return $p['is_active']; })); ?></h4>
                 <small class="text-muted">Aktif Ürün</small>
             </div>
@@ -532,7 +532,7 @@ include '../includes/admin_sidebar.php';
     <div class="col-md-3">
         <div class="card admin-card text-center">
             <div class="card-body">
-                <i class="fas fa-image fa-2x text-info mb-2"></i>
+                <i class="bi bi-image fa-2x text-info mb-2"></i>
                 <h4><?php echo array_sum(array_column($products, 'image_count')); ?></h4>
                 <small class="text-muted">Toplam Resim</small>
             </div>
@@ -546,7 +546,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-edit me-2"></i>Ürün Düzenle
+                    <i class="bi bi-edit me-2"></i>Ürün Düzenle
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -664,7 +664,7 @@ include '../includes/admin_sidebar.php';
                     <div class="row mt-4">
                         <div class="col-12">
                             <h6 class="mb-3">
-                                <i class="fas fa-images me-2"></i>Mevcut Resimler
+                                <i class="bi bi-images me-2"></i>Mevcut Resimler
                                 <span class="badge bg-info ms-2" id="current-image-count">0</span>
                             </h6>
                             <div id="current-product-images" class="row g-2 mb-3"></div>
@@ -677,7 +677,7 @@ include '../includes/admin_sidebar.php';
                                            accept="image/*" multiple>
                                     <button type="button" class="btn btn-outline-primary" 
                                             onclick="addNewProductImages()">
-                                        <i class="fas fa-upload me-1"></i>Yükle
+                                        <i class="bi bi-upload me-1"></i>Yükle
                                     </button>
                                 </div>
                                 <div class="form-text">Birden fazla resim seçebilirsiniz. Maksimum 10MB per dosya.</div>
@@ -709,7 +709,7 @@ include '../includes/admin_sidebar.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>Güncelle
+                        <i class="bi bi-save me-1"></i>Güncelle
                     </button>
                 </div>
             </form>
@@ -721,20 +721,20 @@ include '../includes/admin_sidebar.php';
 <div class="card admin-card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
-            <i class="fas fa-box me-2"></i>Ürünler (<?php echo count($products); ?>)
+            <i class="bi bi-box me-2"></i>Ürünler (<?php echo count($products); ?>)
         </h5>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
-            <i class="fas fa-plus me-1"></i>Yeni Ürün
+            <i class="bi bi-plus me-1"></i>Yeni Ürün
         </button>
     </div>
     <div class="card-body">
         <?php if (empty($products)): ?>
             <div class="text-center py-4">
-                <i class="fas fa-box fa-3x text-muted mb-3"></i>
+                <i class="bi bi-box fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">Ürün bulunamadı</h6>
                 <p class="text-muted">Henüz ürün eklenmemiş.</p>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                    <i class="fas fa-plus me-1"></i>İlk Ürünü Ekle
+                    <i class="bi bi-plus me-1"></i>İlk Ürünü Ekle
                 </button>
             </div>
         <?php else: ?>
@@ -768,7 +768,7 @@ include '../includes/admin_sidebar.php';
                                         <div>
                                             <strong><?php echo htmlspecialchars($product['name']); ?></strong>
                                             <?php if ($product['featured']): ?>
-                                                <i class="fas fa-star text-warning ms-1" title="Öne Çıkan"></i>
+                                                <i class="bi bi-star text-warning ms-1" title="Öne Çıkan"></i>
                                             <?php endif; ?>
                                             <br>
                                             <small class="text-muted"><?php echo htmlspecialchars($product['slug']); ?></small>
@@ -823,16 +823,16 @@ include '../includes/admin_sidebar.php';
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-outline-info" 
                                                 onclick="viewProduct(<?php echo $product['id']; ?>)">
-                                            <i class="fas fa-eye"></i>
+                                            <i class="bi bi-eye"></i>
                                         </button>
                                         <button type="button" class="btn btn-outline-warning" 
                                                 onclick="editProduct(<?php echo $product['id']; ?>)">
-                                            <i class="fas fa-edit"></i>
+                                            <i class="bi bi-edit"></i>
                                         </button>
                                         <a href="?delete=<?php echo $product['id']; ?>" 
                                            class="btn btn-outline-danger"
                                            onclick="return confirm('Bu ürünü ve tüm resimlerini silmek istediğinizden emin misiniz?')">
-                                            <i class="fas fa-trash"></i>
+                                            <i class="bi bi-trash"></i>
                                         </a>
                                     </div>
                                 </td>
@@ -851,7 +851,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-plus me-2"></i>Yeni Ürün Ekle
+                    <i class="bi bi-plus me-2"></i>Yeni Ürün Ekle
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -973,7 +973,7 @@ include '../includes/admin_sidebar.php';
                     <div class="row mt-4">
                         <div class="col-12">
                             <h6 class="mb-3">
-                                <i class="fas fa-images me-2"></i>Ürün Resimleri
+                                <i class="bi bi-images me-2"></i>Ürün Resimleri
                             </h6>
                             <div class="mb-3">
                                 <label for="add_product_images" class="form-label">Resim Dosyaları</label>
@@ -1010,7 +1010,7 @@ include '../includes/admin_sidebar.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" name="add_product" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>Ürün Ekle
+                        <i class="bi bi-save me-1"></i>Ürün Ekle
                     </button>
                 </div>
             </form>
@@ -1146,7 +1146,7 @@ function loadProductImages(images) {
     countBadge.textContent = images.length;
     
     if (images.length === 0) {
-        container.innerHTML = '<div class="col-12 text-center py-4"><p class="text-muted mb-0"><i class="fas fa-image fa-2x mb-2"></i><br>Henüz resim eklenmemiş</p></div>';
+        container.innerHTML = '<div class="col-12 text-center py-4"><p class="text-muted mb-0"><i class="bi bi-image fa-2x mb-2"></i><br>Henüz resim eklenmemiş</p></div>';
         return;
     }
     
@@ -1154,10 +1154,10 @@ function loadProductImages(images) {
         const imageCol = document.createElement('div');
         imageCol.classList.add('col-md-3', 'col-sm-4', 'col-6');
         
-        const primaryBadge = image.is_primary == 1 ? '<span class="badge bg-primary position-absolute top-0 start-0 m-1"><i class="fas fa-star"></i> Ana</span>' : '';
+        const primaryBadge = image.is_primary == 1 ? '<span class="badge bg-primary position-absolute top-0 start-0 m-1"><i class="bi bi-star"></i> Ana</span>' : '';
         const primaryButton = image.is_primary != 1 ? 
-            '<button type="button" class="btn btn-outline-warning" onclick="setPrimaryImage(' + image.id + ')" title="Ana Resim Yap"><i class="fas fa-star"></i></button>' : 
-            '<button type="button" class="btn btn-warning" disabled><i class="fas fa-star"></i></button>';
+            '<button type="button" class="btn btn-outline-warning" onclick="setPrimaryImage(' + image.id + ')" title="Ana Resim Yap"><i class="bi bi-star"></i></button>' : 
+            '<button type="button" class="btn btn-warning" disabled><i class="bi bi-star"></i></button>';
         
         imageCol.innerHTML = 
             '<div class="card position-relative">' +
@@ -1167,7 +1167,7 @@ function loadProductImages(images) {
                     '<div class="btn-group btn-group-sm w-100">' +
                         primaryButton +
                         '<button type="button" class="btn btn-outline-danger" onclick="deleteProductImage(' + image.id + ')" title="Sil">' +
-                            '<i class="fas fa-trash"></i>' +
+                            '<i class="bi bi-trash"></i>' +
                         '</button>' +
                     '</div>' +
                     '<small class="text-muted d-block mt-1">' + (image.alt_text || 'Resim') + '</small>' +

@@ -106,7 +106,7 @@ try {
 
 $pageTitle = 'Sistem Logları';
 $pageDescription = 'Sistem güvenlik loglarını görüntüleyin';
-$pageIcon = 'fas fa-list';
+$pageIcon = 'bi bi-list';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -124,7 +124,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Tüm kayıtlar</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-list text-primary fa-lg"></i>
+                    <i class="bi bi-list text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -146,7 +146,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Son 24 saat</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-calendar-day text-success fa-lg"></i>
+                    <i class="bi bi-calendar-day text-success fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -168,7 +168,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Başarısız işlemler</small>
                 </div>
                 <div class="bg-danger bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-exclamation-triangle text-danger fa-lg"></i>
+                    <i class="bi bi-exclamation-triangle text-danger fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -183,7 +183,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Farklı olay türleri</small>
                 </div>
                 <div class="bg-info bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-tags text-info fa-lg"></i>
+                    <i class="bi bi-tags text-info fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -196,7 +196,7 @@ include '../includes/admin_sidebar.php';
         <form method="GET" class="row g-3 align-items-end">
             <div class="col-md-3">
                 <label for="filter" class="form-label">
-                    <i class="fas fa-filter me-1"></i>Event Türü
+                    <i class="bi bi-filter me-1"></i>Event Türü
                 </label>
                 <select class="form-select" id="filter" name="filter">
                     <option value="all">Tüm Eventler</option>
@@ -211,7 +211,7 @@ include '../includes/admin_sidebar.php';
             
             <div class="col-md-6">
                 <label for="search" class="form-label">
-                    <i class="fas fa-search me-1"></i>Arama
+                    <i class="bi bi-search me-1"></i>Arama
                 </label>
                 <input type="text" class="form-control" id="search" name="search" 
                        value="<?php echo htmlspecialchars($search); ?>" 
@@ -220,13 +220,13 @@ include '../includes/admin_sidebar.php';
             
             <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-search me-1"></i>Filtrele
+                    <i class="bi bi-search me-1"></i>Filtrele
                 </button>
             </div>
             
             <div class="col-md-1">
                 <a href="logs.php" class="btn btn-outline-secondary w-100">
-                    <i class="fas fa-undo"></i>
+                    <i class="bi bi-undo"></i>
                 </a>
             </div>
         </form>
@@ -237,20 +237,20 @@ include '../includes/admin_sidebar.php';
 <div class="card admin-card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
-            <i class="fas fa-list me-2"></i>
+            <i class="bi bi-list me-2"></i>
             Güvenlik Logları (<?php echo $totalLogs; ?> kayıt)
         </h5>
         
         <div class="dropdown">
             <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                <i class="fas fa-download me-1"></i>Dışa Aktar
+                <i class="bi bi-download me-1"></i>Dışa Aktar
             </button>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="#" onclick="exportLogs('csv')">
-                    <i class="fas fa-file-csv me-2"></i>CSV Olarak
+                    <i class="bi bi-file-csv me-2"></i>CSV Olarak
                 </a></li>
                 <li><a class="dropdown-item" href="#" onclick="exportLogs('txt')">
-                    <i class="fas fa-file-alt me-2"></i>TXT Olarak
+                    <i class="bi bi-file-alt me-2"></i>TXT Olarak
                 </a></li>
             </ul>
         </div>
@@ -259,7 +259,7 @@ include '../includes/admin_sidebar.php';
     <div class="card-body p-0">
         <?php if (empty($logs)): ?>
             <div class="text-center py-5">
-                <i class="fas fa-list fa-3x text-muted mb-3"></i>
+                <i class="bi bi-list fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">
                     <?php if ($search || $filter !== 'all'): ?>
                         Filtreye uygun log bulunamadı
@@ -324,7 +324,7 @@ include '../includes/admin_sidebar.php';
                                         if ($details): ?>
                                             <button type="button" class="btn btn-outline-info btn-sm" 
                                                     onclick="showDetails('<?php echo htmlspecialchars(json_encode($details)); ?>')">
-                                                <i class="fas fa-eye me-1"></i>Detay
+                                                <i class="bi bi-eye me-1"></i>Detay
                                             </button>
                                         <?php else: ?>
                                             <small class="text-muted"><?php echo mb_substr(htmlspecialchars($log['details']), 0, 50); ?>...</small>
@@ -352,7 +352,7 @@ include '../includes/admin_sidebar.php';
                             <?php if ($page > 1): ?>
                                 <li class="page-item">
                                     <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $filter !== 'all' ? '&filter=' . $filter : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
-                                        <i class="fas fa-chevron-left"></i>
+                                        <i class="bi bi-chevron-left"></i>
                                     </a>
                                 </li>
                             <?php endif; ?>
@@ -373,7 +373,7 @@ include '../includes/admin_sidebar.php';
                             <?php if ($page < $totalPages): ?>
                                 <li class="page-item">
                                     <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $filter !== 'all' ? '&filter=' . $filter : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
-                                        <i class="fas fa-chevron-right"></i>
+                                        <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </li>
                             <?php endif; ?>
@@ -398,7 +398,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-info-circle me-2"></i>Log Detayları
+                    <i class="bi bi-info-circle me-2"></i>Log Detayları
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>

@@ -111,7 +111,7 @@ include '../includes/design_header.php';
             <div class="design-card h-100">
                 <div class="design-card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-cog me-2"></i>Genel Ayarlar
+                        <i class="bi bi-cog me-2"></i>Genel Ayarlar
                     </h5>
                 </div>
                 <div class="card-body">
@@ -152,7 +152,7 @@ include '../includes/design_header.php';
             <div class="design-card h-100">
                 <div class="design-card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-palette me-2"></i>Renk Şeması
+                        <i class="bi bi-palette me-2"></i>Renk Şeması
                     </h5>
                 </div>
                 <div class="card-body">
@@ -220,7 +220,7 @@ include '../includes/design_header.php';
             <div class="design-card h-100">
                 <div class="design-card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-magic me-2"></i>Hero Bölümü Ayarları
+                        <i class="bi bi-magic me-2"></i>Hero Bölümü Ayarları
                     </h5>
                 </div>
                 <div class="card-body">
@@ -256,7 +256,7 @@ include '../includes/design_header.php';
             <div class="design-card h-100">
                 <div class="design-card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-address-book me-2"></i>İletişim Bilgileri
+                        <i class="bi bi-address-book me-2"></i>İletişim Bilgileri
                     </h5>
                 </div>
                 <div class="card-body">
@@ -279,7 +279,7 @@ include '../includes/design_header.php';
             <div class="design-card h-100">
                 <div class="design-card-header">
                     <h5 class="mb-0">
-                        <i class="fab fa-facebook me-2"></i>Sosyal Medya
+                        <i class="bi bi-facebook me-2"></i>Sosyal Medya
                     </h5>
                 </div>
                 <div class="card-body">
@@ -315,7 +315,7 @@ include '../includes/design_header.php';
             <div class="design-card h-100">
                 <div class="design-card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-chart-bar me-2"></i>Analytics & Tracking
+                        <i class="bi bi-chart-bar me-2"></i>Analytics & Tracking
                     </h5>
                 </div>
                 <div class="card-body">
@@ -334,7 +334,7 @@ include '../includes/design_header.php';
             <div class="design-card">
                 <div class="design-card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-code me-2"></i>Özel Kod
+                        <i class="bi bi-code me-2"></i>Özel Kod
                     </h5>
                 </div>
                 <div class="card-body">
@@ -364,10 +364,10 @@ include '../includes/design_header.php';
         <div class="col-12">
             <div class="d-flex justify-content-end gap-3">
                 <a href="index.php" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Geri Dön
+                    <i class="bi bi-arrow-left me-2"></i>Geri Dön
                 </a>
                 <button type="submit" name="save_settings" class="btn btn-design-primary" data-original-text="Ayarları Kaydet">
-                    <i class="fas fa-save me-2"></i>Ayarları Kaydet
+                    <i class="bi bi-save me-2"></i>Ayarları Kaydet
                 </button>
             </div>
         </div>
@@ -380,12 +380,12 @@ include '../includes/design_header.php';
         <div class="design-card">
             <div class="design-card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-eye me-2"></i>Canlı Önizleme
+                    <i class="bi bi-eye me-2"></i>Canlı Önizleme
                 </h5>
             </div>
             <div class="card-body">
                 <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
+                    <i class="bi bi-info-circle me-2"></i>
                     Değişikliklerinizi görmek için <a href="../index.php" target="_blank">ana sayfayı</a> yeni sekmede açın.
                     Değişiklikler anında yansıtılacaktır.
                 </div>

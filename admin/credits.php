@@ -406,7 +406,7 @@ try {
 
 $pageTitle = 'Kredi Yönetimi';
 $pageDescription = 'Kullanıcı kredilerini yönetin ve kontrol edin';
-$pageIcon = 'fas fa-coins';
+$pageIcon = 'bi bi-coins';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -416,7 +416,7 @@ include '../includes/admin_sidebar.php';
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -424,7 +424,7 @@ include '../includes/admin_sidebar.php';
 
 <?php if ($success): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="bi bi-check-circle me-2"></i>
         <?php echo $success; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -441,7 +441,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted"><?php echo number_format($creditStats['user_count'] ?? 0); ?> kullanıcı</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-coins text-success fa-lg"></i>
+                    <i class="bi bi-coins text-success fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -456,7 +456,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted"><?php echo number_format($creditStats['total_quota'] > 0 ? ($creditStats['total_used'] / $creditStats['total_quota']) * 100 : 0, 1); ?>% kullanım</small>
                 </div>
                 <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-chart-line text-warning fa-lg"></i>
+                    <i class="bi bi-chart-line text-warning fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -471,7 +471,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted"><?php echo number_format($creditStats['users_with_available_credits'] ?? 0); ?> aktif kullanıcı</small>
                 </div>
                 <div class="bg-info bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-wallet text-info fa-lg"></i>
+                    <i class="bi bi-wallet text-info fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -486,7 +486,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Kullanılabilir kredisi olan</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-users text-primary fa-lg"></i>
+                    <i class="bi bi-users text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -506,13 +506,13 @@ include '../includes/admin_sidebar.php';
             
             <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-search me-1"></i>Ara
+                    <i class="bi bi-search me-1"></i>Ara
                 </button>
             </div>
             
             <div class="col-md-2">
                 <a href="credits.php" class="btn btn-outline-secondary w-100">
-                    <i class="fas fa-undo me-1"></i>Temizle
+                    <i class="bi bi-undo me-1"></i>Temizle
                 </a>
             </div>
 
@@ -522,7 +522,7 @@ include '../includes/admin_sidebar.php';
                     <div class="col-auto">
                         <div class="d-flex align-items-center gap-2">
                             <label for="per_page" class="form-label mb-0 fw-bold">
-                                <i class="fas fa-list me-1 text-primary"></i>Sayfa başına:
+                                <i class="bi bi-list me-1 text-primary"></i>Sayfa başına:
                             </label>
                             <select class="form-select form-select-sm px-3 py-2" id="per_page" name="per_page" style="width: 120px; border: 2px solid #e9ecef;" onchange="this.form.submit()">
                                 <option value="10" <?php echo $per_page === 10 ? 'selected' : ''; ?>>10 kayıt</option>
@@ -534,7 +534,7 @@ include '../includes/admin_sidebar.php';
                     </div>
                     <div class="col-auto">
                         <span class="badge bg-light text-dark px-3 py-2">
-                            <i class="fas fa-info-circle me-1"></i>
+                            <i class="bi bi-info-circle me-1"></i>
                             Toplam <?php echo number_format($totalUsers); ?> kayıt bulundu
                         </span>
                     </div>
@@ -548,14 +548,14 @@ include '../includes/admin_sidebar.php';
 <div class="card admin-card">
     <div class="card-header">
         <h5 class="mb-0">
-            <i class="fas fa-users me-2"></i>Kullanıcılar (<?php echo number_format($totalUsers); ?> adet)
+            <i class="bi bi-users me-2"></i>Kullanıcılar (<?php echo number_format($totalUsers); ?> adet)
         </h5>
     </div>
     
     <div class="card-body p-0">
         <?php if (empty($users)): ?>
             <div class="text-center py-5">
-                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <i class="bi bi-users fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">
                     <?php if ($search): ?>
                         Arama kriterine uygun kullanıcı bulunamadı
@@ -592,7 +592,7 @@ include '../includes/admin_sidebar.php';
                                 </td>
                                 <td>
                                     <div>
-                                        <i class="fas fa-envelope me-1"></i>
+                                        <i class="bi bi-envelope me-1"></i>
                                         <small><?php echo htmlspecialchars($userItem['email']); ?></small>
                                     </div>
                                 </td>
@@ -634,25 +634,25 @@ include '../includes/admin_sidebar.php';
                                         <button type="button" class="btn btn-success" 
                                                 onclick="openCreditModal('add', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['credit_quota']; ?>', '<?php echo $userItem['credit_used']; ?>', '<?php echo $userItem['available_credits']; ?>')"
                                                 title="Kredi Kotası Artır">
-                                            <i class="fas fa-plus me-1"></i>Kota +
+                                            <i class="bi bi-plus me-1"></i>Kota +
                                         </button>
                                         <button type="button" class="btn btn-warning" 
                                                 onclick="openCreditModal('set', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['credit_quota']; ?>', '<?php echo $userItem['credit_used']; ?>', '<?php echo $userItem['available_credits']; ?>')"
                                                 title="Kota Yenile">
-                                            <i class="fas fa-edit me-1"></i>Yenile
+                                            <i class="bi bi-edit me-1"></i>Yenile
                                         </button>
                                         <button type="button" class="btn btn-info" 
                                                 onclick="openCreditModal('reset', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['credit_quota']; ?>', '<?php echo $userItem['credit_used']; ?>', '<?php echo $userItem['available_credits']; ?>')"
                                                 title="Kota Sıfırla">
-                                            <i class="fas fa-sync me-1"></i>Sıfırla
+                                            <i class="bi bi-sync me-1"></i>Sıfırla
                                         </button>
                                         <button type="button" class="btn btn-danger" 
                                                 onclick="openCreditModal('deduct', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['credit_quota']; ?>', '<?php echo $userItem['credit_used']; ?>', '<?php echo $userItem['available_credits']; ?>')"
                                                 title="Kredi İadesi">
-                                            <i class="fas fa-undo me-1"></i>İade
+                                            <i class="bi bi-undo me-1"></i>İade
                                         </button>
                                         <a href="user-details.php?id=<?php echo $userItem['id']; ?>" class="btn btn-outline-primary" title="Detaylar">
-                                            <i class="fas fa-eye"></i>
+                                            <i class="bi bi-eye"></i>
                                         </a>
                                     </div>
                                 </td>
@@ -672,7 +672,7 @@ include '../includes/admin_sidebar.php';
                             <div class="col-auto">
                                 <div class="pagination-info">
                                     <span class="badge bg-primary fs-6 px-3 py-2">
-                                        <i class="fas fa-list-ol me-2"></i>
+                                        <i class="bi bi-list-ol me-2"></i>
                                         <?php 
                                         $start = $offset + 1;
                                         $end = min($offset + $per_page, $totalUsers);
@@ -688,7 +688,7 @@ include '../includes/admin_sidebar.php';
                                 <div class="quick-jump-container">
                                     <div class="input-group input-group-sm">
                                         <span class="input-group-text bg-white border-end-0">
-                                            <i class="fas fa-search text-muted"></i>
+                                            <i class="bi bi-search text-muted"></i>
                                         </span>
                                         <input type="number" class="form-control border-start-0" 
                                                id="quickJump" 
@@ -702,7 +702,7 @@ include '../includes/admin_sidebar.php';
                                         <button type="button" class="btn btn-outline-primary btn-sm" 
                                                 onclick="quickJumpToPage()" 
                                                 title="Sayfaya git">
-                                            <i class="fas fa-arrow-right"></i>
+                                            <i class="bi bi-arrow-right"></i>
                                         </button>
                                     </div>
                                     <small class="text-muted d-block mt-1">/ <?php echo $totalPages; ?> sayfa</small>
@@ -722,7 +722,7 @@ include '../includes/admin_sidebar.php';
                                        href="<?php echo $page > 1 ? buildPaginationUrl(1, $search, $per_page) : '#'; ?>" 
                                        title="İlk Sayfa" 
                                        <?php echo $page <= 1 ? 'tabindex="-1"' : ''; ?>>
-                                        <i class="fas fa-angle-double-left"></i>
+                                        <i class="bi bi-angle-double-left"></i>
                                         <span class="d-none d-sm-inline ms-1">İlk</span>
                                     </a>
                                 </li>
@@ -733,7 +733,7 @@ include '../includes/admin_sidebar.php';
                                        href="<?php echo $page > 1 ? buildPaginationUrl($page - 1, $search, $per_page) : '#'; ?>" 
                                        title="Önceki Sayfa"
                                        <?php echo $page <= 1 ? 'tabindex="-1"' : ''; ?>>
-                                        <i class="fas fa-angle-left"></i>
+                                        <i class="bi bi-angle-left"></i>
                                         <span class="d-none d-sm-inline ms-1">Önceki</span>
                                     </a>
                                 </li>
@@ -790,7 +790,7 @@ include '../includes/admin_sidebar.php';
                                        title="Sonraki Sayfa"
                                        <?php echo $page >= $totalPages ? 'tabindex="-1"' : ''; ?>>
                                         <span class="d-none d-sm-inline me-1">Sonraki</span>
-                                        <i class="fas fa-angle-right"></i>
+                                        <i class="bi bi-angle-right"></i>
                                     </a>
                                 </li>
                                 
@@ -801,7 +801,7 @@ include '../includes/admin_sidebar.php';
                                        title="Son Sayfa"
                                        <?php echo $page >= $totalPages ? 'tabindex="-1"' : ''; ?>>
                                         <span class="d-none d-sm-inline me-1">Son</span>
-                                        <i class="fas fa-angle-double-right"></i>
+                                        <i class="bi bi-angle-double-right"></i>
                                     </a>
                                 </li>
                             </ul>
@@ -813,14 +813,14 @@ include '../includes/admin_sidebar.php';
                 <div class="row mt-3 pt-3 border-top">
                     <div class="col-md-6">
                         <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
+                            <i class="bi bi-info-circle me-1"></i>
                             Sayfa <strong><?php echo $page; ?></strong> / <strong><?php echo $totalPages; ?></strong> - 
                             Sayfa başına <strong><?php echo $per_page; ?></strong> kayıt gösteriliyor
                         </small>
                     </div>
                     <div class="col-md-6 text-md-end">
                         <small class="text-muted">
-                            <i class="fas fa-database me-1"></i>
+                            <i class="bi bi-database me-1"></i>
                             Toplam <strong><?php echo number_format($totalUsers); ?></strong> kullanıcı bulundu
                         </small>
                     </div>
@@ -1017,7 +1017,7 @@ function updatePreview() {
             'Yeni Kalan Kullanım: <span class="' + (newAvailableCredits >= 0 ? 'text-success' : 'text-danger') + '">' + newAvailableCredits.toFixed(2) + ' TL</span>';
             
         if (newAvailableCredits < 0) {
-            previewHtml += '<br><br><span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Uyarı: Yeni kota mevcut kullanımdan az!</span>';
+            previewHtml += '<br><br><span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Uyarı: Yeni kota mevcut kullanımdan az!</span>';
         }
         
     } else if (currentOperation === 'reset') {
@@ -1052,7 +1052,7 @@ function updatePreview() {
             'Yeni Kalan Kullanım: <span class="text-success">' + newAvailableCredits.toFixed(2) + ' TL</span>';
             
         if (amount > userCreditUsed) {
-            previewHtml += '<br><br><span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Uyarı: İade miktarı mevcut kullanımdan fazla!</span>';
+            previewHtml += '<br><br><span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Uyarı: İade miktarı mevcut kullanımdan fazla!</span>';
         }
     }
     

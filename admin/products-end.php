@@ -106,7 +106,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" name="add_product" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>Ürün Ekle
+                        <i class="bi bi-save me-1"></i>Ürün Ekle
                     </button>
                 </div>
             </form>

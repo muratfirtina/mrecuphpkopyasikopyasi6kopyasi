@@ -29,7 +29,7 @@ echo "<!DOCTYPE html>
 <body>
     <div class='container py-4'>";
 
-echo "<h1 class='text-center mb-4'><i class='fas fa-phone me-2'></i>Contact Sayfası Database Kurulumu</h1>";
+echo "<h1 class='text-center mb-4'><i class='bi bi-phone me-2'></i>Contact Sayfası Database Kurulumu</h1>";
 
 $steps_completed = 0;
 $total_steps = 4;
@@ -37,15 +37,15 @@ $total_steps = 4;
 try {
     // Step 1: Database Test
     echo "<div class='step info'>";
-    echo "<h4><i class='fas fa-plug me-2'></i>1. Database Bağlantısı</h4>";
+    echo "<h4><i class='bi bi-plug me-2'></i>1. Database Bağlantısı</h4>";
     $pdo->query('SELECT 1');
-    echo "<p class='mb-0'><i class='fas fa-check-circle text-success me-2'></i>Database bağlantısı başarılı!</p>";
+    echo "<p class='mb-0'><i class='bi bi-check-circle text-success me-2'></i>Database bağlantısı başarılı!</p>";
     echo "</div>";
     $steps_completed++;
 
     // Step 2: Create Tables
     echo "<div class='step info'>";
-    echo "<h4><i class='fas fa-table me-2'></i>2. Tabloları Oluşturuluyor</h4>";
+    echo "<h4><i class='bi bi-table me-2'></i>2. Tabloları Oluşturuluyor</h4>";
     
     // contact_settings
     $pdo->exec("CREATE TABLE IF NOT EXISTS contact_settings (
@@ -61,14 +61,14 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )");
-    echo "<p><i class='fas fa-check text-success me-2'></i>contact_settings tablosu hazır</p>";
+    echo "<p><i class='bi bi-check text-success me-2'></i>contact_settings tablosu hazır</p>";
     
     // contact_cards
     $pdo->exec("CREATE TABLE IF NOT EXISTS contact_cards (
         id INT AUTO_INCREMENT PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
         description TEXT NULL,
-        icon VARCHAR(100) NOT NULL DEFAULT 'fas fa-phone',
+        icon VARCHAR(100) NOT NULL DEFAULT 'bi bi-phone',
         icon_color VARCHAR(50) NOT NULL DEFAULT 'text-primary',
         contact_info VARCHAR(255) NOT NULL,
         contact_link VARCHAR(500) NULL,
@@ -80,7 +80,7 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )");
-    echo "<p><i class='fas fa-check text-success me-2'></i>contact_cards tablosu hazır</p>";
+    echo "<p><i class='bi bi-check text-success me-2'></i>contact_cards tablosu hazır</p>";
     
     // contact_office
     $pdo->exec("CREATE TABLE IF NOT EXISTS contact_office (
@@ -96,7 +96,7 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )");
-    echo "<p><i class='fas fa-check text-success me-2'></i>contact_office tablosu hazır</p>";
+    echo "<p><i class='bi bi-check text-success me-2'></i>contact_office tablosu hazır</p>";
     
     // contact_form_settings
     $pdo->exec("CREATE TABLE IF NOT EXISTS contact_form_settings (
@@ -111,7 +111,7 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )");
-    echo "<p><i class='fas fa-check text-success me-2'></i>contact_form_settings tablosu hazır</p>";
+    echo "<p><i class='bi bi-check text-success me-2'></i>contact_form_settings tablosu hazır</p>";
     
     // contact_messages (eğer mevcut değilse)
     $pdo->exec("CREATE TABLE IF NOT EXISTS contact_messages (
@@ -127,14 +127,14 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )");
-    echo "<p><i class='fas fa-check text-success me-2'></i>contact_messages tablosu hazır</p>";
+    echo "<p><i class='bi bi-check text-success me-2'></i>contact_messages tablosu hazır</p>";
     
     echo "</div>";
     $steps_completed++;
 
     // Step 3: Insert Sample Data
     echo "<div class='step info'>";
-    echo "<h4><i class='fas fa-database me-2'></i>3. Örnek Veriler Ekleniyor</h4>";
+    echo "<h4><i class='bi bi-database me-2'></i>3. Örnek Veriler Ekleniyor</h4>";
     
     // contact_settings sample data
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM contact_settings");
@@ -150,9 +150,9 @@ try {
             'Mesajınız başarıyla gönderildi. En kısa sürede size geri dönüş yapacağız.',
             '<h6>Kişisel Verilerin Korunması</h6><p>Mr ECU olarak kişisel verilerinizin gizliliğini korumak önceliğimizdir.</p><h6>İletişim Formunda Toplanan Veriler</h6><ul><li>Ad, soyad bilgileri</li><li>E-posta adresi</li><li>Telefon numarası (isteğe bağlı)</li><li>Mesaj içeriği</li></ul>'
         ]);
-        echo "<p><i class='fas fa-plus text-success me-2'></i>Contact settings örnek verisi eklendi</p>";
+        echo "<p><i class='bi bi-plus text-success me-2'></i>Contact settings örnek verisi eklendi</p>";
     } else {
-        echo "<p><i class='fas fa-info text-warning me-2'></i>Contact settings zaten mevcut</p>";
+        echo "<p><i class='bi bi-info text-warning me-2'></i>Contact settings zaten mevcut</p>";
     }
     
     // contact_cards sample data  
@@ -160,18 +160,18 @@ try {
     $stmt->execute();
     if ($stmt->fetchColumn() == 0) {
         $cards_data = [
-            ['Telefon Desteği', '7/24 telefon desteği alın. Uzman ekibimiz her zaman yanınızda.', 'fas fa-phone', 'text-primary', '+90 (533) 924 29 48', 'tel:+905339242948', 'Hemen Ara', 'btn-outline-primary', 'Pazartesi - Pazar | 24 Saat', 1],
-            ['E-posta Desteği', 'Detaylı sorularınız için e-posta gönderin. 2 saat içinde yanıt alın.', 'fas fa-envelope', 'text-success', 'info@mrecufile.com.tr', 'mailto:info@mrecufile.com.tr', 'E-posta Gönder', 'btn-outline-success', 'Ortalama yanıt süresi: 2 saat', 2],
-            ['WhatsApp Desteği', 'Anlık destek için WhatsApp\'tan yazın. Hızlı ve pratik çözümler.', 'fab fa-whatsapp', 'text-info', '+90 (533) 924 29 48', 'https://wa.me/905339242948?text=Merhaba,%20ECU%20hizmetleri%20hakkında%20bilgi%20almak%20istiyorum.', 'WhatsApp\'ta Yaz', 'btn-outline-info', '7/24 Aktif | Anlık Yanıt', 3]
+            ['Telefon Desteği', '7/24 telefon desteği alın. Uzman ekibimiz her zaman yanınızda.', 'bi bi-phone', 'text-primary', '+90 (533) 924 29 48', 'tel:+905339242948', 'Hemen Ara', 'btn-outline-primary', 'Pazartesi - Pazar | 24 Saat', 1],
+            ['E-posta Desteği', 'Detaylı sorularınız için e-posta gönderin. 2 saat içinde yanıt alın.', 'bi bi-envelope', 'text-success', 'info@mrecufile.com.tr', 'mailto:info@mrecufile.com.tr', 'E-posta Gönder', 'btn-outline-success', 'Ortalama yanıt süresi: 2 saat', 2],
+            ['WhatsApp Desteği', 'Anlık destek için WhatsApp\'tan yazın. Hızlı ve pratik çözümler.', 'bi bi-whatsapp', 'text-info', '+90 (533) 924 29 48', 'https://wa.me/905339242948?text=Merhaba,%20ECU%20hizmetleri%20hakkında%20bilgi%20almak%20istiyorum.', 'WhatsApp\'ta Yaz', 'btn-outline-info', '7/24 Aktif | Anlık Yanıt', 3]
         ];
         
         $stmt = $pdo->prepare("INSERT INTO contact_cards (title, description, icon, icon_color, contact_info, contact_link, button_text, button_color, availability_text, order_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         foreach ($cards_data as $data) {
             $stmt->execute($data);
         }
-        echo "<p><i class='fas fa-plus text-success me-2'></i>Contact cards örnek verileri eklendi (3 kayıt)</p>";
+        echo "<p><i class='bi bi-plus text-success me-2'></i>Contact cards örnek verileri eklendi (3 kayıt)</p>";
     } else {
-        echo "<p><i class='fas fa-info text-warning me-2'></i>Contact cards zaten mevcut</p>";
+        echo "<p><i class='bi bi-info text-warning me-2'></i>Contact cards zaten mevcut</p>";
     }
     
     // contact_office sample data
@@ -187,9 +187,9 @@ try {
             "Metro: Şişli-Mecidiyeköy\nOtobüs: 54, 42A, 181",
             'https://maps.google.com'
         ]);
-        echo "<p><i class='fas fa-plus text-success me-2'></i>Contact office örnek verisi eklendi</p>";
+        echo "<p><i class='bi bi-plus text-success me-2'></i>Contact office örnek verisi eklendi</p>";
     } else {
-        echo "<p><i class='fas fa-info text-warning me-2'></i>Contact office zaten mevcut</p>";
+        echo "<p><i class='bi bi-info text-warning me-2'></i>Contact office zaten mevcut</p>";
     }
     
     // contact_form_settings sample data
@@ -207,9 +207,9 @@ try {
             $subject_options,
             $form_fields
         ]);
-        echo "<p><i class='fas fa-plus text-success me-2'></i>Contact form settings örnek verisi eklendi</p>";
+        echo "<p><i class='bi bi-plus text-success me-2'></i>Contact form settings örnek verisi eklendi</p>";
     } else {
-        echo "<p><i class='fas fa-info text-warning me-2'></i>Contact form settings zaten mevcut</p>";
+        echo "<p><i class='bi bi-info text-warning me-2'></i>Contact form settings zaten mevcut</p>";
     }
     
     echo "</div>";
@@ -217,7 +217,7 @@ try {
 
     // Step 4: Final Verification
     echo "<div class='step info'>";
-    echo "<h4><i class='fas fa-check-double me-2'></i>4. Kurulum Doğrulanıyor</h4>";
+    echo "<h4><i class='bi bi-check-double me-2'></i>4. Kurulum Doğrulanıyor</h4>";
     
     $tables = ['contact_settings', 'contact_cards', 'contact_office', 'contact_form_settings', 'contact_messages'];
     $all_good = true;
@@ -230,18 +230,18 @@ try {
         $total_records += $count;
         
         if ($table !== 'contact_messages' && $count > 0) {
-            echo "<p><i class='fas fa-check text-success me-2'></i>✅ {$table}: {$count} kayıt</p>";
+            echo "<p><i class='bi bi-check text-success me-2'></i>✅ {$table}: {$count} kayıt</p>";
         } elseif ($table === 'contact_messages') {
-            echo "<p><i class='fas fa-check text-success me-2'></i>✅ {$table}: Tablo hazır ({$count} mesaj)</p>";
+            echo "<p><i class='bi bi-check text-success me-2'></i>✅ {$table}: Tablo hazır ({$count} mesaj)</p>";
         } else {
-            echo "<p><i class='fas fa-times text-danger me-2'></i>❌ {$table}: Boş tablo!</p>";
+            echo "<p><i class='bi bi-times text-danger me-2'></i>❌ {$table}: Boş tablo!</p>";
             $all_good = false;
         }
     }
     
     if ($all_good) {
         echo "<div class='alert alert-success mt-3'>";
-        echo "<i class='fas fa-party-horn me-2'></i><strong>Tüm tablolar başarıyla oluşturuldu!</strong><br>";
+        echo "<i class='bi bi-party-horn me-2'></i><strong>Tüm tablolar başarıyla oluşturuldu!</strong><br>";
         echo "Contact sayfası hazır.";
         echo "</div>";
         $steps_completed++;
@@ -250,7 +250,7 @@ try {
 
 } catch (Exception $e) {
     echo "<div class='step error'>";
-    echo "<h4><i class='fas fa-exclamation-triangle me-2'></i>❌ Kurulum Hatası</h4>";
+    echo "<h4><i class='bi bi-exclamation-triangle me-2'></i>❌ Kurulum Hatası</h4>";
     echo "<p><strong>Hata:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
     
     if (DEBUG) {
@@ -274,58 +274,58 @@ echo "</div>";
 if ($steps_completed === $total_steps) {
     // Başarı mesajı
     echo "<div class='step success text-center'>";
-    echo "<h2><i class='fas fa-check-circle me-3 text-success'></i>🎉 Kurulum Tamamlandı!</h2>";
+    echo "<h2><i class='bi bi-check-circle me-3 text-success'></i>🎉 Kurulum Tamamlandı!</h2>";
     echo "<p class='mb-4'>Contact sayfanız artık database entegreli!</p>";
     
     echo "<div class='row g-3'>";
     echo "<div class='col-md-4'>";
     echo "<a href='design/contact.php' class='btn btn-primary w-100'>";
-    echo "<i class='fas fa-edit me-2'></i>İçerik Yönetimi";
+    echo "<i class='bi bi-edit me-2'></i>İçerik Yönetimi";
     echo "</a>";
     echo "</div>";
     echo "<div class='col-md-4'>";
     echo "<a href='contact.php' target='_blank' class='btn btn-success w-100'>";
-    echo "<i class='fas fa-eye me-2'></i>Sayfayı Görüntüle";
+    echo "<i class='bi bi-eye me-2'></i>Sayfayı Görüntüle";
     echo "</a>";
     echo "</div>";
     echo "<div class='col-md-4'>";
     echo "<a href='design/' class='btn btn-info w-100'>";
-    echo "<i class='fas fa-tachometer-alt me-2'></i>Design Panel";
+    echo "<i class='bi bi-tachometer-alt me-2'></i>Design Panel";
     echo "</a>";
     echo "</div>";
     echo "</div>";
     
     echo "<hr class='my-4'>";
-    echo "<h4><i class='fas fa-rocket me-2'></i>Contact Sayfası Özellikleri</h4>";
+    echo "<h4><i class='bi bi-rocket me-2'></i>Contact Sayfası Özellikleri</h4>";
     echo "<div class='row text-center'>";
-    echo "<div class='col-md-3'><i class='fas fa-phone-alt fa-2x text-primary mb-2'></i><br><strong>İletişim Kartları</strong><br><small>Telefon, E-posta, WhatsApp</small></div>";
-    echo "<div class='col-md-3'><i class='fas fa-envelope fa-2x text-success mb-2'></i><br><strong>Dinamik Form</strong><br><small>Özelleştirilebilir Konular</small></div>";
-    echo "<div class='col-md-3'><i class='fas fa-map-marker-alt fa-2x text-info mb-2'></i><br><strong>Ofis Bilgileri</strong><br><small>Google Maps Entegreli</small></div>";
-    echo "<div class='col-md-3'><i class='fas fa-comments fa-2x text-warning mb-2'></i><br><strong>Mesaj Yönetimi</strong><br><small>Gelen Mesajları Takip</small></div>";
+    echo "<div class='col-md-3'><i class='bi bi-phone-alt fa-2x text-primary mb-2'></i><br><strong>İletişim Kartları</strong><br><small>Telefon, E-posta, WhatsApp</small></div>";
+    echo "<div class='col-md-3'><i class='bi bi-envelope fa-2x text-success mb-2'></i><br><strong>Dinamik Form</strong><br><small>Özelleştirilebilir Konular</small></div>";
+    echo "<div class='col-md-3'><i class='bi bi-map-marker-alt fa-2x text-info mb-2'></i><br><strong>Ofis Bilgileri</strong><br><small>Google Maps Entegreli</small></div>";
+    echo "<div class='col-md-3'><i class='bi bi-comments fa-2x text-warning mb-2'></i><br><strong>Mesaj Yönetimi</strong><br><small>Gelen Mesajları Takip</small></div>";
     echo "</div>";
     echo "</div>";
     
     // Cleanup option
     echo "<div class='step warning text-center'>";
-    echo "<h5><i class='fas fa-broom me-2'></i>Temizlik (İsteğe Bağlı)</h5>";
+    echo "<h5><i class='bi bi-broom me-2'></i>Temizlik (İsteğe Bağlı)</h5>";
     echo "<p>Kurulum tamamlandı. Güvenlik için kurulum dosyalarını silebilirsiniz:</p>";
     echo "<a href='?cleanup=1' class='btn btn-warning' onclick='return confirm(\"Kurulum dosyalarını silmek istediğinizden emin misiniz?\")'>"; 
-    echo "<i class='fas fa-trash me-2'></i>Kurulum Dosyalarını Sil";
+    echo "<i class='bi bi-trash me-2'></i>Kurulum Dosyalarını Sil";
     echo "</a>";
     echo "</div>";
     
 } else {
     echo "<div class='step error text-center'>";
-    echo "<h3><i class='fas fa-times-circle me-2 text-danger'></i>Kurulum Tamamlanamadı</h3>";
+    echo "<h3><i class='bi bi-times-circle me-2 text-danger'></i>Kurulum Tamamlanamadı</h3>";
     echo "<p>Lütfen hataları kontrol edin ve tekrar deneyin.</p>";
-    echo "<a href='?' class='btn btn-primary'><i class='fas fa-redo me-2'></i>Tekrar Dene</a>";
+    echo "<a href='?' class='btn btn-primary'><i class='bi bi-redo me-2'></i>Tekrar Dene</a>";
     echo "</div>";
 }
 
 // Cleanup
 if (isset($_GET['cleanup']) && $_GET['cleanup'] == '1') {
     echo "<div class='step warning'>";
-    echo "<h4><i class='fas fa-broom me-2'></i>Dosya Temizleme</h4>";
+    echo "<h4><i class='bi bi-broom me-2'></i>Dosya Temizleme</h4>";
     
     $cleanup_files = [
         'install_contact_tables.php',
@@ -335,17 +335,17 @@ if (isset($_GET['cleanup']) && $_GET['cleanup'] == '1') {
     foreach ($cleanup_files as $file) {
         if (file_exists($file)) {
             if (unlink($file)) {
-                echo "<p><i class='fas fa-check text-success me-2'></i>Silindi: {$file}</p>";
+                echo "<p><i class='bi bi-check text-success me-2'></i>Silindi: {$file}</p>";
             } else {
-                echo "<p><i class='fas fa-times text-danger me-2'></i>Silinemedi: {$file}</p>";
+                echo "<p><i class='bi bi-times text-danger me-2'></i>Silinemedi: {$file}</p>";
             }
         } else {
-            echo "<p><i class='fas fa-info text-muted me-2'></i>Dosya bulunamadı: {$file}</p>";
+            echo "<p><i class='bi bi-info text-muted me-2'></i>Dosya bulunamadı: {$file}</p>";
         }
     }
     
     echo "<div class='alert alert-success mt-3'>";
-    echo "<i class='fas fa-check-circle me-2'></i>Temizlik tamamlandı!";
+    echo "<i class='bi bi-check-circle me-2'></i>Temizlik tamamlandı!";
     echo "</div>";
     
     echo "<script>setTimeout(function(){ window.location.href='design/contact.php'; }, 2000);</script>";

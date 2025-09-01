@@ -88,7 +88,7 @@ try {
             <!-- Dosya Bilgileri -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-file-alt me-2"></i>Dosya Bilgileri</h6>
+                    <h6 class="mb-0"><i class="bi bi-file-alt me-2"></i>Dosya Bilgileri</h6>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -190,7 +190,7 @@ try {
             <!-- Araç Bilgileri -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-car me-2"></i>Araç Bilgileri</h6>
+                    <h6 class="mb-0"><i class="bi bi-car me-2"></i>Araç Bilgileri</h6>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -227,7 +227,7 @@ try {
             <!-- Dosya İndirme -->
             <div class="card">
                 <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-download me-2"></i>Dosya İndirme</h6>
+                    <h6 class="mb-0"><i class="bi bi-download me-2"></i>Dosya İndirme</h6>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -236,11 +236,11 @@ try {
                             <?php if ($fileExists): ?>
                                 <a href="download.php?type=original&id=<?php echo $upload['id']; ?>" 
                                    class="btn btn-outline-primary btn-sm mt-2">
-                                    <i class="fas fa-download me-1"></i>İndir
+                                    <i class="bi bi-download me-1"></i>İndir
                                 </a>
                             <?php else: ?>
                                 <span class="text-danger">
-                                    <i class="fas fa-exclamation-triangle me-1"></i>Dosya bulunamadı
+                                    <i class="bi bi-exclamation-triangle me-1"></i>Dosya bulunamadı
                                 </span>
                             <?php endif; ?>
                         </div>
@@ -256,11 +256,11 @@ try {
                                         <?php if ($responseExists): ?>
                                             <a href="download.php?type=response&file_id=<?php echo $response['id']; ?>" 
                                                class="btn btn-outline-success btn-sm">
-                                                <i class="fas fa-download me-1"></i><?php echo htmlspecialchars($response['filename']); ?>
+                                                <i class="bi bi-download me-1"></i><?php echo htmlspecialchars($response['filename']); ?>
                                             </a>
                                         <?php else: ?>
                                             <span class="text-warning">
-                                                <i class="fas fa-exclamation-triangle me-1"></i>Dosya bulunamadı
+                                                <i class="bi bi-exclamation-triangle me-1"></i>Dosya bulunamadı
                                             </span>
                                         <?php endif; ?>
                                     </div>
@@ -278,7 +278,7 @@ try {
             <!-- Kullanıcı Bilgileri -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-user me-2"></i>Kullanıcı Bilgileri</h6>
+                    <h6 class="mb-0"><i class="bi bi-user me-2"></i>Kullanıcı Bilgileri</h6>
                 </div>
                 <div class="card-body">
                     <div class="text-center mb-3">
@@ -295,7 +295,7 @@ try {
                         
                         <a href="user-details.php?id=<?php echo $upload['user_id']; ?>" 
                            class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-user me-1"></i>Kullanıcı Detayları
+                            <i class="bi bi-user me-1"></i>Kullanıcı Detayları
                         </a>
                     </div>
                 </div>
@@ -305,7 +305,7 @@ try {
             <?php if (!empty($creditHistory)): ?>
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-coins me-2"></i>İlgili Kredi İşlemleri</h6>
+                        <h6 class="mb-0"><i class="bi bi-coins me-2"></i>İlgili Kredi İşlemleri</h6>
                     </div>
                     <div class="card-body p-0">
                         <div class="list-group list-group-flush">
@@ -334,7 +334,7 @@ try {
             <?php if (!empty($otherFiles)): ?>
                 <div class="card">
                     <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-files me-2"></i>Kullanıcının Diğer Dosyaları</h6>
+                        <h6 class="mb-0"><i class="bi bi-files me-2"></i>Kullanıcının Diğer Dosyaları</h6>
                     </div>
                     <div class="card-body p-0">
                         <div class="list-group list-group-flush">

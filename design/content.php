@@ -114,7 +114,7 @@ include '../includes/design_header.php';
     <div class="col-12">
         <?php if (isset($error)): ?>
             <div class="alert alert-danger">
-                <i class="fas fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($error); ?>
+                <i class="bi bi-exclamation-triangle me-2"></i><?php echo htmlspecialchars($error); ?>
             </div>
         <?php endif; ?>
     </div>
@@ -129,25 +129,25 @@ include '../includes/design_header.php';
             <div class="design-card">
                 <div class="design-card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        <i class="fas fa-edit me-2"></i>İçerik Yönetimi
+                        <i class="bi bi-edit me-2"></i>İçerik Yönetimi
                     </h5>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-success btn-sm">
-                            <i class="fas fa-save me-2"></i>Tümünü Kaydet
+                            <i class="bi bi-save me-2"></i>Tümünü Kaydet
                         </button>
                         <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#contentModal" onclick="resetForm()">
-                            <i class="fas fa-plus me-2"></i>Yeni İçerik
+                            <i class="bi bi-plus me-2"></i>Yeni İçerik
                         </button>
                     </div>
                 </div>
                 <div class="card-body">
                     <?php if (empty($contentsBySection)): ?>
                         <div class="text-center py-5">
-                            <i class="fas fa-file-alt text-muted" style="font-size: 4rem;"></i>
+                            <i class="bi bi-file-alt text-muted" style="font-size: 4rem;"></i>
                             <h4 class="text-muted mt-3">Henüz içerik bulunmuyor</h4>
                             <p class="text-muted">İlk içeriğinizi oluşturmak için "Yeni İçerik" butonuna tıklayın.</p>
                             <button type="button" class="btn btn-design-primary" data-bs-toggle="modal" data-bs-target="#contentModal" onclick="resetForm()">
-                                <i class="fas fa-plus me-2"></i>İlk İçeriği Oluştur
+                                <i class="bi bi-plus me-2"></i>İlk İçeriği Oluştur
                             </button>
                         </div>
                     <?php else: ?>
@@ -158,7 +158,7 @@ include '../includes/design_header.php';
                                     <h2 class="accordion-header" id="heading<?php echo md5($section); ?>">
                                         <button class="accordion-button" type="button" data-bs-toggle="collapse" 
                                                 data-bs-target="#collapse<?php echo md5($section); ?>" aria-expanded="true">
-                                            <i class="fas fa-folder-open me-2"></i>
+                                            <i class="bi bi-folder-open me-2"></i>
                                             <?php echo ucfirst(str_replace('_', ' ', $section)); ?> Bölümü
                                             <span class="badge bg-primary ms-2"><?php echo count($sectionContents); ?></span>
                                         </button>
@@ -175,14 +175,14 @@ include '../includes/design_header.php';
                                                                     <button type="button" class="btn btn-outline-primary btn-sm" 
                                                                             onclick="editContent(<?php echo $content['id']; ?>)"
                                                                             data-bs-toggle="modal" data-bs-target="#contentModal">
-                                                                        <i class="fas fa-edit"></i>
+                                                                        <i class="bi bi-edit"></i>
                                                                     </button>
                                                                     <form method="POST" style="display: inline;">
                                                                         <input type="hidden" name="action" value="delete">
                                                                         <input type="hidden" name="id" value="<?php echo $content['id']; ?>">
                                                                         <button type="submit" class="btn btn-outline-danger btn-sm"
                                                                                 onclick="return confirm('Bu içeriği silmek istediğinizden emin misiniz?')">
-                                                                            <i class="fas fa-trash"></i>
+                                                                            <i class="bi bi-trash"></i>
                                                                         </button>
                                                                     </form>
                                                                 </div>
@@ -217,8 +217,8 @@ include '../includes/design_header.php';
                                                                 <?php endif; ?>
                                                                 
                                                                 <small class="text-muted d-block mt-2">
-                                                                    <i class="fas fa-tag me-1"></i><?php echo ucfirst($content['type']); ?> türü |
-                                                                    <i class="fas fa-clock me-1"></i><?php echo date('d.m.Y H:i', strtotime($content['updated_at'])); ?>
+                                                                    <i class="bi bi-tag me-1"></i><?php echo ucfirst($content['type']); ?> türü |
+                                                                    <i class="bi bi-clock me-1"></i><?php echo date('d.m.Y H:i', strtotime($content['updated_at'])); ?>
                                                                 </small>
                                                             </div>
                                                         </div>
@@ -290,7 +290,7 @@ include '../includes/design_header.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-design-primary">
-                        <i class="fas fa-save me-2"></i>Kaydet
+                        <i class="bi bi-save me-2"></i>Kaydet
                     </button>
                 </div>
             </form>
@@ -304,7 +304,7 @@ include '../includes/design_header.php';
         <div class="design-card">
             <div class="design-card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-magic me-2"></i>Hazır İçerik Şablonları
+                    <i class="bi bi-magic me-2"></i>Hazır İçerik Şablonları
                 </h5>
             </div>
             <div class="card-body">
@@ -314,11 +314,11 @@ include '../includes/design_header.php';
                     <div class="col-md-4">
                         <div class="card border-primary">
                             <div class="card-body text-center">
-                                <i class="fas fa-home text-primary mb-2" style="font-size: 2rem;"></i>
+                                <i class="bi bi-home text-primary mb-2" style="font-size: 2rem;"></i>
                                 <h6>Ana Sayfa Şablonu</h6>
                                 <p class="small text-muted">Hero, hizmetler ve iletişim içerikleri</p>
                                 <button type="button" class="btn btn-outline-primary btn-sm" onclick="createTemplate('homepage')">
-                                    <i class="fas fa-plus me-1"></i>Oluştur
+                                    <i class="bi bi-plus me-1"></i>Oluştur
                                 </button>
                             </div>
                         </div>
@@ -327,11 +327,11 @@ include '../includes/design_header.php';
                     <div class="col-md-4">
                         <div class="card border-success">
                             <div class="card-body text-center">
-                                <i class="fas fa-info-circle text-success mb-2" style="font-size: 2rem;"></i>
+                                <i class="bi bi-info-circle text-success mb-2" style="font-size: 2rem;"></i>
                                 <h6>Hakkımızda Şablonu</h6>
                                 <p class="small text-muted">Şirket bilgileri ve değerler</p>
                                 <button type="button" class="btn btn-outline-success btn-sm" onclick="createTemplate('about')">
-                                    <i class="fas fa-plus me-1"></i>Oluştur
+                                    <i class="bi bi-plus me-1"></i>Oluştur
                                 </button>
                             </div>
                         </div>
@@ -340,11 +340,11 @@ include '../includes/design_header.php';
                     <div class="col-md-4">
                         <div class="card border-info">
                             <div class="card-body text-center">
-                                <i class="fas fa-envelope text-info mb-2" style="font-size: 2rem;"></i>
+                                <i class="bi bi-envelope text-info mb-2" style="font-size: 2rem;"></i>
                                 <h6>İletişim Şablonu</h6>
                                 <p class="small text-muted">İletişim formu ve bilgileri</p>
                                 <button type="button" class="btn btn-outline-info btn-sm" onclick="createTemplate('contact')">
-                                    <i class="fas fa-plus me-1"></i>Oluştur
+                                    <i class="bi bi-plus me-1"></i>Oluştur
                                 </button>
                             </div>
                         </div>

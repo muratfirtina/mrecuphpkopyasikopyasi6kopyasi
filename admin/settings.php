@@ -81,7 +81,7 @@ foreach ($defaultSettings as $key => $defaultValue) {
 
 $pageTitle = 'Sistem Ayarları';
 $pageDescription = 'Sistem ayarlarını yönetin';
-$pageIcon = 'fas fa-cog';
+$pageIcon = 'bi bi-cog';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -91,14 +91,14 @@ include '../includes/admin_sidebar.php';
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
     <div class="alert alert-admin alert-danger" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
     </div>
 <?php endif; ?>
 
 <?php if ($success): ?>
     <div class="alert alert-admin alert-success" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="bi bi-check-circle me-2"></i>
         <?php echo $success; ?>
     </div>
 <?php endif; ?>
@@ -110,7 +110,7 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-globe me-2"></i>Genel Ayarlar
+                        <i class="bi bi-globe me-2"></i>Genel Ayarlar
                     </h5>
                 </div>
                 <div class="card-body">
@@ -155,7 +155,7 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-users me-2"></i>Kullanıcı Ayarları
+                        <i class="bi bi-users me-2"></i>Kullanıcı Ayarları
                     </h5>
                 </div>
                 <div class="card-body">
@@ -199,7 +199,7 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-file me-2"></i>Dosya Ayarları
+                        <i class="bi bi-file me-2"></i>Dosya Ayarları
                     </h5>
                 </div>
                 <div class="card-body">
@@ -235,7 +235,7 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-envelope me-2"></i>SMTP Ayarları
+                        <i class="bi bi-envelope me-2"></i>SMTP Ayarları
                     </h5>
                 </div>
                 <div class="card-body">
@@ -289,7 +289,7 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card">
                 <div class="card-body text-center">
                     <button type="submit" name="update_settings" class="btn btn-primary btn-lg">
-                        <i class="fas fa-save me-2"></i>Ayarları Kaydet
+                        <i class="bi bi-save me-2"></i>Ayarları Kaydet
                     </button>
                 </div>
             </div>

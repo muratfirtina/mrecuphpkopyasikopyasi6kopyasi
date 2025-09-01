@@ -225,12 +225,12 @@ include '../includes/user_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="fas fa-edit me-2 text-<?php echo $currentStatus['class']; ?>"></i>
+                        <i class="bi bi-edit me-2 text-<?php echo $currentStatus['class']; ?>"></i>
                         Revize Detayı #<?php echo substr($revision['id'], 0, 8); ?>
                     </h1>
                     <p class="text-muted mb-0">
                         <span class="badge bg-<?php echo $currentStatus['bg']; ?> me-2">
-                            <i class="fas fa-<?php echo $currentStatus['icon']; ?> me-1"></i>
+                            <i class="bi bi-<?php echo $currentStatus['icon']; ?> me-1"></i>
                             <?php echo $currentStatus['text']; ?>
                         </span>
                         <?php echo date('d.m.Y H:i', strtotime($revision['requested_at'])); ?> tarihinde talep edildi
@@ -239,26 +239,26 @@ include '../includes/user_header.php';
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
                         <a href="revisions.php" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>Listeye Dön
+                            <i class="bi bi-arrow-left me-1"></i>Listeye Dön
                         </a>
                         <?php if ($revision['status'] === 'completed' && !empty($revisionFiles)): ?>
                             <?php if (count($revisionFiles) == 1): ?>
                                 <a href="download-revision.php?id=<?php echo $revisionFiles[0]['id']; ?>" class="btn btn-success">
-                                    <i class="fas fa-download me-1"></i>Revize Dosyasını İndir
+                                    <i class="bi bi-download me-1"></i>Revize Dosyasını İndir
                                 </a>
                             <?php else: ?>
                                 <div class="btn-group">
                                     <a href="download-revision.php?id=<?php echo $revisionFiles[0]['id']; ?>" class="btn btn-success">
-                                        <i class="fas fa-download me-1"></i>Ana Dosyayı İndir
+                                        <i class="bi bi-download me-1"></i>Ana Dosyayı İndir
                                     </a>
                                     <a href="download-revision.php?id=<?php echo $revision['id']; ?>" class="btn btn-outline-success">
-                                        <i class="fas fa-download me-1"></i>Tümünü
+                                        <i class="bi bi-download me-1"></i>Tümünü
                                     </a>
                                 </div>
                             <?php endif; ?>
                         <?php endif; ?>
                         <a href="files.php?view=<?php echo $revision['upload_id']; ?>" class="btn btn-outline-primary">
-                            <i class="fas fa-file me-1"></i>Orijinal Dosya
+                            <i class="bi bi-file me-1"></i>Orijinal Dosya
                         </a>
                     </div>
                 </div>
@@ -271,7 +271,7 @@ include '../includes/user_header.php';
                     <div class="card mb-4">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-history me-2"></i>Revize Sürecı
+                                <i class="bi bi-history me-2"></i>Revize Sürecı
                             </h5>
                         </div>
                         <div class="card-body">
@@ -279,7 +279,7 @@ include '../includes/user_header.php';
                                 <!-- Talep Oluşturuldu -->
                                 <div class="timeline-item completed">
                                     <div class="timeline-marker">
-                                        <i class="fas fa-plus"></i>
+                                        <i class="bi bi-plus"></i>
                                     </div>
                                     <div class="timeline-content">
                                         <h6>Revize Talebi Oluşturuldu</h6>
@@ -292,7 +292,7 @@ include '../includes/user_header.php';
                                 <?php if ($revision['admin_id']): ?>
                                 <div class="timeline-item completed">
                                     <div class="timeline-marker">
-                                        <i class="fas fa-user-cog"></i>
+                                        <i class="bi bi-user-cog"></i>
                                     </div>
                                     <div class="timeline-content">
                                         <h6>Admin Atandı</h6>
@@ -311,7 +311,7 @@ include '../includes/user_header.php';
                                 <?php if ($revision['status'] === 'in_progress'): ?>
                                 <div class="timeline-item active">
                                     <div class="timeline-marker">
-                                        <i class="fas fa-cog fa-spin"></i>
+                                        <i class="bi bi-cog fa-spin"></i>
                                     </div>
                                     <div class="timeline-content">
                                         <h6>Revize İşleniyor</h6>
@@ -322,7 +322,7 @@ include '../includes/user_header.php';
                                 <?php elseif ($revision['status'] === 'completed'): ?>
                                 <div class="timeline-item completed">
                                     <div class="timeline-marker">
-                                        <i class="fas fa-check"></i>
+                                        <i class="bi bi-check"></i>
                                     </div>
                                     <div class="timeline-content">
                                         <h6>Revize Tamamlandı</h6>
@@ -333,7 +333,7 @@ include '../includes/user_header.php';
                                 <?php elseif ($revision['status'] === 'rejected'): ?>
                                 <div class="timeline-item rejected">
                                     <div class="timeline-marker">
-                                        <i class="fas fa-times"></i>
+                                        <i class="bi bi-times"></i>
                                     </div>
                                     <div class="timeline-content">
                                         <h6>Revize Reddedildi</h6>
@@ -344,7 +344,7 @@ include '../includes/user_header.php';
                                 <?php else: ?>
                                 <div class="timeline-item pending">
                                     <div class="timeline-marker">
-                                        <i class="fas fa-clock"></i>
+                                        <i class="bi bi-clock"></i>
                                     </div>
                                     <div class="timeline-content">
                                         <h6>İnceleme Bekliyor</h6>
@@ -361,7 +361,7 @@ include '../includes/user_header.php';
                     <div class="card mb-4">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-comment-alt me-2"></i>Talep Detaylarınız
+                                <i class="bi bi-comment-alt me-2"></i>Talep Detaylarınız
                             </h5>
                         </div>
                         <div class="card-body">
@@ -380,7 +380,7 @@ include '../includes/user_header.php';
                     <div class="card mb-4">
                         <div class="card-header bg-light">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-user-cog me-2"></i>Admin Yanıtı
+                                <i class="bi bi-user-cog me-2"></i>Admin Yanıtı
                                 <?php if (($revision['admin_username'] ?? 'Admin bilgisi yok')): ?>
                                     <small class="text-muted">- <?php echo htmlspecialchars(($revision['admin_username'] ?? 'Admin bilgisi yok')); ?></small>
                                 <?php endif; ?>
@@ -398,7 +398,7 @@ include '../includes/user_header.php';
                     <div class="card mb-4">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-file-alt me-2"></i>Dosya Bilgileri
+                                <i class="bi bi-file-alt me-2"></i>Dosya Bilgileri
                             </h5>
                         </div>
                         <div class="card-body">
@@ -423,22 +423,22 @@ include '../includes/user_header.php';
     <?php if ($targetFile['is_found']): ?>
         <div class="file-info">
             <div class="file-icon">
-                <i class="fas fa-file-code text-primary"></i>
+                <i class="bi bi-file-code text-primary"></i>
             </div>
             <div class="file-details">
                 <h6 class="file-name"><?php echo htmlspecialchars($targetFile['name']); ?></h6>
                 <div class="file-meta">
                     <span class="badge bg-light text-dark me-2">
-                        <i class="fas fa-hdd me-1"></i>
+                        <i class="bi bi-hdd me-1"></i>
                         <?php echo formatFileSize($targetFile['size']); ?>
                     </span>
                     <span class="badge bg-<?php echo $currentType['color']; ?>">
-                        <i class="fas fa-info-circle me-1"></i>
+                        <i class="bi bi-info-circle me-1"></i>
                         <?php echo htmlspecialchars($targetFile['type']); ?>
                     </span>
                 </div>
                 <small class="text-muted">
-                    <i class="fas fa-calendar me-1"></i>
+                    <i class="bi bi-calendar me-1"></i>
                     <?php echo $targetFile['date'] ? date('d.m.Y H:i', strtotime($targetFile['date'])) : 'Bilinmiyor'; ?>
                 </small>
             </div>
@@ -457,37 +457,37 @@ include '../includes/user_header.php';
                                         <?php $firstRevisionFile = $revisionFiles[0]; // İlk revizyon dosyasını göster ?>
                                         <div class="file-info">
                                             <div class="file-icon">
-                                                <i class="fas fa-file-code text-success"></i>
+                                                <i class="bi bi-file-code text-success"></i>
                                             </div>
                                             <div class="file-details">
                                                 <h6 class="file-name"><?php echo htmlspecialchars($firstRevisionFile['original_name']); ?></h6>
                                                 <div class="file-meta">
                                                     <span class="badge bg-light text-dark me-2">
-                                                        <i class="fas fa-hdd me-1"></i>
+                                                        <i class="bi bi-hdd me-1"></i>
                                                         <?php echo formatFileSize($firstRevisionFile['file_size']); ?>
                                                     </span>
                                                     <span class="badge bg-success">
-                                                        <i class="fas fa-check me-1"></i>
+                                                        <i class="bi bi-check me-1"></i>
                                                         Hazır
                                                     </span>
                                                     <?php if (count($revisionFiles) > 1): ?>
                                                     <span class="badge bg-info">
-                                                        <i class="fas fa-plus me-1"></i>
+                                                        <i class="bi bi-plus me-1"></i>
                                                         +<?php echo count($revisionFiles) - 1; ?> dosya daha
                                                     </span>
                                                     <?php endif; ?>
                                                 </div>
                                                 <small class="text-muted">
-                                                    <i class="fas fa-calendar me-1"></i>
+                                                    <i class="bi bi-calendar me-1"></i>
                                                     <?php echo date('d.m.Y H:i', strtotime($firstRevisionFile['upload_date'])); ?>
                                                 </small>
                                                 <div class="mt-2">
                                                     <a href="download-revision.php?id=<?php echo $firstRevisionFile['id']; ?>" class="btn btn-success btn-sm">
-                                                        <i class="fas fa-download me-1"></i>İndir
+                                                        <i class="bi bi-download me-1"></i>İndir
                                                     </a>
                                                     <?php if (count($revisionFiles) > 1): ?>
                                                         <a href="download-revision.php?id=<?php echo $revision['id']; ?>" class="btn btn-outline-success btn-sm ms-2">
-                                                            <i class="fas fa-download me-1"></i>Tümünü İndir
+                                                            <i class="bi bi-download me-1"></i>Tümünü İndir
                                                         </a>
                                                     <?php endif; ?>
                                                 </div>
@@ -495,7 +495,7 @@ include '../includes/user_header.php';
                                         </div>
                                     <?php else: ?>
                                     <div class="text-center py-4">
-                                        <i class="fas fa-clock text-muted" style="font-size: 2rem;"></i>
+                                        <i class="bi bi-clock text-muted" style="font-size: 2rem;"></i>
                                         <p class="text-muted mt-2 mb-0">
                                             <?php 
                                             switch($revision['status']) {
@@ -527,7 +527,7 @@ include '../includes/user_header.php';
                     <div class="card mb-4">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-info-circle me-2"></i>Revize Özeti
+                                <i class="bi bi-info-circle me-2"></i>Revize Özeti
                             </h5>
                         </div>
                         <div class="card-body">
@@ -540,7 +540,7 @@ include '../includes/user_header.php';
                                     <span class="summary-label">Durum:</span>
                                     <span class="summary-value">
                                         <span class="badge bg-<?php echo $currentStatus['bg']; ?>">
-                                            <i class="fas fa-<?php echo $currentStatus['icon']; ?> me-1"></i>
+                                            <i class="bi bi-<?php echo $currentStatus['icon']; ?> me-1"></i>
                                             <?php echo $currentStatus['text']; ?>
                                         </span>
                                     </span>
@@ -575,7 +575,7 @@ include '../includes/user_header.php';
                     <div class="card mb-4">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-tools me-2"></i>İşlemler
+                                <i class="bi bi-tools me-2"></i>İşlemler
                             </h5>
                         </div>
                         <div class="card-body">
@@ -583,29 +583,29 @@ include '../includes/user_header.php';
                                 <?php if ($revision['status'] === 'completed' && !empty($revisionFiles)): ?>
                                     <?php if (count($revisionFiles) == 1): ?>
                                         <a href="download-revision.php?id=<?php echo $revisionFiles[0]['id']; ?>" class="btn btn-success">
-                                            <i class="fas fa-download me-2"></i>Revize Dosyasını İndir
+                                            <i class="bi bi-download me-2"></i>Revize Dosyasını İndir
                                         </a>
                                     <?php else: ?>
                                         <a href="download-revision.php?id=<?php echo $revisionFiles[0]['id']; ?>" class="btn btn-success">
-                                            <i class="fas fa-download me-2"></i>Ana Dosyayı İndir
+                                            <i class="bi bi-download me-2"></i>Ana Dosyayı İndir
                                         </a>
                                         <a href="download-revision.php?id=<?php echo $revision['id']; ?>" class="btn btn-outline-success">
-                                            <i class="fas fa-download me-2"></i>Tüm Dosyaları İndir
+                                            <i class="bi bi-download me-2"></i>Tüm Dosyaları İndir
                                         </a>
                                     <?php endif; ?>
                                 <?php endif; ?>
                                 
                                 <a href="files.php?view=<?php echo $revision['upload_id']; ?>" class="btn btn-outline-primary">
-                                    <i class="fas fa-file me-2"></i>Orijinal Dosyayı Görüntüle
+                                    <i class="bi bi-file me-2"></i>Orijinal Dosyayı Görüntüle
                                 </a>
                                 
                                 <a href="revisions.php" class="btn btn-outline-secondary">
-                                    <i class="fas fa-list me-2"></i>Tüm Revize Taleplerim
+                                    <i class="bi bi-list me-2"></i>Tüm Revize Taleplerim
                                 </a>
                                 
                                 <?php if ($revision['status'] === 'completed'): ?>
                                 <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#newRevisionModal">
-                                    <i class="fas fa-plus me-2"></i>Yeni Revize Talebi
+                                    <i class="bi bi-plus me-2"></i>Yeni Revize Talebi
                                 </button>
                                 <?php endif; ?>
                             </div>
@@ -616,17 +616,17 @@ include '../includes/user_header.php';
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-question-circle me-2"></i>Yardım
+                                <i class="bi bi-question-circle me-2"></i>Yardım
                             </h5>
                         </div>
                         <div class="card-body">
                             <p class="card-text">Revize süreciyle ilgili sorularınız varsa:</p>
                             <div class="d-grid gap-2">
                                 <a href="contact.php" class="btn btn-outline-info btn-sm">
-                                    <i class="fas fa-envelope me-2"></i>İletişime Geç
+                                    <i class="bi bi-envelope me-2"></i>İletişime Geç
                                 </a>
                                 <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#helpModal">
-                                    <i class="fas fa-info me-2"></i>Revize Hakkında
+                                    <i class="bi bi-info me-2"></i>Revize Hakkında
                                 </button>
                             </div>
                         </div>
@@ -643,18 +643,18 @@ include '../includes/user_header.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-info-circle me-2 text-primary"></i>Revize Sistemi Hakkında
+                    <i class="bi bi-info-circle me-2 text-primary"></i>Revize Sistemi Hakkında
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="info-section">
-                    <h6><i class="fas fa-question-circle me-2"></i>Revize Sistemi Nedir?</h6>
+                    <h6><i class="bi bi-question-circle me-2"></i>Revize Sistemi Nedir?</h6>
                     <p>Revize sistemi, tamamlanmış ECU dosyalarınızda değişiklik talep etmenizi sağlayan özelliğimizdir.</p>
                 </div>
                 
                 <div class="info-section">
-                    <h6><i class="fas fa-cog me-2"></i>Süreç Nasıl İşler?</h6>
+                    <h6><i class="bi bi-cog me-2"></i>Süreç Nasıl İşler?</h6>
                     <ol class="ps-3">
                         <li>Revize talebiniz sisteme kaydedilir</li>
                         <li>Uzman admin tarafından incelenir</li>
@@ -665,7 +665,7 @@ include '../includes/user_header.php';
                 </div>
                 
                 <div class="info-section">
-                    <h6><i class="fas fa-clock me-2"></i>İşlem Süresi</h6>
+                    <h6><i class="bi bi-clock me-2"></i>İşlem Süresi</h6>
                     <p>Revize talepleri genellikle 24-72 saat içinde tamamlanır. Karmaşık değişiklikler daha uzun sürebilir.</p>
                 </div>
             </div>
@@ -682,20 +682,20 @@ include '../includes/user_header.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-edit me-2 text-warning"></i>Yeni Revize Talebi
+                    <i class="bi bi-edit me-2 text-warning"></i>Yeni Revize Talebi
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="newRevisionForm">
                 <div class="modal-body">
                     <div class="alert alert-info mb-3">
-                        <i class="fas fa-info-circle me-2"></i>
+                        <i class="bi bi-info-circle me-2"></i>
                         <strong>Mevcut Dosya:</strong> <?php echo htmlspecialchars($revision['original_name'] ?? 'Dosya bilgisi yok'); ?>
                     </div>
                     
                     <div class="mb-3">
                         <label for="revisionNotes" class="form-label">
-                            <i class="fas fa-comment me-2"></i>Revize Talebi Açıklaması *
+                            <i class="bi bi-comment me-2"></i>Revize Talebi Açıklaması *
                         </label>
                         <textarea class="form-control" id="revisionNotes" name="revision_notes" rows="4" 
                                   placeholder="Lütfen dosyanızda hangi değişikliklerin yapılmasını istediğinizi detaylı bir şekilde açıklayın..." 
@@ -706,17 +706,17 @@ include '../includes/user_header.php';
                     </div>
                     
                     <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <i class="bi bi-exclamation-triangle me-2"></i>
                         <strong>Önemli:</strong> Revize talebi gönderildikten sonra admin ekibimiz tarafından değerlendirilecektir. 
                         Talebin işleme alınması durumunda kredi hesabınızdan düşüm yapılabilir.
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>İptal
+                        <i class="bi bi-times me-1"></i>İptal
                     </button>
                     <button type="submit" class="btn btn-warning" id="submitRevisionBtn">
-                        <i class="fas fa-paper-plane me-1"></i>Revize Talebi Gönder
+                        <i class="bi bi-paper-plane me-1"></i>Revize Talebi Gönder
                     </button>
                 </div>
             </form>
@@ -959,7 +959,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Buton durumunu değiştir
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Gönderiliyor...';
+            submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-1"></i>Gönderiliyor...';
             
             // XMLHttpRequest ile AJAX isteği (eski tarayıcı uyumlu)
             var xhr = new XMLHttpRequest();
@@ -971,7 +971,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (xhr.readyState === 4) {
                     // Buton durumunu eski haline getir
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Revize Talebi Gönder';
+                    submitBtn.innerHTML = '<i class="bi bi-paper-plane me-1"></i>Revize Talebi Gönder';
                     
                     if (xhr.status === 200) {
                         try {
@@ -1015,7 +1015,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('newRevisionModal').addEventListener('hidden.bs.modal', function() {
             revisionNotes.value = '';
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Revize Talebi Gönder';
+            submitBtn.innerHTML = '<i class="bi bi-paper-plane me-1"></i>Revize Talebi Gönder';
         });
     }
 });
@@ -1036,7 +1036,7 @@ var showAlert = function(message, type) {
     var alertDiv = document.createElement('div');
     alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show alert-dynamic';
     alertDiv.innerHTML = '<div class="d-flex align-items-center">' +
-        '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-triangle') + ' me-3 fa-lg"></i>' +
+        '<i class="bi bi-' + (type === 'success' ? 'check-circle' : 'exclamation-triangle') + ' me-3 fa-lg"></i>' +
         '<div><strong>' + (type === 'success' ? 'Başarılı!' : 'Hata!') + '</strong> ' + message + '</div>' +
         '</div>' +
         '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
@@ -1071,8 +1071,8 @@ var openRevisionFileModal = function(revisionFileId, fileName) {
     revisionFileModal.querySelector('#submitRevisionBtn').id = 'submitRevisionFileBtn';
     
     // Modal başlık ve içeriğini güncelle
-    revisionFileModal.querySelector('.modal-title').innerHTML = '<i class="fas fa-edit me-2 text-warning"></i>Revizyon Dosyası İçin Yeni Talep';
-    revisionFileModal.querySelector('.alert-info').innerHTML = '<i class="fas fa-info-circle me-2"></i><strong>Revizyon Dosyası:</strong> ' + fileName;
+    revisionFileModal.querySelector('.modal-title').innerHTML = '<i class="bi bi-edit me-2 text-warning"></i>Revizyon Dosyası İçin Yeni Talep';
+    revisionFileModal.querySelector('.alert-info').innerHTML = '<i class="bi bi-info-circle me-2"></i><strong>Revizyon Dosyası:</strong> ' + fileName;
     
     // Modalı DOM'a ekle
     document.body.appendChild(revisionFileModal);
@@ -1102,7 +1102,7 @@ var openRevisionFileModal = function(revisionFileId, fileName) {
         
         // Buton durumunu değiştir
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Gönderiliyor...';
+        submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-1"></i>Gönderiliyor...';
         
         // XMLHttpRequest ile AJAX isteği (eski tarayıcı uyumlu)
         var xhr = new XMLHttpRequest();
@@ -1114,7 +1114,7 @@ var openRevisionFileModal = function(revisionFileId, fileName) {
             if (xhr.readyState === 4) {
                 // Buton durumunu eski haline getir
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Revize Talebi Gönder';
+                submitBtn.innerHTML = '<i class="bi bi-paper-plane me-1"></i>Revize Talebi Gönder';
                 
                 if (xhr.status === 200) {
                     try {

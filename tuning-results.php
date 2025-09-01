@@ -325,9 +325,9 @@ include 'includes/header.php';
             </div>
             <div class="col-lg-4 text-center">
                 <div class="position-relative">
-                    <i class="fas fa-car fa-8x" style="opacity: 0.3;"></i>
+                    <i class="bi bi-car fa-8x" style="opacity: 0.3;"></i>
                     <div class="position-absolute top-50 start-50 translate-middle">
-                        <i class="fas fa-tachometer-alt fa-4x text-warning"></i>
+                        <i class="bi bi-tachometer-alt fa-4x text-warning"></i>
                     </div>
                 </div>
             </div>
@@ -505,43 +505,43 @@ include 'includes/header.php';
             <!-- Telefon Button - ID: 1 -->
             <?php if (isset($contactCardsById[1])): ?>
                 <a href="<?php echo $contactCardsById[1]['contact_link'] ?: 'tel:+905551234567'; ?>" class="btn btn-light btn-lg">
-                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'fas fa-phone'; ?> me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[1]['button_text'] ?: 'Hemen Ara'; ?>
+                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'bi bi-phone'; ?> me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[1]['button_text'] ?: 'Hemen Ara'; ?>
                 </a>
             <?php else: ?>
                 <a href="tel:+905551234567" class="btn btn-light btn-lg">
-                    <i class="fas fa-phone me-2"></i>Hemen Ara
+                    <i class="bi bi-phone me-2"></i>Hemen Ara
                 </a>
             <?php endif; ?>
             
             <!-- E-posta Button - ID: 2 -->
             <?php if (isset($contactCardsById[2])): ?>
                 <a href="<?php echo $contactCardsById[2]['contact_link'] ?: 'mailto:' . SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
-                    <i class="<?php echo $contactCardsById[2]['icon'] ?: 'fas fa-envelope'; ?> me-2" style="color: <?php echo $contactCardsById[2]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[2]['button_text'] ?: 'E-posta Gönder'; ?>
+                    <i class="<?php echo $contactCardsById[2]['icon'] ?: 'bi bi-envelope'; ?> me-2" style="color: <?php echo $contactCardsById[2]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[2]['button_text'] ?: 'E-posta Gönder'; ?>
                 </a>
             <?php else: ?>
                 <a href="mailto:<?php echo SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
-                    <i class="fas fa-envelope me-2"></i>E-posta Gönder
+                    <i class="bi bi-envelope me-2"></i>E-posta Gönder
                 </a>
             <?php endif; ?>
             
             <a href="register.php" class="btn btn-warning btn-lg">
-                <i class="fas fa-upload me-2"></i>Dosya Yükle
+                <i class="bi bi-upload me-2"></i>Dosya Yükle
             </a>
         </div>
         
         <div class="row mt-5 text-center">
             <div class="col-md-4">
-                <i class="fas fa-shield-alt fa-2x mb-3"></i>
+                <i class="bi bi-shield-alt fa-2x mb-3"></i>
                 <h5>Güvenli İşlem</h5>
                 <p>Aracınızın garantisi bozulmaz</p>
             </div>
             <div class="col-md-4">
-                <i class="fas fa-clock fa-2x mb-3"></i>
+                <i class="bi bi-clock fa-2x mb-3"></i>
                 <h5>Hızlı Teslimat</h5>
                 <p>24 saat içinde dosyanız hazır</p>
             </div>
             <div class="col-md-4">
-                <i class="fas fa-undo fa-2x mb-3"></i>
+                <i class="bi bi-undo fa-2x mb-3"></i>
                 <h5>Geri Dönüş Garantisi</h5>
                 <p>İstediğiniz zaman eski haline döndürülebilir</p>
             </div>

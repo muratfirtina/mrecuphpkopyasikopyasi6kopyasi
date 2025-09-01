@@ -41,7 +41,7 @@ include 'includes/header.php';
             <div class="col-md-6 col-lg-5">
                 <div class="text-center mt-5 mb-4">
                     <h1 class="h3 mb-3 fw-normal">
-                        <i class="fas fa-key text-primary me-2"></i>
+                        <i class="bi bi-key text-primary me-2"></i>
                         Şifre Sıfırlama
                     </h1>
                     <p class="text-muted">Şifrenizi sıfırlamak için email adresinizi girin</p>
@@ -51,23 +51,23 @@ include 'includes/header.php';
                     <div class="card-body p-4">
                         <?php if ($error): ?>
                             <div class="alert alert-danger" role="alert">
-                                <i class="fas fa-exclamation-triangle me-2"></i><?php echo $error; ?>
+                                <i class="bi bi-exclamation-triangle me-2"></i><?php echo $error; ?>
                             </div>
                         <?php endif; ?>
                         
                         <?php if ($success): ?>
                             <div class="alert alert-success" role="alert">
-                                <i class="fas fa-check-circle me-2"></i><?php echo $success; ?>
+                                <i class="bi bi-check-circle me-2"></i><?php echo $success; ?>
                                 <div class="mt-3">
                                     <a href="login.php" class="btn btn-success">
-                                        <i class="fas fa-sign-in-alt me-1"></i>Giriş Sayfasına Dön
+                                        <i class="bi bi-sign-in-alt me-1"></i>Giriş Sayfasına Dön
                                     </a>
                                 </div>
                             </div>
                         <?php else: ?>
                         
                         <div class="text-center mb-4">
-                            <i class="fas fa-envelope text-primary" style="font-size: 3rem;"></i>
+                            <i class="bi bi-envelope text-primary" style="font-size: 3rem;"></i>
                             <h5 class="mt-3">Email Adresinizi Girin</h5>
                             <p class="text-muted">Size şifre sıfırlama bağlantısı göndereceğiz.</p>
                         </div>
@@ -77,7 +77,7 @@ include 'includes/header.php';
                                 <label for="email" class="form-label">Email Adresi</label>
                                 <div class="input-group">
                                     <span class="input-group-text">
-                                        <i class="fas fa-envelope text-muted"></i>
+                                        <i class="bi bi-envelope text-muted"></i>
                                     </span>
                                     <input type="email" class="form-control" id="email" name="email" 
                                            value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" 
@@ -87,7 +87,7 @@ include 'includes/header.php';
                             
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-paper-plane me-2"></i>Sıfırlama Bağlantısı Gönder
+                                    <i class="bi bi-paper-plane me-2"></i>Sıfırlama Bağlantısı Gönder
                                 </button>
                             </div>
                         </form>
@@ -100,14 +100,14 @@ include 'includes/header.php';
                     <p class="text-muted">
                         Şifrenizi hatırladınız mı? 
                         <a href="login.php" class="text-decoration-none">
-                            <i class="fas fa-sign-in-alt me-1"></i>Giriş Yap
+                            <i class="bi bi-sign-in-alt me-1"></i>Giriş Yap
                         </a>
                     </p>
                     
                     <p class="text-muted">
                         Hesabınız yok mu? 
                         <a href="register.php" class="text-decoration-none">
-                            <i class="fas fa-user-plus me-1"></i>Kayıt Ol
+                            <i class="bi bi-user-plus me-1"></i>Kayıt Ol
                         </a>
                     </p>
                 </div>

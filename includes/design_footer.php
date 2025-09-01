@@ -160,7 +160,7 @@
                     const submitBtn = form.querySelector('[type="submit"]');
                     if (submitBtn) {
                         submitBtn.disabled = true;
-                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Kaydediliyor...';
+                        submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin"></i> Kaydediliyor...';
                     }
                 },
                 success: function(response) {

@@ -468,14 +468,14 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                 <!-- Header -->
                 <div class="feature-box">
                     <h1 class="mb-4">
-                        <i class="fas fa-shield-alt me-3"></i>
+                        <i class="bi bi-shield-alt me-3"></i>
                         GUID Migration Final Check v2.0
                     </h1>
                     <p class="lead mb-3">
                         Mr ECU sisteminin INT'den GUID'e geçiş durumunun kapsamlı analizi
                     </p>
                     <p class="mb-0">
-                        <i class="fas fa-rocket me-2"></i>
+                        <i class="bi bi-rocket me-2"></i>
                         <strong>16. Final GUID Migration Kontrol Dosyası</strong>
                     </p>
                 </div>
@@ -485,13 +485,13 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                     <div class="col-md-3">
                         <div class="stats-card">
                             <h2 class="mb-1"><?php echo $passedChecks; ?>/<?php echo $totalChecks; ?></h2>
-                            <p class="mb-0"><i class="fas fa-check-circle me-2"></i>Tests Passed</p>
+                            <p class="mb-0"><i class="bi bi-check-circle me-2"></i>Tests Passed</p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="stats-card">
                             <h2 class="mb-1"><?php echo $successRate; ?>%</h2>
-                            <p class="mb-0"><i class="fas fa-chart-line me-2"></i>Success Rate</p>
+                            <p class="mb-0"><i class="bi bi-chart-line me-2"></i>Success Rate</p>
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -507,13 +507,13 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                                 echo $statusText[$overallStatus];
                                 ?>
                             </h2>
-                            <p class="mb-0"><i class="fas fa-thermometer-half me-2"></i>Overall Status</p>
+                            <p class="mb-0"><i class="bi bi-thermometer-half me-2"></i>Overall Status</p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="stats-card">
                             <h2 class="mb-1"><?php echo date('H:i'); ?></h2>
-                            <p class="mb-0"><i class="fas fa-clock me-2"></i>Check Time</p>
+                            <p class="mb-0"><i class="bi bi-clock me-2"></i>Check Time</p>
                         </div>
                     </div>
                 </div>
@@ -539,7 +539,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
 
                 <!-- Migration Summary -->
                 <div class="migration-summary">
-                    <h3><i class="fas fa-rocket me-2"></i>Migration Achievements</h3>
+                    <h3><i class="bi bi-rocket me-2"></i>Migration Achievements</h3>
                     <div class="row mt-4">
                         <div class="col-md-3 text-center">
                             <div class="test-category">
@@ -549,19 +549,19 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                         </div>
                         <div class="col-md-3 text-center">
                             <div class="test-category">
-                                <h4><i class="fas fa-database me-2"></i>Database</h4>
+                                <h4><i class="bi bi-database me-2"></i>Database</h4>
                                 <p class="mb-0">GUID schema implemented</p>
                             </div>
                         </div>
                         <div class="col-md-3 text-center">
                             <div class="test-category">
-                                <h4><i class="fas fa-code me-2"></i>Backend</h4>
+                                <h4><i class="bi bi-code me-2"></i>Backend</h4>
                                 <p class="mb-0">Classes updated for GUID</p>
                             </div>
                         </div>
                         <div class="col-md-3 text-center">
                             <div class="test-category">
-                                <h4><i class="fas fa-shield-alt me-2"></i>Security</h4>
+                                <h4><i class="bi bi-shield-alt me-2"></i>Security</h4>
                                 <p class="mb-0">Enhanced protection</p>
                             </div>
                         </div>
@@ -572,7 +572,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="fas fa-list-check me-2"></i>Detailed Test Results
+                            <i class="bi bi-list-check me-2"></i>Detailed Test Results
                             <span class="badge bg-secondary ms-2"><?php echo count($checks); ?> tests</span>
                         </h5>
                     </div>
@@ -590,7 +590,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                                         <div class="d-flex justify-content-between align-items-start">
                                             <div class="flex-grow-1">
                                                 <h6 class="mb-2">
-                                                    <i class="fas fa-<?php echo $check['passed'] ? 'check-circle text-success' : 'times-circle text-danger'; ?> me-2"></i>
+                                                    <i class="bi bi-<?php echo $check['passed'] ? 'check-circle text-success' : 'times-circle text-danger'; ?> me-2"></i>
                                                     <?php echo $check['name']; ?>
                                                 </h6>
                                                 <p class="mb-1"><?php echo $check['message']; ?></p>
@@ -614,7 +614,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                                         <div class="d-flex justify-content-between align-items-start">
                                             <div class="flex-grow-1">
                                                 <h6 class="mb-2">
-                                                    <i class="fas fa-<?php echo $check['passed'] ? 'check-circle text-success' : 'times-circle text-danger'; ?> me-2"></i>
+                                                    <i class="bi bi-<?php echo $check['passed'] ? 'check-circle text-success' : 'times-circle text-danger'; ?> me-2"></i>
                                                     <?php echo $check['name']; ?>
                                                 </h6>
                                                 <p class="mb-1"><?php echo $check['message']; ?></p>
@@ -640,22 +640,22 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                     <div class="row">
                         <div class="col-md-3 mb-2">
                             <a href="config/install-guid.php" class="btn btn-primary btn-action w-100">
-                                <i class="fas fa-redo me-2"></i>Re-install GUID DB
+                                <i class="bi bi-redo me-2"></i>Re-install GUID DB
                             </a>
                         </div>
                         <div class="col-md-3 mb-2">
                             <a href="test-guid-system.php" class="btn btn-info btn-action w-100">
-                                <i class="fas fa-vial me-2"></i>Run System Tests
+                                <i class="bi bi-vial me-2"></i>Run System Tests
                             </a>
                         </div>
                         <div class="col-md-3 mb-2">
                             <a href="admin/" class="btn btn-success btn-action w-100">
-                                <i class="fas fa-cog me-2"></i>Go to Admin Panel
+                                <i class="bi bi-cog me-2"></i>Go to Admin Panel
                             </a>
                         </div>
                         <div class="col-md-3 mb-2">
                             <a href="login.php" class="btn btn-warning btn-action w-100">
-                                <i class="fas fa-sign-in-alt me-2"></i>Test Login System
+                                <i class="bi bi-sign-in-alt me-2"></i>Test Login System
                             </a>
                         </div>
                     </div>
@@ -665,39 +665,39 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                 <div class="card final-status-card">
                     <div class="card-header bg-<?php echo $overallStatus === 'excellent' ? 'success' : ($overallStatus === 'good' ? 'info' : ($overallStatus === 'warning' ? 'warning' : 'danger')); ?> text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-flag-checkered me-2"></i>Migration Status Report
+                            <i class="bi bi-flag-checkered me-2"></i>Migration Status Report
                         </h5>
                     </div>
                     <div class="card-body">
                         <?php if ($overallStatus === 'excellent'): ?>
                             <div class="alert alert-success">
-                                <h4><i class="fas fa-trophy me-2"></i>🎉 GUID Migration Completed Successfully!</h4>
+                                <h4><i class="bi bi-trophy me-2"></i>🎉 GUID Migration Completed Successfully!</h4>
                                 <p class="mb-3">
                                     <strong>Excellent!</strong> GUID migration is complete and all systems are working perfectly. 
                                     Your application is now using UUID-based IDs for enhanced security and scalability.
                                 </p>
                                 <hr>
-                                <h6><i class="fas fa-star me-2"></i>Migration Achievements:</h6>
+                                <h6><i class="bi bi-star me-2"></i>Migration Achievements:</h6>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <ul class="list-unstyled">
-                                            <li><i class="fas fa-check text-success me-2"></i>All database tables now use CHAR(36) GUID primary keys</li>
-                                            <li><i class="fas fa-check text-success me-2"></i>Enhanced security with non-predictable IDs</li>
-                                            <li><i class="fas fa-check text-success me-2"></i>Brute force protection improved significantly</li>
+                                            <li><i class="bi bi-check text-success me-2"></i>All database tables now use CHAR(36) GUID primary keys</li>
+                                            <li><i class="bi bi-check text-success me-2"></i>Enhanced security with non-predictable IDs</li>
+                                            <li><i class="bi bi-check text-success me-2"></i>Brute force protection improved significantly</li>
                                         </ul>
                                     </div>
                                     <div class="col-md-6">
                                         <ul class="list-unstyled">
-                                            <li><i class="fas fa-check text-success me-2"></i>UUID validation throughout the application</li>
-                                            <li><i class="fas fa-check text-success me-2"></i>Foreign key relationships maintained</li>
-                                            <li><i class="fas fa-check text-success me-2"></i>Performance optimized for GUID operations</li>
+                                            <li><i class="bi bi-check text-success me-2"></i>UUID validation throughout the application</li>
+                                            <li><i class="bi bi-check text-success me-2"></i>Foreign key relationships maintained</li>
+                                            <li><i class="bi bi-check text-success me-2"></i>Performance optimized for GUID operations</li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
                         <?php elseif ($overallStatus === 'good'): ?>
                             <div class="alert alert-info">
-                                <h4><i class="fas fa-thumbs-up me-2"></i>Migration Nearly Complete</h4>
+                                <h4><i class="bi bi-thumbs-up me-2"></i>Migration Nearly Complete</h4>
                                 <p>
                                     <strong>Good progress!</strong> Most of the GUID migration is working correctly. 
                                     Please check the failed tests above and fix any remaining issues.
@@ -705,7 +705,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                             </div>
                         <?php elseif ($overallStatus === 'warning'): ?>
                             <div class="alert alert-warning">
-                                <h4><i class="fas fa-exclamation-triangle me-2"></i>Migration Needs Attention</h4>
+                                <h4><i class="bi bi-exclamation-triangle me-2"></i>Migration Needs Attention</h4>
                                 <p>
                                     <strong>Warning:</strong> Several checks have failed. Please review the failed tests 
                                     and complete the migration process before using the system.
@@ -713,7 +713,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                             </div>
                         <?php else: ?>
                             <div class="alert alert-danger">
-                                <h4><i class="fas fa-times-circle me-2"></i>Migration Incomplete</h4>
+                                <h4><i class="bi bi-times-circle me-2"></i>Migration Incomplete</h4>
                                 <p>
                                     <strong>Critical issues found!</strong> The GUID migration is not complete. 
                                     Please address all failed checks before proceeding.
@@ -725,19 +725,19 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                             <div class="row">
                                 <div class="col-md-4">
                                     <small class="text-muted">
-                                        <i class="fas fa-clock me-1"></i><strong>Check completed:</strong><br>
+                                        <i class="bi bi-clock me-1"></i><strong>Check completed:</strong><br>
                                         <?php echo date('Y-m-d H:i:s'); ?>
                                     </small>
                                 </div>
                                 <div class="col-md-4">
                                     <small class="text-muted">
-                                        <i class="fas fa-database me-1"></i><strong>Database:</strong><br>
+                                        <i class="bi bi-database me-1"></i><strong>Database:</strong><br>
                                         <?php echo $pdo->query("SELECT DATABASE()")->fetchColumn(); ?>
                                     </small>
                                 </div>
                                 <div class="col-md-4">
                                     <small class="text-muted">
-                                        <i class="fas fa-server me-1"></i><strong>Server:</strong><br>
+                                        <i class="bi bi-server me-1"></i><strong>Server:</strong><br>
                                         <?php echo $_SERVER['SERVER_NAME'] ?? 'localhost'; ?>
                                     </small>
                                 </div>
@@ -750,25 +750,25 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                 <div class="card mt-4 mb-5">
                     <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="fas fa-tools me-2"></i>Additional Migration Tools
+                            <i class="bi bi-tools me-2"></i>Additional Migration Tools
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <h6><i class="fas fa-file-alt me-2"></i>Documentation</h6>
+                                <h6><i class="bi bi-file-alt me-2"></i>Documentation</h6>
                                 <ul class="list-unstyled">
-                                    <li><a href="GUID_MIGRATION_README.md" target="_blank"><i class="fas fa-book me-2"></i>Migration Guide</a></li>
-                                    <li><a href="final-guid-check.php" target="_blank"><i class="fas fa-clipboard-check me-2"></i>Basic Check</a></li>
-                                    <li><a href="test-guid-system.php" target="_blank"><i class="fas fa-flask me-2"></i>System Tests</a></li>
+                                    <li><a href="GUID_MIGRATION_README.md" target="_blank"><i class="bi bi-book me-2"></i>Migration Guide</a></li>
+                                    <li><a href="final-guid-check.php" target="_blank"><i class="bi bi-clipboard-check me-2"></i>Basic Check</a></li>
+                                    <li><a href="test-guid-system.php" target="_blank"><i class="bi bi-flask me-2"></i>System Tests</a></li>
                                 </ul>
                             </div>
                             <div class="col-md-6">
-                                <h6><i class="fas fa-wrench me-2"></i>Maintenance</h6>
+                                <h6><i class="bi bi-wrench me-2"></i>Maintenance</h6>
                                 <ul class="list-unstyled">
-                                    <li><button class="btn btn-sm btn-outline-primary" onclick="window.location.reload()"><i class="fas fa-sync me-2"></i>Refresh Check</button></li>
-                                    <li><a href="config/install-guid.php" class="btn btn-sm btn-outline-warning"><i class="fas fa-download me-2"></i>Reinstall Schema</a></li>
-                                    <li><a href="admin/system-logs.php" class="btn btn-sm btn-outline-info"><i class="fas fa-history me-2"></i>View Logs</a></li>
+                                    <li><button class="btn btn-sm btn-outline-primary" onclick="window.location.reload()"><i class="bi bi-sync me-2"></i>Refresh Check</button></li>
+                                    <li><a href="config/install-guid.php" class="btn btn-sm btn-outline-warning"><i class="bi bi-download me-2"></i>Reinstall Schema</a></li>
+                                    <li><a href="admin/system-logs.php" class="btn btn-sm btn-outline-info"><i class="bi bi-history me-2"></i>View Logs</a></li>
                                 </ul>
                             </div>
                         </div>

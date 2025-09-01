@@ -149,14 +149,14 @@ include '../includes/user_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="fas fa-history me-2 text-info"></i>İşlem Geçmişi
+                        <i class="bi bi-history me-2 text-info"></i>İşlem Geçmişi
                     </h1>
                     <p class="text-muted mb-0">Kredi işlemlerinizi ve hesap aktivitelerinizi takip edin</p>
                 </div>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
                         <button type="button" class="btn btn-outline-primary" onclick="exportTransactions()">
-                            <i class="fas fa-download me-1"></i>Dışa Aktar
+                            <i class="bi bi-download me-1"></i>Dışa Aktar
                         </button>
                     </div>
                 </div>
@@ -172,12 +172,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-success"><?php echo number_format($totalLoaded, 2); ?></div>
                                     <div class="stat-label">Toplam Yüklenen</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-arrow-up text-success"></i>
+                                        <i class="bi bi-arrow-up text-success"></i>
                                         <span class="text-success">Kredi TL</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon bg-success">
-                                    <i class="fas fa-plus-circle"></i>
+                                    <i class="bi bi-plus-circle"></i>
                                 </div>
                             </div>
                         </div>
@@ -192,12 +192,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-danger"><?php echo number_format($totalSpent, 2); ?></div>
                                     <div class="stat-label">Toplam Harcanan</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-arrow-down text-danger"></i>
+                                        <i class="bi bi-arrow-down text-danger"></i>
                                         <span class="text-danger">Kredi TL</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon bg-danger">
-                                    <i class="fas fa-minus-circle"></i>
+                                    <i class="bi bi-minus-circle"></i>
                                 </div>
                             </div>
                         </div>
@@ -212,12 +212,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-primary"><?php echo $totalTransactions; ?></div>
                                     <div class="stat-label">Toplam İşlem</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-chart-line text-primary"></i>
+                                        <i class="bi bi-chart-line text-primary"></i>
                                         <span class="text-primary">Tüm zamanlar</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon bg-primary">
-                                    <i class="fas fa-exchange-alt"></i>
+                                    <i class="bi bi-exchange-alt"></i>
                                 </div>
                             </div>
                         </div>
@@ -232,12 +232,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-warning"><?php echo $monthlyTransactions; ?></div>
                                     <div class="stat-label">Bu Ay İşlem</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-calendar text-warning"></i>
+                                        <i class="bi bi-calendar text-warning"></i>
                                         <span class="text-warning">Aylık aktivite</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon bg-warning">
-                                    <i class="fas fa-calendar-day"></i>
+                                    <i class="bi bi-calendar-day"></i>
                                 </div>
                             </div>
                         </div>
@@ -249,14 +249,14 @@ include '../includes/user_header.php';
             <div class="filter-card mb-4">
                 <div class="filter-header">
                     <h6 class="mb-0">
-                        <i class="fas fa-filter me-2"></i>Filtrele ve Ara
+                        <i class="bi bi-filter me-2"></i>Filtrele ve Ara
                     </h6>
                 </div>
                 <div class="filter-body">
                     <form method="GET" class="row g-3 align-items-end">
                         <div class="col-md-3">
                             <label for="type" class="form-label">
-                                <i class="fas fa-tag me-1"></i>İşlem Tipi
+                                <i class="bi bi-tag me-1"></i>İşlem Tipi
                             </label>
                             <select class="form-select form-control-modern" id="type" name="type">
                                 <option value="">Tüm İşlemler</option>
@@ -269,7 +269,7 @@ include '../includes/user_header.php';
                         
                         <div class="col-md-3">
                             <label for="date_from" class="form-label">
-                                <i class="fas fa-calendar me-1"></i>Başlangıç Tarihi
+                                <i class="bi bi-calendar me-1"></i>Başlangıç Tarihi
                             </label>
                             <input type="date" class="form-control form-control-modern" id="date_from" name="date_from" 
                                    value="<?php echo htmlspecialchars($dateFrom); ?>">
@@ -277,7 +277,7 @@ include '../includes/user_header.php';
                         
                         <div class="col-md-3">
                             <label for="date_to" class="form-label">
-                                <i class="fas fa-calendar-check me-1"></i>Bitiş Tarihi
+                                <i class="bi bi-calendar-check me-1"></i>Bitiş Tarihi
                             </label>
                             <input type="date" class="form-control form-control-modern" id="date_to" name="date_to" 
                                    value="<?php echo htmlspecialchars($dateTo); ?>">
@@ -286,10 +286,10 @@ include '../includes/user_header.php';
                         <div class="col-md-3">
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary btn-modern">
-                                    <i class="fas fa-search me-1"></i>Filtrele
+                                    <i class="bi bi-search me-1"></i>Filtrele
                                 </button>
                                 <a href="transactions.php" class="btn btn-outline-secondary btn-modern">
-                                    <i class="fas fa-undo me-1"></i>Temizle
+                                    <i class="bi bi-undo me-1"></i>Temizle
                                 </a>
                             </div>
                         </div>
@@ -303,7 +303,7 @@ include '../includes/user_header.php';
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
                             <h5 class="mb-0">
-                                <i class="fas fa-list me-2 text-primary"></i>Kredi İşlemleri
+                                <i class="bi bi-list me-2 text-primary"></i>Kredi İşlemleri
                                 <?php if ($totalTransactions > 0): ?>
                                     <span class="badge bg-primary ms-2"><?php echo $totalTransactions; ?></span>
                                 <?php endif; ?>
@@ -322,7 +322,7 @@ include '../includes/user_header.php';
                                 <div class="empty-state-transactions">
                                     <div class="empty-content">
                                         <div class="empty-icon">
-                                            <i class="fas fa-receipt"></i>
+                                            <i class="bi bi-receipt"></i>
                                         </div>
                                         <h6>
                                             <?php if ($type || $dateFrom || $dateTo): ?>
@@ -341,11 +341,11 @@ include '../includes/user_header.php';
                                         <div class="empty-actions">
                                             <?php if ($type || $dateFrom || $dateTo): ?>
                                                 <a href="transactions.php" class="btn btn-outline-primary">
-                                                    <i class="fas fa-list me-1"></i>Tüm İşlemler
+                                                    <i class="bi bi-list me-1"></i>Tüm İşlemler
                                                 </a>
                                             <?php endif; ?>
                                             <a href="credits.php" class="btn btn-primary">
-                                                <i class="fas fa-credit-card me-1"></i>Kredi Yükle
+                                                <i class="bi bi-credit-card me-1"></i>Kredi Yükle
                                             </a>
                                         </div>
                                     </div>
@@ -357,7 +357,7 @@ include '../includes/user_header.php';
                                         <div class="transaction-item">
                                             <div class="transaction-icon">
                                                 <?php
-                                                $iconClass = 'fas fa-circle';
+                                                $iconClass = 'bi bi-circle';
                                                 $iconColor = 'secondary';
                                                 $amountClass = 'secondary';
                                                 $amountPrefix = '';
@@ -366,7 +366,7 @@ include '../includes/user_header.php';
                                                 switch ($effectiveType) {
                                                     case 'add':
                                                     case 'deposit':
-                                                        $iconClass = 'fas fa-plus-circle';
+                                                        $iconClass = 'bi bi-plus-circle';
                                                         $iconColor = 'success';
                                                         $amountClass = 'success';
                                                         $amountPrefix = '+';
@@ -375,13 +375,13 @@ include '../includes/user_header.php';
                                                     case 'withdraw':
                                                     case 'file_charge':
                                                     case 'purchase':
-                                                        $iconClass = 'fas fa-minus-circle';
+                                                        $iconClass = 'bi bi-minus-circle';
                                                         $iconColor = 'danger';
                                                         $amountClass = 'danger';
                                                         $amountPrefix = '-';
                                                         break;
                                                     default:
-                                                        $iconClass = 'fas fa-circle';
+                                                        $iconClass = 'bi bi-circle';
                                                         $iconColor = 'secondary';
                                                         $amountClass = 'secondary';
                                                         $amountPrefix = '';
@@ -422,13 +422,13 @@ include '../includes/user_header.php';
                                                         
                                                         <div class="transaction-meta">
                                                             <span class="meta-item">
-                                                                <i class="fas fa-calendar-alt me-1"></i>
+                                                                <i class="bi bi-calendar-alt me-1"></i>
                                                                 <?php echo date('d.m.Y H:i', strtotime($transaction['created_at'])); ?>
                                                             </span>
                                                             
                                                             <?php if ($transaction['admin_username']): ?>
                                                                 <span class="meta-item">
-                                                                    <i class="fas fa-user-cog me-1"></i>
+                                                                    <i class="bi bi-user-cog me-1"></i>
                                                                     <?php echo htmlspecialchars($transaction['admin_username']); ?>
                                                                 </span>
                                                             <?php endif; ?>
@@ -461,7 +461,7 @@ include '../includes/user_header.php';
                                                 <?php if ($page > 1): ?>
                                                     <li class="page-item">
                                                         <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $type ? '&type=' . $type : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
-                                                            <i class="fas fa-chevron-left"></i>
+                                                            <i class="bi bi-chevron-left"></i>
                                                         </a>
                                                     </li>
                                                 <?php endif; ?>
@@ -484,7 +484,7 @@ include '../includes/user_header.php';
                                                 <?php if ($page < $totalPages): ?>
                                                     <li class="page-item">
                                                         <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $type ? '&type=' . $type : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
-                                                            <i class="fas fa-chevron-right"></i>
+                                                            <i class="bi bi-chevron-right"></i>
                                                         </a>
                                                     </li>
                                                 <?php endif; ?>
@@ -510,21 +510,21 @@ include '../includes/user_header.php';
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-white border-0 py-3">
                             <h6 class="mb-0">
-                                <i class="fas fa-bolt me-2 text-warning"></i>Hızlı İşlemler
+                                <i class="bi bi-bolt me-2 text-warning"></i>Hızlı İşlemler
                             </h6>
                         </div>
                         <div class="card-body">
                             <div class="d-grid gap-3">
                                 <a href="credits.php" class="btn btn-primary btn-modern">
-                                    <i class="fas fa-credit-card me-2"></i>Kredi Yükle
+                                    <i class="bi bi-credit-card me-2"></i>Kredi Yükle
                                 </a>
                                 
                                 <a href="files.php" class="btn btn-outline-primary btn-modern">
-                                    <i class="fas fa-folder me-2"></i>Dosyalarım
+                                    <i class="bi bi-folder me-2"></i>Dosyalarım
                                 </a>
                                 
                                 <button type="button" class="btn btn-outline-secondary btn-modern" onclick="exportTransactions()">
-                                    <i class="fas fa-download me-2"></i>Excel İndir
+                                    <i class="bi bi-download me-2"></i>Excel İndir
                                 </button>
                             </div>
                         </div>
@@ -534,13 +534,13 @@ include '../includes/user_header.php';
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white border-0 py-3">
                             <h6 class="mb-0">
-                                <i class="fas fa-file me-2 text-secondary"></i>Son Dosya İşlemleri
+                                <i class="bi bi-file me-2 text-secondary"></i>Son Dosya İşlemleri
                             </h6>
                         </div>
                         <div class="card-body">
                             <?php if (empty($recentFiles)): ?>
                                 <div class="text-center py-3">
-                                    <i class="fas fa-folder-open fa-2x text-muted mb-2"></i>
+                                    <i class="bi bi-folder-open fa-2x text-muted mb-2"></i>
                                     <p class="text-muted mb-0">Henüz dosya işlemi yok</p>
                                 </div>
                             <?php else: ?>
@@ -548,7 +548,7 @@ include '../includes/user_header.php';
                                     <?php foreach (array_slice($recentFiles, 0, 5) as $file): ?>
                                         <div class="recent-file-item">
                                             <div class="file-icon">
-                                                <i class="fas fa-file-alt"></i>
+                                                <i class="bi bi-file-alt"></i>
                                             </div>
                                             <div class="file-details">
                                                 <div class="file-name" title="<?php echo htmlspecialchars($file['file_name'] ?? 'Bilinmeyen dosya'); ?>">
@@ -572,14 +572,14 @@ include '../includes/user_header.php';
                                                 ];
                                                 $config = $statusConfig[$file['status'] ?? 'unknown'] ?? ['class' => 'secondary', 'icon' => 'question'];
                                                 ?>
-                                                <i class="fas fa-<?php echo $config['icon']; ?> text-<?php echo $config['class']; ?>"></i>
+                                                <i class="bi bi-<?php echo $config['icon']; ?> text-<?php echo $config['class']; ?>"></i>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
                                 <div class="text-center mt-3">
                                     <a href="files.php" class="btn btn-sm btn-outline-secondary">
-                                        <i class="fas fa-list me-1"></i>Tüm Dosyalar
+                                        <i class="bi bi-list me-1"></i>Tüm Dosyalar
                                     </a>
                                 </div>
                             <?php endif; ?>

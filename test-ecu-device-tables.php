@@ -22,19 +22,19 @@ require_once 'config/config.php';
             <div class="col-lg-10">
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0"><i class="fas fa-database"></i> ECU ve Device Tabloları Test</h3>
+                        <h3 class="mb-0"><i class="bi bi-database"></i> ECU ve Device Tabloları Test</h3>
                     </div>
                     <div class="card-body">
                         
                         <!-- Kurulum Durumu Kontrolü -->
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <h5><i class="fas fa-microchip text-primary"></i> ECU Tablosu</h5>
+                                <h5><i class="bi bi-microchip text-primary"></i> ECU Tablosu</h5>
                                 <?php
                                 try {
                                     $ecuCheck = $pdo->query("SHOW TABLES LIKE 'ecus'");
                                     if ($ecuCheck->rowCount() > 0) {
-                                        echo '<div class="alert alert-success"><i class="fas fa-check"></i> ECU tablosu mevcut</div>';
+                                        echo '<div class="alert alert-success"><i class="bi bi-check"></i> ECU tablosu mevcut</div>';
                                         
                                         // Kayıt sayısını kontrol et
                                         $ecuCount = $pdo->query("SELECT COUNT(*) FROM ecus")->fetchColumn();
@@ -51,21 +51,21 @@ require_once 'config/config.php';
                                             echo '</ul>';
                                         }
                                     } else {
-                                        echo '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> ECU tablosu bulunamadı</div>';
+                                        echo '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> ECU tablosu bulunamadı</div>';
                                     }
                                 } catch (Exception $e) {
-                                    echo '<div class="alert alert-danger"><i class="fas fa-times"></i> ECU tablosu kontrolü hatası: ' . $e->getMessage() . '</div>';
+                                    echo '<div class="alert alert-danger"><i class="bi bi-times"></i> ECU tablosu kontrolü hatası: ' . $e->getMessage() . '</div>';
                                 }
                                 ?>
                             </div>
                             
                             <div class="col-md-6">
-                                <h5><i class="fas fa-tools text-success"></i> Device Tablosu</h5>
+                                <h5><i class="bi bi-tools text-success"></i> Device Tablosu</h5>
                                 <?php
                                 try {
                                     $deviceCheck = $pdo->query("SHOW TABLES LIKE 'devices'");
                                     if ($deviceCheck->rowCount() > 0) {
-                                        echo '<div class="alert alert-success"><i class="fas fa-check"></i> Device tablosu mevcut</div>';
+                                        echo '<div class="alert alert-success"><i class="bi bi-check"></i> Device tablosu mevcut</div>';
                                         
                                         // Kayıt sayısını kontrol et
                                         $deviceCount = $pdo->query("SELECT COUNT(*) FROM devices")->fetchColumn();
@@ -82,10 +82,10 @@ require_once 'config/config.php';
                                             echo '</ul>';
                                         }
                                     } else {
-                                        echo '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Device tablosu bulunamadı</div>';
+                                        echo '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> Device tablosu bulunamadı</div>';
                                     }
                                 } catch (Exception $e) {
-                                    echo '<div class="alert alert-danger"><i class="fas fa-times"></i> Device tablosu kontrolü hatası: ' . $e->getMessage() . '</div>';
+                                    echo '<div class="alert alert-danger"><i class="bi bi-times"></i> Device tablosu kontrolü hatası: ' . $e->getMessage() . '</div>';
                                 }
                                 ?>
                             </div>
@@ -97,13 +97,13 @@ require_once 'config/config.php';
                                 <h5><i class="bi bi-gear-wide-connected"></i> Kurulum İşlemleri</h5>
                                 <div class="d-flex gap-2 flex-wrap">
                                     <a href="install-ecu-device-tables.php" class="btn btn-primary">
-                                        <i class="fas fa-download"></i> Tabloları Kur
+                                        <i class="bi bi-download"></i> Tabloları Kur
                                     </a>
                                     <a href="create_ecus_table.sql" class="btn btn-outline-primary" target="_blank">
-                                        <i class="fas fa-file-code"></i> ECU SQL Dosyası
+                                        <i class="bi bi-file-code"></i> ECU SQL Dosyası
                                     </a>
                                     <a href="create_devices_table.sql" class="btn btn-outline-success" target="_blank">
-                                        <i class="fas fa-file-code"></i> Device SQL Dosyası
+                                        <i class="bi bi-file-code"></i> Device SQL Dosyası
                                     </a>
                                 </div>
                             </div>
@@ -112,16 +112,16 @@ require_once 'config/config.php';
                         <!-- Admin Panel Linki -->
                         <?php if (isLoggedIn() && isAdmin()): ?>
                         <div class="mt-4">
-                            <h5><i class="fas fa-user-shield"></i> Admin İşlemleri</h5>
+                            <h5><i class="bi bi-user-shield"></i> Admin İşlemleri</h5>
                             <div class="d-flex gap-2 flex-wrap">
                                 <a href="admin/ecus.php" class="btn btn-info">
-                                    <i class="fas fa-microchip"></i> ECU Yönetimi
+                                    <i class="bi bi-microchip"></i> ECU Yönetimi
                                 </a>
                                 <a href="admin/devices.php" class="btn btn-success">
-                                    <i class="fas fa-tools"></i> Device Yönetimi
+                                    <i class="bi bi-tools"></i> Device Yönetimi
                                 </a>
                                 <a href="admin/" class="btn btn-dark">
-                                    <i class="fas fa-tachometer-alt"></i> Admin Panel
+                                    <i class="bi bi-tachometer-alt"></i> Admin Panel
                                 </a>
                             </div>
                         </div>
@@ -130,7 +130,7 @@ require_once 'config/config.php';
                         <!-- API Test Linki (sadece admin için) -->
                         <?php if (isLoggedIn() && isAdmin()): ?>
                         <div class="mt-4">
-                            <h5><i class="fas fa-code"></i> API Testleri</h5>
+                            <h5><i class="bi bi-code"></i> API Testleri</h5>
                             <div class="row">
                                 <div class="col-md-6">
                                     <p><strong>ECU API Testleri:</strong></p>
@@ -154,7 +154,7 @@ require_once 'config/config.php';
                         
                         <!-- Tabloların yapısını göster -->
                         <div class="mt-4">
-                            <h5><i class="fas fa-table"></i> Tablo Yapıları</h5>
+                            <h5><i class="bi bi-table"></i> Tablo Yapıları</h5>
                             <div class="row">
                                 <div class="col-md-6">
                                     <?php
@@ -216,7 +216,7 @@ require_once 'config/config.php';
                         <div class="d-flex justify-content-between align-items-center">
                             <small class="text-muted">Test Sayfası - <?= date('d.m.Y H:i:s') ?></small>
                             <a href="index.php" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-home"></i> Ana Sayfa
+                                <i class="bi bi-home"></i> Ana Sayfa
                             </a>
                         </div>
                     </div>

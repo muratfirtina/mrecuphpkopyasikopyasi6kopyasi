@@ -10,7 +10,7 @@ require_once '../config/database.php';
 
 $pageTitle = 'Hizmet Yönetimi';
 $pageDescription = 'Hizmetleri görüntüle, ekle, düzenle ve sil';
-$pageIcon = 'fas fa-concierge-bell';
+$pageIcon = 'bi bi-concierge-bell';
 
 $breadcrumbs = [
     ['title' => 'Dashboard', 'url' => 'index.php'],
@@ -120,13 +120,13 @@ require_once '../includes/design_header.php';
 <!-- Services Management Content -->
 <div class="design-card">
     <div class="design-card-header d-flex justify-content-between align-items-center">
-        <h3><i class="fas fa-concierge-bell me-2"></i>Hizmet Yönetimi</h3>
+        <h3><i class="bi bi-concierge-bell me-2"></i>Hizmet Yönetimi</h3>
         <div class="btn-group">
             <a href="services-add.php" class="btn btn-design-primary">
-                <i class="fas fa-plus me-2"></i>Yeni Hizmet Ekle
+                <i class="bi bi-plus me-2"></i>Yeni Hizmet Ekle
             </a>
             <a href="../services.php" target="_blank" class="btn btn-outline-info">
-                <i class="fas fa-eye me-2"></i>Önizleme
+                <i class="bi bi-eye me-2"></i>Önizleme
             </a>
         </div>
     </div>
@@ -135,7 +135,7 @@ require_once '../includes/design_header.php';
         <!-- Messages -->
         <?php if ($message): ?>
             <div class="alert alert-<?php echo $messageType === 'success' ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
-                <i class="fas fa-<?php echo $messageType === 'success' ? 'check-circle' : 'exclamation-triangle'; ?> me-2"></i>
+                <i class="bi bi-<?php echo $messageType === 'success' ? 'check-circle' : 'exclamation-triangle'; ?> me-2"></i>
                 <?php echo htmlspecialchars($message); ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
@@ -191,7 +191,7 @@ require_once '../includes/design_header.php';
                                        class="btn btn-sm <?php echo $service['is_featured'] ? 'btn-warning' : 'btn-outline-warning'; ?>" 
                                        onclick="return confirm('Öne çıkan durumunu değiştirmek istediğinizden emin misiniz?')">
                                         <?php if ($service['is_featured']): ?>
-                                            <i class="fas fa-star"></i>
+                                            <i class="bi bi-star"></i>
                                         <?php else: ?>
                                             <i class="far fa-star"></i>
                                         <?php endif; ?>
@@ -209,18 +209,18 @@ require_once '../includes/design_header.php';
                                            class="btn btn-outline-info" 
                                            title="Önizleme" 
                                            target="_blank">
-                                            <i class="fas fa-eye"></i>
+                                            <i class="bi bi-eye"></i>
                                         </a>
                                         <a href="services-edit.php?id=<?php echo $service['id']; ?>" 
                                            class="btn btn-outline-primary" 
                                            title="Düzenle">
-                                            <i class="fas fa-edit"></i>
+                                            <i class="bi bi-edit"></i>
                                         </a>
                                         <a href="?action=delete&id=<?php echo $service['id']; ?>" 
                                            class="btn btn-outline-danger" 
                                            title="Sil"
                                            onclick="return confirm('Bu hizmeti silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')">
-                                            <i class="fas fa-trash"></i>
+                                            <i class="bi bi-trash"></i>
                                         </a>
                                     </div>
                                 </td>
@@ -231,11 +231,11 @@ require_once '../includes/design_header.php';
             </div>
         <?php else: ?>
             <div class="text-center p-5">
-                <i class="fas fa-concierge-bell text-muted mb-3" style="font-size: 4rem;"></i>
+                <i class="bi bi-concierge-bell text-muted mb-3" style="font-size: 4rem;"></i>
                 <h4 class="text-muted">Henüz hizmet bulunmuyor</h4>
                 <p class="text-muted">İlk hizmetinizi eklemek için aşağıdaki butona tıklayın.</p>
                 <a href="services-add.php" class="btn btn-design-primary">
-                    <i class="fas fa-plus me-2"></i>Yeni Hizmet Ekle
+                    <i class="bi bi-plus me-2"></i>Yeni Hizmet Ekle
                 </a>
             </div>
         <?php endif; ?>

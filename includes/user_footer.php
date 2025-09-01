@@ -147,7 +147,7 @@
             const submitBtn = form.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>İşleniyor...';
+                submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-2"></i>İşleniyor...';
             }
         }
         

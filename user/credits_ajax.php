@@ -108,7 +108,7 @@ try {
         $paginationHtml .= '<small class="text-muted">Sayfa ' . $page . ' / ' . $totalPages . ' (Toplam ' . $filteredTransactions . ' işlem)</small>';
         $paginationHtml .= '</div></div>';
     } elseif ($filteredTransactions > 0) {
-        $paginationHtml = '<div class="pagination-compact mt-3"><div class="text-center"><small class="text-muted"><i class="fas fa-check-circle text-success me-1"></i>Tüm işlemler gösteriliyor (' . $filteredTransactions . ' işlem)</small></div></div>';
+        $paginationHtml = '<div class="pagination-compact mt-3"><div class="text-center"><small class="text-muted"><i class="bi bi-check-circle text-success me-1"></i>Tüm işlemler gösteriliyor (' . $filteredTransactions . ' işlem)</small></div></div>';
     }
     
     // Başarılı response

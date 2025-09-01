@@ -49,7 +49,7 @@ include 'includes/header.php';
             <div class="col-md-6 col-lg-5">
                 <div class="text-center mt-5 mb-4">
                     <h1 class="h3 mb-3 fw-normal">
-                        <i class="fas fa-lock text-primary me-2"></i>
+                        <i class="bi bi-lock text-primary me-2"></i>
                         Şifre Sıfırlama
                     </h1>
                     <p class="text-muted">Yeni şifre belirleyin</p>
@@ -59,13 +59,13 @@ include 'includes/header.php';
                     <div class="card-body p-4">
                         <?php if ($error): ?>
                             <div class="alert alert-danger" role="alert">
-                                <i class="fas fa-exclamation-triangle me-2"></i><?php echo $error; ?>
+                                <i class="bi bi-exclamation-triangle me-2"></i><?php echo $error; ?>
                             </div>
                             
                             <?php if (strpos($error, 'Geçersiz') !== false): ?>
                                 <div class="text-center">
                                     <a href="forgot-password.php" class="btn btn-primary">
-                                        <i class="fas fa-key me-1"></i>Yeni Sıfırlama Bağlantısı İste
+                                        <i class="bi bi-key me-1"></i>Yeni Sıfırlama Bağlantısı İste
                                     </a>
                                 </div>
                             <?php endif; ?>
@@ -73,17 +73,17 @@ include 'includes/header.php';
                         
                         <?php if ($success): ?>
                             <div class="alert alert-success" role="alert">
-                                <i class="fas fa-check-circle me-2"></i><?php echo $success; ?>
+                                <i class="bi bi-check-circle me-2"></i><?php echo $success; ?>
                                 <div class="mt-3">
                                     <a href="login.php" class="btn btn-success">
-                                        <i class="fas fa-sign-in-alt me-1"></i>Giriş Yap
+                                        <i class="bi bi-sign-in-alt me-1"></i>Giriş Yap
                                     </a>
                                 </div>
                             </div>
                         <?php elseif (!empty($token) && empty($error)): ?>
                         
                         <div class="text-center mb-4">
-                            <i class="fas fa-key text-primary" style="font-size: 3rem;"></i>
+                            <i class="bi bi-key text-primary" style="font-size: 3rem;"></i>
                             <h5 class="mt-3">Yeni Şifre Belirleyin</h5>
                             <p class="text-muted">Güvenli bir şifre seçin ve tekrar girin.</p>
                         </div>
@@ -93,12 +93,12 @@ include 'includes/header.php';
                                 <label for="password" class="form-label">Yeni Şifre</label>
                                 <div class="input-group">
                                     <span class="input-group-text">
-                                        <i class="fas fa-lock text-muted"></i>
+                                        <i class="bi bi-lock text-muted"></i>
                                     </span>
                                     <input type="password" class="form-control" id="password" name="password" 
                                            minlength="6" required autofocus>
                                     <button type="button" class="btn btn-outline-secondary" id="togglePassword">
-                                        <i class="fas fa-eye"></i>
+                                        <i class="bi bi-eye"></i>
                                     </button>
                                 </div>
                                 <div class="form-text">En az 6 karakter olmalıdır.</div>
@@ -108,7 +108,7 @@ include 'includes/header.php';
                                 <label for="confirm_password" class="form-label">Şifre Tekrar</label>
                                 <div class="input-group">
                                     <span class="input-group-text">
-                                        <i class="fas fa-lock text-muted"></i>
+                                        <i class="bi bi-lock text-muted"></i>
                                     </span>
                                     <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
                                            minlength="6" required>
@@ -128,7 +128,7 @@ include 'includes/header.php';
                             
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-save me-2"></i>Şifreyi Güncelle
+                                    <i class="bi bi-save me-2"></i>Şifreyi Güncelle
                                 </button>
                             </div>
                         </form>
@@ -140,14 +140,14 @@ include 'includes/header.php';
                 <div class="text-center mt-4">
                     <p class="text-muted">
                         <a href="login.php" class="text-decoration-none">
-                            <i class="fas fa-sign-in-alt me-1"></i>Giriş Sayfasına Dön
+                            <i class="bi bi-sign-in-alt me-1"></i>Giriş Sayfasına Dön
                         </a>
                     </p>
                     
                     <p class="text-muted">
                         Hesabınız yok mu? 
                         <a href="register.php" class="text-decoration-none">
-                            <i class="fas fa-user-plus me-1"></i>Kayıt Ol
+                            <i class="bi bi-user-plus me-1"></i>Kayıt Ol
                         </a>
                     </p>
                 </div>

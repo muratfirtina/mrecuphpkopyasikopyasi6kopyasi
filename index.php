@@ -228,22 +228,22 @@ include 'includes/header.php';
 
                                             <div class="d-flex gap-3 mb-5">
                                                 <a href="<?php echo htmlspecialchars($slider['button_link']); ?>" class="btn btn-danger btn-lg px-4">
-                                                    <i class="fas fa-search me-2"></i><?php echo htmlspecialchars($slider['button_text']); ?>
+                                                    <i class="bi bi-search me-2"></i><?php echo htmlspecialchars($slider['button_text']); ?>
                                                 </a>
                                                 <!-- <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
                                                     <a href="user/upload.php" class="btn btn-outline-light btn-lg px-4">
-                                                        <i class="fas fa-upload me-2"></i>Dosya Yükle
+                                                        <i class="bi bi-upload me-2"></i>Dosya Yükle
                                                     </a>
                                                 <?php else: ?>
                                                     <a href="register.php" class="btn btn-outline-light btn-lg px-4">
-                                                        <i class="fas fa-upload me-2"></i>Dosya Yükle
+                                                        <i class="bi bi-upload me-2"></i>Dosya Yükle
                                                     </a>
                                                 <?php endif; ?> -->
                                             </div>
                                         </div>
                                         <!-- <div class="col-lg-4">
                                             <div class="text-center">
-                                                <i class="fas fa-microchip" style="font-size: 10rem; opacity: 0.2;"></i>
+                                                <i class="bi bi-microchip" style="font-size: 10rem; opacity: 0.2;"></i>
                                             </div>
                                         </div> -->
                                     <?php else: ?>
@@ -267,15 +267,15 @@ include 'includes/header.php';
 
                                             <div class="d-flex gap-3 mb-5">
                                                 <a href="<?php echo htmlspecialchars($slider['button_link']); ?>" class="btn btn-danger btn-lg px-4">
-                                                    <i class="fas fa-search me-2"></i><?php echo htmlspecialchars($slider['button_text']); ?>
+                                                    <i class="bi bi-search me-2"></i><?php echo htmlspecialchars($slider['button_text']); ?>
                                                 </a>
                                                 <!-- <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
                                                     <a href="user/upload.php" class="btn btn-outline-light btn-lg px-4">
-                                                        <i class="fas fa-upload me-2"></i>Dosya Yükle
+                                                        <i class="bi bi-upload me-2"></i>Dosya Yükle
                                                     </a>
                                                 <?php else: ?>
                                                     <a href="register.php" class="btn btn-outline-light btn-lg px-4">
-                                                        <i class="fas fa-upload me-2"></i>Dosya Yükle
+                                                        <i class="bi bi-upload me-2"></i>Dosya Yükle
                                                     </a>
                                                 <?php endif; ?> -->
                                             </div>
@@ -284,15 +284,15 @@ include 'includes/header.php';
                                             <div class="text-center">
                                                 <?php
                                                 // Slider'a göre icon belirleme
-                                                $icon = 'fas fa-microchip';
+                                                $icon = 'bi bi-microchip';
                                                 if (strpos(strtolower($slider['title']), 'performans') !== false) {
-                                                    $icon = 'fas fa-tachometer-alt';
+                                                    $icon = 'bi bi-tachometer-alt';
                                                 } elseif (strpos(strtolower($slider['title']), 'güvenlik') !== false) {
-                                                    $icon = 'fas fa-key';
+                                                    $icon = 'bi bi-key';
                                                 } elseif (strpos(strtolower($slider['title']), 'şanzıman') !== false) {
                                                     $icon = 'bi bi-gear-wide-connected';
                                                 } elseif (strpos(strtolower($slider['title']), 'destek') !== false) {
-                                                    $icon = 'fas fa-headset';
+                                                    $icon = 'bi bi-headset';
                                                 }
                                                 ?>
                                                 <i class="<?php echo $icon; ?>" style="font-size: 10rem; opacity: 0.2;"></i>
@@ -374,17 +374,17 @@ include 'includes/header.php';
                 $categoryName = strtolower($category['name']);
 
                 if (strpos($categoryName, 'ecu') !== false || strpos($categoryName, 'motor') !== false) {
-                    $icon = 'fas fa-microchip';
+                    $icon = 'bi bi-microchip';
                 } elseif (strpos($categoryName, 'immobilizer') !== false || strpos($categoryName, 'anahtar') !== false) {
-                    $icon = 'fas fa-key';
+                    $icon = 'bi bi-key';
                 } elseif (strpos($categoryName, 'emülatör') !== false || strpos($categoryName, 'şanzıman') !== false) {
-                    $icon = 'fas fa-car-rear';
+                    $icon = 'bi bi-car-rear';
                 } elseif (strpos($categoryName, 'dpf') !== false || strpos($categoryName, 'egr') !== false) {
-                    $icon = 'fas fa-filter';
+                    $icon = 'bi bi-filter';
                 } elseif (strpos($categoryName, 'adblue') !== false) {
-                    $icon = 'fas fa-tint';
+                    $icon = 'bi bi-tint';
                 } elseif (strpos($categoryName, 'chip') !== false || strpos($categoryName, 'tuning') !== false) {
-                    $icon = 'fas fa-tachometer-alt';
+                    $icon = 'bi bi-tachometer-alt';
                 }
             ?>
 
@@ -410,7 +410,7 @@ include 'includes/header.php';
                                             : 'Bu kategorideki tüm ürünleri keşfedin ve ihtiyacınıza uygun çözümü bulun.'; ?>
                                     </p>
                                     <a href="<?php echo BASE_URL; ?>/kategori/<?php echo urlencode($category['slug']); ?>" class="flip-back-link" onclick="event.stopPropagation();">
-                                        İnceleyin <i class="fas fa-arrow-right"></i>
+                                        İnceleyin <i class="bi bi-arrow-right"></i>
                                     </a>
                                 </div>
                             </div>
@@ -434,7 +434,7 @@ include 'includes/header.php';
                             <!-- Front Side (Kırmızı) -->
                             <div class="flip-card-front">
                                 <div class="jet-box-icon">
-                                    <i class="fas fa-upload"></i>
+                                    <i class="bi bi-upload"></i>
                                 </div>
                                 <h4 class="jet-box-title">DOSYA YÜKLEME</h4>
                                 <h5 class="jet-box-subtitle"></h5>
@@ -448,11 +448,11 @@ include 'includes/header.php';
                                 </p>
                                 <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
                                     <a href="user/upload.php" class="flip-back-link" onclick="event.stopPropagation();">
-                                        Yükleyin <i class="fas fa-cloud-upload-alt"></i>
+                                        Yükleyin <i class="bi bi-cloud-upload-alt"></i>
                                     </a>
                                 <?php else: ?>
                                     <a href="register.php" class="flip-back-link" onclick="event.stopPropagation();">
-                                        REGISTER & UPLOAD <i class="fas fa-user-plus"></i>
+                                        REGISTER & UPLOAD <i class="bi bi-user-plus"></i>
                                     </a>
                                 <?php endif; ?>
                             </div>
@@ -479,10 +479,10 @@ include 'includes/header.php';
             <div class="featured-products-container">
                 <!-- Scroll Buttons -->
                 <button class="scroll-btn scroll-btn-left" id="scrollLeft" style="display: none;">
-                    <i class="fas fa-chevron-left"></i>
+                    <i class="bi bi-chevron-left"></i>
                 </button>
                 <button class="scroll-btn scroll-btn-right" id="scrollRight">
-                    <i class="fas fa-chevron-right"></i>
+                    <i class="bi bi-chevron-right"></i>
                 </button>
 
                 <div class="featured-products-scroll" id="featuredProductsScroll">
@@ -541,7 +541,7 @@ include 'includes/header.php';
                                                 <a href="<?php echo BASE_URL; ?>/urun/<?php echo $product['slug']; ?>"
                                                     class="btn btn-light btn-sm product-view-btn"
                                                     onclick="event.stopPropagation();">
-                                                    <i class="fas fa-eye me-1"></i>Detaylar
+                                                    <i class="bi bi-eye me-1"></i>Detaylar
                                                 </a>
                                             </div>
                                         </div>
@@ -573,7 +573,7 @@ include 'includes/header.php';
 
                                         <!-- Featured Badge -->
                                         <div class="featured-badge">
-                                            <i class="fas fa-star"></i>
+                                            <i class="bi bi-star"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -643,7 +643,7 @@ include 'includes/header.php';
                             </div>
                             <div class="col-lg-2 col-md-4 col-sm-6">
                                 <button type="submit" class="btn btn-danger btn-lg w-100 tuning-calculate-btn" disabled>
-                                    <i class="fas fa-calculator me-2"></i>Hesapla
+                                    <i class="bi bi-calculator me-2"></i>Hesapla
                                 </button>
                             </div>
                         </div>
@@ -676,12 +676,12 @@ include 'includes/header.php';
             <div class="row g-4">
                 <?php
                 $serviceIcons = [
-                    'fas fa-microchip',
+                    'bi bi-microchip',
                     'bi bi-gear-wide-connected',
-                    'fas fa-key',
-                    'fas fa-tachometer-alt',
-                    'fas fa-tools',
-                    'fas fa-shield-alt'
+                    'bi bi-key',
+                    'bi bi-tachometer-alt',
+                    'bi bi-tools',
+                    'bi bi-shield-alt'
                 ];
 
                 foreach ($services as $index => $service):
@@ -803,7 +803,7 @@ include 'includes/header.php';
                                     <?php if (!empty($service['price_from'])): ?>
                                         <div class="service-price mb-2">
                                             <small style="color: #ffc107; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
-                                                <i class="fas fa-tag me-1"></i>
+                                                <i class="bi bi-tag me-1"></i>
                                                 <?php echo number_format($service['price_from'], 0); ?> TL'den başlar
                                             </small>
                                         </div>
@@ -814,7 +814,7 @@ include 'includes/header.php';
                                         style="font-size: 0.85rem; font-weight: 500; border-radius: 20px; transition: all 0.3s ease;"
                                         onmouseover="this.style.background='#dc3545'; this.style.color='white'; this.style.transform='translateY(-2px)';"
                                         onmouseout="this.style.background='white'; this.style.color='#212529'; this.style.transform='translateY(0)';">
-                                        <i class="fas fa-info-circle me-1"></i>Detaylar
+                                        <i class="bi bi-info-circle me-1"></i>Detaylar
                                     </a>
                                 </div>
                             </div>
@@ -828,7 +828,7 @@ include 'includes/header.php';
                 <div class="row mt-5">
                     <div class="col-12 text-center">
                         <a href="<?php echo BASE_URL; ?>/services.php" class="btn btn-primary btn-lg px-5 custom-btn">
-                            <i class="fas fa-list me-2"></i>Tüm Hizmetlerimiz
+                            <i class="bi bi-list me-2"></i>Tüm Hizmetlerimiz
                         </a>
                     </div>
                 </div>
@@ -907,7 +907,7 @@ include 'includes/header.php';
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon mb-3">
-                                <i class="fas fa-shield-alt text-primary" style="font-size: 3rem;"></i>
+                                <i class="bi bi-shield-alt text-primary" style="font-size: 3rem;"></i>
                             </div>
                             <h5 class="card-title">Güvenlik</h5>
                             <p class="card-text">
@@ -922,7 +922,7 @@ include 'includes/header.php';
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon mb-3">
-                                <i class="fas fa-clock text-primary" style="font-size: 3rem;"></i>
+                                <i class="bi bi-clock text-primary" style="font-size: 3rem;"></i>
                             </div>
                             <h5 class="card-title">Hızlı İşlem</h5>
                             <p class="card-text">
@@ -937,7 +937,7 @@ include 'includes/header.php';
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon mb-3">
-                                <i class="fas fa-users text-primary" style="font-size: 3rem;"></i>
+                                <i class="bi bi-users text-primary" style="font-size: 3rem;"></i>
                             </div>
                             <h5 class="card-title">Uzman Ekip</h5>
                             <p class="card-text">
@@ -995,35 +995,35 @@ include 'includes/header.php';
                     için sürekli kendimizi geliştiriyor ve teknolojik yenilikleri takip ediyoruz.
                 </p>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><i class="fas fa-check text-primary me-2"></i>10+ yıl deneyim</li>
-                    <li class="mb-2"><i class="fas fa-check text-primary me-2"></i>Profesyonel ekip</li>
-                    <li class="mb-2"><i class="fas fa-check text-primary me-2"></i>7/24 teknik destek</li>
-                    <li class="mb-2"><i class="fas fa-check text-primary me-2"></i>Güncel teknoloji</li>
+                    <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>10+ yıl deneyim</li>
+                    <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Profesyonel ekip</li>
+                    <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>7/24 teknik destek</li>
+                    <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Güncel teknoloji</li>
                 </ul>
             </div>
             <div class="col-lg-6">
                 <div class="row g-3">
                     <div class="col-6">
                         <div class="feature-box text-center p-4 bg-primary bg-opacity-10 rounded shadow">
-                            <i class="fas fa-microchip text-primary" style="font-size: 4rem;"></i>
+                            <i class="bi bi-microchip text-primary" style="font-size: 4rem;"></i>
                             <h6 class="mt-2 mb-0">ECU</h6>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="feature-box text-center p-4 bg-success bg-opacity-10 rounded shadow">
-                            <i class="fas fa-memory text-success" style="font-size: 4rem;"></i>
+                            <i class="bi bi-memory text-success" style="font-size: 4rem;"></i>
                             <h6 class="mt-2 mb-0">CHIP</h6>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="feature-box text-center p-4 bg-danger bg-opacity-10 rounded shadow">
-                            <i class="fas fa-tools text-danger" style="font-size: 4rem;"></i>
+                            <i class="bi bi-tools text-danger" style="font-size: 4rem;"></i>
                             <h6 class="mt-2 mb-0">TOOL</h6>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="feature-box text-center p-4 bg-warning bg-opacity-10 rounded shadow">
-                            <i class="fas fa-car text-warning" style="font-size: 4rem;"></i>
+                            <i class="bi bi-car text-warning" style="font-size: 4rem;"></i>
                             <h6 class="mt-2 mb-0">CAR</h6>
                         </div>
                     </div>
@@ -1042,29 +1042,29 @@ include 'includes/header.php';
         </p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
             <a href="tel:+905551234567" class="btn btn-light btn-lg">
-                <i class="fas fa-phone me-2"></i>Hemen Ara
+                <i class="bi bi-phone me-2"></i>Hemen Ara
             </a>
             <a href="mailto:<?php echo SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
-                <i class="fas fa-envelope me-2"></i>E-posta Gönder
+                <i class="bi bi-envelope me-2"></i>E-posta Gönder
             </a>
             <a href="register.php" class="btn btn-warning btn-lg">
-                <i class="fas fa-upload me-2"></i>Dosya Yükle
+                <i class="bi bi-upload me-2"></i>Dosya Yükle
             </a>
         </div>
 
         <div class="row mt-5 text-center">
             <div class="col-md-4">
-                <i class="fas fa-shield-alt fa-2x mb-3"></i>
+                <i class="bi bi-shield-alt fa-2x mb-3"></i>
                 <h5>Güvenli İşlem</h5>
                 <p>Aracınızın garantisi bozulmaz</p>
             </div>
             <div class="col-md-4">
-                <i class="fas fa-clock fa-2x mb-3"></i>
+                <i class="bi bi-clock fa-2x mb-3"></i>
                 <h5>Hızlı Teslimat</h5>
                 <p>24 saat içinde dosyanız hazır</p>
             </div>
             <div class="col-md-4">
-                <i class="fas fa-undo fa-2x mb-3"></i>
+                <i class="bi bi-undo fa-2x mb-3"></i>
                 <h5>Geri Dönüş Garantisi</h5>
                 <p>İstediğiniz zaman eski haline döndürülebilir</p>
             </div>

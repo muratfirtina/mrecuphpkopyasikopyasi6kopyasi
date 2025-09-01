@@ -21,7 +21,7 @@ echo "<!DOCTYPE html>
         <div class='col-lg-8'>
             <div class='card shadow'>
                 <div class='card-header bg-info text-white'>
-                    <h3 class='mb-0'><i class='fas fa-image me-2'></i>Icon Picture Column Update</h3>
+                    <h3 class='mb-0'><i class='bi bi-image me-2'></i>Icon Picture Column Update</h3>
                 </div>
                 <div class='card-body'>
 ";
@@ -33,7 +33,7 @@ try {
     
     if ($columnExists) {
         echo "<div class='alert alert-info'>
-            <i class='fas fa-info-circle me-2'></i>icon_picture kolonu zaten mevcut.
+            <i class='bi bi-info-circle me-2'></i>icon_picture kolonu zaten mevcut.
         </div>";
     } else {
         // Add the column
@@ -41,7 +41,7 @@ try {
         $pdo->exec($sql);
         
         echo "<div class='alert alert-success'>
-            <i class='fas fa-check-circle me-2'></i>icon_picture kolonu başarıyla eklendi.
+            <i class='bi bi-check-circle me-2'></i>icon_picture kolonu başarıyla eklendi.
         </div>";
     }
     
@@ -79,16 +79,16 @@ try {
     
     echo "<div class='d-grid gap-2 d-md-flex justify-content-md-center mt-4'>
         <a href='services.php' class='btn btn-primary'>
-            <i class='fas fa-cog me-2'></i>Hizmet Yönetimine Git
+            <i class='bi bi-cog me-2'></i>Hizmet Yönetimine Git
         </a>
         <a href='../index.php' class='btn btn-success'>
-            <i class='fas fa-home me-2'></i>Ana Sayfaya Git
+            <i class='bi bi-home me-2'></i>Ana Sayfaya Git
         </a>
     </div>";
     
 } catch (Exception $e) {
     echo "<div class='alert alert-danger'>
-        <i class='fas fa-exclamation-triangle me-2'></i>Hata: " . $e->getMessage() . "
+        <i class='bi bi-exclamation-triangle me-2'></i>Hata: " . $e->getMessage() . "
     </div>";
 }
 

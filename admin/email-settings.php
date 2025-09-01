@@ -102,20 +102,20 @@ include '../includes/admin_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="fas fa-envelope-open-text me-2 text-primary"></i>Email Ayarları
+                        <i class="bi bi-envelope-open-text me-2 text-primary"></i>Email Ayarları
                     </h1>
                     <p class="text-muted mb-0">Email bildirim sistemi yapılandırması</p>
                 </div>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <button type="button" class="btn btn-outline-success" onclick="processEmailQueue()">
-                        <i class="fas fa-sync-alt me-1"></i>Email Kuyruğunu İşle
+                        <i class="bi bi-sync-alt me-1"></i>Email Kuyruğunu İşle
                     </button>
                 </div>
             </div>
 
             <?php if ($error): ?>
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="bi bi-exclamation-triangle me-2"></i>
                     <?php echo $error; ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -123,7 +123,7 @@ include '../includes/admin_header.php';
             
             <?php if ($success): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>
+                    <i class="bi bi-check-circle me-2"></i>
                     <?php echo $success; ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -135,7 +135,7 @@ include '../includes/admin_header.php';
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-cog me-2"></i>SMTP Ayarları
+                                <i class="bi bi-cog me-2"></i>SMTP Ayarları
                             </h5>
                         </div>
                         <div class="card-body">
@@ -172,7 +172,7 @@ include '../includes/admin_header.php';
                                 </div>
                                 
                                 <button type="submit" name="save_email_settings" class="btn btn-primary">
-                                    <i class="fas fa-save me-1"></i>Ayarları Kaydet
+                                    <i class="bi bi-save me-1"></i>Ayarları Kaydet
                                 </button>
                             </form>
                         </div>
@@ -184,7 +184,7 @@ include '../includes/admin_header.php';
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-paper-plane me-2"></i>Email Test
+                                <i class="bi bi-paper-plane me-2"></i>Email Test
                             </h5>
                         </div>
                         <div class="card-body">
@@ -197,7 +197,7 @@ include '../includes/admin_header.php';
                                 </div>
                                 
                                 <button type="submit" name="send_test_email" class="btn btn-success">
-                                    <i class="fas fa-paper-plane me-1"></i>Test Email Gönder
+                                    <i class="bi bi-paper-plane me-1"></i>Test Email Gönder
                                 </button>
                             </form>
                             
@@ -239,7 +239,7 @@ include '../includes/admin_header.php';
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-file-alt me-2"></i>Email Şablonları
+                                <i class="bi bi-file-alt me-2"></i>Email Şablonları
                             </h5>
                         </div>
                         <div class="card-body">
@@ -279,7 +279,7 @@ include '../includes/admin_header.php';
                                             <td>
                                                 <button type="button" class="btn btn-sm btn-outline-primary" 
                                                         onclick="previewTemplate('<?php echo htmlspecialchars($template['id']); ?>')">
-                                                    <i class="fas fa-eye"></i> Önizle
+                                                    <i class="bi bi-eye"></i> Önizle
                                                 </button>
                                             </td>
                                         </tr>

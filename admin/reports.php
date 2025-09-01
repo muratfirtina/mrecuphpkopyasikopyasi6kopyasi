@@ -100,7 +100,7 @@ try {
 
 $pageTitle = 'Raporlar';
 $pageDescription = 'Sistem performansı ve kullanım istatistikleri';
-$pageIcon = 'fas fa-chart-bar';
+$pageIcon = 'bi bi-chart-bar';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -118,7 +118,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-success">+<?php echo (int)$user_stats['monthly_new_users']; ?> bu ay</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-users text-primary fa-lg"></i>
+                    <i class="bi bi-users text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -133,7 +133,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-success">+<?php echo (int)$file_stats['monthly_uploads']; ?> bu ay</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-file text-success fa-lg"></i>
+                    <i class="bi bi-file text-success fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -148,7 +148,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted"><?php echo (int)$credit_stats['monthly_transactions']; ?> işlem/ay</small>
                 </div>
                 <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-coins text-warning fa-lg"></i>
+                    <i class="bi bi-coins text-warning fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -166,7 +166,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted"><?php echo (int)$file_stats['pending_files']; ?> dosya bekliyor</small>
                 </div>
                 <div class="bg-info bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-percentage text-info fa-lg"></i>
+                    <i class="bi bi-percentage text-info fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -180,13 +180,13 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-chart-line me-2"></i>Günlük Dosya Yükleme Aktivitesi (Son 30 Gün)
+                    <i class="bi bi-chart-line me-2"></i>Günlük Dosya Yükleme Aktivitesi (Son 30 Gün)
                 </h5>
             </div>
             <div class="card-body">
                 <?php if (empty($daily_activity)): ?>
                     <div class="text-center py-4">
-                        <i class="fas fa-chart-line text-muted" style="font-size: 3rem;"></i>
+                        <i class="bi bi-chart-line text-muted" style="font-size: 3rem;"></i>
                         <p class="text-muted mt-3">Son 30 günde aktivite yok</p>
                     </div>
                 <?php else: ?>
@@ -203,13 +203,13 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-chart-pie me-2"></i>Dosya Durumları
+                    <i class="bi bi-chart-pie me-2"></i>Dosya Durumları
                 </h5>
             </div>
             <div class="card-body">
                 <?php if ((int)$file_stats['total_files'] == 0): ?>
                     <div class="text-center py-4">
-                        <i class="fas fa-file text-muted" style="font-size: 3rem;"></i>
+                        <i class="bi bi-file text-muted" style="font-size: 3rem;"></i>
                         <p class="text-muted mt-3">Henüz dosya yok</p>
                     </div>
                 <?php else: ?>
@@ -228,13 +228,13 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-car me-2"></i>Popüler Araç Markaları
+                    <i class="bi bi-car me-2"></i>Popüler Araç Markaları
                 </h5>
             </div>
             <div class="card-body">
                 <?php if (empty($popular_brands)): ?>
                     <div class="text-center py-3">
-                        <i class="fas fa-chart-bar text-muted fa-3x"></i>
+                        <i class="bi bi-chart-bar text-muted fa-3x"></i>
                         <p class="text-muted mt-3">Henüz marka verisi yok</p>
                     </div>
                 <?php else: ?>
@@ -275,7 +275,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-info-circle me-2"></i>Sistem Bilgileri
+                    <i class="bi bi-info-circle me-2"></i>Sistem Bilgileri
                 </h5>
             </div>
             <div class="card-body">
@@ -292,13 +292,13 @@ include '../includes/admin_sidebar.php';
                     <h6>Hızlı İşlemler:</h6>
                     <div class="d-flex gap-2 flex-wrap">
                         <a href="settings.php" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-cog me-1"></i>Ayarlar
+                            <i class="bi bi-cog me-1"></i>Ayarlar
                         </a>
                         <a href="logs.php" class="btn btn-sm btn-outline-info">
-                            <i class="fas fa-list me-1"></i>Loglar
+                            <i class="bi bi-list me-1"></i>Loglar
                         </a>
                         <a href="debug-database.php" class="btn btn-sm btn-outline-warning">
-                            <i class="fas fa-database me-1"></i>DB Debug
+                            <i class="bi bi-database me-1"></i>DB Debug
                         </a>
                     </div>
                 </div>

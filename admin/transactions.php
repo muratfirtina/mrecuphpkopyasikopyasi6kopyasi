@@ -110,7 +110,7 @@ try {
 
 $pageTitle = 'İşlem Geçmişi';
 $pageDescription = 'Kredi işlemlerini görüntüleyin ve yönetin';
-$pageIcon = 'fas fa-history';
+$pageIcon = 'bi bi-history';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -128,7 +128,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Yüklenen toplam kredi</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-plus text-success fa-lg"></i>
+                    <i class="bi bi-plus text-success fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -143,7 +143,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Kullanılan/düşürülen kredi</small>
                 </div>
                 <div class="bg-danger bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-minus text-danger fa-lg"></i>
+                    <i class="bi bi-minus text-danger fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -158,7 +158,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Son 90 gün</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-exchange-alt text-primary fa-lg"></i>
+                    <i class="bi bi-exchange-alt text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -173,7 +173,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Günlük aktivite</small>
                 </div>
                 <div class="bg-info bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-clock text-info fa-lg"></i>
+                    <i class="bi bi-clock text-info fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -214,19 +214,19 @@ include '../includes/admin_sidebar.php';
             
             <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-search me-1"></i>Filtrele
+                    <i class="bi bi-search me-1"></i>Filtrele
                 </button>
             </div>
             
             <div class="col-md-2">
                 <a href="transactions.php" class="btn btn-outline-secondary w-100">
-                    <i class="fas fa-undo me-1"></i>Temizle
+                    <i class="bi bi-undo me-1"></i>Temizle
                 </a>
             </div>
             
             <div class="col-md-1">
                 <button type="button" class="btn btn-success w-100" onclick="exportTransactions()">
-                    <i class="fas fa-download"></i>
+                    <i class="bi bi-download"></i>
                 </button>
             </div>
         </form>
@@ -237,14 +237,14 @@ include '../includes/admin_sidebar.php';
 <div class="card admin-card">
     <div class="card-header">
         <h5 class="mb-0">
-            <i class="fas fa-list me-2"></i>Kredi İşlemleri (<?php echo number_format($totalTransactions); ?> adet)
+            <i class="bi bi-list me-2"></i>Kredi İşlemleri (<?php echo number_format($totalTransactions); ?> adet)
         </h5>
     </div>
     
     <div class="card-body p-0">
         <?php if (empty($transactions)): ?>
             <div class="text-center py-5">
-                <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                <i class="bi bi-history fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">
                     <?php if ($search || $filter !== 'all' || $dateFilter): ?>
                         Filtreye uygun işlem bulunamadı
@@ -336,7 +336,7 @@ include '../includes/admin_sidebar.php';
                             <?php if ($page > 1): ?>
                                 <li class="page-item">
                                     <a class="page-link" href="?page=<?php echo $page - 1; ?>&filter=<?php echo urlencode($filter); ?>&date=<?php echo urlencode($dateFilter); ?>&search=<?php echo urlencode($search); ?>">
-                                        <i class="fas fa-chevron-left"></i>
+                                        <i class="bi bi-chevron-left"></i>
                                     </a>
                                 </li>
                             <?php endif; ?>
@@ -356,7 +356,7 @@ include '../includes/admin_sidebar.php';
                             <?php if ($page < $totalPages): ?>
                                 <li class="page-item">
                                     <a class="page-link" href="?page=<?php echo $page + 1; ?>&filter=<?php echo urlencode($filter); ?>&date=<?php echo urlencode($dateFilter); ?>&search=<?php echo urlencode($search); ?>">
-                                        <i class="fas fa-chevron-right"></i>
+                                        <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </li>
                             <?php endif; ?>

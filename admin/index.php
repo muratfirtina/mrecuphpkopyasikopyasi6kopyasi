@@ -74,7 +74,7 @@ $systemStatus = [
 
 $pageTitle = 'Dashboard';
 $pageDescription = 'Sistem genel durumu ve istatistikler';
-$pageIcon = 'fas fa-tachometer-alt';
+$pageIcon = 'bi bi-tachometer-alt';
 
 // Sidebar için istatistikler
 $totalUsers = $userCount;
@@ -85,19 +85,19 @@ $quickActions = [
     [
         'text' => 'Yeni Kullanıcı',
         'url' => 'users.php?action=create',
-        'icon' => 'fas fa-user-plus',
+        'icon' => 'bi bi-user-plus',
         'class' => 'success'
     ],
     [
         'text' => 'Dosyaları Görüntüle',
         'url' => 'uploads.php',
-        'icon' => 'fas fa-folder-open',
+        'icon' => 'bi bi-folder-open',
         'class' => 'primary'
     ],
     [
         'text' => 'Sistem Ayarları',
         'url' => 'settings.php',
-        'icon' => 'fas fa-cog',
+        'icon' => 'bi bi-cog',
         'class' => 'secondary'
     ]
 ];
@@ -117,12 +117,12 @@ include '../includes/admin_sidebar.php';
                     <div class="stat-label">Toplam Kullanıcı</div>
                     <?php if ($todayUsers > 0): ?>
                         <small class="text-success">
-                            <i class="fas fa-arrow-up me-1"></i>+<?php echo $todayUsers; ?> bugün
+                            <i class="bi bi-arrow-up me-1"></i>+<?php echo $todayUsers; ?> bugün
                         </small>
                     <?php endif; ?>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-users text-primary fa-lg"></i>
+                    <i class="bi bi-users text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -136,12 +136,12 @@ include '../includes/admin_sidebar.php';
                     <div class="stat-label">Toplam Dosya</div>
                     <?php if ($todayUploads > 0): ?>
                         <small class="text-success">
-                            <i class="fas fa-arrow-up me-1"></i>+<?php echo $todayUploads; ?> bugün
+                            <i class="bi bi-arrow-up me-1"></i>+<?php echo $todayUploads; ?> bugün
                         </small>
                     <?php endif; ?>
                 </div>
                 <div class="bg-info bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-file text-info fa-lg"></i>
+                    <i class="bi bi-file text-info fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -156,7 +156,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Kullanıcı bakiyeleri</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-coins text-success fa-lg"></i>
+                    <i class="bi bi-coins text-success fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -171,7 +171,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted"><?php echo $activeProducts; ?> aktif</small>
                 </div>
                 <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-box text-warning fa-lg"></i>
+                    <i class="bi bi-box text-warning fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -223,16 +223,16 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="fas fa-clock me-2"></i>Son Yüklenen Dosyalar
+                    <i class="bi bi-clock me-2"></i>Son Yüklenen Dosyalar
                 </h5>
                 <a href="uploads.php" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-eye me-1"></i>Tümünü Gör
+                    <i class="bi bi-eye me-1"></i>Tümünü Gör
                 </a>
             </div>
             <div class="card-body p-0">
                 <?php if (empty($recentUploads)): ?>
                     <div class="text-center py-5">
-                        <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                        <i class="bi bi-folder-open fa-3x text-muted mb-3"></i>
                         <h6 class="text-muted">Henüz dosya yüklenmemiş</h6>
                     </div>
                 <?php else: ?>
@@ -253,7 +253,7 @@ include '../includes/admin_sidebar.php';
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2">
-                                                    <i class="fas fa-user text-primary"></i>
+                                                    <i class="bi bi-user text-primary"></i>
                                                 </div>
                                                 <span class="fw-medium"><?php echo htmlspecialchars($upload['username'] ?? 'Bilinmiyor'); ?></span>
                                             </div>
@@ -292,12 +292,12 @@ include '../includes/admin_sidebar.php';
                                             <div class="btn-group btn-group-sm">
                                                 <a href="file-detail.php?id=<?php echo $upload['id']; ?>" 
                                                    class="btn btn-outline-primary btn-sm" title="Detay">
-                                                    <i class="fas fa-eye"></i>
+                                                    <i class="bi bi-eye"></i>
                                                 </a>
                                                 <?php if ($upload['status'] === 'pending'): ?>
                                                     <a href="uploads.php?action=process&id=<?php echo $upload['id']; ?>" 
                                                        class="btn btn-outline-success btn-sm" title="İşle">
-                                                        <i class="fas fa-play"></i>
+                                                        <i class="bi bi-play"></i>
                                                     </a>
                                                 <?php endif; ?>
                                             </div>
@@ -318,7 +318,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card mb-4">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="fas fa-server me-2"></i>Sistem Durumu
+                    <i class="bi bi-server me-2"></i>Sistem Durumu
                 </h6>
             </div>
             <div class="card-body">
@@ -368,7 +368,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card mb-4">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="fas fa-chart-pie me-2"></i>Hızlı İstatistikler
+                    <i class="bi bi-chart-pie me-2"></i>Hızlı İstatistikler
                 </h6>
             </div>
             <div class="card-body">
@@ -406,29 +406,29 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="fas fa-bolt me-2"></i>Hızlı Eylemler
+                    <i class="bi bi-bolt me-2"></i>Hızlı Eylemler
                 </h6>
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
                     <a href="uploads.php?status=pending" class="btn btn-warning btn-sm">
-                        <i class="fas fa-clock me-2"></i>Bekleyen Dosyalar (<?php echo $fileStats['pending'] ?? 0; ?>)
+                        <i class="bi bi-clock me-2"></i>Bekleyen Dosyalar (<?php echo $fileStats['pending'] ?? 0; ?>)
                     </a>
                     
                     <a href="users.php?filter=new" class="btn btn-info btn-sm">
-                        <i class="fas fa-user-plus me-2"></i>Yeni Kullanıcılar
+                        <i class="bi bi-user-plus me-2"></i>Yeni Kullanıcılar
                     </a>
                     
                     <a href="reports.php" class="btn btn-success btn-sm">
-                        <i class="fas fa-chart-bar me-2"></i>Günlük Rapor
+                        <i class="bi bi-chart-bar me-2"></i>Günlük Rapor
                     </a>
                     
                     <a href="settings.php" class="btn btn-secondary btn-sm">
-                        <i class="fas fa-cog me-2"></i>Sistem Ayarları
+                        <i class="bi bi-cog me-2"></i>Sistem Ayarları
                     </a>
                     
                     <a href="logs.php" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-clipboard-list me-2"></i>Sistem Logları
+                        <i class="bi bi-clipboard-list me-2"></i>Sistem Logları
                     </a>
                 </div>
             </div>
@@ -442,7 +442,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-chart-line me-2"></i>Son 7 Günlük Aktivite
+                    <i class="bi bi-chart-line me-2"></i>Son 7 Günlük Aktivite
                 </h5>
             </div>
             <div class="card-body">

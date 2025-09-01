@@ -174,7 +174,7 @@ include '../includes/admin_sidebar.php';
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h1 class="h3 mb-0">
-                        <i class="fas fa-reply text-primary me-2"></i>
+                        <i class="bi bi-reply text-primary me-2"></i>
                         Yanıt Dosyaları Yönetimi
                     </h1>
                     <p class="text-muted mb-0">Admin tarafından yüklenen yanıt dosyalarını yönetin</p>
@@ -189,14 +189,14 @@ include '../includes/admin_sidebar.php';
     <!-- Bildirimler -->
     <?php if ($error): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i><?php echo $error; ?>
+            <i class="bi bi-exclamation-circle me-2"></i><?php echo $error; ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
 
     <?php if ($success): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i><?php echo $success; ?>
+            <i class="bi bi-check-circle me-2"></i><?php echo $success; ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
@@ -205,7 +205,7 @@ include '../includes/admin_sidebar.php';
     <div class="card mb-4">
         <div class="card-header bg-light">
             <h6 class="mb-0">
-                <i class="fas fa-filter me-2"></i>Filtreler ve Arama
+                <i class="bi bi-filter me-2"></i>Filtreler ve Arama
             </h6>
         </div>
         <div class="card-body">
@@ -233,10 +233,10 @@ include '../includes/admin_sidebar.php';
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary me-2">
-                        <i class="fas fa-search me-1"></i>Filtrele
+                        <i class="bi bi-search me-1"></i>Filtrele
                     </button>
                     <a href="responses.php" class="btn btn-outline-secondary">
-                        <i class="fas fa-times me-1"></i>Temizle
+                        <i class="bi bi-times me-1"></i>Temizle
                     </a>
                 </div>
                 <!-- Per Page Seçimi -->
@@ -245,7 +245,7 @@ include '../includes/admin_sidebar.php';
                     <div class="col-auto">
                         <div class="d-flex align-items-center gap-2">
                             <label for="per_page" class="form-label mb-0 fw-bold">
-                                <i class="fas fa-list me-1 text-primary"></i>Sayfa başına:
+                                <i class="bi bi-list me-1 text-primary"></i>Sayfa başına:
                             </label>
                             <select class="form-select form-select-sm px-3 py-2" id="per_page" name="per_page" style="width: 120px; border: 2px solid #e9ecef;" onchange="this.form.submit()">
                                 <option value="10" <?php echo $per_page === 10 ? 'selected' : ''; ?>>10 kayıt</option>
@@ -257,7 +257,7 @@ include '../includes/admin_sidebar.php';
                     </div>
                     <div class="col-auto">
                         <span class="badge bg-light text-dark px-3 py-2">
-                            <i class="fas fa-info-circle me-1"></i>
+                            <i class="bi bi-info-circle me-1"></i>
                             Toplam <?php echo number_format ($totalRecords); ?> kayıt
                         </span>
                     </div>
@@ -290,7 +290,7 @@ include '../includes/admin_sidebar.php';
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <i class="fas fa-file-download text-success me-2"></i>
+                                            <i class="bi bi-file-download text-success me-2"></i>
                                             <div>
                                                 <div class="fw-bold"><?php echo htmlspecialchars($response['original_name']); ?></div>
                                                 <small class="text-muted"><?php echo formatFileSize($response['file_size']); ?></small>
@@ -340,18 +340,18 @@ include '../includes/admin_sidebar.php';
                                         <div class="btn-group">
                                             <?php if ($response['is_cancelled']): ?>
                                                 <span class="btn btn-sm btn-secondary disabled">
-                                                    <i class="fas fa-ban me-1"></i>İptal Edilmiş
+                                                    <i class="bi bi-ban me-1"></i>İptal Edilmiş
                                                 </span>
                                             <?php else: ?>
                                                 <button type="button" class="btn btn-sm btn-danger" 
                                                         onclick="showCancelModal('<?php echo $response['id']; ?>', 'response', '<?php echo htmlspecialchars($response['original_name']); ?>')">
-                                                    <i class="fas fa-times me-1"></i>İptal Et
+                                                    <i class="bi bi-times me-1"></i>İptal Et
                                                 </button>
                                             <?php endif; ?>
                                             
                                             <a href="file-detail.php?id=<?php echo $response['upload_id']; ?>&type=response" 
                                                class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye me-1"></i>Detay
+                                                <i class="bi bi-eye me-1"></i>Detay
                                             </a>
                                         </div>
                                     </td>
@@ -384,7 +384,7 @@ include '../includes/admin_sidebar.php';
 
             <?php else: ?>
                 <div class="text-center py-5">
-                    <i class="fas fa-file-download fa-4x text-muted mb-3"></i>
+                    <i class="bi bi-file-download fa-4x text-muted mb-3"></i>
                     <h5 class="text-muted">Yanıt dosyası bulunamadı</h5>
                     <p class="text-muted">Arama kriterlerinizi değiştirerek tekrar deneyin.</p>
                 </div>
@@ -399,7 +399,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-gradient-danger text-white border-0">
                 <h5 class="modal-title d-flex align-items-center" id="adminCancelModalLabel">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="bi bi-exclamation-triangle me-2"></i>
                     Yanıt Dosyası İptal Onayı
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
@@ -412,21 +412,21 @@ include '../includes/admin_sidebar.php';
                     
                     <div class="mb-4">
                         <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 50%;">
-                            <i class="fas fa-times text-white fa-2x"></i>
+                            <i class="bi bi-times text-white fa-2x"></i>
                         </div>
                         <h6 class="mb-2 text-dark text-center">Bu yanıt dosyasını iptal etmek istediğinizden emin misiniz?</h6>
                         <p class="text-muted mb-3 text-center">
                             <strong>Dosya:</strong> <span id="cancelFileName"></span>
                         </p>
                         <div class="alert alert-warning d-flex align-items-center mb-3">
-                            <i class="fas fa-info-circle me-2"></i>
+                            <i class="bi bi-info-circle me-2"></i>
                             <small>Bu işlem dosyayı gizleyecek ve varsa ücret iadesi yapacaktır.</small>
                         </div>
                     </div>
                     
                     <div class="mb-3">
                         <label for="adminNotes" class="form-label">
-                            <i class="fas fa-sticky-note me-1"></i>
+                            <i class="bi bi-sticky-note me-1"></i>
                             İptal Sebebi (Opsiyonel)
                         </label>
                         <textarea class="form-control" id="adminNotes" name="admin_notes" rows="3" 
@@ -436,10 +436,10 @@ include '../includes/admin_sidebar.php';
                 </div>
                 <div class="modal-footer border-0 pt-3">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>İptal
+                        <i class="bi bi-times me-1"></i>İptal
                     </button>
                     <button type="submit" class="btn btn-danger px-4">
-                        <i class="fas fa-check me-1"></i>Evet, İptal Et
+                        <i class="bi bi-check me-1"></i>Evet, İptal Et
                     </button>
                 </div>
             </form>

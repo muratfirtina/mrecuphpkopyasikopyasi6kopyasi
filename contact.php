@@ -352,13 +352,13 @@ textarea.form-control {
                 <p class="lead"><?php echo htmlspecialchars($contact_settings['header_subtitle'] ?? 'Uzman ekibimize ulaşın. Her soruya çözüm üretiyoruz.'); ?></p>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="index.php"><i class="fas fa-home"></i> Ana Sayfa</a></li>
+                        <li class="breadcrumb-item"><a href="index.php"><i class="bi bi-home"></i> Ana Sayfa</a></li>
                         <li class="breadcrumb-item active">İletişim</li>
                     </ol>
                 </nav>
             </div>
             <div class="col-lg-4 d-flex align-items-center justify-content-center">
-                <i class="fas fa-comments fa-7x opacity-20 text-white"></i>
+                <i class="bi bi-comments fa-7x opacity-20 text-white"></i>
             </div>
         </div>
     </div>
@@ -409,7 +409,7 @@ textarea.form-control {
                 <div class="form-container">
                     <div class="form-header">
                         <h3>
-                            <i class="fas fa-paper-plane me-2"></i>
+                            <i class="bi bi-paper-plane me-2"></i>
                             <?php echo htmlspecialchars($form_settings['form_title'] ?? 'Bize Mesaj Gönderin'); ?>
                         </h3>
                         <p><?php echo htmlspecialchars($form_settings['form_subtitle'] ?? 'İhtiyacınız olan her şey için buradayız.'); ?></p>
@@ -417,13 +417,13 @@ textarea.form-control {
                     <div class="form-body">
                         <?php if ($error): ?>
                             <div class="alert alert-danger fade show">
-                                <i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?>
+                                <i class="bi bi-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?>
                             </div>
                         <?php endif; ?>
 
                         <?php if ($success): ?>
                             <div class="alert alert-success fade show">
-                                <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($success); ?>
+                                <i class="bi bi-check-circle"></i> <?php echo htmlspecialchars($success); ?>
                             </div>
                         <?php endif; ?>
 
@@ -494,7 +494,7 @@ textarea.form-control {
                     <p class="text-muted"><?php echo nl2br(htmlspecialchars($office_info['description'])); ?></p>
 
                     <div class="info-item">
-                        <div class="info-icon bg-primary"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="info-icon bg-primary"><i class="bi bi-map-marker-alt"></i></div>
                         <div class="info-content">
                             <h6>Adres</h6>
                             <p><?php echo nl2br(htmlspecialchars($office_info['address'])); ?></p>
@@ -502,7 +502,7 @@ textarea.form-control {
                     </div>
 
                     <div class="info-item">
-                        <div class="info-icon bg-success"><i class="fas fa-clock"></i></div>
+                        <div class="info-icon bg-success"><i class="bi bi-clock"></i></div>
                         <div class="info-content">
                             <h6>Çalışma Saatleri</h6>
                             <p><?php echo nl2br(htmlspecialchars($office_info['working_hours'])); ?></p>
@@ -511,7 +511,7 @@ textarea.form-control {
 
                     <?php if ($office_info['transportation']): ?>
                         <div class="info-item">
-                            <div class="info-icon bg-info"><i class="fas fa-subway"></i></div>
+                            <div class="info-icon bg-info"><i class="bi bi-subway"></i></div>
                             <div class="info-content">
                                 <h6>Ulaşım</h6>
                                 <p><?php echo nl2br(htmlspecialchars($office_info['transportation'])); ?></p>
@@ -522,7 +522,7 @@ textarea.form-control {
                     <?php if ($office_info['google_maps_link']): ?>
                         <a href="<?php echo htmlspecialchars($office_info['google_maps_link']); ?>" target="_blank"
                            class="btn btn-outline-primary mt-3">
-                            <i class="fas fa-map-marker-alt me-2"></i>Yol Tarifi Al
+                            <i class="bi bi-map-marker-alt me-2"></i>Yol Tarifi Al
                         </a>
                     <?php endif; ?>
                 </div>

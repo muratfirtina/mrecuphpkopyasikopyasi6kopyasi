@@ -175,10 +175,10 @@ function showNotification(message, type = 'info', duration = 5000) {
     };
     
     const icons = {
-        'success': 'fas fa-check-circle',
-        'error': 'fas fa-exclamation-triangle',
-        'warning': 'fas fa-exclamation-circle',
-        'info': 'fas fa-info-circle'
+        'success': 'bi bi-check-circle',
+        'error': 'bi bi-exclamation-triangle',
+        'warning': 'bi bi-exclamation-circle',
+        'info': 'bi bi-info-circle'
     };
     
     notification.className = `alert ${typeClasses[type]} alert-dismissible fade show`;
@@ -465,7 +465,7 @@ function toggleDarkMode() {
     // Icon değiştir
     const icon = document.querySelector('.dark-mode-toggle i');
     if (icon) {
-        icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        icon.className = isDark ? 'bi bi-sun' : 'bi bi-moon';
     }
 }
 

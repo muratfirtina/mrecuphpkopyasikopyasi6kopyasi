@@ -177,7 +177,7 @@ if (empty($fileId) || !isValidUUID($fileId)) {
 
 $pageTitle = 'Admin - Görüntü Görüntüle';
 $pageDescription = 'Görüntü dosyasını görüntüle ve yönet';
-$pageIcon = 'fas fa-image';
+$pageIcon = 'bi bi-image';
 
 include '../includes/admin_header.php';
 include '../includes/admin_sidebar.php';
@@ -186,7 +186,7 @@ include '../includes/admin_sidebar.php';
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <div>
         <h1 class="h2 mb-0">
-            <i class="fas fa-image me-2 text-primary"></i>Görüntü Görüntüleme
+            <i class="bi bi-image me-2 text-primary"></i>Görüntü Görüntüleme
         </h1>
         <?php if ($imageData): ?>
             <p class="text-muted mb-0">
@@ -199,18 +199,18 @@ include '../includes/admin_sidebar.php';
     </div>
     <div class="btn-toolbar mb-2 mb-md-0">
         <button type="button" class="btn btn-outline-secondary me-2" onclick="history.back()">
-            <i class="fas fa-arrow-left me-1"></i>Geri Dön
+            <i class="bi bi-arrow-left me-1"></i>Geri Dön
         </button>
         <?php if ($imageData): ?>
             <?php if ($fileType === 'additional'): ?>
                 <a href="../download-additional.php?id=<?php echo urlencode($fileId); ?>" 
                    class="btn btn-outline-primary" target="_blank">
-                    <i class="fas fa-download me-1"></i>İndir
+                    <i class="bi bi-download me-1"></i>İndir
                 </a>
             <?php else: ?>
                 <a href="download-file.php?id=<?php echo urlencode($fileId); ?>&type=<?php echo urlencode($fileType); ?>" 
                    class="btn btn-outline-primary" target="_blank">
-                    <i class="fas fa-download me-1"></i>İndir
+                    <i class="bi bi-download me-1"></i>İndir
                 </a>
             <?php endif; ?>
         <?php endif; ?>
@@ -219,12 +219,12 @@ include '../includes/admin_sidebar.php';
 
 <?php if ($error): ?>
     <div class="alert alert-danger" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
     </div>
     <div class="text-center mt-4">
         <a href="uploads.php" class="btn btn-primary">
-            <i class="fas fa-upload me-1"></i>Dosya Yönetimine Dön
+            <i class="bi bi-upload me-1"></i>Dosya Yönetimine Dön
         </a>
     </div>
 <?php elseif ($imageData): ?>
@@ -235,7 +235,7 @@ include '../includes/admin_sidebar.php';
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-light">
                         <h6 class="mb-0">
-                            <i class="fas fa-user me-2"></i>
+                            <i class="bi bi-user me-2"></i>
                             <?php echo $fileType === 'additional' ? 'Dosya Bilgileri' : 'Kullanıcı Bilgileri'; ?>
                         </h6>
                     </div>
@@ -280,7 +280,7 @@ include '../includes/admin_sidebar.php';
                 <div class="card border-0 shadow-sm mt-3">
                     <div class="card-header bg-light">
                         <h6 class="mb-0">
-                            <i class="fas fa-info-circle me-2"></i>Dosya Türü
+                            <i class="bi bi-info-circle me-2"></i>Dosya Türü
                         </h6>
                     </div>
                     <div class="card-body">
@@ -325,7 +325,7 @@ include '../includes/admin_sidebar.php';
                     <div class="row align-items-center">
                         <div class="col-md-6">
                             <h6 class="mb-1">
-                                <i class="fas fa-file-image me-1"></i>
+                                <i class="bi bi-file-image me-1"></i>
                                 <?php echo htmlspecialchars($imageData['original_name']); ?>
                             </h6>
                             <small class="text-muted">
@@ -336,18 +336,18 @@ include '../includes/admin_sidebar.php';
                         <div class="col-md-6 text-md-end">
                             <div class="btn-group me-2" role="group">
                                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="zoomOut()">
-                                    <i class="fas fa-search-minus"></i>
+                                    <i class="bi bi-search-minus"></i>
                                 </button>
                                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetZoom()">
-                                    <i class="fas fa-expand-arrows-alt"></i>
+                                    <i class="bi bi-expand-arrows-alt"></i>
                                 </button>
                                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="zoomIn()">
-                                    <i class="fas fa-search-plus"></i>
+                                    <i class="bi bi-search-plus"></i>
                                 </button>
                             </div>
                             <div class="btn-group" role="group">
                                 <a href="uploads.php" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-list me-1"></i>Dosya Listesi
+                                    <i class="bi bi-list me-1"></i>Dosya Listesi
                                 </a>
                             </div>
                         </div>

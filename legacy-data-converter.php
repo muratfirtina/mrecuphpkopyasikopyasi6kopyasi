@@ -530,7 +530,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                 <div class="card">
                     <div class="card-header">
                         <h2 class="mb-0">
-                            <i class="fas fa-bug"></i> 
+                            <i class="bi bi-bug"></i> 
                             MR.ECU Legacy Data Converter - Debug Sistemi
                         </h2>
                         <p class="mb-0 mt-2">SQL Server veritabanınızı analiz edin ve dinamik query'ler oluşturun</p>
@@ -538,7 +538,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                     
                     <div class="card-body">
                         <div class="alert alert-warning">
-                            <h5><i class="fas fa-exclamation-triangle"></i> Önemli!</h5>
+                            <h5><i class="bi bi-exclamation-triangle"></i> Önemli!</h5>
                             <p class="mb-0">Bu sistem, SQL Server veritabanınızdaki gerçek tablo ve sütun isimlerini tespit ederek
                             doğru SQL sorguları oluşturacaktır. Veritabanı bağlantı bilgilerinizi girin ve analiz başlatın.</p>
                         </div>
@@ -572,7 +572,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                                 
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-plug"></i> Bağlantıyı Test Et
+                                        <i class="bi bi-plug"></i> Bağlantıyı Test Et
                                     </button>
                                 </div>
                             </form>
@@ -580,11 +580,11 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                             <?php if (isset($debug_results['connection'])): ?>
                                 <?php if ($debug_results['connection']['success']): ?>
                                     <div class="alert alert-success mt-3">
-                                        <i class="fas fa-check-circle"></i> <?= $debug_results['connection']['message'] ?>
+                                        <i class="bi bi-check-circle"></i> <?= $debug_results['connection']['message'] ?>
                                     </div>
                                 <?php else: ?>
                                     <div class="alert alert-danger mt-3">
-                                        <i class="fas fa-times-circle"></i> Bağlantı Hatası: <?= $debug_results['connection']['message'] ?>
+                                        <i class="bi bi-times-circle"></i> Bağlantı Hatası: <?= $debug_results['connection']['message'] ?>
                                     </div>
                                 <?php endif; ?>
                             <?php endif; ?>
@@ -601,7 +601,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                                 <input type="hidden" name="password" value="<?= $_POST['password'] ?? '' ?>">
                                 
                                 <button type="submit" class="btn btn-info">
-                                    <i class="fas fa-database"></i> Veritabanlarını Listele
+                                    <i class="bi bi-database"></i> Veritabanlarını Listele
                                 </button>
                             </form>
                             
@@ -613,7 +613,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                                             <?php foreach ($debug_results['databases']['data'] as $db): ?>
                                                 <div class="col-md-4 mb-2">
                                                     <div class="alert alert-info p-2">
-                                                        <i class="fas fa-database"></i> <?= $db ?>
+                                                        <i class="bi bi-database"></i> <?= $db ?>
                                                     </div>
                                                 </div>
                                             <?php endforeach; ?>
@@ -621,7 +621,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                                     </div>
                                 <?php else: ?>
                                     <div class="alert alert-danger mt-3">
-                                        <i class="fas fa-times-circle"></i> <?= $debug_results['databases']['message'] ?>
+                                        <i class="bi bi-times-circle"></i> <?= $debug_results['databases']['message'] ?>
                                     </div>
                                 <?php endif; ?>
                             <?php endif; ?>
@@ -653,7 +653,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                                 <div class="col-md-4">
                                     <label class="form-label">&nbsp;</label>
                                     <button type="submit" class="btn btn-success d-block w-100">
-                                        <i class="fas fa-search"></i> Veritabanını Analiz Et
+                                        <i class="bi bi-search"></i> Veritabanını Analiz Et
                                     </button>
                                 </div>
                             </form>
@@ -687,7 +687,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                                                                             data-bs-toggle="collapse" 
                                                                             data-bs-target="#sample-<?= $table['TABLE_NAME'] ?>" 
                                                                             aria-expanded="false">
-                                                                        <i class="fas fa-eye"></i> Görüntüle
+                                                                        <i class="bi bi-eye"></i> Görüntüle
                                                                     </button>
                                                                     <div class="collapse mt-2" id="sample-<?= $table['TABLE_NAME'] ?>">
                                                                         <div class="card card-body">
@@ -703,7 +703,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                                                                         data-bs-toggle="collapse" 
                                                                         data-bs-target="#columns-<?= $table['TABLE_NAME'] ?>" 
                                                                         aria-expanded="false">
-                                                                    <i class="fas fa-list"></i> Sütunlar
+                                                                    <i class="bi bi-list"></i> Sütunlar
                                                                 </button>
                                                                 <div class="collapse mt-2" id="columns-<?= $table['TABLE_NAME'] ?>">
                                                                     <div class="card card-body">
@@ -726,7 +726,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                                     </div>
                                 <?php else: ?>
                                     <div class="alert alert-danger mt-3">
-                                        <i class="fas fa-times-circle"></i> <?= $debug_results['analysis']['message'] ?>
+                                        <i class="bi bi-times-circle"></i> <?= $debug_results['analysis']['message'] ?>
                                     </div>
                                 <?php endif; ?>
                             <?php endif; ?>
@@ -745,7 +745,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                                 <input type="hidden" name="password" value="<?= $_POST['password'] ?? '' ?>">
                                 
                                 <button type="submit" class="btn btn-warning">
-                                    <i class="fas fa-code"></i> SQL Sorguları Oluştur
+                                    <i class="bi bi-code"></i> SQL Sorguları Oluştur
                                 </button>
                             </form>
                         </div>
@@ -755,16 +755,16 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                         <?php if (!empty($sql_queries)): ?>
                             <?php if (isset($sql_queries['error'])): ?>
                                 <div class="alert alert-danger">
-                                    <i class="fas fa-times-circle"></i> Hata: <?= $sql_queries['error'] ?>
+                                    <i class="bi bi-times-circle"></i> Hata: <?= $sql_queries['error'] ?>
                                 </div>
                             <?php else: ?>
                                 <div class="card">
                                     <div class="card-header bg-success text-white">
-                                        <h5><i class="fas fa-check-circle"></i> Dinamik SQL Sorguları Oluşturuldu!</h5>
+                                        <h5><i class="bi bi-check-circle"></i> Dinamik SQL Sorguları Oluşturuldu!</h5>
                                     </div>
                                     <div class="card-body">
                                         <div class="alert alert-info">
-                                            <h6><i class="fas fa-info-circle"></i> Kullanım Talimatları:</h6>
+                                            <h6><i class="bi bi-info-circle"></i> Kullanım Talimatları:</h6>
                                             <ol class="mb-0">
                                                 <li>Aşağıdaki SQL sorgularını SQL Server Management Studio'da çalıştırın</li>
                                                 <li>Her sorgunun sonucunu CSV formatında export edin</li>
@@ -797,7 +797,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                                                 <div class="card-body">
                                                     <div class="sql-container">
                                                         <button class="copy-btn" onclick="copyToClipboard('query-<?= $type ?>')">
-                                                            <i class="fas fa-copy"></i> Kopyala
+                                                            <i class="bi bi-copy"></i> Kopyala
                                                         </button>
                                                         <pre id="query-<?= $type ?>"><code><?= htmlspecialchars($query) ?></code></pre>
                                                     </div>
@@ -807,10 +807,10 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                                         
                                         <div class="mt-4">
                                             <a href="legacy-migration-interface.php" class="btn btn-primary me-2">
-                                                <i class="fas fa-upload"></i> Migration Interface'e Git
+                                                <i class="bi bi-upload"></i> Migration Interface'e Git
                                             </a>
                                             <a href="migration-dashboard.php" class="btn btn-success">
-                                                <i class="fas fa-tachometer-alt"></i> Migration Dashboard
+                                                <i class="bi bi-tachometer-alt"></i> Migration Dashboard
                                             </a>
                                         </div>
                                     </div>
@@ -821,7 +821,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                         <!-- Sonraki Adımlar -->
                         <div class="card">
                             <div class="card-header bg-info text-white">
-                                <h5><i class="fas fa-arrow-right"></i> Sonraki Adımlar</h5>
+                                <h5><i class="bi bi-arrow-right"></i> Sonraki Adımlar</h5>
                             </div>
                             <div class="card-body">
                                 <ol>
@@ -849,7 +849,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
             navigator.clipboard.writeText(text).then(function() {
                 const button = element.parentElement.querySelector('.copy-btn');
                 const originalText = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-check"></i> Kopyalandı!';
+                button.innerHTML = '<i class="bi bi-check"></i> Kopyalandı!';
                 button.style.background = '#28a745';
                 
                 setTimeout(function() {

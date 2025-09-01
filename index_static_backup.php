@@ -45,22 +45,22 @@ include 'includes/header.php';
                                     </p>
                                     <div class="d-flex gap-3 mb-5">
                                         <a href="#devices" class="btn btn-danger btn-lg px-4">
-                                            <i class="fas fa-search me-2"></i>Cihazları İncele
+                                            <i class="bi bi-search me-2"></i>Cihazları İncele
                                         </a>
                                         <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
                                             <a href="user/upload.php" class="btn btn-outline-light btn-lg px-4">
-                                                <i class="fas fa-upload me-2"></i>Dosya Yükle
+                                                <i class="bi bi-upload me-2"></i>Dosya Yükle
                                             </a>
                                         <?php else: ?>
                                             <a href="register.php" class="btn btn-outline-light btn-lg px-4">
-                                                <i class="fas fa-upload me-2"></i>Dosya Yükle
+                                                <i class="bi bi-upload me-2"></i>Dosya Yükle
                                             </a>
                                         <?php endif; ?>
                                     </div>
                                 </div>
                                 <div class="col-lg-4">
                                     <div class="text-center">
-                                        <i class="fas fa-microchip" style="font-size: 10rem; opacity: 0.2;"></i>
+                                        <i class="bi bi-microchip" style="font-size: 10rem; opacity: 0.2;"></i>
                                     </div>
                                 </div>
                             </div>
@@ -84,16 +84,16 @@ include 'includes/header.php';
                                     </p>
                                     <div class="d-flex gap-3 mb-5">
                                         <a href="#services" class="btn btn-warning btn-lg px-4">
-                                            <i class="fas fa-tachometer-alt me-2"></i>Performans Artışı
+                                            <i class="bi bi-tachometer-alt me-2"></i>Performans Artışı
                                         </a>
                                         <a href="contact.php" class="btn btn-outline-light btn-lg px-4">
-                                            <i class="fas fa-phone me-2"></i>Bilgi Alın
+                                            <i class="bi bi-phone me-2"></i>Bilgi Alın
                                         </a>
                                     </div>
                                 </div>
                                 <div class="col-lg-4">
                                     <div class="text-center">
-                                        <i class="fas fa-tachometer-alt" style="font-size: 10rem; opacity: 0.2;"></i>
+                                        <i class="bi bi-tachometer-alt" style="font-size: 10rem; opacity: 0.2;"></i>
                                     </div>
                                 </div>
                             </div>
@@ -117,16 +117,16 @@ include 'includes/header.php';
                                     </p>
                                     <div class="d-flex gap-3 mb-5">
                                         <a href="#security" class="btn btn-success btn-lg px-4">
-                                            <i class="fas fa-key me-2"></i>Güvenlik Çözümleri
+                                            <i class="bi bi-key me-2"></i>Güvenlik Çözümleri
                                         </a>
                                         <a href="about.php" class="btn btn-outline-light btn-lg px-4">
-                                            <i class="fas fa-info-circle me-2"></i>Detaylar
+                                            <i class="bi bi-info-circle me-2"></i>Detaylar
                                         </a>
                                     </div>
                                 </div>
                                 <div class="col-lg-4">
                                     <div class="text-center">
-                                        <i class="fas fa-key" style="font-size: 10rem; opacity: 0.2;"></i>
+                                        <i class="bi bi-key" style="font-size: 10rem; opacity: 0.2;"></i>
                                     </div>
                                 </div>
                             </div>
@@ -153,7 +153,7 @@ include 'includes/header.php';
                                             <i class="bi bi-gear-wide-connected me-2"></i>TCU Hizmetleri
                                         </a>
                                         <a href="services.php" class="btn btn-outline-light btn-lg px-4">
-                                            <i class="fas fa-list me-2"></i>Tüm Hizmetler
+                                            <i class="bi bi-list me-2"></i>Tüm Hizmetler
                                         </a>
                                     </div>
                                 </div>
@@ -183,16 +183,16 @@ include 'includes/header.php';
                                     </p>
                                     <div class="d-flex gap-3 mb-5">
                                         <a href="contact.php" class="btn btn-primary btn-lg px-4">
-                                            <i class="fas fa-headset me-2"></i>Hemen İletişim
+                                            <i class="bi bi-headset me-2"></i>Hemen İletişim
                                         </a>
                                         <a href="#contact" class="btn btn-outline-light btn-lg px-4">
-                                            <i class="fas fa-clock me-2"></i>7/24 Destek
+                                            <i class="bi bi-clock me-2"></i>7/24 Destek
                                         </a>
                                     </div>
                                 </div>
                                 <div class="col-lg-4">
                                     <div class="text-center">
-                                        <i class="fas fa-headset" style="font-size: 10rem; opacity: 0.2;"></i>
+                                        <i class="bi bi-headset" style="font-size: 10rem; opacity: 0.2;"></i>
                                     </div>
                                 </div>
                             </div>
@@ -228,7 +228,7 @@ include 'includes/header.php';
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon mb-3">
-                                <i class="fas fa-shield-alt text-primary" style="font-size: 3rem;"></i>
+                                <i class="bi bi-shield-alt text-primary" style="font-size: 3rem;"></i>
                             </div>
                             <h5 class="card-title">Güvenlik</h5>
                             <p class="card-text">
@@ -243,7 +243,7 @@ include 'includes/header.php';
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon mb-3">
-                                <i class="fas fa-clock text-primary" style="font-size: 3rem;"></i>
+                                <i class="bi bi-clock text-primary" style="font-size: 3rem;"></i>
                             </div>
                             <h5 class="card-title">Hızlı İşlem</h5>
                             <p class="card-text">
@@ -258,7 +258,7 @@ include 'includes/header.php';
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon mb-3">
-                                <i class="fas fa-users text-primary" style="font-size: 3rem;"></i>
+                                <i class="bi bi-users text-primary" style="font-size: 3rem;"></i>
                             </div>
                             <h5 class="card-title">Uzman Ekip</h5>
                             <p class="card-text">
@@ -285,7 +285,7 @@ include 'includes/header.php';
             <div class="row g-4">
                 <div class="col-lg-3 col-md-6">
                     <div class="service-card text-center p-4">
-                        <i class="fas fa-microchip text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <i class="bi bi-microchip text-primary mb-3" style="font-size: 2.5rem;"></i>
                         <h5>ECU Yazılımları</h5>
                         <p class="text-muted">Motor kontrol ünitesi yazılım düzenlemeleri</p>
                     </div>
@@ -301,7 +301,7 @@ include 'includes/header.php';
                 
                 <div class="col-lg-3 col-md-6">
                     <div class="service-card text-center p-4">
-                        <i class="fas fa-key text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <i class="bi bi-key text-primary mb-3" style="font-size: 2.5rem;"></i>
                         <h5>Immobilizer</h5>
                         <p class="text-muted">İmmobilizer ve anahtar programlama</p>
                     </div>
@@ -309,7 +309,7 @@ include 'includes/header.php';
                 
                 <div class="col-lg-3 col-md-6">
                     <div class="service-card text-center p-4">
-                        <i class="fas fa-tachometer-alt text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <i class="bi bi-tachometer-alt text-primary mb-3" style="font-size: 2.5rem;"></i>
                         <h5>Chip Tuning</h5>
                         <p class="text-muted">Performans artırma ve optimizasyon</p>
                     </div>
@@ -362,10 +362,10 @@ include 'includes/header.php';
                         için sürekli kendimizi geliştiriyor ve teknolojik yenilikleri takip ediyoruz.
                     </p>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><i class="fas fa-check text-primary me-2"></i>10+ yıl deneyim</li>
-                        <li class="mb-2"><i class="fas fa-check text-primary me-2"></i>Profesyonel ekip</li>
-                        <li class="mb-2"><i class="fas fa-check text-primary me-2"></i>7/24 teknik destek</li>
-                        <li class="mb-2"><i class="fas fa-check text-primary me-2"></i>Güncel teknoloji</li>
+                        <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>10+ yıl deneyim</li>
+                        <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Profesyonel ekip</li>
+                        <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>7/24 teknik destek</li>
+                        <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Güncel teknoloji</li>
                     </ul>
                 </div>
                 <div class="col-lg-6">
@@ -401,21 +401,21 @@ include 'includes/header.php';
             <div class="row g-4">
                 <div class="col-lg-4">
                     <div class="contact-info text-center p-4">
-                        <i class="fas fa-envelope text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <i class="bi bi-envelope text-primary mb-3" style="font-size: 2.5rem;"></i>
                         <h5>Email</h5>
                         <p class="text-muted"><?php echo SITE_EMAIL; ?></p>
                     </div>
                 </div>
                 <div class="col-lg-4">
                     <div class="contact-info text-center p-4">
-                        <i class="fas fa-phone text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <i class="bi bi-phone text-primary mb-3" style="font-size: 2.5rem;"></i>
                         <h5>Telefon</h5>
                         <p class="text-muted">+90 (555) 123 45 67</p>
                     </div>
                 </div>
                 <div class="col-lg-4">
                     <div class="contact-info text-center p-4">
-                        <i class="fas fa-map-marker-alt text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <i class="bi bi-map-marker-alt text-primary mb-3" style="font-size: 2.5rem;"></i>
                         <h5>Adres</h5>
                         <p class="text-muted">İstanbul, Türkiye</p>
                     </div>

@@ -220,20 +220,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
 
 $pageTitle = 'Kullanıcı Detayları - ' . $userDetails['first_name'] . ' ' . $userDetails['last_name'];
 $pageDescription = 'Kullanıcı detay bilgileri ve işlemleri';
-$pageIcon = 'fas fa-user';
+$pageIcon = 'bi bi-user';
 
 // Hızlı eylemler
 $quickActions = [
     [
         'text' => 'Tüm Kullanıcılar',
         'url' => 'users.php',
-        'icon' => 'fas fa-users',
+        'icon' => 'bi bi-users',
         'class' => 'secondary'
     ],
     [
         'text' => 'Kredi Ekle',
         'url' => '#',
-        'icon' => 'fas fa-plus',
+        'icon' => 'bi bi-plus',
         'class' => 'success',
         'onclick' => "document.getElementById('addCreditModal').style.display='block'"
     ]
@@ -247,7 +247,7 @@ include '../includes/admin_sidebar.php';
 <!-- Başarı/Hata Mesajları -->
 <?php if (isset($_GET['success'])): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="bi bi-check-circle me-2"></i>
         <?php echo htmlspecialchars($_GET['success']); ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -255,7 +255,7 @@ include '../includes/admin_sidebar.php';
 
 <?php if ($error): ?>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -263,7 +263,7 @@ include '../includes/admin_sidebar.php';
 
 <?php if ($success): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="bi bi-check-circle me-2"></i>
         <?php echo $success; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -275,13 +275,13 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-user me-2"></i>Kullanıcı Bilgileri
+                    <i class="bi bi-user me-2"></i>Kullanıcı Bilgileri
                 </h5>
             </div>
             <div class="card-body">
                 <div class="text-center mb-4">
                     <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                        <i class="fas fa-user fa-2x text-primary"></i>
+                        <i class="bi bi-user fa-2x text-primary"></i>
                     </div>
                     <h4 class="mt-3 mb-1"><?php echo htmlspecialchars($userDetails['first_name'] . ' ' . $userDetails['last_name']); ?></h4>
                     <span class="badge bg-<?php echo $userDetails['role'] === 'admin' ? 'danger' : 'primary'; ?>">
@@ -357,7 +357,7 @@ include '../includes/admin_sidebar.php';
                 
                 <!-- Durum Güncelleme -->
                 <hr>
-                <h6><i class="fas fa-edit me-2"></i>Durum Güncelle</h6>
+                <h6><i class="bi bi-edit me-2"></i>Durum Güncelle</h6>
                 <form method="POST" class="d-inline">
                     <div class="d-flex gap-2">
                         <select name="status" class="form-select form-select-sm">
@@ -366,7 +366,7 @@ include '../includes/admin_sidebar.php';
                             <option value="banned" <?php echo $userDetails['status'] === 'banned' ? 'selected' : ''; ?>>Yasaklı</option>
                         </select>
                         <button type="submit" name="update_status" class="btn btn-sm btn-primary">
-                            <i class="fas fa-save"></i>
+                            <i class="bi bi-save"></i>
                         </button>
                     </div>
                 </form>
@@ -377,7 +377,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card mt-4">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="fas fa-chart-bar me-2"></i>İstatistikler
+                    <i class="bi bi-chart-bar me-2"></i>İstatistikler
                 </h6>
             </div>
             <div class="card-body">
@@ -409,7 +409,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card mt-4">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="fas fa-chart-pie me-2"></i>Kredi İstatistikleri
+                    <i class="bi bi-chart-pie me-2"></i>Kredi İstatistikleri
                 </h6>
             </div>
             <div class="card-body">
@@ -483,7 +483,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card mt-4">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="fas fa-list me-2"></i>İşlem Türleri
+                    <i class="bi bi-list me-2"></i>İşlem Türleri
                 </h6>
             </div>
             <div class="card-body">
@@ -535,7 +535,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card mt-4">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="fas fa-calendar me-2"></i>Aylık Hareketler (Son 12 Ay)
+                    <i class="bi bi-calendar me-2"></i>Aylık Hareketler (Son 12 Ay)
                 </h6>
             </div>
             <div class="card-body">
@@ -585,16 +585,16 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="fas fa-folder me-2"></i>Son Yüklenen Dosyalar
+                    <i class="bi bi-folder me-2"></i>Son Yüklenen Dosyalar
                 </h5>
                 <a href="uploads.php?user_id=<?php echo $userId; ?>" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-eye me-1"></i>Tümünü Gör
+                    <i class="bi bi-eye me-1"></i>Tümünü Gör
                 </a>
             </div>
             <div class="card-body p-0">
                 <?php if (empty($userUploads)): ?>
                     <div class="text-center py-4">
-                        <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                        <i class="bi bi-folder-open fa-3x text-muted mb-3"></i>
                         <h6 class="text-muted">Henüz dosya yüklenmemiş</h6>
                     </div>
                 <?php else: ?>
@@ -639,17 +639,17 @@ include '../includes/admin_sidebar.php';
                                         <td>
                                             <div class="d-flex gap-1">
                                                 <a href="uploads.php?view=<?php echo $upload['id']; ?>" class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-eye me-1"></i>Görüntüle
+                                                    <i class="bi bi-eye me-1"></i>Görüntüle
                                                 </a>
                                                 <?php if (!isset($upload['is_cancelled']) || !$upload['is_cancelled']): ?>
                                                     <button type="button" class="btn btn-warning btn-sm" 
                                                             onclick="showCancelModal('<?php echo $upload['id']; ?>', 'upload', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')" 
                                                             title="Dosyayı İptal Et">
-                                                        <i class="fas fa-times"></i>
+                                                        <i class="bi bi-times"></i>
                                                     </button>
                                                 <?php else: ?>
                                                     <span class="btn btn-sm btn-secondary disabled">
-                                                        <i class="fas fa-ban"></i>
+                                                        <i class="bi bi-ban"></i>
                                                     </span>
                                                 <?php endif; ?>
                                             </div>
@@ -669,7 +669,7 @@ include '../includes/admin_sidebar.php';
                                     <?php if ($uploadsPage > 1): ?>
                                         <li class="page-item">
                                             <a class="page-link" href="?id=<?php echo $userId; ?>&uploads_page=<?php echo $uploadsPage - 1; ?>&credits_page=<?php echo $creditsPage; ?>">
-                                                <i class="fas fa-chevron-left"></i>
+                                                <i class="bi bi-chevron-left"></i>
                                             </a>
                                         </li>
                                     <?php endif; ?>
@@ -687,7 +687,7 @@ include '../includes/admin_sidebar.php';
                                     <?php if ($uploadsPage < $totalUploadsPages): ?>
                                         <li class="page-item">
                                             <a class="page-link" href="?id=<?php echo $userId; ?>&uploads_page=<?php echo $uploadsPage + 1; ?>&credits_page=<?php echo $creditsPage; ?>">
-                                                <i class="fas fa-chevron-right"></i>
+                                                <i class="bi bi-chevron-right"></i>
                                             </a>
                                         </li>
                                     <?php endif; ?>
@@ -703,16 +703,16 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="fas fa-coins me-2"></i>Son Kredi İşlemleri
+                    <i class="bi bi-coins me-2"></i>Son Kredi İşlemleri
                 </h5>
                 <button type="button" class="btn btn-sm btn-success" onclick="document.getElementById('addCreditModal').style.display='block'">
-                    <i class="fas fa-plus me-1"></i>Kredi Ekle
+                    <i class="bi bi-plus me-1"></i>Kredi Ekle
                 </button>
             </div>
             <div class="card-body p-0">
                 <?php if (empty($creditTransactions)): ?>
                     <div class="text-center py-4">
-                        <i class="fas fa-coins fa-3x text-muted mb-3"></i>
+                        <i class="bi bi-coins fa-3x text-muted mb-3"></i>
                         <h6 class="text-muted">Henüz kredi işlemi yok</h6>
                     </div>
                 <?php else: ?>
@@ -767,7 +767,7 @@ include '../includes/admin_sidebar.php';
                                     <?php if ($creditsPage > 1): ?>
                                         <li class="page-item">
                                             <a class="page-link" href="?id=<?php echo $userId; ?>&uploads_page=<?php echo $uploadsPage; ?>&credits_page=<?php echo $creditsPage - 1; ?>">
-                                                <i class="fas fa-chevron-left"></i>
+                                                <i class="bi bi-chevron-left"></i>
                                             </a>
                                         </li>
                                     <?php endif; ?>
@@ -785,7 +785,7 @@ include '../includes/admin_sidebar.php';
                                     <?php if ($creditsPage < $totalCreditsPages): ?>
                                         <li class="page-item">
                                             <a class="page-link" href="?id=<?php echo $userId; ?>&uploads_page=<?php echo $uploadsPage; ?>&credits_page=<?php echo $creditsPage + 1; ?>">
-                                                <i class="fas fa-chevron-right"></i>
+                                                <i class="bi bi-chevron-right"></i>
                                             </a>
                                         </li>
                                     <?php endif; ?>
@@ -803,7 +803,7 @@ include '../includes/admin_sidebar.php';
 <div id="addCreditModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
     <div style="background-color: #fefefe; margin: 10% auto; padding: 20px; border-radius: 10px; width: 400px;">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5><i class="fas fa-plus me-2"></i>Kredi Ekle</h5>
+            <h5><i class="bi bi-plus me-2"></i>Kredi Ekle</h5>
             <button type="button" onclick="document.getElementById('addCreditModal').style.display='none'" class="btn-close"></button>
         </div>
         
@@ -820,7 +820,7 @@ include '../includes/admin_sidebar.php';
             
             <div class="d-flex gap-2">
                 <button type="submit" name="add_credit" class="btn btn-success">
-                    <i class="fas fa-plus me-1"></i>Kredi Ekle
+                    <i class="bi bi-plus me-1"></i>Kredi Ekle
                 </button>
                 <button type="button" onclick="document.getElementById('addCreditModal').style.display='none'" class="btn btn-secondary">
                     İptal
@@ -841,7 +841,7 @@ include '../includes/admin_footer.php';
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-gradient-danger text-white border-0">
                 <h5 class="modal-title d-flex align-items-center" id="adminCancelModalLabel">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="bi bi-exclamation-triangle me-2"></i>
                     Dosya İptal Onayı
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
@@ -854,21 +854,21 @@ include '../includes/admin_footer.php';
                     
                     <div class="mb-4">
                         <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 50%;">
-                            <i class="fas fa-times text-white fa-2x"></i>
+                            <i class="bi bi-times text-white fa-2x"></i>
                         </div>
                         <h6 class="mb-2 text-dark text-center">Bu dosyayı iptal etmek istediğinizden emin misiniz?</h6>
                         <p class="text-muted mb-3 text-center">
                             <strong>Dosya:</strong> <span id="cancelFileName"></span>
                         </p>
                         <div class="alert alert-warning d-flex align-items-center mb-3">
-                            <i class="fas fa-info-circle me-2"></i>
+                            <i class="bi bi-info-circle me-2"></i>
                             <small>Bu işlem dosyayı gizleyecek ve varsa ücret iadesi yapacaktır.</small>
                         </div>
                     </div>
                     
                     <div class="mb-3">
                         <label for="adminCancelNotes" class="form-label">
-                            <i class="fas fa-sticky-note me-1"></i>
+                            <i class="bi bi-sticky-note me-1"></i>
                             İptal Sebebi (Opsiyonel)
                         </label>
                         <textarea class="form-control" id="adminCancelNotes" name="admin_notes" rows="3" 
@@ -878,10 +878,10 @@ include '../includes/admin_footer.php';
                 </div>
                 <div class="modal-footer border-0 pt-3">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>İptal
+                        <i class="bi bi-times me-1"></i>İptal
                     </button>
                     <button type="submit" class="btn btn-danger px-4">
-                        <i class="fas fa-check me-1"></i>Evet, İptal Et
+                        <i class="bi bi-check me-1"></i>Evet, İptal Et
                     </button>
                 </div>
             </form>

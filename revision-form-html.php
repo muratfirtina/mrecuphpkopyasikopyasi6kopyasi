@@ -29,7 +29,7 @@ try {
         </div>
         <div class="card-body">
             <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
+                <i class="bi bi-info-circle me-2"></i>
                 <strong>Bu dosya için işlemdeki revizyon talepleri bulundu.</strong><br>
                 Aşağıdaki formları kullanarak revizyon dosyalarını yükleyebilirsiniz.
             </div>
@@ -38,7 +38,7 @@ try {
                 <div class="revision-upload-section mb-4 p-3 border rounded bg-light">
                     <div class="revision-info mb-3">
                         <h6 class="text-primary">
-                            <i class="fas fa-user me-1"></i>
+                            <i class="bi bi-user me-1"></i>
                             <?php echo htmlspecialchars($revision['first_name'] . ' ' . $revision['last_name']); ?> 
                             (@<?php echo htmlspecialchars($revision['username']); ?>)
                         </h6>
@@ -59,21 +59,21 @@ try {
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="revision_file_<?php echo $revision['id']; ?>" class="form-label">
-                                    <i class="fas fa-file-upload me-1"></i>
+                                    <i class="bi bi-file-upload me-1"></i>
                                     Revizyon Dosyası <span class="text-danger">*</span>
                                 </label>
                                 <input type="file" class="form-control" 
                                        id="revision_file_<?php echo $revision['id']; ?>" 
                                        name="revision_file" required>
                                 <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
+                                    <i class="bi bi-info-circle me-1"></i>
                                     Revize edilmiş dosyayı seçin (Max: <?php echo ini_get('upload_max_filesize'); ?>)
                                 </div>
                             </div>
                             
                             <div class="col-md-6">
                                 <label for="revision_notes_<?php echo $revision['id']; ?>" class="form-label">
-                                    <i class="fas fa-sticky-note me-1"></i>
+                                    <i class="bi bi-sticky-note me-1"></i>
                                     Admin Notları
                                 </label>
                                 <textarea class="form-control" 
@@ -86,19 +86,19 @@ try {
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <button type="submit" name="upload_revision" class="btn btn-success btn-lg">
-                                        <i class="fas fa-upload me-2"></i>Revizyon Dosyasını Yükle
+                                        <i class="bi bi-upload me-2"></i>Revizyon Dosyasını Yükle
                                     </button>
                                     
                                     <div class="revision-actions">
                                         <button type="button" class="btn btn-outline-danger btn-sm" 
                                                 onclick="showRejectModal('<?php echo $revision['id']; ?>')">
-                                            <i class="fas fa-times me-1"></i>Revizyon Talebini Reddet
+                                            <i class="bi bi-times me-1"></i>Revizyon Talebini Reddet
                                         </button>
                                     </div>
                                 </div>
                                 
                                 <small class="text-muted d-block mt-2">
-                                    <i class="fas fa-lightbulb me-1"></i>
+                                    <i class="bi bi-lightbulb me-1"></i>
                                     <strong>Önemli:</strong> Dosya yüklendikten sonra revizyon talebi otomatik olarak "Tamamlandı" durumuna geçecek ve kullanıcı dosyayı indirebilecek.
                                 </small>
                             </div>
@@ -135,13 +135,13 @@ try {
         <div class="card admin-card mb-4">
             <div class="card-header bg-warning text-dark">
                 <h6 class="mb-0">
-                    <i class="fas fa-clock me-2"></i>
+                    <i class="bi bi-clock me-2"></i>
                     Bekleyen Revizyon Talepleri (<?php echo $pendingRevisions; ?> adet)
                 </h6>
             </div>
             <div class="card-body">
                 <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="bi bi-exclamation-triangle me-2"></i>
                     <strong>Bu dosya için bekleyen revizyon talepleri var.</strong><br>
                     Revizyon taleplerini işleme almak için <a href="revisions.php" class="alert-link">Revizyon Yönetimi</a> sayfasını ziyaret edin.
                 </div>
@@ -149,7 +149,7 @@ try {
                 <div class="d-flex gap-2">
                     <a href="revisions.php?search=<?php echo urlencode($upload['original_name']); ?>" 
                        class="btn btn-warning">
-                        <i class="fas fa-list me-1"></i>Revizyon Taleplerini Görüntüle
+                        <i class="bi bi-list me-1"></i>Revizyon Taleplerini Görüntüle
                     </a>
                 </div>
             </div>
@@ -158,19 +158,19 @@ try {
         <div class="card admin-card mb-4">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="fas fa-history me-2"></i>
+                    <i class="bi bi-history me-2"></i>
                     Revizyon Geçmişi
                 </h6>
             </div>
             <div class="card-body">
                 <p class="text-muted mb-3">
-                    <i class="fas fa-info-circle me-1"></i>
+                    <i class="bi bi-info-circle me-1"></i>
                     Bu dosya için toplam <?php echo $totalRevisions; ?> revizyon talebi bulunuyor.
                 </p>
                 
                 <a href="revisions.php?search=<?php echo urlencode($upload['original_name']); ?>" 
                    class="btn btn-outline-primary">
-                    <i class="fas fa-history me-1"></i>Revizyon Geçmişini Görüntüle
+                    <i class="bi bi-history me-1"></i>Revizyon Geçmişini Görüntüle
                 </a>
             </div>
         </div>

@@ -365,7 +365,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                 <!-- Header -->
                 <div class="feature-box text-center">
                     <h1 class="mb-3">
-                        <i class="fas fa-shield-alt me-3"></i>
+                        <i class="bi bi-shield-alt me-3"></i>
                         GUID Migration Final Check
                     </h1>
                     <p class="lead mb-0">
@@ -413,7 +413,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
 
                 <!-- Migration Summary -->
                 <div class="migration-summary">
-                    <h3><i class="fas fa-rocket me-2"></i>Migration Summary</h3>
+                    <h3><i class="bi bi-rocket me-2"></i>Migration Summary</h3>
                     <div class="row mt-3">
                         <div class="col-md-3 text-center">
                             <h4>✅ Core Functions</h4>
@@ -438,7 +438,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="fas fa-list-check me-2"></i>Detailed Check Results
+                            <i class="bi bi-list-check me-2"></i>Detailed Check Results
                         </h5>
                     </div>
                     <div class="card-body">
@@ -447,7 +447,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div class="flex-grow-1">
                                         <h6 class="mb-2">
-                                            <i class="fas fa-<?php echo $check['passed'] ? 'check-circle text-success' : 'times-circle text-danger'; ?> me-2"></i>
+                                            <i class="bi bi-<?php echo $check['passed'] ? 'check-circle text-success' : 'times-circle text-danger'; ?> me-2"></i>
                                             <?php echo $check['name']; ?>
                                         </h6>
                                         <p class="mb-1"><?php echo $check['message']; ?></p>
@@ -471,27 +471,27 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                     <div class="row">
                         <div class="col-md-2">
                             <a href="config/install-guid.php" class="btn btn-primary btn-lg w-100 mb-2">
-                                <i class="fas fa-redo me-2"></i>Re-install DB
+                                <i class="bi bi-redo me-2"></i>Re-install DB
                             </a>
                         </div>
                         <div class="col-md-3">
                             <a href="final-guid-migration-complete.php" class="btn btn-warning btn-lg w-100 mb-2">
-                                <i class="fas fa-star me-2"></i>Complete Check v2.0
+                                <i class="bi bi-star me-2"></i>Complete Check v2.0
                             </a>
                         </div>
                         <div class="col-md-2">
                             <a href="test-guid-system.php" class="btn btn-info btn-lg w-100 mb-2">
-                                <i class="fas fa-vial me-2"></i>System Tests
+                                <i class="bi bi-vial me-2"></i>System Tests
                             </a>
                         </div>
                         <div class="col-md-3">
                             <a href="admin/" class="btn btn-success btn-lg w-100 mb-2">
-                                <i class="fas fa-cog me-2"></i>Go to Admin Panel
+                                <i class="bi bi-cog me-2"></i>Go to Admin Panel
                             </a>
                         </div>
                         <div class="col-md-2">
                             <a href="login.php" class="btn btn-dark btn-lg w-100 mb-2">
-                                <i class="fas fa-sign-in-alt me-2"></i>Test Login
+                                <i class="bi bi-sign-in-alt me-2"></i>Test Login
                             </a>
                         </div>
                     </div>
@@ -501,13 +501,13 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                 <div class="card">
                     <div class="card-header bg-<?php echo $overallStatus === 'excellent' ? 'success' : ($overallStatus === 'good' ? 'info' : ($overallStatus === 'warning' ? 'warning' : 'danger')); ?> text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-flag-checkered me-2"></i>Migration Status
+                            <i class="bi bi-flag-checkered me-2"></i>Migration Status
                         </h5>
                     </div>
                     <div class="card-body">
                         <?php if ($overallStatus === 'excellent'): ?>
                             <div class="alert alert-success">
-                                <h4><i class="fas fa-trophy me-2"></i>Migration Completed Successfully!</h4>
+                                <h4><i class="bi bi-trophy me-2"></i>Migration Completed Successfully!</h4>
                                 <p class="mb-0">
                                     🎉 <strong>Excellent!</strong> GUID migration is complete and all systems are working perfectly. 
                                     Your application is now using UUID-based IDs for enhanced security and scalability.
@@ -524,7 +524,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                             </div>
                         <?php elseif ($overallStatus === 'good'): ?>
                             <div class="alert alert-info">
-                                <h4><i class="fas fa-thumbs-up me-2"></i>Migration Nearly Complete</h4>
+                                <h4><i class="bi bi-thumbs-up me-2"></i>Migration Nearly Complete</h4>
                                 <p>
                                     <strong>Good progress!</strong> Most of the GUID migration is working correctly. 
                                     Please check the failed tests above and fix any remaining issues.
@@ -532,7 +532,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                             </div>
                         <?php elseif ($overallStatus === 'warning'): ?>
                             <div class="alert alert-warning">
-                                <h4><i class="fas fa-exclamation-triangle me-2"></i>Migration Needs Attention</h4>
+                                <h4><i class="bi bi-exclamation-triangle me-2"></i>Migration Needs Attention</h4>
                                 <p>
                                     <strong>Warning:</strong> Several checks have failed. Please review the failed tests 
                                     and complete the migration process before using the system.
@@ -540,7 +540,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                             </div>
                         <?php else: ?>
                             <div class="alert alert-danger">
-                                <h4><i class="fas fa-times-circle me-2"></i>Migration Incomplete</h4>
+                                <h4><i class="bi bi-times-circle me-2"></i>Migration Incomplete</h4>
                                 <p>
                                     <strong>Critical issues found!</strong> The GUID migration is not complete. 
                                     Please address all failed checks before proceeding.
@@ -550,9 +550,9 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                         
                         <div class="mt-3">
                             <small class="text-muted">
-                                <i class="fas fa-clock me-1"></i>Check completed at: <?php echo date('Y-m-d H:i:s'); ?>
-                                <br><i class="fas fa-database me-1"></i>Database: <?php echo $pdo->query("SELECT DATABASE()")->fetchColumn(); ?>
-                                <br><i class="fas fa-server me-1"></i>Server: <?php echo $_SERVER['SERVER_NAME'] ?? 'localhost'; ?>
+                                <i class="bi bi-clock me-1"></i>Check completed at: <?php echo date('Y-m-d H:i:s'); ?>
+                                <br><i class="bi bi-database me-1"></i>Database: <?php echo $pdo->query("SELECT DATABASE()")->fetchColumn(); ?>
+                                <br><i class="bi bi-server me-1"></i>Server: <?php echo $_SERVER['SERVER_NAME'] ?? 'localhost'; ?>
                             </small>
                         </div>
                     </div>
@@ -719,7 +719,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                 <!-- Header -->
                 <div class="feature-box text-center">
                     <h1 class="mb-3">
-                        <i class="fas fa-shield-alt me-3"></i>
+                        <i class="bi bi-shield-alt me-3"></i>
                         GUID Migration Final Check
                     </h1>
                     <p class="lead mb-0">
@@ -767,7 +767,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
 
                 <!-- Migration Summary -->
                 <div class="migration-summary">
-                    <h3><i class="fas fa-rocket me-2"></i>Migration Summary</h3>
+                    <h3><i class="bi bi-rocket me-2"></i>Migration Summary</h3>
                     <div class="row mt-3">
                         <div class="col-md-3 text-center">
                             <h4>✅ Core Functions</h4>
@@ -792,7 +792,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="fas fa-list-check me-2"></i>Detailed Check Results
+                            <i class="bi bi-list-check me-2"></i>Detailed Check Results
                         </h5>
                     </div>
                     <div class="card-body">
@@ -801,7 +801,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div class="flex-grow-1">
                                         <h6 class="mb-2">
-                                            <i class="fas fa-<?php echo $check['passed'] ? 'check-circle text-success' : 'times-circle text-danger'; ?> me-2"></i>
+                                            <i class="bi bi-<?php echo $check['passed'] ? 'check-circle text-success' : 'times-circle text-danger'; ?> me-2"></i>
                                             <?php echo $check['name']; ?>
                                         </h6>
                                         <p class="mb-1"><?php echo $check['message']; ?></p>
@@ -825,22 +825,22 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                     <div class="row">
                         <div class="col-md-3">
                             <a href="config/install-guid.php" class="btn btn-primary btn-lg w-100 mb-2">
-                                <i class="fas fa-redo me-2"></i>Re-install GUID DB
+                                <i class="bi bi-redo me-2"></i>Re-install GUID DB
                             </a>
                         </div>
                         <div class="col-md-3">
                             <a href="test-guid-system.php" class="btn btn-info btn-lg w-100 mb-2">
-                                <i class="fas fa-vial me-2"></i>Run System Tests
+                                <i class="bi bi-vial me-2"></i>Run System Tests
                             </a>
                         </div>
                         <div class="col-md-3">
                             <a href="admin/" class="btn btn-success btn-lg w-100 mb-2">
-                                <i class="fas fa-cog me-2"></i>Go to Admin Panel
+                                <i class="bi bi-cog me-2"></i>Go to Admin Panel
                             </a>
                         </div>
                         <div class="col-md-3">
                             <a href="login.php" class="btn btn-warning btn-lg w-100 mb-2">
-                                <i class="fas fa-sign-in-alt me-2"></i>Test Login System
+                                <i class="bi bi-sign-in-alt me-2"></i>Test Login System
                             </a>
                         </div>
                     </div>
@@ -850,13 +850,13 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                 <div class="card">
                     <div class="card-header bg-<?php echo $overallStatus === 'excellent' ? 'success' : ($overallStatus === 'good' ? 'info' : ($overallStatus === 'warning' ? 'warning' : 'danger')); ?> text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-flag-checkered me-2"></i>Migration Status
+                            <i class="bi bi-flag-checkered me-2"></i>Migration Status
                         </h5>
                     </div>
                     <div class="card-body">
                         <?php if ($overallStatus === 'excellent'): ?>
                             <div class="alert alert-success">
-                                <h4><i class="fas fa-trophy me-2"></i>Migration Completed Successfully!</h4>
+                                <h4><i class="bi bi-trophy me-2"></i>Migration Completed Successfully!</h4>
                                 <p class="mb-0">
                                     🎉 <strong>Excellent!</strong> GUID migration is complete and all systems are working perfectly. 
                                     Your application is now using UUID-based IDs for enhanced security and scalability.
@@ -873,7 +873,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                             </div>
                         <?php elseif ($overallStatus === 'good'): ?>
                             <div class="alert alert-info">
-                                <h4><i class="fas fa-thumbs-up me-2"></i>Migration Nearly Complete</h4>
+                                <h4><i class="bi bi-thumbs-up me-2"></i>Migration Nearly Complete</h4>
                                 <p>
                                     <strong>Good progress!</strong> Most of the GUID migration is working correctly. 
                                     Please check the failed tests above and fix any remaining issues.
@@ -881,7 +881,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                             </div>
                         <?php elseif ($overallStatus === 'warning'): ?>
                             <div class="alert alert-warning">
-                                <h4><i class="fas fa-exclamation-triangle me-2"></i>Migration Needs Attention</h4>
+                                <h4><i class="bi bi-exclamation-triangle me-2"></i>Migration Needs Attention</h4>
                                 <p>
                                     <strong>Warning:</strong> Several checks have failed. Please review the failed tests 
                                     and complete the migration process before using the system.
@@ -889,7 +889,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                             </div>
                         <?php else: ?>
                             <div class="alert alert-danger">
-                                <h4><i class="fas fa-times-circle me-2"></i>Migration Incomplete</h4>
+                                <h4><i class="bi bi-times-circle me-2"></i>Migration Incomplete</h4>
                                 <p>
                                     <strong>Critical issues found!</strong> The GUID migration is not complete. 
                                     Please address all failed checks before proceeding.
@@ -899,9 +899,9 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                         
                         <div class="mt-3">
                             <small class="text-muted">
-                                <i class="fas fa-clock me-1"></i>Check completed at: <?php echo date('Y-m-d H:i:s'); ?>
-                                <br><i class="fas fa-database me-1"></i>Database: <?php echo $pdo->query("SELECT DATABASE()")->fetchColumn(); ?>
-                                <br><i class="fas fa-server me-1"></i>Server: <?php echo $_SERVER['SERVER_NAME'] ?? 'localhost'; ?>
+                                <i class="bi bi-clock me-1"></i>Check completed at: <?php echo date('Y-m-d H:i:s'); ?>
+                                <br><i class="bi bi-database me-1"></i>Database: <?php echo $pdo->query("SELECT DATABASE()")->fetchColumn(); ?>
+                                <br><i class="bi bi-server me-1"></i>Server: <?php echo $_SERVER['SERVER_NAME'] ?? 'localhost'; ?>
                             </small>
                         </div>
                     </div>

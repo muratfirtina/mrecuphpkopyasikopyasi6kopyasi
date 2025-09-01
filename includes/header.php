@@ -571,7 +571,7 @@ if (!isset($pageTitle)) {
             <div class="ecu-device">
                 <!-- <div class="ecu-chip">
                     <div class="chip-inner">
-                        <i class="fas fa-microchip"></i>
+                        <i class="bi bi-microchip"></i>
                     </div>
                     <div class="chip-pins chip-pins-left">
                         <div class="pin"></div>
@@ -592,16 +592,16 @@ if (!isset($pageTitle)) {
                 <!-- Data Files Animation -->
                 <!-- <div class="data-files">
                     <div class="data-file" style="--delay: 0s">
-                        <i class="fas fa-file-alt"></i>
+                        <i class="bi bi-file-alt"></i>
                     </div>
                     <div class="data-file" style="--delay: 0.5s">
-                        <i class="fas fa-file-code"></i>
+                        <i class="bi bi-file-code"></i>
                     </div>
                     <div class="data-file" style="--delay: 1s">
-                        <i class="fas fa-file-archive"></i>
+                        <i class="bi bi-file-archive"></i>
                     </div>
                     <div class="data-file" style="--delay: 1.5s">
-                        <i class="fas fa-database"></i>
+                        <i class="bi bi-database"></i>
                     </div>
                 </div> -->
 

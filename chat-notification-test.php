@@ -16,7 +16,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h5>
-                            <i class="fas fa-comments me-2"></i>
+                            <i class="bi bi-comments me-2"></i>
                             Chat Bildirim Test 
                             <span class="chat-notification-badge badge bg-danger" style="display: none;">0</span>
                         </h5>
@@ -39,12 +39,12 @@
                         
                         <div class="mt-4">
                             <button id="testChatNotification" class="btn btn-primary">
-                                <i class="fas fa-bell me-2"></i>
+                                <i class="bi bi-bell me-2"></i>
                                 Chat Bildirimi Test Et
                             </button>
                             
                             <button id="checkChatCount" class="btn btn-info ms-2">
-                                <i class="fas fa-refresh me-2"></i>
+                                <i class="bi bi-refresh me-2"></i>
                                 Bildirim Sayısını Kontrol Et
                             </button>
                         </div>
@@ -78,7 +78,7 @@
             const resultDiv = document.getElementById('testResult');
             resultDiv.innerHTML = `
                 <div class="alert alert-${isSuccess ? 'success' : 'danger'}">
-                    <i class="fas fa-${isSuccess ? 'check' : 'times'} me-2"></i>
+                    <i class="bi bi-${isSuccess ? 'check' : 'times'} me-2"></i>
                     ${message}
                 </div>
             `;

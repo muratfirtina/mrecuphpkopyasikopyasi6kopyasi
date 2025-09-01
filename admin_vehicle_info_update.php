@@ -192,12 +192,12 @@ function displayVehicleInfo($upload) {
         <?php if (!empty($upload[\'plate\'])): ?>
             <div class="mt-1">
                 <span class="badge bg-dark text-white">
-                    <i class="fas fa-id-card me-1"></i>
+                    <i class="bi bi-id-card me-1"></i>
                     <?php echo strtoupper(htmlspecialchars($upload[\'plate\'])); ?>
                 </span>
                 <?php if (!empty($upload[\'kilometer\'])): ?>
                     <span class="badge bg-secondary text-white ms-1">
-                        <i class="fas fa-tachometer-alt me-1"></i>
+                        <i class="bi bi-tachometer-alt me-1"></i>
                         <?php echo number_format($upload[\'kilometer\']); ?> km
                     </span>
                 <?php endif; ?>

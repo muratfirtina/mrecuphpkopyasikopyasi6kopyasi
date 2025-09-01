@@ -214,7 +214,7 @@ function renderFileDetailsHTML($fileData) {
     // Araç Bilgileri
     $html .= '<div class="row mb-3">';
     $html .= '<div class="col-md-6">';
-    $html .= '<h5><i class="fas fa-car me-2"></i>Araç Bilgileri</h5>';
+    $html .= '<h5><i class="bi bi-car me-2"></i>Araç Bilgileri</h5>';
     $html .= '<table class="table table-sm table-bordered">';
     $html .= '<tr><td><strong>Marka:</strong></td><td>' . $details['vehicle']['brand'] . '</td></tr>';
     $html .= '<tr><td><strong>Model:</strong></td><td>' . $details['vehicle']['model'] . '</td></tr>';
@@ -227,14 +227,14 @@ function renderFileDetailsHTML($fileData) {
     
     // Ekipman Bilgileri
     $html .= '<div class="col-md-6">';
-    $html .= '<h5><i class="fas fa-microchip me-2"></i>Ekipman Bilgileri</h5>';
+    $html .= '<h5><i class="bi bi-microchip me-2"></i>Ekipman Bilgileri</h5>';
     $html .= '<table class="table table-sm table-bordered">';
     $html .= '<tr><td><strong>ECU Tipi:</strong></td><td>' . $details['equipment']['ecu'] . '</td></tr>';
     $html .= '<tr><td><strong>Kullanılan Cihaz:</strong></td><td>' . $details['equipment']['device'] . '</td></tr>';
     $html .= '</table>';
     
     if (!empty($details['technical']['details_list'])) {
-        $html .= '<h6><i class="fas fa-cog me-2"></i>Teknik Detaylar</h6>';
+        $html .= '<h6><i class="bi bi-cog me-2"></i>Teknik Detaylar</h6>';
         $html .= '<ul class="list-unstyled">';
         foreach ($details['technical']['details_list'] as $detail) {
             $html .= '<li><small>' . $detail . '</small></li>';

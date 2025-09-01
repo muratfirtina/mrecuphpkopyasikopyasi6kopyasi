@@ -23,7 +23,7 @@ if (!isset($_SESSION['user_id']) || !function_exists('isLoggedIn')) {
 // Sayfa ayarları
 $pageTitle = 'Footer Yönetimi';
 $pageDescription = 'Website footer verilerini yönetin';
-$pageIcon = 'fas fa-shoe-prints';
+$pageIcon = 'bi bi-shoe-prints';
 
 $message = '';
 $messageType = '';
@@ -246,7 +246,7 @@ include '../includes/design_header.php';
         <!-- Footer Preview -->
         <div class="design-card mb-4">
             <div class="design-card-header">
-                <h6 class="mb-0"><i class="fas fa-eye me-2"></i>Footer Önizleme</h6>
+                <h6 class="mb-0"><i class="bi bi-eye me-2"></i>Footer Önizleme</h6>
             </div>
         <div class="card-body p-0">
             <div class="footer-preview">
@@ -261,7 +261,7 @@ include '../includes/design_header.php';
                         <?php if (!empty($services)): ?>
                             <?php foreach (array_slice($services, 0, 4) as $service): ?>
                                 <div style="font-size: 0.85rem; margin-bottom: 0.5rem;">
-                                    <i class="fas fa-chevron-right me-1" style="font-size: 0.7rem;"></i>
+                                    <i class="bi bi-chevron-right me-1" style="font-size: 0.7rem;"></i>
                                     <?php echo htmlspecialchars($service['name']); ?>
                                 </div>
                             <?php endforeach; ?>
@@ -270,11 +270,11 @@ include '../includes/design_header.php';
                         <?php endif; ?>
                     </div>
                     <div class="col-lg-2 preview-column">
-                        <h6><i class="fas fa-box me-2"></i>Ürünlerimiz</h6>
+                        <h6><i class="bi bi-box me-2"></i>Ürünlerimiz</h6>
                         <?php if (!empty($categories)): ?>
                             <?php foreach (array_slice($categories, 0, 4) as $category): ?>
                                 <div style="font-size: 0.85rem; margin-bottom: 0.5rem;">
-                                    <i class="fas fa-chevron-right me-1" style="font-size: 0.7rem;"></i>
+                                    <i class="bi bi-chevron-right me-1" style="font-size: 0.7rem;"></i>
                                     <?php echo htmlspecialchars($category['name']); ?>
                                 </div>
                             <?php endforeach; ?>
@@ -283,26 +283,26 @@ include '../includes/design_header.php';
                         <?php endif; ?>
                     </div>
                     <div class="col-lg-2 preview-column">
-                        <h6><i class="fas fa-link me-2"></i>Hızlı Bağlantılar</h6>
+                        <h6><i class="bi bi-link me-2"></i>Hızlı Bağlantılar</h6>
                         <div style="font-size: 0.85rem;">
-                            <div style="margin-bottom: 0.5rem;"><i class="fas fa-chevron-right me-1" style="font-size: 0.7rem;"></i>Ana Sayfa</div>
-                            <div style="margin-bottom: 0.5rem;"><i class="fas fa-chevron-right me-1" style="font-size: 0.7rem;"></i>Hakkımızda</div>
-                            <div style="margin-bottom: 0.5rem;"><i class="fas fa-chevron-right me-1" style="font-size: 0.7rem;"></i>İletişim</div>
+                            <div style="margin-bottom: 0.5rem;"><i class="bi bi-chevron-right me-1" style="font-size: 0.7rem;"></i>Ana Sayfa</div>
+                            <div style="margin-bottom: 0.5rem;"><i class="bi bi-chevron-right me-1" style="font-size: 0.7rem;"></i>Hakkımızda</div>
+                            <div style="margin-bottom: 0.5rem;"><i class="bi bi-chevron-right me-1" style="font-size: 0.7rem;"></i>İletişim</div>
                         </div>
                     </div>
                     <div class="col-lg-3 preview-column">
-                        <h6><i class="fas fa-map-marker-alt me-2"></i>İletişim</h6>
+                        <h6><i class="bi bi-map-marker-alt me-2"></i>İletişim</h6>
                         <div style="font-size: 0.85rem;">
                             <?php if ($officeInfo && $officeInfo['address']): ?>
                                 <div style="margin-bottom: 0.5rem;">
-                                    <i class="fas fa-map-marker-alt me-1 text-primary"></i>
+                                    <i class="bi bi-map-marker-alt me-1 text-primary"></i>
                                     <?php echo htmlspecialchars($officeInfo['address']); ?>
                                 </div>
                             <?php endif; ?>
                             
                             <?php if ($officeInfo && $officeInfo['working_hours']): ?>
                                 <div style="margin-bottom: 0.5rem;">
-                                    <i class="fas fa-clock me-1 text-primary"></i>
+                                    <i class="bi bi-clock me-1 text-primary"></i>
                                     <?php echo htmlspecialchars($officeInfo['working_hours']); ?>
                                 </div>
                             <?php endif; ?>
@@ -330,17 +330,17 @@ include '../includes/design_header.php';
                 </li>
                 <li class="nav-item" role="presentation">
                 <button class="nav-link text-white" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories" type="button" role="tab">
-                <i class="fas fa-box me-2"></i>Kategoriler
+                <i class="bi bi-box me-2"></i>Kategoriler
                 </button>
                 </li>
                 <li class="nav-item" role="presentation">
                 <button class="nav-link text-white" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab">
-                <i class="fas fa-map-marker-alt me-2"></i>İletişim
+                <i class="bi bi-map-marker-alt me-2"></i>İletişim
                 </button>
                 </li>
                 <li class="nav-item" role="presentation">
                 <button class="nav-link text-white" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab">
-                <i class="fas fa-cog me-2"></i>Ayarlar
+                <i class="bi bi-cog me-2"></i>Ayarlar
                 </button>
                 </li>
             </ul>
@@ -354,7 +354,7 @@ include '../includes/design_header.php';
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h6 class="mb-0">Footer'da Gösterilecek Hizmetler</h6>
                         <button class="btn-design-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addServiceModal">
-                            <i class="fas fa-plus me-2"></i>Hizmet Ekle
+                            <i class="bi bi-plus me-2"></i>Hizmet Ekle
                         </button>
                     </div>
                     
@@ -376,17 +376,17 @@ include '../includes/design_header.php';
                                             <div class="custom-dropdown">
                                                 <button type="button" class="btn btn-outline-secondary btn-sm" 
                                                         onclick="toggleCustomDropdown('service-<?php echo $service['id']; ?>')">
-                                                    <i class="fas fa-ellipsis-v"></i>
+                                                    <i class="bi bi-ellipsis-v"></i>
                                                 </button>
                                                 <div id="dropdown-service-<?php echo $service['id']; ?>" class="custom-dropdown-menu">
                                                     <button onclick="editService(<?php echo htmlspecialchars(json_encode($service)); ?>)">
-                                                        <i class="fas fa-edit me-2"></i>Düzenle
+                                                        <i class="bi bi-edit me-2"></i>Düzenle
                                                     </button>
                                                     <form method="POST" style="margin: 0;" onsubmit="return confirm('Bu hizmeti silmek istediğinizden emin misiniz?')">
                                                         <input type="hidden" name="action" value="delete_service">
                                                         <input type="hidden" name="service_id" value="<?php echo $service['id']; ?>">
                                                         <button type="submit" style="color: #dc3545;">
-                                                            <i class="fas fa-trash me-2"></i>Sil
+                                                            <i class="bi bi-trash me-2"></i>Sil
                                                         </button>
                                                     </form>
                                                 </div>
@@ -401,7 +401,7 @@ include '../includes/design_header.php';
                                     <i class="bi bi-gear-wide-connected fa-3x text-muted mb-3"></i>
                                     <p class="text-muted">Henüz hizmet eklenmemiş.</p>
                                     <button class="btn-design-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">
-                                        <i class="fas fa-plus me-2"></i>İlk Hizmeti Ekle
+                                        <i class="bi bi-plus me-2"></i>İlk Hizmeti Ekle
                                     </button>
                                 </div>
                             </div>
@@ -414,7 +414,7 @@ include '../includes/design_header.php';
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h6 class="mb-0">Footer'da Gösterilecek Ürün Kategorileri</h6>
                         <button class="btn-design-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-                            <i class="fas fa-plus me-2"></i>Kategori Ekle
+                            <i class="bi bi-plus me-2"></i>Kategori Ekle
                         </button>
                     </div>
                     
@@ -436,17 +436,17 @@ include '../includes/design_header.php';
                                             <div class="custom-dropdown">
                                                 <button type="button" class="btn btn-outline-secondary btn-sm" 
                                                         onclick="toggleCustomDropdown('category-<?php echo $category['id']; ?>')">
-                                                    <i class="fas fa-ellipsis-v"></i>
+                                                    <i class="bi bi-ellipsis-v"></i>
                                                 </button>
                                                 <div id="dropdown-category-<?php echo $category['id']; ?>" class="custom-dropdown-menu">
                                                     <button onclick="editCategory(<?php echo htmlspecialchars(json_encode($category)); ?>)">
-                                                        <i class="fas fa-edit me-2"></i>Düzenle
+                                                        <i class="bi bi-edit me-2"></i>Düzenle
                                                     </button>
                                                     <form method="POST" style="margin: 0;" onsubmit="return confirm('Bu kategoriyi silmek istediğinizden emin misiniz?')">
                                                         <input type="hidden" name="action" value="delete_category">
                                                         <input type="hidden" name="category_id" value="<?php echo $category['id']; ?>">
                                                         <button type="submit" style="color: #dc3545;">
-                                                            <i class="fas fa-trash me-2"></i>Sil
+                                                            <i class="bi bi-trash me-2"></i>Sil
                                                         </button>
                                                     </form>
                                                 </div>
@@ -458,10 +458,10 @@ include '../includes/design_header.php';
                         <?php else: ?>
                             <div class="col-12">
                                 <div class="text-center py-5">
-                                    <i class="fas fa-box fa-3x text-muted mb-3"></i>
+                                    <i class="bi bi-box fa-3x text-muted mb-3"></i>
                                     <p class="text-muted">Henüz kategori eklenmemiş.</p>
                                     <button class="btn-design-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-                                        <i class="fas fa-plus me-2"></i>İlk Kategoriyi Ekle
+                                        <i class="bi bi-plus me-2"></i>İlk Kategoriyi Ekle
                                     </button>
                                 </div>
                             </div>
@@ -476,7 +476,7 @@ include '../includes/design_header.php';
                         <div class="col-lg-6 mb-4">
                             <div class="design-card">
                                 <div class="design-card-header">
-                                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>İletişim Bilgileri</h6>
+                                    <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>İletişim Bilgileri</h6>
                                 </div>
                                 <div class="card-body">
                                     <form method="POST">
@@ -491,7 +491,7 @@ include '../includes/design_header.php';
                                         </div>
                                         
                                         <button type="submit" class="btn-design-primary">
-                                            <i class="fas fa-save me-2"></i>İletişim Bilgilerini Kaydet
+                                            <i class="bi bi-save me-2"></i>İletişim Bilgilerini Kaydet
                                         </button>
                                     </form>
                                 </div>
@@ -502,7 +502,7 @@ include '../includes/design_header.php';
                         <div class="col-lg-6 mb-4">
                             <div class="design-card">
                                 <div class="design-card-header">
-                                    <h6 class="mb-0"><i class="fas fa-building me-2"></i>Ofis Bilgileri</h6>
+                                    <h6 class="mb-0"><i class="bi bi-building me-2"></i>Ofis Bilgileri</h6>
                                 </div>
                                 <div class="card-body">
                                     <form method="POST">
@@ -523,7 +523,7 @@ include '../includes/design_header.php';
                                         </div>
                                         
                                         <button type="submit" class="btn-design-primary">
-                                            <i class="fas fa-save me-2"></i>Ofis Bilgilerini Kaydet
+                                            <i class="bi bi-save me-2"></i>Ofis Bilgilerini Kaydet
                                         </button>
                                     </form>
                                 </div>
@@ -538,11 +538,11 @@ include '../includes/design_header.php';
                         <div class="col-lg-8">
                             <div class="design-card">
                                 <div class="design-card-header">
-                                    <h6 class="mb-0"><i class="fas fa-palette me-2"></i>Footer Görünüm Ayarları</h6>
+                                    <h6 class="mb-0"><i class="bi bi-palette me-2"></i>Footer Görünüm Ayarları</h6>
                                 </div>
                                 <div class="card-body">
                                     <div class="alert alert-info">
-                                        <i class="fas fa-info-circle me-2"></i>
+                                        <i class="bi bi-info-circle me-2"></i>
                                         <strong>Footer Rengi:</strong> #071e3d (Koyu Mavi) kullanılıyor.
                                     </div>
                                     
@@ -552,7 +552,7 @@ include '../includes/design_header.php';
                                             <span class="input-group-text">assets/images/</span>
                                             <input type="text" class="form-control" value="mreculogomini.png" readonly>
                                             <button class="btn btn-outline-secondary" type="button">
-                                                <i class="fas fa-folder-open"></i>
+                                                <i class="bi bi-folder-open"></i>
                                             </button>
                                         </div>
                                         <div class="form-text">Footer'da kullanılan logo dosyası</div>
@@ -565,7 +565,7 @@ include '../includes/design_header.php';
                                     </div>
                                     
                                     <div class="alert alert-warning">
-                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
                                         <strong>Not:</strong> Footer genel ayarları config/config.php dosyasından yönetilir.
                                     </div>
                                 </div>
@@ -575,7 +575,7 @@ include '../includes/design_header.php';
                         <div class="col-lg-4">
                             <div class="design-card">
                                 <div class="design-card-header">
-                                    <h6 class="mb-0"><i class="fas fa-share-alt me-2"></i>Sosyal Medya</h6>
+                                    <h6 class="mb-0"><i class="bi bi-share-alt me-2"></i>Sosyal Medya</h6>
                                 </div>
                                 <div class="card-body">
                                     <div class="mb-3">
@@ -599,7 +599,7 @@ include '../includes/design_header.php';
                                     </div>
                                     
                                     <div class="alert alert-info">
-                                        <small><i class="fas fa-info-circle me-2"></i>Sosyal medya yönetimi gelecek versiyonda eklenecek.</small>
+                                        <small><i class="bi bi-info-circle me-2"></i>Sosyal medya yönetimi gelecek versiyonda eklenecek.</small>
                                     </div>
                                 </div>
                             </div>
@@ -635,7 +635,7 @@ include '../includes/design_header.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn-design-primary">
-                        <i class="fas fa-plus me-2"></i>Hizmeti Ekle
+                        <i class="bi bi-plus me-2"></i>Hizmeti Ekle
                     </button>
                 </div>
             </form>
@@ -667,7 +667,7 @@ include '../includes/design_header.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn-design-primary">
-                        <i class="fas fa-save me-2"></i>Değişiklikleri Kaydet
+                        <i class="bi bi-save me-2"></i>Değişiklikleri Kaydet
                     </button>
                 </div>
             </form>
@@ -699,7 +699,7 @@ include '../includes/design_header.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn-design-primary">
-                        <i class="fas fa-plus me-2"></i>Kategoriyi Ekle
+                        <i class="bi bi-plus me-2"></i>Kategoriyi Ekle
                     </button>
                 </div>
             </form>
@@ -731,7 +731,7 @@ include '../includes/design_header.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn-design-primary">
-                        <i class="fas fa-save me-2"></i>Değişiklikleri Kaydet
+                        <i class="bi bi-save me-2"></i>Değişiklikleri Kaydet
                     </button>
                 </div>
             </form>

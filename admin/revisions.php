@@ -310,7 +310,7 @@ if (isset($_GET['detail_id'])) {
 
 $pageTitle = 'Revize Yönetimi';
 $pageDescription = 'Kullanıcı revize taleplerini yönetin';
-$pageIcon = 'fas fa-edit';
+$pageIcon = 'bi bi-edit';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -320,7 +320,7 @@ include '../includes/admin_sidebar.php';
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -328,7 +328,7 @@ include '../includes/admin_sidebar.php';
 
 <?php if ($success): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="bi bi-check-circle me-2"></i>
         <?php echo $success; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -345,7 +345,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-success">+<?php echo $stats['today_requests']; ?> bugün</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-edit text-primary fa-lg"></i>
+                    <i class="bi bi-edit text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -360,7 +360,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">İşlem bekliyor</small>
                 </div>
                 <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-clock text-warning fa-lg"></i>
+                    <i class="bi bi-clock text-warning fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -390,7 +390,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-danger"><?php echo safe_number_format($stats['rejected_count']); ?> reddedilen</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-check-circle text-success fa-lg"></i>
+                    <i class="bi bi-check-circle text-success fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -401,14 +401,14 @@ include '../includes/admin_sidebar.php';
 <div class="card mb-4">
         <div class="card-header bg-light">
             <h6 class="mb-0">
-                <i class="fas fa-filter me-2"></i>Filtreler ve Arama
+                <i class="bi bi-filter me-2"></i>Filtreler ve Arama
             </h6>
         </div>
     <div class="card-body">
         <form method="GET" class="row g-3 align-items-end">
             <div class="col-md-3">
                 <label for="search" class="form-label">
-                    <i class="fas fa-search me-1"></i>Arama
+                    <i class="bi bi-search me-1"></i>Arama
                 </label>
                 <input type="text" class="form-control" id="search" name="search" 
                        value="<?php echo htmlspecialchars($search); ?>" 
@@ -441,10 +441,10 @@ include '../includes/admin_sidebar.php';
             <div class="col-md-2">
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search me-1"></i>Filtrele
+                        <i class="bi bi-search me-1"></i>Filtrele
                     </button>
                     <a href="revisions.php" class="btn btn-outline-secondary">
-                        <i class="fas fa-undo me-1"></i>Temizle
+                        <i class="bi bi-undo me-1"></i>Temizle
                     </a>
                 </div>
             </div>
@@ -455,7 +455,7 @@ include '../includes/admin_sidebar.php';
                     <div class="col-auto">
                         <div class="d-flex align-items-center gap-2">
                             <label for="per_page" class="form-label mb-0 fw-bold">
-                                <i class="fas fa-list me-1 text-primary"></i>Sayfa başına:
+                                <i class="bi bi-list me-1 text-primary"></i>Sayfa başına:
                             </label>
                             <select class="form-select form-select-sm px-3 py-2" id="per_page" name="per_page" style="width: 120px; border: 2px solid #e9ecef;" onchange="this.form.submit()">
                                 <option value="10" <?php echo $per_page === 10 ? 'selected' : ''; ?>>10 kayıt</option>
@@ -467,7 +467,7 @@ include '../includes/admin_sidebar.php';
                     </div>
                     <div class="col-auto">
                         <span class="badge bg-light text-dark px-3 py-2">
-                            <i class="fas fa-info-circle me-1"></i>
+                            <i class="bi bi-info-circle me-1"></i>
                             Toplam <?php echo number_format($totalRevisions); ?> kayıt bulundu
                         </span>
                     </div>
@@ -481,14 +481,14 @@ include '../includes/admin_sidebar.php';
 <div class="card admin-card">
     <div class="card-header">
         <h5 class="mb-0">
-            <i class="fas fa-list me-2"></i>Revize Talepleri (<?php echo $totalRevisions; ?> adet)
+            <i class="bi bi-list me-2"></i>Revize Talepleri (<?php echo $totalRevisions; ?> adet)
         </h5>
     </div>
     
     <div class="card-body p-0">
         <?php if (empty($revisions)): ?>
             <div class="text-center py-5">
-                <i class="fas fa-edit fa-3x text-muted mb-3"></i>
+                <i class="bi bi-edit fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">
                     <?php if ($status || $dateFrom || $dateTo): ?>
                         Filtreye uygun revize talebi bulunamadı
@@ -570,7 +570,7 @@ include '../includes/admin_sidebar.php';
                                         
                                         <!-- Revize Talep Edilen Dosya -->
                                         <div class="mb-2">
-                                            <i class="fas fa-<?php echo $targetFileIcon; ?> text-<?php echo $targetFileColor; ?> me-2"></i>
+                                            <i class="bi bi-<?php echo $targetFileIcon; ?> text-<?php echo $targetFileColor; ?> me-2"></i>
                                             <strong class="text-<?php echo $targetFileColor; ?>"><?php echo $targetFileType; ?>:</strong><br>
                                             <span class="fw-semibold"><?php echo htmlspecialchars($targetFileName); ?></span>
                                         </div>
@@ -578,7 +578,7 @@ include '../includes/admin_sidebar.php';
                                         <!-- Ana Proje Dosyası Bilgisi -->
                                         <?php if ($revision['response_id'] || $targetFileType === 'Revizyon Dosyası'): ?>
                                             <div class="text-muted small">
-                                                <i class="fas fa-level-up-alt me-1"></i>
+                                                <i class="bi bi-level-up-alt me-1"></i>
                                                 <strong>Ana Proje:</strong> <?php echo htmlspecialchars($revision['original_name'] ?? 'Bilinmiyor'); ?>
                                             </div>
                                         <?php endif; ?>
@@ -594,13 +594,13 @@ include '../includes/admin_sidebar.php';
                                                 <?php endif; ?>
                                                 <?php if (!empty($revision['series_name'])): ?>
                                                     <br><small class="text-muted">
-                                                        <i class="fas fa-tag me-1"></i>
+                                                        <i class="bi bi-tag me-1"></i>
                                                         Seri: <?php echo htmlspecialchars($revision['series_name']); ?>
                                                     </small>
                                                 <?php endif; ?>
                                                 <?php if (!empty($revision['engine_name'])): ?>
                                                     <br><small class="text-muted">
-                                                        <i class="fas fa-cog me-1"></i>
+                                                        <i class="bi bi-cog me-1"></i>
                                                         Motor: <?php echo htmlspecialchars($revision['engine_name']); ?>
                                                     </small>
                                                 <?php endif; ?>
@@ -610,13 +610,13 @@ include '../includes/admin_sidebar.php';
                                         <?php if (!empty($revision['plate'])): ?>
                                             <div class="mt-1">
                                                 <span class="badge bg-dark text-white">
-                                                    <i class="fas fa-id-card me-1"></i>
+                                                    <i class="bi bi-id-card me-1"></i>
                                                     <?php echo strtoupper(htmlspecialchars($revision['plate'])); ?>
                                                 </span>
                                             </div>
                                         <?php else: ?>
                                             <small class="text-muted mt-1">
-                                                <i class="fas fa-minus-circle me-1"></i>
+                                                <i class="bi bi-minus-circle me-1"></i>
                                                 Plaka belirtilmemiş
                                             </small>
                                         <?php endif; ?>
@@ -659,13 +659,13 @@ include '../includes/admin_sidebar.php';
                                             <!-- Onayla Butonu -->
                                             <button type="button" class="btn btn-success btn-sm w-100 mb-1" 
                                                     onclick="showApproveModal('<?php echo $revision['id']; ?>', '<?php echo htmlspecialchars($revision['first_name'] . ' ' . $revision['last_name'], ENT_QUOTES); ?>')">
-                                                <i class="fas fa-check me-1"></i>Onayla
+                                                <i class="bi bi-check me-1"></i>Onayla
                                             </button>
                                             
                                             <!-- Reddet Butonu -->
                                             <button type="button" class="btn btn-danger btn-sm w-100 mb-1" 
                                                     onclick="showRejectModal('<?php echo $revision['id']; ?>')">
-                                                <i class="fas fa-times me-1"></i>Reddet
+                                                <i class="bi bi-times me-1"></i>Reddet
                                             </button>
                                         <?php else: ?>
                                             <span class="text-muted small">İşlenmiş</span>
@@ -675,18 +675,18 @@ include '../includes/admin_sidebar.php';
                                         <?php if (empty($revision['is_cancelled'])): ?>
                                             <button type="button" class="btn btn-warning btn-sm w-100 mb-1" 
                                                     onclick="showCancelModal('<?php echo $revision['id']; ?>', 'revision_request', 'Revize: <?php echo htmlspecialchars($revision['first_name'] . ' ' . $revision['last_name'], ENT_QUOTES); ?>')">
-                                                <i class="fas fa-ban me-1"></i>İptal Et
+                                                <i class="bi bi-ban me-1"></i>İptal Et
                                             </button>
                                         <?php else: ?>
                                             <span class="btn btn-secondary btn-sm w-100 mb-1 disabled" title="İptal Edilmiş">
-                                                <i class="fas fa-ban me-1"></i>İptal Edilmiş
+                                                <i class="bi bi-ban me-1"></i>İptal Edilmiş
                                             </span>
                                         <?php endif; ?>
                                         
                                         <!-- Dosya Detayı Butonu -->
                                         <a href="revision-detail.php?id=<?php echo $revision['id']; ?>" 
                                            class="btn btn-outline-primary btn-sm w-100">
-                                            <i class="fas fa-info-circle me-1"></i>Detay Gör
+                                            <i class="bi bi-info-circle me-1"></i>Detay Gör
                                         </a>
                                     </div>
                                 </td>
@@ -706,7 +706,7 @@ include '../includes/admin_sidebar.php';
                             <div class="col-auto">
                                 <div class="pagination-info">
                                     <span class="badge bg-primary fs-6 px-3 py-2">
-                                        <i class="fas fa-list-ol me-2"></i>
+                                        <i class="bi bi-list-ol me-2"></i>
                                         <?php 
                                         $offset = ($page - 1) * $per_page;
                                         $start = $offset + 1;
@@ -723,7 +723,7 @@ include '../includes/admin_sidebar.php';
                                 <div class="quick-jump-container">
                                     <div class="input-group input-group-sm">
                                         <span class="input-group-text bg-white border-end-0">
-                                            <i class="fas fa-search text-muted"></i>
+                                            <i class="bi bi-search text-muted"></i>
                                         </span>
                                         <input type="number" class="form-control border-start-0" 
                                                id="quickJump" 
@@ -737,7 +737,7 @@ include '../includes/admin_sidebar.php';
                                         <button type="button" class="btn btn-outline-primary btn-sm" 
                                                 onclick="quickJumpToPage()" 
                                                 title="Sayfaya git">
-                                            <i class="fas fa-arrow-right"></i>
+                                            <i class="bi bi-arrow-right"></i>
                                         </button>
                                     </div>
                                     <small class="text-muted d-block mt-1">/ <?php echo $totalPages; ?> sayfa</small>
@@ -757,7 +757,7 @@ include '../includes/admin_sidebar.php';
                                        href="<?php echo $page > 1 ? buildPaginationUrl(1, $search, $status, $dateFrom, $dateTo, $per_page) : '#'; ?>" 
                                        title="İlk Sayfa" 
                                        <?php echo $page <= 1 ? 'tabindex="-1"' : ''; ?>>
-                                        <i class="fas fa-angle-double-left"></i>
+                                        <i class="bi bi-angle-double-left"></i>
                                         <span class="d-none d-sm-inline ms-1">İlk</span>
                                     </a>
                                 </li>
@@ -768,7 +768,7 @@ include '../includes/admin_sidebar.php';
                                        href="<?php echo $page > 1 ? buildPaginationUrl($page - 1, $search, $status, $dateFrom, $dateTo, $per_page) : '#'; ?>" 
                                        title="Önceki Sayfa"
                                        <?php echo $page <= 1 ? 'tabindex="-1"' : ''; ?>>
-                                        <i class="fas fa-angle-left"></i>
+                                        <i class="bi bi-angle-left"></i>
                                         <span class="d-none d-sm-inline ms-1">Önceki</span>
                                     </a>
                                 </li>
@@ -825,7 +825,7 @@ include '../includes/admin_sidebar.php';
                                        title="Sonraki Sayfa"
                                        <?php echo $page >= $totalPages ? 'tabindex="-1"' : ''; ?>>
                                         <span class="d-none d-sm-inline me-1">Sonraki</span>
-                                        <i class="fas fa-angle-right"></i>
+                                        <i class="bi bi-angle-right"></i>
                                     </a>
                                 </li>
                                 
@@ -836,7 +836,7 @@ include '../includes/admin_sidebar.php';
                                        title="Son Sayfa"
                                        <?php echo $page >= $totalPages ? 'tabindex="-1"' : ''; ?>>
                                         <span class="d-none d-sm-inline me-1">Son</span>
-                                        <i class="fas fa-angle-double-right"></i>
+                                        <i class="bi bi-angle-double-right"></i>
                                     </a>
                                 </li>
                             </ul>
@@ -848,14 +848,14 @@ include '../includes/admin_sidebar.php';
                 <div class="row mt-3 pt-3 border-top">
                     <div class="col-md-6">
                         <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
+                            <i class="bi bi-info-circle me-1"></i>
                             Sayfa <strong><?php echo $page; ?></strong> / <strong><?php echo $totalPages; ?></strong> - 
                             Sayfa başına <strong><?php echo $per_page; ?></strong> kayıt gösteriliyor
                         </small>
                     </div>
                     <div class="col-md-6 text-md-end">
                         <small class="text-muted">
-                            <i class="fas fa-database me-1"></i>
+                            <i class="bi bi-database me-1"></i>
                             Toplam <strong><?php echo number_format($totalRevisions); ?></strong> revize talebi bulundu
                         </small>
                     </div>
@@ -872,7 +872,7 @@ include '../includes/admin_sidebar.php';
             <form id="approveRevisionForm" method="POST">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title" id="approveRevisionModalLabel">
-                        <i class="fas fa-check-circle me-2"></i>Revize Talebini Onayla
+                        <i class="bi bi-check-circle me-2"></i>Revize Talebini Onayla
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -881,12 +881,12 @@ include '../includes/admin_sidebar.php';
                     <input type="hidden" name="approve_revision_direct" value="1">
                     
                     <div class="alert alert-success">
-                        <i class="fas fa-info-circle me-2"></i>
+                        <i class="bi bi-info-circle me-2"></i>
                         <strong id="user-name-display"></strong> kullanıcısının revize talebi işleme alınacak.
                     </div>
                     
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        <i class="bi bi-lightbulb text-warning me-2"></i>
                         <div>
                             <strong>Bilgi:</strong> Revize talebi onaylandıktan sonra dosya detay sayfasında revize edilmiş dosyayı yükleyebilirsiniz.
                         </div>
@@ -894,10 +894,10 @@ include '../includes/admin_sidebar.php';
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>Vazgeç
+                        <i class="bi bi-times me-1"></i>Vazgeç
                     </button>
                     <button type="submit" class="btn btn-success" id="approve-submit-btn">
-                        <i class="fas fa-check me-1"></i>Onayla ve İşleme Al
+                        <i class="bi bi-check me-1"></i>Onayla ve İşleme Al
                     </button>
                 </div>
             </form>
@@ -912,7 +912,7 @@ include '../includes/admin_sidebar.php';
             <form id="rejectRevisionForm" method="POST">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title" id="rejectRevisionModalLabel">
-                        <i class="fas fa-times-circle me-2"></i>Revize Talebini Reddet
+                        <i class="bi bi-times-circle me-2"></i>Revize Talebini Reddet
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -921,13 +921,13 @@ include '../includes/admin_sidebar.php';
                     <input type="hidden" name="reject_revision_direct" value="1">
                     
                     <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <i class="bi bi-exclamation-triangle me-2"></i>
                         <strong>Dikkat!</strong> Bu revizyon talebi reddedilecek ve kullanıcıya bildirilecek.
                     </div>
                     
                     <div class="mb-3">
                         <label for="reject_admin_notes" class="form-label">
-                            <i class="fas fa-comment me-1"></i>
+                            <i class="bi bi-comment me-1"></i>
                             Reddetme Sebebi <span class="text-danger">*</span>
                         </label>
                         <textarea class="form-control" id="reject_admin_notes" name="admin_notes" rows="3" 
@@ -937,10 +937,10 @@ include '../includes/admin_sidebar.php';
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>Vazgeç
+                        <i class="bi bi-times me-1"></i>Vazgeç
                     </button>
                     <button type="submit" class="btn btn-danger" id="reject-submit-btn">
-                        <i class="fas fa-times me-1"></i>Reddet
+                        <i class="bi bi-times me-1"></i>Reddet
                     </button>
                 </div>
             </form>
@@ -954,7 +954,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-gradient-danger text-white border-0">
                 <h5 class="modal-title d-flex align-items-center" id="adminCancelModalLabel">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="bi bi-exclamation-triangle me-2"></i>
                     Revize Talebi İptal Onayı
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
@@ -967,21 +967,21 @@ include '../includes/admin_sidebar.php';
                     
                     <div class="mb-4">
                         <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 50%;">
-                            <i class="fas fa-times text-white fa-2x"></i>
+                            <i class="bi bi-times text-white fa-2x"></i>
                         </div>
                         <h6 class="mb-2 text-dark text-center">Bu revize talebini iptal etmek istediğinizden emin misiniz?</h6>
                         <p class="text-muted mb-3 text-center">
                             <strong>Revize:</strong> <span id="cancelFileName"></span>
                         </p>
                         <div class="alert alert-warning d-flex align-items-center mb-3">
-                            <i class="fas fa-info-circle me-2"></i>
+                            <i class="bi bi-info-circle me-2"></i>
                             <small>Bu işlem revize talebini iptal edecek ve varsa ücret iadesi yapacaktır.</small>
                         </div>
                     </div>
                     
                     <div class="mb-3">
                         <label for="adminNotes" class="form-label">
-                            <i class="fas fa-sticky-note me-1"></i>
+                            <i class="bi bi-sticky-note me-1"></i>
                             İptal Sebebi (Opsiyonel)
                         </label>
                         <textarea class="form-control" id="adminNotes" name="admin_notes" rows="3" 
@@ -991,10 +991,10 @@ include '../includes/admin_sidebar.php';
                 </div>
                 <div class="modal-footer border-0 pt-3">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" data-cancel-operation="true">
-                        <i class="fas fa-times me-1"></i>İptal
+                        <i class="bi bi-times me-1"></i>İptal
                     </button>
                     <button type="submit" class="btn btn-danger px-4" data-cancel-operation="true">
-                        <i class="fas fa-check me-1"></i>Evet, İptal Et
+                        <i class="bi bi-check me-1"></i>Evet, İptal Et
                     </button>
                 </div>
             </form>
@@ -1086,7 +1086,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Submit butonunu disable et
             const submitBtn = document.getElementById('approve-submit-btn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>İşleniyor...';
+            submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-1"></i>İşleniyor...';
             
             // Modal'ı kapat
             const modal = bootstrap.Modal.getInstance(document.getElementById('approveRevisionModal'));
@@ -1117,7 +1117,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Submit butonunu disable et
             const submitBtn = document.getElementById('reject-submit-btn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>İşleniyor...';
+            submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-1"></i>İşleniyor...';
             
             // Modal'ı kapat
             const modal = bootstrap.Modal.getInstance(document.getElementById('rejectRevisionModal'));
@@ -1143,7 +1143,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const submitBtn = this.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>İptal ediliyor...';
+                submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-1"></i>İptal ediliyor...';
             }
             
             // Modal'ı kapat

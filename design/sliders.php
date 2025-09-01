@@ -162,17 +162,17 @@ include '../includes/design_header.php';
         <div class="design-card">
             <div class="design-card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="fas fa-images me-2"></i>Hero Slider Yönetimi
+                    <i class="bi bi-images me-2"></i>Hero Slider Yönetimi
                 </h5>
                 <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#sliderModal" onclick="resetForm()">
-                    <i class="fas fa-plus me-2"></i>Yeni Slider
+                    <i class="bi bi-plus me-2"></i>Yeni Slider
                 </button>
             </div>
             <div class="card-body">
                 <!-- Flash Messages -->
                 <?php if ($flashMessage): ?>
                     <div class="alert alert-<?php echo $flashMessage['type'] === 'error' ? 'danger' : $flashMessage['type']; ?> alert-dismissible fade show">
-                        <i class="fas fa-<?php echo $flashMessage['type'] === 'success' ? 'check-circle' : ($flashMessage['type'] === 'error' ? 'exclamation-triangle' : 'info-circle'); ?> me-2"></i>
+                        <i class="bi bi-<?php echo $flashMessage['type'] === 'success' ? 'check-circle' : ($flashMessage['type'] === 'error' ? 'exclamation-triangle' : 'info-circle'); ?> me-2"></i>
                         <?php echo htmlspecialchars($flashMessage['message']); ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -180,17 +180,17 @@ include '../includes/design_header.php';
 
                 <?php if (isset($error)): ?>
                     <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($error); ?>
+                        <i class="bi bi-exclamation-triangle me-2"></i><?php echo htmlspecialchars($error); ?>
                     </div>
                 <?php endif; ?>
 
                 <?php if (empty($sliders)): ?>
                     <div class="text-center py-5">
-                        <i class="fas fa-images text-muted" style="font-size: 4rem;"></i>
+                        <i class="bi bi-images text-muted" style="font-size: 4rem;"></i>
                         <h4 class="text-muted mt-3">Henüz slider bulunmuyor</h4>
                         <p class="text-muted">İlk slider'ınızı oluşturmak için "Yeni Slider" butonuna tıklayın.</p>
                         <button type="button" class="btn btn-design-primary" data-bs-toggle="modal" data-bs-target="#sliderModal" onclick="resetForm()">
-                            <i class="fas fa-plus me-2"></i>İlk Slider'ı Oluştur
+                            <i class="bi bi-plus me-2"></i>İlk Slider'ı Oluştur
                         </button>
                     </div>
                 <?php else: ?>
@@ -236,7 +236,7 @@ include '../includes/design_header.php';
                                             <input type="hidden" name="id" value="<?php echo $slider['id']; ?>">
                                             <button type="submit" class="btn btn-sm btn-<?php echo $slider['is_active'] ? 'success' : 'secondary'; ?>" 
                                                     onclick="return confirm('Durumu değiştirmek istediğinizden emin misiniz?')">
-                                                <i class="fas fa-<?php echo $slider['is_active'] ? 'check' : 'times'; ?>"></i>
+                                                <i class="bi bi-<?php echo $slider['is_active'] ? 'check' : 'times'; ?>"></i>
                                                 <?php echo $slider['is_active'] ? 'Aktif' : 'Pasif'; ?>
                                             </button>
                                         </form>
@@ -251,14 +251,14 @@ include '../includes/design_header.php';
                                             <button type="button" class="btn btn-sm btn-outline-primary" 
                                                     onclick="editSlider('<?php echo $slider['id']; ?>')"
                                                     data-bs-toggle="modal" data-bs-target="#sliderModal">
-                                                <i class="fas fa-edit"></i>
+                                                <i class="bi bi-edit"></i>
                                             </button>
                                             <form method="POST" style="display: inline;">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo $slider['id']; ?>">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger"
                                                         onclick="return confirm('Bu slider\'ı silmek istediğinizden emin misiniz?')">
-                                                    <i class="fas fa-trash"></i>
+                                                    <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>
                                         </div>
@@ -316,13 +316,13 @@ include '../includes/design_header.php';
                             
                             <!-- Dosya Yükleme Alanı -->
                             <div class="upload-area" id="imageUploadArea">
-                                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                <i class="bi bi-cloud-upload-alt fa-3x text-primary mb-3"></i>
                                 <h5>Resmi buraya sürükleyin veya tıklayın</h5>
                                 <p class="text-muted mb-2">JPEG, PNG, WebP formatları desteklenir</p>
                                 <p class="small text-muted">Maksimum dosya boyutu: 5MB</p>
                                 <input type="file" class="d-none" id="imageFileInput" accept="image/*">
                                 <button type="button" class="btn btn-design-primary btn-sm mt-3" onclick="document.getElementById('imageFileInput').click()">
-                                    <i class="fas fa-folder-open me-2"></i>Bilgisayardan Resim Seç
+                                    <i class="bi bi-folder-open me-2"></i>Bilgisayardan Resim Seç
                                 </button>
                             </div>
                             
@@ -345,12 +345,12 @@ include '../includes/design_header.php';
                                                          style="width: 100%; height: 100%; object-fit: cover; display: none;" 
                                                          alt="Resim önizlemesi">
                                                     <div id="imageLoadingSpinner" style="display: none;">
-                                                        <i class="fas fa-spinner fa-spin text-muted"></i>
+                                                        <i class="bi bi-spinner fa-spin text-muted"></i>
                                                     </div>
                                                 </div>
                                                 <div class="ms-3">
                                                     <h6 class="text-success mb-1">
-                                                        <i class="fas fa-check-circle me-2"></i>Resim Seçildi
+                                                        <i class="bi bi-check-circle me-2"></i>Resim Seçildi
                                                     </h6>
                                                     <div class="small text-muted" id="currentImageName">-</div>
                                                     <div class="small text-muted" id="currentImageSize">-</div>
@@ -358,7 +358,7 @@ include '../includes/design_header.php';
                                                 </div>
                                             </div>
                                             <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearImage()">
-                                                <i class="fas fa-times me-1"></i>Kaldır
+                                                <i class="bi bi-times me-1"></i>Kaldır
                                             </button>
                                         </div>
                                     </div>
@@ -396,7 +396,7 @@ include '../includes/design_header.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-design-primary">
-                        <i class="fas fa-save me-2"></i>Kaydet
+                        <i class="bi bi-save me-2"></i>Kaydet
                     </button>
                 </div>
             </form>
@@ -745,7 +745,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const submitBtn = this.querySelector('button[type="submit"]');
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Kaydediliyor...';
+            submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-2"></i>Kaydediliyor...';
         }
     });
     

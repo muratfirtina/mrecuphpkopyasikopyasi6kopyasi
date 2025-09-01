@@ -204,17 +204,17 @@ include '../includes/user_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="fas fa-edit me-2 text-warning"></i>Revize Taleplerim
+                        <i class="bi bi-edit me-2 text-warning"></i>Revize Taleplerim
                     </h1>
                     <p class="text-muted mb-0">Dosyalarınız için gönderdiğiniz revize taleplerini takip edin</p>
                 </div>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
                         <a href="files.php?status=completed" class="btn btn-outline-primary">
-                            <i class="fas fa-plus me-1"></i>Yeni Revize Talebi
+                            <i class="bi bi-plus me-1"></i>Yeni Revize Talebi
                         </a>
                         <a href="files.php" class="btn btn-outline-secondary">
-                            <i class="fas fa-folder me-1"></i>Dosyalarım
+                            <i class="bi bi-folder me-1"></i>Dosyalarım
                         </a>
                     </div>
                 </div>
@@ -230,12 +230,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-primary"><?php echo $totalRevisionCount; ?></div>
                                     <div class="stat-label">Toplam Talep</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-chart-line text-success"></i>
+                                        <i class="bi bi-chart-line text-success"></i>
                                         <span class="text-success">Tüm talepleriniz</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon text-primary">
-                                    <i class="fas fa-edit"></i>
+                                    <i class="bi bi-edit"></i>
                                 </div>
                             </div>
                         </div>
@@ -250,12 +250,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-warning"><?php echo $pendingCount; ?></div>
                                     <div class="stat-label">Bekleyen</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-clock text-warning"></i>
+                                        <i class="bi bi-clock text-warning"></i>
                                         <span class="text-warning">İnceleniyor</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon text-warning">
-                                    <i class="fas fa-clock"></i>
+                                    <i class="bi bi-clock"></i>
                                 </div>
                             </div>
                         </div>
@@ -270,12 +270,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-success"><?php echo $completedCount; ?></div>
                                     <div class="stat-label">Tamamlanan</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-check-circle text-success"></i>
+                                        <i class="bi bi-check-circle text-success"></i>
                                         <span class="text-success">Başarılı</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon text-success">
-                                    <i class="fas fa-check-circle"></i>
+                                    <i class="bi bi-check-circle"></i>
                                 </div>
                             </div>
                         </div>
@@ -290,12 +290,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-danger"><?php echo $rejectedCount; ?></div>
                                     <div class="stat-label">Reddedilen</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-times-circle text-danger"></i>
+                                        <i class="bi bi-times-circle text-danger"></i>
                                         <span class="text-danger">İptal edildi</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon text-danger">
-                                    <i class="fas fa-times-circle"></i>
+                                    <i class="bi bi-times-circle"></i>
                                 </div>
                             </div>
                         </div>
@@ -307,7 +307,7 @@ include '../includes/user_header.php';
             <div class="info-banner mb-4">
                 <div class="info-content">
                     <div class="info-icon">
-                        <i class="fas fa-info-circle"></i>
+                        <i class="bi bi-info-circle"></i>
                     </div>
                     <div class="info-text">
                         <h6 class="mb-1">Revize Sistemi Nasıl Çalışır?</h6>
@@ -324,14 +324,14 @@ include '../includes/user_header.php';
             <div class="filter-card mb-4">
                 <div class="filter-header">
                     <h6 class="mb-0">
-                        <i class="fas fa-filter me-2"></i>Filtrele ve Ara
+                        <i class="bi bi-filter me-2"></i>Filtrele ve Ara
                     </h6>
                 </div>
                 <div class="filter-body">
                     <form method="GET" class="row g-3 align-items-end">
                         <div class="col-md-3">
                             <label for="search" class="form-label">
-                                <i class="fas fa-search me-1"></i>Arama
+                                <i class="bi bi-search me-1"></i>Arama
                             </label>
                             <input type="text" class="form-control form-control-modern" id="search" name="search" 
                                    value="<?php echo htmlspecialchars($search); ?>" 
@@ -340,7 +340,7 @@ include '../includes/user_header.php';
                         
                         <div class="col-md-2">
                             <label for="status" class="form-label">
-                                <i class="fas fa-tag me-1"></i>Durum
+                                <i class="bi bi-tag me-1"></i>Durum
                             </label>
                             <select class="form-select form-control-modern" id="status" name="status">
                                 <option value="">Tüm Durumlar</option>
@@ -352,7 +352,7 @@ include '../includes/user_header.php';
                         
                         <div class="col-md-2">
                             <label for="date_from" class="form-label">
-                                <i class="fas fa-calendar me-1"></i>Başlangıç Tarihi
+                                <i class="bi bi-calendar me-1"></i>Başlangıç Tarihi
                             </label>
                             <input type="date" class="form-control form-control-modern" id="date_from" name="date_from" 
                                    value="<?php echo htmlspecialchars($dateFrom); ?>">
@@ -360,7 +360,7 @@ include '../includes/user_header.php';
                         
                         <div class="col-md-2">
                             <label for="date_to" class="form-label">
-                                <i class="fas fa-calendar-check me-1"></i>Bitiş Tarihi
+                                <i class="bi bi-calendar-check me-1"></i>Bitiş Tarihi
                             </label>
                             <input type="date" class="form-control form-control-modern" id="date_to" name="date_to" 
                                    value="<?php echo htmlspecialchars($dateTo); ?>">
@@ -369,10 +369,10 @@ include '../includes/user_header.php';
                         <div class="col-md-3">
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary btn-modern">
-                                    <i class="fas fa-search me-1"></i>Filtrele
+                                    <i class="bi bi-search me-1"></i>Filtrele
                                 </button>
                                 <a href="revisions.php" class="btn btn-outline-secondary btn-modern">
-                                    <i class="fas fa-undo me-1"></i>Temizle
+                                    <i class="bi bi-undo me-1"></i>Temizle
                                 </a>
                             </div>
                         </div>
@@ -385,7 +385,7 @@ include '../includes/user_header.php';
                 <div class="empty-state-card">
                     <div class="empty-content">
                         <div class="empty-icon">
-                            <i class="fas fa-edit"></i>
+                            <i class="bi bi-edit"></i>
                         </div>
                         <h4>
                             <?php if ($search || $status || $dateFrom || $dateTo): ?>
@@ -404,11 +404,11 @@ include '../includes/user_header.php';
                         <div class="empty-actions">
                             <?php if ($search || $status || $dateFrom || $dateTo): ?>
                                 <a href="revisions.php" class="btn btn-outline-primary btn-lg">
-                                    <i class="fas fa-list me-2"></i>Tüm Talepler
+                                    <i class="bi bi-list me-2"></i>Tüm Talepler
                                 </a>
                             <?php endif; ?>
                             <a href="files.php?status=completed" class="btn btn-primary btn-lg">
-                                <i class="fas fa-plus me-2"></i>Revize Talebi Gönder
+                                <i class="bi bi-plus me-2"></i>Revize Talebi Gönder
                             </a>
                         </div>
                     </div>
@@ -418,7 +418,7 @@ include '../includes/user_header.php';
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-list me-2"></i>Revize Talepleriniz
+                            <i class="bi bi-list me-2"></i>Revize Talepleriniz
                             <span class="badge bg-primary ms-2"><?php echo count($revisions); ?></span>
                         </h5>
                     </div>
@@ -462,7 +462,7 @@ include '../includes/user_header.php';
                                                 <div>
                                                     <!-- Revize Talep Edilen Dosya - Admin sayfası mantığı -->
                                                     <div class="mb-2">
-                                                    <i class="fas fa-<?php echo $revision['target_file']['icon']; ?> text-<?php echo $revision['target_file']['color']; ?> me-2"></i>
+                                                    <i class="bi bi-<?php echo $revision['target_file']['icon']; ?> text-<?php echo $revision['target_file']['color']; ?> me-2"></i>
                                                     <strong class="text-<?php echo $revision['target_file']['color']; ?>"><?php echo htmlspecialchars($revision['target_file']['type']); ?>:</strong><br>
                                                     <span class="fw-semibold text-truncate d-block" style="max-width: 250px;" 
                                                     title="<?php echo htmlspecialchars($revision['target_file']['name']); ?>">
@@ -473,7 +473,7 @@ include '../includes/user_header.php';
                                                     <!-- Ana Proje Dosyası Bilgisi -->
                                                     <?php if ($revision['target_file']['type'] === 'Yanıt Dosyası' || $revision['target_file']['type'] === 'Revizyon Dosyası'): ?>
                                                         <div class="text-muted small">
-                                                            <i class="fas fa-level-up-alt me-1"></i>
+                                                            <i class="bi bi-level-up-alt me-1"></i>
                                                             <strong>Ana Proje:</strong> <?php echo htmlspecialchars($revision['original_name'] ?? 'Bilinmiyor'); ?>
                                                         </div>
                                                     <?php endif; ?>
@@ -483,7 +483,7 @@ include '../includes/user_header.php';
                                                         <div class="mt-2">
                                                             <small class="text-muted text-truncate d-block" style="max-width: 250px;" 
                                                                    title="<?php echo htmlspecialchars($revision['request_notes']); ?>">
-                                                                <i class="fas fa-comment me-1"></i>
+                                                                <i class="bi bi-comment me-1"></i>
                                                                 <?php echo htmlspecialchars(substr($revision['request_notes'], 0, 50)); ?>
                                                                 <?php if (strlen($revision['request_notes']) > 50): ?>..<?php endif; ?>
                                                             </small>
@@ -500,13 +500,13 @@ include '../includes/user_header.php';
                                                         <?php endif; ?>
                                                         <?php if (!empty($revision['series_name'])): ?>
                                                             <br><small class="text-muted">
-                                                                <i class="fas fa-tag me-1"></i>
+                                                                <i class="bi bi-tag me-1"></i>
                                                                 Seri: <?php echo htmlspecialchars($revision['series_name']); ?>
                                                             </small>
                                                         <?php endif; ?>
                                                         <?php if (!empty($revision['engine_name'])): ?>
                                                             <br><small class="text-muted">
-                                                                <i class="fas fa-cog me-1"></i>
+                                                                <i class="bi bi-cog me-1"></i>
                                                                 Motor: <?php echo htmlspecialchars($revision['engine_name']); ?>
                                                             </small>
                                                         <?php endif; ?>
@@ -514,13 +514,13 @@ include '../includes/user_header.php';
                                                     <?php if (!empty($revision['plate'])): ?>
                                                         <div class="mt-1">
                                                             <span class="badge bg-dark text-white">
-                                                                <i class="fas fa-id-card me-1"></i>
+                                                                <i class="bi bi-id-card me-1"></i>
                                                                 <?php echo strtoupper(htmlspecialchars($revision['plate'])); ?>
                                                             </span>
                                                         </div>
                                                     <?php else: ?>
                                                         <small class="text-muted d-block mt-1">
-                                                            <i class="fas fa-minus-circle me-1"></i>
+                                                            <i class="bi bi-minus-circle me-1"></i>
                                                             Plaka belirtilmemiş
                                                         </small>
                                                     <?php endif; ?>
@@ -528,7 +528,7 @@ include '../includes/user_header.php';
                                             </td>
                                             <td>
                                                 <span class="badge bg-<?php echo $config['class']; ?> badge-status">
-                                                    <i class="fas fa-<?php echo $config['icon']; ?> me-1"></i>
+                                                    <i class="bi bi-<?php echo $config['icon']; ?> me-1"></i>
                                                     <?php echo $config['text']; ?>
                                                 </span>
                                             </td>
@@ -551,12 +551,12 @@ include '../includes/user_header.php';
                                             <td>
                                                 <?php if ($revision['credits_charged'] > 0): ?>
                                                     <span class="badge bg-warning text-dark">
-                                                        <i class="fas fa-coins me-1"></i>
+                                                        <i class="bi bi-coins me-1"></i>
                                                         <?php echo $revision['credits_charged']; ?>
                                                     </span>
                                                 <?php else: ?>
                                                     <span class="badge bg-success">
-                                                        <i class="fas fa-gift me-1"></i>
+                                                        <i class="bi bi-gift me-1"></i>
                                                         Ücretsiz
                                                     </span>
                                                 <?php endif; ?>
@@ -564,7 +564,7 @@ include '../includes/user_header.php';
                                             <td>
                                                 <?php if ($revision['admin_username']): ?>
                                                     <div class="d-flex align-items-center">
-                                                        <i class="fas fa-user-cog text-secondary me-1"></i>
+                                                        <i class="bi bi-user-cog text-secondary me-1"></i>
                                                         <span class="text-truncate" style="max-width: 80px;" 
                                                               title="<?php echo htmlspecialchars($revision['admin_username']); ?>">
                                                             <?php echo htmlspecialchars($revision['admin_username']); ?>
@@ -578,18 +578,18 @@ include '../includes/user_header.php';
                                                 <div class="btn-group btn-group-sm" role="group">
                                                     <a href="revision-detail.php?id=<?php echo htmlspecialchars($revision['id']); ?>" 
                                                        class="btn btn-outline-primary" title="Detay">
-                                                        <i class="fas fa-eye"></i>
+                                                        <i class="bi bi-eye"></i>
                                                     </a>
                                                     
                                                     <a href="files.php?view=<?php echo $revision['upload_id']; ?>" 
                                                        class="btn btn-outline-secondary" title="Orijinal Dosya">
-                                                        <i class="fas fa-file"></i>
+                                                        <i class="bi bi-file"></i>
                                                     </a>
                                                     
                                                     <?php if ($revision['status'] === 'completed' && !empty($revision['revision_files'])): ?>
                                                         <a href="download-revision.php?id=<?php echo $revision['revision_files'][0]['id']; ?>" 
                                                            class="btn btn-success" title="Revize Dosyasını İndir">
-                                                            <i class="fas fa-download"></i>
+                                                            <i class="bi bi-download"></i>
                                                         </a>
                                                     <?php endif; ?>
                                                 </div>
@@ -611,7 +611,7 @@ include '../includes/user_header.php';
                                 <?php if ($page > 1): ?>
                                     <li class="page-item">
                                         <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
-                                            <i class="fas fa-chevron-left"></i>
+                                            <i class="bi bi-chevron-left"></i>
                                         </a>
                                     </li>
                                 <?php endif; ?>
@@ -634,7 +634,7 @@ include '../includes/user_header.php';
                                 <?php if ($page < $totalPages): ?>
                                     <li class="page-item">
                                         <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $dateFrom ? '&date_from=' . $dateFrom : ''; ?><?php echo $dateTo ? '&date_to=' . $dateTo : ''; ?>">
-                                            <i class="fas fa-chevron-right"></i>
+                                            <i class="bi bi-chevron-right"></i>
                                         </a>
                                     </li>
                                 <?php endif; ?>
@@ -662,18 +662,18 @@ include '../includes/user_header.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-info-circle me-2 text-primary"></i>Revize Sistemi Hakkında
+                    <i class="bi bi-info-circle me-2 text-primary"></i>Revize Sistemi Hakkında
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="info-section">
-                    <h6><i class="fas fa-question-circle me-2"></i>Revize Sistemi Nedir?</h6>
+                    <h6><i class="bi bi-question-circle me-2"></i>Revize Sistemi Nedir?</h6>
                     <p>Revize sistemi, tamamlanmış ECU dosyalarınızda değişiklik talep etmenizi sağlayan özelliğimizdir. Bu sayede dosyanızın teknik parametrelerini ayarlayabilirsiniz.</p>
                 </div>
                 
                 <div class="info-section">
-                    <h6><i class="fas fa-cog me-2"></i>Nasıl Çalışır?</h6>
+                    <h6><i class="bi bi-cog me-2"></i>Nasıl Çalışır?</h6>
                     <ol class="ps-3">
                         <li>Tamamlanmış dosyalarınızdan birini seçin</li>
                         <li>Revize talep et butonuna tıklayın</li>
@@ -684,12 +684,12 @@ include '../includes/user_header.php';
                 </div>
                 
                 <div class="info-section">
-                    <h6><i class="fas fa-coins me-2"></i>Ücretlendirme</h6>
+                    <h6><i class="bi bi-coins me-2"></i>Ücretlendirme</h6>
                     <p>Revize talepleri için değişikliğin karmaşıklığına göre ek ücret alınabilir. Ücret bilgisi talep onaylanmadan önce size bildirilir.</p>
                 </div>
                 
                 <div class="info-section">
-                    <h6><i class="fas fa-clock me-2"></i>İşlem Süresi</h6>
+                    <h6><i class="bi bi-clock me-2"></i>İşlem Süresi</h6>
                     <p>Revize talepleri genellikle 24-72 saat içinde tamamlanır. Karmaşık değişiklikler daha uzun sürebilir.</p>
                 </div>
             </div>

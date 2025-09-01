@@ -89,7 +89,7 @@ if (!empty($search)) {
 error_log("ECU DEBUG: Final ECU array: " . print_r($ecus, true));
 
 $pageTitle = 'ECU Yönetimi';
-$pageIcon = 'fas fa-microchip';
+$pageIcon = 'bi bi-microchip';
 $pageDescription = 'ECU birimlerini yönetin, ekleyin ve düzenleyin.';
 
 include '../includes/admin_header.php';
@@ -103,7 +103,7 @@ include '../includes/admin_sidebar.php';
                 <div class="page-header">
                     <div class="page-header-actions">
                         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addEcuModal">
-                            <i class="fas fa-plus"></i> Yeni ECU Ekle
+                            <i class="bi bi-plus"></i> Yeni ECU Ekle
                         </button>
                     </div>
                 </div>
@@ -121,7 +121,7 @@ include '../includes/admin_sidebar.php';
                     <div class="col-md-3">
                         <div class="stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-microchip text-primary"></i>
+                                <i class="bi bi-microchip text-primary"></i>
                             </div>
                             <div class="stat-content">
                                 <h3><?= $totalEcus ?></h3>
@@ -134,7 +134,7 @@ include '../includes/admin_sidebar.php';
                 <!-- Arama ve Filtreler -->
                 <div class="card mb-4" style="width: 30%;">
                     <div class="card-header">
-                        <h5><i class="fas fa-search"></i> Arama ve Filtreler</h5>
+                        <h5><i class="bi bi-search"></i> Arama ve Filtreler</h5>
                     </div>
                     <div class="card-body">
                         <form method="GET" class="row g-3">
@@ -146,10 +146,10 @@ include '../includes/admin_sidebar.php';
                             </div>
                             <div class="col-md-6 d-flex align-items-end">
                                 <button type="submit" class="btn btn-primary me-2">
-                                    <i class="fas fa-search"></i> Ara
+                                    <i class="bi bi-search"></i> Ara
                                 </button>
                                 <a href="ecus.php" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i> Temizle
+                                    <i class="bi bi-times"></i> Temizle
                                 </a>
                             </div>
                         </form>
@@ -159,12 +159,12 @@ include '../includes/admin_sidebar.php';
                 <!-- ECU Listesi -->
                 <div class="card" style="width: 30%;">
                     <div class="card-header">
-                        <h5><i class="fas fa-list"></i> ECU Listesi (<?= $totalEcus ?> adet)</h5>
+                        <h5><i class="bi bi-list"></i> ECU Listesi (<?= $totalEcus ?> adet)</h5>
                     </div>
                     <div class="card-body">
                         <?php if (empty($ecus)): ?>
                         <div class="text-center py-4">
-                            <i class="fas fa-microchip fa-3x text-muted mb-3"></i>
+                            <i class="bi bi-microchip fa-3x text-muted mb-3"></i>
                             <p class="text-muted">Henüz ECU bulunmuyor.</p>
                         </div>
                         <?php else: ?>
@@ -187,12 +187,12 @@ include '../includes/admin_sidebar.php';
                                                     data-id="<?= $ecu['id'] ?>" 
                                                     data-name="<?= htmlspecialchars($ecu['name']) ?>"
                                                     data-bs-toggle="modal" data-bs-target="#editEcuModal">
-                                                <i class="fas fa-edit"></i>
+                                                <i class="bi bi-edit"></i>
                                             </button>
                                             <button class="btn btn-sm btn-outline-danger delete-ecu-btn" 
                                                     data-id="<?= $ecu['id'] ?>" 
                                                     data-name="<?= htmlspecialchars($ecu['name']) ?>">
-                                                <i class="fas fa-trash"></i>
+                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </td>
                                     </tr>
@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         tableBody.innerHTML = `
                             <tr>
                                 <td colspan="4" class="text-center py-4">
-                                    <i class="fas fa-microchip text-muted"></i>
+                                    <i class="bi bi-microchip text-muted"></i>
                                     <p class="text-muted mb-0">Arama sonucu bulunamadı.</p>
                                 </td>
                             </tr>
@@ -390,12 +390,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             data-id="${ecu.id}"
                             data-name="${escapeHtml(ecu.name)}"
                             data-bs-toggle="modal" data-bs-target="#editEcuModal">
-                        <i class="fas fa-edit"></i>
+                        <i class="bi bi-edit"></i>
                     </button>
                     <button class="btn btn-sm btn-danger delete-ecu-btn"
                             data-id="${ecu.id}"
                             data-name="${escapeHtml(ecu.name)}">
-                        <i class="fas fa-trash"></i>
+                        <i class="bi bi-trash"></i>
                     </button>
                 </td>
             </tr>

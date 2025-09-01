@@ -26,7 +26,7 @@ foreach ($securityTables as $table) {
 
 $pageTitle = 'Güvenlik Dashboard';
 $pageDescription = 'Sistem güvenliğini izleyin ve yönetin';
-$pageIcon = 'fas fa-shield-alt';
+$pageIcon = 'bi bi-shield-alt';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -35,10 +35,10 @@ include '../includes/admin_sidebar.php';
 
 <?php if (!$securityTablesExist): ?>
     <div class="alert alert-admin alert-warning">
-        <h5><i class="fas fa-exclamation-triangle me-2"></i>Güvenlik Sistemi Kurulum Gerekli</h5>
+        <h5><i class="bi bi-exclamation-triangle me-2"></i>Güvenlik Sistemi Kurulum Gerekli</h5>
         <p class="mb-2">Güvenlik tabloları henüz oluşturulmamış. Lütfen önce güvenlik sistemini kurun.</p>
         <a href="../fix-missing-tables.php" class="btn btn-warning">
-            <i class="fas fa-tools me-2"></i>Güvenlik Sistemini Kur
+            <i class="bi bi-tools me-2"></i>Güvenlik Sistemini Kur
         </a>
     </div>
 <?php else: ?>
@@ -62,7 +62,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Güvenlik olayları</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-chart-bar text-primary fa-lg"></i>
+                    <i class="bi bi-chart-bar text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -85,7 +85,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Son 24 saatte</small>
                 </div>
                 <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-user-slash text-warning fa-lg"></i>
+                    <i class="bi bi-user-slash text-warning fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -108,7 +108,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Blacklist'te</small>
                 </div>
                 <div class="bg-danger bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-ban text-danger fa-lg"></i>
+                    <i class="bi bi-ban text-danger fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -131,7 +131,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Koruma aktif</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-shield text-success fa-lg"></i>
+                    <i class="bi bi-shield text-success fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -144,7 +144,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-exclamation-triangle me-2"></i>Tehdit Seviyeleri
+                    <i class="bi bi-exclamation-triangle me-2"></i>Tehdit Seviyeleri
                 </h5>
             </div>
             <div class="card-body">
@@ -188,7 +188,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-history me-2"></i>Son Güvenlik Olayları
+                    <i class="bi bi-history me-2"></i>Son Güvenlik Olayları
                 </h5>
             </div>
             <div class="card-body">
@@ -208,20 +208,20 @@ include '../includes/admin_sidebar.php';
                         } else {
                             foreach ($recentEvents as $event) {
                                 $details = json_decode($event['details'], true);
-                                $icon = 'fas fa-info-circle text-info';
+                                $icon = 'bi bi-info-circle text-info';
                                 
                                 switch ($event['event_type']) {
                                     case 'sql_injection_attempt':
-                                        $icon = 'fas fa-database text-danger';
+                                        $icon = 'bi bi-database text-danger';
                                         break;
                                     case 'xss_attempt':
-                                        $icon = 'fas fa-code text-warning';
+                                        $icon = 'bi bi-code text-warning';
                                         break;
                                     case 'brute_force_detected':
-                                        $icon = 'fas fa-user-slash text-danger';
+                                        $icon = 'bi bi-user-slash text-danger';
                                         break;
                                     case 'failed_login':
-                                        $icon = 'fas fa-sign-in-alt text-warning';
+                                        $icon = 'bi bi-sign-in-alt text-warning';
                                         break;
                                 }
                                 
@@ -254,7 +254,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-ban me-2"></i>Engellenen IP Adresleri
+                    <i class="bi bi-ban me-2"></i>Engellenen IP Adresleri
                 </h5>
             </div>
             <div class="card-body">
@@ -298,7 +298,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-shield me-2"></i>WAF Kuralları Durumu
+                    <i class="bi bi-shield me-2"></i>WAF Kuralları Durumu
                 </h5>
             </div>
             <div class="card-body">

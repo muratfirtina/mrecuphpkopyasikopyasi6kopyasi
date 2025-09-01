@@ -235,14 +235,14 @@ include '../includes/user_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="fas fa-coins me-2 text-warning"></i>Kredi İşlemleri
+                        <i class="bi bi-coins me-2 text-warning"></i>Kredi İşlemleri
                     </h1>
                     <p class="text-muted mb-0">Hesabınıza kredi yükleyin ve dosya işlemlerinizi gerçekleştirin</p>
                 </div>
                 <!-- <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
                         <a href="transactions.php" class="btn btn-outline-primary">
-                            <i class="fas fa-history me-1"></i>Tüm İşlemler
+                            <i class="bi bi-history me-1"></i>Tüm İşlemler
                         </a>
                     </div>
                 </div> -->
@@ -252,7 +252,7 @@ include '../includes/user_header.php';
             <?php if ($error): ?>
                 <div class="alert alert-danger alert-modern alert-dismissible fade show" role="alert">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+                        <i class="bi bi-exclamation-triangle me-3 fa-lg"></i>
                         <div>
                             <strong>Hata!</strong> <?php echo $error; ?>
                         </div>
@@ -264,7 +264,7 @@ include '../includes/user_header.php';
             <?php if ($success): ?>
                 <div class="alert alert-success alert-modern alert-dismissible fade show" role="alert">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-check-circle me-3 fa-lg"></i>
+                        <i class="bi bi-check-circle me-3 fa-lg"></i>
                         <div>
                             <strong>Başarılı!</strong> <?php echo $success; ?>
                         </div>
@@ -311,11 +311,11 @@ include '../includes/user_header.php';
                             
                             <div class="progress-footer d-flex justify-content-between mt-2">
                                 <div class="used-info">
-                                    <i class="fas fa-minus-circle text-danger me-1"></i>
+                                    <i class="bi bi-minus-circle text-danger me-1"></i>
                                     <span class="text-danger">Kullanılan: <strong><?php echo number_format($creditUsed, 2); ?> TL</strong></span>
                                 </div>
                                 <div class="remaining-info">
-                                    <i class="fas fa-check-circle text-success me-1"></i>
+                                    <i class="bi bi-check-circle text-success me-1"></i>
                                     <span class="text-success">Kalan: <strong><?php echo number_format($availableCredits, 2); ?> TL</strong></span>
                                 </div>
                             </div>
@@ -325,7 +325,7 @@ include '../includes/user_header.php';
                         <!-- <div class="current-balance-display">
                             <div class="balance-card">
                                 <div class="balance-header">
-                                    <i class="fas fa-wallet me-2"></i>
+                                    <i class="bi bi-wallet me-2"></i>
                                     <span>Kullanılabilir Bakiye</span>
                                 </div>
                                 <div class="balance-amount">
@@ -335,11 +335,11 @@ include '../includes/user_header.php';
                                 <div class="balance-status">
                                     <?php if ($availableCredits > 0): ?>
                                         <span class="status-badge status-active">
-                                            <i class="fas fa-check-circle me-1"></i>Aktif
+                                            <i class="bi bi-check-circle me-1"></i>Aktif
                                         </span>
                                     <?php else: ?>
                                         <span class="status-badge status-exhausted">
-                                            <i class="fas fa-exclamation-triangle me-1"></i>Tükendi
+                                            <i class="bi bi-exclamation-triangle me-1"></i>Tükendi
                                         </span>
                                     <?php endif; ?>
                                 </div>
@@ -349,11 +349,11 @@ include '../includes/user_header.php';
                         <!-- İstatistikler -->
                         <div class="credit-stats mt-3">
                             <div class="stat-item">
-                                <i class="fas fa-chart-line text-info"></i>
+                                <i class="bi bi-chart-line text-info"></i>
                                 <span>Toplam İşlem: <strong><?php echo $totalTransactions; ?></strong></span>
                             </div>
                             <div class="stat-item">
-                                <i class="fas fa-calendar-alt text-warning"></i>
+                                <i class="bi bi-calendar-alt text-warning"></i>
                                 <span>Bu Ay: <strong><?php echo number_format($monthlySpent, 2); ?> TL</strong></span>
                             </div>
                         </div>
@@ -391,12 +391,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-success"><?php echo number_format($totalLoaded, 2); ?></div>
                                     <div class="stat-label">Toplam Yüklenen</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-plus-circle text-success"></i>
+                                        <i class="bi bi-plus-circle text-success"></i>
                                         <span class="text-success">Kredi TL</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon text-success">
-                                    <i class="fas fa-plus-circle"></i>
+                                    <i class="bi bi-plus-circle"></i>
                                 </div>
                             </div>
                         </div>
@@ -411,12 +411,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-danger"><?php echo number_format($totalSpent, 2); ?></div>
                                     <div class="stat-label">Toplam Harcanan</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-minus-circle text-danger"></i>
+                                        <i class="bi bi-minus-circle text-danger"></i>
                                         <span class="text-danger">Kredi TL</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon text-danger">
-                                    <i class="fas fa-minus-circle"></i>
+                                    <i class="bi bi-minus-circle"></i>
                                 </div>
                             </div>
                         </div>
@@ -431,12 +431,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-warning"><?php echo number_format($monthlySpent, 2); ?></div>
                                     <div class="stat-label">Bu Ay Harcanan</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-calendar text-warning"></i>
+                                        <i class="bi bi-calendar text-warning"></i>
                                         <span class="text-warning">Aylık kullanım</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon text-warning">
-                                    <i class="fas fa-calendar-alt"></i>
+                                    <i class="bi bi-calendar-alt"></i>
                                 </div>
                             </div>
                         </div>
@@ -451,12 +451,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-primary"><?php echo $totalTransactions; ?></div>
                                     <div class="stat-label">Toplam İşlem</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-exchange-alt text-primary"></i>
+                                        <i class="bi bi-exchange-alt text-primary"></i>
                                         <span class="text-primary">Tüm zamanlar</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon text-primary">
-                                    <i class="fas fa-exchange-alt"></i>
+                                    <i class="bi bi-exchange-alt"></i>
                                 </div>
                             </div>
                         </div>
@@ -471,7 +471,7 @@ include '../includes/user_header.php';
                     <!-- <div class="packages-section mb-4">
                         <div class="section-header">
                             <h4 class="mb-2">
-                                <i class="fas fa-gift me-2 text-primary"></i>Kredi Paketleri
+                                <i class="bi bi-gift me-2 text-primary"></i>Kredi Paketleri
                             </h4>
                             <p class="text-muted">En uygun paketleri seçin ve bonus kredi kazanın</p>
                         </div>
@@ -483,7 +483,7 @@ include '../includes/user_header.php';
                                     
                                     <?php if ($package['popular']): ?>
                                         <div class="popular-badge">
-                                            <i class="fas fa-star me-1"></i>POPÜLER
+                                            <i class="bi bi-star me-1"></i>POPÜLER
                                         </div>
                                     <?php endif; ?>
                                     
@@ -510,14 +510,14 @@ include '../includes/user_header.php';
                                         
                                         <?php if ($package['savings'] > 0): ?>
                                             <div class="savings-info">
-                                                <i class="fas fa-piggy-bank me-1"></i>
+                                                <i class="bi bi-piggy-bank me-1"></i>
                                                 <?php echo number_format(($package['savings'] / $package['price']) * 100, 0); ?>% tasarruf
                                             </div>
                                         <?php endif; ?>
                                         
                                         <div class="package-button">
                                             <span class="btn-text">
-                                                <i class="fas fa-shopping-cart me-1"></i>Satın Al
+                                                <i class="bi bi-shopping-cart me-1"></i>Satın Al
                                             </span>
                                         </div>
                                     </div>
@@ -530,7 +530,7 @@ include '../includes/user_header.php';
                     <!-- <div class="custom-amount-section">
                         <div class="section-header">
                             <h4 class="mb-2">
-                                <i class="fas fa-edit me-2 text-info"></i>Özel Tutar
+                                <i class="bi bi-edit me-2 text-info"></i>Özel Tutar
                             </h4>
                             <p class="text-muted">İstediğiniz tutarda kredi yükleyin</p>
                         </div>
@@ -542,7 +542,7 @@ include '../includes/user_header.php';
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="amount" class="form-label">
-                                            <i class="fas fa-money-bill-wave me-1"></i>Kredi Tutarı
+                                            <i class="bi bi-money-bill-wave me-1"></i>Kredi Tutarı
                                         </label>
                                         <div class="input-group">
                                             <input type="number" class="form-control form-control-modern" 
@@ -556,7 +556,7 @@ include '../includes/user_header.php';
                                     
                                     <div class="form-group">
                                         <label for="payment_method" class="form-label">
-                                            <i class="fas fa-credit-card me-1"></i>Ödeme Yöntemi
+                                            <i class="bi bi-credit-card me-1"></i>Ödeme Yöntemi
                                         </label>
                                         <select class="form-select form-control-modern" id="payment_method" name="payment_method" required>
                                             <option value="">Ödeme yöntemini seçin</option>
@@ -570,7 +570,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="form-actions">
                                     <button type="submit" class="btn btn-success btn-modern btn-lg">
-                                        <i class="fas fa-credit-card me-2"></i>
+                                        <i class="bi bi-credit-card me-2"></i>
                                         Kredi Yükle
                                     </button>
                                 </div>
@@ -582,13 +582,13 @@ include '../includes/user_header.php';
                     <div class="recent-transactions-section">
                         <div class="section-header">
                             <h4 class="mb-2">
-                                <i class="fas fa-clock me-2 text-secondary"></i>Kredi İşlem Geçmişi
+                                <i class="bi bi-clock me-2 text-secondary"></i>Kredi İşlem Geçmişi
                                 <?php if ($filteredTransactions > 0): ?>
                                     <span class="badge bg-primary ms-2"> Toplam <?php echo $filteredTransactions; ?></span>
                                 <?php endif; ?>
                                 <?php if ($filteredTransactions > $limit): ?>
                                 <span class="btn btn-outline-info btn-sm disabled">
-                                    <i class="fas fa-layers me-1"></i><?php echo $filteredTransactions - $limit; ?> daha
+                                    <i class="bi bi-layers me-1"></i><?php echo $filteredTransactions - $limit; ?> daha
                                 </span>
                                 <?php endif; ?>
                             </h4>                       
@@ -604,7 +604,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="col-md-3">
                                     <label for="type_filter" class="form-label form-label-sm">
-                                        <i class="fas fa-tag me-1"></i>İşlem Tipi
+                                        <i class="bi bi-tag me-1"></i>İşlem Tipi
                                     </label>
                                     <select class="form-select form-select-sm" id="type_filter" name="type">
                                         <option value="">Tüm İşlemler</option>
@@ -616,7 +616,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="col-md-3">
                                     <label for="date_from_filter" class="form-label form-label-sm">
-                                        <i class="fas fa-calendar me-1"></i>Başlangıç
+                                        <i class="bi bi-calendar me-1"></i>Başlangıç
                                     </label>
                                     <input type="date" class="form-control form-control-sm" id="date_from_filter" name="date_from" 
                                            value="<?php echo htmlspecialchars($dateFrom); ?>">
@@ -624,7 +624,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="col-md-3">
                                     <label for="date_to_filter" class="form-label form-label-sm">
-                                        <i class="fas fa-calendar-check me-1"></i>Bitiş
+                                        <i class="bi bi-calendar-check me-1"></i>Bitiş
                                     </label>
                                     <input type="date" class="form-control form-control-sm" id="date_to_filter" name="date_to" 
                                            value="<?php echo htmlspecialchars($dateTo); ?>">
@@ -632,7 +632,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="col-md-2">
                                     <label for="limit_filter" class="form-label form-label-sm">
-                                        <i class="fas fa-list me-1"></i>Sayfa Başı
+                                        <i class="bi bi-list me-1"></i>Sayfa Başı
                                     </label>
                                     <select class="form-select form-select-sm" id="limit_filter" name="limit">
                                         <option value="5" <?php echo $limit === 5 ? 'selected' : ''; ?>>5</option>
@@ -646,14 +646,14 @@ include '../includes/user_header.php';
                                 <div class="col-md-2">
                                     <div class="d-flex gap-1">
                                         <button type="submit" class="btn btn-primary btn-sm">
-                                            <i class="fas fa-search me-1"></i>Filtrele
+                                            <i class="bi bi-search me-1"></i>Filtrele
                                         </button>
                                         <a href="credits.php" class="btn btn-outline-secondary btn-sm">
-                                            <i class="fas fa-undo me-1"></i>Temizle
+                                            <i class="bi bi-undo me-1"></i>Temizle
                                         </a>
                                         <?php if (isset($_GET['show_debug']) || (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin')): ?>
                                         <a href="credits.php?debug=1<?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>&limit=<?php echo $limit; ?>" class="btn btn-outline-info btn-sm" title="Debug">
-                                            <i class="fas fa-bug"></i>
+                                            <i class="bi bi-bug"></i>
                                         </a>
                                         <?php endif; ?>
                                     </div>
@@ -664,7 +664,7 @@ include '../includes/user_header.php';
                         <?php if (empty($recentTransactions)): ?>
                             <div class="empty-transactions">
                                 <div class="empty-icon">
-                                    <i class="fas fa-receipt"></i>
+                                    <i class="bi bi-receipt"></i>
                                 </div>
                                 <h6>
                                     <?php if ($type || $dateFrom || $dateTo): ?>
@@ -683,7 +683,7 @@ include '../includes/user_header.php';
                                 <?php if (!($type || $dateFrom || $dateTo)): ?>
                                     <div class="mt-2">
                                         <button type="button" class="btn btn-primary btn-sm" onclick="selectPackage(50, 50)">
-                                            <i class="fas fa-credit-card me-1"></i>Hızlı Kredi Yükle
+                                            <i class="bi bi-credit-card me-1"></i>Hızlı Kredi Yükle
                                         </button>
                                     </div>
                                 <?php endif; ?>
@@ -695,23 +695,23 @@ include '../includes/user_header.php';
                                     <div class="transaction-item">
                                         <div class="transaction-icon">
                                             <?php
-                                            $iconClass = 'fas fa-circle';
+                                            $iconClass = 'bi bi-circle';
                                             $iconColor = 'secondary';
                                             
                                             $effectiveType = $transaction['effective_type'] ?? $transaction['transaction_type'] ?? $transaction['type'] ?? 'unknown';
                                             switch ($effectiveType) {
                                                 case 'add':
-                                                    $iconClass = 'fas fa-plus-circle';
+                                                    $iconClass = 'bi bi-plus-circle';
                                                     $iconColor = 'success';
                                                     break;
                                                 case 'deduct':
                                                 case 'withdraw':
                                                 case 'file_charge':
-                                                    $iconClass = 'fas fa-minus-circle';
+                                                    $iconClass = 'bi bi-minus-circle';
                                                     $iconColor = 'danger';
                                                     break;
                                                 default:
-                                                    $iconClass = 'fas fa-circle';
+                                                    $iconClass = 'bi bi-circle';
                                                     $iconColor = 'secondary';
                                                     break;
                                             }
@@ -745,11 +745,11 @@ include '../includes/user_header.php';
                                                 <?php echo htmlspecialchars($transaction['description'] ?? 'Açıklama yok'); ?>
                                             </div>
                                             <div class="transaction-date">
-                                                <i class="fas fa-calendar-alt me-1"></i>
+                                                <i class="bi bi-calendar-alt me-1"></i>
                                                 <?php echo date('d.m.Y H:i', strtotime($transaction['created_at'])); ?>
                                                 <?php if ($transaction['admin_username']): ?>
                                                     <span class="admin-info ms-2">
-                                                        <i class="fas fa-user-cog me-1"></i>
+                                                        <i class="bi bi-user-cog me-1"></i>
                                                         <?php echo htmlspecialchars($transaction['admin_username']); ?>
                                                     </span>
                                                 <?php endif; ?>
@@ -794,7 +794,7 @@ include '../includes/user_header.php';
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <div class="pagination-info">
                                         <small class="text-muted">
-                                        <i class="fas fa-info-circle me-1"></i>
+                                        <i class="bi bi-info-circle me-1"></i>
                                         <strong>PAGINATION TEST:</strong> 
                                         <?php 
                                         $startRecord = (($page - 1) * $limit) + 1;
@@ -818,7 +818,7 @@ include '../includes/user_header.php';
                                                        class="form-control form-control-sm" 
                                                        style="width: 60px; font-size: 0.75rem;">
                                                 <button type="submit" class="btn btn-sm btn-outline-primary" style="padding: 0.25rem 0.5rem;">
-                                                    <i class="fas fa-arrow-right"></i>
+                                                    <i class="bi bi-arrow-right"></i>
                                                 </button>
                                             </form>
                                         </div>
@@ -830,7 +830,7 @@ include '../includes/user_header.php';
                                             <!-- Test Previous -->
                                             <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
                                                 <a class="page-link" href="?page=<?php echo max(1, $page - 1); ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>&limit=<?php echo $limit; ?>" title="Önceki sayfa">
-                                                    <i class="fas fa-chevron-left"></i> Önceki
+                                                    <i class="bi bi-chevron-left"></i> Önceki
                                                 </a>
                                             </li>
                                             
@@ -842,7 +842,7 @@ include '../includes/user_header.php';
                                             <!-- Test Next -->
                                             <li class="page-item">
                                                 <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>&limit=<?php echo $limit; ?>" title="Sonraki sayfa">
-                                                    Sonraki <i class="fas fa-chevron-right"></i>
+                                                    Sonraki <i class="bi bi-chevron-right"></i>
                                                 </a>
                                             </li>
                                         </ul>
@@ -853,10 +853,10 @@ include '../includes/user_header.php';
                                     <div class="text-center">
                                         <small class="text-muted">
                                             <?php if ($filteredTransactions <= $limit): ?>
-                                            <i class="fas fa-check-circle text-success me-1"></i>
+                                            <i class="bi bi-check-circle text-success me-1"></i>
                                             Tüm işlemler gösteriliyor (<?php echo $filteredTransactions; ?> işlem)
                                             <?php else: ?>
-                                            <i class="fas fa-info-circle text-primary me-1"></i>
+                                            <i class="bi bi-info-circle text-primary me-1"></i>
                                             Sadece son <?php echo $limit; ?> işlem gösteriliyor. 
                                             <a href="transactions.php" class="text-primary text-decoration-none">
                                                 Tüm <?php echo $filteredTransactions; ?> işlemi gör
@@ -877,7 +877,7 @@ include '../includes/user_header.php';
                     <div class="info-card">
                         <div class="info-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-headset me-2"></i>Destek & Yardım
+                                <i class="bi bi-headset me-2"></i>Destek & Yardım
                             </h5>
                         </div>
                         <div class="info-body">
@@ -885,22 +885,22 @@ include '../includes/user_header.php';
                             
                             <div class="support-options">
                                 <a href="mailto:<?php echo SITE_EMAIL; ?>" class="support-option">
-                                    <i class="fas fa-envelope"></i>
+                                    <i class="bi bi-envelope"></i>
                                     <span>E-posta Gönder</span>
                                 </a>
                                 
                                 <a href="tel:+905551234567" class="support-option">
-                                    <i class="fas fa-phone"></i>
+                                    <i class="bi bi-phone"></i>
                                     <span>Telefon Desteği</span>
                                 </a>
                                 
                                 <!-- <button class="support-option" onclick="openWhatsApp()">
-                                    <i class="fab fa-whatsapp"></i>
+                                    <i class="bi bi-whatsapp"></i>
                                     <span>WhatsApp</span>
                                 </button> -->
                                 
                                 <a href="#" class="support-option" onclick="openLiveChat()">
-                                    <i class="fas fa-comments"></i>
+                                    <i class="bi bi-comments"></i>
                                     <span>Canlı Destek</span>
                                 </a>
                             </div>
@@ -2050,7 +2050,7 @@ function showToast(message, type = 'info') {
     toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
     
     toast.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+        <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
@@ -2218,7 +2218,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (show) {
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Filtreliyor...';
+                submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-1"></i>Filtreliyor...';
             }
             if (transactionsList) {
                 transactionsList.classList.add('transaction-loading');
@@ -2226,7 +2226,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-search me-1"></i>Filtrele';
+                submitBtn.innerHTML = '<i class="bi bi-search me-1"></i>Filtrele';
             }
             if (transactionsList) {
                 transactionsList.classList.remove('transaction-loading');
@@ -2244,7 +2244,7 @@ document.addEventListener('DOMContentLoaded', function() {
             listContainer.outerHTML = `
                 <div class="empty-transactions">
                     <div class="empty-icon">
-                        <i class="fas fa-receipt"></i>
+                        <i class="bi bi-receipt"></i>
                     </div>
                     <h6>Filtreye uygun işlem bulunamadı</h6>
                     <p class="text-muted">Farklı filtre kriterleri deneyebilirsiniz.</p>
@@ -2257,7 +2257,7 @@ document.addEventListener('DOMContentLoaded', function() {
             transactions.forEach(function(transaction) {
                 const effectiveType = transaction.effective_type || transaction.transaction_type || transaction.type || 'unknown';
                 const isPositive = ['add', 'deposit'].includes(effectiveType);
-                const iconClass = isPositive ? 'fas fa-plus-circle' : 'fas fa-minus-circle';
+                const iconClass = isPositive ? 'bi bi-plus-circle' : 'bi bi-minus-circle';
                 const iconColor = isPositive ? 'success' : 'danger';
                 const title = isPositive ? 'Kredi Yükleme' : 'Kredi Kullanımı';
                 const badge = isPositive ? 'Yüklendi' : 'Kullanıldı';
@@ -2272,9 +2272,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="transaction-title">${title}</div>
                             <div class="transaction-desc">${transaction.description || 'Açıklama yok'}</div>
                             <div class="transaction-date">
-                                <i class="fas fa-calendar-alt me-1"></i>
+                                <i class="bi bi-calendar-alt me-1"></i>
                                 ${formatDate(transaction.created_at)}
-                                ${transaction.admin_username ? `<span class="admin-info ms-2"><i class="fas fa-user-cog me-1"></i>${transaction.admin_username}</span>` : ''}
+                                ${transaction.admin_username ? `<span class="admin-info ms-2"><i class="bi bi-user-cog me-1"></i>${transaction.admin_username}</span>` : ''}
                             </div>
                         </div>
                         <div class="transaction-amount">

@@ -127,7 +127,7 @@ $basePath = isset($basePath) ? $basePath : '/';
                             <li class="mb-2">
                                 <a href="<?php echo $basePath; ?>hizmet/<?php echo urlencode($service['slug']); ?>"
                                     class="text-light text-decoration-none footer-link">
-                                    <i class="fas fa-chevron-right me-2" style="font-size: 0.8rem;"></i>
+                                    <i class="bi bi-chevron-right me-2" style="font-size: 0.8rem;"></i>
                                     <?php echo htmlspecialchars($service['name']); ?>
                                 </a>
                             </li>
@@ -135,22 +135,22 @@ $basePath = isset($basePath) ? $basePath : '/';
                     <?php else: ?>
                         <li class="mb-2">
                             <a href="<?php echo $basePath; ?>hizmet/ecu-yazilimlari" class="text-light text-decoration-none footer-link">
-                                <i class="fas fa-chevron-right me-2" style="font-size: 0.8rem;"></i>ECU Yazılımları
+                                <i class="bi bi-chevron-right me-2" style="font-size: 0.8rem;"></i>ECU Yazılımları
                             </a>
                         </li>
                         <li class="mb-2">
                             <a href="<?php echo $basePath; ?>hizmet/tcu-yazilimlari" class="text-light text-decoration-none footer-link">
-                                <i class="fas fa-chevron-right me-2" style="font-size: 0.8rem;"></i>TCU Yazılımları
+                                <i class="bi bi-chevron-right me-2" style="font-size: 0.8rem;"></i>TCU Yazılımları
                             </a>
                         </li>
                         <li class="mb-2">
                             <a href="<?php echo $basePath; ?>hizmet/immobilizer" class="text-light text-decoration-none footer-link">
-                                <i class="fas fa-chevron-right me-2" style="font-size: 0.8rem;"></i>Immobilizer
+                                <i class="bi bi-chevron-right me-2" style="font-size: 0.8rem;"></i>Immobilizer
                             </a>
                         </li>
                         <li class="mb-2">
                             <a href="<?php echo $basePath; ?>hizmet/chip-tuning" class="text-light text-decoration-none footer-link">
-                                <i class="fas fa-chevron-right me-2" style="font-size: 0.8rem;"></i>Chip Tuning
+                                <i class="bi bi-chevron-right me-2" style="font-size: 0.8rem;"></i>Chip Tuning
                             </a>
                         </li>
                     <?php endif; ?>
@@ -160,7 +160,7 @@ $basePath = isset($basePath) ? $basePath : '/';
             <!-- Ürünlerimiz -->
             <div class="col-lg-2 col-md-6 mb-4 mb-lg-0">
                 <h6 class="text-white mb-3 footer-heading">
-                    <i class="fas fa-box me-2"></i>Ürünlerimiz
+                    <i class="bi bi-box me-2"></i>Ürünlerimiz
                 </h6>
                 <ul class="list-unstyled footer-links">
                     <?php if (!empty($categories)): ?>
@@ -168,7 +168,7 @@ $basePath = isset($basePath) ? $basePath : '/';
                             <li class="mb-2">
                                 <a href="<?php echo $basePath; ?>kategori/<?php echo urlencode($category['slug']); ?>"
                                     class="text-light text-decoration-none footer-link">
-                                    <i class="fas fa-chevron-right me-2" style="font-size: 0.8rem;"></i>
+                                    <i class="bi bi-chevron-right me-2" style="font-size: 0.8rem;"></i>
                                     <?php echo htmlspecialchars($category['name']); ?>
                                 </a>
                             </li>
@@ -176,17 +176,17 @@ $basePath = isset($basePath) ? $basePath : '/';
                     <?php else: ?>
                         <li class="mb-2">
                             <a href="<?php echo $basePath; ?>kategori/ecu-modulleri" class="text-light text-decoration-none footer-link">
-                                <i class="fas fa-chevron-right me-2" style="font-size: 0.8rem;"></i>ECU Modülleri
+                                <i class="bi bi-chevron-right me-2" style="font-size: 0.8rem;"></i>ECU Modülleri
                             </a>
                         </li>
                         <li class="mb-2">
                             <a href="<?php echo $basePath; ?>kategori/yazilim-araclari" class="text-light text-decoration-none footer-link">
-                                <i class="fas fa-chevron-right me-2" style="font-size: 0.8rem;"></i>Yazılım Araçları
+                                <i class="bi bi-chevron-right me-2" style="font-size: 0.8rem;"></i>Yazılım Araçları
                             </a>
                         </li>
                         <li class="mb-2">
                             <a href="<?php echo $basePath; ?>kategori/donanim-urunleri" class="text-light text-decoration-none footer-link">
-                                <i class="fas fa-chevron-right me-2" style="font-size: 0.8rem;"></i>Donanım Ürünleri
+                                <i class="bi bi-chevron-right me-2" style="font-size: 0.8rem;"></i>Donanım Ürünleri
                             </a>
                         </li>
                     <?php endif; ?>
@@ -196,27 +196,27 @@ $basePath = isset($basePath) ? $basePath : '/';
             <!-- Hızlı Bağlantılar -->
             <div class="col-lg-2 col-md-6 mb-4 mb-lg-0">
                 <h6 class="text-white mb-3 footer-heading">
-                    <i class="fas fa-link me-2"></i>Hızlı Bağlantılar
+                    <i class="bi bi-link me-2"></i>Hızlı Bağlantılar
                 </h6>
                 <ul class="list-unstyled footer-links">
                     <li class="mb-2">
                         <a href="<?php echo $basePath; ?>index.php" class="text-light text-decoration-none footer-link">
-                            <i class="fas fa-chevron-right me-2" style="font-size: 0.8rem;"></i>Ana Sayfa
+                            <i class="bi bi-chevron-right me-2" style="font-size: 0.8rem;"></i>Ana Sayfa
                         </a>
                     </li>
                     <li class="mb-2">
                         <a href="<?php echo $basePath; ?>index.php#about" class="text-light text-decoration-none footer-link">
-                            <i class="fas fa-chevron-right me-2" style="font-size: 0.8rem;"></i>Hakkımızda
+                            <i class="bi bi-chevron-right me-2" style="font-size: 0.8rem;"></i>Hakkımızda
                         </a>
                     </li>
                     <li class="mb-2">
                         <a href="<?php echo $basePath; ?>contact.php" class="text-light text-decoration-none footer-link">
-                            <i class="fas fa-chevron-right me-2" style="font-size: 0.8rem;"></i>İletişim
+                            <i class="bi bi-chevron-right me-2" style="font-size: 0.8rem;"></i>İletişim
                         </a>
                     </li>
                     <li class="mb-2">
                         <a href="<?php echo $basePath; ?>blog.php" class="text-light text-decoration-none footer-link">
-                            <i class="fas fa-chevron-right me-2" style="font-size: 0.8rem;"></i>Blog
+                            <i class="bi bi-chevron-right me-2" style="font-size: 0.8rem;"></i>Blog
                         </a>
                     </li>
                 </ul>
@@ -225,7 +225,7 @@ $basePath = isset($basePath) ? $basePath : '/';
             <!-- İletişim Bilgileri -->
             <div class="col-lg-3 col-md-6">
                 <h6 class="text-white mb-3 footer-heading">
-                    <i class="fas fa-map-marker-alt me-2"></i>İletişim Bilgileri
+                    <i class="bi bi-map-marker-alt me-2"></i>İletişim Bilgileri
                 </h6>
                 <ul class="list-unstyled footer-contact">
                     <!-- <?php if (!empty($contactInfo)): ?>
@@ -238,7 +238,7 @@ $basePath = isset($basePath) ? $basePath : '/';
 
                     <?php if (!empty($officeData['address'])): ?>
                         <li class="mb-2">
-                            <i class="fas fa-map-marker-alt me-2 text-primary"></i>
+                            <i class="bi bi-map-marker-alt me-2 text-primary"></i>
                             <span class="text-light"><?php echo htmlspecialchars($officeData['address']); ?></span>
                         </li>
                     <?php endif; ?>
@@ -252,7 +252,7 @@ $basePath = isset($basePath) ? $basePath : '/';
 
                     if ($phoneData && !empty($phoneData['contact_info'])): ?>
                         <li class="mb-2">
-                            <i class="fas fa-phone me-2 text-primary"></i>
+                            <i class="bi bi-phone me-2 text-primary"></i>
                             <a href="<?php echo htmlspecialchars($phoneData['contact_link']); ?>"
                                 class="text-light text-decoration-none footer-link">
                                 <?php echo htmlspecialchars($phoneData['contact_info']); ?>
@@ -269,7 +269,7 @@ $basePath = isset($basePath) ? $basePath : '/';
 
                     if ($emailData && !empty($emailData['contact_info'])): ?>
                         <li class="mb-2">
-                            <i class="fas fa-envelope me-2 text-primary"></i>
+                            <i class="bi bi-envelope me-2 text-primary"></i>
                             <a href="<?php echo htmlspecialchars($emailData['contact_link']); ?>"
                                 class="text-light text-decoration-none footer-link">
                                 <?php echo htmlspecialchars($emailData['contact_info']); ?>
@@ -279,7 +279,7 @@ $basePath = isset($basePath) ? $basePath : '/';
 
                     <?php if (!empty($officeData['working_hours'])): ?>
                         <li class="mb-2">
-                            <i class="fas fa-clock me-2 text-primary"></i>
+                            <i class="bi bi-clock me-2 text-primary"></i>
                             <span class="text-light"><?php echo htmlspecialchars($officeData['working_hours']); ?></span>
                         </li>
                     <?php endif; ?>

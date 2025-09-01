@@ -421,7 +421,7 @@ include 'includes/header.php';
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
                             <a href="index.php" class="text-white-50 text-decoration-none">
-                                <i class="fas fa-home me-1"></i>Ana Sayfa
+                                <i class="bi bi-home me-1"></i>Ana Sayfa
                             </a>
                         </li>
                         <li class="breadcrumb-item active text-white" aria-current="page">Hizmetler</li>
@@ -489,10 +489,10 @@ include 'includes/header.php';
                                 <!-- Butonlar -->
                                 <div class="service-actions">
                                     <a href="hizmet/<?php echo urlencode($service['slug']); ?>" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-info-circle me-1"></i>Detaylar
+                                        <i class="bi bi-info-circle me-1"></i>Detaylar
                                     </a>
                                     <a href="<?php echo isLoggedIn() ? 'user/upload.php' : 'register.php'; ?>" class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-upload me-1"></i>Hizmet Al
+                                        <i class="bi bi-upload me-1"></i>Hizmet Al
                                     </a>
                                 </div>
                             </div>
@@ -528,7 +528,7 @@ include 'includes/header.php';
                     <div class="position-relative">
                         <div class="process-step-icon">
                             <span class="step-number">1</span>
-                            <i class="fas fa-upload"></i>
+                            <i class="bi bi-upload"></i>
                         </div>
                     </div>
                     <h5>Dosya Yükle</h5>
@@ -558,7 +558,7 @@ include 'includes/header.php';
                     <div class="position-relative">
                         <div class="process-step-icon">
                             <span class="step-number">3</span>
-                            <i class="fas fa-check-circle"></i>
+                            <i class="bi bi-check-circle"></i>
                         </div>
                     </div>
                     <h5>Kalite Kontrolü</h5>
@@ -573,7 +573,7 @@ include 'includes/header.php';
                     <div class="position-relative">
                         <div class="process-step-icon">
                             <span class="step-number">4</span>
-                            <i class="fas fa-download"></i>
+                            <i class="bi bi-download"></i>
                         </div>
                     </div>
                     <h5>Dosya Teslimi</h5>
@@ -602,17 +602,17 @@ include 'includes/header.php';
                 <div class="d-flex flex-column gap-2">
                     <?php if (!isLoggedIn()): ?>
                         <a href="register.php" class="btn btn-light btn-lg">
-                            <i class="fas fa-user-plus me-2"></i>Ücretsiz Kayıt Ol
+                            <i class="bi bi-user-plus me-2"></i>Ücretsiz Kayıt Ol
                         </a>
                         <a href="login.php" class="btn btn-outline-light">
-                            <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
+                            <i class="bi bi-sign-in-alt me-2"></i>Giriş Yap
                         </a>
                     <?php else: ?>
                         <a href="user/upload.php" class="btn btn-light btn-lg">
-                            <i class="fas fa-upload me-2"></i>Dosya Yükle
+                            <i class="bi bi-upload me-2"></i>Dosya Yükle
                         </a>
                         <a href="user/" class="btn btn-outline-light">
-                            <i class="fas fa-tachometer-alt me-2"></i>Panel
+                            <i class="bi bi-tachometer-alt me-2"></i>Panel
                         </a>
                     <?php endif; ?>
                 </div>

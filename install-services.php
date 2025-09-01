@@ -23,7 +23,7 @@ echo "<!DOCTYPE html>
         <div class='col-lg-8'>
             <div class='card shadow'>
                 <div class='card-header bg-primary text-white'>
-                    <h3 class='mb-0'><i class='fas fa-concierge-bell me-2'></i>Services System Kurulumu</h3>
+                    <h3 class='mb-0'><i class='bi bi-concierge-bell me-2'></i>Services System Kurulumu</h3>
                 </div>
                 <div class='card-body'>
 ";
@@ -97,7 +97,7 @@ try {
                 'slug' => 'ecu-yazilim-optimizasyonu',
                 'description' => 'Motor kontrol ünitesi yazılımlarınızı profesyonelce optimize ediyoruz. Performans artışı, yakıt tasarrufu ve motor verimliliği sağlıyoruz.',
                 'features' => json_encode(['Performans artışı', 'Yakıt tasarrufu', 'Motor verimliliği', 'Profesyonel yazılım', 'Güvenli optimizasyon']),
-                'icon' => 'fas fa-microchip',
+                'icon' => 'bi bi-microchip',
                 'price_from' => 150.00,
                 'is_featured' => 1,
                 'sort_order' => 1
@@ -107,7 +107,7 @@ try {
                 'slug' => 'hiz-limiti-iptali',
                 'description' => 'Araçlarda elektronik hız limiti kısıtlamalarını güvenli şekilde kaldırıyoruz. Tam performans potansiyelinizi açığa çıkarın.',
                 'features' => json_encode(['Elektronik limit kaldırma', 'Güvenli işlem', 'Tam performans', 'Profesyonel destek', 'Hızlı teslimat']),
-                'icon' => 'fas fa-tachometer-alt',
+                'icon' => 'bi bi-tachometer-alt',
                 'price_from' => 200.00,
                 'is_featured' => 1,
                 'sort_order' => 2
@@ -117,7 +117,7 @@ try {
                 'slug' => 'dpf-egr-iptali',
                 'description' => 'Dizel araçlarda DPF (partikül filtresi) ve EGR (egzoz gazı resirkülasyonu) sistemlerini güvenli şekilde iptal ediyoruz.',
                 'features' => json_encode(['DPF sistemi iptali', 'EGR sistem iptali', 'Motor ömrü uzatma', 'Yakıt tasarrufu', 'Emisyon çözümü']),
-                'icon' => 'fas fa-filter',
+                'icon' => 'bi bi-filter',
                 'price_from' => 300.00,
                 'is_featured' => 1,
                 'sort_order' => 3
@@ -127,7 +127,7 @@ try {
                 'slug' => 'immobilizer-iptali',
                 'description' => 'Arızalı immobilizer sistemlerini güvenli şekilde devre dışı bırakıyoruz. Aracınızı sorunsuz çalıştırın.',
                 'features' => json_encode(['İmmobilizer devre dışı', 'Anahtar sorunu çözümü', 'Start sorunu çözümü', 'Güvenli işlem', '7/24 destek']),
-                'icon' => 'fas fa-key',
+                'icon' => 'bi bi-key',
                 'price_from' => 100.00,
                 'is_featured' => 0,
                 'sort_order' => 4
@@ -147,7 +147,7 @@ try {
                 'slug' => 'adblue-iptali',
                 'description' => 'AdBlue sistemi sorunlarını kalıcı olarak çözüyoruz. Sistem arızalarından kurtulun.',
                 'features' => json_encode(['AdBlue sistem iptali', 'Arıza lambaları çözümü', 'Kalıcı çözüm', 'Maliyet tasarrufu', 'Profesyonel hizmet']),
-                'icon' => 'fas fa-tint',
+                'icon' => 'bi bi-tint',
                 'price_from' => 180.00,
                 'is_featured' => 0,
                 'sort_order' => 6
@@ -203,11 +203,11 @@ try {
 foreach ($messages as $msg) {
     $alertClass = 'alert-' . $msg['type'];
     $icon = match($msg['type']) {
-        'success' => 'fas fa-check-circle',
-        'danger' => 'fas fa-exclamation-triangle',
-        'warning' => 'fas fa-exclamation-circle',
-        'info' => 'fas fa-info-circle',
-        default => 'fas fa-info-circle'
+        'success' => 'bi bi-check-circle',
+        'danger' => 'bi bi-exclamation-triangle',
+        'warning' => 'bi bi-exclamation-circle',
+        'info' => 'bi bi-info-circle',
+        default => 'bi bi-info-circle'
     };
     
     echo "<div class='alert $alertClass' role='alert'>";
@@ -219,7 +219,7 @@ foreach ($messages as $msg) {
 if ($success) {
     echo "
     <div class='alert alert-success' role='alert'>
-        <h5><i class='fas fa-check-circle me-2'></i>Kurulum Tamamlandı!</h5>
+        <h5><i class='bi bi-check-circle me-2'></i>Kurulum Tamamlandı!</h5>
         <p class='mb-0'>Services sistemi başarıyla kuruldu. Artık aşağıdaki özellikleri kullanabilirsiniz:</p>
         <ul class='mt-2 mb-0'>
             <li>Ana sayfada dinamik hizmetler bölümü</li>
@@ -231,20 +231,20 @@ if ($success) {
     
     <div class='d-grid gap-2 d-md-flex justify-content-md-center'>
         <a href='index.php' class='btn btn-primary'>
-            <i class='fas fa-home me-2'></i>Ana Sayfaya Git
+            <i class='bi bi-home me-2'></i>Ana Sayfaya Git
         </a>
         <a href='services.php' class='btn btn-info'>
-            <i class='fas fa-list me-2'></i>Hizmetleri Görüntüle
+            <i class='bi bi-list me-2'></i>Hizmetleri Görüntüle
         </a>
         <a href='design/' class='btn btn-secondary'>
-            <i class='fas fa-cog me-2'></i>Design Panel
+            <i class='bi bi-cog me-2'></i>Design Panel
         </a>
     </div>
     ";
 } else {
     echo "
     <div class='alert alert-danger' role='alert'>
-        <h5><i class='fas fa-exclamation-triangle me-2'></i>Kurulum Hatası!</h5>
+        <h5><i class='bi bi-exclamation-triangle me-2'></i>Kurulum Hatası!</h5>
         <p class='mb-0'>Services sistemi kurulumu sırasında hata oluştu. Lütfen hataları düzeltip tekrar deneyin.</p>
     </div>
     ";

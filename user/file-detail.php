@@ -495,7 +495,7 @@ include '../includes/user_header.php';
                         </ol>
                     </nav>
                     <h1 class="h2 mb-0">
-                        <i class="fas fa-<?php echo $fileType === 'response' ? 'reply' : 'file-alt'; ?> me-2 text-primary"></i>
+                        <i class="bi bi-<?php echo $fileType === 'response' ? 'reply' : 'file-alt'; ?> me-2 text-primary"></i>
                         <?php echo htmlspecialchars($fileDetail['original_name'] ?? 'Bilinmeyen dosya'); ?>
                     </h1>
                     <p class="text-muted mb-0">
@@ -505,7 +505,7 @@ include '../includes/user_header.php';
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
                         <a href="files.php" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>Geri Dön
+                            <i class="bi bi-arrow-left me-1"></i>Geri Dön
                         </a>
                     </div>
                 </div>
@@ -515,7 +515,7 @@ include '../includes/user_header.php';
             <?php if ($error): ?>
                 <div class="alert alert-danger alert-modern alert-dismissible fade show" role="alert">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+                        <i class="bi bi-exclamation-triangle me-3 fa-lg"></i>
                         <div>
                             <strong>Hata!</strong> <?php echo $error; ?>
                         </div>
@@ -527,7 +527,7 @@ include '../includes/user_header.php';
             <?php if ($success): ?>
                 <div class="alert alert-success alert-modern alert-dismissible fade show" role="alert">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-check-circle me-3 fa-lg"></i>
+                        <i class="bi bi-check-circle me-3 fa-lg"></i>
                         <div>
                             <strong>Başarılı!</strong> <?php echo $success; ?>
                         </div>
@@ -540,7 +540,7 @@ include '../includes/user_header.php';
             <div class="detail-card main-file-card mb-4">
                 <div class="detail-card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-<?php echo $fileType === 'response' ? 'reply' : 'file-alt'; ?> me-2"></i>
+                        <i class="bi bi-<?php echo $fileType === 'response' ? 'reply' : 'file-alt'; ?> me-2"></i>
                         <?php echo $fileType === 'response' ? 'Yanıt Dosyası Bilgileri' : 'Ana Dosya Bilgileri'; ?>
                     </h5>
                     <div class="file-status">
@@ -558,7 +558,7 @@ include '../includes/user_header.php';
                         }
                         ?>
                         <span class="badge bg-<?php echo $config['class']; ?> status-badge">
-                            <i class="fas fa-<?php echo $config['icon']; ?> me-1"></i>
+                            <i class="bi bi-<?php echo $config['icon']; ?> me-1"></i>
                             <?php echo $config['text']; ?>
                         </span>
                     </div>
@@ -568,7 +568,7 @@ include '../includes/user_header.php';
                     <div class="row">
                         <div class="col-md-6">
                             <h6 class="text-muted mb-3">
-                                <i class="fas fa-info-circle me-2"></i>Dosya Bilgileri
+                                <i class="bi bi-info-circle me-2"></i>Dosya Bilgileri
                             </h6>
                             <div class="detail-list"  style="gap: 0;">
                                 <div class="detail-item">
@@ -578,7 +578,7 @@ include '../includes/user_header.php';
                                 <?php if ($totalCreditsSpent > 0): ?>
                                     <div class="detail-item total-credits-item">
                                         <span class="label">
-                                            <i class="fas fa-coins text-warning me-1"></i>
+                                            <i class="bi bi-coins text-warning me-1"></i>
                                             <?php echo $fileType === 'response' ? 'Bu Dosya için Toplam Harcama:' : 'Bu Dosya için Toplam Harcama:'; ?>
                                         </span>
                                         <span class="value total-credits-value">
@@ -628,23 +628,23 @@ include '../includes/user_header.php';
                                 <?php if (($fileType === 'response') || ($fileType === 'upload' && $fileDetail['status'] === 'completed')): ?>
                                     <div class="d-flex gap-2">
                                         <a href="download.php?id=<?php echo $fileDetail['id']; ?>&type=<?php echo $fileType; ?>" class="btn btn-success">
-                                            <i class="fas fa-download me-1"></i>İndir
+                                            <i class="bi bi-download me-1"></i>İndir
                                         </a>
                                         <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
                                         <?php if (isImageFile($fileDetail['original_name'])): ?>
                                             <a href="view-image.php?id=<?php echo $fileDetail['id']; ?>&type=<?php echo $fileType; ?>" class="btn btn-info">
-                                                <i class="fas fa-eye me-1"></i>Dosyayı Görüntüle
+                                                <i class="bi bi-eye me-1"></i>Dosyayı Görüntüle
                                             </a>
                                         <?php endif; ?>
                                         <button type="button" class="btn btn-outline-danger" 
                                             onclick="requestCancellation('<?php echo $fileDetail['id']; ?>', '<?php echo $fileType; ?>', '<?php echo htmlspecialchars($fileDetail['original_name']); ?>')">
-                                            <i class="fas fa-times me-1"></i>İptal
+                                            <i class="bi bi-times me-1"></i>İptal
                                         </button>
                                     </div>
                                 <?php elseif ($fileType === 'upload'): ?>
                                     <button type="button" class="btn btn-outline-danger" 
                                         onclick="requestCancellation('<?php echo $fileDetail['id']; ?>', 'upload', '<?php echo htmlspecialchars($fileDetail['original_name']); ?>')">
-                                        <i class="fas fa-times me-1"></i>İptal Et
+                                        <i class="bi bi-times me-1"></i>İptal Et
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -652,7 +652,7 @@ include '../includes/user_header.php';
 
                         <div class="col-md-6">
                             <h6 class="text-muted mb-3">
-                                <i class="fas fa-car me-2"></i>Araç Bilgileri
+                                <i class="bi bi-car me-2"></i>Araç Bilgileri
                             </h6>
                             <div class="detail-list" style="gap: 0;">
                                 <div class="detail-item">
@@ -716,7 +716,7 @@ include '../includes/user_header.php';
                         <?php if (!empty($fileDetail['original_notes'])): ?>
                             <div class="mt-4">
                                 <h6 class="text-muted mb-3">
-                                    <i class="fas fa-comment me-2"></i>Orijinal Dosya Notları
+                                    <i class="bi bi-comment me-2"></i>Orijinal Dosya Notları
                                 </h6>
                                 <div class="notes-content">
                                     <?php echo nl2br(htmlspecialchars($fileDetail['original_notes'])); ?>
@@ -728,7 +728,7 @@ include '../includes/user_header.php';
                         <?php if (!empty($fileDetail['admin_notes'])): ?>
                             <div class="mt-4">
                                 <h6 class="text-muted mb-3">
-                                    <i class="fas fa-user-cog me-2"></i>Admin Notları
+                                    <i class="bi bi-user-cog me-2"></i>Admin Notları
                                 </h6>
                                 <div class="admin-notes-content">
                                     <?php echo displayAdminNotes($fileDetail['admin_notes']); ?>
@@ -742,7 +742,7 @@ include '../includes/user_header.php';
                         <?php if ($fileType === 'response' || ($fileType === 'upload' && $fileDetail['status'] === 'completed')): ?>
                             <button type="button" class="btn btn-warning me-2" 
                                     onclick="requestRevision('<?php echo $fileDetail['id']; ?>', '<?php echo $fileType; ?>')">
-                                <i class="fas fa-redo me-2"></i>Revize Talep Et
+                                <i class="bi bi-redo me-2"></i>Revize Talep Et
                             </button>
                         <?php endif; ?>
                     </div> -->
@@ -755,7 +755,7 @@ include '../includes/user_header.php';
                     <div class="detail-card mb-4">
                         <div class="detail-card-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-reply me-2"></i>Yanıt Dosyaları (<?php echo count($responses); ?>)
+                                <i class="bi bi-reply me-2"></i>Yanıt Dosyaları (<?php echo count($responses); ?>)
                             </h5>
                         </div>
                         <div class="detail-card-body">
@@ -763,7 +763,7 @@ include '../includes/user_header.php';
                                 <?php foreach ($responses as $response): ?>
                                     <div class="response-file-item">
                                         <div class="file-icon">
-                                            <i class="fas fa-reply text-success"></i>
+                                            <i class="bi bi-reply text-success"></i>
                                         </div>
                                         <div class="file-info">
                                             <h6 class="file-name">
@@ -771,16 +771,16 @@ include '../includes/user_header.php';
                                             </h6>
                                             <div class="file-meta">
                                                 <span class="meta-item">
-                                                    <i class="fas fa-calendar me-1"></i>
+                                                    <i class="bi bi-calendar me-1"></i>
                                                     <?php echo date('d.m.Y H:i', strtotime($response['upload_date'])); ?>
                                                 </span>
                                                 <span class="meta-item">
-                                                    <i class="fas fa-hdd me-1"></i>
+                                                    <i class="bi bi-hdd me-1"></i>
                                                     <?php echo formatFileSize($response['file_size']); ?>
                                                 </span>
                                                 <?php if (!empty($response['admin_username'])): ?>
                                                     <span class="meta-item">
-                                                        <i class="fas fa-user-cog me-1"></i>
+                                                        <i class="bi bi-user-cog me-1"></i>
                                                         <?php echo htmlspecialchars($response['admin_username']); ?>
                                                     </span>
                                                 <?php endif; ?>
@@ -788,7 +788,7 @@ include '../includes/user_header.php';
                                             <?php if (!empty($response['admin_notes'])): ?>
                                                 <div class="file-notes mt-2">
                                                     <small class="text-muted">
-                                                        <i class="fas fa-comment-dots me-1"></i>
+                                                        <i class="bi bi-comment-dots me-1"></i>
                                                         <?php
                                                         if (filterAdminNotes($response['admin_notes'])) {
                                                             echo htmlspecialchars(substr($response['admin_notes'], 0, 100)) . (strlen($response['admin_notes']) > 100 ? '...' : '');
@@ -802,24 +802,24 @@ include '../includes/user_header.php';
                                         </div>
                                         <div class="file-actions">
                                             <a href="file-detail.php?id=<?php echo $response['id']; ?>&type=response" class="btn btn-outline-primary btn-sm">
-                                                <i class="fas fa-eye me-1"></i>Detay
+                                                <i class="bi bi-eye me-1"></i>Detay
                                             </a>
                                             <a href="download.php?id=<?php echo $response['id']; ?>&type=response" class="btn btn-success btn-sm">
-                                                <i class="fas fa-download me-1"></i>İndir
+                                                <i class="bi bi-download me-1"></i>İndir
                                             </a>
                                             <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
                                             <?php if (isImageFile($response['original_name'])): ?>
                                                 <a href="view-image.php?id=<?php echo $response['id']; ?>&type=response" class="btn btn-info btn-sm">
-                                                    <i class="fas fa-eye"></i>
+                                                    <i class="bi bi-eye"></i>
                                                 </a>
                                             <?php endif; ?>
                                             <button type="button" class="btn btn-outline-warning btn-sm"
                                                 onclick="requestRevision('<?php echo $response['id']; ?>', 'response')">
-                                                <i class="fas fa-redo me-1"></i>Revize
+                                                <i class="bi bi-redo me-1"></i>Revize
                                             </button>
                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                 onclick="requestCancellation('<?php echo $response['id']; ?>', 'response', '<?php echo htmlspecialchars($response['original_name']); ?>')">
-                                                <i class="fas fa-times me-1"></i>İptal
+                                                <i class="bi bi-times me-1"></i>İptal
                                             </button>
                                         </div>
                                     </div>
@@ -834,7 +834,7 @@ include '../includes/user_header.php';
                     <div class="detail-card mb-4">
                         <div class="detail-card-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-edit me-2"></i>Revize Dosyaları (<?php echo count($allRevisionFiles); ?>)
+                                <i class="bi bi-edit me-2"></i>Revize Dosyaları (<?php echo count($allRevisionFiles); ?>)
                             </h5>
                         </div>
                         <div class="detail-card-body">
@@ -842,7 +842,7 @@ include '../includes/user_header.php';
                                 <?php foreach ($allRevisionFiles as $revFile): ?>
                                     <div class="revision-file-item">
                                         <div class="file-icon">
-                                            <i class="fas fa-edit text-warning"></i>
+                                            <i class="bi bi-edit text-warning"></i>
                                         </div>
                                         <div class="file-info">
                                             <h6 class="file-name">
@@ -850,28 +850,28 @@ include '../includes/user_header.php';
                                             </h6>
                                             <div class="file-meta">
                                                 <span class="meta-item">
-                                                    <i class="fas fa-calendar me-1"></i>
+                                                    <i class="bi bi-calendar me-1"></i>
                                                     <?php echo date('d.m.Y H:i', strtotime($revFile['upload_date'])); ?>
                                                 </span>
                                                 <span class="meta-item">
-                                                    <i class="fas fa-hdd me-1"></i>
+                                                    <i class="bi bi-hdd me-1"></i>
                                                     <?php echo formatFileSize($revFile['file_size']); ?>
                                                 </span>
                                                 <?php if (!empty($revFile['admin_username'])): ?>
                                                     <span class="meta-item">
-                                                        <i class="fas fa-user-cog me-1"></i>
+                                                        <i class="bi bi-user-cog me-1"></i>
                                                         <?php echo htmlspecialchars($revFile['admin_username']); ?>
                                                     </span>
                                                 <?php endif; ?>
                                                 <span class="meta-item">
-                                                    <i class="fas fa-hashtag me-1"></i>
+                                                    <i class="bi bi-hashtag me-1"></i>
                                                     Revize #<?php echo substr($revFile['revision_id'], 0, 8); ?>
                                                 </span>
                                             </div>
                                             <?php if (!empty($revFile['revision_notes'])): ?>
                                                 <div class="file-notes mt-2">
                                                     <small class="text-muted">
-                                                        <i class="fas fa-comment-dots me-1"></i>
+                                                        <i class="bi bi-comment-dots me-1"></i>
                                                         <strong>Talep:</strong> <?php echo htmlspecialchars(substr($revFile['revision_notes'], 0, 100)) . (strlen($revFile['revision_notes']) > 100 ? '...' : ''); ?>
                                                     </small>
                                                 </div>
@@ -879,7 +879,7 @@ include '../includes/user_header.php';
                                             <?php if (!empty($revFile['admin_notes'])): ?>
                                                 <div class="file-notes mt-1">
                                                     <small class="text-muted">
-                                                        <i class="fas fa-user-shield me-1"></i>
+                                                        <i class="bi bi-user-shield me-1"></i>
                                                         <strong>Admin Notu:</strong> <?php echo htmlspecialchars(substr($revFile['admin_notes'], 0, 100)) . (strlen($revFile['admin_notes']) > 100 ? '...' : ''); ?>
                                                     </small>
                                                 </div>
@@ -887,24 +887,24 @@ include '../includes/user_header.php';
                                         </div>
                                         <div class="file-actions">
                                             <a href="revision-detail.php?id=<?php echo $revFile['revision_id']; ?>" class="btn btn-outline-primary btn-sm">
-                                                <i class="fas fa-eye me-1"></i>Detay
+                                                <i class="bi bi-eye me-1"></i>Detay
                                             </a>
                                             <a href="download-revision.php?id=<?php echo $revFile['id']; ?>" class="btn btn-warning btn-sm">
-                                                <i class="fas fa-download me-1"></i>İndir
+                                                <i class="bi bi-download me-1"></i>İndir
                                             </a>
                                             <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
                                             <?php if (isImageFile($revFile['original_name'])): ?>
                                                 <a href="view-image.php?id=<?php echo $revFile['id']; ?>&type=revision" class="btn btn-info btn-sm">
-                                                    <i class="fas fa-eye"></i>
+                                                    <i class="bi bi-eye"></i>
                                                 </a>
                                             <?php endif; ?>
                                             <button type="button" class="btn btn-outline-warning btn-sm"
                                                 onclick="requestRevision('<?php echo $revFile['id']; ?>', 'revision')">
-                                                <i class="fas fa-redo me-1"></i>Yeniden Revize
+                                                <i class="bi bi-redo me-1"></i>Yeniden Revize
                                             </button>
                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                 onclick="requestCancellation('<?php echo $revFile['id']; ?>', 'revision', '<?php echo htmlspecialchars($revFile['original_name']); ?>')">
-                                                <i class="fas fa-times me-1"></i>İptal
+                                                <i class="bi bi-times me-1"></i>İptal
                                             </button>
                                         </div>
                                     </div>
@@ -924,7 +924,7 @@ include '../includes/user_header.php';
                     <div class="detail-card mb-4">
                         <div class="detail-card-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-paperclip me-2"></i>Ek Dosyalar
+                                <i class="bi bi-paperclip me-2"></i>Ek Dosyalar
                                 <span class="badge bg-secondary ms-2"><?php echo count($additionalFiles); ?></span>
                             </h5>
                         </div>
@@ -933,7 +933,7 @@ include '../includes/user_header.php';
                                 <?php foreach ($additionalFiles as $file): ?>
                                     <div class="other-file-item"> <!-- Aynı sınıf isimleriyle tutarlılık -->
                                         <div class="file-icon">
-                                            <i class="fas fa-paperclip text-info"></i> <!-- Farklı ikon, ama aynı yapı -->
+                                            <i class="bi bi-paperclip text-info"></i> <!-- Farklı ikon, ama aynı yapı -->
                                         </div>
                                         <div class="file-info">
                                             <h6 class="file-name">
@@ -944,7 +944,7 @@ include '../includes/user_header.php';
                                             </h6>
                                             <div class="file-meta">
                                                 <span class="meta-item">
-                                                    <i class="fas fa-user me-1"></i>
+                                                    <i class="bi bi-user me-1"></i>
                                                     <?php if ($file['sender_type'] === 'admin'): ?>
                                                         <span class="badge bg-primary">Admin</span>
                                                     <?php else: ?>
@@ -953,21 +953,21 @@ include '../includes/user_header.php';
                                                     <?php echo htmlspecialchars($file['sender_first_name'] . ' ' . $file['sender_last_name']); ?>
                                                 </span>
                                                 <span class="meta-item">
-                                                    <i class="fas fa-calendar me-1"></i>
+                                                    <i class="bi bi-calendar me-1"></i>
                                                     <?php echo date('d.m.Y H:i', strtotime($file['upload_date'])); ?>
                                                 </span>
                                                 <span class="meta-item">
-                                                    <i class="fas fa-hdd me-1"></i>
+                                                    <i class="bi bi-hdd me-1"></i>
                                                     <?php echo formatFileSize($file['file_size']); ?>
                                                 </span>
                                                 <?php if ($file['credits'] > 0): ?>
                                                     <span class="meta-item">
-                                                        <i class="fas fa-coins me-1"></i>
+                                                        <i class="bi bi-coins me-1"></i>
                                                         <span class="badge bg-danger"><?php echo $file['credits']; ?> kredi</span>
                                                     </span>
                                                 <?php else: ?>
                                                     <span class="meta-item">
-                                                        <i class="fas fa-tag me-1"></i>
+                                                        <i class="bi bi-tag me-1"></i>
                                                         <span class="badge bg-secondary">Ücretsiz</span>
                                                     </span>
                                                 <?php endif; ?>
@@ -975,7 +975,7 @@ include '../includes/user_header.php';
                                             <?php if (!empty($file['notes'])): ?>
                                                 <div class="file-notes mt-2">
                                                     <small class="text-muted">
-                                                        <i class="fas fa-comment-dots me-1"></i>
+                                                        <i class="bi bi-comment-dots me-1"></i>
                                                         <strong>Not:</strong> <?php echo htmlspecialchars(substr($file['notes'], 0, 100)) . (strlen($file['notes']) > 100 ? '...' : ''); ?>
                                                     </small>
                                                 </div>
@@ -983,17 +983,17 @@ include '../includes/user_header.php';
                                         </div>
                                         <div class="file-actions">
                                             <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm">
-                                                <i class="fas fa-download me-1"></i>İndir
+                                                <i class="bi bi-download me-1"></i>İndir
                                             </a>
                                             <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
                                             <?php if (isImageFile($file['original_name'])): ?>
                                                 <a href="view-image.php?id=<?php echo $file['id']; ?>&type=additional" class="btn btn-info btn-sm">
-                                                    <i class="fas fa-eye"></i>
+                                                    <i class="bi bi-eye"></i>
                                                 </a>
                                             <?php endif; ?>
                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                 onclick="requestCancellation('<?php echo $file['id']; ?>', 'additional', '<?php echo htmlspecialchars($file['original_name']); ?>')">
-                                                <i class="fas fa-times me-1"></i>İptal
+                                                <i class="bi bi-times me-1"></i>İptal
                                             </button>
                                         </div>
                                     </div>
@@ -1013,7 +1013,7 @@ include '../includes/user_header.php';
                         <div class="detail-card" style="height: 100%; display: flex; flex-direction: column;">
                             <div class="card-header">
                                 <h6 class="mb-0">
-                                    <i class="fas fa-upload me-2"></i>Admine Dosya Gönder
+                                    <i class="bi bi-upload me-2"></i>Admine Dosya Gönder
                                 </h6>
                             </div>
                             <div class="card-body mt-5">
@@ -1038,12 +1038,12 @@ include '../includes/user_header.php';
                                         </div>
 
                                         <button type="submit" class="btn btn-primary w-100" id="submitAdditionalFileBtn">
-                                            <i class="fas fa-upload me-1"></i>Dosyayı Gönder
+                                            <i class="bi bi-upload me-1"></i>Dosyayı Gönder
                                         </button>
                                     </form>
                                 <?php else: ?>
                                     <div class="alert alert-warning">
-                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
                                         Admin kullanıcısı bulunamadı. Dosya gönderilemiyor.
                                     </div>
                                 <?php endif; ?>
@@ -1056,14 +1056,14 @@ include '../includes/user_header.php';
                         <div class="detail-card" id="chatContainer" style="height: 100%; display: flex; flex-direction: column;">
                             <div class="card-header">
                                 <h6 class="mb-0">
-                                    <i class="fas fa-comments me-2"></i>Admin ile Mesajlaşma
+                                    <i class="bi bi-comments me-2"></i>Admin ile Mesajlaşma
                                 </h6>
                             </div>
                             <div class="card-body p-0">
                                 <!-- Chat Mesajları -->
                                 <div id="chatMessages" class="chat-messages" style="height: 400px; overflow-y: auto; padding: 1rem;">
                                     <div class="text-center text-muted">
-                                        <i class="fas fa-spinner fa-spin"></i> Mesajlar yükleniyor...
+                                        <i class="bi bi-spinner fa-spin"></i> Mesajlar yükleniyor...
                                     </div>
                                 </div>
 
@@ -1078,7 +1078,7 @@ include '../includes/user_header.php';
                                         </div>
                                         <div class="align-self-end">
                                             <button type="submit" class="btn btn-primary">
-                                                <i class="fas fa-paper-plane"></i>
+                                                <i class="bi bi-paper-plane"></i>
                                             </button>
                                         </div>
                                     </form>
@@ -1150,7 +1150,7 @@ include '../includes/user_header.php';
                                     if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
                                         listElement.innerHTML = `
                                             <div class="text-center text-warning py-4">
-                                                <i class="fas fa-wifi fa-2x mb-2"></i>
+                                                <i class="bi bi-wifi fa-2x mb-2"></i>
                                                 <p class="mb-0">Bağlantı hatası. Lütfen sayfayı yenileyin.</p>
                                             </div>
                                         `;
@@ -1187,7 +1187,7 @@ include '../includes/user_header.php';
                         if (otherFiles.length === 0) {
                             container.innerHTML = `
                                 <div class="text-center text-muted py-4">
-                                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                                    <i class="bi bi-inbox fa-2x mb-2"></i>
                                     <p class="mb-0">Henüz ek dosya bulunmuyor.</p>
                                 </div>
                             `;
@@ -1205,7 +1205,7 @@ include '../includes/user_header.php';
                             html += `
                                 <div class="other-file-item ${isUnread ? 'unread' : ''}" data-file-id="${file.id}" style="animation-delay: ${index * 0.05}s">
                                     <div class="file-icon">
-                                        <i class="fas fa-file text-white"></i>
+                                        <i class="bi bi-file text-white"></i>
                                     </div>
                                     <div class="flex-grow-1">
                                         <strong>${escapeHtml(file.original_name)}</strong>
@@ -1221,7 +1221,7 @@ include '../includes/user_header.php';
                                     </div>
                                     <a href="../download-additional.php?id=${file.id}" class="btn btn-primary btn-sm" 
                                        onclick="markAsRead('${file.id}')">
-                                        <i class="fas fa-download"></i>
+                                        <i class="bi bi-download"></i>
                                     </a>
                                 </div>
                             `;
@@ -1328,7 +1328,7 @@ include '../includes/user_header.php';
                                 const submitBtn = this.querySelector('button[type="submit"]');
                                 const originalText = submitBtn.innerHTML;
                                 submitBtn.disabled = true;
-                                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Yüklüyor...';
+                                submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-2"></i>Yüklüyor...';
 
                                 fetch('../ajax/additional_files.php', {
                                         method: 'POST',
@@ -1392,7 +1392,7 @@ include '../includes/user_header.php';
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
                                 <div>
-                                    <strong><i class="fas fa-check-circle me-2"></i>Başarılı!</strong>
+                                    <strong><i class="bi bi-check-circle me-2"></i>Başarılı!</strong>
                                     <span class="ms-2">${message}</span>
                                 </div>
                             </div>
@@ -1425,7 +1425,7 @@ include '../includes/user_header.php';
                         alertDiv.style.cssText = 'animation: shake 0.3s ease; position: relative; z-index: 1000;';
                         alertDiv.innerHTML = `
                             <div class="d-flex align-items-center">
-                                <i class="fas fa-exclamation-triangle fa-lg me-2"></i>
+                                <i class="bi bi-exclamation-triangle fa-lg me-2"></i>
                                 <div>
                                     <strong>Hata!</strong>
                                     <span class="ms-2">${message}</span>
@@ -1478,7 +1478,7 @@ include '../includes/user_header.php';
                     <div class="detail-card mb-4">
                         <div class="detail-card-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-comments me-2 text-primary"></i>İletişim Geçmişi (<?php echo count($communicationHistory); ?>)
+                                <i class="bi bi-comments me-2 text-primary"></i>İletişim Geçmişi (<?php echo count($communicationHistory); ?>)
                             </h5>
                             <span class="badge bg-primary">
                                 Ben ↔ Admin Konuşmalarım
@@ -1486,7 +1486,7 @@ include '../includes/user_header.php';
                         </div>
                         <div class="detail-card-body">
                             <div class="alert alert-info mb-4">
-                                <i class="fas fa-info-circle me-2"></i>
+                                <i class="bi bi-info-circle me-2"></i>
                                 <strong>Bu dosya ile ilgili tüm konuşmalarım:</strong>
                                 Yükleme notlarım, admin yanıtları, revize taleplerim ve cevapları kronolojik sırada.
                             </div>
@@ -1497,12 +1497,12 @@ include '../includes/user_header.php';
                                         <div class="timeline-marker">
                                             <?php
                                             $typeConfig = [
-                                                'user_upload' => ['icon' => 'fas fa-upload text-primary', 'color' => 'primary'],
-                                                'admin_response' => ['icon' => 'fas fa-reply text-success', 'color' => 'success'],
-                                                'user_revision_request' => ['icon' => 'fas fa-edit text-warning', 'color' => 'warning'],
-                                                'admin_revision_response' => ['icon' => 'fas fa-user-shield text-info', 'color' => 'info']
+                                                'user_upload' => ['icon' => 'bi bi-upload text-primary', 'color' => 'primary'],
+                                                'admin_response' => ['icon' => 'bi bi-reply text-success', 'color' => 'success'],
+                                                'user_revision_request' => ['icon' => 'bi bi-edit text-warning', 'color' => 'warning'],
+                                                'admin_revision_response' => ['icon' => 'bi bi-user-shield text-info', 'color' => 'info']
                                             ];
-                                            $config = $typeConfig[$comm['type']] ?? ['icon' => 'fas fa-comment text-secondary', 'color' => 'secondary'];
+                                            $config = $typeConfig[$comm['type']] ?? ['icon' => 'bi bi-comment text-secondary', 'color' => 'secondary'];
                                             ?>
                                             <i class="<?php echo $config['icon']; ?>"></i>
                                         </div>
@@ -1512,35 +1512,35 @@ include '../includes/user_header.php';
                                                     <h6 class="mb-1">
                                                         <?php if ($comm['type'] === 'user_upload'): ?>
                                                             <span class="badge bg-primary">
-                                                                <i class="fas fa-user me-1"></i>Dosya Yükleme Notum
+                                                                <i class="bi bi-user me-1"></i>Dosya Yükleme Notum
                                                             </span>
                                                         <?php elseif ($comm['type'] === 'admin_response'): ?>
                                                             <span class="badge bg-success">
-                                                                <i class="fas fa-user-shield me-1"></i>Admin'in Yanıt Dosyası Notu
+                                                                <i class="bi bi-user-shield me-1"></i>Admin'in Yanıt Dosyası Notu
                                                             </span>
                                                         <?php elseif ($comm['type'] === 'user_revision_request'): ?>
                                                             <span class="badge bg-warning">
-                                                                <i class="fas fa-edit me-1"></i>Revize Talebim
+                                                                <i class="bi bi-edit me-1"></i>Revize Talebim
                                                             </span>
                                                         <?php elseif ($comm['type'] === 'admin_revision_response'): ?>
                                                             <span class="badge bg-info">
-                                                                <i class="fas fa-reply me-1"></i>Admin'in Cevabı
+                                                                <i class="bi bi-reply me-1"></i>Admin'in Cevabı
                                                             </span>
                                                         <?php endif; ?>
 
                                                         <?php if (isset($comm['file_name'])): ?>
                                                             <span class="badge bg-secondary ms-2">
-                                                                <i class="fas fa-file me-1"></i><?php echo htmlspecialchars(substr($comm['file_name'], 0, 20)) . (strlen($comm['file_name']) > 20 ? '...' : ''); ?>
+                                                                <i class="bi bi-file me-1"></i><?php echo htmlspecialchars(substr($comm['file_name'], 0, 20)) . (strlen($comm['file_name']) > 20 ? '...' : ''); ?>
                                                             </span>
                                                         <?php endif; ?>
                                                     </h6>
                                                     <small class="text-muted">
-                                                        <i class="fas fa-calendar me-1"></i>
+                                                        <i class="bi bi-calendar me-1"></i>
                                                         <?php echo date('d.m.Y H:i', strtotime($comm['date'])); ?>
 
                                                         <?php if (isset($comm['admin_username']) && !empty($comm['admin_username'])): ?>
                                                             <span class="ms-2">
-                                                                <i class="fas fa-user-shield me-1"></i>
+                                                                <i class="bi bi-user-shield me-1"></i>
                                                                 Admin: <?php echo htmlspecialchars($comm['admin_username']); ?>
                                                             </span>
                                                         <?php endif; ?>
@@ -1552,7 +1552,7 @@ include '../includes/user_header.php';
                                             <?php if (!empty($comm['response_file_name'])): ?>
                                                 <div class="mb-3">
                                                     <div class="file-reference">
-                                                        <i class="fas fa-arrow-right text-primary me-2"></i>
+                                                        <i class="bi bi-arrow-right text-primary me-2"></i>
                                                         <strong>Revize ettiğim dosya:</strong>
                                                         <span class="text-primary"><?php echo htmlspecialchars($comm['response_file_name']); ?></span>
                                                         <small class="text-muted ms-2">(Yanıt Dosyası)</small>
@@ -1596,12 +1596,12 @@ include '../includes/user_header.php';
                                                 <div class="mb-3">
                                                     <div class="file-reference">
                                                         <?php if ($targetFileType === 'Revizyon Dosyası'): ?>
-                                                            <i class="fas fa-arrow-right text-warning me-2"></i>
+                                                            <i class="bi bi-arrow-right text-warning me-2"></i>
                                                             <strong>Revize talep ettiğim dosya:</strong>
                                                             <span class="text-warning"><?php echo htmlspecialchars($targetFileName); ?></span>
                                                             <small class="text-muted ms-2">(<?php echo $targetFileType; ?>)</small>
                                                         <?php else: ?>
-                                                            <i class="fas fa-arrow-right text-success me-2"></i>
+                                                            <i class="bi bi-arrow-right text-success me-2"></i>
                                                             <strong>Revize talep ettiğim dosya:</strong>
                                                             <span class="text-success"><?php echo $targetFileName; ?></span>
                                                             <small class="text-muted ms-2">(<?php echo $targetFileType; ?>)</small>
@@ -1614,7 +1614,7 @@ include '../includes/user_header.php';
                                             <?php if (!empty($comm['user_notes'])): ?>
                                                 <div class="revision-note user-note mb-3">
                                                     <div class="note-header">
-                                                        <i class="fas fa-user me-2 text-primary"></i>
+                                                        <i class="bi bi-user me-2 text-primary"></i>
                                                         <strong>
                                                             <?php if ($comm['type'] === 'user_upload'): ?>
                                                                 Yükleme sırasında yazdığım notlar:
@@ -1633,7 +1633,7 @@ include '../includes/user_header.php';
                                             <?php if (!empty($comm['admin_notes'])): ?>
                                                 <div class="revision-note admin-note mb-2">
                                                     <div class="note-header">
-                                                        <i class="fas fa-user-shield me-2 text-success"></i>
+                                                        <i class="bi bi-user-shield me-2 text-success"></i>
                                                         <strong>
                                                             <?php if ($comm['type'] === 'admin_response'): ?>
                                                                 Admin'in yanıt dosyası notları:
@@ -1651,7 +1651,7 @@ include '../includes/user_header.php';
                                                 <?php if (!empty($comm['revision_files'])): ?>
                                                     <div class="admin-files mt-3">
                                                         <h6 class="text-success mb-2">
-                                                            <i class="fas fa-file-download me-2"></i>
+                                                            <i class="bi bi-file-download me-2"></i>
                                                             Admin'in Yükledıği Revizyon Dosyaları:
                                                         </h6>
                                                         <div class="admin-files-list">
@@ -1659,7 +1659,7 @@ include '../includes/user_header.php';
                                                                 <div class="admin-file-item">
                                                                     <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-2">
                                                                         <div class="file-info">
-                                                                            <i class="fas fa-file-download text-success me-2"></i>
+                                                                            <i class="bi bi-file-download text-success me-2"></i>
                                                                             <strong><?php echo htmlspecialchars($revFile['original_name']); ?></strong>
                                                                             <span class="text-muted ms-2">
                                                                                 (<?php echo formatFileSize($revFile['file_size']); ?>)
@@ -1668,19 +1668,19 @@ include '../includes/user_header.php';
                                                                         <div class="d-flex gap-2">
                                                                             <a href="revision-detail.php?id=<?php echo $revFile['revision_id']; ?>"
                                                                                 class="btn btn-outline-primary btn-sm">
-                                                                                <i class="fas fa-eye me-1"></i>Detay
+                                                                                <i class="bi bi-eye me-1"></i>Detay
                                                                             </a>
                                                                             <a href="download-revision.php?id=<?php echo $revFile['id']; ?>"
                                                                                 class="btn btn-success btn-sm">
-                                                                                <i class="fas fa-download me-1"></i>İndir
+                                                                                <i class="bi bi-download me-1"></i>İndir
                                                                             </a>
                                                                             <button type="button" class="btn btn-outline-warning btn-sm"
                                                                                 onclick="requestRevision('<?php echo $revFile['id']; ?>', 'revision')">
-                                                                                <i class="fas fa-redo me-1"></i>Revize Talep Et
+                                                                                <i class="bi bi-redo me-1"></i>Revize Talep Et
                                                                             </button>
                                                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                                                 onclick="requestCancellation('<?php echo $revFile['id']; ?>', 'revision', '<?php echo htmlspecialchars($revFile['original_name']); ?>')">
-                                                                                <i class="fas fa-times me-1"></i>İptal
+                                                                                <i class="bi bi-times me-1"></i>İptal
                                                                             </button>
                                                                         </div>
                                                                     </div>
@@ -1693,14 +1693,14 @@ include '../includes/user_header.php';
                                                     <?php if ($comm['type'] === 'admin_response' && !empty($comm['response_id'])): ?>
                                                         <div class="admin-files mt-3">
                                                             <h6 class="text-success mb-2">
-                                                                <i class="fas fa-file-download me-2"></i>
+                                                                <i class="bi bi-file-download me-2"></i>
                                                                 Admin'in Yüklediği Yanıt Dosyası:
                                                             </h6>
                                                             <div class="admin-files-list">
                                                                 <div class="admin-file-item">
                                                                     <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-2">
                                                                         <div class="file-info">
-                                                                            <i class="fas fa-file-download text-success me-2"></i>
+                                                                            <i class="bi bi-file-download text-success me-2"></i>
                                                                             <strong><?php echo htmlspecialchars($comm['file_name']); ?></strong>
                                                                             <span class="text-muted ms-2">
                                                                                 (Yanıt Dosyası)
@@ -1709,19 +1709,19 @@ include '../includes/user_header.php';
                                                                         <div class="d-flex gap-2">
                                                                             <a href="file-detail.php?id=<?php echo $comm['response_id']; ?>&type=response"
                                                                                 class="btn btn-outline-primary btn-sm">
-                                                                                <i class="fas fa-eye me-1"></i>Detay
+                                                                                <i class="bi bi-eye me-1"></i>Detay
                                                                             </a>
                                                                             <a href="download.php?id=<?php echo $comm['response_id']; ?>&type=response"
                                                                                 class="btn btn-success btn-sm">
-                                                                                <i class="fas fa-download me-1"></i>İndir
+                                                                                <i class="bi bi-download me-1"></i>İndir
                                                                             </a>
                                                                             <button type="button" class="btn btn-outline-warning btn-sm"
                                                                                 onclick="requestRevision('<?php echo $comm['response_id']; ?>', 'response')">
-                                                                                <i class="fas fa-redo me-1"></i>Revize Talep Et
+                                                                                <i class="bi bi-redo me-1"></i>Revize Talep Et
                                                                             </button>
                                                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                                                 onclick="requestCancellation('<?php echo $comm['response_id']; ?>', 'response', '<?php echo htmlspecialchars($comm['file_name']); ?>')">
-                                                                                <i class="fas fa-times me-1"></i>İptal
+                                                                                <i class="bi bi-times me-1"></i>İptal
                                                                             </button>
                                                                         </div>
                                                                     </div>
@@ -1733,7 +1733,7 @@ include '../includes/user_header.php';
                                                     <?php if ($comm['type'] === 'user_revision_request' && $comm['status'] === 'pending'): ?>
                                                         <div class="revision-note admin-note mb-2 pending-response">
                                                             <div class="note-header">
-                                                                <i class="fas fa-hourglass-half me-2 text-muted"></i>
+                                                                <i class="bi bi-hourglass-half me-2 text-muted"></i>
                                                                 <strong>Admin Cevabı:</strong>
                                                             </div>
                                                             <div class="note-content">
@@ -1749,7 +1749,7 @@ include '../includes/user_header.php';
                                                 <div class="communication-meta">
                                                     <?php if (isset($comm['credits_charged']) && $comm['credits_charged'] > 0): ?>
                                                         <span class="meta-item text-warning">
-                                                            <i class="fas fa-coins me-1"></i>
+                                                            <i class="bi bi-coins me-1"></i>
                                                             <?php echo $comm['credits_charged']; ?> kredi düşürüldü
                                                         </span>
                                                     <?php endif; ?>
@@ -1757,7 +1757,7 @@ include '../includes/user_header.php';
                                                     <?php if (isset($comm['response_id'])): ?>
                                                         <a href="file-detail.php?id=<?php echo $comm['response_id']; ?>&type=response"
                                                             class="meta-item text-primary" style="text-decoration: none;">
-                                                            <i class="fas fa-external-link-alt me-1"></i>
+                                                            <i class="bi bi-external-link-alt me-1"></i>
                                                             Dosyayı Görüntüle
                                                         </a>
                                                     <?php endif; ?>
@@ -1765,7 +1765,7 @@ include '../includes/user_header.php';
                                                     <?php if (isset($comm['revision_id'])): ?>
                                                         <a href="revision-detail.php?id=<?php echo $comm['revision_id']; ?>"
                                                             class="meta-item text-info" style="text-decoration: none;">
-                                                            <i class="fas fa-history me-1"></i>
+                                                            <i class="bi bi-history me-1"></i>
                                                             Revizyon Detayları
                                                         </a>
                                                     <?php endif; ?>
@@ -1783,7 +1783,7 @@ include '../includes/user_header.php';
                             <!-- İletişim Özeti -->
                             <div class="communication-summary mt-4 p-3 bg-light rounded">
                                 <h6 class="mb-2">
-                                    <i class="fas fa-chart-line me-2 text-info"></i>İletişim Özeti
+                                    <i class="bi bi-chart-line me-2 text-info"></i>İletişim Özeti
                                 </h6>
                                 <div class="row text-center">
                                     <?php
@@ -1820,7 +1820,7 @@ include '../includes/user_header.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-redo me-2 text-warning"></i>Revize Talebi
+                    <i class="bi bi-redo me-2 text-warning"></i>Revize Talebi
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -1834,7 +1834,7 @@ include '../includes/user_header.php';
     border: 1px solid #81c784;
     border-radius: 12px;">
                         <div class="d-flex">
-                            <i class="fas fa-info-circle me-3 mt-1"></i>
+                            <i class="bi bi-info-circle me-3 mt-1"></i>
                             <div>
                                 <strong>Revize Talebi Hakkında</strong>
                                 <p class="mb-0 mt-1" id="revisionInfoText">
@@ -1847,14 +1847,14 @@ include '../includes/user_header.php';
 
                     <div class="mb-3">
                         <label for="revision_notes" class="form-label fw-semibold">
-                            <i class="fas fa-comment me-1"></i>
+                            <i class="bi bi-comment me-1"></i>
                             Revize Talebi Açıklaması <span class="text-danger">*</span>
                         </label>
                         <textarea class="form-control form-control-modern" id="revision_notes" name="revision_notes"
                             rows="5" required
                             placeholder="Lütfen dosyada hangi değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: 'Güç artırımı', 'EGR kapatma', 'DPF silme' gibi..."></textarea>
                         <div class="form-text">
-                            <i class="fas fa-lightbulb me-1"></i>
+                            <i class="bi bi-lightbulb me-1"></i>
                             Ne tür değişiklik istediğinizi mümkün olduğunca detaylı açıklayın.
                         </div>
                     </div>
@@ -1862,7 +1862,7 @@ include '../includes/user_header.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-warning">
-                        <i class="fas fa-paper-plane me-2"></i>Revize Talebi Gönder
+                        <i class="bi bi-paper-plane me-2"></i>Revize Talebi Gönder
                     </button>
                 </div>
             </form>
@@ -2480,15 +2480,15 @@ include '../includes/user_header.php';
 
                 // Modal içeriğini dosya tipine göre ayarla
                 if (fileType === 'response') {
-                    modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Yanıt Dosyası Revize Talebi';
+                    modalTitle.innerHTML = '<i class="bi bi-redo me-2 text-warning"></i>Yanıt Dosyası Revize Talebi';
                     revisionInfoText.innerHTML = 'Yanıt dosyasında bir değişiklik veya düzenleme istiyorsanız bu formu kullanabilirsiniz. Admin ekibimiz dosyanızı yeniden gözden geçirecek ve geliştirilmiş bir sürüm hazırlayacaktır.';
                     revisionNotesElement.placeholder = 'Yanıt dosyasında hangi değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Daha fazla güç istiyorum", "Yakıt tüketimi daha iyi olsun", "Torku artmalı" gibi...';
                 } else if (fileType === 'revision') {
-                    modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Revize Dosyası İçin Yeni Revize Talebi';
+                    modalTitle.innerHTML = '<i class="bi bi-redo me-2 text-warning"></i>Revize Dosyası İçin Yeni Revize Talebi';
                     revisionInfoText.innerHTML = 'Mevcut revize dosyasında ek değişiklikler istiyorsanız bu formu kullanabilirsiniz. Admin ekibimiz dosyanızı tekrar gözden geçirecek ve istekleriniz doğrultusunda düzenleyecektir.';
                     revisionNotesElement.placeholder = 'Revize dosyasında hangi ek değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Daha fazla performans", "Farklı ayarlar", "Ek özellikler" gibi...';
                 } else {
-                    modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Revize Talebi';
+                    modalTitle.innerHTML = '<i class="bi bi-redo me-2 text-warning"></i>Revize Talebi';
                     revisionInfoText.innerHTML = 'Dosyanızda bir değişiklik veya düzenleme istiyorsanız bu formu kullanabilirsiniz. Talep incelendikten sonra size geri dönüş yapılacaktır.';
                     revisionNotesElement.placeholder = 'Lütfen dosyada hangi değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Güç artırımı", "EGR kapatma", "DPF silme" gibi...';
                 }
@@ -2993,7 +2993,7 @@ include '../includes/user_header.php';
                     // Hiç mesaj yoksa
                     document.getElementById('chatMessages').innerHTML = `
                     <div class="text-center text-muted py-4">
-                        <i class="fas fa-comment-slash me-2"></i>
+                        <i class="bi bi-comment-slash me-2"></i>
                         Henüz mesaj yok. İlk mesajı siz gönderin!
                     </div>
                 `;
@@ -3004,7 +3004,7 @@ include '../includes/user_header.php';
                 if (!lastMessageId) {
                     document.getElementById('chatMessages').innerHTML = `
                     <div class="text-center text-danger py-4">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <i class="bi bi-exclamation-triangle me-2"></i>
                         Mesajlar yüklenemedi.
                     </div>
                 `;
@@ -3179,14 +3179,14 @@ include '../includes/user_header.php';
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title" id="fileCancellationModalLabel">
-                    <i class="fas fa-times-circle me-2"></i>Dosya İptali
+                    <i class="bi bi-times-circle me-2"></i>Dosya İptali
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="alert alert-warning border-0 mb-4">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-triangle fa-2x text-warning me-3"></i>
+                        <i class="bi bi-exclamation-triangle fa-2x text-warning me-3"></i>
                         <div>
                             <h6 class="alert-heading mb-1">Dikkat!</h6>
                             <p class="mb-0">Bu dosyayı iptal etmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
@@ -3200,7 +3200,7 @@ include '../includes/user_header.php';
                     
                     <div class="file-info-box mb-4">
                         <div class="d-flex align-items-center">
-                            <i class="fas fa-file-alt fa-2x text-primary me-3"></i>
+                            <i class="bi bi-file-alt fa-2x text-primary me-3"></i>
                             <div>
                                 <h6 class="mb-1">Dosya:</h6>
                                 <p class="mb-0 text-muted" id="cancelFileName">-</p>
@@ -3210,13 +3210,13 @@ include '../includes/user_header.php';
                     
                     <div class="mb-4">
                         <label for="cancellationReason" class="form-label">
-                            <i class="fas fa-comment-dots me-1"></i>
+                            <i class="bi bi-comment-dots me-1"></i>
                             İptal Sebebi <span class="text-danger">*</span>
                         </label>
                         <textarea class="form-control" id="cancellationReason" name="reason" rows="4" 
                                   placeholder="Lütfen dosyayı neden iptal etmek istediğinizi açıklayın..." required></textarea>
                         <div class="form-text">
-                            <i class="fas fa-info-circle me-1"></i>
+                            <i class="bi bi-info-circle me-1"></i>
                             Minimum 10 karakter gereklidir.
                         </div>
                     </div>
@@ -3224,12 +3224,12 @@ include '../includes/user_header.php';
                     <div class="row g-3">
                         <div class="col-6">
                             <button type="button" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">
-                                <i class="fas fa-times me-1"></i>Vazgeç
+                                <i class="bi bi-times me-1"></i>Vazgeç
                             </button>
                         </div>
                         <div class="col-6">
                             <button type="submit" class="btn btn-danger w-100" id="submitCancellationBtn">
-                                <i class="fas fa-paper-plane me-1"></i>İptal Talebi Gönder
+                                <i class="bi bi-paper-plane me-1"></i>İptal Talebi Gönder
                             </button>
                         </div>
                     </div>
@@ -3284,7 +3284,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const submitBtn = document.getElementById('submitCancellationBtn');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Gönderiliyor...';
+            submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-1"></i>Gönderiliyor...';
             
             // AJAX ile iptal talebi gönder
             fetch('../ajax/file-cancellation.php', {
@@ -3335,7 +3335,7 @@ function showCancellationSuccessMessage(message) {
     alertDiv.style.cssText = 'animation: slideDown 0.3s ease; position: relative; z-index: 1000;';
     alertDiv.innerHTML = `
         <div class="d-flex align-items-center">
-            <i class="fas fa-check-circle fa-lg me-2"></i>
+            <i class="bi bi-check-circle fa-lg me-2"></i>
             <div>
                 <strong>Başarılı!</strong>
                 <span class="ms-2">${message}</span>

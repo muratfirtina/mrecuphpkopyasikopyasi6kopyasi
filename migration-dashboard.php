@@ -234,7 +234,7 @@ function checkSystemStatus($pdo) {
                 <div class="card">
                     <div class="card-header">
                         <h1 class="mb-0">
-                            <i class="fas fa-exchange-alt"></i> 
+                            <i class="bi bi-exchange-alt"></i> 
                             MR.ECU Legacy Migration Dashboard
                         </h1>
                         <p class="mb-0 mt-2">SQL Server'dan MySQL GUID sistemine veri geçiş merkezi</p>
@@ -243,7 +243,7 @@ function checkSystemStatus($pdo) {
                     <div class="card-body">
                         <?php if (isset($dbError)): ?>
                             <div class="status-card error">
-                                <h5><i class="fas fa-exclamation-triangle"></i> Database Bağlantı Hatası</h5>
+                                <h5><i class="bi bi-exclamation-triangle"></i> Database Bağlantı Hatası</h5>
                                 <p><?= htmlspecialchars($dbError) ?></p>
                                 <a href="config/install-guid.php" class="btn btn-danger">Database'i Kur</a>
                             </div>
@@ -251,17 +251,17 @@ function checkSystemStatus($pdo) {
                             <!-- Sistem Durumu -->
                             <?php if ($systemStatus['healthy']): ?>
                                 <div class="status-card healthy">
-                                    <h5><i class="fas fa-check-circle"></i> Sistem Sağlıklı</h5>
+                                    <h5><i class="bi bi-check-circle"></i> Sistem Sağlıklı</h5>
                                     <p>GUID MySQL veritabanı hazır. Migration işlemleri başlatılabilir.</p>
                                     <?php if ($systemStatus['legacy_ready']): ?>
-                                        <small class="text-success"><i class="fas fa-info-circle"></i> Legacy tablolar mevcut</small>
+                                        <small class="text-success"><i class="bi bi-info-circle"></i> Legacy tablolar mevcut</small>
                                     <?php else: ?>
-                                        <small class="text-warning"><i class="fas fa-info-circle"></i> Legacy tablolar henüz oluşturulmamış</small>
+                                        <small class="text-warning"><i class="bi bi-info-circle"></i> Legacy tablolar henüz oluşturulmamış</small>
                                     <?php endif; ?>
                                 </div>
                             <?php else: ?>
                                 <div class="status-card error">
-                                    <h5><i class="fas fa-exclamation-triangle"></i> Sistem Sorunları</h5>
+                                    <h5><i class="bi bi-exclamation-triangle"></i> Sistem Sorunları</h5>
                                     <ul class="mb-0">
                                         <?php foreach ($systemStatus['issues'] as $issue): ?>
                                             <li><?= htmlspecialchars($issue) ?></li>
@@ -276,31 +276,31 @@ function checkSystemStatus($pdo) {
                                 <div class="col-md-2">
                                     <div class="stats-card">
                                         <h3><?= $stats['total_users'] ?? 0 ?></h3>
-                                        <p><i class="fas fa-users"></i> Kullanıcılar</p>
+                                        <p><i class="bi bi-users"></i> Kullanıcılar</p>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="stats-card">
                                         <h3><?= $stats['total_admins'] ?? 0 ?></h3>
-                                        <p><i class="fas fa-user-shield"></i> Adminler</p>
+                                        <p><i class="bi bi-user-shield"></i> Adminler</p>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="stats-card">
                                         <h3><?= $stats['total_files'] ?? 0 ?></h3>
-                                        <p><i class="fas fa-file"></i> Dosyalar</p>
+                                        <p><i class="bi bi-file"></i> Dosyalar</p>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="stats-card">
                                         <h3><?= number_format($stats['total_credits'] ?? 0, 0) ?></h3>
-                                        <p><i class="fas fa-coins"></i> Krediler</p>
+                                        <p><i class="bi bi-coins"></i> Krediler</p>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="stats-card">
                                         <h3><?= $stats['total_brands'] ?? 0 ?></h3>
-                                        <p><i class="fas fa-car"></i> Markalar</p>
+                                        <p><i class="bi bi-car"></i> Markalar</p>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
@@ -318,12 +318,12 @@ function checkSystemStatus($pdo) {
                                 <div class="card tool-card">
                                     <div class="card-body text-center">
                                         <div class="tool-icon">
-                                            <i class="fas fa-code"></i>
+                                            <i class="bi bi-code"></i>
                                         </div>
                                         <h5>1. Data Converter</h5>
                                         <p>SQL Server verilerini MySQL formatına dönüştürme kodları</p>
                                         <a href="legacy-data-converter.php" class="btn btn-info btn-tool">
-                                            <i class="fas fa-exchange-alt"></i> Converter'a Git
+                                            <i class="bi bi-exchange-alt"></i> Converter'a Git
                                         </a>
                                     </div>
                                 </div>
@@ -333,12 +333,12 @@ function checkSystemStatus($pdo) {
                                 <div class="card tool-card">
                                     <div class="card-body text-center">
                                         <div class="tool-icon">
-                                            <i class="fas fa-database"></i>
+                                            <i class="bi bi-database"></i>
                                         </div>
                                         <h5>2. Sample Data</h5>
                                         <p>Test için örnek legacy verileri oluştur</p>
                                         <a href="sample-data-generator.php" class="btn btn-warning btn-tool">
-                                            <i class="fas fa-plus"></i> Sample Data Oluştur
+                                            <i class="bi bi-plus"></i> Sample Data Oluştur
                                         </a>
                                     </div>
                                 </div>
@@ -348,12 +348,12 @@ function checkSystemStatus($pdo) {
                                 <div class="card tool-card">
                                     <div class="card-body text-center">
                                         <div class="tool-icon">
-                                            <i class="fas fa-upload"></i>
+                                            <i class="bi bi-upload"></i>
                                         </div>
                                         <h5>3. Migration Interface</h5>
                                         <p>CSV dosyalarını MySQL'e import etme arayüzü</p>
                                         <a href="legacy-migration-interface.php" class="btn btn-success btn-tool">
-                                            <i class="fas fa-play"></i> Migration Başlat
+                                            <i class="bi bi-play"></i> Migration Başlat
                                         </a>
                                     </div>
                                 </div>
@@ -363,7 +363,7 @@ function checkSystemStatus($pdo) {
                         <!-- Sistem Testleri -->
                         <div class="card">
                             <div class="card-header bg-primary text-white">
-                                <h5><i class="fas fa-check-circle"></i> Sistem Testleri</h5>
+                                <h5><i class="bi bi-check-circle"></i> Sistem Testleri</h5>
                             </div>
                             <div class="card-body">
                                 <div class="row">
@@ -371,20 +371,20 @@ function checkSystemStatus($pdo) {
                                         <h6>GUID Sistem Testleri</h6>
                                         <p>GUID sisteminin çalışıp çalışmadığını kontrol edin.</p>
                                         <a href="final-guid-migration-complete.php" class="btn btn-primary">
-                                            <i class="fas fa-check"></i> GUID Test
+                                            <i class="bi bi-check"></i> GUID Test
                                         </a>
                                         <a href="test-guid-system.php" class="btn btn-secondary">
-                                            <i class="fas fa-cog"></i> Basic Test
+                                            <i class="bi bi-cog"></i> Basic Test
                                         </a>
                                     </div>
                                     <div class="col-md-6">
                                         <h6>Uygulama Testleri</h6>
                                         <p>Ana uygulama ve admin panelini test edin.</p>
                                         <a href="index.php" class="btn btn-info">
-                                            <i class="fas fa-home"></i> Ana Sayfa
+                                            <i class="bi bi-home"></i> Ana Sayfa
                                         </a>
                                         <a href="admin/" class="btn btn-warning">
-                                            <i class="fas fa-user-shield"></i> Admin Panel
+                                            <i class="bi bi-user-shield"></i> Admin Panel
                                         </a>
                                     </div>
                                 </div>
@@ -394,14 +394,14 @@ function checkSystemStatus($pdo) {
                         <!-- Migration Süreci -->
                         <div class="card">
                             <div class="card-header bg-dark text-white">
-                                <h5><i class="fas fa-list-ol"></i> Migration Süreci</h5>
+                                <h5><i class="bi bi-list-ol"></i> Migration Süreci</h5>
                             </div>
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-3">
                                         <div class="text-center">
                                             <div class="mb-3">
-                                                <i class="fas fa-database fa-3x text-primary"></i>
+                                                <i class="bi bi-database fa-3x text-primary"></i>
                                             </div>
                                             <h6>1. Hazırlık</h6>
                                             <p>SQL Server'dan verileri export edin</p>
@@ -410,7 +410,7 @@ function checkSystemStatus($pdo) {
                                     <div class="col-md-3">
                                         <div class="text-center">
                                             <div class="mb-3">
-                                                <i class="fas fa-exchange-alt fa-3x text-info"></i>
+                                                <i class="bi bi-exchange-alt fa-3x text-info"></i>
                                             </div>
                                             <h6>2. Dönüştürme</h6>
                                             <p>Data Converter ile formatları uyarlayın</p>
@@ -419,7 +419,7 @@ function checkSystemStatus($pdo) {
                                     <div class="col-md-3">
                                         <div class="text-center">
                                             <div class="mb-3">
-                                                <i class="fas fa-upload fa-3x text-success"></i>
+                                                <i class="bi bi-upload fa-3x text-success"></i>
                                             </div>
                                             <h6>3. Import</h6>
                                             <p>Migration Interface ile verileri aktarın</p>
@@ -428,7 +428,7 @@ function checkSystemStatus($pdo) {
                                     <div class="col-md-3">
                                         <div class="text-center">
                                             <div class="mb-3">
-                                                <i class="fas fa-check-circle fa-3x text-warning"></i>
+                                                <i class="bi bi-check-circle fa-3x text-warning"></i>
                                             </div>
                                             <h6>4. Test</h6>
                                             <p>Sistem testleri ile doğrulayın</p>

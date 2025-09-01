@@ -89,7 +89,7 @@ if (!empty($search)) {
 error_log("DEVICE DEBUG: Final device array: " . print_r($devices, true));
 
 $pageTitle = 'Device Yönetimi';
-$pageIcon = 'fas fa-tools';
+$pageIcon = 'bi bi-tools';
 $pageDescription = 'Tuning device\'larını yönetin, ekleyin ve düzenleyin.';
 
 include '../includes/admin_header.php';
@@ -103,7 +103,7 @@ include '../includes/admin_sidebar.php';
                 <div class="page-header">
                     <div class="page-header-actions">
                         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addDeviceModal">
-                            <i class="fas fa-plus"></i> Yeni Device Ekle
+                            <i class="bi bi-plus"></i> Yeni Device Ekle
                         </button>
                     </div>
                 </div>
@@ -121,7 +121,7 @@ include '../includes/admin_sidebar.php';
                     <div class="col-md-3">
                         <div class="stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-tools text-success"></i>
+                                <i class="bi bi-tools text-success"></i>
                             </div>
                             <div class="stat-content">
                                 <h3><?= $totalDevices ?></h3>
@@ -134,7 +134,7 @@ include '../includes/admin_sidebar.php';
                 <!-- Arama ve Filtreler -->
                 <div class="card mb-4" style="width: 30%;">
                     <div class="card-header">
-                        <h5><i class="fas fa-search"></i> Arama ve Filtreler</h5>
+                        <h5><i class="bi bi-search"></i> Arama ve Filtreler</h5>
                     </div>
                     <div class="card-body">
                         <form method="GET" class="row g-3">
@@ -146,10 +146,10 @@ include '../includes/admin_sidebar.php';
                             </div>
                             <div class="col-md-6 d-flex align-items-end">
                                 <button type="submit" class="btn btn-primary me-2">
-                                    <i class="fas fa-search"></i> Ara
+                                    <i class="bi bi-search"></i> Ara
                                 </button>
                                 <a href="devices.php" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i> Temizle
+                                    <i class="bi bi-times"></i> Temizle
                                 </a>
                             </div>
                         </form>
@@ -159,12 +159,12 @@ include '../includes/admin_sidebar.php';
                 <!-- Device Listesi -->
                 <div class="card" style="width: 30%;">
                     <div class="card-header">
-                        <h5><i class="fas fa-list"></i> Device Listesi (<?= $totalDevices ?> adet)</h5>
+                        <h5><i class="bi bi-list"></i> Device Listesi (<?= $totalDevices ?> adet)</h5>
                     </div>
                     <div class="card-body">
                         <?php if (empty($devices)): ?>
                         <div class="text-center py-4">
-                            <i class="fas fa-tools fa-3x text-muted mb-3"></i>
+                            <i class="bi bi-tools fa-3x text-muted mb-3"></i>
                             <p class="text-muted">Henüz device bulunmuyor.</p>
                         </div>
                         <?php else: ?>
@@ -187,12 +187,12 @@ include '../includes/admin_sidebar.php';
                                                     data-id="<?= $device['id'] ?>" 
                                                     data-name="<?= htmlspecialchars($device['name']) ?>"
                                                     data-bs-toggle="modal" data-bs-target="#editDeviceModal">
-                                                <i class="fas fa-edit"></i>
+                                                <i class="bi bi-edit"></i>
                                             </button>
                                             <button class="btn btn-sm btn-outline-danger delete-device-btn" 
                                                     data-id="<?= $device['id'] ?>" 
                                                     data-name="<?= htmlspecialchars($device['name']) ?>">
-                                                <i class="fas fa-trash"></i>
+                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </td>
                                     </tr>
@@ -359,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         tableBody.innerHTML = `
                             <tr>
                                 <td colspan="4" class="text-center py-4">
-                                    <i class="fas fa-tools text-muted"></i>
+                                    <i class="bi bi-tools text-muted"></i>
                                     <p class="text-muted mb-0">Arama sonucu bulunamadı.</p>
                                 </td>
                             </tr>
@@ -391,12 +391,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             data-id="${device.id}"
                             data-name="${escapeHtml(device.name)}"
                             data-bs-toggle="modal" data-bs-target="#editDeviceModal">
-                        <i class="fas fa-edit"></i>
+                        <i class="bi bi-edit"></i>
                     </button>
                     <button class="btn btn-sm btn-danger delete-device-btn"
                             data-id="${device.id}"
                             data-name="${escapeHtml(device.name)}">
-                        <i class="fas fa-trash"></i>
+                        <i class="bi bi-trash"></i>
                     </button>
                 </td>
             </tr>

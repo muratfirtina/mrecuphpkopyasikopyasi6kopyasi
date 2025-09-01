@@ -139,14 +139,14 @@ include '../includes/admin_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="fas fa-times-circle me-2 text-danger"></i>Dosya İptal Talepleri
+                        <i class="bi bi-times-circle me-2 text-danger"></i>Dosya İptal Talepleri
                     </h1>
                     <p class="text-muted mb-0">Kullanıcıların dosya iptal taleplerini yönetin</p>
                 </div>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
                         <button type="button" class="btn btn-outline-secondary" onclick="location.reload()">
-                            <i class="fas fa-sync me-1"></i>Yenile
+                            <i class="bi bi-sync me-1"></i>Yenile
                         </button>
                     </div>
                 </div>
@@ -155,7 +155,7 @@ include '../includes/admin_header.php';
             <!-- Hata/Başarı Mesajları -->
             <?php if ($error): ?>
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="bi bi-exclamation-triangle me-2"></i>
                     <strong>Hata!</strong> <?php echo $error; ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -163,7 +163,7 @@ include '../includes/admin_header.php';
 
             <?php if ($success): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>
+                    <i class="bi bi-check-circle me-2"></i>
                     <strong>Başarılı!</strong> <?php echo $success; ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -180,7 +180,7 @@ include '../includes/admin_header.php';
                                     <div class="stat-label">Toplam Talep</div>
                                 </div>
                                 <div class="stat-icon bg-primary">
-                                    <i class="fas fa-list"></i>
+                                    <i class="bi bi-list"></i>
                                 </div>
                             </div>
                         </div>
@@ -196,7 +196,7 @@ include '../includes/admin_header.php';
                                     <div class="stat-label">Bekleyen</div>
                                 </div>
                                 <div class="stat-icon bg-warning">
-                                    <i class="fas fa-clock"></i>
+                                    <i class="bi bi-clock"></i>
                                 </div>
                             </div>
                         </div>
@@ -212,7 +212,7 @@ include '../includes/admin_header.php';
                                     <div class="stat-label">Onaylanan</div>
                                 </div>
                                 <div class="stat-icon bg-success">
-                                    <i class="fas fa-check"></i>
+                                    <i class="bi bi-check"></i>
                                 </div>
                             </div>
                         </div>
@@ -228,7 +228,7 @@ include '../includes/admin_header.php';
                                     <div class="stat-label">İade Edilen Kredi</div>
                                 </div>
                                 <div class="stat-icon bg-info">
-                                    <i class="fas fa-coins"></i>
+                                    <i class="bi bi-coins"></i>
                                 </div>
                             </div>
                         </div>
@@ -240,7 +240,7 @@ include '../includes/admin_header.php';
             <div class="card mb-4">
                 <div class="card-header">
                     <h6 class="mb-0">
-                        <i class="fas fa-filter me-2"></i>Filtrele
+                        <i class="bi bi-filter me-2"></i>Filtrele
                     </h6>
                 </div>
                 <div class="card-body">
@@ -265,10 +265,10 @@ include '../includes/admin_header.php';
                         <div class="col-md-5">
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-search me-1"></i>Filtrele
+                                    <i class="bi bi-search me-1"></i>Filtrele
                                 </button>
                                 <a href="file-cancellations.php" class="btn btn-outline-secondary">
-                                    <i class="fas fa-undo me-1"></i>Temizle
+                                    <i class="bi bi-undo me-1"></i>Temizle
                                 </a>
                             </div>
                         </div>
@@ -309,10 +309,10 @@ include '../includes/admin_header.php';
                                 </div>
                                 <div class="col-md-2 d-flex align-items-end">
                                     <button type="submit" class="btn btn-primary me-2">
-                                        <i class="fas fa-search me-1"></i>Filtrele
+                                        <i class="bi bi-search me-1"></i>Filtrele
                                     </button>
                                     <a href="file-cancellations.php" class="btn btn-outline-secondary">
-                                        <i class="fas fa-times me-1"></i>Temizle
+                                        <i class="bi bi-times me-1"></i>Temizle
                                     </a>
                                 </div>
                             </form>
@@ -325,7 +325,7 @@ include '../includes/admin_header.php';
             <?php if (empty($cancellations)): ?>
                 <div class="card">
                     <div class="card-body text-center py-5">
-                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <i class="bi bi-inbox fa-3x text-muted mb-3"></i>
                         <h5>
                             <?php if ($search || $status): ?>
                                 Filtreye uygun iptal talebi bulunamadı
@@ -389,7 +389,7 @@ include '../includes/admin_header.php';
                                                         $plate = $cancellation['upload_plate'] ?? '';
                                                         $fileDate = $cancellation['upload_date'] ?? '';
                                                         $fileTypeDisplay = 'ANA DOSYA';
-                                                        $fileTypeIcon = 'fas fa-file-upload';
+                                                        $fileTypeIcon = 'bi bi-file-upload';
                                                         $fileTypeColor = 'bg-primary';
                                                         break;
                                                     case 'response':
@@ -398,7 +398,7 @@ include '../includes/admin_header.php';
                                                         $plate = $cancellation['response_main_plate'] ?? '';
                                                         $fileDate = $cancellation['response_date'] ?? '';
                                                         $fileTypeDisplay = 'YANIT DOSYASI';
-                                                        $fileTypeIcon = 'fas fa-reply';
+                                                        $fileTypeIcon = 'bi bi-reply';
                                                         $fileTypeColor = 'bg-success';
                                                         break;
                                                     case 'revision':
@@ -407,7 +407,7 @@ include '../includes/admin_header.php';
                                                         $plate = $cancellation['revision_main_plate'] ?? '';
                                                         $fileDate = $cancellation['revision_date'] ?? '';
                                                         $fileTypeDisplay = 'REVİZYON DOSYASI';
-                                                        $fileTypeIcon = 'fas fa-edit';
+                                                        $fileTypeIcon = 'bi bi-edit';
                                                         $fileTypeColor = 'bg-warning';
                                                         break;
                                                     case 'additional':
@@ -416,7 +416,7 @@ include '../includes/admin_header.php';
                                                         $plate = $cancellation['additional_main_plate'] ?? '';
                                                         $fileDate = $cancellation['additional_date'] ?? '';
                                                         $fileTypeDisplay = 'EK DOSYA';
-                                                        $fileTypeIcon = 'fas fa-paperclip';
+                                                        $fileTypeIcon = 'bi bi-paperclip';
                                                         $fileTypeColor = 'bg-info';
                                                         break;
                                                 }
@@ -434,7 +434,7 @@ include '../includes/admin_header.php';
                                                 <?php if (!empty($fileName)): ?>
                                                     <div class="cancelled-file-name mb-2">
                                                         <div class="fw-bold text-dark mb-1">
-                                                            <i class="fas fa-times-circle text-danger me-1"></i>
+                                                            <i class="bi bi-times-circle text-danger me-1"></i>
                                                             İptal Edilen Dosya:
                                                         </div>
                                                         <div class="file-name-display p-2 bg-light border-start border-danger border-3">
@@ -447,7 +447,7 @@ include '../includes/admin_header.php';
                                                 <?php if (!empty($mainFileName) && $mainFileName !== $fileName): ?>
                                                     <div class="linked-file mb-2">
                                                         <div class="fw-bold text-success mb-1">
-                                                            <i class="fas fa-link me-1"></i>
+                                                            <i class="bi bi-link me-1"></i>
                                                             Bağlı Ana Dosya:
                                                         </div>
                                                         <div class="linked-file-display p-2 bg-light border-start border-success border-2">
@@ -460,7 +460,7 @@ include '../includes/admin_header.php';
                                                 <?php if (!empty($plate)): ?>
                                                     <div class="vehicle-info mb-2">
                                                         <div class="fw-bold text-info mb-1">
-                                                            <i class="fas fa-car me-1"></i>
+                                                            <i class="bi bi-car me-1"></i>
                                                             Araç Plakası:
                                                         </div>
                                                         <div class="plate-display">
@@ -472,7 +472,7 @@ include '../includes/admin_header.php';
                                                 <?php else: ?>
                                                     <div class="vehicle-info mb-2">
                                                         <div class="fw-bold text-muted mb-1">
-                                                            <i class="fas fa-car me-1"></i>
+                                                            <i class="bi bi-car me-1"></i>
                                                             Araç Plakası:
                                                         </div>
                                                         <div class="plate-display">
@@ -502,7 +502,7 @@ include '../includes/admin_header.php';
                                                     <?php if (!empty($fileDate)): ?>
                                                         <div class="mt-2">
                                                             <small class="text-muted">
-                                                                <i class="fas fa-calendar me-1"></i>
+                                                                <i class="bi bi-calendar me-1"></i>
                                                                 <strong>Dosya Tarihi:</strong> <?php echo date('d.m.Y H:i', strtotime($fileDate)); ?>
                                                             </small>
                                                         </div>
@@ -518,16 +518,16 @@ include '../includes/admin_header.php';
                                         <td>
                                             <?php if ($cancellation['credits_to_refund'] > 0): ?>
                                                 <span class="badge bg-success">
-                                                    <i class="fas fa-coins me-1"></i>
+                                                    <i class="bi bi-coins me-1"></i>
                                                     <?php echo number_format($cancellation['credits_to_refund'], 2); ?> kredi
                                                 </span>
                                                 <?php if ($cancellation['status'] === 'approved'): ?>
                                                     <small class="text-success d-block">
-                                                        <i class="fas fa-check-circle me-1"></i>İade Edildi
+                                                        <i class="bi bi-check-circle me-1"></i>İade Edildi
                                                     </small>
                                                 <?php elseif ($cancellation['status'] === 'pending'): ?>
                                                     <small class="text-warning d-block">
-                                                        <i class="fas fa-clock me-1"></i>İade Bekliyor
+                                                        <i class="bi bi-clock me-1"></i>İade Bekliyor
                                                     </small>
                                                 <?php endif; ?>
                                             <?php else: ?>
@@ -544,7 +544,7 @@ include '../includes/admin_header.php';
                                             $config = $statusConfig[$cancellation['status']] ?? ['class' => 'secondary', 'text' => 'Bilinmiyor', 'icon' => 'question'];
                                             ?>
                                             <span class="badge bg-<?php echo $config['class']; ?>">
-                                                <i class="fas fa-<?php echo $config['icon']; ?> me-1"></i>
+                                                <i class="bi bi-<?php echo $config['icon']; ?> me-1"></i>
                                                 <?php echo $config['text']; ?>
                                             </span>
                                         </td>
@@ -560,16 +560,16 @@ include '../includes/admin_header.php';
                                                 <?php if ($cancellation['status'] === 'pending'): ?>
                                                     <button type="button" class="btn btn-success btn-sm mb-1" 
                                                             onclick="showActionModal('<?php echo $cancellation['id']; ?>', 'approve', '<?php echo htmlspecialchars($cancellation['reason']); ?>', <?php echo $cancellation['credits_to_refund']; ?>)">
-                                                        <i class="fas fa-check me-1"></i>Onayla
+                                                        <i class="bi bi-check me-1"></i>Onayla
                                                     </button>
                                                     <button type="button" class="btn btn-danger btn-sm mb-1" 
                                                             onclick="showActionModal('<?php echo $cancellation['id']; ?>', 'reject', '<?php echo htmlspecialchars($cancellation['reason']); ?>', <?php echo $cancellation['credits_to_refund']; ?>)">
-                                                        <i class="fas fa-times me-1"></i>Reddet
+                                                        <i class="bi bi-times me-1"></i>Reddet
                                                     </button>
                                                 <?php else: ?>
                                                     <button type="button" class="btn btn-outline-info btn-sm mb-1" 
                                                             onclick="showDetailsModal('<?php echo htmlspecialchars($cancellation['reason']); ?>', '<?php echo htmlspecialchars($cancellation['admin_notes'] ?? ''); ?>', '<?php echo htmlspecialchars($cancellation['admin_username'] ?? ''); ?>')">
-                                                        <i class="fas fa-eye me-1"></i>Detay
+                                                        <i class="bi bi-eye me-1"></i>Detay
                                                     </button>
                                                 <?php endif; ?>
                                                 
@@ -603,11 +603,11 @@ include '../includes/admin_header.php';
                                                 <?php if (!empty($detailUrl)): ?>
                                                     <a href="<?php echo $detailUrl; ?>" target="_blank" class="btn btn-outline-primary btn-sm" 
                                                        title="<?php echo $detailTitle; ?>">
-                                                        <i class="fas fa-external-link-alt me-1"></i>Dosya
+                                                        <i class="bi bi-external-link-alt me-1"></i>Dosya
                                                     </a>
                                                 <?php else: ?>
                                                     <button type="button" class="btn btn-outline-secondary btn-sm" disabled title="Dosya detayı bulunamadı">
-                                                        <i class="fas fa-ban me-1"></i>Dosya
+                                                        <i class="bi bi-ban me-1"></i>Dosya
                                                     </button>
                                                 <?php endif; ?>
                                             </div>
@@ -670,7 +670,7 @@ include '../includes/admin_header.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-info-circle me-2"></i>İptal Talebi Detayları
+                    <i class="bi bi-info-circle me-2"></i>İptal Talebi Detayları
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -814,7 +814,7 @@ function showActionModal(cancellationId, action, reason, refundAmount) {
     const actionRefund = document.getElementById('actionRefund');
     
     if (action === 'approve') {
-        title.innerHTML = '<i class="fas fa-check me-2 text-success"></i>İptal Talebini Onayla';
+        title.innerHTML = '<i class="bi bi-check me-2 text-success"></i>İptal Talebini Onayla';
         submitBtn.className = 'btn btn-success';
         submitBtn.textContent = 'Onayla ve Dosyayı Sil';
         adminNotesLabel.textContent = 'Onay Notu (Opsiyonel):';
@@ -824,12 +824,12 @@ function showActionModal(cancellationId, action, reason, refundAmount) {
         
         if (refundAmount > 0) {
             refundInfo.style.display = 'block';
-            actionRefund.innerHTML = '<i class="fas fa-coins me-1"></i>' + refundAmount.toFixed(2) + ' kredi iade edilecek';
+            actionRefund.innerHTML = '<i class="bi bi-coins me-1"></i>' + refundAmount.toFixed(2) + ' kredi iade edilecek';
         } else {
             refundInfo.style.display = 'none';
         }
     } else {
-        title.innerHTML = '<i class="fas fa-times me-2 text-danger"></i>İptal Talebini Reddet';
+        title.innerHTML = '<i class="bi bi-times me-2 text-danger"></i>İptal Talebini Reddet';
         submitBtn.className = 'btn btn-danger';
         submitBtn.textContent = 'Reddet';
         adminNotesLabel.textContent = 'Red Sebebi:';

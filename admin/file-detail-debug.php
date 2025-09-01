@@ -302,7 +302,7 @@ try {
         $pageDescription = 'Dosya detaylarını görüntüleyin ve yönetin';
     }
     
-    $pageIcon = 'fas fa-file-alt';
+    $pageIcon = 'bi bi-file-alt';
     
     if ($debug) {
         echo "<!-- DEBUG: All setup completed successfully -->\n";
@@ -376,7 +376,7 @@ try {
     <!-- Hata/Başarı Mesajları -->
     <?php if ($error): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
+            <i class="bi bi-exclamation-triangle me-2"></i>
             <?php echo $error; ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -384,7 +384,7 @@ try {
 
     <?php if ($success): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
+            <i class="bi bi-check-circle me-2"></i>
             <?php echo $success; ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -422,18 +422,18 @@ try {
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="fas fa-<?php echo $fileType === 'response' ? 'reply' : 'file-alt'; ?> me-2"></i>
+                    <i class="bi bi-<?php echo $fileType === 'response' ? 'reply' : 'file-alt'; ?> me-2"></i>
                     <?php echo $fileType === 'response' ? 'Yanıt Dosyası' : 'Dosya'; ?> Detayları
                 </h5>
                 <div class="d-flex gap-2">
                     <?php if ($fileType === 'response'): ?>
                         <a href="file-detail.php?id=<?php echo $uploadId; ?>" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-file-alt me-1"></i>Orijinal Dosyayı Görüntüle
+                            <i class="bi bi-file-alt me-1"></i>Orijinal Dosyayı Görüntüle
                         </a>
                     <?php endif; ?>
                     
                     <a href="uploads.php" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-arrow-left me-1"></i>Geri
+                        <i class="bi bi-arrow-left me-1"></i>Geri
                     </a>
                 </div>
             </div>
@@ -522,7 +522,7 @@ try {
                                 <label class="form-label">Plaka</label>
                                 <div class="form-control-plaintext">
                                     <span class="text-primary fw-bold">
-                                        <i class="fas fa-id-card me-1"></i><?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
+                                        <i class="bi bi-id-card me-1"></i><?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
                                     </span>
                                 </div>
                             </div>
@@ -567,7 +567,7 @@ try {
         <div class="card admin-card mb-4">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="fas fa-reply me-2"></i>Yanıt Dosyası Yükle
+                    <i class="bi bi-reply me-2"></i>Yanıt Dosyası Yükle
                 </h6>
             </div>
             <div class="card-body">
@@ -592,7 +592,7 @@ try {
                         
                         <div class="col-12">
                             <button type="submit" name="upload_response" class="btn btn-primary">
-                                <i class="fas fa-upload me-1"></i>Yanıt Dosyasını Yükle
+                                <i class="bi bi-upload me-1"></i>Yanıt Dosyasını Yükle
                             </button>
                         </div>
                     </div>
@@ -606,7 +606,7 @@ try {
         <div class="card admin-card mb-4">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="fas fa-reply me-2"></i>Yanıt Dosyaları (<?php echo count($responseFiles); ?>)
+                    <i class="bi bi-reply me-2"></i>Yanıt Dosyaları (<?php echo count($responseFiles); ?>)
                 </h6>
             </div>
             <div class="card-body">
@@ -637,7 +637,7 @@ try {
                                     <td>
                                         <a href="file-detail.php?id=<?php echo $uploadId; ?>&type=response&response_id=<?php echo $responseFile['id']; ?>" 
                                            class="btn btn-outline-primary btn-sm">
-                                            <i class="fas fa-eye me-1"></i>Detay
+                                            <i class="bi bi-eye me-1"></i>Detay
                                         </a>
                                     </td>
                                 </tr>

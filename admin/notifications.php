@@ -148,7 +148,7 @@ $typeNames = [
 // Sayfa bilgileri
 $pageTitle = 'Bildirimler';
 $pageDescription = 'Admin panel bildirimleri ve sistem uyarıları';
-$pageIcon = 'fas fa-bell';
+$pageIcon = 'bi bi-bell';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -158,16 +158,16 @@ include '../includes/admin_sidebar.php';
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
     <div class="alert alert-admin alert-danger" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
         
         <?php if (isset($installUrl)): ?>
             <div class="mt-3">
                 <a href="<?php echo $installUrl; ?>" class="btn btn-sm btn-outline-light">
-                    <i class="fas fa-cog me-1"></i>Kurulum Scriptini Çalıştır
+                    <i class="bi bi-cog me-1"></i>Kurulum Scriptini Çalıştır
                 </a>
                 <a href="../config/check-notification-system.php" class="btn btn-sm btn-outline-light">
-                    <i class="fas fa-check me-1"></i>Sistem Durumunu Kontrol Et
+                    <i class="bi bi-check me-1"></i>Sistem Durumunu Kontrol Et
                 </a>
             </div>
         <?php endif; ?>
@@ -176,7 +176,7 @@ include '../includes/admin_sidebar.php';
 
 <?php if ($success): ?>
     <div class="alert alert-admin alert-success" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="bi bi-check-circle me-2"></i>
         <?php echo $success; ?>
     </div>
 <?php endif; ?>
@@ -194,7 +194,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Tüm bildirimler</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-bell text-primary fa-lg"></i>
+                    <i class="bi bi-bell text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -209,7 +209,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Bekleyen bildirimler</small>
                 </div>
                 <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-bell-slash text-warning fa-lg"></i>
+                    <i class="bi bi-bell-slash text-warning fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -224,7 +224,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">İşlenmiş bildirimler</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-check-circle text-success fa-lg"></i>
+                    <i class="bi bi-check-circle text-success fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -239,7 +239,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Farklı tür sayısı</small>
                 </div>
                 <div class="bg-info bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-tags text-info fa-lg"></i>
+                    <i class="bi bi-tags text-info fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -252,7 +252,7 @@ include '../includes/admin_sidebar.php';
         <form method="GET" class="row g-3 align-items-end">
             <div class="col-md-4">
                 <label for="filter" class="form-label">
-                    <i class="fas fa-filter me-1"></i>Durum Filtresi
+                    <i class="bi bi-filter me-1"></i>Durum Filtresi
                 </label>
                 <select class="form-select" id="filter" name="filter" onchange="this.form.submit()">
                     <option value="all" <?php echo $filter === 'all' ? 'selected' : ''; ?>>Tüm Bildirimler</option>
@@ -263,7 +263,7 @@ include '../includes/admin_sidebar.php';
             
             <div class="col-md-4">
                 <label for="type" class="form-label">
-                    <i class="fas fa-tag me-1"></i>Bildirim Türü
+                    <i class="bi bi-tag me-1"></i>Bildirim Türü
                 </label>
                 <select class="form-select" id="type" name="type" onchange="this.form.submit()">
                     <option value="all" <?php echo $type === 'all' ? 'selected' : ''; ?>>Tüm Türler</option>
@@ -278,10 +278,10 @@ include '../includes/admin_sidebar.php';
             <div class="col-md-4">
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search me-1"></i>Filtrele
+                        <i class="bi bi-search me-1"></i>Filtrele
                     </button>
                     <a href="notifications.php" class="btn btn-outline-secondary">
-                        <i class="fas fa-undo me-1"></i>Sıfırla
+                        <i class="bi bi-undo me-1"></i>Sıfırla
                     </a>
                 </div>
             </div>
@@ -293,7 +293,7 @@ include '../includes/admin_sidebar.php';
 <div class="card admin-card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
-            <i class="fas fa-bell me-2"></i>
+            <i class="bi bi-bell me-2"></i>
             Bildirimler
             <?php if ($unreadCount > 0): ?>
                 <span class="badge bg-warning ms-2"><?php echo $unreadCount; ?> okunmamış</span>
@@ -304,7 +304,7 @@ include '../includes/admin_sidebar.php';
                 <form method="POST" class="d-inline">
                     <button type="submit" name="mark_all_read" class="btn btn-sm btn-success" 
                             onclick="return confirm('Tüm bildirimler okundu olarak işaretlenecek. Emin misiniz?')">
-                        <i class="fas fa-check-double me-1"></i>Tümünü Okundu İşaretle
+                        <i class="bi bi-check-double me-1"></i>Tümünü Okundu İşaretle
                     </button>
                 </form>
             <?php endif; ?>
@@ -314,7 +314,7 @@ include '../includes/admin_sidebar.php';
     <div class="card-body p-0">
         <?php if (empty($notifications)): ?>
             <div class="text-center py-5">
-                <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                <i class="bi bi-bell-slash fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">
                     <?php if ($filter !== 'all' || $type !== 'all'): ?>
                         Filtreye uygun bildirim bulunamadı
@@ -389,14 +389,14 @@ include '../includes/admin_sidebar.php';
                                     <td>
                                         <?php if ($notification['is_read']): ?>
                                             <span class="badge bg-success">
-                                                <i class="fas fa-check me-1"></i>Okundu
+                                                <i class="bi bi-check me-1"></i>Okundu
                                             </span>
                                             <?php if ($notification['read_at']): ?>
                                                 <br><small class="text-muted"><?php echo date('d.m H:i', strtotime($notification['read_at'])); ?></small>
                                             <?php endif; ?>
                                         <?php else: ?>
                                             <span class="badge bg-warning">
-                                                <i class="fas fa-clock me-1"></i>Okunmamış
+                                                <i class="bi bi-clock me-1"></i>Okunmamış
                                             </span>
                                         <?php endif; ?>
                                     </td>
@@ -406,14 +406,14 @@ include '../includes/admin_sidebar.php';
                                                 <a href="<?php echo htmlspecialchars($notification['action_url']); ?>" 
                                                    class="btn btn-outline-primary btn-sm"
                                                    onclick="markAsRead('<?php echo $notification['id']; ?>')">
-                                                    <i class="fas fa-external-link-alt me-1"></i>Görüntüle
+                                                    <i class="bi bi-external-link-alt me-1"></i>Görüntüle
                                                 </a>
                                             <?php endif; ?>
                                             
                                             <?php if (!$notification['is_read']): ?>
                                                 <button type="button" class="btn btn-outline-success btn-sm" 
                                                         onclick="markSingleAsRead('<?php echo $notification['id']; ?>')">
-                                                    <i class="fas fa-check me-1"></i>Okundu İşaretle
+                                                    <i class="bi bi-check me-1"></i>Okundu İşaretle
                                                 </button>
                                             <?php endif; ?>
                                         </div>
@@ -430,7 +430,7 @@ include '../includes/admin_sidebar.php';
                         <div>
                             <button type="submit" name="mark_read" class="btn btn-success btn-sm" 
                                     id="markSelectedBtn" disabled>
-                                <i class="fas fa-check me-1"></i>Seçilenleri Okundu İşaretle (<span id="selectedCount">0</span>)
+                                <i class="bi bi-check me-1"></i>Seçilenleri Okundu İşaretle (<span id="selectedCount">0</span>)
                             </button>
                         </div>
                         <div class="text-muted small">
@@ -475,16 +475,16 @@ include '../includes/admin_sidebar.php';
 <!-- Kurulum Gerekli Uyarısı -->
 <div class="card admin-card">
     <div class="card-body text-center py-5">
-        <i class="fas fa-cog fa-4x text-muted mb-4"></i>
+        <i class="bi bi-cog fa-4x text-muted mb-4"></i>
         <h4>Bildirim Sistemi Kurulum Gerekli</h4>
         <p class="text-muted mb-4">Bildirim sistemini kullanabilmek için önce kurulum yapmanız gerekiyor.</p>
         
         <div class="d-flex justify-content-center gap-3">
             <a href="../config/check-notification-system.php" class="btn btn-outline-primary">
-                <i class="fas fa-check me-1"></i>Sistem Durumunu Kontrol Et
+                <i class="bi bi-check me-1"></i>Sistem Durumunu Kontrol Et
             </a>
             <a href="../config/install-notifications.php" class="btn btn-primary">
-                <i class="fas fa-play me-1"></i>Kurulum Scriptini Çalıştır
+                <i class="bi bi-play me-1"></i>Kurulum Scriptini Çalıştır
             </a>
         </div>
     </div>

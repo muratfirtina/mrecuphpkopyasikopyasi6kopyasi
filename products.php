@@ -488,7 +488,7 @@ include 'includes/header.php';
                     <!-- Search -->
                     <div class="filter-section">
                         <h5 class="filter-title">
-                            <i class="fas fa-search me-2"></i>Arama
+                            <i class="bi bi-search me-2"></i>Arama
                         </h5>
                         <form action="<?php echo BASE_URL; ?>/urunler" method="get" class="mb-0">
                             <?php if ($categorySlug): ?>
@@ -502,7 +502,7 @@ include 'includes/header.php';
                                        placeholder="Ürün ara..." 
                                        value="<?php echo htmlspecialchars($searchQuery); ?>">
                                 <button class="btn btn-outline-secondary" type="submit">
-                                    <i class="fas fa-search"></i>
+                                    <i class="bi bi-search"></i>
                                 </button>
                             </div>
                         </form>
@@ -512,7 +512,7 @@ include 'includes/header.php';
                     <?php if (!empty($categories)): ?>
                         <div class="filter-section">
                             <h5 class="filter-title">
-                                <i class="fas fa-tags me-2"></i>Kategoriler
+                                <i class="bi bi-tags me-2"></i>Kategoriler
                             </h5>
                             <ul class="filter-list">
                                 <li class="filter-item">
@@ -538,7 +538,7 @@ include 'includes/header.php';
                     <?php if (!empty($brands)): ?>
                         <div class="filter-section">
                             <h5 class="filter-title">
-                                <i class="fas fa-award me-2"></i>Markalar
+                                <i class="bi bi-award me-2"></i>Markalar
                             </h5>
                             <ul class="filter-list">
                                 <li class="filter-item">
@@ -625,7 +625,7 @@ include 'includes/header.php';
                                                      class="product-image">
                                             <?php else: ?>
                                                 <div class="product-image bg-light d-flex align-items-center justify-content-center">
-                                                    <i class="fas fa-image text-muted fa-3x"></i>
+                                                    <i class="bi bi-image text-muted fa-3x"></i>
                                                 </div>
                                             <?php endif; ?>
                                         </a>
@@ -633,7 +633,7 @@ include 'includes/header.php';
                                         <!-- Badges -->
                                         <?php if ($product['featured']): ?>
                                             <div class="product-badge badge-featured">
-                                                <i class="fas fa-star me-1"></i>Öne Çıkan
+                                                <i class="bi bi-star me-1"></i>Öne Çıkan
                                             </div>
                                         <?php elseif ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
                                             <?php 
@@ -685,7 +685,7 @@ include 'includes/header.php';
                                             </div>
                                             
                                             <a href="/mrecuphpkopyasikopyasi6kopyasi/urun/<?php echo $product['slug']; ?>" class="contact-button">
-                                                <i class="fas fa-info-circle me-2"></i>Detayları Görüntüle
+                                                <i class="bi bi-info-circle me-2"></i>Detayları Görüntüle
                                             </a>
                                         </div>
                                     </div>
@@ -762,19 +762,19 @@ include 'includes/header.php';
                 <?php else: ?>
                     <!-- No Products Found -->
                     <div class="no-products">
-                        <i class="fas fa-search fa-4x text-muted mb-4"></i>
+                        <i class="bi bi-search fa-4x text-muted mb-4"></i>
                         <h4 class="text-muted mb-3">Ürün bulunamadı</h4>
                         <?php if (!empty($searchQuery)): ?>
                             <p class="text-muted mb-4">
                                 "<strong><?php echo htmlspecialchars($searchQuery); ?></strong>" için arama sonucu bulunamadı.
                             </p>
                             <a href="/urunler" class="btn btn-primary">
-                                <i class="fas fa-arrow-left me-2"></i>Tüm Ürünleri Görüntüle
+                                <i class="bi bi-arrow-left me-2"></i>Tüm Ürünleri Görüntüle
                             </a>
                         <?php else: ?>
                             <p class="text-muted mb-4">Seçilen kriterlerde ürün bulunmamaktadır.</p>
                             <a href="/mrecuphpkopyasikopyasi6kopyasi/urunler" class="btn btn-primary">
-                                <i class="fas fa-refresh me-2"></i>Filtreleri Temizle
+                                <i class="bi bi-refresh me-2"></i>Filtreleri Temizle
                             </a>
                         <?php endif; ?>
                     </div>

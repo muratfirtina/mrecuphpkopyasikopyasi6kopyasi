@@ -619,7 +619,7 @@ include 'includes/header.php';
                      class="brand-logo-large">
             <?php else: ?>
                 <div class="brand-logo-large d-flex align-items-center justify-content-center bg-white">
-                    <i class="fas fa-award text-primary fa-3x"></i>
+                    <i class="bi bi-award text-primary fa-3x"></i>
                 </div>
             <?php endif; ?> -->
             
@@ -715,14 +715,14 @@ include 'includes/header.php';
                                      class="product-image">
                             <?php else: ?>
                                 <div class="product-image bg-light d-flex align-items-center justify-content-center">
-                                    <i class="fas fa-image text-muted fa-3x"></i>
+                                    <i class="bi bi-image text-muted fa-3x"></i>
                                 </div>
                             <?php endif; ?>
                             
                             <!-- Badges -->
                             <?php if ($product['featured']): ?>
                                 <div class="product-badge badge-featured">
-                                    <i class="fas fa-star me-1"></i>Öne Çıkan
+                                    <i class="bi bi-star me-1"></i>Öne Çıkan
                                 </div>
                             <?php elseif ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
                                 <?php 
@@ -766,7 +766,7 @@ include 'includes/header.php';
                             
                             <div class="product-actions">
                                 <a href="/mrecuphpkopyasikopyasi6kopyasi/urun/<?php echo $product['slug']; ?>" class="btn-detail">
-                                    <i class="fas fa-eye"></i>
+                                    <i class="bi bi-eye"></i>
                                     Detayları Görüntüle
                                 </a>
                             </div>
@@ -819,11 +819,11 @@ include 'includes/header.php';
         <?php else: ?>
             <!-- Empty State -->
             <div class="empty-state">
-                <i class="fas fa-box-open"></i>
+                <i class="bi bi-box-open"></i>
                 <h3>Bu kombinasyonda ürün bulunamadı</h3>
                 <p><?php echo htmlspecialchars($brand['name']); ?> markasının <?php echo htmlspecialchars($category['name']); ?> kategorisinde henüz ürün bulunmuyor.</p>
                 <a href="/mrecuphpkopyasikopyasi6kopyasi/kategori/<?php echo $category['slug']; ?>" class="btn btn-primary btn-lg">
-                    <i class="fas fa-arrow-left me-2"></i>
+                    <i class="bi bi-arrow-left me-2"></i>
                     <?php echo htmlspecialchars($category['name']); ?> Kategorisine Dön
                 </a>
             </div>
@@ -853,7 +853,7 @@ include 'includes/header.php';
                                          class="related-brand-logo">
                                 <?php else: ?>
                                     <div class="related-brand-logo d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-award text-muted"></i>
+                                        <i class="bi bi-award text-muted"></i>
                                     </div>
                                 <?php endif; ?>
                                 

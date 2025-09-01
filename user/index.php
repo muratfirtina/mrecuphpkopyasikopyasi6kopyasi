@@ -90,7 +90,7 @@ include '../includes/user_header.php';
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
                         <a href="upload.php" class="btn btn-primary">
-                            <i class="fas fa-upload me-1"></i>Dosya Yükle
+                            <i class="bi bi-upload me-1"></i>Dosya Yükle
                         </a>
                     </div>
                 </div>
@@ -107,7 +107,7 @@ include '../includes/user_header.php';
                             </p>
                             <div class="welcome-stats">
                                 <div class="stat">
-                                    <i class="fas fa-coins text-warning"></i>
+                                    <i class="bi bi-coins text-warning"></i>
                                     <span>Mevcut Kalan Kredi: <strong><?php echo number_format($userCredits, 2); ?> TL</strong></span>
                                 </div>
                             </div>
@@ -115,7 +115,7 @@ include '../includes/user_header.php';
                     </div>
                     <div class="col-md-4 text-center">
                         <div class="welcome-icon">
-                            <i class="fas fa-tachometer-alt"></i>
+                            <i class="bi bi-tachometer-alt"></i>
                         </div>
                     </div>
                 </div>
@@ -131,12 +131,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number"><?php echo $totalUploads; ?></div>
                                     <div class="stat-label">Toplam Dosya</div>
                                     <div class="stat-change">
-                                        <i class="fas fa-arrow-up text-success"></i>
+                                        <i class="bi bi-arrow-up text-success"></i>
                                         <span class="text-success">Bu ay +<?php echo $monthlyUploads; ?></span>
                                     </div>
                                 </div>
                                 <div class="stat-icon bg-primary">
-                                    <i class="fas fa-file"></i>
+                                    <i class="bi bi-file"></i>
                                 </div>
                             </div>
                         </div>
@@ -152,18 +152,18 @@ include '../includes/user_header.php';
                                     <div class="stat-label">Bekleyen</div>
                                     <?php if ($pendingUploads > 0): ?>
                                         <div class="stat-change">
-                                            <i class="fas fa-clock text-warning"></i>
+                                            <i class="bi bi-clock text-warning"></i>
                                             <span class="text-warning">İnceleme aşamasında</span>
                                         </div>
                                     <?php else: ?>
                                         <div class="stat-change">
-                                            <i class="fas fa-check text-success"></i>
+                                            <i class="bi bi-check text-success"></i>
                                             <span class="text-success">Bekleyen dosya yok</span>
                                         </div>
                                     <?php endif; ?>
                                 </div>
                                 <div class="stat-icon bg-warning">
-                                    <i class="fas fa-clock"></i>
+                                    <i class="bi bi-clock"></i>
                                 </div>
                             </div>
                         </div>
@@ -184,7 +184,7 @@ include '../includes/user_header.php';
                                         </div>
                                     <?php else: ?>
                                         <div class="stat-change">
-                                            <i class="fas fa-check text-success"></i>
+                                            <i class="bi bi-check text-success"></i>
                                             <span class="text-success">İşlenen dosya yok</span>
                                         </div>
                                     <?php endif; ?>
@@ -205,12 +205,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-success"><?php echo $completedUploads; ?></div>
                                     <div class="stat-label">Tamamlanan</div>
                                     <div class="stat-change">
-                                        <i class="fas fa-download text-success"></i>
+                                        <i class="bi bi-download text-success"></i>
                                         <span class="text-success">İndirilmeye hazır</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon bg-success">
-                                    <i class="fas fa-check-circle"></i>
+                                    <i class="bi bi-check-circle"></i>
                                 </div>
                             </div>
                         </div>
@@ -224,22 +224,22 @@ include '../includes/user_header.php';
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
                             <h5 class="mb-0">
-                                <i class="fas fa-folder me-2 text-primary"></i>Son Yüklenen Dosyalar
+                                <i class="bi bi-folder me-2 text-primary"></i>Son Yüklenen Dosyalar
                             </h5>
                             <a href="files.php" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-eye me-1"></i>Tümünü Gör
+                                <i class="bi bi-eye me-1"></i>Tümünü Gör
                             </a>
                         </div>
                         <div class="card-body p-0">
                             <?php if (empty($userUploads)): ?>
                                 <div class="empty-state">
                                     <div class="empty-icon">
-                                        <i class="fas fa-folder-open"></i>
+                                        <i class="bi bi-folder-open"></i>
                                     </div>
                                     <h6>Henüz dosya yüklenmemiş</h6>
                                     <p class="text-muted mb-3">İlk dosyanızı yüklemek için butona tıklayın</p>
                                     <a href="upload.php" class="btn btn-primary">
-                                        <i class="fas fa-upload me-2"></i>Dosya Yükle
+                                        <i class="bi bi-upload me-2"></i>Dosya Yükle
                                     </a>
                                 </div>
                             <?php else: ?>
@@ -259,7 +259,7 @@ include '../includes/user_header.php';
                                                     <td>
                                                         <div class="d-flex align-items-center">
                                                             <div class="file-icon me-3">
-                                                                <i class="fas fa-file-alt"></i>
+                                                                <i class="bi bi-file-alt"></i>
                                                             </div>
                                                             <div>
                                                                 <div class="fw-medium"><?php echo htmlspecialchars($upload['original_name'] ?? 'Bilinmeyen dosya'); ?></div>
@@ -283,7 +283,7 @@ include '../includes/user_header.php';
                                                         $config = $statusConfig[$upload['status']] ?? ['class' => 'secondary', 'text' => 'Bilinmiyor', 'icon' => 'question'];
                                                         ?>
                                                         <span class="badge bg-<?php echo $config['class']; ?> badge-modern">
-                                                            <i class="fas fa-<?php echo $config['icon']; ?> me-1"></i>
+                                                            <i class="bi bi-<?php echo $config['icon']; ?> me-1"></i>
                                                             <?php echo $config['text']; ?>
                                                         </span>
                                                     </td>
@@ -300,12 +300,12 @@ include '../includes/user_header.php';
                                                             <?php if ($upload['status'] === 'completed'): ?>
                                                                 <a href="download.php?id=<?php echo $upload['id']; ?>" 
                                                                    class="btn btn-success btn-sm" title="İndir">
-                                                                    <i class="fas fa-download"></i>
+                                                                    <i class="bi bi-download"></i>
                                                                 </a>
                                                             <?php endif; ?>
                                                             <a href="file-detail.php?id=<?php echo $upload['id']; ?>" 
                                                                class="btn btn-outline-primary btn-sm" title="Detay">
-                                                                <i class="fas fa-eye"></i>
+                                                                <i class="bi bi-eye"></i>
                                                             </a>
                                                         </div>
                                                     </td>
@@ -325,25 +325,25 @@ include '../includes/user_header.php';
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-white border-0 py-3">
                             <h5 class="mb-0">
-                                <i class="fas fa-bolt me-2 text-warning"></i>Hızlı İşlemler
+                                <i class="bi bi-bolt me-2 text-warning"></i>Hızlı İşlemler
                             </h5>
                         </div>
                         <div class="card-body">
                             <div class="d-grid gap-3">
                                 <a href="upload.php" class="btn btn-primary btn-modern">
-                                    <i class="fas fa-upload me-2"></i>Yeni Dosya Yükle
+                                    <i class="bi bi-upload me-2"></i>Yeni Dosya Yükle
                                 </a>
                                 
                                 <a href="files.php" class="btn btn-outline-primary btn-modern">
-                                    <i class="fas fa-folder me-2"></i>Dosyalarımı Görüntüle
+                                    <i class="bi bi-folder me-2"></i>Dosyalarımı Görüntüle
                                 </a>
                                 
                                 <a href="credits.php" class="btn btn-outline-success btn-modern">
-                                    <i class="fas fa-credit-card me-2"></i>Kredi Yükle
+                                    <i class="bi bi-credit-card me-2"></i>Kredi Yükle
                                 </a>
                                 
                                 <a href="profile.php" class="btn btn-outline-secondary btn-modern">
-                                    <i class="fas fa-user-cog me-2"></i>Profil Ayarları
+                                    <i class="bi bi-user-cog me-2"></i>Profil Ayarları
                                 </a>
                             </div>
                         </div>
@@ -353,14 +353,14 @@ include '../includes/user_header.php';
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-white border-0 py-3">
                             <h6 class="mb-0">
-                                <i class="fas fa-chart-pie me-2 text-info"></i>Hesap Durumu
+                                <i class="bi bi-chart-pie me-2 text-info"></i>Hesap Durumu
                             </h6>
                         </div>
                         <div class="card-body">
                             <div class="account-stats">
                                 <div class="stat-row">
                                     <div class="stat-info">
-                                        <i class="fas fa-coins text-warning"></i>
+                                        <i class="bi bi-coins text-warning"></i>
                                         <span>Mevcut Kredi</span>
                                     </div>
                                     <div class="stat-value text-warning fw-bold">
@@ -370,7 +370,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="stat-row">
                                     <div class="stat-info">
-                                        <i class="fas fa-file text-primary"></i>
+                                        <i class="bi bi-file text-primary"></i>
                                         <span>Toplam Dosya</span>
                                     </div>
                                     <div class="stat-value text-primary fw-bold">
@@ -380,7 +380,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="stat-row">
                                     <div class="stat-info">
-                                        <i class="fas fa-calendar text-info"></i>
+                                        <i class="bi bi-calendar text-info"></i>
                                         <span>Bu Ay</span>
                                     </div>
                                     <div class="stat-value text-info fw-bold">
@@ -391,7 +391,7 @@ include '../includes/user_header.php';
                             
                             <?php if ($userCredits < 10): ?>
                                 <div class="alert alert-warning mt-3 mb-0">
-                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
                                     <small>
                                         Krediniz azalıyor. <a href="credits.php" class="alert-link fw-semibold">Kredi yükleyin</a>
                                     </small>
@@ -404,13 +404,13 @@ include '../includes/user_header.php';
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white border-0 py-3">
                             <h6 class="mb-0">
-                                <i class="fas fa-history me-2 text-secondary"></i>Son İşlemler
+                                <i class="bi bi-history me-2 text-secondary"></i>Son İşlemler
                             </h6>
                         </div>
                         <div class="card-body">
                             <?php if (empty($recentTransactions)): ?>
                                 <div class="text-center py-3">
-                                    <i class="fas fa-history fa-2x text-muted mb-2"></i>
+                                    <i class="bi bi-history fa-2x text-muted mb-2"></i>
                                     <p class="text-muted mb-0">Henüz işlem yapılmamış</p>
                                 </div>
                             <?php else: ?>
@@ -419,9 +419,9 @@ include '../includes/user_header.php';
                                         <div class="transaction-item">
                                             <div class="transaction-icon">
                                                 <?php if (($transaction['transaction_type'] ?? '') === 'add'): ?>
-                                                    <i class="fas fa-plus-circle text-success"></i>
+                                                    <i class="bi bi-plus-circle text-success"></i>
                                                 <?php else: ?>
-                                                    <i class="fas fa-minus-circle text-danger"></i>
+                                                    <i class="bi bi-minus-circle text-danger"></i>
                                                 <?php endif; ?>
                                             </div>
                                             <div class="transaction-details">
@@ -444,7 +444,7 @@ include '../includes/user_header.php';
                                 </div>
                                 <div class="text-center mt-3">
                                     <a href="transactions.php" class="btn btn-sm btn-outline-secondary">
-                                        <i class="fas fa-list me-1"></i>Tüm İşlemler
+                                        <i class="bi bi-list me-1"></i>Tüm İşlemler
                                     </a>
                                 </div>
                             <?php endif; ?>

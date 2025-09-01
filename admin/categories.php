@@ -234,7 +234,7 @@ function createSlug($text) {
 
 $pageTitle = 'Kategori Yönetimi';
 $pageDescription = 'Ürün kategorilerini yönetin';
-$pageIcon = 'fas fa-tags';
+$pageIcon = 'bi bi-tags';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -244,7 +244,7 @@ include '../includes/admin_sidebar.php';
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
     <div class="alert alert-admin alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -252,7 +252,7 @@ include '../includes/admin_sidebar.php';
 
 <?php if ($success): ?>
     <div class="alert alert-admin alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="bi bi-check-circle me-2"></i>
         <?php echo $success; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -262,20 +262,20 @@ include '../includes/admin_sidebar.php';
 <div class="card admin-card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
-            <i class="fas fa-tags me-2"></i>Kategoriler (<?php echo count($categories); ?>)
+            <i class="bi bi-tags me-2"></i>Kategoriler (<?php echo count($categories); ?>)
         </h5>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-            <i class="fas fa-plus me-1"></i>Yeni Kategori
+            <i class="bi bi-plus me-1"></i>Yeni Kategori
         </button>
     </div>
     <div class="card-body">
         <?php if (empty($categories)): ?>
             <div class="text-center py-4">
-                <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                <i class="bi bi-tags fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">Kategori bulunamadı</h6>
                 <p class="text-muted">Henüz kategori eklenmemiş.</p>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-                    <i class="fas fa-plus me-1"></i>İlk Kategoriyi Ekle
+                    <i class="bi bi-plus me-1"></i>İlk Kategoriyi Ekle
                 </button>
             </div>
         <?php else: ?>
@@ -347,12 +347,12 @@ include '../includes/admin_sidebar.php';
             <?php echo (int)$category["sort_order"]; ?>,
             <?php echo json_encode($category["image"] ?? ""); ?>
         )'>
-    <i class="fas fa-edit"></i>
+    <i class="bi bi-edit"></i>
 </button>
         <a href="?delete=<?php echo $category['id']; ?>" 
            class="btn btn-outline-danger"
            onclick="return confirm('Bu kategoriyi silmek istediğinizden emin misiniz?')">
-            <i class="fas fa-trash"></i>
+            <i class="bi bi-trash"></i>
         </a>
     </div>
                                 </td>
@@ -371,7 +371,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-plus me-2"></i>Yeni Kategori Ekle
+                    <i class="bi bi-plus me-2"></i>Yeni Kategori Ekle
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -425,7 +425,7 @@ include '../includes/admin_sidebar.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" name="add_category" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>Kategori Ekle
+                        <i class="bi bi-save me-1"></i>Kategori Ekle
                     </button>
                 </div>
             </form>
@@ -439,7 +439,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-edit me-2"></i>Kategori Düzenle
+                    <i class="bi bi-edit me-2"></i>Kategori Düzenle
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -511,7 +511,7 @@ include '../includes/admin_sidebar.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" name="update_category" class="btn btn-warning">
-                        <i class="fas fa-save me-1"></i>Güncelle
+                        <i class="bi bi-save me-1"></i>Güncelle
                     </button>
                 </div>
             </form>

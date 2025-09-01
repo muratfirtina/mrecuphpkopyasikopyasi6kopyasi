@@ -377,7 +377,7 @@ include '../includes/user_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="fas fa-folder me-2 text-primary"></i>Dosyalarım
+                        <i class="bi bi-folder me-2 text-primary"></i>Dosyalarım
                         <?php if ($singleFileMode): ?>
                             <small class="badge bg-info ms-2">Bildirimden Filtrelendi</small>
                         <?php endif; ?>
@@ -393,7 +393,7 @@ include '../includes/user_header.php';
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
                         <a href="upload.php" class="btn btn-primary">
-                            <i class="fas fa-upload me-1"></i>Yeni Dosya
+                            <i class="bi bi-upload me-1"></i>Yeni Dosya
                         </a>
                     </div>
                 </div>
@@ -403,7 +403,7 @@ include '../includes/user_header.php';
             <?php if ($error): ?>
                 <div class="alert alert-danger alert-modern alert-dismissible fade show" role="alert">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+                        <i class="bi bi-exclamation-triangle me-3 fa-lg"></i>
                         <div>
                             <strong>Hata!</strong> <?php echo $error; ?>
                         </div>
@@ -415,7 +415,7 @@ include '../includes/user_header.php';
             <?php if ($success): ?>
                 <div class="alert alert-success alert-modern alert-dismissible fade show" role="alert">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-check-circle me-3 fa-lg"></i>
+                        <i class="bi bi-check-circle me-3 fa-lg"></i>
                         <div>
                             <strong>Başarılı!</strong> <?php echo $success; ?>
                         </div>
@@ -434,12 +434,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-primary"><?php echo $stats['total']; ?></div>
                                     <div class="stat-label">Toplam Dosya</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-chart-line text-success"></i>
+                                        <i class="bi bi-chart-line text-success"></i>
                                         <span class="text-success">Aktif koleksiyon</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon bg-primary">
-                                    <i class="fas fa-file"></i>
+                                    <i class="bi bi-file"></i>
                                 </div>
                             </div>
                         </div>
@@ -454,12 +454,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-warning"><?php echo $stats['pending']; ?></div>
                                     <div class="stat-label">Bekleyen</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-clock text-warning"></i>
+                                        <i class="bi bi-clock text-warning"></i>
                                         <span class="text-warning">İnceleme sırası</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon bg-warning">
-                                    <i class="fas fa-clock"></i>
+                                    <i class="bi bi-clock"></i>
                                 </div>
                             </div>
                         </div>
@@ -494,12 +494,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-success"><?php echo $stats['completed']; ?></div>
                                     <div class="stat-label">Tamamlanan</div>
                                     <div class="stat-trend">
-                                        <i class="fas fa-download text-success"></i>
+                                        <i class="bi bi-download text-success"></i>
                                         <span class="text-success">İndirilmeye hazır</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon bg-success">
-                                    <i class="fas fa-check-circle"></i>
+                                    <i class="bi bi-check-circle"></i>
                                 </div>
                             </div>
                         </div>
@@ -511,7 +511,7 @@ include '../includes/user_header.php';
             <div class="filter-card mb-4">
                 <div class="filter-header">
                     <h6 class="mb-0">
-                        <i class="fas fa-filter me-2"></i>Filtrele ve Ara
+                        <i class="bi bi-filter me-2"></i>Filtrele ve Ara
                     </h6>
                 </div>
                             <!-- Dosya ID Filtresi Uyarısı -->
@@ -521,10 +521,10 @@ include '../includes/user_header.php';
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;">
-                    <i class="fas fa-info-circle me-2"></i>
+                    <i class="bi bi-info-circle me-2"></i>
                     <strong>Belirli dosya görüntüleniyor:</strong> ID: <?php echo htmlspecialchars($filterId); ?>
                     <a href="files.php" class="btn btn-sm btn-outline-primary ms-2">
-                        <i class="fas fa-times me-1"></i>Filtreyi Kaldır
+                        <i class="bi bi-times me-1"></i>Filtreyi Kaldır
                     </a>
                 </div>
             <?php endif; ?>
@@ -535,7 +535,7 @@ include '../includes/user_header.php';
                         <?php endif; ?>
                         <div class="col-md-4">
                             <label for="search" class="form-label">
-                                <i class="fas fa-search me-1"></i>Dosya Ara
+                                <i class="bi bi-search me-1"></i>Dosya Ara
                             </label>
                             <input type="text" class="form-control form-control-modern" id="search" name="search" 
                                    value="<?php echo htmlspecialchars($search); ?>" 
@@ -544,7 +544,7 @@ include '../includes/user_header.php';
                         
                         <div class="col-md-3">
                             <label for="status" class="form-label">
-                                <i class="fas fa-tag me-1"></i>Durum
+                                <i class="bi bi-tag me-1"></i>Durum
                             </label>
                             <select class="form-select form-control-modern" id="status" name="status">
                                 <option value="">Tüm Durumlar</option>
@@ -558,21 +558,21 @@ include '../includes/user_header.php';
                         <div class="col-md-5">
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary btn-modern bg-success">
-                                    <i class="fas fa-search me-1"></i>Filtrele
+                                    <i class="bi bi-search me-1"></i>Filtrele
                                 </button>
                                 <a href="files.php" class="btn btn-outline-secondary btn-modern">
-                                    <i class="fas fa-undo me-1"></i><?php echo $filterId ? 'Tüm Dosyalar' : 'Temizle'; ?>
+                                    <i class="bi bi-undo me-1"></i><?php echo $filterId ? 'Tüm Dosyalar' : 'Temizle'; ?>
                                 </a>
                                 <div class="dropdown">
                                     <button class="btn btn-outline-info btn-modern dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                        <i class="fas fa-download me-1"></i>İşlemler
+                                        <i class="bi bi-download me-1"></i>İşlemler
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item" href="#" onclick="exportToExcel()">
-                                            <i class="fas fa-file-excel me-2"></i>Excel Export
+                                            <i class="bi bi-file-excel me-2"></i>Excel Export
                                         </a></li>
                                         <li><a class="dropdown-item" href="#" onclick="refreshPage()">
-                                            <i class="fas fa-sync me-2"></i>Sayfayı Yenile
+                                            <i class="bi bi-sync me-2"></i>Sayfayı Yenile
                                         </a></li>
                                     </ul>
                                 </div>
@@ -587,7 +587,7 @@ include '../includes/user_header.php';
                 <div class="empty-state-card">
                     <div class="empty-content">
                         <div class="empty-icon">
-                            <i class="fas fa-folder-open"></i>
+                            <i class="bi bi-folder-open"></i>
                         </div>
                         <h4>
                             <?php if ($filterId): ?>
@@ -610,11 +610,11 @@ include '../includes/user_header.php';
                         <div class="empty-actions">
                             <?php if ($search || $status): ?>
                                 <a href="files.php" class="btn btn-outline-primary btn-lg">
-                                    <i class="fas fa-list me-2"></i>Tüm Dosyalar
+                                    <i class="bi bi-list me-2"></i>Tüm Dosyalar
                                 </a>
                             <?php endif; ?>
                             <a href="upload.php" class="btn btn-primary btn-lg">
-                                <i class="fas fa-upload me-2"></i>Dosya Yükle
+                                <i class="bi bi-upload me-2"></i>Dosya Yükle
                             </a>
                         </div>
                     </div>
@@ -627,7 +627,7 @@ include '../includes/user_header.php';
                             <thead>
                                 <tr>
                                     <th width="40">
-                                        <i class="fas fa-file-alt"></i>
+                                        <i class="bi bi-file-alt"></i>
                                     </th>
                                     <th>Dosya Adı</th>
                                     <th>Araç Bilgileri</th>
@@ -642,7 +642,7 @@ include '../includes/user_header.php';
                                     <tr class="file-row" data-file-id="<?php echo $file['id']; ?>">
                                         <td>
                                             <div class="file-icon">
-                                                <i class="fas fa-file-alt text-primary"></i>
+                                                <i class="bi bi-file-alt text-primary"></i>
                                             </div>
                                         </td>
                                         <td>
@@ -650,10 +650,10 @@ include '../includes/user_header.php';
                                                 <?php if (isset($file['processing_type']) && $file['processing_type'] === 'revision'): ?>
                                                     <!-- Revize İşlenen Dosya Görünümü -->
                                                     <h6 class="file-name mb-1">
-                                                        <i class="fas fa-file-alt text-primary me-1"></i>
+                                                        <i class="bi bi-file-alt text-primary me-1"></i>
                                                         <strong>Ana Dosya:</strong> <?php echo htmlspecialchars($file['original_name']); ?>
                                                         <span class="badge bg-info ms-2">
-                                                            <i class="fas fa-sync-alt me-1"></i>Revize İşleniyor
+                                                            <i class="bi bi-sync-alt me-1"></i>Revize İşleniyor
                                                         </span>
                                                     </h6>
                                                     
@@ -663,7 +663,7 @@ include '../includes/user_header.php';
                                                                 <span class="badge bg-warning text-dark ms-1"><?php echo $file['target_file_type']; ?></span>
                                                             <?php endif; ?>
                                                         <small class="d-block text-warning">
-                                                            <i class="fas fa-arrow-circle-right me-1"></i>
+                                                            <i class="bi bi-arrow-circle-right me-1"></i>
                                                             <strong>Revize Edilmesi İstenen:</strong> 
                                                             <?php echo htmlspecialchars($file['target_file_name'] ?? $file['original_name']); ?>
                                                             
@@ -678,7 +678,7 @@ include '../includes/user_header.php';
                                                         </small>
                                                         <?php if (isset($file['request_notes']) && !empty($file['request_notes'])): ?>
                                                             <small class="d-block text-muted mt-1">
-                                                                <i class="fas fa-comment-dots me-1"></i>
+                                                                <i class="bi bi-comment-dots me-1"></i>
                                                                 <em>"<?php echo htmlspecialchars(substr($file['request_notes'], 0, 60)) . (strlen($file['request_notes']) > 60 ? '...' : ''); ?>"</em>
                                                             </small>
                                                         <?php endif; ?>
@@ -692,7 +692,7 @@ include '../includes/user_header.php';
                                                 
                                                 <?php if (!empty($file['upload_notes'])): ?>
                                                     <small class="text-muted">
-                                                        <i class="fas fa-sticky-note me-1"></i>
+                                                        <i class="bi bi-sticky-note me-1"></i>
                                                         <?php echo htmlspecialchars(substr($file['upload_notes'], 0, 50)) . (strlen($file['upload_notes']) > 50 ? '...' : ''); ?>
                                                     </small>
                                                 <?php endif; ?>
@@ -708,13 +708,13 @@ include '../includes/user_header.php';
                                                         <?php endif; ?>
                                                         <?php if (!empty($file['series_name'])): ?>
                                                             <br><small class="text-muted">
-                                                                <i class="fas fa-tag me-1"></i>
+                                                                <i class="bi bi-tag me-1"></i>
                                                                 Seri: <?php echo htmlspecialchars($file['series_name']); ?>
                                                             </small>
                                                         <?php endif; ?>
                                                         <?php if (!empty($file['engine_name'])): ?>
                                                             <br><small class="text-muted">
-                                                                <i class="fas fa-cog me-1"></i>
+                                                                <i class="bi bi-cog me-1"></i>
                                                                 Motor: <?php echo htmlspecialchars($file['engine_name']); ?>
                                                             </small>
                                                         <?php endif; ?>
@@ -722,13 +722,13 @@ include '../includes/user_header.php';
                                                     <?php if (!empty($file['plate'])): ?>
                                                         <div class="mt-1">
                                                             <span class="badge bg-dark text-white">
-                                                                <i class="fas fa-id-card me-1"></i>
+                                                                <i class="bi bi-id-card me-1"></i>
                                                                 <?php echo strtoupper(htmlspecialchars($file['plate'])); ?>
                                                             </span>
                                                         </div>
                                                     <?php else: ?>
                                                         <small class="text-muted d-block mt-1">
-                                                            <i class="fas fa-minus-circle me-1"></i>
+                                                            <i class="bi bi-minus-circle me-1"></i>
                                                             Plaka belirtilmemiş
                                                         </small>
                                                     <?php endif; ?>
@@ -747,7 +747,7 @@ include '../includes/user_header.php';
                                             
                                             <!-- Ana dosya durumu -->
                                             <span class="badge bg-<?php echo $config['class']; ?> status-badge">
-                                                <i class="fas fa-<?php echo $config['icon']; ?> me-1"></i>
+                                                <i class="bi bi-<?php echo $config['icon']; ?> me-1"></i>
                                                 <?php echo $config['text']; ?>
                                             </span>
                                             
@@ -763,7 +763,7 @@ include '../includes/user_header.php';
                                                 <br>
                                                 <span class="badge bg-<?php echo $revConfig['class']; ?> status-badge mt-1" 
                                                       title="Bu dosya için revize talebi <?php echo $file['revision_status'] === 'in_progress' ? 'işleme alındı' : 'beklemede'; ?>">
-                                                    <i class="fas fa-<?php echo $revConfig['icon']; ?> me-1"></i>
+                                                    <i class="bi bi-<?php echo $revConfig['icon']; ?> me-1"></i>
                                                     <?php echo $revConfig['text']; ?>
                                                 </span>
                                             <?php endif; ?>
@@ -811,7 +811,7 @@ include '../includes/user_header.php';
                                         <td class="text-center">
                                             <div class="action-buttons">
                                                 <a href="file-detail.php?id=<?php echo $file['id']; ?>" class="btn btn-outline-primary btn-sm">
-                                                    <i class="fas fa-eye me-1"></i>Detay
+                                                    <i class="bi bi-eye me-1"></i>Detay
                                                 </a>
                                                 
                                                 <!-- Görüntü Dosyası için Görüntüle Butonu -->
@@ -819,25 +819,25 @@ include '../includes/user_header.php';
                                                     <a href="view-image.php?id=<?php echo $file['id']; ?>&type=upload" 
                                                        class="btn btn-outline-info btn-sm" 
                                                        title="Görüntüyü büyük boyutta gör">
-                                                        <i class="fas fa-image me-1"></i>Görüntüle
+                                                        <i class="bi bi-image me-1"></i>Görüntüle
                                                     </a>
                                                 <?php endif; ?>
                                                 
                                                 <?php if ($file['status'] === 'completed'): ?>
                                                     <a href="download.php?id=<?php echo $file['id']; ?>&type=upload" 
                                                        class="btn btn-success btn-sm">
-                                                        <i class="fas fa-download me-1"></i>İndir
+                                                        <i class="bi bi-download me-1"></i>İndir
                                                     </a>
                                                     
                                                     <?php if (!$file['has_active_revision']): ?>
                                                         <button type="button" class="btn btn-outline-warning btn-sm" 
                                                                 onclick="requestRevision('<?php echo $file['id']; ?>', 'upload')">
-                                                            <i class="fas fa-redo me-1"></i>Revize
+                                                            <i class="bi bi-redo me-1"></i>Revize
                                                         </button>
                                                     <?php else: ?>
                                                         <a href="revision-detail.php?id=<?php echo $file['revision_id']; ?>" class="btn btn-outline-info btn-sm"
                                                            title="Revize talebi <?php echo $file['revision_status'] === 'in_progress' ? 'işleme alındı' : 'beklemede'; ?>">
-                                                            <i class="fas fa-eye me-1"></i>Revize Takip
+                                                            <i class="bi bi-eye me-1"></i>Revize Takip
                                                         </a>
                                                     <?php endif; ?>
                                                 <?php endif; ?>
@@ -846,7 +846,7 @@ include '../includes/user_header.php';
                                                 <!-- İptal Butonu -->
                                                 <button type="button" class="btn btn-outline-danger btn-sm" 
                                                         onclick="requestCancellation('<?php echo $file['id']; ?>', 'upload', '<?php echo htmlspecialchars($file['original_name']); ?>')">
-                                                    <i class="fas fa-times me-1"></i>İptal
+                                                    <i class="bi bi-times me-1"></i>İptal
                                                 </button>
                                             </div>
                                         </td>
@@ -866,7 +866,7 @@ include '../includes/user_header.php';
                                 <?php if ($page > 1): ?>
                                     <li class="page-item">
                                         <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>">
-                                            <i class="fas fa-chevron-left"></i>
+                                            <i class="bi bi-chevron-left"></i>
                                         </a>
                                     </li>
                                 <?php endif; ?>
@@ -889,7 +889,7 @@ include '../includes/user_header.php';
                                 <?php if ($page < $totalPages): ?>
                                     <li class="page-item">
                                         <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>">
-                                            <i class="fas fa-chevron-right"></i>
+                                            <i class="bi bi-chevron-right"></i>
                                         </a>
                                     </li>
                                 <?php endif; ?>
@@ -915,7 +915,7 @@ include '../includes/user_header.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-redo me-2 text-warning"></i>Revize Talebi
+                    <i class="bi bi-redo me-2 text-warning"></i>Revize Talebi
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -929,7 +929,7 @@ include '../includes/user_header.php';
     border: 1px solid #81c784;
     border-radius: 12px;"> 
                         <div class="d-flex">
-                            <i class="fas fa-info-circle me-3 mt-1"></i>
+                            <i class="bi bi-info-circle me-3 mt-1"></i>
                             <div>
                                 <strong>Revize Talebi Hakkında</strong>
                                 <p class="mb-0 mt-1" id="revisionInfoText">
@@ -942,14 +942,14 @@ include '../includes/user_header.php';
                     
                     <div class="mb-3">
                         <label for="revision_notes" class="form-label fw-semibold">
-                            <i class="fas fa-comment me-1"></i>
+                            <i class="bi bi-comment me-1"></i>
                             Revize Talebi Açıklaması <span class="text-danger">*</span>
                         </label>
                         <textarea class="form-control form-control-modern" id="revision_notes" name="revision_notes" 
                                   rows="5" required
                                   placeholder="Lütfen dosyada hangi değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: 'Güç artırımı', 'EGR kapatma', 'DPF silme' gibi..."></textarea>
                         <div class="form-text">
-                            <i class="fas fa-lightbulb me-1"></i>
+                            <i class="bi bi-lightbulb me-1"></i>
                             Ne tür değişiklik istediğinizi mümkün olduğunca detaylı açıklayın.
                         </div>
                     </div>
@@ -957,7 +957,7 @@ include '../includes/user_header.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-warning">
-                        <i class="fas fa-paper-plane me-2"></i>Revize Talebi Gönder
+                        <i class="bi bi-paper-plane me-2"></i>Revize Talebi Gönder
                     </button>
                 </div>
             </form>
@@ -971,7 +971,7 @@ include '../includes/user_header.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-times-circle me-2 text-danger"></i>Dosya İptal Talebi
+                    <i class="bi bi-times-circle me-2 text-danger"></i>Dosya İptal Talebi
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -981,7 +981,7 @@ include '../includes/user_header.php';
                 
                 <div class="alert alert-warning">
                     <div class="d-flex">
-                        <i class="fas fa-exclamation-triangle me-3 mt-1"></i>
+                        <i class="bi bi-exclamation-triangle me-3 mt-1"></i>
                         <div>
                             <strong>Dikkat!</strong>
                             <p class="mb-0 mt-1">
@@ -998,21 +998,21 @@ include '../includes/user_header.php';
                 
                 <div class="mb-3">
                     <label class="form-label fw-semibold">
-                        <i class="fas fa-file me-1"></i>İptal edilecek dosya:
+                        <i class="bi bi-file me-1"></i>İptal edilecek dosya:
                     </label>
                     <div class="form-control-plaintext" id="cancellationFileName" style="background: #f8f9fa; padding: 0.75rem; border-radius: 8px;"></div>
                 </div>
                 
                 <div class="mb-3">
                     <label for="cancellation_reason" class="form-label fw-semibold">
-                        <i class="fas fa-comment me-1"></i>
+                        <i class="bi bi-comment me-1"></i>
                         İptal Sebebi <span class="text-danger">*</span>
                     </label>
                     <textarea class="form-control form-control-modern" id="cancellation_reason" name="cancellation_reason" 
                               rows="4" required
                               placeholder="Lütfen dosyayı neden iptal etmek istediğinizi açıklayın. Örneğin: 'Yanlış dosya yükledim', 'Artık ihtiyacım yok', 'Başka seçenek tercih ediyorum' gibi..."></textarea>
                     <div class="form-text">
-                        <i class="fas fa-lightbulb me-1"></i>
+                        <i class="bi bi-lightbulb me-1"></i>
                         İptal sebebinizi belirtmeniz, gelecekteki hizmet kalitemizi artırmamıza yardımcı olur.
                     </div>
                 </div>
@@ -1020,7 +1020,7 @@ include '../includes/user_header.php';
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
                 <button type="button" class="btn btn-danger" onclick="submitCancellation()">
-                    <i class="fas fa-paper-plane me-2"></i>İptal Talebi Gönder
+                    <i class="bi bi-paper-plane me-2"></i>İptal Talebi Gönder
                 </button>
             </div>
         </div>
@@ -1415,11 +1415,11 @@ function requestRevision(fileId, fileType = 'upload') {
     const modalTitle = document.querySelector('#revisionModal .modal-title');
     
     if (fileType === 'response') {
-        modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Yanıt Dosyası Revize Talebi';
+        modalTitle.innerHTML = '<i class="bi bi-redo me-2 text-warning"></i>Yanıt Dosyası Revize Talebi';
         revisionInfoText.innerHTML = 'Yanıt dosyasında bir değişiklik veya düzenleme istiyorsanız bu formu kullanabilirsiniz. Admin ekibimiz dosyanızı yeniden gözden geçirecek ve geliştirilmiş bir sürüm hazırlayacaktır.';
         document.getElementById('revision_notes').placeholder = 'Yanıt dosyasında hangi değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Daha fazla güç istiyorum", "Yakıt tüketimi daha iyi olsun", "Torku artmalı" gibi...';
     } else {
-        modalTitle.innerHTML = '<i class="fas fa-redo me-2 text-warning"></i>Revize Talebi';
+        modalTitle.innerHTML = '<i class="bi bi-redo me-2 text-warning"></i>Revize Talebi';
         revisionInfoText.innerHTML = 'Dosyanızda bir değişiklik veya düzenleme istiyorsanız bu formu kullanabilirsiniz. Talep incelendikten sonra size geri dönüş yapılacaktır.';
         document.getElementById('revision_notes').placeholder = 'Lütfen dosyada hangi değişiklikleri istediğinizi detaylı olarak açıklayın. Örneğin: "Güç artırımı", "EGR kapatma", "DPF silme" gibi...';
     }
@@ -1459,7 +1459,7 @@ function submitCancellation() {
     // Loading state
     const submitBtn = document.querySelector('#cancellationModal .btn-danger');
     const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Gönderiliyor...';
+    submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-2"></i>Gönderiliyor...';
     submitBtn.disabled = true;
     
     // AJAX request
@@ -1510,7 +1510,7 @@ function showAlert(type, message) {
     const alertContainer = document.querySelector('.container-fluid .row main');
     const alertHtml = `
         <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="margin-top: 1rem;">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+            <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>

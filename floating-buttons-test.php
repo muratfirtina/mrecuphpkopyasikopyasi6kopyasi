@@ -17,13 +17,13 @@ include_once 'includes/header.php';
             <div class="card shadow-lg">
                 <div class="card-header bg-primary text-white">
                     <h3 class="mb-0">
-                        <i class="fas fa-test-tube me-2"></i>
+                        <i class="bi bi-test-tube me-2"></i>
                         Floating Buttons Test Sayfası
                     </h3>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-info">
-                        <h5><i class="fas fa-info-circle me-2"></i>Test Edilecek Özellikler:</h5>
+                        <h5><i class="bi bi-info-circle me-2"></i>Test Edilecek Özellikler:</h5>
                         <ul class="mb-0">
                             <li><strong>WhatsApp Floating Button:</strong> Sayfanın sağ alt köşesinde yeşil WhatsApp butonu görünmeli</li>
                             <li><strong>Scroll to Top Button:</strong> Sayfa aşağı kaydırıldığında sol alt köşede kırmızı yukarı ok butonu görünmeli</li>
@@ -33,7 +33,7 @@ include_once 'includes/header.php';
 
                     <div class="row">
                         <div class="col-md-6">
-                            <h4><i class="fab fa-whatsapp text-success me-2"></i>WhatsApp Button</h4>
+                            <h4><i class="bi bi-whatsapp text-success me-2"></i>WhatsApp Button</h4>
                             <p>Sağ alt köşede bulunan yeşil WhatsApp butonuna tıklayarak test edin.</p>
                             <ul>
                                 <li>Button hover efekti çalışıyor mu?</li>
@@ -43,7 +43,7 @@ include_once 'includes/header.php';
                             </ul>
                         </div>
                         <div class="col-md-6">
-                            <h4><i class="fas fa-arrow-up text-danger me-2"></i>Scroll to Top Button</h4>
+                            <h4><i class="bi bi-arrow-up text-danger me-2"></i>Scroll to Top Button</h4>
                             <p>Sayfayı aşağı kaydırın ve sol alt köşede beliren butonu test edin.</p>
                             <ul>
                                 <li>300px kaydırma sonrası görünüyor mu?</li>
@@ -57,30 +57,30 @@ include_once 'includes/header.php';
                     <hr>
 
                     <!-- FontAwesome Test Section -->
-                    <h4><i class="fas fa-icons me-2"></i>FontAwesome İkon Testi</h4>
+                    <h4><i class="bi bi-icons me-2"></i>FontAwesome İkon Testi</h4>
                     <div class="row">
                         <div class="col-md-3 text-center mb-3">
                             <div class="p-3 border rounded">
-                                <i class="fas fa-home fa-2x text-primary mb-2"></i>
-                                <br><small>fas fa-home</small>
+                                <i class="bi bi-home fa-2x text-primary mb-2"></i>
+                                <br><small>bi bi-home</small>
                             </div>
                         </div>
                         <div class="col-md-3 text-center mb-3">
                             <div class="p-3 border rounded">
-                                <i class="fas fa-user fa-2x text-success mb-2"></i>
-                                <br><small>fas fa-user</small>
+                                <i class="bi bi-user fa-2x text-success mb-2"></i>
+                                <br><small>bi bi-user</small>
                             </div>
                         </div>
                         <div class="col-md-3 text-center mb-3">
                             <div class="p-3 border rounded">
-                                <i class="fab fa-whatsapp fa-2x text-success mb-2"></i>
-                                <br><small>fab fa-whatsapp</small>
+                                <i class="bi bi-whatsapp fa-2x text-success mb-2"></i>
+                                <br><small>bi bi-whatsapp</small>
                             </div>
                         </div>
                         <div class="col-md-3 text-center mb-3">
                             <div class="p-3 border rounded">
-                                <i class="fas fa-arrow-up fa-2x text-danger mb-2"></i>
-                                <br><small>fas fa-arrow-up</small>
+                                <i class="bi bi-arrow-up fa-2x text-danger mb-2"></i>
+                                <br><small>bi bi-arrow-up</small>
                             </div>
                         </div>
                     </div>
@@ -88,7 +88,7 @@ include_once 'includes/header.php';
                     <hr>
 
                     <!-- Keyboard Shortcuts -->
-                    <h4><i class="fas fa-keyboard me-2"></i>Klavye Kısayolları</h4>
+                    <h4><i class="bi bi-keyboard me-2"></i>Klavye Kısayolları</h4>
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
@@ -131,13 +131,13 @@ include_once 'includes/header.php';
     <!-- Son test alanı -->
     <div class="card mt-4 mb-5">
         <div class="card-body text-center">
-            <h3><i class="fas fa-flag-checkered text-success me-2"></i>Test Tamamlandı!</h3>
+            <h3><i class="bi bi-flag-checkered text-success me-2"></i>Test Tamamlandı!</h3>
             <p>Eğer bu alanı görüyorsanız ve butonlar çalışıyorsa, entegrasyon başarılıdır.</p>
             <button class="btn btn-success me-2" onclick="scrollToTop()">
-                <i class="fas fa-arrow-up me-1"></i>Sayfa Başına Dön
+                <i class="bi bi-arrow-up me-1"></i>Sayfa Başına Dön
             </button>
             <a href="https://wa.me/905551234567" target="_blank" class="btn btn-success">
-                <i class="fab fa-whatsapp me-1"></i>WhatsApp Test
+                <i class="bi bi-whatsapp me-1"></i>WhatsApp Test
             </a>
         </div>
     </div>

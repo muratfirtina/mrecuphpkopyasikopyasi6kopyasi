@@ -415,7 +415,7 @@ $cssPath = '../assets/css/style.css';
     <nav class="navbar navbar-expand-lg navbar-dark admin-navbar">
         <div class="container-fluid">
             <a class="navbar-brand" href="../index.php">
-                <i class="fas fa-microchip me-2"></i>
+                <i class="bi bi-microchip me-2"></i>
                 <?php echo SITE_NAME; ?> - Admin
             </a>
             
@@ -427,12 +427,12 @@ $cssPath = '../assets/css/style.css';
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="../index.php">
-                            <i class="fas fa-globe me-1"></i>Siteyi Görüntüle
+                            <i class="bi bi-globe me-1"></i>Siteyi Görüntüle
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="../user/">
-                            <i class="fas fa-user me-1"></i>Kullanıcı Paneli
+                            <i class="bi bi-user me-1"></i>Kullanıcı Paneli
                         </a>
                     </li>
                 </ul>
@@ -494,7 +494,7 @@ $cssPath = '../assets/css/style.css';
                     
                     <li class="nav-item dropdown me-2">
                         <a class="nav-link position-relative p-2" href="#" id="adminNotificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-bell fa-lg text-white"></i>
+                            <i class="bi bi-bell fa-lg text-white"></i>
                             <?php if ($unreadCount > 0): ?>
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger badge-notification">
                                 <?php echo $unreadCount; ?>
@@ -543,25 +543,25 @@ $cssPath = '../assets/css/style.css';
                                                 <i class="<?php 
                                                     switch($notification['type']) {
                                                         case 'user_registration':
-                                                            echo 'fas fa-user-plus text-success';
+                                                            echo 'bi bi-user-plus text-success';
                                                             break;
                                                         case 'file_upload':
-                                                            echo 'fas fa-upload text-warning';
+                                                            echo 'bi bi-upload text-warning';
                                                             break;
                                                         case 'revision_request':
-                                                            echo 'fas fa-edit text-danger';
+                                                            echo 'bi bi-edit text-danger';
                                                             break;
                                                         case 'revision_response':
-                                                            echo 'fas fa-reply text-success';
+                                                            echo 'bi bi-reply text-success';
                                                             break;
                                                         case 'file_status_update':
-                                                            echo 'fas fa-sync-alt text-primary';
+                                                            echo 'bi bi-sync-alt text-primary';
                                                             break;
                                                         case 'system_warning':
-                                                            echo 'fas fa-exclamation-triangle text-danger';
+                                                            echo 'bi bi-exclamation-triangle text-danger';
                                                             break;
                                                         default:
-                                                            echo 'fas fa-info-circle text-info';
+                                                            echo 'bi bi-info-circle text-info';
                                                     }
                                                 ?>"></i>
                                             </div>
@@ -570,7 +570,7 @@ $cssPath = '../assets/css/style.css';
                                             <div class="fw-semibold"><?php echo htmlspecialchars($notification['title']); ?></div>
                                             <div class="text-muted small"><?php echo htmlspecialchars(substr($notification['message'], 0, 100)); ?><?php echo strlen($notification['message']) > 100 ? '...' : ''; ?></div>
                                             <div class="text-muted small mt-1">
-                                                <i class="fas fa-clock me-1"></i>
+                                                <i class="bi bi-clock me-1"></i>
                                                 <?php echo isset($notification['created_at']) ? date('d.m.Y H:i', strtotime($notification['created_at'])) : 'Yeni'; ?>
                                             </div>
                                         </div>
@@ -598,7 +598,7 @@ $cssPath = '../assets/css/style.css';
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="admin-avatar me-2">
-                                <i class="fas fa-user-shield fa-lg"></i>
+                                <i class="bi bi-user-shield fa-lg"></i>
                             </div>
                             <div class="admin-info">
                                 <span class="fw-semibold"><?php echo isset($_SESSION['username']) ? $_SESSION['username'] : 'Admin'; ?></span>
@@ -608,7 +608,7 @@ $cssPath = '../assets/css/style.css';
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 280px;">
                             <li class="dropdown-header">
                                 <div class="d-flex align-items-center">
-                                    <i class="fas fa-user-shield fa-2x text-muted me-2"></i>
+                                    <i class="bi bi-user-shield fa-2x text-muted me-2"></i>
                                     <div>
                                         <div class="fw-semibold"><?php echo isset($_SESSION['username']) ? $_SESSION['username'] : 'Admin'; ?></div>
                                         <small class="text-muted"><?php echo isset($_SESSION['email']) ? $_SESSION['email'] : 'admin@system.com'; ?></small>
@@ -621,22 +621,22 @@ $cssPath = '../assets/css/style.css';
                             <li class="dropdown-header small text-uppercase text-muted">Sistem Yönetimi</li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="index.php">
-                                    <i class="fas fa-tachometer-alt me-3 text-primary"></i>Dashboard
+                                    <i class="bi bi-tachometer-alt me-3 text-primary"></i>Dashboard
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="users.php">
-                                    <i class="fas fa-users me-3 text-info"></i>Kullanıcı Yönetimi
+                                    <i class="bi bi-users me-3 text-info"></i>Kullanıcı Yönetimi
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="uploads.php">
-                                    <i class="fas fa-folder me-3 text-warning"></i>Dosya Yönetimi
+                                    <i class="bi bi-folder me-3 text-warning"></i>Dosya Yönetimi
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="settings.php">
-                                    <i class="fas fa-cog me-3 text-secondary"></i>Sistem Ayarları
+                                    <i class="bi bi-cog me-3 text-secondary"></i>Sistem Ayarları
                                 </a>
                             </li>
                             
@@ -644,17 +644,17 @@ $cssPath = '../assets/css/style.css';
                             <li class="dropdown-header small text-uppercase text-muted">Güvenlik & Raporlar</li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="security-dashboard.php">
-                                    <i class="fas fa-shield-alt me-3 text-success"></i>Güvenlik Dashboard
+                                    <i class="bi bi-shield-alt me-3 text-success"></i>Güvenlik Dashboard
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="logs.php">
-                                    <i class="fas fa-clipboard-list me-3 text-dark"></i>Sistem Logları
+                                    <i class="bi bi-clipboard-list me-3 text-dark"></i>Sistem Logları
                                 </a>
                             </li>
                             <!-- <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="analytics.php">
-                                    <i class="fas fa-chart-bar me-3 text-info"></i>Analitik Raporlar
+                                    <i class="bi bi-chart-bar me-3 text-info"></i>Analitik Raporlar
                                 </a>
                             </li> -->
                             
@@ -662,19 +662,19 @@ $cssPath = '../assets/css/style.css';
                             <li class="dropdown-header small text-uppercase text-muted">Hesap İşlemleri</li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="../user/profile.php">
-                                    <i class="fas fa-user me-3 text-primary"></i>Profil Ayarları
+                                    <i class="bi bi-user me-3 text-primary"></i>Profil Ayarları
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="../user/">
-                                    <i class="fas fa-user-circle me-3 text-secondary"></i>Kullanıcı Paneli
+                                    <i class="bi bi-user-circle me-3 text-secondary"></i>Kullanıcı Paneli
                                 </a>
                             </li>
                             
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2 text-danger" href="../logout.php">
-                                    <i class="fas fa-sign-out-alt me-3"></i>Güvenli Çıkış
+                                    <i class="bi bi-sign-out-alt me-3"></i>Güvenli Çıkış
                                 </a>
                             </li>
                         </ul>

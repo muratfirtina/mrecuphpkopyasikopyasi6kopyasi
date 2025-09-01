@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const submitBtn = editForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Güncelleniyor...';
+            submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-1"></i>Güncelleniyor...';
             submitBtn.disabled = true;
             
             fetch('ajax/update-product.php', {
@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.success) {
                     const successAlert = document.createElement('div');
                     successAlert.className = 'alert alert-success alert-dismissible fade show';
-                    successAlert.innerHTML = '<i class="fas fa-check-circle me-2"></i>' + data.message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+                    successAlert.innerHTML = '<i class="bi bi-check-circle me-2"></i>' + data.message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
                     
                     const pageTitle = document.querySelector('.card-header');
                     pageTitle.parentNode.insertBefore(successAlert, pageTitle.nextSibling);

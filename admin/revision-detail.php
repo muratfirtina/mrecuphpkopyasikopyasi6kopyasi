@@ -318,7 +318,7 @@ endif;
 
 $pageTitle = 'Revizyon Detayı';
 $pageDescription = 'Revizyon talebi detayları ve işlemleri';
-$pageIcon = 'fas fa-edit';
+$pageIcon = 'bi bi-edit';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -328,7 +328,7 @@ include '../includes/admin_sidebar.php';
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -336,7 +336,7 @@ include '../includes/admin_sidebar.php';
 
 <?php if ($success): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="bi bi-check-circle me-2"></i>
         <?php echo $success; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -357,7 +357,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="fas fa-edit me-2"></i>Revizyon Talebi #<?php echo substr($revision['id'], 0, 8); ?>
+                    <i class="bi bi-edit me-2"></i>Revizyon Talebi #<?php echo substr($revision['id'], 0, 8); ?>
                 </h5>
                 <div>
                     <?php
@@ -382,7 +382,7 @@ include '../includes/admin_sidebar.php';
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <h6 class="text-primary"><i class="fas fa-info-circle me-2"></i>Revizyon Bilgileri</h6>
+                        <h6 class="text-primary"><i class="bi bi-info-circle me-2"></i>Revizyon Bilgileri</h6>
                         <table class="table table-sm">
                             <tr>
                                 <td><strong>Talep Tarihi:</strong></td>
@@ -406,7 +406,7 @@ include '../includes/admin_sidebar.php';
                     </div>
 
                     <div class="col-md-6">
-                        <h6 class="text-success"><i class="fas fa-user me-2"></i>Kullanıcı Bilgileri</h6>
+                        <h6 class="text-success"><i class="bi bi-user me-2"></i>Kullanıcı Bilgileri</h6>
                         <table class="table table-sm">
                             <tr>
                                 <td><strong>Ad Soyad:</strong></td>
@@ -438,7 +438,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-file-alt me-2"></i>Dosya Bilgileri
+                    <i class="bi bi-file-alt me-2"></i>Dosya Bilgileri
                 </h5>
             </div>
             <div class="card-body">
@@ -447,11 +447,11 @@ include '../includes/admin_sidebar.php';
                     <div class="col-12">
                         <div class="alert-<?php echo $targetFileColor; ?> border-<?php echo $targetFileColor; ?> border-2 shadow-sm" style="background-color: var(--bs-<?php echo $targetFileColor; ?>-bg-subtle); padding: 20px; border-radius: 0.375rem;">
                             <h5 class="text-<?php echo $targetFileColor; ?> mb-3 fw-bold">
-                                <i class="fas fa-<?php echo $targetFileIcon; ?> me-2 fa-lg"></i>
+                                <i class="bi bi-<?php echo $targetFileIcon; ?> me-2 fa-lg"></i>
                                 REVİZYON TALEP EDİLEN DOSYA
                             </h5>
                             <div class="badge bg-<?php echo $targetFileColor; ?> text-white mb-3 px-3 py-2">
-                                <i class="fas fa-info-circle me-1"></i>
+                                <i class="bi bi-info-circle me-1"></i>
                                 <?php echo $targetFileType; ?>
                             </div>
 
@@ -488,7 +488,7 @@ include '../includes/admin_sidebar.php';
                                             <div class="ms-3">
                                                 <?php if ($targetFileType === 'Revizyon Dosyası'): ?>
                                                     <div class="alert-warning mb-0 border-warning" style="background-color: #fff3cd; padding: 10px; border-radius: 0.375rem;">
-                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                        <i class="bi bi-exclamation-triangle me-2"></i>
                                                         <strong>DİKKAT:</strong> Bu bir revizyon dosyasına yapılan yeni revizyon talebidir!
                                                     </div>
                                                 <?php else: ?>
@@ -508,12 +508,12 @@ include '../includes/admin_sidebar.php';
                                             <div class="d-flex justify-content-center gap-3">
                                                 <a href="<?php echo $targetDownloadUrl; ?>"
                                                     class="btn btn-<?php echo $targetFileColor; ?> btn-lg shadow">
-                                                    <i class="fas fa-download me-2"></i>
+                                                    <i class="bi bi-download me-2"></i>
                                                     Revizyon Talep Edilen Dosyayı İndir
                                                 </a>
                                                 <?php if ($targetFileType === 'Revizyon Dosyası'): ?>
                                                     <button type="button" class="btn btn-outline-info btn-lg" data-bs-toggle="modal" data-bs-target="#revisionHistoryModal">
-                                                        <i class="fas fa-history me-2"></i>
+                                                        <i class="bi bi-history me-2"></i>
                                                         Önceki Revizyonları Gör
                                                     </button>
                                                 <?php endif; ?>
@@ -531,7 +531,7 @@ include '../includes/admin_sidebar.php';
 
                 <div class="row">
                     <div class="col-md-6">
-                        <h6 class="text-primary"><i class="fas fa-upload me-2"></i>Ana Proje Dosyası</h6>
+                        <h6 class="text-primary"><i class="bi bi-upload me-2"></i>Ana Proje Dosyası</h6>
                         <table class="table table-sm">
                             <tr>
                                 <td><strong>Dosya Adı:</strong></td>
@@ -541,7 +541,7 @@ include '../includes/admin_sidebar.php';
                                         <a href="file-detail.php?id=<?php echo $revision['upload_id']; ?>" 
                                            class="btn btn-outline-primary btn-sm ms-2" 
                                            title="Ana projeye git">
-                                            <i class="fas fa-external-link-alt me-1"></i>
+                                            <i class="bi bi-external-link-alt me-1"></i>
                                             Ana Projeye Git
                                         </a>
                                     </div>
@@ -563,7 +563,7 @@ include '../includes/admin_sidebar.php';
                     </div>
 
                     <div class="col-md-6">
-                        <h6 class="text-secondary"><i class="fas fa-car me-2"></i>Araç Bilgileri</h6>
+                        <h6 class="text-secondary"><i class="bi bi-car me-2"></i>Araç Bilgileri</h6>
                         <table class="table table-sm">
                             <tr>
                                 <td><strong>Marka:</strong></td>
@@ -585,7 +585,7 @@ include '../includes/admin_sidebar.php';
                 <!-- <?php if ($revision['response_id']): ?>
                     <div class="row mt-3">
                         <div class="col-12">
-                            <h6 class="text-info"><i class="fas fa-reply me-2"></i>Revize Talep Edilen Yanıt Dosyası</h6>
+                            <h6 class="text-info"><i class="bi bi-reply me-2"></i>Revize Talep Edilen Yanıt Dosyası</h6>
                             <div class="alert alert-info">
                                 <strong>Dosya:</strong> <?php echo htmlspecialchars($revision['response_original_name']); ?><br>
                                 <strong>Boyut:</strong> <?php echo formatFileSize($revision['response_file_size']); ?><br>
@@ -616,7 +616,7 @@ include '../includes/admin_sidebar.php';
                             <form method="POST" class="d-inline">
                                 <input type="hidden" name="approve_revision" value="1">
                                 <button type="submit" class="btn btn-success me-2 mb-2" onclick="return confirm('Revizyon talebini onaylamak istediğinizden emin misiniz?')">
-                                    <i class="fas fa-check me-1"></i>Onayla ve İşleme Al
+                                    <i class="bi bi-check me-1"></i>Onayla ve İşleme Al
                                 </button>
                             </form>
                         </div>
@@ -624,7 +624,7 @@ include '../includes/admin_sidebar.php';
                         <div class="col-md-6">
                             <!-- Reddet -->
                             <button type="button" class="btn btn-danger mb-2" data-bs-toggle="modal" data-bs-target="#rejectModal">
-                                <i class="fas fa-times me-1"></i>Reddet
+                                <i class="bi bi-times me-1"></i>Reddet
                             </button>
                         </div>
                     </div>
@@ -641,7 +641,7 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card border-info">
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-upload me-2"></i>Revize Dosyası Yükleme ve Tamamlama
+                        <i class="bi bi-upload me-2"></i>Revize Dosyası Yükleme ve Tamamlama
                     </h5>
                 </div>
                 <div class="card-body">
@@ -652,7 +652,7 @@ include '../includes/admin_sidebar.php';
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="revision_file" class="form-label">
-                                        <i class="fas fa-file me-1"></i>Revize Edilmiş Dosya <span class="text-danger">*</span>
+                                        <i class="bi bi-file me-1"></i>Revize Edilmiş Dosya <span class="text-danger">*</span>
                                     </label>
                                     <input type="file" class="form-control" id="revision_file" name="revision_file" required>
                                     <div class="form-text">Desteklenen formatlar: .bin, .hex, .ecu, .map</div>
@@ -661,7 +661,7 @@ include '../includes/admin_sidebar.php';
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="credits_used" class="form-label">
-                                        <i class="fas fa-coins me-1"></i>Kullanılan Kredi Miktarı <span class="text-danger">*</span>
+                                        <i class="bi bi-coins me-1"></i>Kullanılan Kredi Miktarı <span class="text-danger">*</span>
                                     </label>
                                     <input type="number" class="form-control" id="credits_used" name="credits_used"
                                         min="0" value="<?php echo $revision['credits_charged'] ?: 5; ?>" required>
@@ -672,7 +672,7 @@ include '../includes/admin_sidebar.php';
 
                         <div class="mb-3">
                             <label for="completion_notes" class="form-label">
-                                <i class="fas fa-comment-alt me-1"></i>Tamamlama Notları
+                                <i class="bi bi-comment-alt me-1"></i>Tamamlama Notları
                             </label>
                             <textarea class="form-control" id="completion_notes" name="completion_notes" rows="4"
                                 placeholder="Revizyon hakkında kullanıcıya iletilecek notlar (isteğe bağlı)..."></textarea>
@@ -681,17 +681,17 @@ include '../includes/admin_sidebar.php';
 
                         <div class="d-flex gap-3">
                             <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-check-circle me-2"></i>Revizyon Dosyasını Yükle ve Tamamla
+                                <i class="bi bi-check-circle me-2"></i>Revizyon Dosyasını Yükle ve Tamamla
                             </button>
 
                             <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#previewNotesModal">
-                                <i class="fas fa-eye me-1"></i>Notları Önizle
+                                <i class="bi bi-eye me-1"></i>Notları Önizle
                             </button>
                         </div>
 
                         <div class="mt-3">
                             <div class="alert alert-info mb-0">
-                                <i class="fas fa-info-circle me-2"></i>
+                                <i class="bi bi-info-circle me-2"></i>
                                 <strong>Bilgi:</strong> Dosya yüklendiğinde revizyon otomatik olarak "Tamamlandı" durumuna geçer ve kullanıcıya bildirim gönderilir.
                             </div>
                         </div>
@@ -709,7 +709,7 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-files me-2"></i>Yüklenen Revizyon Dosyaları (<?php echo count($revisionFiles); ?> adet)
+                        <i class="bi bi-files me-2"></i>Yüklenen Revizyon Dosyaları (<?php echo count($revisionFiles); ?> adet)
                     </h5>
                 </div>
                 <div class="card-body">
@@ -728,11 +728,11 @@ include '../includes/admin_sidebar.php';
                                 <?php foreach ($revisionFiles as $file): ?>
                                     <tr>
                                         <td>
-                                            <i class="fas fa-file-code text-success me-2"></i>
+                                            <i class="bi bi-file-code text-success me-2"></i>
                                             <div class="fw-medium"><?php echo htmlspecialchars($file['original_name']); ?></div>
                                             <?php if (!empty($file['admin_notes'])): ?>
                                                 <small class="text-muted d-block mt-1">
-                                                    <i class="fas fa-sticky-note me-1"></i>
+                                                    <i class="bi bi-sticky-note me-1"></i>
                                                     <?php echo htmlspecialchars(substr($file['admin_notes'], 0, 100)); ?>
                                                     <?php if (strlen($file['admin_notes']) > 100): ?>...<?php endif; ?>
                                                 </small>
@@ -765,17 +765,17 @@ include '../includes/admin_sidebar.php';
                                             <div class="d-flex gap-1">
                                                 <a href="download.php?type=revision&id=<?php echo $file['id']; ?>"
                                                     class="btn btn-outline-primary btn-sm">
-                                                    <i class="fas fa-download me-1"></i>İndir
+                                                    <i class="bi bi-download me-1"></i>İndir
                                                 </a>
                                                 <?php if (!isset($file['is_cancelled']) || !$file['is_cancelled']): ?>
                                                     <button type="button" class="btn btn-warning btn-sm" 
                                                             onclick="showCancelModal('<?php echo $file['id']; ?>', 'revision_file', '<?php echo htmlspecialchars($file['original_name'], ENT_QUOTES); ?>')" 
                                                             title="Revizyon Dosyasını İptal Et">
-                                                        <i class="fas fa-times me-1"></i>İptal
+                                                        <i class="bi bi-times me-1"></i>İptal
                                                     </button>
                                                 <?php else: ?>
                                                     <span class="btn btn-sm btn-secondary disabled">
-                                                        <i class="fas fa-ban me-1"></i>İptal Edilmiş
+                                                        <i class="bi bi-ban me-1"></i>İptal Edilmiş
                                                     </span>
                                                 <?php endif; ?>
                                             </div>
@@ -798,7 +798,7 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-history me-2"></i>Bu Dosyanın Revizyon Geçmişi (<?php echo count($revisionHistory); ?> adet)
+                        <i class="bi bi-history me-2"></i>Bu Dosyanın Revizyon Geçmişi (<?php echo count($revisionHistory); ?> adet)
                     </h5>
                 </div>
                 <div class="card-body">
@@ -807,7 +807,7 @@ include '../includes/admin_sidebar.php';
                             <div class="timeline-item <?php echo $historyItem['id'] === $revisionId ? 'current' : ''; ?>">
                                 <div class="timeline-marker">
                                     <?php if ($historyItem['id'] === $revisionId): ?>
-                                        <i class="fas fa-eye text-primary"></i>
+                                        <i class="bi bi-eye text-primary"></i>
                                     <?php else: ?>
                                         <span class="badge bg-<?php echo $statusClass[$historyItem['status']] ?? 'secondary'; ?>">
                                             <?php echo $index + 1; ?>
@@ -852,7 +852,7 @@ include '../includes/admin_sidebar.php';
                                         <div class="mt-2">
                                             <a href="revision-detail.php?id=<?php echo $historyItem['id']; ?>"
                                                 class="btn btn-outline-primary btn-sm">
-                                                <i class="fas fa-eye me-1"></i>Detay
+                                                <i class="bi bi-eye me-1"></i>Detay
                                             </a>
                                         </div>
                                     <?php endif; ?>
@@ -873,7 +873,7 @@ include '../includes/admin_sidebar.php';
             <form method="POST">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title" id="rejectModalLabel">
-                        <i class="fas fa-times-circle me-2"></i>Revizyon Talebini Reddet
+                        <i class="bi bi-times-circle me-2"></i>Revizyon Talebini Reddet
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -881,13 +881,13 @@ include '../includes/admin_sidebar.php';
                     <input type="hidden" name="reject_revision" value="1">
 
                     <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <i class="bi bi-exclamation-triangle me-2"></i>
                         <strong>Dikkat!</strong> Bu revizyon talebi reddedilecek ve kullanıcıya bildirilecek.
                     </div>
 
                     <div class="mb-3">
                         <label for="admin_notes" class="form-label">
-                            <i class="fas fa-comment me-1"></i>
+                            <i class="bi bi-comment me-1"></i>
                             Reddetme Sebebi <span class="text-danger">*</span>
                         </label>
                         <textarea class="form-control" id="admin_notes" name="admin_notes" rows="4"
@@ -897,10 +897,10 @@ include '../includes/admin_sidebar.php';
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>Vazgeç
+                        <i class="bi bi-times me-1"></i>Vazgeç
                     </button>
                     <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-times me-1"></i>Reddet
+                        <i class="bi bi-times me-1"></i>Reddet
                     </button>
                 </div>
             </form>
@@ -914,7 +914,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
                 <h5 class="modal-title" id="revisionHistoryModalLabel">
-                    <i class="fas fa-history me-2"></i>Bu Dosyanın Revizyon Geçmişi
+                    <i class="bi bi-history me-2"></i>Bu Dosyanın Revizyon Geçmişi
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -940,14 +940,14 @@ include '../includes/admin_sidebar.php';
                                                 <strong>Talep Eden:</strong> <?php echo htmlspecialchars($historyItem['first_name'] . ' ' . $historyItem['last_name']); ?>
                                             </p>
                                             <small class="text-muted">
-                                                <i class="fas fa-calendar me-1"></i><?php echo formatDate($historyItem['requested_at']); ?>
+                                                <i class="bi bi-calendar me-1"></i><?php echo formatDate($historyItem['requested_at']); ?>
                                             </small>
                                         </div>
                                         <div>
                                             <?php if ($historyItem['id'] !== $revisionId): ?>
                                                 <a href="revision-detail.php?id=<?php echo $historyItem['id']; ?>"
                                                     class="btn btn-outline-primary btn-sm">
-                                                    <i class="fas fa-eye me-1"></i>Detay
+                                                    <i class="bi bi-eye me-1"></i>Detay
                                                 </a>
                                             <?php endif; ?>
                                         </div>
@@ -971,7 +971,7 @@ include '../includes/admin_sidebar.php';
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>Kapat
+                    <i class="bi bi-times me-1"></i>Kapat
                 </button>
             </div>
         </div>
@@ -984,13 +984,13 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="previewNotesModalLabel">
-                    <i class="fas fa-eye me-2"></i>Kullanıcıya Gönderilecek E-posta Önizlemesi
+                    <i class="bi bi-eye me-2"></i>Kullanıcıya Gönderilecek E-posta Önizlemesi
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
+                    <i class="bi bi-info-circle me-2"></i>
                     <strong>Bilgi:</strong> Bu önizleme, kullanıcıya gönderilecek e-postanın içeriğini gösterir.
                 </div>
 
@@ -1006,19 +1006,19 @@ include '../includes/admin_sidebar.php';
                         <div class="col-md-6">
                             <strong>Revizyon Bilgileri:</strong>
                             <ul class="list-unstyled ms-3">
-                                <li><i class="fas fa-hashtag me-1"></i> ID: #<?php echo substr($revisionId, 0, 8); ?></li>
-                                <li><i class="fas fa-calendar me-1"></i> Talep Tarihi: <?php echo formatDate($revision['requested_at']); ?></li>
-                                <li><i class="fas fa-file me-1"></i> Dosya: <?php echo htmlspecialchars($revision['original_name']); ?></li>
-                                <li><i class="fas fa-coins me-1"></i> Kullanılan Kredi: <span id="preview-credits">5</span></li>
+                                <li><i class="bi bi-hashtag me-1"></i> ID: #<?php echo substr($revisionId, 0, 8); ?></li>
+                                <li><i class="bi bi-calendar me-1"></i> Talep Tarihi: <?php echo formatDate($revision['requested_at']); ?></li>
+                                <li><i class="bi bi-file me-1"></i> Dosya: <?php echo htmlspecialchars($revision['original_name']); ?></li>
+                                <li><i class="bi bi-coins me-1"></i> Kullanılan Kredi: <span id="preview-credits">5</span></li>
                             </ul>
                         </div>
                         <div class="col-md-6">
                             <strong>Araç Bilgileri:</strong>
                             <ul class="list-unstyled ms-3">
-                                <li><i class="fas fa-car me-1"></i> Marka: <?php echo htmlspecialchars($revision['brand_name'] ?: 'Belirtilmemiş'); ?></li>
+                                <li><i class="bi bi-car me-1"></i> Marka: <?php echo htmlspecialchars($revision['brand_name'] ?: 'Belirtilmemiş'); ?></li>
                                 <li><i class="bi bi-gear-wide-connected me-1"></i> Model: <?php echo htmlspecialchars($revision['model_name'] ?: 'Belirtilmemiş'); ?></li>
-                                <li><i class="fas fa-calendar-alt me-1"></i> Yıl: <?php echo htmlspecialchars($revision['year'] ?: 'Belirtilmemiş'); ?></li>
-                                <li><i class="fas fa-id-card me-1"></i> Plaka: <?php echo htmlspecialchars($revision['plate'] ?: 'Belirtilmemiş'); ?></li>
+                                <li><i class="bi bi-calendar-alt me-1"></i> Yıl: <?php echo htmlspecialchars($revision['year'] ?: 'Belirtilmemiş'); ?></li>
+                                <li><i class="bi bi-id-card me-1"></i> Plaka: <?php echo htmlspecialchars($revision['plate'] ?: 'Belirtilmemiş'); ?></li>
                             </ul>
                         </div>
                     </div>
@@ -1038,7 +1038,7 @@ include '../includes/admin_sidebar.php';
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>Kapat
+                    <i class="bi bi-times me-1"></i>Kapat
                 </button>
             </div>
         </div>
@@ -1246,7 +1246,7 @@ include '../includes/admin_footer.php';
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-gradient-danger text-white border-0">
                 <h5 class="modal-title d-flex align-items-center" id="adminCancelModalLabel">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="bi bi-exclamation-triangle me-2"></i>
                     Dosya İptal Onayı
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
@@ -1259,21 +1259,21 @@ include '../includes/admin_footer.php';
                     
                     <div class="mb-4">
                         <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 50%;">
-                            <i class="fas fa-times text-white fa-2x"></i>
+                            <i class="bi bi-times text-white fa-2x"></i>
                         </div>
                         <h6 class="mb-2 text-dark text-center">Bu dosyayı iptal etmek istediğinizden emin misiniz?</h6>
                         <p class="text-muted mb-3 text-center">
                             <strong>Dosya:</strong> <span id="cancelFileName"></span>
                         </p>
                         <div class="alert alert-warning d-flex align-items-center mb-3">
-                            <i class="fas fa-info-circle me-2"></i>
+                            <i class="bi bi-info-circle me-2"></i>
                             <small>Bu işlem dosyayı gizleyecek ve varsa ücret iadesi yapacaktır.</small>
                         </div>
                     </div>
                     
                     <div class="mb-3">
                         <label for="adminCancelNotes" class="form-label">
-                            <i class="fas fa-sticky-note me-1"></i>
+                            <i class="bi bi-sticky-note me-1"></i>
                             İptal Sebebi (Opsiyonel)
                         </label>
                         <textarea class="form-control" id="adminCancelNotes" name="admin_notes" rows="3" 
@@ -1283,10 +1283,10 @@ include '../includes/admin_footer.php';
                 </div>
                 <div class="modal-footer border-0 pt-3">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>İptal
+                        <i class="bi bi-times me-1"></i>İptal
                     </button>
                     <button type="submit" class="btn btn-danger px-4">
-                        <i class="fas fa-check me-1"></i>Evet, İptal Et
+                        <i class="bi bi-check me-1"></i>Evet, İptal Et
                     </button>
                 </div>
             </form>

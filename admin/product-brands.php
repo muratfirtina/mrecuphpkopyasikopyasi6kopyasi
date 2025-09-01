@@ -189,7 +189,7 @@ try {
 
 $pageTitle = 'Ürün Markalar';
 $pageDescription = 'Ürün markalarını yönetin';
-$pageIcon = 'fas fa-award';
+$pageIcon = 'bi bi-award';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -218,7 +218,7 @@ include '../includes/admin_sidebar.php';
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
     <div class="alert alert-admin alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -226,7 +226,7 @@ include '../includes/admin_sidebar.php';
 
 <?php if ($success): ?>
     <div class="alert alert-admin alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="bi bi-check-circle me-2"></i>
         <?php echo $success; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -237,7 +237,7 @@ include '../includes/admin_sidebar.php';
     <div class="col-md-3">
         <div class="card admin-card text-center">
             <div class="card-body">
-                <i class="fas fa-award fa-2x text-primary mb-2"></i>
+                <i class="bi bi-award fa-2x text-primary mb-2"></i>
                 <h4><?php echo count($brands); ?></h4>
                 <small class="text-muted">Toplam Marka</small>
             </div>
@@ -246,7 +246,7 @@ include '../includes/admin_sidebar.php';
     <div class="col-md-3">
         <div class="card admin-card text-center">
             <div class="card-body">
-                <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                <i class="bi bi-star fa-2x text-warning mb-2"></i>
                 <h4><?php echo count(array_filter($brands, function($b) { return $b['is_featured']; })); ?></h4>
                 <small class="text-muted">Öne Çıkan</small>
             </div>
@@ -255,7 +255,7 @@ include '../includes/admin_sidebar.php';
     <div class="col-md-3">
         <div class="card admin-card text-center">
             <div class="card-body">
-                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                <i class="bi bi-check-circle fa-2x text-success mb-2"></i>
                 <h4><?php echo count(array_filter($brands, function($b) { return $b['is_active']; })); ?></h4>
                 <small class="text-muted">Aktif Marka</small>
             </div>
@@ -264,7 +264,7 @@ include '../includes/admin_sidebar.php';
     <div class="col-md-3">
         <div class="card admin-card text-center">
             <div class="card-body">
-                <i class="fas fa-box fa-2x text-info mb-2"></i>
+                <i class="bi bi-box fa-2x text-info mb-2"></i>
                 <h4><?php echo array_sum(array_column($brands, 'product_count')); ?></h4>
                 <small class="text-muted">Toplam Ürün</small>
             </div>
@@ -276,20 +276,20 @@ include '../includes/admin_sidebar.php';
 <div class="card admin-card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
-            <i class="fas fa-award me-2"></i>Markalar (<?php echo count($brands); ?>)
+            <i class="bi bi-award me-2"></i>Markalar (<?php echo count($brands); ?>)
         </h5>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBrandModal">
-            <i class="fas fa-plus me-1"></i>Yeni Marka
+            <i class="bi bi-plus me-1"></i>Yeni Marka
         </button>
     </div>
     <div class="card-body">
         <?php if (empty($brands)): ?>
             <div class="text-center py-4">
-                <i class="fas fa-award fa-3x text-muted mb-3"></i>
+                <i class="bi bi-award fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">Marka bulunamadı</h6>
                 <p class="text-muted">Henüz marka eklenmemiş.</p>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBrandModal">
-                    <i class="fas fa-plus me-1"></i>İlk Markayı Ekle
+                    <i class="bi bi-plus me-1"></i>İlk Markayı Ekle
                 </button>
             </div>
         <?php else: ?>
@@ -323,7 +323,7 @@ include '../includes/admin_sidebar.php';
                                         <div>
                                             <strong><?php echo htmlspecialchars($brand['name']); ?></strong>
                                             <?php if ($brand['is_featured']): ?>
-                                                <i class="fas fa-star text-warning ms-1" title="Öne Çıkan"></i>
+                                                <i class="bi bi-star text-warning ms-1" title="Öne Çıkan"></i>
                                             <?php endif; ?>
                                             <br>
                                             <small class="text-muted"><?php echo htmlspecialchars($brand['slug']); ?></small>
@@ -331,7 +331,7 @@ include '../includes/admin_sidebar.php';
                                                 <br>
                                                 <a href="<?php echo htmlspecialchars($brand['website']); ?>" 
                                                    target="_blank" class="text-info text-decoration-none">
-                                                    <i class="fas fa-external-link-alt"></i>
+                                                    <i class="bi bi-external-link-alt"></i>
                                                     <?php echo parse_url($brand['website'], PHP_URL_HOST); ?>
                                                 </a>
                                             <?php endif; ?>
@@ -366,12 +366,12 @@ include '../includes/admin_sidebar.php';
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-outline-warning" 
                                                 onclick="editBrand(<?php echo htmlspecialchars(json_encode($brand)); ?>)">
-                                            <i class="fas fa-edit"></i>
+                                            <i class="bi bi-edit"></i>
                                         </button>
                                         <a href="?delete=<?php echo $brand['id']; ?>" 
                                            class="btn btn-outline-danger"
                                            onclick="return confirm('Bu markayı silmek istediğinizden emin misiniz? Bağlı ürünler etkilenebilir!')">
-                                            <i class="fas fa-trash"></i>
+                                            <i class="bi bi-trash"></i>
                                         </a>
                                     </div>
                                 </td>
@@ -390,7 +390,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-plus me-2"></i>Yeni Marka Ekle
+                    <i class="bi bi-plus me-2"></i>Yeni Marka Ekle
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -466,7 +466,7 @@ include '../includes/admin_sidebar.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" name="add_brand" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>Marka Ekle
+                        <i class="bi bi-save me-1"></i>Marka Ekle
                     </button>
                 </div>
             </form>
@@ -480,7 +480,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-edit me-2"></i>Marka Düzenle
+                    <i class="bi bi-edit me-2"></i>Marka Düzenle
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -562,7 +562,7 @@ include '../includes/admin_sidebar.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" name="update_brand" class="btn btn-warning">
-                        <i class="fas fa-save me-1"></i>Güncelle
+                        <i class="bi bi-save me-1"></i>Güncelle
                     </button>
                 </div>
             </form>

@@ -513,19 +513,19 @@ include 'includes/header.php';
                                          class="brand-logo">
                                 <?php else: ?>
                                     <div class="brand-logo d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-award text-muted fa-2x"></i>
+                                        <i class="bi bi-award text-muted fa-2x"></i>
                                     </div>
                                 <?php endif; ?>
                                 
                                 <!-- <h3 class="brand-name"><?php echo htmlspecialchars($brand['name']); ?></h3> -->
                                 <p class="brand-product-count">
-                                    <i class="fas fa-box me-1"></i>
+                                    <i class="bi bi-box me-1"></i>
                                     <?php echo $brand['product_count']; ?> ürün
                                 </p>
                                 
                                 <span class="brand-view-products">
                                     Ürünleri Görüntüle
-                                    <i class="fas fa-arrow-right"></i>
+                                    <i class="bi bi-arrow-right"></i>
                                 </span>
                             </a>
                         </div>
@@ -536,7 +536,7 @@ include 'includes/header.php';
     <?php else: ?>
         <section class="empty-state">
             <div class="container">
-                <i class="fas fa-box-open"></i>
+                <i class="bi bi-box-open"></i>
                 <h3>Bu kategoride henüz marka bulunmuyor</h3>
                 <p>Yakında yeni markalar eklenecektir.</p>
             </div>
@@ -549,7 +549,7 @@ include 'includes/header.php';
             <div class="container">
                 <div class="text-center mb-5">
                     <h2 class="h1 mb-3">
-                        <i class="fas fa-star text-warning me-3"></i>
+                        <i class="bi bi-star text-warning me-3"></i>
                         Öne Çıkan Ürünler
                     </h2>
                     <p class="lead text-muted">
@@ -567,14 +567,14 @@ include 'includes/header.php';
                                          class="product-image">
                                 <?php else: ?>
                                     <div class="product-image bg-light d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-image text-muted fa-2x"></i>
+                                        <i class="bi bi-image text-muted fa-2x"></i>
                                     </div>
                                 <?php endif; ?>
                                 
                                 <div class="product-info">
                                     <?php if ($product['brand_name']): ?>
                                         <p class="product-brand">
-                                            <i class="fas fa-award me-1"></i>
+                                            <i class="bi bi-award me-1"></i>
                                             <?php echo htmlspecialchars($product['brand_name']); ?>
                                         </p>
                                     <?php endif; ?>
@@ -607,7 +607,7 @@ include 'includes/header.php';
                     <?php echo htmlspecialchars($category['name']); ?> kategorisindeki tüm ürünleri görüntülemek için tıklayın
                 </p>
                 <a href="/mrecuphpkopyasikopyasi6kopyasi/urunler?category=<?php echo $category['slug']; ?>" class="cta-button">
-                    <i class="fas fa-th-large"></i>
+                    <i class="bi bi-th-large"></i>
                     Tüm Ürünleri Görüntüle
                 </a>
             </div>

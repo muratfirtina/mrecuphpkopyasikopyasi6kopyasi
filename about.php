@@ -61,7 +61,7 @@ include 'includes/header.php';
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
                             <a href="index.php" class="text-white-50 text-decoration-none">
-                                <i class="fas fa-home me-1"></i>Ana Sayfa
+                                <i class="bi bi-home me-1"></i>Ana Sayfa
                             </a>
                         </li>
                         <li class="breadcrumb-item active text-white" aria-current="page">Hakkımızda</li>
@@ -113,7 +113,7 @@ include 'includes/header.php';
                                 <?php foreach ($features as $feature): ?>
                                     <div class="col-6">
                                         <div class="d-flex align-items-center">
-                                            <i class="<?php echo htmlspecialchars($feature['icon'] ?? 'fas fa-check-circle text-success'); ?> me-2 fs-5"></i>
+                                            <i class="<?php echo htmlspecialchars($feature['icon'] ?? 'bi bi-check-circle text-success'); ?> me-2 fs-5"></i>
                                             <span class="fw-semibold"><?php echo htmlspecialchars($feature['title'] ?? ''); ?></span>
                                         </div>
                                     </div>
@@ -182,7 +182,7 @@ include 'includes/header.php';
                                 </p>
                             </div>
                             <div class="col-lg-4 text-center">
-                                <i class="fas fa-bullseye" style="font-size: 4rem; opacity: 0.7;"></i>
+                                <i class="bi bi-bullseye" style="font-size: 4rem; opacity: 0.7;"></i>
                             </div>
                         </div>
                     </div>
@@ -217,7 +217,7 @@ include 'includes/header.php';
                                      alt="<?php echo htmlspecialchars($feature['title']); ?>" 
                                      class="img-fluid" style="height: 60px;">
                             <?php else: ?>
-                                <i class="<?php echo htmlspecialchars($feature['icon'] ?? 'fas fa-cog'); ?>" style="font-size: 3rem; color: #007bff;"></i>
+                                <i class="<?php echo htmlspecialchars($feature['icon'] ?? 'bi bi-cog'); ?>" style="font-size: 3rem; color: #007bff;"></i>
                             <?php endif; ?>
                         </div>
                         <h5 class="fw-bold mb-3"><?php echo htmlspecialchars($feature['title']); ?></h5>
@@ -273,7 +273,7 @@ include 'includes/header.php';
                                 <?php foreach ($vision_features as $vf): ?>
                                     <div class="col-12">
                                         <div class="d-flex align-items-center p-3 bg-light rounded-3">
-                                            <i class="<?php echo htmlspecialchars($vf['icon'] ?? 'fas fa-rocket text-primary'); ?> me-3 fs-4"></i>
+                                            <i class="<?php echo htmlspecialchars($vf['icon'] ?? 'bi bi-rocket text-primary'); ?> me-3 fs-4"></i>
                                             <div>
                                                 <h6 class="mb-1 fw-bold"><?php echo htmlspecialchars($vf['title'] ?? ''); ?></h6>
                                                 <?php if (!empty($vf['description'])): ?>
@@ -302,29 +302,29 @@ include 'includes/header.php';
         </p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
             <a href="tel:+905551234567" class="btn btn-light btn-lg">
-                <i class="fas fa-phone me-2"></i>Hemen Ara
+                <i class="bi bi-phone me-2"></i>Hemen Ara
             </a>
             <a href="mailto:<?php echo SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
-                <i class="fas fa-envelope me-2"></i>E-posta Gönder
+                <i class="bi bi-envelope me-2"></i>E-posta Gönder
             </a>
             <a href="register.php" class="btn btn-warning btn-lg">
-                <i class="fas fa-upload me-2"></i>Dosya Yükle
+                <i class="bi bi-upload me-2"></i>Dosya Yükle
             </a>
         </div>
         
         <div class="row mt-5 text-center">
             <div class="col-md-4">
-                <i class="fas fa-shield-alt fa-2x mb-3"></i>
+                <i class="bi bi-shield-alt fa-2x mb-3"></i>
                 <h5 style="color: #fff !important;">Güvenli İşlem</h5>
                 <p style="color: #fff !important;">Aracınızın garantisi bozulmaz</p>
             </div>
             <div class="col-md-4">
-                <i class="fas fa-clock fa-2x mb-3"></i>
+                <i class="bi bi-clock fa-2x mb-3"></i>
                 <h5 style="color: #fff !important;">Hızlı Teslimat</h5>
                 <p style="color: #fff !important;">24 saat içinde dosyanız hazır</p>
             </div>
             <div class="col-md-4">
-                <i class="fas fa-undo fa-2x mb-3"></i>
+                <i class="bi bi-undo fa-2x mb-3"></i>
                 <h5 style="color: #fff !important;">Geri Dönüş Garantisi</h5>
                 <p style="color: #fff !important;">İstediğiniz zaman eski haline döndürülebilir</p>
             </div>

@@ -64,19 +64,19 @@ include 'includes/header.php';
                     box-shadow: 0 20px 50px rgba(0,0,0,0.2);
                 ">
                     <div class="card-header text-center py-4" style="background: linear-gradient(45deg, #28a745, #20c997); color: white;">
-                        <h3 class="mb-0"><i class="fas fa-user-plus me-2"></i> Hesap Oluştur</h3>
+                        <h3 class="mb-0"><i class="bi bi-user-plus me-2"></i> Hesap Oluştur</h3>
                         <p class="mb-0 mt-1" style="opacity: 0.85;">Ücretsiz üye olun</p>
                     </div>
                     <div class="card-body p-5">
                         <?php if ($error): ?>
                             <div class="alert alert-danger border-0 rounded-4 text-center">
-                                <i class="fas fa-exclamation-triangle me-2"></i> <?php echo $error; ?>
+                                <i class="bi bi-exclamation-triangle me-2"></i> <?php echo $error; ?>
                             </div>
                         <?php endif; ?>
 
                         <?php if ($success): ?>
                             <div class="alert alert-success border-0 rounded-4 text-center">
-                                <i class="fas fa-check-circle me-2"></i> <?php echo $success; ?>
+                                <i class="bi bi-check-circle me-2"></i> <?php echo $success; ?>
                             </div>
                             <div class="text-center mt-3">
                                 <a href="login.php" class="btn btn-success rounded-4 px-4">Giriş Yap</a>
@@ -131,7 +131,7 @@ include 'includes/header.php';
 
                                 <button type="submit" class="btn btn-success btn-lg w-100 mt-4 rounded-4 py-3 fw-bold"
                                         style="background: linear-gradient(135deg, #28a745, #20c997); border: none;">
-                                    <i class="fas fa-user-plus me-2"></i> Hesap Oluştur
+                                    <i class="bi bi-user-plus me-2"></i> Hesap Oluştur
                                 </button>
                             </form>
                         <?php endif; ?>
@@ -157,21 +157,21 @@ include 'includes/header.php';
                     <div class="card-body p-4">
                         <h4 class="text-white mb-4">Neden <?php echo SITE_NAME; ?>?</h4>
                         <div class="d-flex align-items-start mb-4 text-white">
-                            <i class="fas fa-shield-alt fa-2x me-3 opacity-75"></i>
+                            <i class="bi bi-shield-alt fa-2x me-3 opacity-75"></i>
                             <div>
                                 <h6>Güvenli Platform</h6>
                                 <small>SSL şifreleme ile korunan tüm verileriniz.</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-start mb-4 text-white">
-                            <i class="fas fa-rocket fa-2x me-3 opacity-75"></i>
+                            <i class="bi bi-rocket fa-2x me-3 opacity-75"></i>
                             <div>
                                 <h6>Hızlı İşlem</h6>
                                 <small>ECU dosyalarınız 24 saat içinde işlenir.</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-start mb-4 text-white">
-                            <i class="fas fa-headset fa-2x me-3 opacity-75"></i>
+                            <i class="bi bi-headset fa-2x me-3 opacity-75"></i>
                             <div>
                                 <h6>7/24 Destek</h6>
                                 <small>Uzman ekibimiz her zaman yanınızda.</small>

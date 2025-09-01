@@ -87,11 +87,11 @@ include 'includes/header.php';
                             backdrop-filter: blur(10px);
                             border: 1px solid rgba(255,255,255,0.2);
                         ">
-                            <i class="fas fa-sign-in-alt" style="font-size: 5rem; margin-bottom: 1rem; opacity: 0.8;"></i>
+                            <i class="bi bi-sign-in-alt" style="font-size: 5rem; margin-bottom: 1rem; opacity: 0.8;"></i>
                             <h3 class="fw-bold mb-3">Hoş Geldiniz</h3>
                             <p style="opacity: 0.9;">Hesabınıza giriş yapın ve ECU hizmetlerinden faydalanmaya başlayın.</p>
                             <button type="button" class="btn btn-light mt-4" onclick="flipCard(true)" style="align-self: center;">
-                                <i class="fas fa-user-plus me-2"></i> Kayıt Ol
+                                <i class="bi bi-user-plus me-2"></i> Kayıt Ol
                             </button>
                         </div>
 
@@ -113,11 +113,11 @@ include 'includes/header.php';
                             backdrop-filter: blur(10px);
                             border: 1px solid rgba(255,255,255,0.1);
                         ">
-                            <i class="fas fa-user-plus" style="font-size: 5rem; margin-bottom: 1rem; opacity: 0.8;"></i>
+                            <i class="bi bi-user-plus" style="font-size: 5rem; margin-bottom: 1rem; opacity: 0.8;"></i>
                             <h3 class="fw-bold mb-3">Hesap Oluştur</h3>
                             <p style="opacity: 0.9;">Yeni bir hesapla tüm özelliklerden faydalanın.</p>
                             <a href="register.php" class="btn btn-outline-light mt-4" style="align-self: center;">
-                                <i class="fas fa-arrow-right me-2"></i> Kayıt Ol
+                                <i class="bi bi-arrow-right me-2"></i> Kayıt Ol
                             </a>
                         </div>
                     </div>
@@ -134,13 +134,13 @@ include 'includes/header.php';
                     box-shadow: 0 20px 50px rgba(0,0,0,0.2);
                 ">
                     <div class="card-header text-center py-4" style="background: linear-gradient(45deg, #e91c1c, #fd6060); color: white;">
-                        <h3 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i> Giriş Yap</h3>
+                        <h3 class="mb-0"><i class="bi bi-sign-in-alt me-2"></i> Giriş Yap</h3>
                         <p class="mb-0 mt-1" style="opacity: 0.85;">Hesabınıza güvenli giriş</p>
                     </div>
                     <div class="card-body p-5">
                         <?php if ($error): ?>
                             <div class="alert alert-danger border-0 rounded-4 text-center" style="background: #f8d7da; color: #721c24;">
-                                <i class="fas fa-exclamation-triangle me-2"></i> <?php echo $error; ?>
+                                <i class="bi bi-exclamation-triangle me-2"></i> <?php echo $error; ?>
                             </div>
                         <?php endif; ?>
 
@@ -158,7 +158,7 @@ include 'includes/header.php';
                                     <input type="password" name="password" id="password" class="form-control form-control-lg rounded-4"
                                            placeholder="••••••••" required>
                                     <button type="button" class="btn btn-outline-secondary" onclick="togglePassword()">
-                                        <i class="fas fa-eye" id="toggleIcon"></i>
+                                        <i class="bi bi-eye" id="toggleIcon"></i>
                                     </button>
                                 </div>
                             </div>
@@ -173,7 +173,7 @@ include 'includes/header.php';
 
                             <button type="submit" class="btn btn-danger btn-lg w-100 rounded-4 py-3 fw-bold"
                                     style="background: linear-gradient(135deg, #dc3545, #c82333); border: none;">
-                                <i class="fas fa-sign-in-alt me-2"></i> Giriş Yap
+                                <i class="bi bi-sign-in-alt me-2"></i> Giriş Yap
                             </button>
                         </form>
 
@@ -195,10 +195,10 @@ function togglePassword() {
     const icon = document.getElementById('toggleIcon');
     if (input.type === 'password') {
         input.type = 'text';
-        icon.className = 'fas fa-eye-slash';
+        icon.className = 'bi bi-eye-slash';
     } else {
         input.type = 'password';
-        icon.className = 'fas fa-eye';
+        icon.className = 'bi bi-eye';
     }
 }
 

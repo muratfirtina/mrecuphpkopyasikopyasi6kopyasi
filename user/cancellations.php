@@ -82,14 +82,14 @@ include '../includes/user_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="fas fa-times-circle me-2 text-danger"></i>İptal Taleplerim
+                        <i class="bi bi-times-circle me-2 text-danger"></i>İptal Taleplerim
                     </h1>
                     <p class="text-muted mb-0">Gönderdiğiniz dosya iptal taleplerini görüntüleyin</p>
                 </div>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
                         <a href="files.php" class="btn btn-outline-primary">
-                            <i class="fas fa-arrow-left me-1"></i>Dosyalarıma Dön
+                            <i class="bi bi-arrow-left me-1"></i>Dosyalarıma Dön
                         </a>
                     </div>
                 </div>
@@ -98,7 +98,7 @@ include '../includes/user_header.php';
             <!-- Hata/Başarı Mesajları -->
             <?php if ($error): ?>
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="bi bi-exclamation-triangle me-2"></i>
                     <strong>Hata!</strong> <?php echo $error; ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -106,7 +106,7 @@ include '../includes/user_header.php';
 
             <?php if ($success): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>
+                    <i class="bi bi-check-circle me-2"></i>
                     <strong>Başarılı!</strong> <?php echo $success; ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -116,13 +116,13 @@ include '../includes/user_header.php';
             <?php if (empty($cancellations)): ?>
                 <div class="card">
                     <div class="card-body text-center py-5">
-                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <i class="bi bi-inbox fa-3x text-muted mb-3"></i>
                         <h5>Henüz iptal talebi bulunmuyor</h5>
                         <p class="text-muted mb-4">
                             Dosyalarınızı iptal etmek istediğinizde buradan takip edebilirsiniz.
                         </p>
                         <a href="files.php" class="btn btn-primary">
-                            <i class="fas fa-folder me-2"></i>Dosyalarım
+                            <i class="bi bi-folder me-2"></i>Dosyalarım
                         </a>
                     </div>
                 </div>
@@ -151,7 +151,7 @@ include '../includes/user_header.php';
                                         $config = $statusConfig[$cancellation['status']] ?? ['class' => 'secondary', 'text' => 'Bilinmiyor', 'icon' => 'question'];
                                         ?>
                                         <span class="badge bg-<?php echo $config['class']; ?> fs-6">
-                                            <i class="fas fa-<?php echo $config['icon']; ?> me-1"></i>
+                                            <i class="bi bi-<?php echo $config['icon']; ?> me-1"></i>
                                             <?php echo $config['text']; ?>
                                         </span>
                                     </div>
@@ -160,14 +160,14 @@ include '../includes/user_header.php';
                                     <div class="row">
                                         <div class="col-md-8">
                                             <h6 class="text-primary mb-2">
-                                                <i class="fas fa-comment-dots me-1"></i>
+                                                <i class="bi bi-comment-dots me-1"></i>
                                                 İptal Sebebiniz:
                                             </h6>
                                             <p class="mb-3"><?php echo nl2br(htmlspecialchars($cancellation['reason'])); ?></p>
                                             
                                             <?php if ($cancellation['status'] !== 'pending' && !empty($cancellation['admin_notes'])): ?>
                                                 <h6 class="text-info mb-2">
-                                                    <i class="fas fa-user-shield me-1"></i>
+                                                    <i class="bi bi-user-shield me-1"></i>
                                                     Admin Yanıtı:
                                                 </h6>
                                                 <div class="alert alert-light border-start border-info border-3">
@@ -200,7 +200,7 @@ include '../includes/user_header.php';
                                                         <?php if ($cancellation['credits_to_refund'] > 0): ?>
                                                             <small class="text-muted d-block">Kredi İadesi</small>
                                                             <span class="badge bg-success">
-                                                                <i class="fas fa-coins me-1"></i>
+                                                                <i class="bi bi-coins me-1"></i>
                                                                 <?php echo number_format($cancellation['credits_to_refund'], 2); ?>
                                                             </span>
                                                         <?php else: ?>
@@ -216,7 +216,7 @@ include '../includes/user_header.php';
                                 <?php if ($cancellation['status'] !== 'pending' && !empty($cancellation['processed_at'])): ?>
                                     <div class="card-footer text-muted">
                                         <small>
-                                            <i class="fas fa-clock me-1"></i>
+                                            <i class="bi bi-clock me-1"></i>
                                             İşlem tarihi: <?php echo date('d.m.Y H:i', strtotime($cancellation['processed_at'])); ?>
                                         </small>
                                     </div>

@@ -310,7 +310,7 @@ try {
 $pageTitle = 'Kullanıcılar';
 $pageDescription = $status === '1' ? 'Aktif kullanıcıları yönetin ve düzenleyin' : 
                  ($status === '0' ? 'Pasif kullanıcıları yönetin ve düzenleyin' : 'Sistem kullanıcılarını yönetin ve düzenleyin');
-$pageIcon = 'fas fa-users';
+$pageIcon = 'bi bi-users';
 
 // Sidebar için istatistikler
 $totalUsersForSidebar = $stats['total_users'];
@@ -321,7 +321,7 @@ $quickActions = [
     [
         'text' => 'Yeni Kullanıcı',
         'url' => '#',
-        'icon' => 'fas fa-user-plus',
+        'icon' => 'bi bi-user-plus',
         'class' => 'success',
         'data-bs-toggle' => 'modal',
         'data-bs-target' => '#addUserModal'
@@ -329,13 +329,13 @@ $quickActions = [
     [
         'text' => 'Excel Export',
         'url' => 'export-users.php',
-        'icon' => 'fas fa-file-excel',
+        'icon' => 'bi bi-file-excel',
         'class' => 'info'
     ],
     [
         'text' => 'İstatistikler',
         'url' => 'reports.php?type=users',
-        'icon' => 'fas fa-chart-bar',
+        'icon' => 'bi bi-chart-bar',
         'class' => 'warning'
     ]
 ];
@@ -407,14 +407,14 @@ function deleteUser(userId, username) {
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
     <div class="alert alert-admin alert-danger" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
     </div>
 <?php endif; ?>
 
 <?php if ($success): ?>
     <div class="alert alert-admin alert-success" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="bi bi-check-circle me-2"></i>
         <?php echo $success; ?>
     </div>
 <?php endif; ?>
@@ -430,7 +430,7 @@ function deleteUser(userId, username) {
                     <small class="text-success">+<?php echo $stats['new_users_30d']; ?> son 30 gün</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-users text-primary fa-lg"></i>
+                    <i class="bi bi-users text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -445,7 +445,7 @@ function deleteUser(userId, username) {
                     <small class="text-muted"><?php echo number_format($stats['inactive_count']); ?> pasif</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-user-check text-success fa-lg"></i>
+                    <i class="bi bi-user-check text-success fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -460,7 +460,7 @@ function deleteUser(userId, username) {
                     <small class="text-muted"><?php echo number_format($stats['user_count']); ?> normal kullanıcı</small>
                 </div>
                 <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-user-shield text-warning fa-lg"></i>
+                    <i class="bi bi-user-shield text-warning fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -475,7 +475,7 @@ function deleteUser(userId, username) {
                     <small class="text-muted">Sistem geneli</small>
                 </div>
                 <div class="bg-info bg-opacity-10 p-3 rounded">
-                    <i class="fas fa-coins text-info fa-lg"></i>
+                    <i class="bi bi-coins text-info fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -488,7 +488,7 @@ function deleteUser(userId, username) {
         <form method="GET" class="row g-3 align-items-end">
             <div class="col-md-3">
                 <label for="search" class="form-label">
-                    <i class="fas fa-search me-1"></i>Arama
+                    <i class="bi bi-search me-1"></i>Arama
                 </label>
                 <input type="text" class="form-control" id="search" name="search" 
                        value="<?php echo htmlspecialchars($search); ?>" 
@@ -497,7 +497,7 @@ function deleteUser(userId, username) {
             
             <div class="col-md-2">
                 <label for="role" class="form-label">
-                    <i class="fas fa-user-tag me-1"></i>Rol
+                    <i class="bi bi-user-tag me-1"></i>Rol
                 </label>
                 <select class="form-select" id="role" name="role">
                     <option value="">Tüm Roller</option>
@@ -508,7 +508,7 @@ function deleteUser(userId, username) {
             
             <div class="col-md-2">
                 <label for="status" class="form-label">
-                    <i class="fas fa-toggle-on me-1"></i>Durum
+                    <i class="bi bi-toggle-on me-1"></i>Durum
                 </label>
                 <select class="form-select" id="status" name="status">
                     <option value="">Tüm Durumlar</option>
@@ -519,7 +519,7 @@ function deleteUser(userId, username) {
             
             <div class="col-md-2">
                 <label for="sort" class="form-label">
-                    <i class="fas fa-sort me-1"></i>Sıralama
+                    <i class="bi bi-sort me-1"></i>Sıralama
                 </label>
                 <select class="form-select" id="sort" name="sort">
                     <option value="created_at" <?php echo $sortBy === 'created_at' ? 'selected' : ''; ?>>Kayıt Tarihi</option>
@@ -533,13 +533,13 @@ function deleteUser(userId, username) {
             <div class="col-md-3">
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search me-1"></i>Filtrele
+                        <i class="bi bi-search me-1"></i>Filtrele
                     </button>
                     <a href="users.php" class="btn btn-outline-secondary">
-                        <i class="fas fa-undo me-1"></i>Temizle
+                        <i class="bi bi-undo me-1"></i>Temizle
                     </a>
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                        <i class="fas fa-plus me-1"></i>Yeni
+                        <i class="bi bi-plus me-1"></i>Yeni
                     </button>
                 </div>
             </div>
@@ -550,7 +550,7 @@ function deleteUser(userId, username) {
                     <div class="col-auto">
                         <div class="d-flex align-items-center gap-2">
                             <label for="per_page" class="form-label mb-0 fw-bold">
-                                <i class="fas fa-list me-1 text-primary"></i>Sayfa başına:
+                                <i class="bi bi-list me-1 text-primary"></i>Sayfa başına:
                             </label>
                             <select class="form-select form-select-sm px-3 py-2" id="per_page" name="per_page" style="width: 120px; border: 2px solid #e9ecef;" onchange="this.form.submit()">
                                 <option value="10" <?php echo $per_page === 10 ? 'selected' : ''; ?>>10 kayıt</option>
@@ -563,7 +563,7 @@ function deleteUser(userId, username) {
                     </div>
                     <div class="col-auto">
                         <span class="badge bg-light text-dark px-3 py-2">
-                            <i class="fas fa-info-circle me-1"></i>
+                            <i class="bi bi-info-circle me-1"></i>
                             Toplam <?php echo number_format($totalUsers); ?> kayıt bulundu
                         </span>
                     </div>
@@ -577,26 +577,26 @@ function deleteUser(userId, username) {
 <div class="card admin-card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
-            <i class="fas fa-users me-2"></i>
+            <i class="bi bi-users me-2"></i>
             Kullanıcı Listesi (<?php echo $totalUsers; ?> kullanıcı)
         </h5>
         
         <?php if (!empty($users)): ?>
             <div class="dropdown">
                 <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-cog me-1"></i>Toplu İşlemler
+                    <i class="bi bi-cog me-1"></i>Toplu İşlemler
                 </button>
                 <ul class="dropdown-menu">
                     <li><h6 class="dropdown-header">Seçili kullanıcılar için:</h6></li>
                     <li><a class="dropdown-item" href="#" onclick="bulkAction('activate')">
-                        <i class="fas fa-check-circle me-2 text-success"></i>Aktif Yap
+                        <i class="bi bi-check-circle me-2 text-success"></i>Aktif Yap
                     </a></li>
                     <li><a class="dropdown-item" href="#" onclick="bulkAction('deactivate')">
-                        <i class="fas fa-times-circle me-2 text-warning"></i>Pasif Yap
+                        <i class="bi bi-times-circle me-2 text-warning"></i>Pasif Yap
                     </a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="#" onclick="bulkAction('delete')">
-                        <i class="fas fa-trash me-2 text-danger"></i>Sil
+                        <i class="bi bi-trash me-2 text-danger"></i>Sil
                     </a></li>
                 </ul>
             </div>
@@ -606,7 +606,7 @@ function deleteUser(userId, username) {
     <div class="card-body p-0">
         <?php if (empty($users)): ?>
             <div class="text-center py-5">
-                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <i class="bi bi-users fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">
                     <?php if ($search || $role || $status !== ''): ?>
                         Filtreye uygun kullanıcı bulunamadı
@@ -646,7 +646,7 @@ function deleteUser(userId, username) {
                                     <div class="d-flex align-items-center">
                                         <div class="user-avatar me-3">
                                             <div class="bg-primary bg-opacity-10 rounded-circle p-2">
-                                                <i class="fas fa-user text-primary"></i>
+                                                <i class="bi bi-user text-primary"></i>
                                             </div>
                                         </div>
                                         <div>
@@ -658,15 +658,15 @@ function deleteUser(userId, username) {
                                 <td>
                                     <div>
                                         <div class="mb-1">
-                                            <i class="fas fa-envelope me-1 text-muted"></i>
+                                            <i class="bi bi-envelope me-1 text-muted"></i>
                                             <small><?php echo htmlspecialchars($userData['email']); ?></small>
                                             <?php if ($userData['email_verified']): ?>
-                                                <i class="fas fa-check-circle text-success ms-1" title="Doğrulanmış"></i>
+                                                <i class="bi bi-check-circle text-success ms-1" title="Doğrulanmış"></i>
                                             <?php endif; ?>
                                         </div>
                                         <?php if ($userData['phone']): ?>
                                             <div>
-                                                <i class="fas fa-phone me-1 text-muted"></i>
+                                                <i class="bi bi-phone me-1 text-muted"></i>
                                                 <small><?php echo htmlspecialchars($userData['phone']); ?></small>
                                             </div>
                                         <?php endif; ?>
@@ -675,13 +675,13 @@ function deleteUser(userId, username) {
                                 <td>
                                     <div class="mb-2">
                                         <span class="badge bg-<?php echo $userData['role'] === 'admin' ? 'warning' : 'info'; ?>">
-                                            <i class="fas fa-<?php echo $userData['role'] === 'admin' ? 'user-shield' : 'user'; ?> me-1"></i>
+                                            <i class="bi bi-<?php echo $userData['role'] === 'admin' ? 'user-shield' : 'user'; ?> me-1"></i>
                                             <?php echo ucfirst($userData['role']); ?>
                                         </span>
                                     </div>
                                     <div>
                                         <span class="badge bg-<?php echo $userData['status'] === 'active' ? 'success' : 'danger'; ?>">
-                                            <i class="fas fa-<?php echo $userData['status'] === 'active' ? 'check' : 'times'; ?> me-1"></i>
+                                            <i class="bi bi-<?php echo $userData['status'] === 'active' ? 'check' : 'times'; ?> me-1"></i>
                                             <?php echo $userData['status'] === 'active' ? 'Aktif' : 'Pasif'; ?>
                                         </span>
                                     </div>
@@ -707,19 +707,19 @@ function deleteUser(userId, username) {
                                         <a href="user-details.php?id=<?php echo $userData['id']; ?>" 
                                            class="btn btn-outline-primary btn-sm" 
                                            target="_blank">
-                                            <i class="fas fa-eye me-1"></i>Detay
+                                            <i class="bi bi-eye me-1"></i>Detay
                                         </a>
                                         
                                         <button type="button" class="btn btn-outline-<?php echo $userData['status'] === 'active' ? 'warning' : 'success'; ?> btn-sm" 
                                                 onclick="toggleUserStatus('<?php echo $userData['id']; ?>', '<?php echo $userData['status'] === 'active' ? 'inactive' : 'active'; ?>')">
-                                            <i class="fas fa-<?php echo $userData['status'] === 'active' ? 'pause' : 'play'; ?> me-1"></i>
+                                            <i class="bi bi-<?php echo $userData['status'] === 'active' ? 'pause' : 'play'; ?> me-1"></i>
                                             <?php echo $userData['status'] === 'active' ? 'Pasif Yap' : 'Aktif Yap'; ?>
                                         </button>
                                         
                                         <?php if ($userData['role'] !== 'admin'): ?>
                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                     onclick="deleteUser('<?php echo $userData['id']; ?>', '<?php echo htmlspecialchars($userData['username']); ?>')">
-                                                <i class="fas fa-trash me-1"></i>Sil
+                                                <i class="bi bi-trash me-1"></i>Sil
                                             </button>
                                         <?php endif; ?>
                                     </div>
@@ -740,7 +740,7 @@ function deleteUser(userId, username) {
                                 <div class="col-auto">
                                     <div class="pagination-info">
                                         <span class="badge bg-primary fs-6 px-3 py-2">
-                                            <i class="fas fa-list-ol me-2"></i>
+                                            <i class="bi bi-list-ol me-2"></i>
                                             <?php 
                                             $start = $offset + 1;
                                             $end = min($offset + $limit, $totalUsers);
@@ -756,7 +756,7 @@ function deleteUser(userId, username) {
                                     <div class="quick-jump-container">
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text bg-white border-end-0">
-                                                <i class="fas fa-search text-muted"></i>
+                                                <i class="bi bi-search text-muted"></i>
                                             </span>
                                             <input type="number" class="form-control border-start-0" 
                                                    id="quickJump" 
@@ -770,7 +770,7 @@ function deleteUser(userId, username) {
                                             <button type="button" class="btn btn-outline-primary btn-sm" 
                                                     onclick="quickJumpToPage()" 
                                                     title="Sayfaya git">
-                                                <i class="fas fa-arrow-right"></i>
+                                                <i class="bi bi-arrow-right"></i>
                                             </button>
                                         </div>
                                         <small class="text-muted d-block mt-1">/ <?php echo $totalPages; ?> sayfa</small>
@@ -790,7 +790,7 @@ function deleteUser(userId, username) {
                                            href="<?php echo $page > 1 ? buildPaginationUrl(1) : '#'; ?>" 
                                            title="İlk Sayfa" 
                                            <?php echo $page <= 1 ? 'tabindex="-1"' : ''; ?>>
-                                            <i class="fas fa-angle-double-left"></i>
+                                            <i class="bi bi-angle-double-left"></i>
                                             <span class="d-none d-sm-inline ms-1">İlk</span>
                                         </a>
                                     </li>
@@ -801,7 +801,7 @@ function deleteUser(userId, username) {
                                            href="<?php echo $page > 1 ? buildPaginationUrl($page - 1) : '#'; ?>" 
                                            title="Önceki Sayfa"
                                            <?php echo $page <= 1 ? 'tabindex="-1"' : ''; ?>>
-                                            <i class="fas fa-angle-left"></i>
+                                            <i class="bi bi-angle-left"></i>
                                             <span class="d-none d-sm-inline ms-1">Önceki</span>
                                         </a>
                                     </li>
@@ -858,7 +858,7 @@ function deleteUser(userId, username) {
                                            title="Sonraki Sayfa"
                                            <?php echo $page >= $totalPages ? 'tabindex="-1"' : ''; ?>>
                                             <span class="d-none d-sm-inline me-1">Sonraki</span>
-                                            <i class="fas fa-angle-right"></i>
+                                            <i class="bi bi-angle-right"></i>
                                         </a>
                                     </li>
                                     
@@ -869,7 +869,7 @@ function deleteUser(userId, username) {
                                            title="Son Sayfa"
                                            <?php echo $page >= $totalPages ? 'tabindex="-1"' : ''; ?>>
                                             <span class="d-none d-sm-inline me-1">Son</span>
-                                            <i class="fas fa-angle-double-right"></i>
+                                            <i class="bi bi-angle-double-right"></i>
                                         </a>
                                     </li>
                                 </ul>
@@ -881,14 +881,14 @@ function deleteUser(userId, username) {
                     <div class="row mt-3 pt-3 border-top">
                         <div class="col-md-6">
                             <small class="text-muted">
-                                <i class="fas fa-info-circle me-1"></i>
+                                <i class="bi bi-info-circle me-1"></i>
                                 Sayfa <strong><?php echo $page; ?></strong> / <strong><?php echo $totalPages; ?></strong> - 
                                 Sayfa başına <strong><?php echo $limit; ?></strong> kayıt gösteriliyor
                             </small>
                         </div>
                         <div class="col-md-6 text-md-end">
                             <small class="text-muted">
-                                <i class="fas fa-database me-1"></i>
+                                <i class="bi bi-database me-1"></i>
                                 Toplam <strong><?php echo number_format($totalUsers); ?></strong> kullanıcı bulundu
                             </small>
                         </div>
@@ -904,7 +904,7 @@ function deleteUser(userId, username) {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-user-plus me-2"></i>Yeni Kullanıcı Ekle
+                    <i class="bi bi-user-plus me-2"></i>Yeni Kullanıcı Ekle
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -978,7 +978,7 @@ function deleteUser(userId, username) {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save me-2"></i>Kullanıcı Ekle
+                        <i class="bi bi-save me-2"></i>Kullanıcı Ekle
                     </button>
                 </div>
             </form>

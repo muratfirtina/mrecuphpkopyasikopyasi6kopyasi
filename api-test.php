@@ -30,25 +30,25 @@ $apis = [
             <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
-                        <h3><i class="fas fa-code"></i> API Test Sayfası</h3>
+                        <h3><i class="bi bi-code"></i> API Test Sayfası</h3>
                     </div>
                     <div class="card-body">
                         
                         <!-- Login Durumu Kontrolü -->
                         <?php if (!isLoggedIn()): ?>
                         <div class="alert alert-warning mb-4">
-                            <h5><i class="fas fa-exclamation-triangle"></i> Login Gerekli</h5>
+                            <h5><i class="bi bi-exclamation-triangle"></i> Login Gerekli</h5>
                             <p>API'ları test edebilmek için admin olarak giriş yapmanız gerekiyor.</p>
                             <a href="login.php" class="btn btn-primary">Giriş Yap</a>
                         </div>
                         <?php elseif (!isAdmin()): ?>
                         <div class="alert alert-danger mb-4">
-                            <h5><i class="fas fa-ban"></i> Admin Yetkisi Gerekli</h5>
+                            <h5><i class="bi bi-ban"></i> Admin Yetkisi Gerekli</h5>
                             <p>API'ları test edebilmek için admin yetkisine sahip olmanız gerekiyor.</p>
                         </div>
                         <?php else: ?>
                         <div class="alert alert-success mb-4">
-                            <h5><i class="fas fa-check-circle"></i> Yetki Onaylandı</h5>
+                            <h5><i class="bi bi-check-circle"></i> Yetki Onaylandı</h5>
                             <p>Admin olarak giriş yaptınız. API testleri başlatılıyor...</p>
                         </div>
                         <?php endif; ?>
@@ -98,7 +98,7 @@ $apis = [
                                         </div>
                                         <div class="mt-2">
                                             <a href="<?= $url ?>" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-external-link-alt"></i> Aç
+                                                <i class="bi bi-external-link-alt"></i> Aç
                                             </a>
                                         </div>
                                     </div>

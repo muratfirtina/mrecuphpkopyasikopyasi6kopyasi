@@ -36,7 +36,7 @@ if (isset($_SESSION['user_id'])) {
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'active' : ''; ?>" href="index.php">
                     <div class="nav-icon">
-                        <i class="fas fa-tachometer-alt"></i>
+                        <i class="bi bi-tachometer-alt"></i>
                     </div>
                     <span>Dashboard</span>
                 </a>
@@ -46,13 +46,13 @@ if (isset($_SESSION['user_id'])) {
         <!-- Dosya İşlemleri -->
         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
             <span>Dosya İşlemleri</span>
-            <i class="fas fa-folder-open"></i>
+            <i class="bi bi-folder-open"></i>
         </h6>
         <ul class="nav flex-column mb-2">
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'upload.php' ? 'active' : ''; ?>" href="upload.php">
                     <div class="nav-icon bg-success">
-                        <i class="fas fa-upload"></i>
+                        <i class="bi bi-upload"></i>
                     </div>
                     <span>Dosya Yükle</span>
                 </a>
@@ -60,7 +60,7 @@ if (isset($_SESSION['user_id'])) {
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'files.php' ? 'active' : ''; ?>" href="files.php">
                     <div class="nav-icon bg-primary">
-                        <i class="fas fa-folder"></i>
+                        <i class="bi bi-folder"></i>
                     </div>
                     <span>Dosyalarım</span>
                     <?php
@@ -78,7 +78,7 @@ if (isset($_SESSION['user_id'])) {
             <li class="nav-item">
                 <a class="nav-link" href="files.php?status=pending">
                     <div class="nav-icon bg-warning">
-                        <i class="fas fa-clock"></i>
+                        <i class="bi bi-clock"></i>
                     </div>
                     <span>Bekleyen Dosyalar</span>
                     <?php
@@ -132,7 +132,7 @@ if (isset($_SESSION['user_id'])) {
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'revisions.php' ? 'active' : ''; ?>" href="revisions.php">
                     <div class="nav-icon bg-orange">
-                        <i class="fas fa-edit"></i>
+                        <i class="bi bi-edit"></i>
                     </div>
                     <span>Revize Taleplerim</span>
                     <?php
@@ -150,7 +150,7 @@ if (isset($_SESSION['user_id'])) {
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'cancellations.php' ? 'active' : ''; ?>" href="cancellations.php">
                     <div class="nav-icon bg-danger">
-                        <i class="fas fa-times-circle"></i>
+                        <i class="bi bi-times-circle"></i>
                     </div>
                     <span>İptal Taleplerim</span>
                     <?php
@@ -170,13 +170,13 @@ if (isset($_SESSION['user_id'])) {
         <!-- Hesap Yönetimi -->
         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
             <span>Hesap Yönetimi</span>
-            <i class="fas fa-user-cog"></i>
+            <i class="bi bi-user-cog"></i>
         </h6>
         <ul class="nav flex-column mb-2">
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'profile.php' ? 'active' : ''; ?>" href="profile.php">
                     <div class="nav-icon bg-secondary">
-                        <i class="fas fa-user"></i>
+                        <i class="bi bi-user"></i>
                     </div>
                     <span>Profil Ayarları</span>
                 </a>
@@ -184,7 +184,7 @@ if (isset($_SESSION['user_id'])) {
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'credits.php' ? 'active' : ''; ?>" href="credits.php">
                     <div class="nav-icon bg-warning">
-                        <i class="fas fa-coins"></i>
+                        <i class="bi bi-coins"></i>
                     </div>
                     <span>Kredi İşlemleri</span>
                 </a>
@@ -192,7 +192,7 @@ if (isset($_SESSION['user_id'])) {
             <!-- <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'transactions.php' ? 'active' : ''; ?>" href="transactions.php">
                     <div class="nav-icon bg-info">
-                        <i class="fas fa-history"></i>
+                        <i class="bi bi-history"></i>
                     </div>
                     <span>İşlem Geçmişi</span>
                 </a>
@@ -205,7 +205,7 @@ if (isset($_SESSION['user_id'])) {
                 <div class="widget-content">
                     <!-- Widget Başlığı -->
                     <div class="widget-header">
-                        <i class="fas fa-wallet widget-icon"></i>
+                        <i class="bi bi-wallet widget-icon"></i>
                         <div class="header-info">
                             <h6 class="widget-title">Kredi Durumu</h6>
                             <small class="widget-subtitle">Kullanılan Bakiye</small>
@@ -246,11 +246,11 @@ if (isset($_SESSION['user_id'])) {
                         <!-- Progress İstatistikleri -->
                         <div class="progress-stats">
                             <div class="stat-used">
-                                <i class="fas fa-minus-circle"></i>
+                                <i class="bi bi-minus-circle"></i>
                                 <span><?php echo number_format($sidebarCreditUsed, 0); ?> TL</span>
                             </div>
                             <div class="stat-remaining">
-                                <i class="fas fa-check-circle"></i>
+                                <i class="bi bi-check-circle"></i>
                                 <span><?php echo number_format($sidebarAvailableCredits, 0); ?> TL</span>
                             </div>
                         </div>
@@ -270,7 +270,7 @@ if (isset($_SESSION['user_id'])) {
                     <div class="widget-actions">
                         <div class="action-buttons">
                             <a href="credits.php" class="btn btn-sm btn-light-custom btn-secondary-action">
-                                <i class="fas fa-history me-1"></i>Geçmiş
+                                <i class="bi bi-history me-1"></i>Geçmiş
                             </a>
                         </div>
                     </div>
@@ -283,13 +283,13 @@ if (isset($_SESSION['user_id'])) {
             <div class="sidebar-widget support-card">
                 <div class="widget-content">
                     <div class="widget-header">
-                        <i class="fas fa-headset widget-icon"></i>
+                        <i class="bi bi-headset widget-icon"></i>
                         <h6 class="widget-title">Yardım & Destek</h6>
                     </div>
                     <p class="widget-text">Herhangi bir sorunla karşılaştığınızda bizimle iletişime geçebilirsiniz.</p>
                     <div class="widget-actions">
                         <a href="mailto:<?php echo SITE_EMAIL; ?>" class="btn btn-sm btn-light-custom">
-                            <i class="fas fa-envelope me-1"></i>İletişim
+                            <i class="bi bi-envelope me-1"></i>İletişim
                         </a>
                     </div>
                 </div>

@@ -123,10 +123,10 @@
           "info": "alert-info"
         };
         const icons = {
-          "success": "fas fa-check-circle",
-          "error": "fas fa-exclamation-triangle",
-          "warning": "fas fa-exclamation-circle",
-          "info": "fas fa-info-circle"
+          "success": "bi bi-check-circle",
+          "error": "bi bi-exclamation-triangle",
+          "warning": "bi bi-exclamation-circle",
+          "info": "bi bi-info-circle"
         };
         notification.className = `alert ${typeClasses[type]} alert-dismissible fade show`;
         notification.innerHTML = `

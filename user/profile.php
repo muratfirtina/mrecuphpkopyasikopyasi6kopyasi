@@ -146,14 +146,14 @@ include '../includes/user_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="fas fa-user-cog me-2 text-primary"></i>Profil Ayarları
+                        <i class="bi bi-user-cog me-2 text-primary"></i>Profil Ayarları
                     </h1>
                     <p class="text-muted mb-0">Hesap bilgilerinizi görüntüleyin ve güncelleyin</p>
                 </div>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
                         <a href="files.php" class="btn btn-outline-primary">
-                            <i class="fas fa-folder me-1"></i>Dosyalarım
+                            <i class="bi bi-folder me-1"></i>Dosyalarım
                         </a>
                     </div>
                 </div>
@@ -163,7 +163,7 @@ include '../includes/user_header.php';
             <?php if ($error): ?>
                 <div class="alert alert-danger alert-modern alert-dismissible fade show" role="alert">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+                        <i class="bi bi-exclamation-triangle me-3 fa-lg"></i>
                         <div>
                             <strong>Hata!</strong> <?php echo $error; ?>
                         </div>
@@ -175,7 +175,7 @@ include '../includes/user_header.php';
             <?php if ($success): ?>
                 <div class="alert alert-success alert-modern alert-dismissible fade show" role="alert">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-check-circle me-3 fa-lg"></i>
+                        <i class="bi bi-check-circle me-3 fa-lg"></i>
                         <div>
                             <strong>Başarılı!</strong> <?php echo $success; ?>
                         </div>
@@ -189,7 +189,7 @@ include '../includes/user_header.php';
                 <div class="profile-content">
                     <div class="profile-avatar">
                         <div class="avatar-circle">
-                            <i class="fas fa-user"></i>
+                            <i class="bi bi-user"></i>
                         </div>
                         <div class="status-indicator <?php echo ($userData['is_active'] ?? 1) ? 'active' : 'inactive'; ?>"></div>
                     </div>
@@ -199,15 +199,15 @@ include '../includes/user_header.php';
                         </h3>
                         <div class="profile-details">
                             <span class="detail-item">
-                                <i class="fas fa-at me-1"></i>
+                                <i class="bi bi-at me-1"></i>
                                 <?php echo htmlspecialchars($userData['username']); ?>
                             </span>
                             <span class="detail-item">
-                                <i class="fas fa-envelope me-1"></i>
+                                <i class="bi bi-envelope me-1"></i>
                                 <?php echo htmlspecialchars($userData['email']); ?>
                             </span>
                             <span class="detail-item">
-                                <i class="fas fa-calendar me-1"></i>
+                                <i class="bi bi-calendar me-1"></i>
                                 Üye: <?php echo date('M Y', strtotime($userData['created_at'])); ?>
                             </span>
                         </div>
@@ -241,7 +241,7 @@ include '../includes/user_header.php';
                     <div class="settings-card mb-4">
                         <div class="settings-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-user me-2"></i>Kişisel Bilgiler
+                                <i class="bi bi-user me-2"></i>Kişisel Bilgiler
                             </h5>
                             <p class="text-muted mb-0">Profil bilgilerinizi güncelleyin</p>
                         </div>
@@ -253,7 +253,7 @@ include '../includes/user_header.php';
                                 <div class="form-grid">
                                     <div class="form-group">
                                         <label for="first_name" class="form-label">
-                                            <i class="fas fa-user me-1"></i>Ad <span class="required">*</span>
+                                            <i class="bi bi-user me-1"></i>Ad <span class="required">*</span>
                                         </label>
                                         <input type="text" class="form-control form-control-modern" 
                                                id="first_name" name="first_name" 
@@ -263,7 +263,7 @@ include '../includes/user_header.php';
                                     
                                     <div class="form-group">
                                         <label for="last_name" class="form-label">
-                                            <i class="fas fa-user me-1"></i>Soyad <span class="required">*</span>
+                                            <i class="bi bi-user me-1"></i>Soyad <span class="required">*</span>
                                         </label>
                                         <input type="text" class="form-control form-control-modern" 
                                                id="last_name" name="last_name" 
@@ -273,53 +273,53 @@ include '../includes/user_header.php';
                                     
                                     <div class="form-group">
                                         <label for="username" class="form-label">
-                                            <i class="fas fa-at me-1"></i>Kullanıcı Adı
+                                            <i class="bi bi-at me-1"></i>Kullanıcı Adı
                                         </label>
                                         <input type="text" class="form-control form-control-modern" 
                                                id="username" value="<?php echo htmlspecialchars($userData['username']); ?>" 
                                                disabled>
                                         <div class="form-help">
-                                            <i class="fas fa-info-circle me-1"></i>Kullanıcı adı değiştirilemez
+                                            <i class="bi bi-info-circle me-1"></i>Kullanıcı adı değiştirilemez
                                         </div>
                                     </div>
                                     
                                     <div class="form-group">
                                         <label for="email" class="form-label">
-                                            <i class="fas fa-envelope me-1"></i>E-posta Adresi
+                                            <i class="bi bi-envelope me-1"></i>E-posta Adresi
                                         </label>
                                         <input type="email" class="form-control form-control-modern" 
                                                id="email" value="<?php echo htmlspecialchars($userData['email']); ?>" 
                                                disabled>
                                         <div class="form-help">
-                                            <i class="fas fa-info-circle me-1"></i>E-posta adresi değiştirilemez
+                                            <i class="bi bi-info-circle me-1"></i>E-posta adresi değiştirilemez
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="phone" class="form-label">
-                                        <i class="fas fa-phone me-1"></i>Telefon Numarası
+                                        <i class="bi bi-phone me-1"></i>Telefon Numarası
                                     </label>
                                     <input type="tel" class="form-control form-control-modern" 
                                            id="phone" name="phone" 
                                            value="<?php echo htmlspecialchars($userData['phone'] ?? ''); ?>"
                                            placeholder="+90 (555) 123 45 67">
                                     <div class="form-help">
-                                        <i class="fas fa-info-circle me-1"></i>SMS bildirimleri için kullanılır
+                                        <i class="bi bi-info-circle me-1"></i>SMS bildirimleri için kullanılır
                                     </div>
                                 </div>
                                 
                                 <!-- Bildirim Ayarları -->
                                 <div class="form-section">
                                     <h6 class="section-title">
-                                        <i class="fas fa-bell me-2"></i>Bildirim Tercihleri
+                                        <i class="bi bi-bell me-2"></i>Bildirim Tercihleri
                                     </h6>
                                     
                                     <div class="notification-settings">
                                         <div class="notification-item">
                                             <div class="notification-info">
                                                 <div class="notification-title">
-                                                    <i class="fas fa-envelope text-primary me-2"></i>
+                                                    <i class="bi bi-envelope text-primary me-2"></i>
                                                     E-posta Bildirimleri
                                                 </div>
                                                 <div class="notification-desc">
@@ -339,7 +339,7 @@ include '../includes/user_header.php';
                                         <div class="notification-item">
                                             <div class="notification-info">
                                                 <div class="notification-title">
-                                                    <i class="fas fa-sms text-success me-2"></i>
+                                                    <i class="bi bi-sms text-success me-2"></i>
                                                     SMS Bildirimleri
                                                 </div>
                                                 <div class="notification-desc">
@@ -360,10 +360,10 @@ include '../includes/user_header.php';
                                 
                                 <div class="form-actions">
                                     <button type="reset" class="btn btn-outline-secondary btn-modern">
-                                        <i class="fas fa-undo me-2"></i>Sıfırla
+                                        <i class="bi bi-undo me-2"></i>Sıfırla
                                     </button>
                                     <button type="submit" class="btn btn-primary btn-modern">
-                                        <i class="fas fa-save me-2"></i>Bilgileri Güncelle
+                                        <i class="bi bi-save me-2"></i>Bilgileri Güncelle
                                     </button>
                                 </div>
                             </form>
@@ -374,7 +374,7 @@ include '../includes/user_header.php';
                     <div class="settings-card">
                         <div class="settings-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-shield-alt me-2"></i>Güvenlik Ayarları
+                                <i class="bi bi-shield-alt me-2"></i>Güvenlik Ayarları
                             </h5>
                             <p class="text-muted mb-0">Hesabınızın güvenliğini artırın</p>
                         </div>
@@ -385,7 +385,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="form-group">
                                     <label for="current_password" class="form-label">
-                                        <i class="fas fa-lock me-1"></i>Mevcut Şifre <span class="required">*</span>
+                                        <i class="bi bi-lock me-1"></i>Mevcut Şifre <span class="required">*</span>
                                     </label>
                                     <div class="password-input-group">
                                         <input type="password" class="form-control form-control-modern" 
@@ -393,14 +393,14 @@ include '../includes/user_header.php';
                                                placeholder="Mevcut şifrenizi girin" required>
                                         <button type="button" class="password-toggle" 
                                                 onclick="togglePasswordVisibility('current_password')">
-                                            <i class="fas fa-eye" id="current_password_icon"></i>
+                                            <i class="bi bi-eye" id="current_password_icon"></i>
                                         </button>
                                     </div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="new_password" class="form-label">
-                                        <i class="fas fa-key me-1"></i>Yeni Şifre <span class="required">*</span>
+                                        <i class="bi bi-key me-1"></i>Yeni Şifre <span class="required">*</span>
                                     </label>
                                     <div class="password-input-group">
                                         <input type="password" class="form-control form-control-modern" 
@@ -409,17 +409,17 @@ include '../includes/user_header.php';
                                                minlength="6" required>
                                         <button type="button" class="password-toggle" 
                                                 onclick="togglePasswordVisibility('new_password')">
-                                            <i class="fas fa-eye" id="new_password_icon"></i>
+                                            <i class="bi bi-eye" id="new_password_icon"></i>
                                         </button>
                                     </div>
                                     <div class="form-help">
-                                        <i class="fas fa-info-circle me-1"></i>En az 6 karakter, harf ve rakam içermeli
+                                        <i class="bi bi-info-circle me-1"></i>En az 6 karakter, harf ve rakam içermeli
                                     </div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="confirm_password" class="form-label">
-                                        <i class="fas fa-check-double me-1"></i>Yeni Şifre (Tekrar) <span class="required">*</span>
+                                        <i class="bi bi-check-double me-1"></i>Yeni Şifre (Tekrar) <span class="required">*</span>
                                     </label>
                                     <div class="password-input-group">
                                         <input type="password" class="form-control form-control-modern" 
@@ -427,7 +427,7 @@ include '../includes/user_header.php';
                                                placeholder="Yeni şifrenizi tekrar girin" required>
                                         <button type="button" class="password-toggle" 
                                                 onclick="togglePasswordVisibility('confirm_password')">
-                                            <i class="fas fa-eye" id="confirm_password_icon"></i>
+                                            <i class="bi bi-eye" id="confirm_password_icon"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -443,7 +443,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="form-actions">
                                     <button type="submit" class="btn btn-warning btn-modern">
-                                        <i class="fas fa-shield-alt me-2"></i>Şifremi Değiştir
+                                        <i class="bi bi-shield-alt me-2"></i>Şifremi Değiştir
                                     </button>
                                 </div>
                             </form>
@@ -457,14 +457,14 @@ include '../includes/user_header.php';
                     <div class="info-card mb-4">
                         <div class="info-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-chart-pie me-2"></i>Hesap İstatistikleri
+                                <i class="bi bi-chart-pie me-2"></i>Hesap İstatistikleri
                             </h5>
                         </div>
                         <div class="info-body">
                             <div class="stats-overview">
                                 <div class="stat-row">
                                     <div class="stat-icon bg-primary">
-                                        <i class="fas fa-file"></i>
+                                        <i class="bi bi-file"></i>
                                     </div>
                                     <div class="stat-details">
                                         <div class="stat-value"><?php echo $stats['total_uploads']; ?></div>
@@ -474,7 +474,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="stat-row">
                                     <div class="stat-icon bg-success">
-                                        <i class="fas fa-check-circle"></i>
+                                        <i class="bi bi-check-circle"></i>
                                     </div>
                                     <div class="stat-details">
                                         <div class="stat-value"><?php echo $stats['completed_uploads']; ?></div>
@@ -484,7 +484,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="stat-row">
                                     <div class="stat-icon bg-warning">
-                                        <i class="fas fa-clock"></i>
+                                        <i class="bi bi-clock"></i>
                                     </div>
                                     <div class="stat-details">
                                         <div class="stat-value"><?php echo $stats['pending_uploads']; ?></div>
@@ -509,14 +509,14 @@ include '../includes/user_header.php';
                     <div class="info-card mb-4">
                         <div class="info-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-info-circle me-2"></i>Hesap Detayları
+                                <i class="bi bi-info-circle me-2"></i>Hesap Detayları
                             </h5>
                         </div>
                         <div class="info-body">
                             <div class="account-details">
                                 <div class="detail-item">
                                     <div class="detail-label">
-                                        <i class="fas fa-calendar-plus text-primary me-2"></i>
+                                        <i class="bi bi-calendar-plus text-primary me-2"></i>
                                         Üyelik Tarihi
                                     </div>
                                     <div class="detail-value">
@@ -526,7 +526,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="detail-item">
                                     <div class="detail-label">
-                                        <i class="fas fa-sign-in-alt text-success me-2"></i>
+                                        <i class="bi bi-sign-in-alt text-success me-2"></i>
                                         Son Giriş
                                     </div>
                                     <div class="detail-value">
@@ -536,7 +536,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="detail-item">
                                     <div class="detail-label">
-                                        <i class="fas fa-coins text-warning me-2"></i>
+                                        <i class="bi bi-coins text-warning me-2"></i>
                                         Mevcut Kredi
                                     </div>
                                     <div class="detail-value">
@@ -546,7 +546,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="detail-item">
                                     <div class="detail-label">
-                                        <i class="fas fa-exchange-alt text-info me-2"></i>
+                                        <i class="bi bi-exchange-alt text-info me-2"></i>
                                         Toplam İşlem
                                     </div>
                                     <div class="detail-value">
@@ -561,14 +561,14 @@ include '../includes/user_header.php';
                     <div class="info-card">
                         <div class="info-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-bolt me-2"></i>Hızlı İşlemler
+                                <i class="bi bi-bolt me-2"></i>Hızlı İşlemler
                             </h5>
                         </div>
                         <div class="info-body">
                             <div class="quick-actions">
                                 <a href="upload.php" class="quick-action">
                                     <div class="action-icon bg-primary">
-                                        <i class="fas fa-upload"></i>
+                                        <i class="bi bi-upload"></i>
                                     </div>
                                     <div class="action-text">
                                         <div class="action-title">Dosya Yükle</div>
@@ -578,7 +578,7 @@ include '../includes/user_header.php';
                                 
                                 <a href="files.php" class="quick-action">
                                     <div class="action-icon bg-info">
-                                        <i class="fas fa-folder"></i>
+                                        <i class="bi bi-folder"></i>
                                     </div>
                                     <div class="action-text">
                                         <div class="action-title">Dosyalarım</div>
@@ -588,7 +588,7 @@ include '../includes/user_header.php';
                                 
                                 <a href="credits.php" class="quick-action">
                                     <div class="action-icon bg-success">
-                                        <i class="fas fa-credit-card"></i>
+                                        <i class="bi bi-credit-card"></i>
                                     </div>
                                     <div class="action-text">
                                         <div class="action-title">Kredi Yükle</div>
@@ -598,7 +598,7 @@ include '../includes/user_header.php';
                                 
                                 <a href="transactions.php" class="quick-action">
                                     <div class="action-icon bg-secondary">
-                                        <i class="fas fa-history"></i>
+                                        <i class="bi bi-history"></i>
                                     </div>
                                     <div class="action-text">
                                         <div class="action-title">İşlem Geçmişi</div>
@@ -1124,10 +1124,10 @@ function togglePasswordVisibility(fieldId) {
     
     if (field.type === 'password') {
         field.type = 'text';
-        icon.className = 'fas fa-eye-slash';
+        icon.className = 'bi bi-eye-slash';
     } else {
         field.type = 'password';
-        icon.className = 'fas fa-eye';
+        icon.className = 'bi bi-eye';
     }
 }
 
@@ -1255,7 +1255,7 @@ function showToast(message, type = 'info') {
     const iconClass = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle';
     
     toast.innerHTML = `
-        <i class="fas fa-${iconClass} me-2"></i>
+        <i class="bi bi-${iconClass} me-2"></i>
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;

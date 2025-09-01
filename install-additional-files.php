@@ -24,13 +24,13 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
     <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
             <h6 class="mb-0">
-                <i class="fas fa-paperclip me-2"></i>Ek Dosyalar
+                <i class="bi bi-paperclip me-2"></i>Ek Dosyalar
                 <?php if (!empty($additionalFiles)): ?>
                     <span class="badge bg-secondary ms-2"><?php echo count($additionalFiles); ?></span>
                 <?php endif; ?>
             </h6>
             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadAdditionalFileModal">
-                <i class="fas fa-plus me-1"></i>Ek Dosya Gönder
+                <i class="bi bi-plus me-1"></i>Ek Dosya Gönder
             </button>
         </div>
     </div>
@@ -53,7 +53,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
                         <?php foreach ($additionalFiles as $file): ?>
                             <tr class="<?php echo $file['is_read'] ? '' : 'table-warning'; ?>">
                                 <td>
-                                    <i class="fas fa-file me-1"></i>
+                                    <i class="bi bi-file me-1"></i>
                                     <?php echo htmlspecialchars($file['original_name']); ?>
                                     <?php if (!$file['is_read'] && $file['receiver_id'] === $_SESSION['user_id']): ?>
                                         <span class="badge bg-warning ms-2">Yeni</span>
@@ -94,7 +94,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
                                 </td>
                                 <td>
                                     <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm" title="İndir">
-                                        <i class="fas fa-download"></i>
+                                        <i class="bi bi-download"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -104,7 +104,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
             </div>
         <?php else: ?>
             <div class="alert alert-info mb-0">
-                <i class="fas fa-info-circle me-2"></i>
+                <i class="bi bi-info-circle me-2"></i>
                 Henüz ek dosya bulunmuyor.
             </div>
         <?php endif; ?>
@@ -118,7 +118,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
             <form id="uploadAdditionalFileForm" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="fas fa-upload me-2"></i>Kullanıcıya Ek Dosya Gönder
+                        <i class="bi bi-upload me-2"></i>Kullanıcıya Ek Dosya Gönder
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -146,14 +146,14 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
                     </div>
                     
                     <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <i class="bi bi-exclamation-triangle me-2"></i>
                         <strong>Dikkat:</strong> Ücret belirlerseniz, kullanıcının hesabından otomatik olarak kredi düşülecektir.
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-upload me-1"></i>Dosyayı Gönder
+                        <i class="bi bi-upload me-1"></i>Dosyayı Gönder
                     </button>
                 </div>
             </form>
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Yükleniyor...';
+            submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-1"></i>Yükleniyor...';
             
             fetch('../ajax/additional_files.php', {
                 method: 'POST',
@@ -236,13 +236,13 @@ $additionalFiles = $fileManager->getAdditionalFiles($fileId, $userId, 'user');
     <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
             <h6 class="mb-0">
-                <i class="fas fa-paperclip me-2"></i>Ek Dosyalar
+                <i class="bi bi-paperclip me-2"></i>Ek Dosyalar
                 <?php if (!empty($additionalFiles)): ?>
                     <span class="badge bg-secondary ms-2"><?php echo count($additionalFiles); ?></span>
                 <?php endif; ?>
             </h6>
             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadAdditionalFileModal">
-                <i class="fas fa-plus me-1"></i>Ek Dosya Gönder
+                <i class="bi bi-plus me-1"></i>Ek Dosya Gönder
             </button>
         </div>
     </div>
@@ -264,7 +264,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($fileId, $userId, 'user');
                         <?php foreach ($additionalFiles as $file): ?>
                             <tr class="<?php echo $file['is_read'] ? '' : 'table-warning'; ?>">
                                 <td>
-                                    <i class="fas fa-file me-1"></i>
+                                    <i class="bi bi-file me-1"></i>
                                     <?php echo htmlspecialchars($file['original_name']); ?>
                                     <?php if (!$file['is_read'] && $file['receiver_id'] === $userId): ?>
                                         <span class="badge bg-warning ms-2">Yeni</span>
@@ -295,7 +295,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($fileId, $userId, 'user');
                                 </td>
                                 <td>
                                     <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm" title="İndir">
-                                        <i class="fas fa-download"></i>
+                                        <i class="bi bi-download"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -305,7 +305,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($fileId, $userId, 'user');
             </div>
         <?php else: ?>
             <div class="alert alert-info mb-0">
-                <i class="fas fa-info-circle me-2"></i>
+                <i class="bi bi-info-circle me-2"></i>
                 Henüz ek dosya bulunmuyor. Yukarıdaki butonu kullanarak admine dosya gönderebilirsiniz.
             </div>
         <?php endif; ?>
@@ -319,7 +319,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($fileId, $userId, 'user');
             <form id="uploadAdditionalFileForm" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="fas fa-upload me-2"></i>Admine Ek Dosya Gönder
+                        <i class="bi bi-upload me-2"></i>Admine Ek Dosya Gönder
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -381,14 +381,14 @@ $additionalFiles = $fileManager->getAdditionalFiles($fileId, $userId, 'user');
                     </div>
                     
                     <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
+                        <i class="bi bi-info-circle me-2"></i>
                         Dosyanız admin tarafından incelenecektir.
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-upload me-1"></i>Dosyayı Gönder
+                        <i class="bi bi-upload me-1"></i>Dosyayı Gönder
                     </button>
                 </div>
             </form>
@@ -411,7 +411,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Yükleniyor...';
+            submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-1"></i>Yükleniyor...';
             
             fetch('../ajax/additional_files.php', {
                 method: 'POST',

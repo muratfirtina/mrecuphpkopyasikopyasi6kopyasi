@@ -313,14 +313,14 @@ try {
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="fas fa-upload me-2 text-primary"></i>Dosya Yükle
+                        <i class="bi bi-upload me-2 text-primary"></i>Dosya Yükle
                     </h1>
                     <p class="text-muted mb-0">ECU dosyanızı güvenli bir şekilde yükleyin ve işletmemize gönderin</p>
                 </div>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
                         <a href="files.php" class="btn btn-outline-secondary">
-                            <i class="fas fa-folder me-1"></i>Dosyalarım
+                            <i class="bi bi-folder me-1"></i>Dosyalarım
                         </a>
                     </div>
                 </div>
@@ -329,7 +329,7 @@ try {
             <?php if ($error): ?>
                 <div class="alert alert-danger alert-modern" role="alert">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+                        <i class="bi bi-exclamation-triangle me-3 fa-lg"></i>
                         <div>
                             <strong>Hata!</strong> <?php echo $error; ?>
                         </div>
@@ -340,12 +340,12 @@ try {
             <?php if ($success): ?>
                 <div class="alert alert-success alert-modern" role="alert">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-check-circle me-3 fa-lg"></i>
+                        <i class="bi bi-check-circle me-3 fa-lg"></i>
                         <div>
                             <strong>Başarılı!</strong> <?php echo $success; ?>
                             <div class="mt-2">
                                 <a href="files.php" class="btn btn-success btn-sm">
-                                    <i class="fas fa-folder me-1"></i>Dosyalarımı Görüntüle
+                                    <i class="bi bi-folder me-1"></i>Dosyalarımı Görüntüle
                                 </a>
                             </div>
                         </div>
@@ -381,7 +381,7 @@ try {
                                     <div class="form-step active" id="step-1">
                                         <div class="step-header mb-4">
                                             <h4 class="mb-2">
-                                                <i class="fas fa-car me-2 text-primary"></i>Araç Bilgileri
+                                                <i class="bi bi-car me-2 text-primary"></i>Araç Bilgileri
                                             </h4>
                                             <p class="text-muted">ECU'nun bulunduğu aracın teknik bilgilerini girin</p>
                                         </div>
@@ -466,7 +466,7 @@ try {
                                                 </select>
                                                 <div class="form-help">
                                                     <small class="text-muted">
-                                                        <i class="fas fa-microchip me-1"></i>ECU tipi seçin
+                                                        <i class="bi bi-microchip me-1"></i>ECU tipi seçin
                                                     </small>
                                                 </div>
                                             </div>
@@ -484,7 +484,7 @@ try {
                                                 </select>
                                                 <div class="form-help">
                                                     <small class="text-muted">
-                                                        <i class="fas fa-tools me-1"></i>Tuning cihazı seçin
+                                                        <i class="bi bi-tools me-1"></i>Tuning cihazı seçin
                                                     </small>
                                                 </div>
                                             </div>
@@ -533,7 +533,7 @@ try {
 
                                         <div class="step-actions mt-4">
                                             <button type="button" class="btn btn-primary btn-modern next-step">
-                                                Devam Et <i class="fas fa-arrow-right ms-2"></i>
+                                                Devam Et <i class="bi bi-arrow-right ms-2"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -542,7 +542,7 @@ try {
                                     <div class="form-step" id="step-2">
                                         <div class="step-header mb-4">
                                             <h4 class="mb-2">
-                                                <i class="fas fa-cloud-upload-alt me-2 text-primary"></i>Dosya Yükleme
+                                                <i class="bi bi-cloud-upload-alt me-2 text-primary"></i>Dosya Yükleme
                                             </h4>
                                             <p class="text-muted">ECU dosyanızı seçin ve isteğe bağlı notlarınızı ekleyin</p>
                                         </div>
@@ -554,7 +554,7 @@ try {
                                                        required style="display: none;">
                                                 <div class="upload-content">
                                                     <div class="upload-icon">
-                                                        <i class="fas fa-cloud-upload-alt"></i>
+                                                        <i class="bi bi-cloud-upload-alt"></i>
                                                     </div>
                                                     <h5 class="upload-title">Dosyanızı buraya sürükleyin</h5>
                                                     <p class="upload-subtitle">veya 
@@ -564,11 +564,11 @@ try {
                                                     </p>
                                                     <div class="upload-info">
                                                         <div class="info-item">
-                                                            <i class="fas fa-file-code me-1"></i>
+                                                            <i class="bi bi-file-code me-1"></i>
                                                             <span>Desteklenen: Tüm dosya türleri</span>
                                                         </div>
                                                         <div class="info-item">
-                                                            <i class="fas fa-weight-hanging me-1"></i>
+                                                            <i class="bi bi-weight-hanging me-1"></i>
                                                             <span>Maks. boyut: <?php echo (MAX_FILE_SIZE / 1024 / 1024); ?>MB</span>
                                                         </div>
                                                     </div>
@@ -580,14 +580,14 @@ try {
                                         <div class="mb-4" id="fileInfo" style="display: none;">
                                             <div class="file-preview">
                                                 <div class="file-icon">
-                                                    <i class="fas fa-file-alt"></i>
+                                                    <i class="bi bi-file-alt"></i>
                                                 </div>
                                                 <div class="file-details">
                                                     <div class="file-name" id="fileName"></div>
                                                     <div class="file-size" id="fileSize"></div>
                                                 </div>
                                                 <button type="button" class="btn btn-sm btn-outline-danger remove-file" onclick="clearFile()">
-                                                    <i class="fas fa-times"></i>
+                                                    <i class="bi bi-times"></i>
                                                 </button>
                                             </div>
                                         </div>
@@ -603,10 +603,10 @@ try {
 
                                         <div class="step-actions mt-4">
                                             <button type="button" class="btn btn-outline-secondary btn-modern prev-step me-2">
-                                                <i class="fas fa-arrow-left me-2"></i>Geri
+                                                <i class="bi bi-arrow-left me-2"></i>Geri
                                             </button>
                                             <button type="button" class="btn btn-primary btn-modern next-step">
-                                                Devam Et <i class="fas fa-arrow-right ms-2"></i>
+                                                Devam Et <i class="bi bi-arrow-right ms-2"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -615,14 +615,14 @@ try {
                                     <div class="form-step" id="step-3">
                                         <div class="step-header mb-4">
                                             <h4 class="mb-2">
-                                                <i class="fas fa-check-circle me-2 text-success"></i>Bilgileri Kontrol Edin
+                                                <i class="bi bi-check-circle me-2 text-success"></i>Bilgileri Kontrol Edin
                                             </h4>
                                             <p class="text-muted">Yükleme işlemini tamamlamadan önce bilgilerinizi kontrol edin</p>
                                         </div>
                                         
                                         <div class="summary-card mb-4">
                                             <h6 class="summary-title">
-                                                <i class="fas fa-car me-2"></i>Araç Bilgileri
+                                                <i class="bi bi-car me-2"></i>Araç Bilgileri
                                             </h6>
                                             <div class="summary-content">
                                                 <div class="summary-item">
@@ -662,7 +662,7 @@ try {
 
                                         <div class="summary-card mb-4">
                                             <h6 class="summary-title">
-                                                <i class="fas fa-file me-2"></i>Dosya Bilgileri
+                                                <i class="bi bi-file me-2"></i>Dosya Bilgileri
                                             </h6>
                                             <div class="summary-content">
                                                 <div class="summary-item">
@@ -689,10 +689,10 @@ try {
 
                                         <div class="step-actions">
                                             <button type="button" class="btn btn-outline-secondary btn-modern prev-step me-2">
-                                                <i class="fas fa-arrow-left me-2"></i>Geri
+                                                <i class="bi bi-arrow-left me-2"></i>Geri
                                             </button>
                                             <button type="submit" class="btn btn-success btn-modern btn-lg">
-                                                <i class="fas fa-paper-plane me-2"></i>Dosyayı Yükle ve Gönder
+                                                <i class="bi bi-paper-plane me-2"></i>Dosyayı Yükle ve Gönder
                                             </button>
                                         </div>
                                     </div>
@@ -707,7 +707,7 @@ try {
                     <div class="info-card mb-4">
                         <div class="info-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-info-circle me-2"></i>Bilgi Özeti
+                                <i class="bi bi-info-circle me-2"></i>Bilgi Özeti
                             </h5>
                             <div class="info-body">
                                 <div class="info-list">
@@ -1317,7 +1317,7 @@ function showError(message) {
     const alert = document.createElement('div');
     alert.className = 'alert alert-danger alert-dismissible fade show';
     alert.innerHTML = `
-        <i class="fas fa-exclamation-triangle me-2"></i>${message}
+        <i class="bi bi-exclamation-triangle me-2"></i>${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
     document.querySelector('main').insertBefore(alert, document.querySelector('.upload-wizard'));

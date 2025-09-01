@@ -686,7 +686,7 @@ include 'includes/header.php';
                         <?php endif; ?>
                     <?php else: ?>
                         <div class="main-image d-flex align-items-center justify-content-center bg-light">
-                            <i class="fas fa-image fa-2x text-muted"></i>
+                            <i class="bi bi-image fa-2x text-muted"></i>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -721,7 +721,7 @@ include 'includes/header.php';
                     </div>
 
                     <div class="features">
-                        <h5><i class="fas fa-check-circle"></i> Ürün Özellikleri</h5>
+                        <h5><i class="bi bi-check-circle"></i> Ürün Özellikleri</h5>
                         <ul class="feature-list">
                             <li class="feature-item">Orijinal ve kaliteli üretim</li>
                             <li class="feature-item">2 yıl üretici garantisi</li>
@@ -733,7 +733,7 @@ include 'includes/header.php';
                     <!-- İletişim Bölümü -->
                     <div class="contact-section">
                         <h4 class="mb-3">
-                            <i class="fas fa-headset me-2"></i>Destek ve Satış
+                            <i class="bi bi-headset me-2"></i>Destek ve Satış
                         </h4>
                         <p class="mb-0">Ürün hakkında detaylı bilgi almak veya hemen satın almak için bizimle iletişime geçin.</p>
 
@@ -741,12 +741,12 @@ include 'includes/header.php';
                             <!-- Telefon Button - ID: 1 -->
                             <?php if (isset($contactCardsById[1])): ?>
                                 <a href="<?php echo $contactCardsById[1]['contact_link'] ?: 'tel:' . CONTACT_PHONE; ?>" class="contact-btn contact-btn-primary">
-                                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'fas fa-phone'; ?>" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i>
+                                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'bi bi-phone'; ?>" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i>
                                     <?php echo $contactCardsById[1]['button_text'] ?: 'Hemen Ara'; ?>
                                 </a>
                             <?php else: ?>
                                 <a href="tel:<?php echo CONTACT_PHONE; ?>" class="contact-btn contact-btn-primary">
-                                    <i class="fas fa-phone"></i>
+                                    <i class="bi bi-phone"></i>
                                     Hemen Ara
                                 </a>
                             <?php endif; ?>
@@ -755,13 +755,13 @@ include 'includes/header.php';
                             <?php if (isset($contactCardsById[2])): ?>
                                 <a href="<?php echo $contactCardsById[2]['contact_link'] ?: 'mailto:' . SMTP_FROM_EMAIL . '?subject=' . urlencode($product['name'] . ' - Bilgi Talebi') . '&body=' . urlencode('Merhaba, ' . $product['name'] . ' ürünü hakkında bilgi almak istiyorum.'); ?>" 
                                    class="contact-btn contact-btn-secondary">
-                                    <i class="<?php echo $contactCardsById[2]['icon'] ?: 'fas fa-envelope'; ?>" style="color: <?php echo $contactCardsById[2]['icon_color'] ?: ''; ?>;"></i>
+                                    <i class="<?php echo $contactCardsById[2]['icon'] ?: 'bi bi-envelope'; ?>" style="color: <?php echo $contactCardsById[2]['icon_color'] ?: ''; ?>;"></i>
                                     <?php echo $contactCardsById[2]['button_text'] ?: 'E-posta'; ?>
                                 </a>
                             <?php else: ?>
                                 <a href="mailto:<?php echo SMTP_FROM_EMAIL; ?>?subject=<?php echo urlencode($product['name'] . ' - Bilgi Talebi'); ?>&body=<?php echo urlencode('Merhaba, ' . $product['name'] . ' ürünü hakkında bilgi almak istiyorum.'); ?>"
                                    class="contact-btn contact-btn-secondary">
-                                    <i class="fas fa-envelope"></i>
+                                    <i class="bi bi-envelope"></i>
                                     E-posta
                                 </a>
                             <?php endif; ?>
@@ -770,13 +770,13 @@ include 'includes/header.php';
                             <?php if (isset($contactCardsById[3])): ?>
                                 <a href="<?php echo $contactCardsById[3]['contact_link'] ?: 'https://wa.me/' . preg_replace('/\D/', '', CONTACT_WHATSAPP) . '?text=' . urlencode("Merhaba, " . $product['name'] . " ürünü hakkında bilgi almak istiyorum."); ?>" 
                                    class="contact-btn contact-btn-secondary" target="_blank">
-                                    <i class="<?php echo $contactCardsById[3]['icon'] ?: 'fab fa-whatsapp'; ?>" style="color: <?php echo $contactCardsById[3]['icon_color'] ?: ''; ?>;"></i>
+                                    <i class="<?php echo $contactCardsById[3]['icon'] ?: 'bi bi-whatsapp'; ?>" style="color: <?php echo $contactCardsById[3]['icon_color'] ?: ''; ?>;"></i>
                                     <?php echo $contactCardsById[3]['button_text'] ?: 'WhatsApp'; ?>
                                 </a>
                             <?php else: ?>
                                 <a href="https://wa.me/<?php echo preg_replace('/\D/', '', CONTACT_WHATSAPP); ?>?text=<?php echo urlencode("Merhaba, " . $product['name'] . " ürünü hakkında bilgi almak istiyorum."); ?>"
                                    class="contact-btn contact-btn-secondary" target="_blank">
-                                    <i class="fab fa-whatsapp"></i>
+                                    <i class="bi bi-whatsapp"></i>
                                     WhatsApp
                                 </a>
                             <?php endif; ?>
@@ -787,7 +787,7 @@ include 'includes/header.php';
 
             <!-- Açıklama ve Özellikler -->
             <div class="description-section">
-                <h2 class="description-title"><i class="fas fa-info-circle"></i> Ürün Açıklaması</h2>
+                <h2 class="description-title"><i class="bi bi-info-circle"></i> Ürün Açıklaması</h2>
                 <div class="product-description">
                     <?php echo $product['description']; ?>
                 </div>
@@ -831,7 +831,7 @@ include 'includes/header.php';
             <?php if (!empty($relatedProducts)): ?>
                 <div class="container related-products">
                     <h3 class="text-center mb-5">
-                        <i class="fas fa-boxes me-2"></i>İlgili Ürünler
+                        <i class="bi bi-boxes me-2"></i>İlgili Ürünler
                     </h3>
                     <div class="row">
                         <?php foreach ($relatedProducts as $relatedProduct): ?>
@@ -843,14 +843,14 @@ include 'includes/header.php';
                                             class="related-product-image">
                                     <?php else: ?>
                                         <div class="related-product-image bg-light d-flex align-items-center justify-content-center">
-                                            <i class="fas fa-image text-muted fa-2x"></i>
+                                            <i class="bi bi-image text-muted fa-2x"></i>
                                         </div>
                                     <?php endif; ?>
                                     <div class="related-product-info">
                                         <h5 class="related-product-title"><?php echo htmlspecialchars($relatedProduct['name']); ?></h5>
                                         <?php if ($relatedProduct['brand_name']): ?>
                                             <p class="text-muted mb-2">
-                                                <small><i class="fas fa-award me-1"></i><?php echo htmlspecialchars($relatedProduct['brand_name']); ?></small>
+                                                <small><i class="bi bi-award me-1"></i><?php echo htmlspecialchars($relatedProduct['brand_name']); ?></small>
                                             </p>
                                         <?php endif; ?>
                                         <div class="related-product-price">

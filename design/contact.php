@@ -9,7 +9,7 @@ require_once '../config/database.php';
 
 // Sayfa ayarları
 $pageTitle = 'İletişim İçerik Yönetimi';
-$pageIcon = 'fas fa-phone';
+$pageIcon = 'bi bi-phone';
 $breadcrumbs = [
     ['title' => 'Dashboard', 'url' => 'index.php'],
     ['title' => 'İletişim Yönetimi']
@@ -319,7 +319,7 @@ include '../includes/design_header.php';
                     </div>
                     <div>
                         <a href="../contact.php" target="_blank" class="btn btn-outline-success">
-                            <i class="fas fa-external-link-alt me-2"></i>Sayfayı Görüntüle
+                            <i class="bi bi-external-link-alt me-2"></i>Sayfayı Görüntüle
                         </a>
                     </div>
                 </div>
@@ -328,19 +328,19 @@ include '../includes/design_header.php';
                     <nav>
                         <div class="nav nav-tabs px-3 pt-3" id="nav-tab" role="tablist">
                             <button class="nav-link active" id="nav-settings-tab" data-bs-toggle="tab" data-bs-target="#nav-settings" type="button">
-                                <i class="fas fa-cog me-2"></i>Genel Ayarlar
+                                <i class="bi bi-cog me-2"></i>Genel Ayarlar
                             </button>
                             <button class="nav-link" id="nav-cards-tab" data-bs-toggle="tab" data-bs-target="#nav-cards" type="button">
-                                <i class="fas fa-address-card me-2"></i>İletişim Kartları
+                                <i class="bi bi-address-card me-2"></i>İletişim Kartları
                             </button>
                             <button class="nav-link" id="nav-office-tab" data-bs-toggle="tab" data-bs-target="#nav-office" type="button">
-                                <i class="fas fa-building me-2"></i>Ofis Bilgileri
+                                <i class="bi bi-building me-2"></i>Ofis Bilgileri
                             </button>
                             <button class="nav-link" id="nav-form-tab" data-bs-toggle="tab" data-bs-target="#nav-form" type="button">
-                                <i class="fas fa-envelope me-2"></i>Form Ayarları
+                                <i class="bi bi-envelope me-2"></i>Form Ayarları
                             </button>
                             <button class="nav-link" id="nav-messages-tab" data-bs-toggle="tab" data-bs-target="#nav-messages" type="button">
-                                <i class="fas fa-comments me-2"></i>Mesajlar
+                                <i class="bi bi-comments me-2"></i>Mesajlar
                             </button>
                         </div>
                     </nav>
@@ -405,14 +405,14 @@ include '../includes/design_header.php';
                                         <!-- Yayınlama Ayarları -->
                                         <div class="card shadow-sm mb-4">
                                             <div class="card-header">
-                                                <h6 class="mb-0"><i class="fas fa-cog me-2"></i>Ayarlar</h6>
+                                                <h6 class="mb-0"><i class="bi bi-cog me-2"></i>Ayarlar</h6>
                                             </div>
                                             <div class="card-body">
                                                 <div class="form-check mb-3">
                                                     <input class="form-check-input" type="checkbox" name="settings_is_active" 
                                                            <?php echo (!isset($contact_settings['is_active']) || $contact_settings['is_active']) ? 'checked' : ''; ?>>
                                                     <label class="form-check-label">
-                                                        <i class="fas fa-eye text-success me-1"></i>Aktif
+                                                        <i class="bi bi-eye text-success me-1"></i>Aktif
                                                     </label>
                                                 </div>
                                             </div>
@@ -420,7 +420,7 @@ include '../includes/design_header.php';
 
                                         <div class="d-grid">
                                             <button type="submit" class="btn btn-design-primary btn-lg">
-                                                <i class="fas fa-save me-2"></i>Genel Ayarları Kaydet
+                                                <i class="bi bi-save me-2"></i>Genel Ayarları Kaydet
                                             </button>
                                         </div>
                                     </div>
@@ -432,7 +432,7 @@ include '../includes/design_header.php';
                         <div class="tab-pane fade" id="nav-cards">
                             <div class="row">
                                 <div class="col-lg-8">
-                                    <h5 class="mb-3"><i class="fas fa-address-card me-2 text-primary"></i>Mevcut İletişim Kartları</h5>
+                                    <h5 class="mb-3"><i class="bi bi-address-card me-2 text-primary"></i>Mevcut İletişim Kartları</h5>
                                     <div id="contactCardsList">
                                         <?php foreach ($contact_cards as $card): ?>
                                             <div class="contact-card-preview">
@@ -461,14 +461,14 @@ include '../includes/design_header.php';
                                                     <div class="ms-3">
                                                         <button class="btn btn-outline-primary btn-sm me-1" 
                                                                 onclick="editContactCard(<?php echo htmlspecialchars(json_encode($card)); ?>)">
-                                                            <i class="fas fa-edit"></i>
+                                                            <i class="bi bi-edit"></i>
                                                         </button>
                                                         <form method="POST" class="d-inline" 
                                                               onsubmit="return confirm('Bu kartı silmek istediğinizden emin misiniz?')">
                                                             <input type="hidden" name="action" value="delete_contact_card">
                                                             <input type="hidden" name="card_id" value="<?php echo $card['id']; ?>">
                                                             <button type="submit" class="btn btn-outline-danger btn-sm">
-                                                                <i class="fas fa-trash"></i>
+                                                                <i class="bi bi-trash"></i>
                                                             </button>
                                                         </form>
                                                     </div>
@@ -478,7 +478,7 @@ include '../includes/design_header.php';
                                         
                                         <?php if (empty($contact_cards)): ?>
                                             <div class="text-center text-muted py-4">
-                                                <i class="fas fa-address-card fa-3x mb-3 opacity-25"></i>
+                                                <i class="bi bi-address-card fa-3x mb-3 opacity-25"></i>
                                                 <p>Henüz iletişim kartı eklenmemiş.</p>
                                             </div>
                                         <?php endif; ?>
@@ -488,7 +488,7 @@ include '../includes/design_header.php';
                                 <div class="col-lg-4">
                                     <div class="card shadow-sm">
                                         <div class="card-header">
-                                            <h6 class="mb-0"><i class="fas fa-plus me-2"></i>Yeni Kart Ekle</h6>
+                                            <h6 class="mb-0"><i class="bi bi-plus me-2"></i>Yeni Kart Ekle</h6>
                                         </div>
                                         <div class="card-body">
                                             <form method="POST" action="" id="contactCardForm">
@@ -509,10 +509,10 @@ include '../includes/design_header.php';
                                                     <label class="form-label fw-bold">Icon *</label>
                                                     <div class="input-group">
                                                         <span class="input-group-text bg-light">
-                                                            <i id="cardIconPreview" class="fas fa-phone fs-4"></i>
+                                                            <i id="cardIconPreview" class="bi bi-phone fs-4"></i>
                                                         </span>
                                                         <input type="text" class="form-control" name="card_icon" id="cardIcon" 
-                                                               value="fas fa-phone" required placeholder="fas fa-phone">
+                                                               value="bi bi-phone" required placeholder="bi bi-phone">
                                                     </div>
                                                 </div>
                                                 
@@ -577,7 +577,7 @@ include '../includes/design_header.php';
                                                 
                                                 <div class="d-grid">
                                                     <button type="submit" class="btn btn-design-primary" id="cardSubmitBtn">
-                                                        <i class="fas fa-plus me-2"></i>Kart Ekle
+                                                        <i class="bi bi-plus me-2"></i>Kart Ekle
                                                     </button>
                                                 </div>
                                                 <button type="button" class="btn btn-outline-secondary w-100 mt-2 d-none" id="cardCancelBtn" onclick="resetContactCardForm()">
@@ -640,14 +640,14 @@ include '../includes/design_header.php';
                                         <!-- Ayarlar -->
                                         <div class="card shadow-sm mb-4">
                                             <div class="card-header">
-                                                <h6 class="mb-0"><i class="fas fa-cog me-2"></i>Ayarlar</h6>
+                                                <h6 class="mb-0"><i class="bi bi-cog me-2"></i>Ayarlar</h6>
                                             </div>
                                             <div class="card-body">
                                                 <div class="form-check mb-3">
                                                     <input class="form-check-input" type="checkbox" name="office_is_active" 
                                                            <?php echo (!isset($office_info['is_active']) || $office_info['is_active']) ? 'checked' : ''; ?>>
                                                     <label class="form-check-label">
-                                                        <i class="fas fa-eye text-success me-1"></i>Aktif
+                                                        <i class="bi bi-eye text-success me-1"></i>Aktif
                                                     </label>
                                                 </div>
                                             </div>
@@ -655,7 +655,7 @@ include '../includes/design_header.php';
 
                                         <div class="d-grid">
                                             <button type="submit" class="btn btn-design-primary btn-lg">
-                                                <i class="fas fa-save me-2"></i>Ofis Bilgilerini Kaydet
+                                                <i class="bi bi-save me-2"></i>Ofis Bilgilerini Kaydet
                                             </button>
                                         </div>
                                     </div>
@@ -702,7 +702,7 @@ include '../includes/design_header.php';
                                                             <input type="text" class="form-control" name="subject_options[]" 
                                                                    placeholder="Konu seçeneği" value="<?php echo htmlspecialchars($option); ?>">
                                                             <button type="button" class="btn btn-outline-danger remove-subject-option">
-                                                                <i class="fas fa-minus"></i>
+                                                                <i class="bi bi-minus"></i>
                                                             </button>
                                                         </div>
                                                     </div>
@@ -712,14 +712,14 @@ include '../includes/design_header.php';
                                                         <div class="input-group">
                                                             <input type="text" class="form-control" name="subject_options[]" placeholder="Konu seçeneği">
                                                             <button type="button" class="btn btn-outline-danger remove-subject-option" style="display:none;">
-                                                                <i class="fas fa-minus"></i>
+                                                                <i class="bi bi-minus"></i>
                                                             </button>
                                                         </div>
                                                     </div>
                                                 <?php endif; ?>
                                             </div>
                                             <button type="button" class="btn btn-sm btn-outline-primary" id="addSubjectOption">
-                                                <i class="fas fa-plus me-1"></i>Seçenek Ekle
+                                                <i class="bi bi-plus me-1"></i>Seçenek Ekle
                                             </button>
                                         </div>
                                     </div>
@@ -728,7 +728,7 @@ include '../includes/design_header.php';
                                         <!-- Form Ayarları -->
                                         <div class="card shadow-sm mb-4">
                                             <div class="card-header">
-                                                <h6 class="mb-0"><i class="fas fa-cog me-2"></i>Form Ayarları</h6>
+                                                <h6 class="mb-0"><i class="bi bi-cog me-2"></i>Form Ayarları</h6>
                                             </div>
                                             <div class="card-body">
                                                 <div class="form-check mb-3">
@@ -742,7 +742,7 @@ include '../includes/design_header.php';
                                                     <input class="form-check-input" type="checkbox" name="form_is_active" 
                                                            <?php echo (!isset($form_settings['is_active']) || $form_settings['is_active']) ? 'checked' : ''; ?>>
                                                     <label class="form-check-label">
-                                                        <i class="fas fa-eye text-success me-1"></i>Aktif
+                                                        <i class="bi bi-eye text-success me-1"></i>Aktif
                                                     </label>
                                                 </div>
                                             </div>
@@ -750,7 +750,7 @@ include '../includes/design_header.php';
 
                                         <div class="d-grid">
                                             <button type="submit" class="btn btn-design-primary btn-lg">
-                                                <i class="fas fa-save me-2"></i>Form Ayarlarını Kaydet
+                                                <i class="bi bi-save me-2"></i>Form Ayarlarını Kaydet
                                             </button>
                                         </div>
                                     </div>
@@ -763,9 +763,9 @@ include '../includes/design_header.php';
                             <div class="row">
                                 <div class="col-12">
                                     <div class="d-flex justify-content-between align-items-center mb-4">
-                                        <h5 class="mb-0"><i class="fas fa-comments me-2 text-primary"></i>Son İletişim Mesajları</h5>
+                                        <h5 class="mb-0"><i class="bi bi-comments me-2 text-primary"></i>Son İletişim Mesajları</h5>
                                         <a href="../admin/contact-messages.php" class="btn btn-outline-primary">
-                                            <i class="fas fa-list me-2"></i>Tüm Mesajları Gör
+                                            <i class="bi bi-list me-2"></i>Tüm Mesajları Gör
                                         </a>
                                     </div>
                                     
@@ -792,7 +792,7 @@ include '../includes/design_header.php';
                                                                 <?php if (strlen($msg['message']) > 100): ?>...<?php endif; ?>
                                                             </p>
                                                             <small class="text-muted">
-                                                                <i class="fas fa-clock me-1"></i>
+                                                                <i class="bi bi-clock me-1"></i>
                                                                 <?php echo date('d.m.Y H:i', strtotime($msg['created_at'])); ?>
                                                             </small>
                                                         </div>
@@ -802,7 +802,7 @@ include '../includes/design_header.php';
                                         </div>
                                     <?php else: ?>
                                         <div class="text-center text-muted py-5">
-                                            <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
+                                            <i class="bi bi-inbox fa-3x mb-3 opacity-25"></i>
                                             <p>Henüz mesaj bulunmuyor.</p>
                                         </div>
                                     <?php endif; ?>
@@ -819,7 +819,7 @@ include '../includes/design_header.php';
 <script>
 // Icon önizleme
 document.getElementById('cardIcon').addEventListener('input', function() {
-    document.getElementById('cardIconPreview').className = this.value.trim() || 'fas fa-phone fs-4';
+    document.getElementById('cardIconPreview').className = this.value.trim() || 'bi bi-phone fs-4';
 });
 
 // Konu seçeneği ekleme/silme
@@ -831,7 +831,7 @@ document.getElementById('addSubjectOption').addEventListener('click', function()
         <div class="input-group">
             <input type="text" class="form-control" name="subject_options[]" placeholder="Konu seçeneği">
             <button type="button" class="btn btn-outline-danger remove-subject-option">
-                <i class="fas fa-minus"></i>
+                <i class="bi bi-minus"></i>
             </button>
         </div>
     `;
@@ -866,7 +866,7 @@ function editContactCard(card) {
     // Icon önizlemesini güncelle
     document.getElementById('cardIconPreview').className = card.icon + ' fs-4';
     
-    document.getElementById('cardSubmitBtn').innerHTML = '<i class="fas fa-save me-2"></i>Güncelle';
+    document.getElementById('cardSubmitBtn').innerHTML = '<i class="bi bi-save me-2"></i>Güncelle';
     document.getElementById('cardCancelBtn').classList.remove('d-none');
     
     // Cards tab'ına git
@@ -878,9 +878,9 @@ function resetContactCardForm() {
     document.getElementById('contactCardForm').reset();
     document.getElementById('cardAction').value = 'add_contact_card';
     document.getElementById('cardId').value = '';
-    document.getElementById('cardIcon').value = 'fas fa-phone';
-    document.getElementById('cardIconPreview').className = 'fas fa-phone fs-4';
-    document.getElementById('cardSubmitBtn').innerHTML = '<i class="fas fa-plus me-2"></i>Kart Ekle';
+    document.getElementById('cardIcon').value = 'bi bi-phone';
+    document.getElementById('cardIconPreview').className = 'bi bi-phone fs-4';
+    document.getElementById('cardSubmitBtn').innerHTML = '<i class="bi bi-plus me-2"></i>Kart Ekle';
     document.getElementById('cardCancelBtn').classList.add('d-none');
 }
 

@@ -903,7 +903,7 @@ if ($fileType === 'response') {
     $pageDescription = 'Dosya detaylarını görüntüleyin ve yönetin';
 }
 
-$pageIcon = 'fas fa-file-alt';
+$pageIcon = 'bi bi-file-alt';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -928,7 +928,7 @@ include '../includes/admin_sidebar.php';
 <!-- Hata/Başarı Mesajları -->
 <?php if ($error): ?>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -936,7 +936,7 @@ include '../includes/admin_sidebar.php';
 
 <?php if ($success): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="bi bi-check-circle me-2"></i>
         <?php echo $success; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -947,26 +947,26 @@ include '../includes/admin_sidebar.php';
     <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
             <h5 class="mb-0">
-                <i class="fas fa-<?php echo $fileType === 'response' ? 'reply' : 'file-alt'; ?> me-2"></i>
+                <i class="bi bi-<?php echo $fileType === 'response' ? 'reply' : 'file-alt'; ?> me-2"></i>
                 <?php echo $fileType === 'response' ? 'Yanıt Dosyası' : 'Dosya'; ?> Detayları
             </h5>
             <div class="d-flex gap-2">
                 <?php if ($fileType === 'response'): ?>
                     <a href="file-detail.php?id=<?php echo $uploadId; ?>" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-file-alt me-1"></i>Orijinal Dosyayı Görüntüle
+                        <i class="bi bi-file-alt me-1"></i>Orijinal Dosyayı Görüntüle
                     </a>
                     <a href="file-detail.php?id=<?php echo $uploadId; ?>#response-files" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-list me-1"></i>Tüm Yanıtları Görüntüle
+                        <i class="bi bi-list me-1"></i>Tüm Yanıtları Görüntüle
                     </a>
                     <!-- Admin İptal Butonu (Response Dosyası) -->
                     <?php if (!isset($upload['is_cancelled']) || !$upload['is_cancelled']): ?>
                         <button type="button" class="btn btn-danger btn-sm" 
                                 onclick="showCancelModal('<?php echo $responseId; ?>', 'response', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')">
-                            <i class="fas fa-times me-1"></i>İptal Et
+                            <i class="bi bi-times me-1"></i>İptal Et
                         </button>
                     <?php else: ?>
                         <span class="btn btn-secondary btn-sm disabled">
-                            <i class="fas fa-ban me-1"></i>İptal Edilmiş
+                            <i class="bi bi-ban me-1"></i>İptal Edilmiş
                         </span>
                     <?php endif; ?>
                 <?php else: ?>
@@ -974,11 +974,11 @@ include '../includes/admin_sidebar.php';
                     <?php if (!isset($upload['is_cancelled']) || !$upload['is_cancelled']): ?>
                         <button type="button" class="btn btn-danger btn-sm" 
                                 onclick="showCancelModal('<?php echo $uploadId; ?>', 'upload', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')">
-                            <i class="fas fa-times me-1"></i>Dosyayı İptal Et
+                            <i class="bi bi-times me-1"></i>Dosyayı İptal Et
                         </button>
                     <?php else: ?>
                         <span class="btn btn-secondary btn-sm disabled">
-                            <i class="fas fa-ban me-1"></i>İptal Edilmiş
+                            <i class="bi bi-ban me-1"></i>İptal Edilmiş
                         </span>
                     <?php endif; ?>
                 <?php endif; ?>
@@ -1017,7 +1017,7 @@ include '../includes/admin_sidebar.php';
             </div>
             <div class="card-body">
                 <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
+                    <i class="bi bi-info-circle me-2"></i>
                     <strong>Bu dosya için işlemdeki revizyon talepleri bulundu.</strong><br>
                     Aşağıdaki formları kullanarak revizyon dosyalarını yükleyebilirsiniz.
                 </div>
@@ -1026,7 +1026,7 @@ include '../includes/admin_sidebar.php';
                     <div class="revision-upload-section mb-4 p-3 border rounded bg-light">
                         <div class="revision-info mb-3">
                             <h6 class="text-primary">
-                                <i class="fas fa-user me-1"></i>
+                                <i class="bi bi-user me-1"></i>
                                 <?php echo htmlspecialchars($revision['first_name'] . ' ' . $revision['last_name']); ?>
                                 (@<?php echo htmlspecialchars($revision['username']); ?>)
                             </h6>
@@ -1047,21 +1047,21 @@ include '../includes/admin_sidebar.php';
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="revision_file_<?php echo $revision['id']; ?>" class="form-label">
-                                        <i class="fas fa-file-upload me-1"></i>
+                                        <i class="bi bi-file-upload me-1"></i>
                                         Revizyon Dosyası <span class="text-danger">*</span>
                                     </label>
                                     <input type="file" class="form-control"
                                         id="revision_file_<?php echo $revision['id']; ?>"
                                         name="revision_file" required>
                                     <div class="form-text">
-                                        <i class="fas fa-info-circle me-1"></i>
+                                        <i class="bi bi-info-circle me-1"></i>
                                         Revize edilmiş dosyayı seçin (Max: <?php echo ini_get('upload_max_filesize'); ?>)
                                     </div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label for="revision_notes_<?php echo $revision['id']; ?>" class="form-label">
-                                        <i class="fas fa-sticky-note me-1"></i>
+                                        <i class="bi bi-sticky-note me-1"></i>
                                         Admin Notları
                                     </label>
                                     <textarea class="form-control"
@@ -1073,7 +1073,7 @@ include '../includes/admin_sidebar.php';
 
                                 <div class="col-md-2">
                                     <label for="revision_credits_<?php echo $revision['id']; ?>" class="form-label">
-                                        <i class="fas fa-coins me-1"></i>
+                                        <i class="bi bi-coins me-1"></i>
                                         Revizyon Ücreti <span class="text-danger">*</span>
                                     </label>
                                     <input type="number" class="form-control"
@@ -1089,19 +1089,19 @@ include '../includes/admin_sidebar.php';
                                 <div class="col-12">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <button type="submit" name="upload_revision" class="btn btn-success btn-lg">
-                                            <i class="fas fa-upload me-2"></i>Revizyon Dosyasını Yükle
+                                            <i class="bi bi-upload me-2"></i>Revizyon Dosyasını Yükle
                                         </button>
 
                                         <div class="revision-actions">
                                             <button type="button" class="btn btn-outline-danger btn-sm"
                                                 onclick="showRejectModal('<?php echo $revision['id']; ?>')">
-                                                <i class="fas fa-times me-1"></i>Revizyon Talebini Reddet
+                                                <i class="bi bi-times me-1"></i>Revizyon Talebini Reddet
                                             </button>
                                         </div>
                                     </div>
 
                                     <small class="text-muted d-block mt-2">
-                                        <i class="fas fa-lightbulb me-1"></i>
+                                        <i class="bi bi-lightbulb me-1"></i>
                                         <strong>Önemli:</strong> Dosya yüklendikten sonra revizyon talebi otomatik olarak "Tamamlandı" durumuna geçecek ve kullanıcı dosyayı indirebilecek.
                                     </small>
                                 </div>
@@ -1153,13 +1153,13 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card mb-4">
                 <div class="card-header bg-warning text-dark">
                     <h6 class="mb-0">
-                        <i class="fas fa-clock me-2"></i>
+                        <i class="bi bi-clock me-2"></i>
                         Bekleyen Revizyon Talepleri (<?php echo $pendingRevisions; ?> adet)
                     </h6>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-info mb-4">
-                        <i class="fas fa-info-circle me-2"></i>
+                        <i class="bi bi-info-circle me-2"></i>
                         <strong>Bu dosya için bekleyen revizyon talepleri bulundu.</strong><br>
                         <small class="text-muted">
                             Aşağıdaki revizyon taleplerini inceleyip "İşleme Al" veya "Reddet" seçeneklerini kullanabilirsiniz.
@@ -1184,11 +1184,11 @@ include '../includes/admin_sidebar.php';
                                     <!-- Hangi Dosyaya Revizyon Talep Edildi -->
                                     <div class="mb-3">
                                         <h6 class="text-primary mb-2">
-                                            <i class="fas fa-file-alt me-2"></i>Revizyon Talep Edilen Dosya:
+                                            <i class="bi bi-file-alt me-2"></i>Revizyon Talep Edilen Dosya:
                                         </h6>
                                         <div class="file-reference-box p-3 bg-white rounded border">
                                             <?php if (!empty($revision['response_file_name'])): ?>
-                                                <i class="fas fa-reply text-primary me-2"></i>
+                                                <i class="bi bi-reply text-primary me-2"></i>
                                                 <strong>Yanıt Dosyası:</strong>
                                                 <span class="text-primary"><?php echo htmlspecialchars($revision['response_file_name']); ?></span>
                                                 <small class="text-muted d-block mt-1">Kullanıcı yanıt dosyasında değişiklik istiyor</small>
@@ -1238,7 +1238,7 @@ include '../includes/admin_sidebar.php';
                                                     }
                                                 }
                                                 ?>
-                                                <i class="fas fa-<?php echo $targetFileIcon; ?> text-<?php echo $targetFileColor; ?> me-2"></i>
+                                                <i class="bi bi-<?php echo $targetFileIcon; ?> text-<?php echo $targetFileColor; ?> me-2"></i>
                                                 <strong><?php echo $targetFileType; ?>:</strong>
                                                 <span class="text-<?php echo $targetFileColor; ?>"><?php echo htmlspecialchars($targetFileName); ?></span>
                                                 <small class="text-muted d-block mt-1">
@@ -1255,7 +1255,7 @@ include '../includes/admin_sidebar.php';
                                     <!-- Revizyon Talep Notu -->
                                     <div class="mb-3">
                                         <h6 class="text-info mb-2">
-                                            <i class="fas fa-comment-dots me-2"></i>Kullanıcının Revizyon Talebi:
+                                            <i class="bi bi-comment-dots me-2"></i>Kullanıcının Revizyon Talebi:
                                         </h6>
                                         <div class="revision-request-note p-3 bg-white rounded border border-info">
                                             <?php echo nl2br(htmlspecialchars($revision['request_notes'])); ?>
@@ -1265,7 +1265,7 @@ include '../includes/admin_sidebar.php';
                                     <!-- Tarih Bilgisi -->
                                     <div class="mb-3">
                                         <small class="text-muted">
-                                            <i class="fas fa-calendar me-1"></i>
+                                            <i class="bi bi-calendar me-1"></i>
                                             <strong>Talep Tarihi:</strong> <?php echo date('d.m.Y H:i', strtotime($revision['requested_at'])); ?>
                                             (<?php echo date('H:i', strtotime($revision['requested_at'])); ?>)
                                         </small>
@@ -1296,7 +1296,7 @@ include '../includes/admin_sidebar.php';
                                                     <a href="download-file.php?id=<?php echo $responseFileId; ?>&type=response"
                                                         class="btn btn-outline-primary btn-sm w-100 mb-2"
                                                         title="Revizyon talep edilen yanıt dosyasını indir">
-                                                        <i class="fas fa-download me-1"></i>Yanıt Dosyasını İndir
+                                                        <i class="bi bi-download me-1"></i>Yanıt Dosyasını İndir
                                                     </a>
                                                 <?php endif; ?>
                                             <?php else: ?>
@@ -1331,7 +1331,7 @@ include '../includes/admin_sidebar.php';
                                                 <a href="download-file.php?id=<?php echo $downloadFileId; ?>&type=<?php echo $downloadType; ?>"
                                                     class="btn btn-outline-primary btn-sm w-100 mb-2"
                                                     title="Revizyon talep edilen dosyayı indir">
-                                                    <i class="fas fa-download me-1"></i>
+                                                    <i class="bi bi-download me-1"></i>
                                                     <?php echo $downloadType === 'revision' ? 'Revizyon Dosyasını İndir' : 'Ana Dosyayı İndir'; ?>
                                                 </a>
                                             <?php endif; ?>
@@ -1344,14 +1344,14 @@ include '../includes/admin_sidebar.php';
                                             <button type="button"
                                                 class="btn btn-success w-100"
                                                 onclick="showApprovalModal('<?php echo $revision['id']; ?>', '<?php echo htmlspecialchars($revision['first_name'] . ' ' . $revision['last_name']); ?>', '<?php echo htmlspecialchars(addslashes($revision['request_notes'])); ?>')">
-                                                <i class="fas fa-check me-1"></i>İşleme Al
+                                                <i class="bi bi-check me-1"></i>İşleme Al
                                             </button>
                                         </form>
 
                                         <!-- Reddet Butonu -->
                                         <button type="button" class="btn btn-danger w-100"
                                             onclick="showRejectModal('<?php echo $revision['id']; ?>')">
-                                            <i class="fas fa-times me-1"></i>Reddet
+                                            <i class="bi bi-times me-1"></i>Reddet
                                         </button>
 
                                         <hr class="my-3">
@@ -1359,7 +1359,7 @@ include '../includes/admin_sidebar.php';
                                         <!-- Detaylı Görünüm -->
                                         <a href="revisions.php?search=<?php echo urlencode($upload['original_name']); ?>"
                                             class="btn btn-outline-secondary btn-sm w-100">
-                                            <i class="fas fa-list me-1"></i>Tüm Revizyon Geçmişi
+                                            <i class="bi bi-list me-1"></i>Tüm Revizyon Geçmişi
                                         </a>
                                     </div>
                                 </div>
@@ -1367,7 +1367,7 @@ include '../includes/admin_sidebar.php';
 
                             <div class="revision-id-info mt-3 pt-3 border-top">
                                 <small class="text-muted">
-                                    <i class="fas fa-hashtag me-1"></i>
+                                    <i class="bi bi-hashtag me-1"></i>
                                     <strong>Revizyon ID:</strong> <code><?php echo substr($revision['id'], 0, 8); ?>...</code>
                                 </small>
                             </div>
@@ -1383,19 +1383,19 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card mb-4">
                 <div class="card-header">
                     <h6 class="mb-0">
-                        <i class="fas fa-history me-2"></i>
+                        <i class="bi bi-history me-2"></i>
                         Revizyon Geçmişi
                     </h6>
                 </div>
                 <div class="card-body">
                     <p class="text-muted mb-3">
-                        <i class="fas fa-info-circle me-1"></i>
+                        <i class="bi bi-info-circle me-1"></i>
                         Bu dosya için toplam <?php echo $totalRevisions; ?> revizyon talebi bulunuyor.
                     </p>
 
                     <a href="revisions.php?search=<?php echo urlencode($upload['original_name']); ?>"
                         class="btn btn-outline-primary">
-                        <i class="fas fa-history me-1"></i>Revizyon Geçmişini Görüntüle
+                        <i class="bi bi-history me-1"></i>Revizyon Geçmişini Görüntüle
                     </a>
                 </div>
             </div>
@@ -1410,7 +1410,7 @@ include '../includes/admin_sidebar.php';
             <div class="col-md-4">
                 <div class="file-meta card border p-3">
                     <h6 class="mb-3 d-flex align-items-center">
-                        <i class="fas fa-info-circle me-2 text-primary"></i> Dosya Bilgileri
+                        <i class="bi bi-info-circle me-2 text-primary"></i> Dosya Bilgileri
                     </h6>
                     <div class="meta-list">
                         <div class="d-flex justify-content-between border-bottom py-2">
@@ -1489,22 +1489,22 @@ include '../includes/admin_sidebar.php';
                         <div class="mt-3">
                             <?php if ($fileType === 'response'): ?>
                                 <a href="download-file.php?id=<?php echo $responseId; ?>&type=response" class="btn btn-success btn-sm w-100">
-                                    <i class="fas fa-download me-1"></i>Dosyayı İndir
+                                    <i class="bi bi-download me-1"></i>Dosyayı İndir
                                 </a>
                                 <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
                                 <?php if (isImageFile($upload['original_name'])): ?>
                                     <a href="view-image.php?id=<?php echo $responseId; ?>&type=response" class="btn btn-info btn-sm w-100 mt-1">
-                                        <i class="fas fa-eye me-1"></i>Dosyayı Görüntüle
+                                        <i class="bi bi-eye me-1"></i>Dosyayı Görüntüle
                                     </a>
                                 <?php endif; ?>
                             <?php else: ?>
                                 <a href="download-file.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-success btn-sm w-100">
-                                    <i class="fas fa-download me-1"></i>Dosyayı İndir
+                                    <i class="bi bi-download me-1"></i>Dosyayı İndir
                                 </a>
                                 <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
                                 <?php if (isImageFile($upload['original_name'])): ?>
                                     <a href="view-image.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-info btn-sm w-100 mt-1">
-                                        <i class="fas fa-eye me-1"></i>Dosyayı Görüntüle
+                                        <i class="bi bi-eye me-1"></i>Dosyayı Görüntüle
                                     </a>
                                 <?php endif; ?>
                             <?php endif; ?>
@@ -1526,7 +1526,7 @@ include '../includes/admin_sidebar.php';
             <div class="col-md-4">
                 <div class="file-meta card border p-3">
                     <h6 class="mb-3 d-flex align-items-center">
-                        <i class="fas fa-car me-2 text-success"></i> Araç Bilgileri
+                        <i class="bi bi-car me-2 text-success"></i> Araç Bilgileri
                     </h6>
                     <div class="meta-list">
                         <div class="d-flex justify-content-between border-bottom py-2">
@@ -1569,7 +1569,7 @@ include '../includes/admin_sidebar.php';
                             <div class="d-flex justify-content-between border-top pt-2 mt-2">
                                 <span class="text-muted">Plaka:</span>
                                 <span class="fw-medium text-primary">
-                                    <i class="fas fa-id-card me-1"></i><?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
+                                    <i class="bi bi-id-card me-1"></i><?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
                                 </span>
                             </div>
                         <?php endif; ?>
@@ -1607,7 +1607,7 @@ include '../includes/admin_sidebar.php';
                             <small class="text-muted">Dosya Durumu:</small><br>
                             <?php if ($fileType === 'response'): ?>
                                 <span class="badge bg-success fs-6">
-                                    <i class="fas fa-reply me-1"></i>Yanıt Dosyası
+                                    <i class="bi bi-reply me-1"></i>Yanıt Dosyası
                                 </span>
                             <?php else: ?>
                                 <span class="badge bg-<?php echo $statusClass[$upload['status']] ?? 'secondary'; ?> fs-6">
@@ -1620,10 +1620,10 @@ include '../includes/admin_sidebar.php';
 
                         <div class="d-grid gap-2">
                             <a href="user-details.php?id=<?php echo $upload['user_id']; ?>" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-user me-1"></i>Kullanıcı Profili
+                                <i class="bi bi-user me-1"></i>Kullanıcı Profili
                             </a>
                             <a href="uploads.php?user_id=<?php echo $upload['user_id']; ?>" class="btn btn-outline-secondary btn-sm">
-                                <i class="fas fa-files me-1"></i>Diğer Dosyalar
+                                <i class="bi bi-files me-1"></i>Diğer Dosyalar
                             </a>
                         </div>
                     </div>
@@ -1638,7 +1638,7 @@ include '../includes/admin_sidebar.php';
     <div class="card admin-card mb-4" id="response-files">
         <div class="card-header">
             <h6 class="mb-0">
-                <i class="fas fa-reply me-2"></i>Yanıt Dosyaları (<?php echo count($responseFiles); ?>)
+                <i class="bi bi-reply me-2"></i>Yanıt Dosyaları (<?php echo count($responseFiles); ?>)
             </h6>
         </div>
         <div class="card-body">
@@ -1677,17 +1677,17 @@ include '../includes/admin_sidebar.php';
                                     <div class="d-flex gap-1">
                                         <a href="file-detail.php?id=<?php echo $uploadId; ?>&type=response&response_id=<?php echo $responseFile['id']; ?>"
                                             class="btn btn-outline-primary btn-sm" title="Detayları Görüntüle">
-                                            <i class="fas fa-eye me-1"></i>Detay
+                                            <i class="bi bi-eye me-1"></i>Detay
                                         </a>
                                         <a href="download-file.php?id=<?php echo $responseFile['id']; ?>&type=response"
                                             class="btn btn-success btn-sm" title="Dosyayı İndir">
-                                            <i class="fas fa-download me-1"></i>İndir
+                                            <i class="bi bi-download me-1"></i>İndir
                                         </a>
                                         <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
                                         <?php if (isImageFile($responseFile['original_name'])): ?>
                                             <a href="view-image.php?id=<?php echo $responseFile['id']; ?>&type=response"
                                                 class="btn btn-info btn-sm" title="Dosyayı Görüntüle">
-                                                <i class="fas fa-eye"></i>
+                                                <i class="bi bi-eye"></i>
                                             </a>
                                         <?php endif; ?>
                                         <!-- Admin İptal Butonu (Yanıt Dosyası) -->
@@ -1695,11 +1695,11 @@ include '../includes/admin_sidebar.php';
                                             <button type="button" class="btn btn-danger btn-sm" 
                                                     onclick="showCancelModal('<?php echo $responseFile['id']; ?>', 'response', '<?php echo htmlspecialchars($responseFile['original_name'], ENT_QUOTES); ?>')"
                                                     title="Dosyayı İptal Et">
-                                                <i class="fas fa-times"></i>
+                                                <i class="bi bi-times"></i>
                                             </button>
                                         <?php else: ?>
                                             <span class="btn btn-secondary btn-sm disabled" title="İptal Edilmiş">
-                                                <i class="fas fa-ban"></i>
+                                                <i class="bi bi-ban"></i>
                                             </span>
                                         <?php endif; ?>
                                     </div>
@@ -1718,7 +1718,7 @@ include '../includes/admin_sidebar.php';
     <div class="card admin-card mb-4" id="revision-files">
         <div class="card-header">
             <h6 class="mb-0">
-                <i class="fas fa-edit me-2"></i>Revize Dosyaları (<?php echo count($revisionFiles); ?>)
+                <i class="bi bi-edit me-2"></i>Revize Dosyaları (<?php echo count($revisionFiles); ?>)
             </h6>
         </div>
         <div class="card-body">
@@ -1745,12 +1745,12 @@ include '../includes/admin_sidebar.php';
                                 <td>
                                     <?php if (isset($revisionFile['credits_charged']) && $revisionFile['credits_charged'] > 0): ?>
                                         <span class="badge bg-warning text-dark">
-                                            <i class="fas fa-coins me-1"></i>
+                                            <i class="bi bi-coins me-1"></i>
                                             <?php echo number_format($revisionFile['credits_charged'], 1); ?> kredi
                                         </span>
                                     <?php else: ?>
                                         <span class="badge bg-success">
-                                            <i class="fas fa-gift me-1"></i>
+                                            <i class="bi bi-gift me-1"></i>
                                             Ücretsiz
                                         </span>
                                     <?php endif; ?>
@@ -1760,17 +1760,17 @@ include '../includes/admin_sidebar.php';
                                     <div class="d-flex gap-1">
                                         <a href="revision-detail.php?id=<?php echo $revisionFile['revision_id']; ?>"
                                             class="btn btn-outline-primary btn-sm" title="Revizyon Detaylarını Görüntüle">
-                                            <i class="fas fa-eye me-1"></i>Detay
+                                            <i class="bi bi-eye me-1"></i>Detay
                                         </a>
                                         <a href="download-file.php?id=<?php echo $revisionFile['id']; ?>&type=revision"
                                             class="btn btn-success btn-sm" title="Dosyayı İndir">
-                                            <i class="fas fa-download me-1"></i>İndir
+                                            <i class="bi bi-download me-1"></i>İndir
                                         </a>
                                         <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
                                         <?php if (isImageFile($revisionFile['original_name'])): ?>
                                             <a href="view-image.php?id=<?php echo $revisionFile['id']; ?>&type=revision"
                                                 class="btn btn-info btn-sm" title="Dosyayı Görüntüle">
-                                                <i class="fas fa-eye"></i>
+                                                <i class="bi bi-eye"></i>
                                             </a>
                                         <?php endif; ?>
                                         <!-- Admin İptal Butonu (Revizyon Dosyası) -->
@@ -1778,11 +1778,11 @@ include '../includes/admin_sidebar.php';
                                             <button type="button" class="btn btn-danger btn-sm" 
                                                     onclick="showCancelModal('<?php echo $revisionFile['id']; ?>', 'revision', '<?php echo htmlspecialchars($revisionFile['original_name'], ENT_QUOTES); ?>')"
                                                     title="Dosyayı İptal Et">
-                                                <i class="fas fa-times"></i>
+                                                <i class="bi bi-times"></i>
                                             </button>
                                         <?php else: ?>
                                             <span class="btn btn-secondary btn-sm disabled" title="İptal Edilmiş">
-                                                <i class="fas fa-ban"></i>
+                                                <i class="bi bi-ban"></i>
                                             </span>
                                         <?php endif; ?>
                                     </div>
@@ -1805,7 +1805,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
     <div class="card-header">
         <div class="d-flex justify-content-between align-items-center">
             <h6 class="mb-0">
-                <i class="fas fa-paperclip me-2"></i>Ek Dosyalar
+                <i class="bi bi-paperclip me-2"></i>Ek Dosyalar
                 <?php if (!empty($additionalFiles)): ?>
                     <span class="badge bg-secondary ms-2"><?php echo count($additionalFiles); ?></span>
                 <?php endif; ?>
@@ -1831,7 +1831,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
                         <?php foreach ($additionalFiles as $file): ?>
                             <tr class="<?php echo $file['is_read'] ? '' : 'table-warning'; ?>">
                                 <td>
-                                    <i class="fas fa-file me-1"></i>
+                                    <i class="bi bi-file me-1"></i>
                                     <?php echo htmlspecialchars($file['original_name']); ?>
                                     <?php if (!$file['is_read'] && $file['receiver_id'] === $_SESSION['user_id']): ?>
                                         <span class="badge bg-warning ms-2">Yeni</span>
@@ -1873,12 +1873,12 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
                                 <td>
                                     <div class="d-flex gap-1">
                                         <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm" title="İndir">
-                                            <i class="fas fa-download"></i>
+                                            <i class="bi bi-download"></i>
                                         </a>
                                         <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
                                         <?php if (isImageFile($file['original_name'])): ?>
                                             <a href="view-image.php?id=<?php echo $file['id']; ?>&type=additional" class="btn btn-info btn-sm" title="Dosyayı Görüntüle">
-                                                <i class="fas fa-eye"></i>
+                                                <i class="bi bi-eye"></i>
                                             </a>
                                         <?php endif; ?>
                                         <!-- Admin İptal Butonu (Ek Dosya) -->
@@ -1886,11 +1886,11 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
                                             <button type="button" class="btn btn-danger btn-sm" 
                                                     onclick="showCancelModal('<?php echo $file['id']; ?>', 'additional', '<?php echo htmlspecialchars($file['original_name'], ENT_QUOTES); ?>')"
                                                     title="Dosyayı İptal Et">
-                                                <i class="fas fa-times"></i>
+                                                <i class="bi bi-times"></i>
                                             </button>
                                         <?php else: ?>
                                             <span class="btn btn-secondary btn-sm disabled" title="İptal Edilmiş">
-                                                <i class="fas fa-ban"></i>
+                                                <i class="bi bi-ban"></i>
                                             </span>
                                         <?php endif; ?>
                                     </div>
@@ -1902,7 +1902,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
             </div>
         <?php else: ?>
             <div class="alert alert-info mb-0">
-                <i class="fas fa-info-circle me-2"></i>
+                <i class="bi bi-info-circle me-2"></i>
                 Henüz ek dosya bulunmuyor.
             </div>
         <?php endif; ?>
@@ -1925,7 +1925,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Yükleniyor...';
+            submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-1"></i>Yükleniyor...';
             
             fetch('../ajax/additional_files.php', {
                 method: 'POST',
@@ -1965,7 +1965,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
-                    <i class="fas fa-reply me-2"></i>Yanıt Dosyası Yükle
+                    <i class="bi bi-reply me-2"></i>Yanıt Dosyası Yükle
                 </h6>
                 <?php if ($upload['status'] === 'processing'): ?>
                     <span class="badge bg-info">
@@ -1978,7 +1978,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <?php if ($upload['status'] === 'processing'): ?>
                 <div class="alert-info mb-3" style="padding: 1rem; border-radius: 0.375rem;">
                     <div class="d-flex">
-                        <i class="fas fa-info-circle me-3 mt-1"></i>
+                        <i class="bi bi-info-circle me-3 mt-1"></i>
                         <div>
                             <strong>Dosya işleme alındı!</strong><br>
                             <small class="text-muted">
@@ -2011,7 +2011,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     <div class="col-12">
                         <button type="submit" name="upload_response" class="btn btn-primary">
-                            <i class="fas fa-upload me-1"></i>Yanıt Dosyasını Yükle
+                            <i class="bi bi-upload me-1"></i>Yanıt Dosyasını Yükle
                         </button>
                     </div>
                 </div>
@@ -2026,7 +2026,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
-                    <i class="fas fa-comments me-2 text-primary"></i>İletişim Geçmişi
+                    <i class="bi bi-comments me-2 text-primary"></i>İletişim Geçmişi
                     <span class="badge bg-secondary ms-2"><?php echo count($communicationHistory); ?> mesaj</span>
                 </h6>
                 <div class="d-flex gap-2">
@@ -2036,7 +2036,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <div class="card-body">
             <div class="alert alert-info mb-3">
-                <i class="fas fa-info-circle me-2"></i>
+                <i class="bi bi-info-circle me-2"></i>
                 <strong>Bu kullanıcıyla olan tüm iletişim geçmişi:</strong>
                 Kullanıcının dosya yükleme notları, revize talepleri ve admin cevapları kronolojik sırada listelenmektedir.
             </div>
@@ -2047,12 +2047,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="timeline-marker">
                             <?php
                             $typeConfig = [
-                                'user_upload' => ['icon' => 'fas fa-upload text-primary', 'color' => 'primary'],
-                                'admin_response' => ['icon' => 'fas fa-reply text-success', 'color' => 'success'],
-                                'user_revision_request' => ['icon' => 'fas fa-edit text-warning', 'color' => 'warning'],
-                                'admin_revision_response' => ['icon' => 'fas fa-user-shield text-info', 'color' => 'info']
+                                'user_upload' => ['icon' => 'bi bi-upload text-primary', 'color' => 'primary'],
+                                'admin_response' => ['icon' => 'bi bi-reply text-success', 'color' => 'success'],
+                                'user_revision_request' => ['icon' => 'bi bi-edit text-warning', 'color' => 'warning'],
+                                'admin_revision_response' => ['icon' => 'bi bi-user-shield text-info', 'color' => 'info']
                             ];
-                            $config = $typeConfig[$comm['type']] ?? ['icon' => 'fas fa-comment text-secondary', 'color' => 'secondary'];
+                            $config = $typeConfig[$comm['type']] ?? ['icon' => 'bi bi-comment text-secondary', 'color' => 'secondary'];
                             ?>
                             <i class="<?php echo $config['icon']; ?>"></i>
                         </div>
@@ -2062,15 +2062,15 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <h6 class="mb-1">
                                         <?php if ($comm['type'] === 'user_upload'): ?>
                                             <span class="badge bg-primary">
-                                                <i class="fas fa-user me-1"></i>Kullanıcının Yükleme Notu
+                                                <i class="bi bi-user me-1"></i>Kullanıcının Yükleme Notu
                                             </span>
                                         <?php elseif ($comm['type'] === 'admin_response'): ?>
                                             <span class="badge bg-success">
-                                                <i class="fas fa-user-shield me-1"></i>Admin'in Yanıt Dosyası Notu
+                                                <i class="bi bi-user-shield me-1"></i>Admin'in Yanıt Dosyası Notu
                                             </span>
                                         <?php elseif ($comm['type'] === 'user_revision_request'): ?>
                                             <span class="badge bg-warning" style="background-color: #ffc107 !important; color: #212529 !important; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px;">
-                                                <i class="fas fa-edit me-1"></i>Kullanıcının Revize Talebi
+                                                <i class="bi bi-edit me-1"></i>Kullanıcının Revize Talebi
                                             </span>
                                             <?php if (isset($comm['revision_status'])): ?>
                                                 <span class="badge bg-<?php echo
@@ -2081,23 +2081,23 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <?php endif; ?>
                                         <?php elseif ($comm['type'] === 'admin_revision_response'): ?>
                                             <span class="badge bg-info">
-                                                <i class="fas fa-reply me-1"></i>Admin'in Revize Cevabı
+                                                <i class="bi bi-reply me-1"></i>Admin'in Revize Cevabı
                                             </span>
                                         <?php endif; ?>
 
                                         <?php if (isset($comm['file_name'])): ?>
                                             <span class="badge bg-secondary ms-2">
-                                                <i class="fas fa-file me-1"></i><?php echo htmlspecialchars(substr($comm['file_name'], 0, 20)) . (strlen($comm['file_name']) > 20 ? '...' : ''); ?>
+                                                <i class="bi bi-file me-1"></i><?php echo htmlspecialchars(substr($comm['file_name'], 0, 20)) . (strlen($comm['file_name']) > 20 ? '...' : ''); ?>
                                             </span>
                                         <?php endif; ?>
                                     </h6>
                                     <small class="text-muted">
-                                        <i class="fas fa-calendar me-1"></i>
+                                        <i class="bi bi-calendar me-1"></i>
                                         <?php echo formatDate($comm['date']); ?>
 
                                         <?php if (isset($comm['admin_username']) && !empty($comm['admin_username'])): ?>
                                             <span class="ms-2">
-                                                <i class="fas fa-user-shield me-1"></i>
+                                                <i class="bi bi-user-shield me-1"></i>
                                                 Admin: <?php echo htmlspecialchars($comm['admin_username']); ?>
                                             </span>
                                         <?php endif; ?>
@@ -2110,7 +2110,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <?php if (!empty($comm['response_file_name'])): ?>
                                     <div class="mb-3">
                                         <div class="file-reference">
-                                            <i class="fas fa-arrow-right text-primary me-2"></i>
+                                            <i class="bi bi-arrow-right text-primary me-2"></i>
                                             <strong>Revize talep edilen dosya:</strong>
                                             <span class="text-primary"><?php echo htmlspecialchars($comm['response_file_name']); ?></span>
                                             <?php if (isset($comm['is_response_mode']) && $comm['is_response_mode'] && $comm['response_file_name'] === $comm['current_response_file_name']): ?>
@@ -2172,12 +2172,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <div class="mb-3">
                                         <div class="file-reference">
                                             <?php if ($targetFileType === 'Revizyon Dosyası'): ?>
-                                                <i class="fas fa-arrow-right text-warning me-2"></i>
+                                                <i class="bi bi-arrow-right text-warning me-2"></i>
                                                 <strong>Revize talep edilen dosya:</strong>
                                                 <span class="text-warning"><?php echo htmlspecialchars($targetFileName); ?></span>
                                                 <small class="text-muted ms-2">(<?php echo $targetFileType; ?>)</small>
                                             <?php else: ?>
-                                                <i class="fas fa-arrow-right text-success me-2"></i>
+                                                <i class="bi bi-arrow-right text-success me-2"></i>
                                                 <strong>Revize edilen dosya:</strong>
                                                 <span class="text-success"><?php echo htmlspecialchars($targetFileName); ?></span>
                                                 <small class="text-muted ms-2">(<?php echo $targetFileType; ?>)</small>
@@ -2193,7 +2193,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <h6 class="mb-1 text-warning">
-                                                <i class="fas fa-file-alt me-2"></i>
+                                                <i class="bi bi-file-alt me-2"></i>
                                                 Kullanıcının Revizyon Talep Ettiği Dosya
                                             </h6>
                                             <div class="file-details">
@@ -2202,7 +2202,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     <strong><?php echo htmlspecialchars($comm['response_file_name']); ?></strong>
                                                     <br>
                                                     <small class="text-muted">
-                                                        <i class="fas fa-reply me-1"></i>Yanıt Dosyası
+                                                        <i class="bi bi-reply me-1"></i>Yanıt Dosyası
                                                     </small>
                                                 <?php else: ?>
                                                     <!-- Ana dosya veya önceki revizyon dosyası için talep -->
@@ -2267,7 +2267,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     <strong><?php echo htmlspecialchars($targetFileInfo['name']); ?></strong>
                                                     <br>
                                                     <small class="text-muted">
-                                                        <i class="fas fa-<?php echo $targetFileInfo['icon']; ?> me-1"></i><?php echo $targetFileInfo['type']; ?>
+                                                        <i class="bi bi-<?php echo $targetFileInfo['icon']; ?> me-1"></i><?php echo $targetFileInfo['type']; ?>
                                                     </small>
                                                 <?php endif; ?>
                                             </div>
@@ -2287,7 +2287,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 <?php if ($responseFileId): ?>
                                                     <a href="download-file.php?id=<?php echo $responseFileId; ?>&type=response"
                                                         class="btn btn-warning btn-sm" title="Revizyon talep edilen yanıt dosyasını indir">
-                                                        <i class="fas fa-download me-1"></i>İndir
+                                                        <i class="bi bi-download me-1"></i>İndir
                                                     </a>
                                                 <?php endif; ?>
                                             <?php else: ?>
@@ -2327,7 +2327,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 ?>
                                                 <a href="download-file.php?id=<?php echo $downloadFileId; ?>&type=<?php echo $downloadType; ?>"
                                                     class="btn btn-warning btn-sm" title="Revizyon talep edilen dosyayı indir">
-                                                    <i class="fas fa-download me-1"></i>İndir
+                                                    <i class="bi bi-download me-1"></i>İndir
                                                 </a>
                                             <?php endif; ?>
                                         </div>
@@ -2340,7 +2340,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                 <div class="revision-note user-note mb-3">
                                     <div class="note-header">
-                                        <i class="fas fa-user me-2 text-primary"></i>
+                                        <i class="bi bi-user me-2 text-primary"></i>
                                         <strong>
                                             <?php if ($comm['type'] === 'user_upload'): ?>
                                                 Kullanıcının yükleme sırasında yazdığı notlar:
@@ -2355,7 +2355,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <a href="download-file.php?id=<?php echo $uploadId; ?>&type=upload"
                                                 class="btn btn-success btn-sm ms-2"
                                                 title="Kullanıcının yüklediği dosyayı indir">
-                                                <i class="fas fa-download me-1"></i>Dosyayı İndir
+                                                <i class="bi bi-download me-1"></i>Dosyayı İndir
                                             </a>
                                         <?php endif; ?>
                                     </div>
@@ -2368,7 +2368,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <?php if (!empty($comm['admin_notes'])): ?>
                                 <div class="revision-note admin-note mb-2">
                                     <div class="note-header">
-                                        <i class="fas fa-user-shield me-2 text-success"></i>
+                                        <i class="bi bi-user-shield me-2 text-success"></i>
                                         <strong>
                                             <?php if ($comm['type'] === 'admin_response'): ?>
                                                 Admin'in yanıt dosyası notları:
@@ -2388,7 +2388,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <a href="download-file.php?id=<?php echo $comm['response_id']; ?>&type=response"
                                                 class="btn btn-primary btn-sm ms-2"
                                                 title="Admin'in yanıt dosyasını indir">
-                                                <i class="fas fa-download me-1"></i>Yanıt Dosyasını İndir
+                                                <i class="bi bi-download me-1"></i>Yanıt Dosyasını İndir
                                             </a>
                                         <?php endif; ?>
                                     </div>
@@ -2399,23 +2399,23 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <h6 class="mb-1 text-success">
-                                                        <i class="fas fa-file-download me-2"></i>
+                                                        <i class="bi bi-file-download me-2"></i>
                                                         Admin'in Yüklediği Revizyon Dosyası
                                                     </h6>
                                                     <div class="file-details">
                                                         <strong><?php echo htmlspecialchars($comm['revision_file_data']['original_name']); ?></strong>
                                                         <br>
                                                         <small class="text-muted">
-                                                            <i class="fas fa-weight me-1"></i><?php echo formatFileSize($comm['revision_file_data']['file_size']); ?>
+                                                            <i class="bi bi-weight me-1"></i><?php echo formatFileSize($comm['revision_file_data']['file_size']); ?>
                                                             &nbsp;&nbsp;
-                                                            <i class="fas fa-calendar me-1"></i><?php echo formatDate($comm['revision_file_data']['upload_date']); ?>
+                                                            <i class="bi bi-calendar me-1"></i><?php echo formatDate($comm['revision_file_data']['upload_date']); ?>
                                                         </small>
                                                     </div>
                                                 </div>
                                                 <div>
                                                     <a href="download-file.php?id=<?php echo $comm['revision_id']; ?>&type=revision"
                                                         class="btn btn-success btn-sm" title="Revizyon Dosyasını İndir">
-                                                        <i class="fas fa-download me-1"></i>İndir
+                                                        <i class="bi bi-download me-1"></i>İndir
                                                     </a>
                                                 </div>
                                             </div>
@@ -2426,7 +2426,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <?php if ($comm['type'] === 'user_revision_request' && $comm['status'] === 'pending'): ?>
                                     <div class="revision-note admin-note mb-2 pending-response">
                                         <div class="note-header">
-                                            <i class="fas fa-hourglass-half me-2 text-muted"></i>
+                                            <i class="bi bi-hourglass-half me-2 text-muted"></i>
                                             <strong>Admin Cevabı:</strong>
                                         </div>
                                         <div class="note-content">
@@ -2442,7 +2442,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="communication-meta">
                                 <?php if (isset($comm['credits_charged']) && $comm['credits_charged'] > 0): ?>
                                     <span class="meta-item text-warning">
-                                        <i class="fas fa-coins me-1"></i>
+                                        <i class="bi bi-coins me-1"></i>
                                         <?php echo $comm['credits_charged']; ?> kredi düşürüldü
                                     </span>
                                 <?php endif; ?>
@@ -2450,14 +2450,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <?php if (isset($comm['response_id'])): ?>
                                     <a href="file-detail.php?id=<?php echo $uploadId; ?>&type=response&response_id=<?php echo $comm['response_id']; ?>"
                                         class="meta-item text-primary" style="text-decoration: none;">
-                                        <i class="fas fa-external-link-alt me-1"></i>
+                                        <i class="bi bi-external-link-alt me-1"></i>
                                         Yanıt Dosyasını Görüntüle
                                     </a>
                                 <?php endif; ?>
 
                                 <?php if (isset($comm['revision_id'])): ?>
                                     <span class="meta-item text-info">
-                                        <i class="fas fa-hashtag me-1"></i>
+                                        <i class="bi bi-hashtag me-1"></i>
                                         Revize #<?php echo substr($comm['revision_id'], 0, 8); ?>
                                     </span>
                                 <?php endif; ?>
@@ -2469,12 +2469,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <form method="POST" style="display: inline;">
                                                 <input type="hidden" name="revision_id" value="<?php echo $comm['revision_id']; ?>">
                                                 <button type="submit" name="approve_revision_direct" class="btn btn-sm btn-warning">
-                                                    <i class="fas fa-check me-1"></i>İşleme Al
+                                                    <i class="bi bi-check me-1"></i>İşleme Al
                                                 </button>
                                             </form>
                                             <button type="button" class="btn btn-sm btn-danger" 
                                                     onclick="showRejectModal('<?php echo $comm['revision_id']; ?>')">
-                                                <i class="fas fa-times me-1"></i>Reddet
+                                                <i class="bi bi-times me-1"></i>Reddet
                                             </button>
                                         </div>
                                     </div>
@@ -2493,7 +2493,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- İletişim Özeti -->
             <div class="communication-summary mt-4 p-3 bg-light rounded">
                 <h6 class="mb-2">
-                    <i class="fas fa-chart-line me-2 text-info"></i>İletişim Özeti
+                    <i class="bi bi-chart-line me-2 text-info"></i>İletişim Özeti
                 </h6>
                 <div class="row text-center">
                     <?php
@@ -2527,14 +2527,14 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
-                    <i class="fas fa-history me-2 text-info"></i>Kullanıcının Tüm Revize Geçmişi
+                    <i class="bi bi-history me-2 text-info"></i>Kullanıcının Tüm Revize Geçmişi
                     <span class="badge bg-secondary ms-2"><?php echo count($userAllRevisions); ?> toplam talep</span>
                 </h6>
                 <div class="d-flex gap-2">
                     <span class="badge bg-info">Diğer Dosyalar Dahil</span>
                     <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse"
                         data-bs-target="#userHistoryCollapse" aria-expanded="false">
-                        <i class="fas fa-eye me-1"></i>Geçmişi Göster/Gizle
+                        <i class="bi bi-eye me-1"></i>Geçmişi Göster/Gizle
                     </button>
                 </div>
             </div>
@@ -2542,7 +2542,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="collapse" id="userHistoryCollapse">
             <div class="card-body">
                 <div class="alert-info" style="position: relative; padding: 1rem 1rem; margin-bottom: 1rem;">
-                    <i class="fas fa-info-circle me-2"></i>
+                    <i class="bi bi-info-circle me-2"></i>
                     <strong>Bu kullanıcının tüm dosyalarındaki revize talep geçmişi:</strong>
                     Bu listeyi kullanarak kullanıcıyla daha önce nelerin konuşulduğunu görebilir,
                     tutarlı hizmet verebilirsiniz.
@@ -2554,10 +2554,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="timeline-marker">
                                 <?php
                                 $iconClass = [
-                                    'pending' => 'fas fa-clock text-warning',
+                                    'pending' => 'bi bi-clock text-warning',
                                     'in_progress' => 'bi bi-gear-wide-connected text-info',
-                                    'completed' => 'fas fa-check-circle text-success',
-                                    'rejected' => 'fas fa-times-circle text-danger'
+                                    'completed' => 'bi bi-check-circle text-success',
+                                    'rejected' => 'bi bi-times-circle text-danger'
                                 ];
                                 $statusText = [
                                     'pending' => 'Bekliyor',
@@ -2566,7 +2566,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     'rejected' => 'Reddedildi'
                                 ];
                                 ?>
-                                <i class="<?php echo $iconClass[$revision['status']] ?? 'fas fa-question-circle text-secondary'; ?>"></i>
+                                <i class="<?php echo $iconClass[$revision['status']] ?? 'bi bi-question-circle text-secondary'; ?>"></i>
                             </div>
                             <div class="timeline-content">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
@@ -2579,16 +2579,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                             <?php if ($revision['upload_id'] === $uploadId): ?>
                                                 <span class="badge bg-primary ms-2">
-                                                    <i class="fas fa-star me-1"></i>Bu Dosya
+                                                    <i class="bi bi-star me-1"></i>Bu Dosya
                                                 </span>
                                             <?php else: ?>
                                                 <span class="badge bg-secondary ms-2">
-                                                    <i class="fas fa-external-link-alt me-1"></i>Diğer Dosya
+                                                    <i class="bi bi-external-link-alt me-1"></i>Diğer Dosya
                                                 </span>
                                             <?php endif; ?>
                                         </h6>
                                         <small class="text-muted">
-                                            <i class="fas fa-calendar me-1"></i>
+                                            <i class="bi bi-calendar me-1"></i>
                                             <?php echo formatDate($revision['requested_at']); ?>
                                         </small>
                                     </div>
@@ -2598,14 +2598,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="mb-3">
                                     <div class="file-reference-extended">
                                         <?php if (!empty($revision['response_file_name'])): ?>
-                                            <i class="fas fa-reply text-success me-2"></i>
+                                            <i class="bi bi-reply text-success me-2"></i>
                                             <strong>Yanıt Dosyası:</strong>
                                             <span class="text-success"><?php echo safeHtml($revision['response_file_name']); ?></span>
                                             <br>
-                                            <i class="fas fa-level-up-alt text-muted me-2 ms-3"></i>
+                                            <i class="bi bi-level-up-alt text-muted me-2 ms-3"></i>
                                             <small class="text-muted">Ana Dosya: <?php echo safeHtml($revision['upload_file_name']); ?></small>
                                         <?php else: ?>
-                                            <i class="fas fa-file text-primary me-2"></i>
+                                            <i class="bi bi-file text-primary me-2"></i>
                                             <strong>Ana Dosya:</strong>
                                             <span class="text-primary"><?php echo safeHtml($revision['upload_file_name']); ?></span>
                                         <?php endif; ?>
@@ -2613,7 +2613,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <?php if ($revision['upload_id'] !== $uploadId): ?>
                                             <a href="file-detail.php?id=<?php echo $revision['upload_id']; ?>"
                                                 class="btn btn-outline-primary btn-xs ms-2" title="Bu dosyayı görüntüle">
-                                                <i class="fas fa-external-link-alt"></i>
+                                                <i class="bi bi-external-link-alt"></i>
                                             </a>
                                         <?php endif; ?>
                                     </div>
@@ -2622,7 +2622,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <!-- Kullanıcının Revize Talep Notu -->
                                 <div class="revision-note user-note mb-3">
                                     <div class="note-header">
-                                        <i class="fas fa-comment-dots me-2 text-primary"></i>
+                                        <i class="bi bi-comment-dots me-2 text-primary"></i>
                                         <strong>Kullanıcının Talebi:</strong>
                                     </div>
                                     <div class="note-content">
@@ -2634,7 +2634,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <?php if (!empty($revision['admin_notes']) && filterAdminNotes($revision['admin_notes'])): ?>
                                     <div class="revision-note admin-note mb-2">
                                         <div class="note-header">
-                                            <i class="fas fa-user-shield me-2 text-success"></i>
+                                            <i class="bi bi-user-shield me-2 text-success"></i>
                                             <strong>Admin Cevabı:</strong>
                                             <?php if (!empty($revision['admin_username'])): ?>
                                                 <small class="text-muted">
@@ -2662,14 +2662,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="revision-meta">
                                     <?php if ($revision['credits_charged'] > 0): ?>
                                         <span class="meta-item text-warning">
-                                            <i class="fas fa-coins me-1"></i>
+                                            <i class="bi bi-coins me-1"></i>
                                             <?php echo $revision['credits_charged']; ?> kredi düşürüldü
                                         </span>
                                     <?php endif; ?>
 
                                     <?php if ($revision['completed_at']): ?>
                                         <span class="meta-item text-success">
-                                            <i class="fas fa-check me-1"></i>
+                                            <i class="bi bi-check me-1"></i>
                                             Tamamlandı: <?php echo formatDate($revision['completed_at']); ?>
                                         </span>
                                     <?php endif; ?>
@@ -2695,7 +2695,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="card admin-card mb-3">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="fas fa-upload me-2"></i>Kullanıcıya Dosya Gönder
+                    <i class="bi bi-upload me-2"></i>Kullanıcıya Dosya Gönder
                 </h6>
             </div>
             <div class="card-body">
@@ -2723,7 +2723,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-upload me-1"></i>Dosyayı Gönder
+                        <i class="bi bi-upload me-1"></i>Dosyayı Gönder
                     </button>
                 </form>
             </div>
@@ -2737,7 +2737,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="card admin-card" id="chatContainer">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="fas fa-comments me-2"></i>Mesajlaşma
+                    <i class="bi bi-comments me-2"></i>Mesajlaşma
                     <span class="badge bg-secondary ms-2" id="messageCount">0</span>
                 </h6>
             </div>
@@ -2745,7 +2745,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <!-- Chat Mesajları -->
                 <div id="chatMessages" class="chat-messages" style="height: 400px; overflow-y: auto; padding: 1rem;">
                     <div class="text-center text-muted">
-                        <i class="fas fa-spinner fa-spin"></i> Mesajlar yükleniyor...
+                        <i class="bi bi-spinner fa-spin"></i> Mesajlar yükleniyor...
                     </div>
                 </div>
 
@@ -2760,7 +2760,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div class="align-self-end">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-paper-plane"></i>
+                                <i class="bi bi-paper-plane"></i>
                             </button>
                         </div>
                     </form>
@@ -2777,7 +2777,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="rejectRevisionModalLabel">
-                    <i class="fas fa-times-circle text-danger me-2"></i>Revize Talebini Reddet
+                    <i class="bi bi-times-circle text-danger me-2"></i>Revize Talebini Reddet
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -2791,16 +2791,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="form-text">Bu mesaj kullanıcıya gönderilecektir.</div>
                     </div>
                     <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <i class="bi bi-exclamation-triangle me-2"></i>
                         <strong>Dikkat:</strong> Revize talebi reddedildikten sonra geri alınamaz.
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>İptal
+                        <i class="bi bi-times me-1"></i>İptal
                     </button>
                     <button type="submit" name="reject_revision_direct" class="btn btn-danger">
-                        <i class="fas fa-times-circle me-1"></i>Revize Talebini Reddet
+                        <i class="bi bi-times-circle me-1"></i>Revize Talebini Reddet
                     </button>
                 </div>
             </form>
@@ -3286,14 +3286,14 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="modal-content">
             <div class="modal-header bg-gradient" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
                 <h5 class="modal-title d-flex align-items-center" id="approvalModalLabel">
-                    <i class="fas fa-check-circle me-2"></i>
+                    <i class="bi bi-check-circle me-2"></i>
                     Revizyon Talebini İşleme Al
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="alert-info d-flex align-items-center mb-4" style="padding: 1rem; border-radius: 0.375rem;">
-                    <i class="fas fa-info-circle me-2 fa-lg"></i>
+                    <i class="bi bi-info-circle me-2 fa-lg"></i>
                     <div>
                         <strong>Bu işlem:</strong> Revizyon talebini "İşleme Alındı" durumuna geçirecek ve revize edilmiş dosyayı yükleme formunu aktif hale getirecektir.
                     </div>
@@ -3301,7 +3301,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 <div class="revision-details">
                     <h6 class="text-primary mb-3">
-                        <i class="fas fa-user me-2"></i>
+                        <i class="bi bi-user me-2"></i>
                         Talep Eden Kullanıcı
                     </h6>
                     <div class="user-info bg-light p-3 rounded mb-4">
@@ -3310,7 +3310,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
 
                     <h6 class="text-warning mb-3">
-                        <i class="fas fa-comment-dots me-2"></i>
+                        <i class="bi bi-comment-dots me-2"></i>
                         Kullanıcının Revizyon Talebi
                     </h6>
                     <div class="request-notes bg-warning bg-opacity-10 p-3 rounded border border-warning mb-4">
@@ -3318,7 +3318,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
 
                     <div class="alert-success d-flex align-items-center" style="padding: 1rem; border-radius: 0.375rem;">
-                        <i class="fas fa-thumbs-up me-2 fa-lg"></i>
+                        <i class="bi bi-thumbs-up me-2 fa-lg"></i>
                         <div>
                             <strong>Onay verdiğinizde:</strong>
                             <ul class="mb-0 mt-2">
@@ -3332,11 +3332,11 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary d-flex align-items-center" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>
+                    <i class="bi bi-times me-2"></i>
                     İptal Et
                 </button>
                 <button type="button" class="btn btn-success d-flex align-items-center" id="confirm-approval-btn" onclick="confirmApproval()">
-                    <i class="fas fa-check me-2"></i>
+                    <i class="bi bi-check me-2"></i>
                     Evet, İşleme Al
                 </button>
             </div>
@@ -3357,7 +3357,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="modal-body">
                 <div class="alert-warning d-flex align-items-center mb-4" style="padding: 1rem; border-radius: 0.375rem;">
-                    <i class="fas fa-exclamation-triangle me-2 fa-lg"></i>
+                    <i class="bi bi-exclamation-triangle me-2 fa-lg"></i>
                     <div>
                         <strong>Bu işlem:</strong> Dosyayı "Bekliyor" durumundan "İşleniyor" durumuna geçirecektir.
                     </div>
@@ -3365,7 +3365,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 <div class="file-info bg-light p-3 rounded mb-4">
                     <h6 class="text-primary mb-3">
-                        <i class="fas fa-file-alt me-2"></i>
+                        <i class="bi bi-file-alt me-2"></i>
                         Dosya Bilgileri
                     </h6>
                     <div class="row">
@@ -3383,7 +3383,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
 
                 <div class="alert-info d-flex align-items-center" style="padding: 1rem; border-radius: 0.375rem;">
-                    <i class="fas fa-info-circle me-2 fa-lg"></i>
+                    <i class="bi bi-info-circle me-2 fa-lg"></i>
                     <div>
                         <strong>Onay verdiğinizde:</strong>
                         <ul class="mb-0 mt-2">
@@ -3396,11 +3396,11 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary d-flex align-items-center" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>
+                    <i class="bi bi-times me-2"></i>
                     İptal Et
                 </button>
                 <button type="button" class="btn btn-warning d-flex align-items-center" id="confirm-processing-btn" onclick="confirmFileProcessing()">
-                    <i class="fas fa-check me-2"></i>
+                    <i class="bi bi-check me-2"></i>
                     Evet, İşleme Al
                 </button>
             </div>
@@ -3419,7 +3419,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title d-flex align-items-center" id="adminCancelModalLabel">
-                    <i class="fas fa-times-circle me-2"></i>
+                    <i class="bi bi-times-circle me-2"></i>
                     Dosyayı İptal Et
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -3431,13 +3431,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     <input type="hidden" id="cancelFileType" name="file_type" value="">
                     
                     <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <i class="bi bi-exclamation-triangle me-2"></i>
                         <strong>Dikkat!</strong> Bu işlem geri alınamaz. Dosya iptal edildikten sonra kullanıcı tarafından erişilemez hale gelecektir.
                     </div>
                     
                     <div class="file-info bg-light p-3 rounded mb-3">
                         <h6 class="text-danger mb-2">
-                            <i class="fas fa-file-alt me-2"></i>
+                            <i class="bi bi-file-alt me-2"></i>
                             İptal Edilecek Dosya
                         </h6>
                         <div class="row">
@@ -3452,7 +3452,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     <div class="mb-3">
                         <label for="cancelAdminNotes" class="form-label">
-                            <i class="fas fa-comment me-1"></i>
+                            <i class="bi bi-comment me-1"></i>
                             İptal Nedeni <span class="text-danger">*</span>
                         </label>
                         <textarea class="form-control" id="cancelAdminNotes" name="admin_notes" rows="4" required
@@ -3461,7 +3461,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     
                     <div class="alert-info d-flex align-items-center" style="padding: 1rem; border-radius: 0.375rem;">
-                        <i class="fas fa-info-circle me-2 fa-lg"></i>
+                        <i class="bi bi-info-circle me-2 fa-lg"></i>
                         <div>
                             <strong>İptal işlemi sonrası:</strong>
                             <ul class="mb-0 mt-2">
@@ -3475,11 +3475,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary d-flex align-items-center" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>
+                        <i class="bi bi-times me-2"></i>
                         Vazgeç
                     </button>
                     <button type="submit" name="admin_cancel_file" class="btn btn-danger d-flex align-items-center" id="confirmCancelBtn">
-                        <i class="fas fa-times-circle me-2"></i>
+                        <i class="bi bi-times-circle me-2"></i>
                         Dosyayı İptal Et
                     </button>
                 </div>
@@ -3494,7 +3494,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="rejectRevisionModalLabel">
-                    <i class="fas fa-times-circle text-danger me-2"></i>Revizyon Talebini Reddet
+                    <i class="bi bi-times-circle text-danger me-2"></i>Revizyon Talebini Reddet
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -3502,12 +3502,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="modal-body">
                     <input type="hidden" id="rejectRevisionId" name="revision_id" value="">
                     <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <i class="bi bi-exclamation-triangle me-2"></i>
                         <strong>Dikkat!</strong> Bu revizyon talebi reddedilecek ve kullanıcıya bildirilecek.
                     </div>
                     <div class="mb-3">
                         <label for="admin_notes" class="form-label">
-                            <i class="fas fa-comment me-1"></i>
+                            <i class="bi bi-comment me-1"></i>
                             Ret Nedeni <span class="text-danger">*</span>
                         </label>
                         <textarea class="form-control" id="admin_notes" name="admin_notes" rows="3" required
@@ -3517,10 +3517,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>Vazgeç
+                        <i class="bi bi-times me-1"></i>Vazgeç
                     </button>
                     <button type="submit" name="reject_revision_direct" class="btn btn-danger">
-                        <i class="fas fa-times me-1"></i>Talebi Reddet
+                        <i class="bi bi-times me-1"></i>Talebi Reddet
                     </button>
                 </div>
             </form>
@@ -3550,7 +3550,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Loading durumunu göster
             const confirmBtn = document.getElementById('confirm-approval-btn');
             const originalText = confirmBtn.innerHTML;
-            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>İşleniyor...';
+            confirmBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-2"></i>İşleniyor...';
             confirmBtn.disabled = true;
 
             // Form'u submit et
@@ -3581,7 +3581,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Button'u reset et
                 const confirmBtn = document.getElementById('confirm-approval-btn');
                 if (confirmBtn) {
-                    confirmBtn.innerHTML = '<i class="fas fa-check me-2"></i>Evet, İşleme Al';
+                    confirmBtn.innerHTML = '<i class="bi bi-check me-2"></i>Evet, İşleme Al';
                     confirmBtn.disabled = false;
                 }
             });
@@ -3603,7 +3603,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Loading durumunu göster
         const confirmBtn = document.getElementById('confirm-processing-btn');
         const originalText = confirmBtn.innerHTML;
-        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>İşleniyor...';
+        confirmBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-2"></i>İşleniyor...';
         confirmBtn.disabled = true;
 
         // Form'u submit et
@@ -3646,7 +3646,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const originalText = confirmBtn.innerHTML;
                 
                 // Loading durumunu göster
-                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>İptal Ediliyor...';
+                confirmBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-2"></i>İptal Ediliyor...';
                 confirmBtn.disabled = true;
                 
                 // Formı normal şekilde submit et (sayfa yenilenir)
@@ -3660,7 +3660,7 @@ document.addEventListener('DOMContentLoaded', function() {
             adminCancelModal.addEventListener('hidden.bs.modal', function() {
                 const confirmBtn = document.getElementById('confirmCancelBtn');
                 if (confirmBtn) {
-                    confirmBtn.innerHTML = '<i class="fas fa-times-circle me-2"></i>Dosyayı İptal Et';
+                    confirmBtn.innerHTML = '<i class="bi bi-times-circle me-2"></i>Dosyayı İptal Et';
                     confirmBtn.disabled = false;
                 }
             });
@@ -3977,7 +3977,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Hiç mesaj yoksa
                     document.getElementById('chatMessages').innerHTML = `
                     <div class="text-center text-muted py-4">
-                        <i class="fas fa-comment-slash me-2"></i>
+                        <i class="bi bi-comment-slash me-2"></i>
                         Henüz mesaj yok. Kullanıcıya ilk mesajı siz gönderin!
                     </div>
                 `;
@@ -3988,7 +3988,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!lastMessageId) {
                     document.getElementById('chatMessages').innerHTML = `
                     <div class="text-center text-danger py-4">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <i class="bi bi-exclamation-triangle me-2"></i>
                         Mesajlar yüklenemedi.
                     </div>
                 `;

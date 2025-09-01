@@ -54,7 +54,7 @@ $pageTitle = 'Session Temizlendi';
             <div class="col-md-8 col-lg-6">
                 <div class="text-center mt-5 mb-4">
                     <h1 class="h3 mb-3 fw-normal">
-                        <i class="fas fa-broom text-success"></i>
+                        <i class="bi bi-broom text-success"></i>
                         Session Temizlendi
                     </h1>
                 </div>
@@ -62,17 +62,17 @@ $pageTitle = 'Session Temizlendi';
                 <div class="card shadow">
                     <div class="card-body p-4">
                         <div class="alert alert-success text-center">
-                            <i class="fas fa-check-circle me-2"></i>
+                            <i class="bi bi-check-circle me-2"></i>
                             <strong>Session başarıyla temizlendi!</strong>
                             <p class="mb-0 mt-2">Artık tekrar giriş yapabilirsiniz.</p>
                         </div>
                         
                         <div class="d-grid gap-2">
                             <a href="login.php" class="btn btn-primary btn-lg">
-                                <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
+                                <i class="bi bi-sign-in-alt me-2"></i>Giriş Yap
                             </a>
                             <a href="index.php" class="btn btn-outline-secondary">
-                                <i class="fas fa-home me-2"></i>Ana Sayfa
+                                <i class="bi bi-home me-2"></i>Ana Sayfa
                             </a>
                         </div>
                         
@@ -81,7 +81,7 @@ $pageTitle = 'Session Temizlendi';
                             <hr class="my-4">
                             <div class="text-center">
                                 <button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="collapse" data-bs-target="#debugInfo">
-                                    <i class="fas fa-code me-1"></i>Debug Bilgileri
+                                    <i class="bi bi-code me-1"></i>Debug Bilgileri
                                 </button>
                             </div>
                             
@@ -119,7 +119,7 @@ $pageTitle = 'Session Temizlendi';
                 
                 <div class="text-center mt-4">
                     <p class="text-muted">
-                        <i class="fas fa-info-circle me-1"></i>
+                        <i class="bi bi-info-circle me-1"></i>
                         Session sorunları yaşıyorsanız bu sayfayı kullanarak temizleyebilirsiniz.
                     </p>
                 </div>

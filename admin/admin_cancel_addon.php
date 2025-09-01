@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_cancel_file']))
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-gradient-danger text-white border-0">
                 <h5 class="modal-title d-flex align-items-center" id="adminCancelModalLabel">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="bi bi-exclamation-triangle me-2"></i>
                     Dosya İptal Onayı
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
@@ -77,21 +77,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_cancel_file']))
                     
                     <div class="mb-4">
                         <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 50%;">
-                            <i class="fas fa-times text-white fa-2x"></i>
+                            <i class="bi bi-times text-white fa-2x"></i>
                         </div>
                         <h6 class="mb-2 text-dark text-center">Bu dosyayı iptal etmek istediğinizden emin misiniz?</h6>
                         <p class="text-muted mb-3 text-center">
                             <strong>Dosya:</strong> <span id="cancelFileName"></span>
                         </p>
                         <div class="alert alert-warning d-flex align-items-center mb-3">
-                            <i class="fas fa-info-circle me-2"></i>
+                            <i class="bi bi-info-circle me-2"></i>
                             <small>Bu işlem dosyayı gizleyecek ve eğer ücretli ise kullanıcıya kredi iadesi yapacaktır.</small>
                         </div>
                     </div>
                     
                     <div class="mb-3">
                         <label for="adminNotes" class="form-label">
-                            <i class="fas fa-sticky-note me-1"></i>
+                            <i class="bi bi-sticky-note me-1"></i>
                             İptal Sebebi (Opsiyonel)
                         </label>
                         <textarea class="form-control" id="adminNotes" name="admin_notes" rows="3" 
@@ -101,11 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_cancel_file']))
                 </div>
                 <div class="modal-footer border-0 pt-3">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>
+                        <i class="bi bi-times me-1"></i>
                         İptal
                     </button>
                     <button type="submit" class="btn btn-danger px-4" style="box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                        <i class="fas fa-check me-1"></i>
+                        <i class="bi bi-check me-1"></i>
                         Evet, İptal Et
                     </button>
                 </div>
@@ -182,11 +182,11 @@ function showCancelModal(fileId, fileType, fileName) {
 <?php if (!isset($upload['is_cancelled']) || !$upload['is_cancelled']): ?>
     <button type="button" class="btn btn-danger" 
             onclick="showCancelModal('<?php echo $uploadId; ?>', 'upload', '<?php echo htmlspecialchars($upload['original_name'] ?? 'Bilinmeyen dosya'); ?>')">
-        <i class="fas fa-times me-1"></i>Dosyayı İptal Et
+        <i class="bi bi-times me-1"></i>Dosyayı İptal Et
     </button>
 <?php else: ?>
     <span class="btn btn-secondary disabled">
-        <i class="fas fa-ban me-1"></i>İptal Edilmiş
+        <i class="bi bi-ban me-1"></i>İptal Edilmiş
     </span>
 <?php endif; ?>
 */

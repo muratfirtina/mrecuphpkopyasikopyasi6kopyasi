@@ -14,7 +14,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['is_admin']) || !$_SESSION[
 
 $pageTitle = 'Veritabanı Yapısı';
 $pageDescription = 'Veritabanı tablolarının yapısını inceleme';
-$pageIcon = 'fas fa-database';
+$pageIcon = 'bi bi-database';
 
 // Belirli revizyon ID'sini kontrol et
 $checkRevisionId = isset($_GET['revision_id']) ? sanitize($_GET['revision_id']) : '';
@@ -86,7 +86,7 @@ include '../includes/admin_sidebar.php';
 <!-- Hata Mesajları -->
 <?php if (isset($error)): ?>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $error; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -94,7 +94,7 @@ include '../includes/admin_sidebar.php';
 
 <?php if (isset($revisionError)): ?>
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
+        <i class="bi bi-exclamation-triangle me-2"></i>
         <?php echo $revisionError; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -113,7 +113,7 @@ include '../includes/admin_sidebar.php';
     <div class="col-12">
         <div class="card admin-card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-search me-2"></i>Revizyon Kontrolü</h5>
+                <h5 class="mb-0"><i class="bi bi-search me-2"></i>Revizyon Kontrolü</h5>
             </div>
             <div class="card-body">
                 <form method="GET" class="row g-3">
@@ -125,7 +125,7 @@ include '../includes/admin_sidebar.php';
                     </div>
                     <div class="col-md-4 d-flex align-items-end">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search me-1"></i>Kontrol Et
+                            <i class="bi bi-search me-1"></i>Kontrol Et
                         </button>
                     </div>
                 </form>
@@ -140,7 +140,7 @@ include '../includes/admin_sidebar.php';
     <div class="col-12">
         <div class="card admin-card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Revizyon Verisi Analizi</h5>
+                <h5 class="mb-0"><i class="bi bi-edit me-2"></i>Revizyon Verisi Analizi</h5>
             </div>
             <div class="card-body">
                 <?php if ($revisionData['revision']): ?>
@@ -191,7 +191,7 @@ include '../includes/admin_sidebar.php';
                         </div>
                     <?php else: ?>
                         <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <i class="bi bi-exclamation-triangle me-2"></i>
                             File_uploads tablosunda veri bulunamadı!
                         </div>
                     <?php endif; ?>
@@ -220,7 +220,7 @@ include '../includes/admin_sidebar.php';
                         </div>
                     <?php elseif ($revisionData['revision']['response_id']): ?>
                         <div class="alert alert-danger">
-                            <i class="fas fa-times-circle me-2"></i>
+                            <i class="bi bi-times-circle me-2"></i>
                             Response ID mevcut ama file_responses tablosunda veri bulunamadı!
                         </div>
                     <?php endif; ?>
@@ -259,14 +259,14 @@ include '../includes/admin_sidebar.php';
                         </div>
                     <?php else: ?>
                         <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
+                            <i class="bi bi-info-circle me-2"></i>
                             Revision_files tablosunda veri yok.
                         </div>
                     <?php endif; ?>
 
                     <!-- Sorun Tespiti -->
                     <div class="alert alert-secondary">
-                        <h6><i class="fas fa-diagnoses me-2"></i>Sorun Tespiti</h6>
+                        <h6><i class="bi bi-diagnoses me-2"></i>Sorun Tespiti</h6>
                         <ul class="mb-0">
                             <?php if (!$revisionData['file_upload']): ?>
                                 <li class="text-danger">❌ Ana dosya bilgisi (file_uploads) eksik!</li>
@@ -290,7 +290,7 @@ include '../includes/admin_sidebar.php';
 
                 <?php else: ?>
                     <div class="alert alert-danger">
-                        <i class="fas fa-times-circle me-2"></i>
+                        <i class="bi bi-times-circle me-2"></i>
                         Revizyon bulunamadı!
                     </div>
                 <?php endif; ?>
@@ -305,7 +305,7 @@ include '../includes/admin_sidebar.php';
     <div class="col-12">
         <div class="card admin-card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-table me-2"></i>Veritabanı Tabloları (<?php echo count($tables); ?> adet)</h5>
+                <h5 class="mb-0"><i class="bi bi-table me-2"></i>Veritabanı Tabloları (<?php echo count($tables); ?> adet)</h5>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -313,7 +313,7 @@ include '../includes/admin_sidebar.php';
                         <div class="col-md-3 mb-2">
                             <a href="?table=<?php echo urlencode($table); ?>" 
                                class="btn btn-outline-primary btn-sm w-100 <?php echo $table === $selectedTable ? 'active' : ''; ?>">
-                                <i class="fas fa-table me-1"></i><?php echo htmlspecialchars($table); ?>
+                                <i class="bi bi-table me-1"></i><?php echo htmlspecialchars($table); ?>
                             </a>
                         </div>
                     <?php endforeach; ?>
@@ -330,7 +330,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-info-circle me-2"></i>Tablo Yapısı: <?php echo htmlspecialchars($selectedTable); ?>
+                    <i class="bi bi-info-circle me-2"></i>Tablo Yapısı: <?php echo htmlspecialchars($selectedTable); ?>
                 </h5>
             </div>
             <div class="card-body">
@@ -392,7 +392,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-database me-2"></i>Örnek Veriler (İlk 5 Kayıt)
+                    <i class="bi bi-database me-2"></i>Örnek Veriler (İlk 5 Kayıt)
                 </h5>
             </div>
             <div class="card-body">
