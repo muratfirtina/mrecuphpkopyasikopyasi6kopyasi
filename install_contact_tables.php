@@ -280,7 +280,7 @@ if ($steps_completed === $total_steps) {
     echo "<div class='row g-3'>";
     echo "<div class='col-md-4'>";
     echo "<a href='design/contact.php' class='btn btn-primary w-100'>";
-    echo "<i class='bi bi-edit me-2'></i>İçerik Yönetimi";
+    echo "<i class='bi bi-pencil-square me-2'></i>İçerik Yönetimi";
     echo "</a>";
     echo "</div>";
     echo "<div class='col-md-4'>";

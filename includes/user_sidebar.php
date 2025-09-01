@@ -132,7 +132,7 @@ if (isset($_SESSION['user_id'])) {
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'revisions.php' ? 'active' : ''; ?>" href="revisions.php">
                     <div class="nav-icon bg-orange">
-                        <i class="bi bi-edit"></i>
+                        <i class="bi bi-pencil-square"></i>
                     </div>
                     <span>Revize Taleplerim</span>
                     <?php

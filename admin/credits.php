@@ -639,7 +639,7 @@ include '../includes/admin_sidebar.php';
                                         <button type="button" class="btn btn-warning" 
                                                 onclick="openCreditModal('set', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['credit_quota']; ?>', '<?php echo $userItem['credit_used']; ?>', '<?php echo $userItem['available_credits']; ?>')"
                                                 title="Kota Yenile">
-                                            <i class="bi bi-edit me-1"></i>Yenile
+                                            <i class="bi bi-pencil-square me-1"></i>Yenile
                                         </button>
                                         <button type="button" class="btn btn-info" 
                                                 onclick="openCreditModal('reset', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['credit_quota']; ?>', '<?php echo $userItem['credit_used']; ?>', '<?php echo $userItem['available_credits']; ?>')"

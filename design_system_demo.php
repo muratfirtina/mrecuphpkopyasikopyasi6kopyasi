@@ -240,7 +240,7 @@ echo "<a href='design/settings.php' class='demo-btn'>Ayarlar</a>";
 echo "</div>";
 
 echo "<div class='feature-card text-center'>";
-echo "<i class='bi bi-edit feature-icon'></i>";
+echo "<i class='bi bi-pencil-square feature-icon'></i>";
 echo "<h5>İçerik Yönetimi</h5>";
 echo "<p>Sayfa içeriklerini, metinleri ve diğer elemanları database üzerinden düzenleyin.</p>";
 echo "<a href='design/content.php' class='demo-btn'>İçerik Panel</a>";

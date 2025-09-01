@@ -243,7 +243,7 @@ include 'includes/header.php';
                                         </div>
                                         <!-- <div class="col-lg-4">
                                             <div class="text-center">
-                                                <i class="bi bi-microchip" style="font-size: 10rem; opacity: 0.2;"></i>
+                                                <i class="bi bi-cpu" style="font-size: 10rem; opacity: 0.2;"></i>
                                             </div>
                                         </div> -->
                                     <?php else: ?>
@@ -284,7 +284,7 @@ include 'includes/header.php';
                                             <div class="text-center">
                                                 <?php
                                                 // Slider'a göre icon belirleme
-                                                $icon = 'bi bi-microchip';
+                                                $icon = 'bi bi-cpu';
                                                 if (strpos(strtolower($slider['title']), 'performans') !== false) {
                                                     $icon = 'bi bi-tachometer-alt';
                                                 } elseif (strpos(strtolower($slider['title']), 'güvenlik') !== false) {
@@ -374,7 +374,7 @@ include 'includes/header.php';
                 $categoryName = strtolower($category['name']);
 
                 if (strpos($categoryName, 'ecu') !== false || strpos($categoryName, 'motor') !== false) {
-                    $icon = 'bi bi-microchip';
+                    $icon = 'bi bi-cpu';
                 } elseif (strpos($categoryName, 'immobilizer') !== false || strpos($categoryName, 'anahtar') !== false) {
                     $icon = 'bi bi-key';
                 } elseif (strpos($categoryName, 'emülatör') !== false || strpos($categoryName, 'şanzıman') !== false) {
@@ -676,7 +676,7 @@ include 'includes/header.php';
             <div class="row g-4">
                 <?php
                 $serviceIcons = [
-                    'bi bi-microchip',
+                    'bi bi-cpu',
                     'bi bi-gear-wide-connected',
                     'bi bi-key',
                     'bi bi-tachometer-alt',
@@ -1005,7 +1005,7 @@ include 'includes/header.php';
                 <div class="row g-3">
                     <div class="col-6">
                         <div class="feature-box text-center p-4 bg-primary bg-opacity-10 rounded shadow">
-                            <i class="bi bi-microchip text-primary" style="font-size: 4rem;"></i>
+                            <i class="bi bi-cpu text-primary" style="font-size: 4rem;"></i>
                             <h6 class="mt-2 mb-0">ECU</h6>
                         </div>
                     </div>

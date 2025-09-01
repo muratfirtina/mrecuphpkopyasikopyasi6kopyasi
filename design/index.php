@@ -121,7 +121,7 @@ try {
             <div class="d-flex align-items-center">
                 <div class="flex-shrink-0">
                     <div class="stat-icon bg-warning text-white rounded-circle p-3">
-                        <i class="bi bi-edit fa-xl"></i>
+                        <i class="bi bi-pencil-square fa-xl"></i>
                     </div>
                 </div>
                 <div class="flex-grow-1 ms-3">
@@ -169,7 +169,7 @@ try {
         <div class="design-card h-100">
             <div class="card-body text-center p-4">
                 <div class="mb-3">
-                    <i class="bi bi-edit text-info" style="font-size: 3rem;"></i>
+                    <i class="bi bi-pencil-square text-info" style="font-size: 3rem;"></i>
                 </div>
                 <h5 class="card-title">İçerik Yönetimi</h5>
                 <p class="card-text text-muted">Sayfa içeriklerini, metinleri ve diğer elemanları düzenleyin.</p>
@@ -234,7 +234,7 @@ try {
                         <i class="bi bi-eye me-2"></i>Site Önizleme
                     </a>
                     <a href="content.php" class="btn btn-outline-info">
-                        <i class="bi bi-edit me-2"></i>İçerik Düzenle
+                        <i class="bi bi-pencil-square me-2"></i>İçerik Düzenle
                     </a>
                     <a href="settings.php" class="btn btn-outline-warning">
                         <i class="bi bi-palette me-2"></i>Tema Ayarları

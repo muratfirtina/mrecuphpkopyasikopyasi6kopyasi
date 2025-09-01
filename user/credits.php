@@ -530,7 +530,7 @@ include '../includes/user_header.php';
                     <!-- <div class="custom-amount-section">
                         <div class="section-header">
                             <h4 class="mb-2">
-                                <i class="bi bi-edit me-2 text-info"></i>Özel Tutar
+                                <i class="bi bi-pencil-square me-2 text-info"></i>Özel Tutar
                             </h4>
                             <p class="text-muted">İstediğiniz tutarda kredi yükleyin</p>
                         </div>

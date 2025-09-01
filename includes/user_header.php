@@ -361,7 +361,7 @@ if (isset($_SESSION['user_id'])) {
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center" href="../index.php">
                 <div class="navbar-brand-icon me-2">
-                    <i class="bi bi-microchip"></i>
+                    <i class="bi bi-cpu"></i>
                 </div>
                 <div>
                     <span class="fw-bold"><?php echo SITE_NAME; ?></span>
@@ -564,7 +564,7 @@ if (isset($_SESSION['user_id'])) {
                                         <a class="dropdown-item d-flex align-items-center py-2" href="revisions.php">
                                             <div class="me-3">
                                                 <div class="bg-warning bg-opacity-10 p-2 rounded-circle">
-                                                    <i class="bi bi-edit text-warning"></i>
+                                                    <i class="bi bi-pencil-square text-warning"></i>
                                                 </div>
                                             </div>
                                             <div>
@@ -653,7 +653,7 @@ if (isset($_SESSION['user_id'])) {
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="revisions.php">
-                                    <i class="bi bi-edit me-3 text-warning"></i>
+                                    <i class="bi bi-pencil-square me-3 text-warning"></i>
                                     Revize Taleplerim
                                     <?php if ($pendingUserRevisions > 0): ?>
                                         <span class="badge bg-warning ms-auto"><?php echo $pendingUserRevisions; ?></span>

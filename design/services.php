@@ -214,7 +214,7 @@ require_once '../includes/design_header.php';
                                         <a href="services-edit.php?id=<?php echo $service['id']; ?>" 
                                            class="btn btn-outline-primary" 
                                            title="Düzenle">
-                                            <i class="bi bi-edit"></i>
+                                            <i class="bi bi-pencil-square"></i>
                                         </a>
                                         <a href="?action=delete&id=<?php echo $service['id']; ?>" 
                                            class="btn btn-outline-danger" 

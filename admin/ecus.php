@@ -89,7 +89,7 @@ if (!empty($search)) {
 error_log("ECU DEBUG: Final ECU array: " . print_r($ecus, true));
 
 $pageTitle = 'ECU Yönetimi';
-$pageIcon = 'bi bi-microchip';
+$pageIcon = 'bi bi-cpu';
 $pageDescription = 'ECU birimlerini yönetin, ekleyin ve düzenleyin.';
 
 include '../includes/admin_header.php';
@@ -121,7 +121,7 @@ include '../includes/admin_sidebar.php';
                     <div class="col-md-3">
                         <div class="stat-card">
                             <div class="stat-icon">
-                                <i class="bi bi-microchip text-primary"></i>
+                                <i class="bi bi-cpu text-primary"></i>
                             </div>
                             <div class="stat-content">
                                 <h3><?= $totalEcus ?></h3>
@@ -164,7 +164,7 @@ include '../includes/admin_sidebar.php';
                     <div class="card-body">
                         <?php if (empty($ecus)): ?>
                         <div class="text-center py-4">
-                            <i class="bi bi-microchip fa-3x text-muted mb-3"></i>
+                            <i class="bi bi-cpu fa-3x text-muted mb-3"></i>
                             <p class="text-muted">Henüz ECU bulunmuyor.</p>
                         </div>
                         <?php else: ?>
@@ -187,7 +187,7 @@ include '../includes/admin_sidebar.php';
                                                     data-id="<?= $ecu['id'] ?>" 
                                                     data-name="<?= htmlspecialchars($ecu['name']) ?>"
                                                     data-bs-toggle="modal" data-bs-target="#editEcuModal">
-                                                <i class="bi bi-edit"></i>
+                                                <i class="bi bi-pencil-square"></i>
                                             </button>
                                             <button class="btn btn-sm btn-outline-danger delete-ecu-btn" 
                                                     data-id="<?= $ecu['id'] ?>" 
@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         tableBody.innerHTML = `
                             <tr>
                                 <td colspan="4" class="text-center py-4">
-                                    <i class="bi bi-microchip text-muted"></i>
+                                    <i class="bi bi-cpu text-muted"></i>
                                     <p class="text-muted mb-0">Arama sonucu bulunamadı.</p>
                                 </td>
                             </tr>
@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             data-id="${ecu.id}"
                             data-name="${escapeHtml(ecu.name)}"
                             data-bs-toggle="modal" data-bs-target="#editEcuModal">
-                        <i class="bi bi-edit"></i>
+                        <i class="bi bi-pencil-square"></i>
                     </button>
                     <button class="btn btn-sm btn-danger delete-ecu-btn"
                             data-id="${ecu.id}"

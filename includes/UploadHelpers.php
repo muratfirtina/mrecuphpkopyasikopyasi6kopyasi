@@ -227,7 +227,7 @@ function renderFileDetailsHTML($fileData) {
     
     // Ekipman Bilgileri
     $html .= '<div class="col-md-6">';
-    $html .= '<h5><i class="bi bi-microchip me-2"></i>Ekipman Bilgileri</h5>';
+    $html .= '<h5><i class="bi bi-cpu me-2"></i>Ekipman Bilgileri</h5>';
     $html .= '<table class="table table-sm table-bordered">';
     $html .= '<tr><td><strong>ECU Tipi:</strong></td><td>' . $details['equipment']['ecu'] . '</td></tr>';
     $html .= '<tr><td><strong>Kullanılan Cihaz:</strong></td><td>' . $details['equipment']['device'] . '</td></tr>';

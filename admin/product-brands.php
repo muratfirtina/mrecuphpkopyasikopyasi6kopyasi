@@ -366,7 +366,7 @@ include '../includes/admin_sidebar.php';
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-outline-warning" 
                                                 onclick="editBrand(<?php echo htmlspecialchars(json_encode($brand)); ?>)">
-                                            <i class="bi bi-edit"></i>
+                                            <i class="bi bi-pencil-square"></i>
                                         </button>
                                         <a href="?delete=<?php echo $brand['id']; ?>" 
                                            class="btn btn-outline-danger"
@@ -480,7 +480,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="bi bi-edit me-2"></i>Marka Düzenle
+                    <i class="bi bi-pencil-square me-2"></i>Marka Düzenle
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>

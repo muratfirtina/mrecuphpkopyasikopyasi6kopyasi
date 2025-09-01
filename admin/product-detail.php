@@ -236,7 +236,7 @@ include '../includes/admin_sidebar.php';
                 <i class="bi bi-arrow-left me-1"></i>Geri Dön
             </a>
             <button type="button" class="btn btn-warning" onclick="editProduct(<?php echo $product['id']; ?>)">
-                <i class="bi bi-edit me-1"></i>Düzenle
+                <i class="bi bi-pencil-square me-1"></i>Düzenle
             </button>
         </div>
     </div>
@@ -420,7 +420,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="bi bi-edit me-2"></i>Ürün Düzenle
+                    <i class="bi bi-pencil-square me-2"></i>Ürün Düzenle
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>

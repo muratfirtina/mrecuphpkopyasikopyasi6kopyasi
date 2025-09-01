@@ -310,7 +310,7 @@ if (isset($_GET['detail_id'])) {
 
 $pageTitle = 'Revize Yönetimi';
 $pageDescription = 'Kullanıcı revize taleplerini yönetin';
-$pageIcon = 'bi bi-edit';
+$pageIcon = 'bi bi-pencil-square';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -345,7 +345,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-success">+<?php echo $stats['today_requests']; ?> bugün</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-edit text-primary fa-lg"></i>
+                    <i class="bi bi-pencil-square text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -488,7 +488,7 @@ include '../includes/admin_sidebar.php';
     <div class="card-body p-0">
         <?php if (empty($revisions)): ?>
             <div class="text-center py-5">
-                <i class="bi bi-edit fa-3x text-muted mb-3"></i>
+                <i class="bi bi-pencil-square fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">
                     <?php if ($status || $dateFrom || $dateTo): ?>
                         Filtreye uygun revize talebi bulunamadı

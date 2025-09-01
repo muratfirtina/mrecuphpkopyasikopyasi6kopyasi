@@ -461,7 +461,7 @@ include '../includes/design_header.php';
                                                     <div class="ms-3">
                                                         <button class="btn btn-outline-primary btn-sm me-1" 
                                                                 onclick="editContactCard(<?php echo htmlspecialchars(json_encode($card)); ?>)">
-                                                            <i class="bi bi-edit"></i>
+                                                            <i class="bi bi-pencil-square"></i>
                                                         </button>
                                                         <form method="POST" class="d-inline" 
                                                               onsubmit="return confirm('Bu kartı silmek istediğinizden emin misiniz?')">

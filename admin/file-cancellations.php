@@ -407,7 +407,7 @@ include '../includes/admin_header.php';
                                                         $plate = $cancellation['revision_main_plate'] ?? '';
                                                         $fileDate = $cancellation['revision_date'] ?? '';
                                                         $fileTypeDisplay = 'REVİZYON DOSYASI';
-                                                        $fileTypeIcon = 'bi bi-edit';
+                                                        $fileTypeIcon = 'bi bi-pencil-square';
                                                         $fileTypeColor = 'bg-warning';
                                                         break;
                                                     case 'additional':

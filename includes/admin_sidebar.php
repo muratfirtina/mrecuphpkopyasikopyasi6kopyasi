@@ -240,7 +240,7 @@
                         <div class="nav-section">Sistem</div>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'ECU Yönetimi') ? 'active' : ''; ?>" href="ecus.php">
-                            <i class="bi bi-microchip"></i>ECU Yönetimi
+                            <i class="bi bi-cpu"></i>ECU Yönetimi
                         </a>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Device Yönetimi') ? 'active' : ''; ?>" href="devices.php">

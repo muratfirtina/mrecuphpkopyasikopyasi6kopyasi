@@ -251,7 +251,7 @@ include '../includes/design_header.php';
                                             <button type="button" class="btn btn-sm btn-outline-primary" 
                                                     onclick="editSlider('<?php echo $slider['id']; ?>')"
                                                     data-bs-toggle="modal" data-bs-target="#sliderModal">
-                                                <i class="bi bi-edit"></i>
+                                                <i class="bi bi-pencil-square"></i>
                                             </button>
                                             <form method="POST" style="display: inline;">
                                                 <input type="hidden" name="action" value="delete">

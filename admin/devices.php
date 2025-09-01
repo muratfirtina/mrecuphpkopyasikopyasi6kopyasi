@@ -187,7 +187,7 @@ include '../includes/admin_sidebar.php';
                                                     data-id="<?= $device['id'] ?>" 
                                                     data-name="<?= htmlspecialchars($device['name']) ?>"
                                                     data-bs-toggle="modal" data-bs-target="#editDeviceModal">
-                                                <i class="bi bi-edit"></i>
+                                                <i class="bi bi-pencil-square"></i>
                                             </button>
                                             <button class="btn btn-sm btn-outline-danger delete-device-btn" 
                                                     data-id="<?= $device['id'] ?>" 
@@ -391,7 +391,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             data-id="${device.id}"
                             data-name="${escapeHtml(device.name)}"
                             data-bs-toggle="modal" data-bs-target="#editDeviceModal">
-                        <i class="bi bi-edit"></i>
+                        <i class="bi bi-pencil-square"></i>
                     </button>
                     <button class="btn btn-sm btn-danger delete-device-btn"
                             data-id="${device.id}"

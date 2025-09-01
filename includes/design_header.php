@@ -485,7 +485,7 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
                 <span>Site Ayarları</span>
             </a>
             <a href="content.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'content.php') ? 'active' : ''; ?>">
-                <i class="bi bi-edit"></i>
+                <i class="bi bi-pencil-square"></i>
                 <span>İçerik Yönetimi</span>
             </a>
             <a href="media.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'media.php') ? 'active' : ''; ?>">

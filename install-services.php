@@ -97,7 +97,7 @@ try {
                 'slug' => 'ecu-yazilim-optimizasyonu',
                 'description' => 'Motor kontrol ünitesi yazılımlarınızı profesyonelce optimize ediyoruz. Performans artışı, yakıt tasarrufu ve motor verimliliği sağlıyoruz.',
                 'features' => json_encode(['Performans artışı', 'Yakıt tasarrufu', 'Motor verimliliği', 'Profesyonel yazılım', 'Güvenli optimizasyon']),
-                'icon' => 'bi bi-microchip',
+                'icon' => 'bi bi-cpu',
                 'price_from' => 150.00,
                 'is_featured' => 1,
                 'sort_order' => 1

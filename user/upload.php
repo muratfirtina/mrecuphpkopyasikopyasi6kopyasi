@@ -466,7 +466,7 @@ try {
                                                 </select>
                                                 <div class="form-help">
                                                     <small class="text-muted">
-                                                        <i class="bi bi-microchip me-1"></i>ECU tipi seçin
+                                                        <i class="bi bi-cpu me-1"></i>ECU tipi seçin
                                                     </small>
                                                 </div>
                                             </div>

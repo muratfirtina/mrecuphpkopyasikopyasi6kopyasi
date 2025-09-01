@@ -8,7 +8,7 @@ require_once '../config/database.php';
 
 $pageTitle = 'Hizmet Düzenle';
 $pageDescription = 'Hizmet bilgilerini düzenle';
-$pageIcon = 'bi bi-edit';
+$pageIcon = 'bi bi-pencil-square';
 
 $message = '';
 $messageType = '';
@@ -309,7 +309,7 @@ require_once '../includes/design_header.php';
                                 <input type="text" class="form-control" id="icon" name="icon" 
                                        value="<?= htmlspecialchars($service['icon']) ?>" required placeholder="bi bi-gear-wide-connected">
                             </div>
-                            <div class="form-text">Örnek: bi bi-microchip</div>
+                            <div class="form-text">Örnek: bi bi-cpu</div>
                         </div>
 
                         <!-- Özellikler -->

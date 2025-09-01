@@ -225,7 +225,7 @@ include '../includes/user_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="bi bi-edit me-2 text-<?php echo $currentStatus['class']; ?>"></i>
+                        <i class="bi bi-pencil-square me-2 text-<?php echo $currentStatus['class']; ?>"></i>
                         Revize Detayı #<?php echo substr($revision['id'], 0, 8); ?>
                     </h1>
                     <p class="text-muted mb-0">
@@ -682,7 +682,7 @@ include '../includes/user_header.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="bi bi-edit me-2 text-warning"></i>Yeni Revize Talebi
+                    <i class="bi bi-pencil-square me-2 text-warning"></i>Yeni Revize Talebi
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -1071,7 +1071,7 @@ var openRevisionFileModal = function(revisionFileId, fileName) {
     revisionFileModal.querySelector('#submitRevisionBtn').id = 'submitRevisionFileBtn';
     
     // Modal başlık ve içeriğini güncelle
-    revisionFileModal.querySelector('.modal-title').innerHTML = '<i class="bi bi-edit me-2 text-warning"></i>Revizyon Dosyası İçin Yeni Talep';
+    revisionFileModal.querySelector('.modal-title').innerHTML = '<i class="bi bi-pencil-square me-2 text-warning"></i>Revizyon Dosyası İçin Yeni Talep';
     revisionFileModal.querySelector('.alert-info').innerHTML = '<i class="bi bi-info-circle me-2"></i><strong>Revizyon Dosyası:</strong> ' + fileName;
     
     // Modalı DOM'a ekle

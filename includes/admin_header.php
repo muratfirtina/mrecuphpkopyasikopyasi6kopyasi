@@ -415,7 +415,7 @@ $cssPath = '../assets/css/style.css';
     <nav class="navbar navbar-expand-lg navbar-dark admin-navbar">
         <div class="container-fluid">
             <a class="navbar-brand" href="../index.php">
-                <i class="bi bi-microchip me-2"></i>
+                <i class="bi bi-cpu me-2"></i>
                 <?php echo SITE_NAME; ?> - Admin
             </a>
             
@@ -549,7 +549,7 @@ $cssPath = '../assets/css/style.css';
                                                             echo 'bi bi-upload text-warning';
                                                             break;
                                                         case 'revision_request':
-                                                            echo 'bi bi-edit text-danger';
+                                                            echo 'bi bi-pencil-square text-danger';
                                                             break;
                                                         case 'revision_response':
                                                             echo 'bi bi-reply text-success';

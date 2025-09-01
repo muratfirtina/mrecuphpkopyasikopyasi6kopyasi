@@ -129,7 +129,7 @@ include '../includes/design_header.php';
             <div class="design-card">
                 <div class="design-card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        <i class="bi bi-edit me-2"></i>İçerik Yönetimi
+                        <i class="bi bi-pencil-square me-2"></i>İçerik Yönetimi
                     </h5>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-success btn-sm">
@@ -175,7 +175,7 @@ include '../includes/design_header.php';
                                                                     <button type="button" class="btn btn-outline-primary btn-sm" 
                                                                             onclick="editContent(<?php echo $content['id']; ?>)"
                                                                             data-bs-toggle="modal" data-bs-target="#contentModal">
-                                                                        <i class="bi bi-edit"></i>
+                                                                        <i class="bi bi-pencil-square"></i>
                                                                     </button>
                                                                     <form method="POST" style="display: inline;">
                                                                         <input type="hidden" name="action" value="delete">

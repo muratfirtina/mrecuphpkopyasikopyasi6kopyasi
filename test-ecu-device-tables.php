@@ -29,7 +29,7 @@ require_once 'config/config.php';
                         <!-- Kurulum Durumu Kontrolü -->
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <h5><i class="bi bi-microchip text-primary"></i> ECU Tablosu</h5>
+                                <h5><i class="bi bi-cpu text-primary"></i> ECU Tablosu</h5>
                                 <?php
                                 try {
                                     $ecuCheck = $pdo->query("SHOW TABLES LIKE 'ecus'");
@@ -115,7 +115,7 @@ require_once 'config/config.php';
                             <h5><i class="bi bi-user-shield"></i> Admin İşlemleri</h5>
                             <div class="d-flex gap-2 flex-wrap">
                                 <a href="admin/ecus.php" class="btn btn-info">
-                                    <i class="bi bi-microchip"></i> ECU Yönetimi
+                                    <i class="bi bi-cpu"></i> ECU Yönetimi
                                 </a>
                                 <a href="admin/devices.php" class="btn btn-success">
                                     <i class="bi bi-tools"></i> Device Yönetimi

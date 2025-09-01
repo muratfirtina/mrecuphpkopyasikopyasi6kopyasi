@@ -204,7 +204,7 @@ include '../includes/user_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="bi bi-edit me-2 text-warning"></i>Revize Taleplerim
+                        <i class="bi bi-pencil-square me-2 text-warning"></i>Revize Taleplerim
                     </h1>
                     <p class="text-muted mb-0">Dosyalarınız için gönderdiğiniz revize taleplerini takip edin</p>
                 </div>
@@ -235,7 +235,7 @@ include '../includes/user_header.php';
                                     </div>
                                 </div>
                                 <div class="stat-icon text-primary">
-                                    <i class="bi bi-edit"></i>
+                                    <i class="bi bi-pencil-square"></i>
                                 </div>
                             </div>
                         </div>
@@ -385,7 +385,7 @@ include '../includes/user_header.php';
                 <div class="empty-state-card">
                     <div class="empty-content">
                         <div class="empty-icon">
-                            <i class="bi bi-edit"></i>
+                            <i class="bi bi-pencil-square"></i>
                         </div>
                         <h4>
                             <?php if ($search || $status || $dateFrom || $dateTo): ?>

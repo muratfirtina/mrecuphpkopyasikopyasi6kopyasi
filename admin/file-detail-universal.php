@@ -386,7 +386,7 @@ include '../includes/admin_header.php';
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2" role="group">
                         <a href="file-detail.php?id=<?php echo $fileId; ?>&type=<?php echo $fileType; ?>" class="btn btn-outline-primary">
-                            <i class="bi bi-edit me-1"></i>Detaylı Düzenleme
+                            <i class="bi bi-pencil-square me-1"></i>Detaylı Düzenleme
                         </a>
                         
                         <?php if (!empty($fileData['download_url'])): ?>

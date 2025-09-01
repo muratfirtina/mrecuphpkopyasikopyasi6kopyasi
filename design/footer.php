@@ -380,7 +380,7 @@ include '../includes/design_header.php';
                                                 </button>
                                                 <div id="dropdown-service-<?php echo $service['id']; ?>" class="custom-dropdown-menu">
                                                     <button onclick="editService(<?php echo htmlspecialchars(json_encode($service)); ?>)">
-                                                        <i class="bi bi-edit me-2"></i>Düzenle
+                                                        <i class="bi bi-pencil-square me-2"></i>Düzenle
                                                     </button>
                                                     <form method="POST" style="margin: 0;" onsubmit="return confirm('Bu hizmeti silmek istediğinizden emin misiniz?')">
                                                         <input type="hidden" name="action" value="delete_service">
@@ -440,7 +440,7 @@ include '../includes/design_header.php';
                                                 </button>
                                                 <div id="dropdown-category-<?php echo $category['id']; ?>" class="custom-dropdown-menu">
                                                     <button onclick="editCategory(<?php echo htmlspecialchars(json_encode($category)); ?>)">
-                                                        <i class="bi bi-edit me-2"></i>Düzenle
+                                                        <i class="bi bi-pencil-square me-2"></i>Düzenle
                                                     </button>
                                                     <form method="POST" style="margin: 0;" onsubmit="return confirm('Bu kategoriyi silmek istediğinizden emin misiniz?')">
                                                         <input type="hidden" name="action" value="delete_category">

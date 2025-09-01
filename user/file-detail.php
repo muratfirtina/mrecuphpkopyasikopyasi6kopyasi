@@ -834,7 +834,7 @@ include '../includes/user_header.php';
                     <div class="detail-card mb-4">
                         <div class="detail-card-header">
                             <h5 class="mb-0">
-                                <i class="bi bi-edit me-2"></i>Revize Dosyaları (<?php echo count($allRevisionFiles); ?>)
+                                <i class="bi bi-pencil-square me-2"></i>Revize Dosyaları (<?php echo count($allRevisionFiles); ?>)
                             </h5>
                         </div>
                         <div class="detail-card-body">
@@ -842,7 +842,7 @@ include '../includes/user_header.php';
                                 <?php foreach ($allRevisionFiles as $revFile): ?>
                                     <div class="revision-file-item">
                                         <div class="file-icon">
-                                            <i class="bi bi-edit text-warning"></i>
+                                            <i class="bi bi-pencil-square text-warning"></i>
                                         </div>
                                         <div class="file-info">
                                             <h6 class="file-name">
@@ -1499,7 +1499,7 @@ include '../includes/user_header.php';
                                             $typeConfig = [
                                                 'user_upload' => ['icon' => 'bi bi-upload text-primary', 'color' => 'primary'],
                                                 'admin_response' => ['icon' => 'bi bi-reply text-success', 'color' => 'success'],
-                                                'user_revision_request' => ['icon' => 'bi bi-edit text-warning', 'color' => 'warning'],
+                                                'user_revision_request' => ['icon' => 'bi bi-pencil-square text-warning', 'color' => 'warning'],
                                                 'admin_revision_response' => ['icon' => 'bi bi-user-shield text-info', 'color' => 'info']
                                             ];
                                             $config = $typeConfig[$comm['type']] ?? ['icon' => 'bi bi-comment text-secondary', 'color' => 'secondary'];
@@ -1520,7 +1520,7 @@ include '../includes/user_header.php';
                                                             </span>
                                                         <?php elseif ($comm['type'] === 'user_revision_request'): ?>
                                                             <span class="badge bg-warning">
-                                                                <i class="bi bi-edit me-1"></i>Revize Talebim
+                                                                <i class="bi bi-pencil-square me-1"></i>Revize Talebim
                                                             </span>
                                                         <?php elseif ($comm['type'] === 'admin_revision_response'): ?>
                                                             <span class="badge bg-info">

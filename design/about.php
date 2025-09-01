@@ -702,7 +702,7 @@ include '../includes/design_header.php';
                                                     <div class="ms-3">
                                                         <button class="btn btn-outline-primary btn-sm me-1" 
                                                                 onclick="editCoreValue(<?php echo htmlspecialchars(json_encode($value)); ?>)">
-                                                            <i class="bi bi-edit"></i>
+                                                            <i class="bi bi-pencil-square"></i>
                                                         </button>
                                                         <form method="POST" class="d-inline" 
                                                               onsubmit="return confirm('Bu değeri silmek istediğinizden emin misiniz?')">
@@ -848,7 +848,7 @@ include '../includes/design_header.php';
                                                     <div class="ms-3">
                                                         <button class="btn btn-outline-primary btn-sm me-1" 
                                                                 onclick="editServiceFeature(<?php echo htmlspecialchars(json_encode($feature)); ?>)">
-                                                            <i class="bi bi-edit"></i>
+                                                            <i class="bi bi-pencil-square"></i>
                                                         </button>
                                                         <form method="POST" class="d-inline" 
                                                               onsubmit="return confirm('Bu özelliği silmek istediğinizden emin misiniz?')">

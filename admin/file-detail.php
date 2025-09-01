@@ -1718,7 +1718,7 @@ include '../includes/admin_sidebar.php';
     <div class="card admin-card mb-4" id="revision-files">
         <div class="card-header">
             <h6 class="mb-0">
-                <i class="bi bi-edit me-2"></i>Revize Dosyaları (<?php echo count($revisionFiles); ?>)
+                <i class="bi bi-pencil-square me-2"></i>Revize Dosyaları (<?php echo count($revisionFiles); ?>)
             </h6>
         </div>
         <div class="card-body">
@@ -2049,7 +2049,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             $typeConfig = [
                                 'user_upload' => ['icon' => 'bi bi-upload text-primary', 'color' => 'primary'],
                                 'admin_response' => ['icon' => 'bi bi-reply text-success', 'color' => 'success'],
-                                'user_revision_request' => ['icon' => 'bi bi-edit text-warning', 'color' => 'warning'],
+                                'user_revision_request' => ['icon' => 'bi bi-pencil-square text-warning', 'color' => 'warning'],
                                 'admin_revision_response' => ['icon' => 'bi bi-user-shield text-info', 'color' => 'info']
                             ];
                             $config = $typeConfig[$comm['type']] ?? ['icon' => 'bi bi-comment text-secondary', 'color' => 'secondary'];
@@ -2070,7 +2070,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                             </span>
                                         <?php elseif ($comm['type'] === 'user_revision_request'): ?>
                                             <span class="badge bg-warning" style="background-color: #ffc107 !important; color: #212529 !important; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px;">
-                                                <i class="bi bi-edit me-1"></i>Kullanıcının Revize Talebi
+                                                <i class="bi bi-pencil-square me-1"></i>Kullanıcının Revize Talebi
                                             </span>
                                             <?php if (isset($comm['revision_status'])): ?>
                                                 <span class="badge bg-<?php echo

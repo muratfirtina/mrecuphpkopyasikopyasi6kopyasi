@@ -571,7 +571,7 @@ if (!isset($pageTitle)) {
             <div class="ecu-device">
                 <!-- <div class="ecu-chip">
                     <div class="chip-inner">
-                        <i class="bi bi-microchip"></i>
+                        <i class="bi bi-cpu"></i>
                     </div>
                     <div class="chip-pins chip-pins-left">
                         <div class="pin"></div>

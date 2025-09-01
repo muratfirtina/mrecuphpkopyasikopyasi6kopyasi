@@ -357,7 +357,7 @@ include '../includes/admin_sidebar.php';
                 
                 <!-- Durum Güncelleme -->
                 <hr>
-                <h6><i class="bi bi-edit me-2"></i>Durum Güncelle</h6>
+                <h6><i class="bi bi-pencil-square me-2"></i>Durum Güncelle</h6>
                 <form method="POST" class="d-inline">
                     <div class="d-flex gap-2">
                         <select name="status" class="form-select form-select-sm">

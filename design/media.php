@@ -261,7 +261,7 @@ include '../includes/design_header.php';
                                                 </button>
                                                 <button type="button" class="btn btn-primary btn-sm" onclick="editMedia(<?php echo $media['id']; ?>)"
                                                         data-bs-toggle="modal" data-bs-target="#editModal">
-                                                    <i class="bi bi-edit"></i>
+                                                    <i class="bi bi-pencil-square"></i>
                                                 </button>
                                                 <button type="button" class="btn btn-info btn-sm" onclick="copyUrl('<?php echo '../' . $media['file_path']; ?>')">
                                                     <i class="bi bi-copy"></i>

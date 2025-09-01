@@ -140,7 +140,7 @@ include '../includes/admin_sidebar.php';
     <div class="col-12">
         <div class="card admin-card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-edit me-2"></i>Revizyon Verisi Analizi</h5>
+                <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Revizyon Verisi Analizi</h5>
             </div>
             <div class="card-body">
                 <?php if ($revisionData['revision']): ?>

@@ -70,7 +70,7 @@ define('NOTIFICATION_TEMPLATES', [
     'revision_request' => [
         'title' => 'Yeni Revizyon Talebi',
         'message' => '{filename} için revizyon talebi oluşturuldu.',
-        'icon' => 'bi bi-edit',
+        'icon' => 'bi bi-pencil-square',
         'level' => 'warning'
     ],
     'revision_approved' => [

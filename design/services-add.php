@@ -247,7 +247,7 @@ require_once '../includes/design_header.php';
                                 <input type="text" class="form-control" id="icon" name="icon" 
                                        value="<?= htmlspecialchars($formData['icon'] ?? '') ?>" required placeholder="bi bi-gear-wide-connected">
                             </div>
-                            <div class="form-text">Örnek: bi bi-microchip</div>
+                            <div class="form-text">Örnek: bi bi-cpu</div>
                         </div>
 
                         <!-- Özellikler -->

@@ -60,7 +60,7 @@ include 'includes/header.php';
                                 </div>
                                 <div class="col-lg-4">
                                     <div class="text-center">
-                                        <i class="bi bi-microchip" style="font-size: 10rem; opacity: 0.2;"></i>
+                                        <i class="bi bi-cpu" style="font-size: 10rem; opacity: 0.2;"></i>
                                     </div>
                                 </div>
                             </div>
@@ -285,7 +285,7 @@ include 'includes/header.php';
             <div class="row g-4">
                 <div class="col-lg-3 col-md-6">
                     <div class="service-card text-center p-4">
-                        <i class="bi bi-microchip text-primary mb-3" style="font-size: 2.5rem;"></i>
+                        <i class="bi bi-cpu text-primary mb-3" style="font-size: 2.5rem;"></i>
                         <h5>ECU Yazılımları</h5>
                         <p class="text-muted">Motor kontrol ünitesi yazılım düzenlemeleri</p>
                     </div>

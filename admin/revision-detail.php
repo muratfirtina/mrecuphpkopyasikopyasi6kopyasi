@@ -318,7 +318,7 @@ endif;
 
 $pageTitle = 'Revizyon Detayı';
 $pageDescription = 'Revizyon talebi detayları ve işlemleri';
-$pageIcon = 'bi bi-edit';
+$pageIcon = 'bi bi-pencil-square';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -357,7 +357,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="bi bi-edit me-2"></i>Revizyon Talebi #<?php echo substr($revision['id'], 0, 8); ?>
+                    <i class="bi bi-pencil-square me-2"></i>Revizyon Talebi #<?php echo substr($revision['id'], 0, 8); ?>
                 </h5>
                 <div>
                     <?php
