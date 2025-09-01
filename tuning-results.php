@@ -101,6 +101,22 @@ try {
     exit;
 }
 
+// Contact cards bilgilerini getir
+try {
+    $stmt = $pdo->prepare("SELECT * FROM contact_cards WHERE id IN (1, 2, 3) ORDER BY id");
+    $stmt->execute();
+    $contactCards = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // ID'lere göre indexle
+    $contactCardsById = [];
+    foreach ($contactCards as $card) {
+        $contactCardsById[$card['id']] = $card;
+    }
+} catch (PDOException $e) {
+    error_log('Contact cards fetch failed: ' . $e->getMessage());
+    $contactCardsById = [];
+}
+
 // Header include
 include 'includes/header.php';
 ?>
@@ -486,12 +502,28 @@ include 'includes/header.php';
             Profesyonel ekibimiz ile iletişime geçin ve aracınız için en uygun chip tuning çözümünü keşfedin.
         </p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
-            <a href="tel:+905551234567" class="btn btn-light btn-lg">
-                <i class="fas fa-phone me-2"></i>Hemen Ara
-            </a>
-            <a href="mailto:<?php echo SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
-                <i class="fas fa-envelope me-2"></i>E-posta Gönder
-            </a>
+            <!-- Telefon Button - ID: 1 -->
+            <?php if (isset($contactCardsById[1])): ?>
+                <a href="<?php echo $contactCardsById[1]['contact_link'] ?: 'tel:+905551234567'; ?>" class="btn btn-light btn-lg">
+                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'fas fa-phone'; ?> me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[1]['button_text'] ?: 'Hemen Ara'; ?>
+                </a>
+            <?php else: ?>
+                <a href="tel:+905551234567" class="btn btn-light btn-lg">
+                    <i class="fas fa-phone me-2"></i>Hemen Ara
+                </a>
+            <?php endif; ?>
+            
+            <!-- E-posta Button - ID: 2 -->
+            <?php if (isset($contactCardsById[2])): ?>
+                <a href="<?php echo $contactCardsById[2]['contact_link'] ?: 'mailto:' . SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
+                    <i class="<?php echo $contactCardsById[2]['icon'] ?: 'fas fa-envelope'; ?> me-2" style="color: <?php echo $contactCardsById[2]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[2]['button_text'] ?: 'E-posta Gönder'; ?>
+                </a>
+            <?php else: ?>
+                <a href="mailto:<?php echo SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-envelope me-2"></i>E-posta Gönder
+                </a>
+            <?php endif; ?>
+            
             <a href="register.php" class="btn btn-warning btn-lg">
                 <i class="fas fa-upload me-2"></i>Dosya Yükle
             </a>

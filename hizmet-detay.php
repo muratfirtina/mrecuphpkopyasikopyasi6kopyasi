@@ -27,6 +27,22 @@ try {
     redirect('services.php');
 }
 
+// Contact cards bilgilerini getir
+try {
+    $stmt = $pdo->prepare("SELECT * FROM contact_cards WHERE id IN (1, 2, 3) ORDER BY id");
+    $stmt->execute();
+    $contactCards = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // ID'lere göre indexle
+    $contactCardsById = [];
+    foreach ($contactCards as $card) {
+        $contactCardsById[$card['id']] = $card;
+    }
+} catch (PDOException $e) {
+    error_log('Contact cards fetch failed: ' . $e->getMessage());
+    $contactCardsById = [];
+}
+
 // Meta bilgileri
 $pageTitle = $service['name'] . ' - Hizmetlerimiz';
 $pageDescription = substr($service['description'], 0, 160);
@@ -565,20 +581,46 @@ include 'includes/header.php';
                     <!-- Contact Info -->
                     <div class="contact-info">
                         <h5 class="mb-3"><i class="fas fa-headset me-2 text-primary"></i>İletişim</h5>
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fas fa-envelope text-primary me-2"></i>
-                            <span><?php echo SITE_EMAIL; ?></span>
-                        </div>
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fas fa-phone text-primary me-2"></i>
-                            <span>+90 (555) 123 45 67</span>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-clock text-primary me-2"></i>
-                            <span>7/24 Destek</span>
-                        </div>
+                        
+                        <!-- E-posta - ID: 2 -->
+                        <?php if (isset($contactCardsById[2])): ?>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="<?php echo $contactCardsById[2]['icon'] ?: 'fas fa-envelope'; ?> text-primary me-2" style="color: <?php echo $contactCardsById[2]['icon_color'] ?: ''; ?> !important;"></i>
+                                <span><?php echo $contactCardsById[2]['contact_info'] ?: SITE_EMAIL; ?></span>
+                            </div>
+                        <?php else: ?>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-envelope text-primary me-2"></i>
+                                <span><?php echo SITE_EMAIL; ?></span>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <!-- Telefon - ID: 1 -->
+                        <?php if (isset($contactCardsById[1])): ?>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="<?php echo $contactCardsById[1]['icon'] ?: 'fas fa-phone'; ?> text-primary me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?> !important;"></i>
+                                <span><?php echo $contactCardsById[1]['contact_info'] ?: '+90 (555) 123 45 67'; ?></span>
+                            </div>
+                        <?php else: ?>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-phone text-primary me-2"></i>
+                                <span>+90 (555) 123 45 67</span>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <!-- WhatsApp - ID: 3 -->
+                        <?php if (isset($contactCardsById[3])): ?>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="<?php echo $contactCardsById[3]['icon'] ?: 'fab fa-whatsapp'; ?> text-primary me-2" style="color: <?php echo $contactCardsById[3]['icon_color'] ?: ''; ?> !important;"></i>
+                                <span><?php echo $contactCardsById[3]['contact_info'] ?: '+90 (555) 123 45 67'; ?></span>
+                            </div>
+                        <?php else: ?>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fab fa-whatsapp text-primary me-2"></i>
+                                <span>+90 (555) 123 45 67</span>
+                            </div>
+                        <?php endif; ?>
                     </div>
-
                     <hr class="my-4">
 
                     <!-- Quick Links -->
@@ -678,12 +720,28 @@ try {
             Profesyonel ekibimiz ile iletişime geçin ve aracınız için en uygun chip tuning çözümünü keşfedin.
         </p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
-            <a href="tel:+905551234567" class="btn btn-light btn-lg">
-                <i class="fas fa-phone me-2"></i>Hemen Ara
-            </a>
-            <a href="mailto:<?php echo SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
-                <i class="fas fa-envelope me-2"></i>E-posta Gönder
-            </a>
+            <!-- Telefon Button - ID: 1 -->
+            <?php if (isset($contactCardsById[1])): ?>
+                <a href="<?php echo $contactCardsById[1]['contact_link'] ?: 'tel:+905551234567'; ?>" class="btn btn-light btn-lg">
+                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'fas fa-phone'; ?> me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[1]['button_text'] ?: 'Hemen Ara'; ?>
+                </a>
+            <?php else: ?>
+                <a href="tel:+905551234567" class="btn btn-light btn-lg">
+                    <i class="fas fa-phone me-2"></i>Hemen Ara
+                </a>
+            <?php endif; ?>
+            
+            <!-- E-posta Button - ID: 2 -->
+            <?php if (isset($contactCardsById[2])): ?>
+                <a href="<?php echo $contactCardsById[2]['contact_link'] ?: 'mailto:' . SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
+                    <i class="<?php echo $contactCardsById[2]['icon'] ?: 'fas fa-envelope'; ?> me-2" style="color: <?php echo $contactCardsById[2]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[2]['button_text'] ?: 'E-posta Gönder'; ?>
+                </a>
+            <?php else: ?>
+                <a href="mailto:<?php echo SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-envelope me-2"></i>E-posta Gönder
+                </a>
+            <?php endif; ?>
+            
             <a href="../register.php" class="btn btn-warning btn-lg">
                 <i class="fas fa-upload me-2"></i>Dosya Yükle
             </a>

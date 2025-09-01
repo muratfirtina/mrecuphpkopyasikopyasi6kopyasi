@@ -829,7 +829,7 @@ if (!isset($pageTitle)) {
                         <li class="nav-item">
                             <a class="nav-link modern-nav-link login-btn" href="/mrecuphpkopyasikopyasi6kopyasi/login.php">
                                 <i class="fas fa-sign-in-alt"></i>
-                                <span>Giriş</span>
+                                <span>Panele Giriş</span>
                             </a>
                         </li>
                         <li class="nav-item">

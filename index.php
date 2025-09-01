@@ -230,7 +230,7 @@ include 'includes/header.php';
                                                 <a href="<?php echo htmlspecialchars($slider['button_link']); ?>" class="btn btn-danger btn-lg px-4">
                                                     <i class="fas fa-search me-2"></i><?php echo htmlspecialchars($slider['button_text']); ?>
                                                 </a>
-                                                <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
+                                                <!-- <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
                                                     <a href="user/upload.php" class="btn btn-outline-light btn-lg px-4">
                                                         <i class="fas fa-upload me-2"></i>Dosya Yükle
                                                     </a>
@@ -238,14 +238,14 @@ include 'includes/header.php';
                                                     <a href="register.php" class="btn btn-outline-light btn-lg px-4">
                                                         <i class="fas fa-upload me-2"></i>Dosya Yükle
                                                     </a>
-                                                <?php endif; ?>
+                                                <?php endif; ?> -->
                                             </div>
                                         </div>
-                                        <div class="col-lg-4">
+                                        <!-- <div class="col-lg-4">
                                             <div class="text-center">
                                                 <i class="fas fa-microchip" style="font-size: 10rem; opacity: 0.2;"></i>
                                             </div>
-                                        </div>
+                                        </div> -->
                                     <?php else: ?>
                                         <!-- Diğer Slider'lar: Orijinal İçerik -->
                                         <div class="col-lg-8">
@@ -269,7 +269,7 @@ include 'includes/header.php';
                                                 <a href="<?php echo htmlspecialchars($slider['button_link']); ?>" class="btn btn-danger btn-lg px-4">
                                                     <i class="fas fa-search me-2"></i><?php echo htmlspecialchars($slider['button_text']); ?>
                                                 </a>
-                                                <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
+                                                <!-- <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
                                                     <a href="user/upload.php" class="btn btn-outline-light btn-lg px-4">
                                                         <i class="fas fa-upload me-2"></i>Dosya Yükle
                                                     </a>
@@ -277,10 +277,10 @@ include 'includes/header.php';
                                                     <a href="register.php" class="btn btn-outline-light btn-lg px-4">
                                                         <i class="fas fa-upload me-2"></i>Dosya Yükle
                                                     </a>
-                                                <?php endif; ?>
+                                                <?php endif; ?> -->
                                             </div>
                                         </div>
-                                        <div class="col-lg-4">
+                                        <<!-- div class="col-lg-4">
                                             <div class="text-center">
                                                 <?php
                                                 // Slider'a göre icon belirleme
@@ -297,7 +297,7 @@ include 'includes/header.php';
                                                 ?>
                                                 <i class="<?php echo $icon; ?>" style="font-size: 10rem; opacity: 0.2;"></i>
                                             </div>
-                                        </div>
+                                        </div> -->
                                     <?php endif; ?>
                                 </div>
                             </div>

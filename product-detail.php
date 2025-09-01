@@ -102,6 +102,22 @@ try {
     error_log('Product view count update failed: ' . $e->getMessage());
 }
 
+// Contact cards bilgilerini getir
+try {
+    $stmt = $pdo->prepare("SELECT * FROM contact_cards WHERE id IN (1, 2, 3) ORDER BY id");
+    $stmt->execute();
+    $contactCards = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // ID'lere göre indexle
+    $contactCardsById = [];
+    foreach ($contactCards as $card) {
+        $contactCardsById[$card['id']] = $card;
+    }
+} catch (PDOException $e) {
+    error_log('Contact cards fetch failed: ' . $e->getMessage());
+    $contactCardsById = [];
+}
+
 // Header include
 include 'includes/header.php';
 ?>
@@ -722,20 +738,48 @@ include 'includes/header.php';
                         <p class="mb-0">Ürün hakkında detaylı bilgi almak veya hemen satın almak için bizimle iletişime geçin.</p>
 
                         <div class="contact-buttons">
-                            <a href="tel:<?php echo CONTACT_PHONE; ?>" class="contact-btn contact-btn-primary">
-                                <i class="fas fa-phone"></i>
-                                Hemen Ara
-                            </a>
-                            <a href="https://wa.me/<?php echo preg_replace('/\D/', '', CONTACT_WHATSAPP); ?>?text=<?php echo urlencode("Merhaba, " . $product['name'] . " ürünü hakkında bilgi almak istiyorum."); ?>"
-                                class="contact-btn contact-btn-secondary" target="_blank">
-                                <i class="fab fa-whatsapp"></i>
-                                WhatsApp
-                            </a>
-                            <a href="mailto:<?php echo SMTP_FROM_EMAIL; ?>?subject=<?php echo urlencode($product['name'] . ' - Bilgi Talebi'); ?>&body=<?php echo urlencode('Merhaba, ' . $product['name'] . ' ürünü hakkında bilgi almak istiyorum.'); ?>"
-                                class="contact-btn contact-btn-secondary">
-                                <i class="fas fa-envelope"></i>
-                                E-posta
-                            </a>
+                            <!-- Telefon Button - ID: 1 -->
+                            <?php if (isset($contactCardsById[1])): ?>
+                                <a href="<?php echo $contactCardsById[1]['contact_link'] ?: 'tel:' . CONTACT_PHONE; ?>" class="contact-btn contact-btn-primary">
+                                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'fas fa-phone'; ?>" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i>
+                                    <?php echo $contactCardsById[1]['button_text'] ?: 'Hemen Ara'; ?>
+                                </a>
+                            <?php else: ?>
+                                <a href="tel:<?php echo CONTACT_PHONE; ?>" class="contact-btn contact-btn-primary">
+                                    <i class="fas fa-phone"></i>
+                                    Hemen Ara
+                                </a>
+                            <?php endif; ?>
+                            
+                            <!-- E-posta Button - ID: 2 -->
+                            <?php if (isset($contactCardsById[2])): ?>
+                                <a href="<?php echo $contactCardsById[2]['contact_link'] ?: 'mailto:' . SMTP_FROM_EMAIL . '?subject=' . urlencode($product['name'] . ' - Bilgi Talebi') . '&body=' . urlencode('Merhaba, ' . $product['name'] . ' ürünü hakkında bilgi almak istiyorum.'); ?>" 
+                                   class="contact-btn contact-btn-secondary">
+                                    <i class="<?php echo $contactCardsById[2]['icon'] ?: 'fas fa-envelope'; ?>" style="color: <?php echo $contactCardsById[2]['icon_color'] ?: ''; ?>;"></i>
+                                    <?php echo $contactCardsById[2]['button_text'] ?: 'E-posta'; ?>
+                                </a>
+                            <?php else: ?>
+                                <a href="mailto:<?php echo SMTP_FROM_EMAIL; ?>?subject=<?php echo urlencode($product['name'] . ' - Bilgi Talebi'); ?>&body=<?php echo urlencode('Merhaba, ' . $product['name'] . ' ürünü hakkında bilgi almak istiyorum.'); ?>"
+                                   class="contact-btn contact-btn-secondary">
+                                    <i class="fas fa-envelope"></i>
+                                    E-posta
+                                </a>
+                            <?php endif; ?>
+                            
+                            <!-- WhatsApp Button - ID: 3 -->
+                            <?php if (isset($contactCardsById[3])): ?>
+                                <a href="<?php echo $contactCardsById[3]['contact_link'] ?: 'https://wa.me/' . preg_replace('/\D/', '', CONTACT_WHATSAPP) . '?text=' . urlencode("Merhaba, " . $product['name'] . " ürünü hakkında bilgi almak istiyorum."); ?>" 
+                                   class="contact-btn contact-btn-secondary" target="_blank">
+                                    <i class="<?php echo $contactCardsById[3]['icon'] ?: 'fab fa-whatsapp'; ?>" style="color: <?php echo $contactCardsById[3]['icon_color'] ?: ''; ?>;"></i>
+                                    <?php echo $contactCardsById[3]['button_text'] ?: 'WhatsApp'; ?>
+                                </a>
+                            <?php else: ?>
+                                <a href="https://wa.me/<?php echo preg_replace('/\D/', '', CONTACT_WHATSAPP); ?>?text=<?php echo urlencode("Merhaba, " . $product['name'] . " ürünü hakkında bilgi almak istiyorum."); ?>"
+                                   class="contact-btn contact-btn-secondary" target="_blank">
+                                    <i class="fab fa-whatsapp"></i>
+                                    WhatsApp
+                                </a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
