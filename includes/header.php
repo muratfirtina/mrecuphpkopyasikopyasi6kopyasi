@@ -42,6 +42,62 @@ if (!isset($pageTitle)) {
     <link href="<?php echo isset($cssPath) ? $cssPath : '/mrecuphpkopyasikopyasi6kopyasi/assets/css/style.css'; ?>" rel="stylesheet">
     
     <!-- Modern Navigation Styles -->
+    <?php 
+    // PHP değişkenlerini CSS bloğundan önce tanımla
+    $currentPage = basename($_SERVER['PHP_SELF']);
+    $isHomePage = ($currentPage === 'index.php' || $currentPage === '');
+    
+    // CSS için değişkenleri hazırla
+    if ($isHomePage) {
+        $navbarBackground = 'rgba(7, 30, 61, 0.1)';
+        $navbarBoxShadow = '0 2px 15px rgba(0, 0, 0, 0.1)';
+    } else {
+        $navbarBackground = '#071e3d';
+        $navbarBoxShadow = '0 2px 15px rgba(0, 0, 0, 0.2)';
+    }
+    ?>
+    <?php 
+    // Responsive CSS için dinamik sınıflar tanımla
+    $bodyPaddingClass = $isHomePage ? 'home-page-body' : 'inner-page-body';
+    $responsiveBodyCSS = '';
+    
+    if (!$isHomePage) {
+        $responsiveBodyCSS = '
+        /* Ana sayfa dışındaki sayfalar için responsive padding */
+        @media (max-width: 991.98px) {
+            body.inner-page-body {
+                padding-top: 120px !important;
+            }
+        }
+        
+        @media (max-width: 767.98px) {
+            body.inner-page-body {
+                padding-top: 100px !important;
+            }
+        }
+        
+        body.inner-page-body {
+            padding-top: 140px !important;
+        }';
+    } else {
+        $responsiveBodyCSS = '
+        body.home-page-body {
+            padding-top: 0px !important;
+        }
+        
+        @media (max-width: 991.98px) {
+            body.home-page-body {
+                padding-top: 0px !important;
+            }
+        }
+        
+        @media (max-width: 767.98px) {
+            body.home-page-body {
+                padding-top: 0px !important;
+            }
+        }';
+    }
+    ?>
     <style>
     /* Bootstrap Icons Styling */
     .bi {
@@ -51,19 +107,10 @@ if (!isset($pageTitle)) {
     
     /* Modern Navigation Styles */
     .modern-navbar {
-        <?php 
-        $currentPage = basename($_SERVER['PHP_SELF']);
-        $isHomePage = ($currentPage === 'index.php' || $currentPage === '');
-        
-        if ($isHomePage): ?>
-        background: rgba(7, 30, 61, 0.1) !important;
+        background: <?php echo $navbarBackground; ?> !important;
         /* backdrop-filter: blur(15px); */
         -webkit-backdrop-filter: blur(15px);
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-        <?php else: ?>
-        background: #071e3d !important;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
-        <?php endif; ?>
+        box-shadow: <?php echo $navbarBoxShadow; ?>;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         transition: all 0.3s ease;
         padding: 1.1rem 0;
@@ -374,16 +421,6 @@ if (!isset($pageTitle)) {
             padding: 1.25rem 0;
         }
         
-        <?php if (!$isHomePage): ?>
-        body {
-            padding-top: 120px !important;
-        }
-        <?php else: ?>
-        body {
-            padding-top: 0px;
-        }
-        <?php endif; ?>
-        
         .brand-text {
             display: none;
         }
@@ -410,16 +447,6 @@ if (!isset($pageTitle)) {
         .modern-navbar.scrolled {
             padding: 1rem 0;
         }
-        
-        <?php if (!$isHomePage): ?>
-        body {
-            padding-top: 100px !important;
-        }
-        <?php else: ?>
-        body {
-            padding-top: 0px;
-        }
-        <?php endif; ?>
         
         .navbar-collapse {
             background: rgba(0, 0, 0, 0.9);
@@ -476,17 +503,8 @@ if (!isset($pageTitle)) {
         line-height: 1.6 !important;
     }
     
-    /* Ana sayfa değilse normal padding ver */
-    <?php 
-    $currentPage = basename($_SERVER['PHP_SELF']);
-    $isHomePage = ($currentPage === 'index.php' || $currentPage === '');
-    
-    if (!$isHomePage): ?>
-    /* Ana sayfa dışındaki sayfalar için padding */
-    body {
-        padding-top: 140px !important;
-    }
-    <?php endif; ?>
+    /* Ana sayfa ve iç sayfa padding'ı - Dinamik CSS ile yönetiliyor */
+    <?php echo $responsiveBodyCSS; ?>
     
     /* Ensure responsive breakpoints still work properly */
     @media (max-width: 575.98px) {
@@ -563,7 +581,7 @@ if (!isset($pageTitle)) {
     <link rel="icon" type="image/svg+xml" href="/mrecuphpkopyasikopyasi6kopyasi/assets/images/favicon.svg">
     <link rel="shortcut icon" href="/mrecuphpkopyasikopyasi6kopyasi/assets/images/favicon.svg">
 </head>
-<body class="<?php echo isset($bodyClass) ? $bodyClass : ''; ?>">
+<body class="<?php echo isset($bodyClass) ? $bodyClass . ' ' : ''; ?><?php echo $bodyPaddingClass; ?>">
     
     <!-- ECU Spinner Overlay -->
     <div id="ecuSpinner" class="ecu-spinner-overlay" style="display: none;">
@@ -719,7 +737,6 @@ if (!isset($pageTitle)) {
                                 <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/kategori/<?php echo $headerCategory['slug']; ?>">
                                     <i class="bi bi-tag-fill me-2"></i>
                                     <?php echo htmlspecialchars($headerCategory['name']); ?>
-                                    <span class="badge bg-secondary ms-auto"><?php echo $headerCategory['product_count']; ?></span>
                                 </a>
                             </li>
                             <?php

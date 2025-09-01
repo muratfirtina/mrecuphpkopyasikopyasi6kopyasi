@@ -280,7 +280,7 @@ include 'includes/header.php';
                                                 <?php endif; ?> -->
                                             </div>
                                         </div>
-                                        <<!-- div class="col-lg-4">
+                                        <!-- div class="col-lg-4">
                                             <div class="text-center">
                                                 <?php
                                                 // Slider'a göre icon belirleme
@@ -398,12 +398,10 @@ include 'includes/header.php';
                                         <i class="<?php echo $icon; ?>"></i>
                                     </div>
                                     <h4 class="jet-box-title"><?php echo strtoupper(htmlspecialchars($category['name'])); ?></h4>
-                                    <h5 class="jet-box-subtitle"><?php echo $category['product_count']; ?> ÜRÜN</h5>
                                 </div>
                                 <!-- Back Side (Siyah) -->
                                 <div class="flip-card-back">
                                     <h4 class="flip-back-title"><?php echo strtoupper(htmlspecialchars($category['name'])); ?></h4>
-                                    <h5 class="flip-back-subtitle"><?php echo $category['product_count']; ?> ÜRÜN MEVCUT</h5>
                                     <p class="flip-back-description">
                                         <?php echo !empty($category['description'])
                                             ? htmlspecialchars(substr($category['description'], 0, 100)) . '...'
