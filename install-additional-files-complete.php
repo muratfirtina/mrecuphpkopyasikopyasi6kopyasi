@@ -189,7 +189,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION[\'user_
                         <?php foreach ($additionalFiles as $file): ?>
                             <tr class="<?php echo $file[\'is_read\'] ? \'\' : \'table-warning\'; ?>">
                                 <td>
-                                    <i class="bi bi-file me-1"></i>
+                                    <i class="bi bi-folder2-open me-1"></i>
                                     <?php echo htmlspecialchars($file[\'original_name\']); ?>
                                     <?php if (!$file[\'is_read\'] && $file[\'receiver_id\'] === $_SESSION[\'user_id\']): ?>
                                         <span class="badge bg-warning ms-2">Yeni</span>
@@ -386,7 +386,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($fileId, $userId, \'user\');
                         <?php foreach ($additionalFiles as $file): ?>
                             <tr class="<?php echo $file[\'is_read\'] ? \'\' : \'table-warning\'; ?>">
                                 <td>
-                                    <i class="bi bi-file me-1"></i>
+                                    <i class="bi bi-folder2-open me-1"></i>
                                     <?php echo htmlspecialchars($file[\'original_name\']); ?>
                                     <?php if (!$file[\'is_read\'] && $file[\'receiver_id\'] === $userId): ?>
                                         <span class="badge bg-warning ms-2">Yeni</span>

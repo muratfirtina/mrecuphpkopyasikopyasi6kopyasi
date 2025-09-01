@@ -88,7 +88,7 @@ try {
             <!-- Dosya Bilgileri -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h6 class="mb-0"><i class="bi bi-file-alt me-2"></i>Dosya Bilgileri</h6>
+                    <h6 class="mb-0"><i class="bi bi-folder2-open-alt me-2"></i>Dosya Bilgileri</h6>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -305,7 +305,7 @@ try {
             <?php if (!empty($creditHistory)): ?>
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h6 class="mb-0"><i class="bi bi-coins me-2"></i>İlgili Kredi İşlemleri</h6>
+                        <h6 class="mb-0"><i class="bi bi-coin me-2"></i>İlgili Kredi İşlemleri</h6>
                     </div>
                     <div class="card-body p-0">
                         <div class="list-group list-group-flush">
@@ -334,7 +334,7 @@ try {
             <?php if (!empty($otherFiles)): ?>
                 <div class="card">
                     <div class="card-header">
-                        <h6 class="mb-0"><i class="bi bi-files me-2"></i>Kullanıcının Diğer Dosyaları</h6>
+                        <h6 class="mb-0"><i class="bi bi-folder2-opens me-2"></i>Kullanıcının Diğer Dosyaları</h6>
                     </div>
                     <div class="card-body p-0">
                         <div class="list-group list-group-flush">

@@ -310,7 +310,7 @@ try {
 $pageTitle = 'Kullanıcılar';
 $pageDescription = $status === '1' ? 'Aktif kullanıcıları yönetin ve düzenleyin' : 
                  ($status === '0' ? 'Pasif kullanıcıları yönetin ve düzenleyin' : 'Sistem kullanıcılarını yönetin ve düzenleyin');
-$pageIcon = 'bi bi-users';
+$pageIcon = 'bi bi-person';
 
 // Sidebar için istatistikler
 $totalUsersForSidebar = $stats['total_users'];
@@ -329,7 +329,7 @@ $quickActions = [
     [
         'text' => 'Excel Export',
         'url' => 'export-users.php',
-        'icon' => 'bi bi-file-excel',
+        'icon' => 'bi bi-folder2-open-excel',
         'class' => 'info'
     ],
     [
@@ -430,7 +430,7 @@ function deleteUser(userId, username) {
                     <small class="text-success">+<?php echo $stats['new_users_30d']; ?> son 30 gün</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-users text-primary fa-lg"></i>
+                    <i class="bi bi-person text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -475,7 +475,7 @@ function deleteUser(userId, username) {
                     <small class="text-muted">Sistem geneli</small>
                 </div>
                 <div class="bg-info bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-coins text-info fa-lg"></i>
+                    <i class="bi bi-coin text-info fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -577,7 +577,7 @@ function deleteUser(userId, username) {
 <div class="card admin-card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
-            <i class="bi bi-users me-2"></i>
+            <i class="bi bi-person me-2"></i>
             Kullanıcı Listesi (<?php echo $totalUsers; ?> kullanıcı)
         </h5>
         
@@ -592,7 +592,7 @@ function deleteUser(userId, username) {
                         <i class="bi bi-check-circle me-2 text-success"></i>Aktif Yap
                     </a></li>
                     <li><a class="dropdown-item" href="#" onclick="bulkAction('deactivate')">
-                        <i class="bi bi-times-circle me-2 text-warning"></i>Pasif Yap
+                        <i class="bi bi-clock-history me-2 text-warning"></i>Pasif Yap
                     </a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="#" onclick="bulkAction('delete')">
@@ -606,7 +606,7 @@ function deleteUser(userId, username) {
     <div class="card-body p-0">
         <?php if (empty($users)): ?>
             <div class="text-center py-5">
-                <i class="bi bi-users fa-3x text-muted mb-3"></i>
+                <i class="bi bi-person fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">
                     <?php if ($search || $role || $status !== ''): ?>
                         Filtreye uygun kullanıcı bulunamadı

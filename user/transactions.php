@@ -149,7 +149,7 @@ include '../includes/user_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="bi bi-history me-2 text-info"></i>İşlem Geçmişi
+                        <i class="bi bi-pencil me-2 text-info"></i>İşlem Geçmişi
                     </h1>
                     <p class="text-muted mb-0">Kredi işlemlerinizi ve hesap aktivitelerinizi takip edin</p>
                 </div>
@@ -534,7 +534,7 @@ include '../includes/user_header.php';
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white border-0 py-3">
                             <h6 class="mb-0">
-                                <i class="bi bi-file me-2 text-secondary"></i>Son Dosya İşlemleri
+                                <i class="bi bi-folder2-open me-2 text-secondary"></i>Son Dosya İşlemleri
                             </h6>
                         </div>
                         <div class="card-body">
@@ -548,7 +548,7 @@ include '../includes/user_header.php';
                                     <?php foreach (array_slice($recentFiles, 0, 5) as $file): ?>
                                         <div class="recent-file-item">
                                             <div class="file-icon">
-                                                <i class="bi bi-file-alt"></i>
+                                                <i class="bi bi-folder2-open-alt"></i>
                                             </div>
                                             <div class="file-details">
                                                 <div class="file-name" title="<?php echo htmlspecialchars($file['file_name'] ?? 'Bilinmeyen dosya'); ?>">

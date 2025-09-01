@@ -290,12 +290,12 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-danger"><?php echo $rejectedCount; ?></div>
                                     <div class="stat-label">Reddedilen</div>
                                     <div class="stat-trend">
-                                        <i class="bi bi-times-circle text-danger"></i>
+                                        <i class="bi bi-clock-history text-danger"></i>
                                         <span class="text-danger">İptal edildi</span>
                                     </div>
                                 </div>
                                 <div class="stat-icon text-danger">
-                                    <i class="bi bi-times-circle"></i>
+                                    <i class="bi bi-clock-history"></i>
                                 </div>
                             </div>
                         </div>
@@ -551,7 +551,7 @@ include '../includes/user_header.php';
                                             <td>
                                                 <?php if ($revision['credits_charged'] > 0): ?>
                                                     <span class="badge bg-warning text-dark">
-                                                        <i class="bi bi-coins me-1"></i>
+                                                        <i class="bi bi-coin me-1"></i>
                                                         <?php echo $revision['credits_charged']; ?>
                                                     </span>
                                                 <?php else: ?>
@@ -583,7 +583,7 @@ include '../includes/user_header.php';
                                                     
                                                     <a href="files.php?view=<?php echo $revision['upload_id']; ?>" 
                                                        class="btn btn-outline-secondary" title="Orijinal Dosya">
-                                                        <i class="bi bi-file"></i>
+                                                        <i class="bi bi-folder2-open"></i>
                                                     </a>
                                                     
                                                     <?php if ($revision['status'] === 'completed' && !empty($revision['revision_files'])): ?>
@@ -684,7 +684,7 @@ include '../includes/user_header.php';
                 </div>
                 
                 <div class="info-section">
-                    <h6><i class="bi bi-coins me-2"></i>Ücretlendirme</h6>
+                    <h6><i class="bi bi-coin me-2"></i>Ücretlendirme</h6>
                     <p>Revize talepleri için değişikliğin karmaşıklığına göre ek ücret alınabilir. Ücret bilgisi talep onaylanmadan önce size bildirilir.</p>
                 </div>
                 

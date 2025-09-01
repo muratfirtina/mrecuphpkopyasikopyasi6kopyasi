@@ -155,7 +155,7 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-users me-2"></i>Kullanıcı Ayarları
+                        <i class="bi bi-person me-2"></i>Kullanıcı Ayarları
                     </h5>
                 </div>
                 <div class="card-body">
@@ -199,7 +199,7 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-file me-2"></i>Dosya Ayarları
+                        <i class="bi bi-folder2-open me-2"></i>Dosya Ayarları
                     </h5>
                 </div>
                 <div class="card-body">

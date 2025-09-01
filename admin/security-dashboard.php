@@ -188,7 +188,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="bi bi-history me-2"></i>Son Güvenlik Olayları
+                    <i class="bi bi-pencil me-2"></i>Son Güvenlik Olayları
                 </h5>
             </div>
             <div class="card-body">

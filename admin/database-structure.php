@@ -220,7 +220,7 @@ include '../includes/admin_sidebar.php';
                         </div>
                     <?php elseif ($revisionData['revision']['response_id']): ?>
                         <div class="alert alert-danger">
-                            <i class="bi bi-times-circle me-2"></i>
+                            <i class="bi bi-clock-history me-2"></i>
                             Response ID mevcut ama file_responses tablosunda veri bulunamadı!
                         </div>
                     <?php endif; ?>
@@ -290,7 +290,7 @@ include '../includes/admin_sidebar.php';
 
                 <?php else: ?>
                     <div class="alert alert-danger">
-                        <i class="bi bi-times-circle me-2"></i>
+                        <i class="bi bi-clock-history me-2"></i>
                         Revizyon bulunamadı!
                     </div>
                 <?php endif; ?>

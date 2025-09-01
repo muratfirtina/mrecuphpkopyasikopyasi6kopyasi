@@ -46,7 +46,7 @@ include 'includes/header.php';
                     <div class="card-body p-4 text-center">
                         <?php if ($error): ?>
                             <div class="mb-4">
-                                <i class="bi bi-times-circle text-danger" style="font-size: 4rem;"></i>
+                                <i class="bi bi-clock-history text-danger" style="font-size: 4rem;"></i>
                                 <h4 class="mt-3 text-danger">Doğrulama Başarısız</h4>
                                 <p class="text-muted"><?php echo $error; ?></p>
                                 

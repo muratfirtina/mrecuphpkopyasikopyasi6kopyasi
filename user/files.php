@@ -439,7 +439,7 @@ include '../includes/user_header.php';
                                     </div>
                                 </div>
                                 <div class="stat-icon bg-primary">
-                                    <i class="bi bi-file"></i>
+                                    <i class="bi bi-folder2-open"></i>
                                 </div>
                             </div>
                         </div>
@@ -569,7 +569,7 @@ include '../includes/user_header.php';
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item" href="#" onclick="exportToExcel()">
-                                            <i class="bi bi-file-excel me-2"></i>Excel Export
+                                            <i class="bi bi-folder2-open-excel me-2"></i>Excel Export
                                         </a></li>
                                         <li><a class="dropdown-item" href="#" onclick="refreshPage()">
                                             <i class="bi bi-sync me-2"></i>Sayfayı Yenile
@@ -627,7 +627,7 @@ include '../includes/user_header.php';
                             <thead>
                                 <tr>
                                     <th width="40">
-                                        <i class="bi bi-file-alt"></i>
+                                        <i class="bi bi-folder2-open-alt"></i>
                                     </th>
                                     <th>Dosya Adı</th>
                                     <th>Araç Bilgileri</th>
@@ -642,7 +642,7 @@ include '../includes/user_header.php';
                                     <tr class="file-row" data-file-id="<?php echo $file['id']; ?>">
                                         <td>
                                             <div class="file-icon">
-                                                <i class="bi bi-file-alt text-primary"></i>
+                                                <i class="bi bi-folder2-open-alt text-primary"></i>
                                             </div>
                                         </td>
                                         <td>
@@ -650,7 +650,7 @@ include '../includes/user_header.php';
                                                 <?php if (isset($file['processing_type']) && $file['processing_type'] === 'revision'): ?>
                                                     <!-- Revize İşlenen Dosya Görünümü -->
                                                     <h6 class="file-name mb-1">
-                                                        <i class="bi bi-file-alt text-primary me-1"></i>
+                                                        <i class="bi bi-folder2-open-alt text-primary me-1"></i>
                                                         <strong>Ana Dosya:</strong> <?php echo htmlspecialchars($file['original_name']); ?>
                                                         <span class="badge bg-info ms-2">
                                                             <i class="bi bi-sync-alt me-1"></i>Revize İşleniyor
@@ -971,7 +971,7 @@ include '../includes/user_header.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="bi bi-times-circle me-2 text-danger"></i>Dosya İptal Talebi
+                    <i class="bi bi-clock-history me-2 text-danger"></i>Dosya İptal Talebi
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -998,7 +998,7 @@ include '../includes/user_header.php';
                 
                 <div class="mb-3">
                     <label class="form-label fw-semibold">
-                        <i class="bi bi-file me-1"></i>İptal edilecek dosya:
+                        <i class="bi bi-folder2-open me-1"></i>İptal edilecek dosya:
                     </label>
                     <div class="form-control-plaintext" id="cancellationFileName" style="background: #f8f9fa; padding: 0.75rem; border-radius: 8px;"></div>
                 </div>

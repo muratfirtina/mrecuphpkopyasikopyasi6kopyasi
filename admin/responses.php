@@ -290,7 +290,7 @@ include '../includes/admin_sidebar.php';
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <i class="bi bi-file-download text-success me-2"></i>
+                                            <i class="bi bi-folder2-open-download text-success me-2"></i>
                                             <div>
                                                 <div class="fw-bold"><?php echo htmlspecialchars($response['original_name']); ?></div>
                                                 <small class="text-muted"><?php echo formatFileSize($response['file_size']); ?></small>
@@ -384,7 +384,7 @@ include '../includes/admin_sidebar.php';
 
             <?php else: ?>
                 <div class="text-center py-5">
-                    <i class="bi bi-file-download fa-4x text-muted mb-3"></i>
+                    <i class="bi bi-folder2-open-download fa-4x text-muted mb-3"></i>
                     <h5 class="text-muted">Yanıt dosyası bulunamadı</h5>
                     <p class="text-muted">Arama kriterlerinizi değiştirerek tekrar deneyin.</p>
                 </div>

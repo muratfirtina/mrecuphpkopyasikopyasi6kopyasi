@@ -435,7 +435,7 @@ class SampleDataGenerator {
                             </div>
                             
                             <div class="col-md-6">
-                                <h5><i class="bi bi-files-o"></i> Oluşturulan Dosyalar</h5>
+                                <h5><i class="bi bi-folder2-opens-o"></i> Oluşturulan Dosyalar</h5>
                                 <div class="file-list">
                                     <?php
                                     $sampleDir = __DIR__ . '/sample_data/';
@@ -445,7 +445,7 @@ class SampleDataGenerator {
                                             foreach ($files as $file) {
                                                 echo '<div class="file-item">';
                                                 echo '<span>';
-                                                echo '<i class="bi bi-file-csv text-success"></i> ';
+                                                echo '<i class="bi bi-folder2-open-csv text-success"></i> ';
                                                 echo basename($file);
                                                 echo '</span>';
                                                 echo '<span class="text-muted">';

@@ -110,7 +110,7 @@ try {
 
 $pageTitle = 'İşlem Geçmişi';
 $pageDescription = 'Kredi işlemlerini görüntüleyin ve yönetin';
-$pageIcon = 'bi bi-history';
+$pageIcon = 'bi bi-pencil';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -244,7 +244,7 @@ include '../includes/admin_sidebar.php';
     <div class="card-body p-0">
         <?php if (empty($transactions)): ?>
             <div class="text-center py-5">
-                <i class="bi bi-history fa-3x text-muted mb-3"></i>
+                <i class="bi bi-pencil fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">
                     <?php if ($search || $filter !== 'all' || $dateFilter): ?>
                         Filtreye uygun işlem bulunamadı

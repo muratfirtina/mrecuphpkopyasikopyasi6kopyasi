@@ -527,7 +527,7 @@ include '../includes/design_header.php';
                                 <i class="bi bi-heart me-2"></i>Temel Değerler
                             </button>
                             <button class="nav-link" id="nav-features-tab" data-bs-toggle="tab" data-bs-target="#nav-features" type="button">
-                                <i class="bi bi-concierge-bell me-2"></i>Hizmet Özellikleri
+                                <i class="bi bi-gear me-2"></i>Hizmet Özellikleri
                             </button>
                             <button class="nav-link" id="nav-vision-tab" data-bs-toggle="tab" data-bs-target="#nav-vision" type="button">
                                 <i class="bi bi-eye me-2"></i>Vizyon
@@ -811,7 +811,7 @@ include '../includes/design_header.php';
                         <div class="tab-pane fade" id="nav-features">
                             <div class="row">
                                 <div class="col-lg-8">
-                                    <h5 class="mb-3"><i class="bi bi-concierge-bell me-2 text-primary"></i>Mevcut Hizmet Özellikleri</h5>
+                                    <h5 class="mb-3"><i class="bi bi-gear me-2 text-primary"></i>Mevcut Hizmet Özellikleri</h5>
                                     <div id="serviceFeaturesList">
                                         <?php foreach ($service_features as $feature): ?>
                                             <div class="feature-card">
@@ -865,7 +865,7 @@ include '../includes/design_header.php';
                                         
                                         <?php if (empty($service_features)): ?>
                                             <div class="text-center text-muted py-4">
-                                                <i class="bi bi-concierge-bell fa-3x mb-3 opacity-25"></i>
+                                                <i class="bi bi-gear fa-3x mb-3 opacity-25"></i>
                                                 <p>Henüz hizmet özelliği eklenmemiş.</p>
                                             </div>
                                         <?php endif; ?>

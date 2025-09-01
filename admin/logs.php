@@ -247,10 +247,10 @@ include '../includes/admin_sidebar.php';
             </button>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="#" onclick="exportLogs('csv')">
-                    <i class="bi bi-file-csv me-2"></i>CSV Olarak
+                    <i class="bi bi-folder2-open-csv me-2"></i>CSV Olarak
                 </a></li>
                 <li><a class="dropdown-item" href="#" onclick="exportLogs('txt')">
-                    <i class="bi bi-file-alt me-2"></i>TXT Olarak
+                    <i class="bi bi-folder2-open-alt me-2"></i>TXT Olarak
                 </a></li>
             </ul>
         </div>

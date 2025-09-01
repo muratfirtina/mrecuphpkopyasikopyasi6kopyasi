@@ -44,8 +44,8 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+     <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?php echo $basePath; ?>assets/css/style.css">
@@ -493,7 +493,7 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
                 <span>Medya Yönetimi</span>
             </a>
             <a href="services.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'services.php') ? 'active' : ''; ?>">
-                <i class="bi bi-concierge-bell"></i>
+                <i class="bi bi-gear"></i>
                 <span>Hizmet Yönetimi</span>
             </a>
             <a href="footer.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'footer.php') ? 'active' : ''; ?>">

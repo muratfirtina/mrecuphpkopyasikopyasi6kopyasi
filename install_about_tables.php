@@ -289,7 +289,7 @@ if ($steps_completed === $total_steps) {
     
 } else {
     echo "<div class='step error text-center'>";
-    echo "<h3><i class='bi bi-times-circle me-2 text-danger'></i>Kurulum Tamamlanamadı</h3>";
+    echo "<h3><i class='bi bi-clock-history me-2 text-danger'></i>Kurulum Tamamlanamadı</h3>";
     echo "<p>Lütfen hataları kontrol edin ve tekrar deneyin.</p>";
     echo "<a href='?' class='btn btn-primary'><i class='bi bi-redo me-2'></i>Tekrar Dene</a>";
     echo "</div>";

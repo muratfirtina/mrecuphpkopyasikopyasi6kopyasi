@@ -150,7 +150,7 @@ if (isset($_SESSION['user_id'])) {
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'cancellations.php' ? 'active' : ''; ?>" href="cancellations.php">
                     <div class="nav-icon bg-danger">
-                        <i class="bi bi-times-circle"></i>
+                        <i class="bi bi-clock-history"></i>
                     </div>
                     <span>İptal Taleplerim</span>
                     <?php
@@ -184,7 +184,7 @@ if (isset($_SESSION['user_id'])) {
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'credits.php' ? 'active' : ''; ?>" href="credits.php">
                     <div class="nav-icon bg-warning">
-                        <i class="bi bi-coins"></i>
+                        <i class="bi bi-coin"></i>
                     </div>
                     <span>Kredi İşlemleri</span>
                 </a>
@@ -192,7 +192,7 @@ if (isset($_SESSION['user_id'])) {
             <!-- <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'transactions.php' ? 'active' : ''; ?>" href="transactions.php">
                     <div class="nav-icon bg-info">
-                        <i class="bi bi-history"></i>
+                        <i class="bi bi-pencil"></i>
                     </div>
                     <span>İşlem Geçmişi</span>
                 </a>
@@ -270,7 +270,7 @@ if (isset($_SESSION['user_id'])) {
                     <div class="widget-actions">
                         <div class="action-buttons">
                             <a href="credits.php" class="btn btn-sm btn-light-custom btn-secondary-action">
-                                <i class="bi bi-history me-1"></i>Geçmiş
+                                <i class="bi bi-pencil me-1"></i>Geçmiş
                             </a>
                         </div>
                     </div>

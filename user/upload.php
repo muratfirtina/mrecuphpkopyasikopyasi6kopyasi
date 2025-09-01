@@ -564,7 +564,7 @@ try {
                                                     </p>
                                                     <div class="upload-info">
                                                         <div class="info-item">
-                                                            <i class="bi bi-file-code me-1"></i>
+                                                            <i class="bi bi-folder2-open-code me-1"></i>
                                                             <span>Desteklenen: Tüm dosya türleri</span>
                                                         </div>
                                                         <div class="info-item">
@@ -580,7 +580,7 @@ try {
                                         <div class="mb-4" id="fileInfo" style="display: none;">
                                             <div class="file-preview">
                                                 <div class="file-icon">
-                                                    <i class="bi bi-file-alt"></i>
+                                                    <i class="bi bi-folder2-open-alt"></i>
                                                 </div>
                                                 <div class="file-details">
                                                     <div class="file-name" id="fileName"></div>
@@ -662,7 +662,7 @@ try {
 
                                         <div class="summary-card mb-4">
                                             <h6 class="summary-title">
-                                                <i class="bi bi-file me-2"></i>Dosya Bilgileri
+                                                <i class="bi bi-folder2-open me-2"></i>Dosya Bilgileri
                                             </h6>
                                             <div class="summary-content">
                                                 <div class="summary-item">

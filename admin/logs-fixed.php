@@ -95,7 +95,7 @@ $pageTitle = 'Sistem Logları';
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2">
-                        <i class="bi bi-history me-2"></i><?php echo $pageTitle; ?>
+                        <i class="bi bi-pencil me-2"></i><?php echo $pageTitle; ?>
                     </h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <div class="btn-group me-2">
@@ -132,7 +132,7 @@ $pageTitle = 'Sistem Logları';
                     <div class="card-body">
                         <?php if (empty($logs)): ?>
                             <div class="text-center py-5">
-                                <i class="bi bi-file-alt text-muted" style="font-size: 3rem;"></i>
+                                <i class="bi bi-folder2-open-alt text-muted" style="font-size: 3rem;"></i>
                                 <p class="text-muted mt-3">Henüz log kaydı bulunmuyor.</p>
                                 <p class="text-muted">Güvenlik olayları otomatik olarak burada görünecektir.</p>
                             </div>

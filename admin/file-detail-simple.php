@@ -203,7 +203,7 @@ include '../includes/admin_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="bi bi-file-alt me-2 text-primary"></i>
+                        <i class="bi bi-folder2-open-alt me-2 text-primary"></i>
                         <?php echo strtoupper($fileType); ?> Dosya Detayı
                     </h1>
                     <p class="text-muted mb-0">
@@ -255,7 +255,7 @@ include '../includes/admin_header.php';
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted">Dosya Adı</label>
                                     <div class="form-control-plaintext">
-                                        <i class="bi bi-file me-2 text-primary"></i>
+                                        <i class="bi bi-folder2-open me-2 text-primary"></i>
                                         <strong><?php echo htmlspecialchars($fileData['original_name'] ?? $fileData['filename'] ?? 'Bilinmeyen'); ?></strong>
                                     </div>
                                 </div>

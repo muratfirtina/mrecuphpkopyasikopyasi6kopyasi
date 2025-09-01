@@ -578,7 +578,7 @@ include '../includes/user_header.php';
                                 <?php if ($totalCreditsSpent > 0): ?>
                                     <div class="detail-item total-credits-item">
                                         <span class="label">
-                                            <i class="bi bi-coins text-warning me-1"></i>
+                                            <i class="bi bi-coin text-warning me-1"></i>
                                             <?php echo $fileType === 'response' ? 'Bu Dosya için Toplam Harcama:' : 'Bu Dosya için Toplam Harcama:'; ?>
                                         </span>
                                         <span class="value total-credits-value">
@@ -962,7 +962,7 @@ include '../includes/user_header.php';
                                                 </span>
                                                 <?php if ($file['credits'] > 0): ?>
                                                     <span class="meta-item">
-                                                        <i class="bi bi-coins me-1"></i>
+                                                        <i class="bi bi-coin me-1"></i>
                                                         <span class="badge bg-danger"><?php echo $file['credits']; ?> kredi</span>
                                                     </span>
                                                 <?php else: ?>
@@ -1205,7 +1205,7 @@ include '../includes/user_header.php';
                             html += `
                                 <div class="other-file-item ${isUnread ? 'unread' : ''}" data-file-id="${file.id}" style="animation-delay: ${index * 0.05}s">
                                     <div class="file-icon">
-                                        <i class="bi bi-file text-white"></i>
+                                        <i class="bi bi-folder2-open text-white"></i>
                                     </div>
                                     <div class="flex-grow-1">
                                         <strong>${escapeHtml(file.original_name)}</strong>
@@ -1530,7 +1530,7 @@ include '../includes/user_header.php';
 
                                                         <?php if (isset($comm['file_name'])): ?>
                                                             <span class="badge bg-secondary ms-2">
-                                                                <i class="bi bi-file me-1"></i><?php echo htmlspecialchars(substr($comm['file_name'], 0, 20)) . (strlen($comm['file_name']) > 20 ? '...' : ''); ?>
+                                                                <i class="bi bi-folder2-open me-1"></i><?php echo htmlspecialchars(substr($comm['file_name'], 0, 20)) . (strlen($comm['file_name']) > 20 ? '...' : ''); ?>
                                                             </span>
                                                         <?php endif; ?>
                                                     </h6>
@@ -1651,7 +1651,7 @@ include '../includes/user_header.php';
                                                 <?php if (!empty($comm['revision_files'])): ?>
                                                     <div class="admin-files mt-3">
                                                         <h6 class="text-success mb-2">
-                                                            <i class="bi bi-file-download me-2"></i>
+                                                            <i class="bi bi-folder2-open-download me-2"></i>
                                                             Admin'in Yükledıği Revizyon Dosyaları:
                                                         </h6>
                                                         <div class="admin-files-list">
@@ -1659,7 +1659,7 @@ include '../includes/user_header.php';
                                                                 <div class="admin-file-item">
                                                                     <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-2">
                                                                         <div class="file-info">
-                                                                            <i class="bi bi-file-download text-success me-2"></i>
+                                                                            <i class="bi bi-folder2-open-download text-success me-2"></i>
                                                                             <strong><?php echo htmlspecialchars($revFile['original_name']); ?></strong>
                                                                             <span class="text-muted ms-2">
                                                                                 (<?php echo formatFileSize($revFile['file_size']); ?>)
@@ -1693,14 +1693,14 @@ include '../includes/user_header.php';
                                                     <?php if ($comm['type'] === 'admin_response' && !empty($comm['response_id'])): ?>
                                                         <div class="admin-files mt-3">
                                                             <h6 class="text-success mb-2">
-                                                                <i class="bi bi-file-download me-2"></i>
+                                                                <i class="bi bi-folder2-open-download me-2"></i>
                                                                 Admin'in Yüklediği Yanıt Dosyası:
                                                             </h6>
                                                             <div class="admin-files-list">
                                                                 <div class="admin-file-item">
                                                                     <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-2">
                                                                         <div class="file-info">
-                                                                            <i class="bi bi-file-download text-success me-2"></i>
+                                                                            <i class="bi bi-folder2-open-download text-success me-2"></i>
                                                                             <strong><?php echo htmlspecialchars($comm['file_name']); ?></strong>
                                                                             <span class="text-muted ms-2">
                                                                                 (Yanıt Dosyası)
@@ -1749,7 +1749,7 @@ include '../includes/user_header.php';
                                                 <div class="communication-meta">
                                                     <?php if (isset($comm['credits_charged']) && $comm['credits_charged'] > 0): ?>
                                                         <span class="meta-item text-warning">
-                                                            <i class="bi bi-coins me-1"></i>
+                                                            <i class="bi bi-coin me-1"></i>
                                                             <?php echo $comm['credits_charged']; ?> kredi düşürüldü
                                                         </span>
                                                     <?php endif; ?>
@@ -1765,7 +1765,7 @@ include '../includes/user_header.php';
                                                     <?php if (isset($comm['revision_id'])): ?>
                                                         <a href="revision-detail.php?id=<?php echo $comm['revision_id']; ?>"
                                                             class="meta-item text-info" style="text-decoration: none;">
-                                                            <i class="bi bi-history me-1"></i>
+                                                            <i class="bi bi-pencil me-1"></i>
                                                             Revizyon Detayları
                                                         </a>
                                                     <?php endif; ?>
@@ -3179,7 +3179,7 @@ include '../includes/user_header.php';
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title" id="fileCancellationModalLabel">
-                    <i class="bi bi-times-circle me-2"></i>Dosya İptali
+                    <i class="bi bi-clock-history me-2"></i>Dosya İptali
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -3200,7 +3200,7 @@ include '../includes/user_header.php';
                     
                     <div class="file-info-box mb-4">
                         <div class="d-flex align-items-center">
-                            <i class="bi bi-file-alt fa-2x text-primary me-3"></i>
+                            <i class="bi bi-folder2-open-alt fa-2x text-primary me-3"></i>
                             <div>
                                 <h6 class="mb-1">Dosya:</h6>
                                 <p class="mb-0 text-muted" id="cancelFileName">-</p>

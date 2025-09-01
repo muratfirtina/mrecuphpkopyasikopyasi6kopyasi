@@ -584,7 +584,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                                     </div>
                                 <?php else: ?>
                                     <div class="alert alert-danger mt-3">
-                                        <i class="bi bi-times-circle"></i> Bağlantı Hatası: <?= $debug_results['connection']['message'] ?>
+                                        <i class="bi bi-clock-history"></i> Bağlantı Hatası: <?= $debug_results['connection']['message'] ?>
                                     </div>
                                 <?php endif; ?>
                             <?php endif; ?>
@@ -621,7 +621,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                                     </div>
                                 <?php else: ?>
                                     <div class="alert alert-danger mt-3">
-                                        <i class="bi bi-times-circle"></i> <?= $debug_results['databases']['message'] ?>
+                                        <i class="bi bi-clock-history"></i> <?= $debug_results['databases']['message'] ?>
                                     </div>
                                 <?php endif; ?>
                             <?php endif; ?>
@@ -726,7 +726,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                                     </div>
                                 <?php else: ?>
                                     <div class="alert alert-danger mt-3">
-                                        <i class="bi bi-times-circle"></i> <?= $debug_results['analysis']['message'] ?>
+                                        <i class="bi bi-clock-history"></i> <?= $debug_results['analysis']['message'] ?>
                                     </div>
                                 <?php endif; ?>
                             <?php endif; ?>
@@ -755,7 +755,7 @@ ORDER BY " . (in_array('Id', $wallet_columns) ? 'wl.Id' : (in_array('CreatedDate
                         <?php if (!empty($sql_queries)): ?>
                             <?php if (isset($sql_queries['error'])): ?>
                                 <div class="alert alert-danger">
-                                    <i class="bi bi-times-circle"></i> Hata: <?= $sql_queries['error'] ?>
+                                    <i class="bi bi-clock-history"></i> Hata: <?= $sql_queries['error'] ?>
                                 </div>
                             <?php else: ?>
                                 <div class="card">

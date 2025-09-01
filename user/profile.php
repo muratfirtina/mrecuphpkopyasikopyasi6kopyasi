@@ -464,7 +464,7 @@ include '../includes/user_header.php';
                             <div class="stats-overview">
                                 <div class="stat-row">
                                     <div class="stat-icon bg-primary">
-                                        <i class="bi bi-file"></i>
+                                        <i class="bi bi-folder2-open"></i>
                                     </div>
                                     <div class="stat-details">
                                         <div class="stat-value"><?php echo $stats['total_uploads']; ?></div>
@@ -536,7 +536,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="detail-item">
                                     <div class="detail-label">
-                                        <i class="bi bi-coins text-warning me-2"></i>
+                                        <i class="bi bi-coin text-warning me-2"></i>
                                         Mevcut Kredi
                                     </div>
                                     <div class="detail-value">
@@ -598,7 +598,7 @@ include '../includes/user_header.php';
                                 
                                 <a href="transactions.php" class="quick-action">
                                     <div class="action-icon bg-secondary">
-                                        <i class="bi bi-history"></i>
+                                        <i class="bi bi-pencil"></i>
                                     </div>
                                     <div class="action-text">
                                         <div class="action-title">İşlem Geçmişi</div>

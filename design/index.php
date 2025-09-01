@@ -210,7 +210,7 @@ try {
                     </div>
                 <?php else: ?>
                     <div class="text-center py-4">
-                        <i class="bi bi-history text-muted" style="font-size: 3rem;"></i>
+                        <i class="bi bi-pencil text-muted" style="font-size: 3rem;"></i>
                         <p class="text-muted mt-2">Henüz güncelleme bulunmuyor</p>
                     </div>
                 <?php endif; ?>

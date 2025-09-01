@@ -45,7 +45,7 @@ if (isset($_POST['clear_logs'])) {
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="bi bi-file-alt me-2 text-info"></i>Email Test Logları
+                        <i class="bi bi-folder2-open-alt me-2 text-info"></i>Email Test Logları
                     </h1>
                     <p class="text-muted mb-0">
                         Test modunda gönderilen email'lerin logları

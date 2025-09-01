@@ -302,7 +302,7 @@ try {
         $pageDescription = 'Dosya detaylarını görüntüleyin ve yönetin';
     }
     
-    $pageIcon = 'bi bi-file-alt';
+    $pageIcon = 'bi bi-folder2-open-alt';
     
     if ($debug) {
         echo "<!-- DEBUG: All setup completed successfully -->\n";
@@ -428,7 +428,7 @@ try {
                 <div class="d-flex gap-2">
                     <?php if ($fileType === 'response'): ?>
                         <a href="file-detail.php?id=<?php echo $uploadId; ?>" class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-file-alt me-1"></i>Orijinal Dosyayı Görüntüle
+                            <i class="bi bi-folder2-open-alt me-1"></i>Orijinal Dosyayı Görüntüle
                         </a>
                     <?php endif; ?>
                     

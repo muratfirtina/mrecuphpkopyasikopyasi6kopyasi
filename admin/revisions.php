@@ -912,7 +912,7 @@ include '../includes/admin_sidebar.php';
             <form id="rejectRevisionForm" method="POST">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title" id="rejectRevisionModalLabel">
-                        <i class="bi bi-times-circle me-2"></i>Revize Talebini Reddet
+                        <i class="bi bi-clock-history me-2"></i>Revize Talebini Reddet
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>

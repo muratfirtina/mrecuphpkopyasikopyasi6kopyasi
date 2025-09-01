@@ -276,7 +276,7 @@ function checkSystemStatus($pdo) {
                                 <div class="col-md-2">
                                     <div class="stats-card">
                                         <h3><?= $stats['total_users'] ?? 0 ?></h3>
-                                        <p><i class="bi bi-users"></i> Kullanıcılar</p>
+                                        <p><i class="bi bi-person"></i> Kullanıcılar</p>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
@@ -288,13 +288,13 @@ function checkSystemStatus($pdo) {
                                 <div class="col-md-2">
                                     <div class="stats-card">
                                         <h3><?= $stats['total_files'] ?? 0 ?></h3>
-                                        <p><i class="bi bi-file"></i> Dosyalar</p>
+                                        <p><i class="bi bi-folder2-open"></i> Dosyalar</p>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="stats-card">
                                         <h3><?= number_format($stats['total_credits'] ?? 0, 0) ?></h3>
-                                        <p><i class="bi bi-coins"></i> Krediler</p>
+                                        <p><i class="bi bi-coin"></i> Krediler</p>
                                     </div>
                                 </div>
                                 <div class="col-md-2">

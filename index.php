@@ -937,7 +937,7 @@ include 'includes/header.php';
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon mb-3">
-                                <i class="bi bi-users text-primary" style="font-size: 3rem;"></i>
+                                <i class="bi bi-person text-primary" style="font-size: 3rem;"></i>
                             </div>
                             <h5 class="card-title">Uzman Ekip</h5>
                             <p class="card-text">

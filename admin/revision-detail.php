@@ -438,7 +438,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="bi bi-file-alt me-2"></i>Dosya Bilgileri
+                    <i class="bi bi-folder2-open-alt me-2"></i>Dosya Bilgileri
                 </h5>
             </div>
             <div class="card-body">
@@ -513,7 +513,7 @@ include '../includes/admin_sidebar.php';
                                                 </a>
                                                 <?php if ($targetFileType === 'Revizyon Dosyası'): ?>
                                                     <button type="button" class="btn btn-outline-info btn-lg" data-bs-toggle="modal" data-bs-target="#revisionHistoryModal">
-                                                        <i class="bi bi-history me-2"></i>
+                                                        <i class="bi bi-pencil me-2"></i>
                                                         Önceki Revizyonları Gör
                                                     </button>
                                                 <?php endif; ?>
@@ -652,7 +652,7 @@ include '../includes/admin_sidebar.php';
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="revision_file" class="form-label">
-                                        <i class="bi bi-file me-1"></i>Revize Edilmiş Dosya <span class="text-danger">*</span>
+                                        <i class="bi bi-folder2-open me-1"></i>Revize Edilmiş Dosya <span class="text-danger">*</span>
                                     </label>
                                     <input type="file" class="form-control" id="revision_file" name="revision_file" required>
                                     <div class="form-text">Desteklenen formatlar: .bin, .hex, .ecu, .map</div>
@@ -661,7 +661,7 @@ include '../includes/admin_sidebar.php';
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="credits_used" class="form-label">
-                                        <i class="bi bi-coins me-1"></i>Kullanılan Kredi Miktarı <span class="text-danger">*</span>
+                                        <i class="bi bi-coin me-1"></i>Kullanılan Kredi Miktarı <span class="text-danger">*</span>
                                     </label>
                                     <input type="number" class="form-control" id="credits_used" name="credits_used"
                                         min="0" value="<?php echo $revision['credits_charged'] ?: 5; ?>" required>
@@ -709,7 +709,7 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-files me-2"></i>Yüklenen Revizyon Dosyaları (<?php echo count($revisionFiles); ?> adet)
+                        <i class="bi bi-folder2-opens me-2"></i>Yüklenen Revizyon Dosyaları (<?php echo count($revisionFiles); ?> adet)
                     </h5>
                 </div>
                 <div class="card-body">
@@ -728,7 +728,7 @@ include '../includes/admin_sidebar.php';
                                 <?php foreach ($revisionFiles as $file): ?>
                                     <tr>
                                         <td>
-                                            <i class="bi bi-file-code text-success me-2"></i>
+                                            <i class="bi bi-folder2-open-code text-success me-2"></i>
                                             <div class="fw-medium"><?php echo htmlspecialchars($file['original_name']); ?></div>
                                             <?php if (!empty($file['admin_notes'])): ?>
                                                 <small class="text-muted d-block mt-1">
@@ -798,7 +798,7 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-history me-2"></i>Bu Dosyanın Revizyon Geçmişi (<?php echo count($revisionHistory); ?> adet)
+                        <i class="bi bi-pencil me-2"></i>Bu Dosyanın Revizyon Geçmişi (<?php echo count($revisionHistory); ?> adet)
                     </h5>
                 </div>
                 <div class="card-body">
@@ -873,7 +873,7 @@ include '../includes/admin_sidebar.php';
             <form method="POST">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title" id="rejectModalLabel">
-                        <i class="bi bi-times-circle me-2"></i>Revizyon Talebini Reddet
+                        <i class="bi bi-clock-history me-2"></i>Revizyon Talebini Reddet
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -914,7 +914,7 @@ include '../includes/admin_sidebar.php';
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
                 <h5 class="modal-title" id="revisionHistoryModalLabel">
-                    <i class="bi bi-history me-2"></i>Bu Dosyanın Revizyon Geçmişi
+                    <i class="bi bi-pencil me-2"></i>Bu Dosyanın Revizyon Geçmişi
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -1008,8 +1008,8 @@ include '../includes/admin_sidebar.php';
                             <ul class="list-unstyled ms-3">
                                 <li><i class="bi bi-hashtag me-1"></i> ID: #<?php echo substr($revisionId, 0, 8); ?></li>
                                 <li><i class="bi bi-calendar me-1"></i> Talep Tarihi: <?php echo formatDate($revision['requested_at']); ?></li>
-                                <li><i class="bi bi-file me-1"></i> Dosya: <?php echo htmlspecialchars($revision['original_name']); ?></li>
-                                <li><i class="bi bi-coins me-1"></i> Kullanılan Kredi: <span id="preview-credits">5</span></li>
+                                <li><i class="bi bi-folder2-open me-1"></i> Dosya: <?php echo htmlspecialchars($revision['original_name']); ?></li>
+                                <li><i class="bi bi-coin me-1"></i> Kullanılan Kredi: <span id="preview-credits">5</span></li>
                             </ul>
                         </div>
                         <div class="col-md-6">

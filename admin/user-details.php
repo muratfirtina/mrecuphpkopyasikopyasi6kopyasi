@@ -227,7 +227,7 @@ $quickActions = [
     [
         'text' => 'Tüm Kullanıcılar',
         'url' => 'users.php',
-        'icon' => 'bi bi-users',
+        'icon' => 'bi bi-person',
         'class' => 'secondary'
     ],
     [
@@ -703,7 +703,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="bi bi-coins me-2"></i>Son Kredi İşlemleri
+                    <i class="bi bi-coin me-2"></i>Son Kredi İşlemleri
                 </h5>
                 <button type="button" class="btn btn-sm btn-success" onclick="document.getElementById('addCreditModal').style.display='block'">
                     <i class="bi bi-plus me-1"></i>Kredi Ekle
@@ -712,7 +712,7 @@ include '../includes/admin_sidebar.php';
             <div class="card-body p-0">
                 <?php if (empty($creditTransactions)): ?>
                     <div class="text-center py-4">
-                        <i class="bi bi-coins fa-3x text-muted mb-3"></i>
+                        <i class="bi bi-coin fa-3x text-muted mb-3"></i>
                         <h6 class="text-muted">Henüz kredi işlemi yok</h6>
                     </div>
                 <?php else: ?>

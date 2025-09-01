@@ -64,7 +64,7 @@ define('NOTIFICATION_TEMPLATES', [
     'file_status_update' => [
         'title' => 'Dosya Durumu Güncellendi',
         'message' => '{filename} dosyasının durumu {status} olarak güncellendi.',
-        'icon' => 'bi bi-file-alt',
+        'icon' => 'bi bi-folder2-open-alt',
         'level' => 'info'
     ],
     'revision_request' => [
@@ -82,7 +82,7 @@ define('NOTIFICATION_TEMPLATES', [
     'revision_rejected' => [
         'title' => 'Revizyon Reddedildi',
         'message' => '{filename} revizyonu reddedildi. Sebep: {reason}',
-        'icon' => 'bi bi-times-circle',
+        'icon' => 'bi bi-clock-history',
         'level' => 'error'
     ],
     'user_registration' => [
@@ -94,7 +94,7 @@ define('NOTIFICATION_TEMPLATES', [
     'credit_update' => [
         'title' => 'Kredi Güncelleme',
         'message' => 'Kredi bakiyeniz güncellendi. Yeni bakiye: {amount}',
-        'icon' => 'bi bi-coins',
+        'icon' => 'bi bi-coin',
         'level' => 'info'
     ],
     'system_warning' => [

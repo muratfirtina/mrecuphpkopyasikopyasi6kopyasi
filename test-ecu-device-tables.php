@@ -100,10 +100,10 @@ require_once 'config/config.php';
                                         <i class="bi bi-download"></i> Tabloları Kur
                                     </a>
                                     <a href="create_ecus_table.sql" class="btn btn-outline-primary" target="_blank">
-                                        <i class="bi bi-file-code"></i> ECU SQL Dosyası
+                                        <i class="bi bi-folder2-open-code"></i> ECU SQL Dosyası
                                     </a>
                                     <a href="create_devices_table.sql" class="btn btn-outline-success" target="_blank">
-                                        <i class="bi bi-file-code"></i> Device SQL Dosyası
+                                        <i class="bi bi-folder2-open-code"></i> Device SQL Dosyası
                                     </a>
                                 </div>
                             </div>

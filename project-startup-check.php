@@ -78,7 +78,7 @@ foreach ($required_extensions as $ext) {
         echo "</div>";
     } else {
         echo "<div class='status-card error p-3'>";
-        echo "<i class='bi bi-times-circle text-danger me-2'></i>";
+        echo "<i class='bi bi-clock-history text-danger me-2'></i>";
         echo "<strong>❌ $ext</strong> - Eksik";
         echo "</div>";
         $allPassed = false;
@@ -105,7 +105,7 @@ foreach ($config_files as $file => $desc) {
         echo "</div>";
     } else {
         echo "<div class='status-card error p-3'>";
-        echo "<i class='bi bi-times-circle text-danger me-2'></i>";
+        echo "<i class='bi bi-clock-history text-danger me-2'></i>";
         echo "<strong>❌ $desc</strong> - $file eksik";
         echo "</div>";
         $allPassed = false;
@@ -161,7 +161,7 @@ try {
     }
 } catch (Exception $e) {
     echo "<div class='status-card error p-3'>";
-    echo "<i class='bi bi-times-circle text-danger me-2'></i>";
+    echo "<i class='bi bi-clock-history text-danger me-2'></i>";
     echo "<strong>❌ Veritabanı Hatası:</strong> " . $e->getMessage();
     echo "</div>";
     $allPassed = false;
@@ -188,7 +188,7 @@ if (isset($pdo) && $pdo) {
             $table_count++;
         } catch (Exception $e) {
             echo "<div class='status-card error p-3'>";
-            echo "<i class='bi bi-times-circle text-danger me-2'></i>";
+            echo "<i class='bi bi-clock-history text-danger me-2'></i>";
             echo "<strong>❌ $table</strong> - Tablo bulunamadı";
             echo "</div>";
             $allPassed = false;
@@ -220,7 +220,7 @@ try {
     }
 } catch (Exception $e) {
     echo "<div class='status-card error p-3'>";
-    echo "<i class='bi bi-times-circle text-danger me-2'></i>";
+    echo "<i class='bi bi-clock-history text-danger me-2'></i>";
     echo "<strong>❌ GUID Fonksiyonları:</strong> " . $e->getMessage();
     echo "</div>";
     $allPassed = false;

@@ -59,7 +59,7 @@ try {
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="revision_file_<?php echo $revision['id']; ?>" class="form-label">
-                                    <i class="bi bi-file-upload me-1"></i>
+                                    <i class="bi bi-folder2-open-upload me-1"></i>
                                     Revizyon Dosyası <span class="text-danger">*</span>
                                 </label>
                                 <input type="file" class="form-control" 
@@ -158,7 +158,7 @@ try {
         <div class="card admin-card mb-4">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="bi bi-history me-2"></i>
+                    <i class="bi bi-pencil me-2"></i>
                     Revizyon Geçmişi
                 </h6>
             </div>
@@ -170,7 +170,7 @@ try {
                 
                 <a href="revisions.php?search=<?php echo urlencode($upload['original_name']); ?>" 
                    class="btn btn-outline-primary">
-                    <i class="bi bi-history me-1"></i>Revizyon Geçmişini Görüntüle
+                    <i class="bi bi-pencil me-1"></i>Revizyon Geçmişini Görüntüle
                 </a>
             </div>
         </div>

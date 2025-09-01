@@ -903,7 +903,7 @@ if ($fileType === 'response') {
     $pageDescription = 'Dosya detaylarını görüntüleyin ve yönetin';
 }
 
-$pageIcon = 'bi bi-file-alt';
+$pageIcon = 'bi bi-folder2-open-alt';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -953,7 +953,7 @@ include '../includes/admin_sidebar.php';
             <div class="d-flex gap-2">
                 <?php if ($fileType === 'response'): ?>
                     <a href="file-detail.php?id=<?php echo $uploadId; ?>" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-file-alt me-1"></i>Orijinal Dosyayı Görüntüle
+                        <i class="bi bi-folder2-open-alt me-1"></i>Orijinal Dosyayı Görüntüle
                     </a>
                     <a href="file-detail.php?id=<?php echo $uploadId; ?>#response-files" class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-list me-1"></i>Tüm Yanıtları Görüntüle
@@ -1047,7 +1047,7 @@ include '../includes/admin_sidebar.php';
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="revision_file_<?php echo $revision['id']; ?>" class="form-label">
-                                        <i class="bi bi-file-upload me-1"></i>
+                                        <i class="bi bi-folder2-open-upload me-1"></i>
                                         Revizyon Dosyası <span class="text-danger">*</span>
                                     </label>
                                     <input type="file" class="form-control"
@@ -1073,7 +1073,7 @@ include '../includes/admin_sidebar.php';
 
                                 <div class="col-md-2">
                                     <label for="revision_credits_<?php echo $revision['id']; ?>" class="form-label">
-                                        <i class="bi bi-coins me-1"></i>
+                                        <i class="bi bi-coin me-1"></i>
                                         Revizyon Ücreti <span class="text-danger">*</span>
                                     </label>
                                     <input type="number" class="form-control"
@@ -1184,7 +1184,7 @@ include '../includes/admin_sidebar.php';
                                     <!-- Hangi Dosyaya Revizyon Talep Edildi -->
                                     <div class="mb-3">
                                         <h6 class="text-primary mb-2">
-                                            <i class="bi bi-file-alt me-2"></i>Revizyon Talep Edilen Dosya:
+                                            <i class="bi bi-folder2-open-alt me-2"></i>Revizyon Talep Edilen Dosya:
                                         </h6>
                                         <div class="file-reference-box p-3 bg-white rounded border">
                                             <?php if (!empty($revision['response_file_name'])): ?>
@@ -1383,7 +1383,7 @@ include '../includes/admin_sidebar.php';
             <div class="card admin-card mb-4">
                 <div class="card-header">
                     <h6 class="mb-0">
-                        <i class="bi bi-history me-2"></i>
+                        <i class="bi bi-pencil me-2"></i>
                         Revizyon Geçmişi
                     </h6>
                 </div>
@@ -1395,7 +1395,7 @@ include '../includes/admin_sidebar.php';
 
                     <a href="revisions.php?search=<?php echo urlencode($upload['original_name']); ?>"
                         class="btn btn-outline-primary">
-                        <i class="bi bi-history me-1"></i>Revizyon Geçmişini Görüntüle
+                        <i class="bi bi-pencil me-1"></i>Revizyon Geçmişini Görüntüle
                     </a>
                 </div>
             </div>
@@ -1623,7 +1623,7 @@ include '../includes/admin_sidebar.php';
                                 <i class="bi bi-user me-1"></i>Kullanıcı Profili
                             </a>
                             <a href="uploads.php?user_id=<?php echo $upload['user_id']; ?>" class="btn btn-outline-secondary btn-sm">
-                                <i class="bi bi-files me-1"></i>Diğer Dosyalar
+                                <i class="bi bi-folder2-opens me-1"></i>Diğer Dosyalar
                             </a>
                         </div>
                     </div>
@@ -1745,7 +1745,7 @@ include '../includes/admin_sidebar.php';
                                 <td>
                                     <?php if (isset($revisionFile['credits_charged']) && $revisionFile['credits_charged'] > 0): ?>
                                         <span class="badge bg-warning text-dark">
-                                            <i class="bi bi-coins me-1"></i>
+                                            <i class="bi bi-coin me-1"></i>
                                             <?php echo number_format($revisionFile['credits_charged'], 1); ?> kredi
                                         </span>
                                     <?php else: ?>
@@ -1831,7 +1831,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
                         <?php foreach ($additionalFiles as $file): ?>
                             <tr class="<?php echo $file['is_read'] ? '' : 'table-warning'; ?>">
                                 <td>
-                                    <i class="bi bi-file me-1"></i>
+                                    <i class="bi bi-folder2-open me-1"></i>
                                     <?php echo htmlspecialchars($file['original_name']); ?>
                                     <?php if (!$file['is_read'] && $file['receiver_id'] === $_SESSION['user_id']): ?>
                                         <span class="badge bg-warning ms-2">Yeni</span>
@@ -2087,7 +2087,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                         <?php if (isset($comm['file_name'])): ?>
                                             <span class="badge bg-secondary ms-2">
-                                                <i class="bi bi-file me-1"></i><?php echo htmlspecialchars(substr($comm['file_name'], 0, 20)) . (strlen($comm['file_name']) > 20 ? '...' : ''); ?>
+                                                <i class="bi bi-folder2-open me-1"></i><?php echo htmlspecialchars(substr($comm['file_name'], 0, 20)) . (strlen($comm['file_name']) > 20 ? '...' : ''); ?>
                                             </span>
                                         <?php endif; ?>
                                     </h6>
@@ -2193,7 +2193,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <h6 class="mb-1 text-warning">
-                                                <i class="bi bi-file-alt me-2"></i>
+                                                <i class="bi bi-folder2-open-alt me-2"></i>
                                                 Kullanıcının Revizyon Talep Ettiği Dosya
                                             </h6>
                                             <div class="file-details">
@@ -2399,7 +2399,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <h6 class="mb-1 text-success">
-                                                        <i class="bi bi-file-download me-2"></i>
+                                                        <i class="bi bi-folder2-open-download me-2"></i>
                                                         Admin'in Yüklediği Revizyon Dosyası
                                                     </h6>
                                                     <div class="file-details">
@@ -2442,7 +2442,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="communication-meta">
                                 <?php if (isset($comm['credits_charged']) && $comm['credits_charged'] > 0): ?>
                                     <span class="meta-item text-warning">
-                                        <i class="bi bi-coins me-1"></i>
+                                        <i class="bi bi-coin me-1"></i>
                                         <?php echo $comm['credits_charged']; ?> kredi düşürüldü
                                     </span>
                                 <?php endif; ?>
@@ -2527,7 +2527,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
-                    <i class="bi bi-history me-2 text-info"></i>Kullanıcının Tüm Revize Geçmişi
+                    <i class="bi bi-pencil me-2 text-info"></i>Kullanıcının Tüm Revize Geçmişi
                     <span class="badge bg-secondary ms-2"><?php echo count($userAllRevisions); ?> toplam talep</span>
                 </h6>
                 <div class="d-flex gap-2">
@@ -2557,7 +2557,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     'pending' => 'bi bi-clock text-warning',
                                     'in_progress' => 'bi bi-gear-wide-connected text-info',
                                     'completed' => 'bi bi-check-circle text-success',
-                                    'rejected' => 'bi bi-times-circle text-danger'
+                                    'rejected' => 'bi bi-clock-history text-danger'
                                 ];
                                 $statusText = [
                                     'pending' => 'Bekliyor',
@@ -2605,7 +2605,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <i class="bi bi-level-up-alt text-muted me-2 ms-3"></i>
                                             <small class="text-muted">Ana Dosya: <?php echo safeHtml($revision['upload_file_name']); ?></small>
                                         <?php else: ?>
-                                            <i class="bi bi-file text-primary me-2"></i>
+                                            <i class="bi bi-folder2-open text-primary me-2"></i>
                                             <strong>Ana Dosya:</strong>
                                             <span class="text-primary"><?php echo safeHtml($revision['upload_file_name']); ?></span>
                                         <?php endif; ?>
@@ -2662,7 +2662,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="revision-meta">
                                     <?php if ($revision['credits_charged'] > 0): ?>
                                         <span class="meta-item text-warning">
-                                            <i class="bi bi-coins me-1"></i>
+                                            <i class="bi bi-coin me-1"></i>
                                             <?php echo $revision['credits_charged']; ?> kredi düşürüldü
                                         </span>
                                     <?php endif; ?>
@@ -2777,7 +2777,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="rejectRevisionModalLabel">
-                    <i class="bi bi-times-circle text-danger me-2"></i>Revize Talebini Reddet
+                    <i class="bi bi-clock-history text-danger me-2"></i>Revize Talebini Reddet
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -2800,7 +2800,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="bi bi-times me-1"></i>İptal
                     </button>
                     <button type="submit" name="reject_revision_direct" class="btn btn-danger">
-                        <i class="bi bi-times-circle me-1"></i>Revize Talebini Reddet
+                        <i class="bi bi-clock-history me-1"></i>Revize Talebini Reddet
                     </button>
                 </div>
             </form>
@@ -3365,7 +3365,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 <div class="file-info bg-light p-3 rounded mb-4">
                     <h6 class="text-primary mb-3">
-                        <i class="bi bi-file-alt me-2"></i>
+                        <i class="bi bi-folder2-open-alt me-2"></i>
                         Dosya Bilgileri
                     </h6>
                     <div class="row">
@@ -3419,7 +3419,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title d-flex align-items-center" id="adminCancelModalLabel">
-                    <i class="bi bi-times-circle me-2"></i>
+                    <i class="bi bi-clock-history me-2"></i>
                     Dosyayı İptal Et
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -3437,7 +3437,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     <div class="file-info bg-light p-3 rounded mb-3">
                         <h6 class="text-danger mb-2">
-                            <i class="bi bi-file-alt me-2"></i>
+                            <i class="bi bi-folder2-open-alt me-2"></i>
                             İptal Edilecek Dosya
                         </h6>
                         <div class="row">
@@ -3479,7 +3479,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         Vazgeç
                     </button>
                     <button type="submit" name="admin_cancel_file" class="btn btn-danger d-flex align-items-center" id="confirmCancelBtn">
-                        <i class="bi bi-times-circle me-2"></i>
+                        <i class="bi bi-clock-history me-2"></i>
                         Dosyayı İptal Et
                     </button>
                 </div>
@@ -3494,7 +3494,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="rejectRevisionModalLabel">
-                    <i class="bi bi-times-circle text-danger me-2"></i>Revizyon Talebini Reddet
+                    <i class="bi bi-clock-history text-danger me-2"></i>Revizyon Talebini Reddet
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -3660,7 +3660,7 @@ document.addEventListener('DOMContentLoaded', function() {
             adminCancelModal.addEventListener('hidden.bs.modal', function() {
                 const confirmBtn = document.getElementById('confirmCancelBtn');
                 if (confirmBtn) {
-                    confirmBtn.innerHTML = '<i class="bi bi-times-circle me-2"></i>Dosyayı İptal Et';
+                    confirmBtn.innerHTML = '<i class="bi bi-clock-history me-2"></i>Dosyayı İptal Et';
                     confirmBtn.disabled = false;
                 }
             });

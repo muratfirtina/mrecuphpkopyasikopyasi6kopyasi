@@ -628,12 +628,12 @@ if (isset($_SESSION['user_id'])) {
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="credits.php">
-                                    <i class="bi bi-coins me-3 text-warning"></i>Kredi Yükle
+                                    <i class="bi bi-coin me-3 text-warning"></i>Kredi Yükle
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="transactions.php">
-                                    <i class="bi bi-history me-3 text-info"></i>İşlem Geçmişi
+                                    <i class="bi bi-pencil me-3 text-info"></i>İşlem Geçmişi
                                 </a>
                             </li>
 

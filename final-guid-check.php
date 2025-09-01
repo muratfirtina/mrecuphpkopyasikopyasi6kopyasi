@@ -540,7 +540,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                             </div>
                         <?php else: ?>
                             <div class="alert alert-danger">
-                                <h4><i class="bi bi-times-circle me-2"></i>Migration Incomplete</h4>
+                                <h4><i class="bi bi-clock-history me-2"></i>Migration Incomplete</h4>
                                 <p>
                                     <strong>Critical issues found!</strong> The GUID migration is not complete. 
                                     Please address all failed checks before proceeding.
@@ -889,7 +889,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                             </div>
                         <?php else: ?>
                             <div class="alert alert-danger">
-                                <h4><i class="bi bi-times-circle me-2"></i>Migration Incomplete</h4>
+                                <h4><i class="bi bi-clock-history me-2"></i>Migration Incomplete</h4>
                                 <p>
                                     <strong>Critical issues found!</strong> The GUID migration is not complete. 
                                     Please address all failed checks before proceeding.

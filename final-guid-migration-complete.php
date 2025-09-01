@@ -713,7 +713,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                             </div>
                         <?php else: ?>
                             <div class="alert alert-danger">
-                                <h4><i class="bi bi-times-circle me-2"></i>Migration Incomplete</h4>
+                                <h4><i class="bi bi-clock-history me-2"></i>Migration Incomplete</h4>
                                 <p>
                                     <strong>Critical issues found!</strong> The GUID migration is not complete. 
                                     Please address all failed checks before proceeding.
@@ -756,7 +756,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <h6><i class="bi bi-file-alt me-2"></i>Documentation</h6>
+                                <h6><i class="bi bi-folder2-open-alt me-2"></i>Documentation</h6>
                                 <ul class="list-unstyled">
                                     <li><a href="GUID_MIGRATION_README.md" target="_blank"><i class="bi bi-book me-2"></i>Migration Guide</a></li>
                                     <li><a href="final-guid-check.php" target="_blank"><i class="bi bi-clipboard-check me-2"></i>Basic Check</a></li>
@@ -768,7 +768,7 @@ $overallStatus = $successRate >= 90 ? 'excellent' : ($successRate >= 75 ? 'good'
                                 <ul class="list-unstyled">
                                     <li><button class="btn btn-sm btn-outline-primary" onclick="window.location.reload()"><i class="bi bi-sync me-2"></i>Refresh Check</button></li>
                                     <li><a href="config/install-guid.php" class="btn btn-sm btn-outline-warning"><i class="bi bi-download me-2"></i>Reinstall Schema</a></li>
-                                    <li><a href="admin/system-logs.php" class="btn btn-sm btn-outline-info"><i class="bi bi-history me-2"></i>View Logs</a></li>
+                                    <li><a href="admin/system-logs.php" class="btn btn-sm btn-outline-info"><i class="bi bi-pencil me-2"></i>View Logs</a></li>
                                 </ul>
                             </div>
                         </div>

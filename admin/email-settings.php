@@ -239,7 +239,7 @@ include '../includes/admin_header.php';
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="bi bi-file-alt me-2"></i>Email Şablonları
+                                <i class="bi bi-folder2-open-alt me-2"></i>Email Şablonları
                             </h5>
                         </div>
                         <div class="card-body">

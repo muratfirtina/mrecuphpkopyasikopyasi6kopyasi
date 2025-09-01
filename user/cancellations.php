@@ -82,7 +82,7 @@ include '../includes/user_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="bi bi-times-circle me-2 text-danger"></i>İptal Taleplerim
+                        <i class="bi bi-clock-history me-2 text-danger"></i>İptal Taleplerim
                     </h1>
                     <p class="text-muted mb-0">Gönderdiğiniz dosya iptal taleplerini görüntüleyin</p>
                 </div>
@@ -200,7 +200,7 @@ include '../includes/user_header.php';
                                                         <?php if ($cancellation['credits_to_refund'] > 0): ?>
                                                             <small class="text-muted d-block">Kredi İadesi</small>
                                                             <span class="badge bg-success">
-                                                                <i class="bi bi-coins me-1"></i>
+                                                                <i class="bi bi-coin me-1"></i>
                                                                 <?php echo number_format($cancellation['credits_to_refund'], 2); ?>
                                                             </span>
                                                         <?php else: ?>

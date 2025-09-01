@@ -406,7 +406,7 @@ try {
 
 $pageTitle = 'Kredi Yönetimi';
 $pageDescription = 'Kullanıcı kredilerini yönetin ve kontrol edin';
-$pageIcon = 'bi bi-coins';
+$pageIcon = 'bi bi-coin';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -441,7 +441,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted"><?php echo number_format($creditStats['user_count'] ?? 0); ?> kullanıcı</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-coins text-success fa-lg"></i>
+                    <i class="bi bi-coin text-success fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -486,7 +486,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Kullanılabilir kredisi olan</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-users text-primary fa-lg"></i>
+                    <i class="bi bi-person text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -548,14 +548,14 @@ include '../includes/admin_sidebar.php';
 <div class="card admin-card">
     <div class="card-header">
         <h5 class="mb-0">
-            <i class="bi bi-users me-2"></i>Kullanıcılar (<?php echo number_format($totalUsers); ?> adet)
+            <i class="bi bi-person me-2"></i>Kullanıcılar (<?php echo number_format($totalUsers); ?> adet)
         </h5>
     </div>
     
     <div class="card-body p-0">
         <?php if (empty($users)): ?>
             <div class="text-center py-5">
-                <i class="bi bi-users fa-3x text-muted mb-3"></i>
+                <i class="bi bi-person fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">
                     <?php if ($search): ?>
                         Arama kriterine uygun kullanıcı bulunamadı

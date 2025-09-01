@@ -105,7 +105,7 @@
                         </a>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Revizyon İşlemleri') ? 'active' : ''; ?>" href="revisions.php">
-                            <i class="bi bi-history"></i>Revizyonlar
+                            <i class="bi bi-pencil"></i>Revizyonlar
                             <?php
                             // Bekleyen ve işleme alınan revizyon sayılarını al
                             try {
@@ -131,7 +131,7 @@
                         </a>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Dosya İptal Talepleri') ? 'active' : ''; ?>" href="file-cancellations.php">
-                            <i class="bi bi-times-circle"></i>İptal Talepleri
+                            <i class="bi bi-clock-history"></i>İptal Talepleri
                             <?php
                             // Bekleyen iptal talep sayısını al
                             try {
@@ -191,11 +191,11 @@
                         <div class="nav-section">Kullanıcı Yönetimi</div>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Kullanıcılar') ? 'active' : ''; ?>" href="users.php">
-                            <i class="bi bi-users"></i>Kullanıcılar
+                            <i class="bi bi-person"></i>Kullanıcılar
                         </a>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Kredi Yönetimi') ? 'active' : ''; ?>" href="credits.php">
-                            <i class="bi bi-coins"></i>Kredi Yönetimi
+                            <i class="bi bi-coin"></i>Kredi Yönetimi
                         </a>
 
                         <a class="nav-link <?php echo ($pageTitle == 'İletişim Mesajları') ? 'active' : ''; ?>" href="contact-messages.php">

@@ -258,7 +258,7 @@ include '../includes/user_header.php';
                             <?php endif; ?>
                         <?php endif; ?>
                         <a href="files.php?view=<?php echo $revision['upload_id']; ?>" class="btn btn-outline-primary">
-                            <i class="bi bi-file me-1"></i>Orijinal Dosya
+                            <i class="bi bi-folder2-open me-1"></i>Orijinal Dosya
                         </a>
                     </div>
                 </div>
@@ -271,7 +271,7 @@ include '../includes/user_header.php';
                     <div class="card mb-4">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="bi bi-history me-2"></i>Revize Sürecı
+                                <i class="bi bi-pencil me-2"></i>Revize Sürecı
                             </h5>
                         </div>
                         <div class="card-body">
@@ -398,7 +398,7 @@ include '../includes/user_header.php';
                     <div class="card mb-4">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="bi bi-file-alt me-2"></i>Dosya Bilgileri
+                                <i class="bi bi-folder2-open-alt me-2"></i>Dosya Bilgileri
                             </h5>
                         </div>
                         <div class="card-body">
@@ -423,7 +423,7 @@ include '../includes/user_header.php';
     <?php if ($targetFile['is_found']): ?>
         <div class="file-info">
             <div class="file-icon">
-                <i class="bi bi-file-code text-primary"></i>
+                <i class="bi bi-folder2-open-code text-primary"></i>
             </div>
             <div class="file-details">
                 <h6 class="file-name"><?php echo htmlspecialchars($targetFile['name']); ?></h6>
@@ -457,7 +457,7 @@ include '../includes/user_header.php';
                                         <?php $firstRevisionFile = $revisionFiles[0]; // İlk revizyon dosyasını göster ?>
                                         <div class="file-info">
                                             <div class="file-icon">
-                                                <i class="bi bi-file-code text-success"></i>
+                                                <i class="bi bi-folder2-open-code text-success"></i>
                                             </div>
                                             <div class="file-details">
                                                 <h6 class="file-name"><?php echo htmlspecialchars($firstRevisionFile['original_name']); ?></h6>
@@ -596,7 +596,7 @@ include '../includes/user_header.php';
                                 <?php endif; ?>
                                 
                                 <a href="files.php?view=<?php echo $revision['upload_id']; ?>" class="btn btn-outline-primary">
-                                    <i class="bi bi-file me-2"></i>Orijinal Dosyayı Görüntüle
+                                    <i class="bi bi-folder2-open me-2"></i>Orijinal Dosyayı Görüntüle
                                 </a>
                                 
                                 <a href="revisions.php" class="btn btn-outline-secondary">

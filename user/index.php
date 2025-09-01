@@ -107,7 +107,7 @@ include '../includes/user_header.php';
                             </p>
                             <div class="welcome-stats">
                                 <div class="stat">
-                                    <i class="bi bi-coins text-warning"></i>
+                                    <i class="bi bi-coin text-warning"></i>
                                     <span>Mevcut Kalan Kredi: <strong><?php echo number_format($userCredits, 2); ?> TL</strong></span>
                                 </div>
                             </div>
@@ -136,7 +136,7 @@ include '../includes/user_header.php';
                                     </div>
                                 </div>
                                 <div class="stat-icon bg-primary">
-                                    <i class="bi bi-file"></i>
+                                    <i class="bi bi-folder2-open"></i>
                                 </div>
                             </div>
                         </div>
@@ -259,7 +259,7 @@ include '../includes/user_header.php';
                                                     <td>
                                                         <div class="d-flex align-items-center">
                                                             <div class="file-icon me-3">
-                                                                <i class="bi bi-file-alt"></i>
+                                                                <i class="bi bi-folder2-open-alt"></i>
                                                             </div>
                                                             <div>
                                                                 <div class="fw-medium"><?php echo htmlspecialchars($upload['original_name'] ?? 'Bilinmeyen dosya'); ?></div>
@@ -360,7 +360,7 @@ include '../includes/user_header.php';
                             <div class="account-stats">
                                 <div class="stat-row">
                                     <div class="stat-info">
-                                        <i class="bi bi-coins text-warning"></i>
+                                        <i class="bi bi-coin text-warning"></i>
                                         <span>Mevcut Kredi</span>
                                     </div>
                                     <div class="stat-value text-warning fw-bold">
@@ -370,7 +370,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="stat-row">
                                     <div class="stat-info">
-                                        <i class="bi bi-file text-primary"></i>
+                                        <i class="bi bi-folder2-open text-primary"></i>
                                         <span>Toplam Dosya</span>
                                     </div>
                                     <div class="stat-value text-primary fw-bold">
@@ -404,13 +404,13 @@ include '../includes/user_header.php';
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white border-0 py-3">
                             <h6 class="mb-0">
-                                <i class="bi bi-history me-2 text-secondary"></i>Son İşlemler
+                                <i class="bi bi-pencil me-2 text-secondary"></i>Son İşlemler
                             </h6>
                         </div>
                         <div class="card-body">
                             <?php if (empty($recentTransactions)): ?>
                                 <div class="text-center py-3">
-                                    <i class="bi bi-history fa-2x text-muted mb-2"></i>
+                                    <i class="bi bi-pencil fa-2x text-muted mb-2"></i>
                                     <p class="text-muted mb-0">Henüz işlem yapılmamış</p>
                                 </div>
                             <?php else: ?>

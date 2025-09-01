@@ -139,7 +139,7 @@ include '../includes/admin_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="bi bi-times-circle me-2 text-danger"></i>Dosya İptal Talepleri
+                        <i class="bi bi-clock-history me-2 text-danger"></i>Dosya İptal Talepleri
                     </h1>
                     <p class="text-muted mb-0">Kullanıcıların dosya iptal taleplerini yönetin</p>
                 </div>
@@ -228,7 +228,7 @@ include '../includes/admin_header.php';
                                     <div class="stat-label">İade Edilen Kredi</div>
                                 </div>
                                 <div class="stat-icon bg-info">
-                                    <i class="bi bi-coins"></i>
+                                    <i class="bi bi-coin"></i>
                                 </div>
                             </div>
                         </div>
@@ -389,7 +389,7 @@ include '../includes/admin_header.php';
                                                         $plate = $cancellation['upload_plate'] ?? '';
                                                         $fileDate = $cancellation['upload_date'] ?? '';
                                                         $fileTypeDisplay = 'ANA DOSYA';
-                                                        $fileTypeIcon = 'bi bi-file-upload';
+                                                        $fileTypeIcon = 'bi bi-folder2-open-upload';
                                                         $fileTypeColor = 'bg-primary';
                                                         break;
                                                     case 'response':
@@ -434,7 +434,7 @@ include '../includes/admin_header.php';
                                                 <?php if (!empty($fileName)): ?>
                                                     <div class="cancelled-file-name mb-2">
                                                         <div class="fw-bold text-dark mb-1">
-                                                            <i class="bi bi-times-circle text-danger me-1"></i>
+                                                            <i class="bi bi-clock-history text-danger me-1"></i>
                                                             İptal Edilen Dosya:
                                                         </div>
                                                         <div class="file-name-display p-2 bg-light border-start border-danger border-3">
@@ -518,7 +518,7 @@ include '../includes/admin_header.php';
                                         <td>
                                             <?php if ($cancellation['credits_to_refund'] > 0): ?>
                                                 <span class="badge bg-success">
-                                                    <i class="bi bi-coins me-1"></i>
+                                                    <i class="bi bi-coin me-1"></i>
                                                     <?php echo number_format($cancellation['credits_to_refund'], 2); ?> kredi
                                                 </span>
                                                 <?php if ($cancellation['status'] === 'approved'): ?>
@@ -824,7 +824,7 @@ function showActionModal(cancellationId, action, reason, refundAmount) {
         
         if (refundAmount > 0) {
             refundInfo.style.display = 'block';
-            actionRefund.innerHTML = '<i class="bi bi-coins me-1"></i>' + refundAmount.toFixed(2) + ' kredi iade edilecek';
+            actionRefund.innerHTML = '<i class="bi bi-coin me-1"></i>' + refundAmount.toFixed(2) + ' kredi iade edilecek';
         } else {
             refundInfo.style.display = 'none';
         }

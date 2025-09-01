@@ -122,7 +122,7 @@ include '../includes/admin_sidebar.php';
                     <?php endif; ?>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-users text-primary fa-lg"></i>
+                    <i class="bi bi-person text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -141,7 +141,7 @@ include '../includes/admin_sidebar.php';
                     <?php endif; ?>
                 </div>
                 <div class="bg-info bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-file text-info fa-lg"></i>
+                    <i class="bi bi-folder2-open text-info fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -156,7 +156,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Kullanıcı bakiyeleri</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-coins text-success fa-lg"></i>
+                    <i class="bi bi-coin text-success fa-lg"></i>
                 </div>
             </div>
         </div>

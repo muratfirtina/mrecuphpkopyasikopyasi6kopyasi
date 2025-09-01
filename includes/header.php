@@ -592,13 +592,13 @@ if (!isset($pageTitle)) {
                 <!-- Data Files Animation -->
                 <!-- <div class="data-files">
                     <div class="data-file" style="--delay: 0s">
-                        <i class="bi bi-file-alt"></i>
+                        <i class="bi bi-folder2-open-alt"></i>
                     </div>
                     <div class="data-file" style="--delay: 0.5s">
-                        <i class="bi bi-file-code"></i>
+                        <i class="bi bi-folder2-open-code"></i>
                     </div>
                     <div class="data-file" style="--delay: 1s">
-                        <i class="bi bi-file-archive"></i>
+                        <i class="bi bi-folder2-open-archive"></i>
                     </div>
                     <div class="data-file" style="--delay: 1.5s">
                         <i class="bi bi-database"></i>
@@ -815,7 +815,7 @@ if (!isset($pageTitle)) {
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/user/files.php">
-                                        <i class="bi bi-file-earmark-fill me-2"></i>Dosyalarım
+                                        <i class="bi bi-folder2-open-earmark-fill me-2"></i>Dosyalarım
                                     </a>
                                 </li>
                                 <li>

@@ -23,7 +23,7 @@ echo "<!DOCTYPE html>
         <div class='col-lg-8'>
             <div class='card shadow'>
                 <div class='card-header bg-primary text-white'>
-                    <h3 class='mb-0'><i class='bi bi-concierge-bell me-2'></i>Services System Kurulumu</h3>
+                    <h3 class='mb-0'><i class='bi bi-gear me-2'></i>Services System Kurulumu</h3>
                 </div>
                 <div class='card-body'>
 ";

@@ -173,7 +173,7 @@ include '../includes/user_header.php';
                                 <div class="row align-items-center">
                                     <div class="col-md-6">
                                         <h6 class="mb-1">
-                                            <i class="bi bi-file-image me-1"></i>
+                                            <i class="bi bi-folder2-open-image me-1"></i>
                                             <?php echo htmlspecialchars($imageData['original_name']); ?>
                                         </h6>
                                         <small class="text-muted">

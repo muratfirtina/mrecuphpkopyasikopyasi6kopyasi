@@ -309,7 +309,7 @@ include '../includes/admin_sidebar.php';
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <i class="bi bi-file text-info me-2"></i>
+                                            <i class="bi bi-folder2-open text-info me-2"></i>
                                             <div>
                                                 <div class="fw-bold"><?php echo htmlspecialchars($file['original_name']); ?></div>
                                                 <small class="text-muted"><?php echo formatFileSize($file['file_size']); ?></small>

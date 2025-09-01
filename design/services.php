@@ -10,7 +10,7 @@ require_once '../config/database.php';
 
 $pageTitle = 'Hizmet Yönetimi';
 $pageDescription = 'Hizmetleri görüntüle, ekle, düzenle ve sil';
-$pageIcon = 'bi bi-concierge-bell';
+$pageIcon = 'bi bi-gear';
 
 $breadcrumbs = [
     ['title' => 'Dashboard', 'url' => 'index.php'],
@@ -120,7 +120,7 @@ require_once '../includes/design_header.php';
 <!-- Services Management Content -->
 <div class="design-card">
     <div class="design-card-header d-flex justify-content-between align-items-center">
-        <h3><i class="bi bi-concierge-bell me-2"></i>Hizmet Yönetimi</h3>
+        <h3><i class="bi bi-gear me-2"></i>Hizmet Yönetimi</h3>
         <div class="btn-group">
             <a href="services-add.php" class="btn btn-design-primary">
                 <i class="bi bi-plus me-2"></i>Yeni Hizmet Ekle
@@ -231,7 +231,7 @@ require_once '../includes/design_header.php';
             </div>
         <?php else: ?>
             <div class="text-center p-5">
-                <i class="bi bi-concierge-bell text-muted mb-3" style="font-size: 4rem;"></i>
+                <i class="bi bi-gear text-muted mb-3" style="font-size: 4rem;"></i>
                 <h4 class="text-muted">Henüz hizmet bulunmuyor</h4>
                 <p class="text-muted">İlk hizmetinizi eklemek için aşağıdaki butona tıklayın.</p>
                 <a href="services-add.php" class="btn btn-design-primary">

@@ -41,8 +41,8 @@ $cssPath = '../assets/css/style.css';
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+     <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <!-- Chart.js for admin charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -626,7 +626,7 @@ $cssPath = '../assets/css/style.css';
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="users.php">
-                                    <i class="bi bi-users me-3 text-info"></i>Kullanıcı Yönetimi
+                                    <i class="bi bi-person me-3 text-info"></i>Kullanıcı Yönetimi
                                 </a>
                             </li>
                             <li>

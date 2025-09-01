@@ -118,7 +118,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-success">+<?php echo (int)$user_stats['monthly_new_users']; ?> bu ay</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-users text-primary fa-lg"></i>
+                    <i class="bi bi-person text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -133,7 +133,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-success">+<?php echo (int)$file_stats['monthly_uploads']; ?> bu ay</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-file text-success fa-lg"></i>
+                    <i class="bi bi-folder2-open text-success fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -148,7 +148,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted"><?php echo (int)$credit_stats['monthly_transactions']; ?> işlem/ay</small>
                 </div>
                 <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-coins text-warning fa-lg"></i>
+                    <i class="bi bi-coin text-warning fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -209,7 +209,7 @@ include '../includes/admin_sidebar.php';
             <div class="card-body">
                 <?php if ((int)$file_stats['total_files'] == 0): ?>
                     <div class="text-center py-4">
-                        <i class="bi bi-file text-muted" style="font-size: 3rem;"></i>
+                        <i class="bi bi-folder2-open text-muted" style="font-size: 3rem;"></i>
                         <p class="text-muted mt-3">Henüz dosya yok</p>
                     </div>
                 <?php else: ?>

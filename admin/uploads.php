@@ -267,7 +267,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-success">+<?php echo $stats['today_uploads']; ?> bugün</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-file text-primary fa-lg"></i>
+                    <i class="bi bi-folder2-open text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -448,7 +448,7 @@ include '../includes/admin_sidebar.php';
             <div class="modal-body text-center py-4">
                 <div class="mb-4">
                     <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ff6b6b, #ffa500); border-radius: 50%;">
-                        <i class="bi bi-file-alt text-white fa-2x"></i>
+                        <i class="bi bi-folder2-open-alt text-white fa-2x"></i>
                     </div>
                     <h6 class="mb-2 text-dark">Bu dosyayı işleme almak istediğinizden emin misiniz?</h6>
                     <p class="text-muted mb-0">Bu işlem dosyanın durumunu "İşleniyor" olarak değiştirecek ve dosya detay sayfasına yönlendirecektir.</p>
@@ -532,7 +532,7 @@ include '../includes/admin_sidebar.php';
 <div class="card admin-card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
-            <i class="bi bi-file-upload me-2"></i>
+            <i class="bi bi-folder2-open-upload me-2"></i>
             Dosya Yüklemeleri
         </h5>
         <div class="text-muted small">
@@ -552,7 +552,7 @@ include '../includes/admin_sidebar.php';
     <div class="card-body p-0">
         <?php if (empty($uploads)): ?>
             <div class="text-center py-5">
-                <i class="bi bi-file-upload fa-3x text-muted mb-3"></i>
+                <i class="bi bi-folder2-open-upload fa-3x text-muted mb-3"></i>
                 <h6 class="text-muted">
                     <?php if ($search || $status || $brand || $dateFrom || $dateTo): ?>
                         Filtreye uygun dosya bulunamadı
@@ -580,7 +580,7 @@ include '../includes/admin_sidebar.php';
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="file-icon me-3">
-                                            <i class="bi bi-file-alt fa-2x text-primary"></i>
+                                            <i class="bi bi-folder2-open-alt fa-2x text-primary"></i>
                                         </div>
                                         <div>
                                             <h6 class="mb-1 text-truncate" style="max-width: 200px;" 
