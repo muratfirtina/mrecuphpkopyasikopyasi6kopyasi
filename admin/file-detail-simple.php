@@ -203,7 +203,7 @@ include '../includes/admin_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="bi bi-folder2-open-alt me-2 text-primary"></i>
+                        <i class="bi bi-folder2-open me-2 text-primary"></i>
                         <?php echo strtoupper($fileType); ?> Dosya Detayı
                     </h1>
                     <p class="text-muted mb-0">
@@ -311,7 +311,7 @@ include '../includes/admin_header.php';
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="bi bi-user me-2"></i>Kullanıcı Bilgileri
+                                <i class="bi bi-person me-2"></i>Kullanıcı Bilgileri
                             </h5>
                         </div>
                         <div class="card-body">
@@ -380,7 +380,7 @@ include '../includes/admin_header.php';
             <div class="card mt-3">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-cog me-2"></i>Admin İşlemleri
+                        <i class="bi bi-gear me-2"></i>Admin İşlemleri
                     </h5>
                 </div>
                 <div class="card-body">
@@ -408,7 +408,7 @@ include '../includes/admin_header.php';
                         </a>
                         
                         <a href="user-details.php?id=<?php echo $fileData['user_id']; ?>" class="btn btn-outline-primary">
-                            <i class="bi bi-user me-1"></i>Kullanıcı Detayı
+                            <i class="bi bi-person me-1"></i>Kullanıcı Detayı
                         </a>
                     </div>
                 </div>

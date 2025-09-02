@@ -340,7 +340,7 @@ include '../includes/design_header.php';
                 </li>
                 <li class="nav-item" role="presentation">
                 <button class="nav-link text-white" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab">
-                <i class="bi bi-cog me-2"></i>Ayarlar
+                <i class="bi bi-gear me-2"></i>Ayarlar
                 </button>
                 </li>
             </ul>

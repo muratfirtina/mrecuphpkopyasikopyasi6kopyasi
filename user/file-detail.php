@@ -728,7 +728,7 @@ include '../includes/user_header.php';
                         <?php if (!empty($fileDetail['admin_notes'])): ?>
                             <div class="mt-4">
                                 <h6 class="text-muted mb-3">
-                                    <i class="bi bi-user-cog me-2"></i>Admin Notları
+                                    <i class="bi bi-person-fill me-2"></i>Admin Notları
                                 </h6>
                                 <div class="admin-notes-content">
                                     <?php echo displayAdminNotes($fileDetail['admin_notes']); ?>
@@ -780,7 +780,7 @@ include '../includes/user_header.php';
                                                 </span>
                                                 <?php if (!empty($response['admin_username'])): ?>
                                                     <span class="meta-item">
-                                                        <i class="bi bi-user-cog me-1"></i>
+                                                        <i class="bi bi-person-fill me-1"></i>
                                                         <?php echo htmlspecialchars($response['admin_username']); ?>
                                                     </span>
                                                 <?php endif; ?>
@@ -859,7 +859,7 @@ include '../includes/user_header.php';
                                                 </span>
                                                 <?php if (!empty($revFile['admin_username'])): ?>
                                                     <span class="meta-item">
-                                                        <i class="bi bi-user-cog me-1"></i>
+                                                        <i class="bi bi-person-fill me-1"></i>
                                                         <?php echo htmlspecialchars($revFile['admin_username']); ?>
                                                     </span>
                                                 <?php endif; ?>
@@ -879,7 +879,7 @@ include '../includes/user_header.php';
                                             <?php if (!empty($revFile['admin_notes'])): ?>
                                                 <div class="file-notes mt-1">
                                                     <small class="text-muted">
-                                                        <i class="bi bi-user-shield me-1"></i>
+                                                        <i class="bi bi-person-fill-gear me-1"></i>
                                                         <strong>Admin Notu:</strong> <?php echo htmlspecialchars(substr($revFile['admin_notes'], 0, 100)) . (strlen($revFile['admin_notes']) > 100 ? '...' : ''); ?>
                                                     </small>
                                                 </div>
@@ -944,7 +944,7 @@ include '../includes/user_header.php';
                                             </h6>
                                             <div class="file-meta">
                                                 <span class="meta-item">
-                                                    <i class="bi bi-user me-1"></i>
+                                                    <i class="bi bi-person me-1"></i>
                                                     <?php if ($file['sender_type'] === 'admin'): ?>
                                                         <span class="badge bg-primary">Admin</span>
                                                     <?php else: ?>
@@ -1078,7 +1078,7 @@ include '../includes/user_header.php';
                                         </div>
                                         <div class="align-self-end">
                                             <button type="submit" class="btn btn-primary">
-                                                <i class="bi bi-paper-plane"></i>
+                                                <i class="bi bi-send"></i>
                                             </button>
                                         </div>
                                     </form>
@@ -1500,7 +1500,7 @@ include '../includes/user_header.php';
                                                 'user_upload' => ['icon' => 'bi bi-upload text-primary', 'color' => 'primary'],
                                                 'admin_response' => ['icon' => 'bi bi-reply text-success', 'color' => 'success'],
                                                 'user_revision_request' => ['icon' => 'bi bi-pencil-square text-warning', 'color' => 'warning'],
-                                                'admin_revision_response' => ['icon' => 'bi bi-user-shield text-info', 'color' => 'info']
+                                                'admin_revision_response' => ['icon' => 'bi bi-person-fill-gear text-info', 'color' => 'info']
                                             ];
                                             $config = $typeConfig[$comm['type']] ?? ['icon' => 'bi bi-comment text-secondary', 'color' => 'secondary'];
                                             ?>
@@ -1512,11 +1512,11 @@ include '../includes/user_header.php';
                                                     <h6 class="mb-1">
                                                         <?php if ($comm['type'] === 'user_upload'): ?>
                                                             <span class="badge bg-primary">
-                                                                <i class="bi bi-user me-1"></i>Dosya Yükleme Notum
+                                                                <i class="bi bi-person me-1"></i>Dosya Yükleme Notum
                                                             </span>
                                                         <?php elseif ($comm['type'] === 'admin_response'): ?>
                                                             <span class="badge bg-success">
-                                                                <i class="bi bi-user-shield me-1"></i>Admin'in Yanıt Dosyası Notu
+                                                                <i class="bi bi-person-fill-gear me-1"></i>Admin'in Yanıt Dosyası Notu
                                                             </span>
                                                         <?php elseif ($comm['type'] === 'user_revision_request'): ?>
                                                             <span class="badge bg-warning">
@@ -1540,7 +1540,7 @@ include '../includes/user_header.php';
 
                                                         <?php if (isset($comm['admin_username']) && !empty($comm['admin_username'])): ?>
                                                             <span class="ms-2">
-                                                                <i class="bi bi-user-shield me-1"></i>
+                                                                <i class="bi bi-person-fill-gear me-1"></i>
                                                                 Admin: <?php echo htmlspecialchars($comm['admin_username']); ?>
                                                             </span>
                                                         <?php endif; ?>
@@ -1614,7 +1614,7 @@ include '../includes/user_header.php';
                                             <?php if (!empty($comm['user_notes'])): ?>
                                                 <div class="revision-note user-note mb-3">
                                                     <div class="note-header">
-                                                        <i class="bi bi-user me-2 text-primary"></i>
+                                                        <i class="bi bi-person me-2 text-primary"></i>
                                                         <strong>
                                                             <?php if ($comm['type'] === 'user_upload'): ?>
                                                                 Yükleme sırasında yazdığım notlar:
@@ -1633,7 +1633,7 @@ include '../includes/user_header.php';
                                             <?php if (!empty($comm['admin_notes'])): ?>
                                                 <div class="revision-note admin-note mb-2">
                                                     <div class="note-header">
-                                                        <i class="bi bi-user-shield me-2 text-success"></i>
+                                                        <i class="bi bi-person-fill-gear me-2 text-success"></i>
                                                         <strong>
                                                             <?php if ($comm['type'] === 'admin_response'): ?>
                                                                 Admin'in yanıt dosyası notları:
@@ -1783,7 +1783,7 @@ include '../includes/user_header.php';
                             <!-- İletişim Özeti -->
                             <div class="communication-summary mt-4 p-3 bg-light rounded">
                                 <h6 class="mb-2">
-                                    <i class="bi bi-chart-line me-2 text-info"></i>İletişim Özeti
+                                    <i class="bi bi bar-chart-line me-2 text-info"></i>İletişim Özeti
                                 </h6>
                                 <div class="row text-center">
                                     <?php
@@ -1862,7 +1862,7 @@ include '../includes/user_header.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-warning">
-                        <i class="bi bi-paper-plane me-2"></i>Revize Talebi Gönder
+                        <i class="bi bi-send me-2"></i>Revize Talebi Gönder
                     </button>
                 </div>
             </form>
@@ -3200,7 +3200,7 @@ include '../includes/user_header.php';
                     
                     <div class="file-info-box mb-4">
                         <div class="d-flex align-items-center">
-                            <i class="bi bi-folder2-open-alt fa-2x text-primary me-3"></i>
+                            <i class="bi bi-folder2-open fa-2x text-primary me-3"></i>
                             <div>
                                 <h6 class="mb-1">Dosya:</h6>
                                 <p class="mb-0 text-muted" id="cancelFileName">-</p>
@@ -3229,7 +3229,7 @@ include '../includes/user_header.php';
                         </div>
                         <div class="col-6">
                             <button type="submit" class="btn btn-danger w-100" id="submitCancellationBtn">
-                                <i class="bi bi-paper-plane me-1"></i>İptal Talebi Gönder
+                                <i class="bi bi-send me-1"></i>İptal Talebi Gönder
                             </button>
                         </div>
                     </div>

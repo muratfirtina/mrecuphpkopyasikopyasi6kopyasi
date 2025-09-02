@@ -63,7 +63,7 @@ include 'includes/header.php';
                                         <i class="bi bi-sign-in-alt me-1"></i>Giriş Yap
                                     </a>
                                     <a href="register.php" class="btn btn-outline-secondary">
-                                        <i class="bi bi-user-plus me-1"></i>Yeni Hesap Oluştur
+                                        <i class="bi bi-person-plus me-1"></i>Yeni Hesap Oluştur
                                     </a>
                                     <a href="forgot-password.php" class="btn btn-outline-info">
                                         <i class="bi bi-key me-1"></i>Şifremi Unuttum

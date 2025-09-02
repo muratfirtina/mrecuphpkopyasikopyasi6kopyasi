@@ -87,7 +87,7 @@ include 'includes/header.php';
                             
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="bi bi-paper-plane me-2"></i>Sıfırlama Bağlantısı Gönder
+                                    <i class="bi bi-send me-2"></i>Sıfırlama Bağlantısı Gönder
                                 </button>
                             </div>
                         </form>
@@ -107,7 +107,7 @@ include 'includes/header.php';
                     <p class="text-muted">
                         Hesabınız yok mu? 
                         <a href="register.php" class="text-decoration-none">
-                            <i class="bi bi-user-plus me-1"></i>Kayıt Ol
+                            <i class="bi bi-person-plus me-1"></i>Kayıt Ol
                         </a>
                     </p>
                 </div>

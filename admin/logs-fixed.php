@@ -132,7 +132,7 @@ $pageTitle = 'Sistem Logları';
                     <div class="card-body">
                         <?php if (empty($logs)): ?>
                             <div class="text-center py-5">
-                                <i class="bi bi-folder2-open-alt text-muted" style="font-size: 3rem;"></i>
+                                <i class="bi bi-folder2-open text-muted" style="font-size: 3rem;"></i>
                                 <p class="text-muted mt-3">Henüz log kaydı bulunmuyor.</p>
                                 <p class="text-muted">Güvenlik olayları otomatik olarak burada görünecektir.</p>
                             </div>

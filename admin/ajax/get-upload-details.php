@@ -88,7 +88,7 @@ try {
             <!-- Dosya Bilgileri -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h6 class="mb-0"><i class="bi bi-folder2-open-alt me-2"></i>Dosya Bilgileri</h6>
+                    <h6 class="mb-0"><i class="bi bi-folder2-open me-2"></i>Dosya Bilgileri</h6>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -278,7 +278,7 @@ try {
             <!-- Kullanıcı Bilgileri -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h6 class="mb-0"><i class="bi bi-user me-2"></i>Kullanıcı Bilgileri</h6>
+                    <h6 class="mb-0"><i class="bi bi-person me-2"></i>Kullanıcı Bilgileri</h6>
                 </div>
                 <div class="card-body">
                     <div class="text-center mb-3">
@@ -295,7 +295,7 @@ try {
                         
                         <a href="user-details.php?id=<?php echo $upload['user_id']; ?>" 
                            class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-user me-1"></i>Kullanıcı Detayları
+                            <i class="bi bi-person me-1"></i>Kullanıcı Detayları
                         </a>
                     </div>
                 </div>

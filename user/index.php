@@ -115,7 +115,7 @@ include '../includes/user_header.php';
                     </div>
                     <div class="col-md-4 text-center">
                         <div class="welcome-icon">
-                            <i class="bi bi-tachometer-alt"></i>
+                            <i class="bi bi-speedometer"></i>
                         </div>
                     </div>
                 </div>
@@ -259,7 +259,7 @@ include '../includes/user_header.php';
                                                     <td>
                                                         <div class="d-flex align-items-center">
                                                             <div class="file-icon me-3">
-                                                                <i class="bi bi-folder2-open-alt"></i>
+                                                                <i class="bi bi-folder2-open"></i>
                                                             </div>
                                                             <div>
                                                                 <div class="fw-medium"><?php echo htmlspecialchars($upload['original_name'] ?? 'Bilinmeyen dosya'); ?></div>
@@ -343,7 +343,7 @@ include '../includes/user_header.php';
                                 </a>
                                 
                                 <a href="profile.php" class="btn btn-outline-secondary btn-modern">
-                                    <i class="bi bi-user-cog me-2"></i>Profil Ayarları
+                                    <i class="bi bi-person-fill me-2"></i>Profil Ayarları
                                 </a>
                             </div>
                         </div>
@@ -353,7 +353,7 @@ include '../includes/user_header.php';
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-white border-0 py-3">
                             <h6 class="mb-0">
-                                <i class="bi bi-chart-pie me-2 text-info"></i>Hesap Durumu
+                                <i class="bi bi-pie-chart me-2 text-info"></i>Hesap Durumu
                             </h6>
                         </div>
                         <div class="card-body">

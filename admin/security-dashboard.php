@@ -26,7 +26,7 @@ foreach ($securityTables as $table) {
 
 $pageTitle = 'Güvenlik Dashboard';
 $pageDescription = 'Sistem güvenliğini izleyin ve yönetin';
-$pageIcon = 'bi bi-shield-alt';
+$pageIcon = 'bi bi-shield-exclamation';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -62,7 +62,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Güvenlik olayları</small>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-chart-bar text-primary fa-lg"></i>
+                    <i class="bi bi-bar-chart text-primary fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -85,7 +85,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Son 24 saatte</small>
                 </div>
                 <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-user-slash text-warning fa-lg"></i>
+                    <i class="bi bi-person-slash text-warning fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -131,7 +131,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted">Koruma aktif</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-shield text-success fa-lg"></i>
+                    <i class="bi bi-shield-exclamation text-success fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -218,7 +218,7 @@ include '../includes/admin_sidebar.php';
                                         $icon = 'bi bi-code text-warning';
                                         break;
                                     case 'brute_force_detected':
-                                        $icon = 'bi bi-user-slash text-danger';
+                                        $icon = 'bi bi-person-slash text-danger';
                                         break;
                                     case 'failed_login':
                                         $icon = 'bi bi-sign-in-alt text-warning';
@@ -298,7 +298,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="bi bi-shield me-2"></i>WAF Kuralları Durumu
+                    <i class="bi bi-shield-exclamation me-2"></i>WAF Kuralları Durumu
                 </h5>
             </div>
             <div class="card-body">

@@ -432,7 +432,7 @@ $cssPath = '../assets/css/style.css';
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="../user/">
-                            <i class="bi bi-user me-1"></i>Kullanıcı Paneli
+                            <i class="bi bi-person me-1"></i>Kullanıcı Paneli
                         </a>
                     </li>
                 </ul>
@@ -543,7 +543,7 @@ $cssPath = '../assets/css/style.css';
                                                 <i class="<?php 
                                                     switch($notification['type']) {
                                                         case 'user_registration':
-                                                            echo 'bi bi-user-plus text-success';
+                                                            echo 'bi bi-person-plus text-success';
                                                             break;
                                                         case 'file_upload':
                                                             echo 'bi bi-upload text-warning';
@@ -598,7 +598,7 @@ $cssPath = '../assets/css/style.css';
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="admin-avatar me-2">
-                                <i class="bi bi-user-shield fa-lg"></i>
+                                <i class="bi bi-person-fill-gear fa-lg"></i>
                             </div>
                             <div class="admin-info">
                                 <span class="fw-semibold"><?php echo isset($_SESSION['username']) ? $_SESSION['username'] : 'Admin'; ?></span>
@@ -608,7 +608,7 @@ $cssPath = '../assets/css/style.css';
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 280px;">
                             <li class="dropdown-header">
                                 <div class="d-flex align-items-center">
-                                    <i class="bi bi-user-shield fa-2x text-muted me-2"></i>
+                                    <i class="bi bi-person-fill-gear fa-2x text-muted me-2"></i>
                                     <div>
                                         <div class="fw-semibold"><?php echo isset($_SESSION['username']) ? $_SESSION['username'] : 'Admin'; ?></div>
                                         <small class="text-muted"><?php echo isset($_SESSION['email']) ? $_SESSION['email'] : 'admin@system.com'; ?></small>
@@ -621,7 +621,7 @@ $cssPath = '../assets/css/style.css';
                             <li class="dropdown-header small text-uppercase text-muted">Sistem Yönetimi</li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="index.php">
-                                    <i class="bi bi-tachometer-alt me-3 text-primary"></i>Dashboard
+                                    <i class="bi bi-speedometer me-3 text-primary"></i>Dashboard
                                 </a>
                             </li>
                             <li>
@@ -636,7 +636,7 @@ $cssPath = '../assets/css/style.css';
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="settings.php">
-                                    <i class="bi bi-cog me-3 text-secondary"></i>Sistem Ayarları
+                                    <i class="bi bi-gear me-3 text-secondary"></i>Sistem Ayarları
                                 </a>
                             </li>
                             
@@ -644,17 +644,17 @@ $cssPath = '../assets/css/style.css';
                             <li class="dropdown-header small text-uppercase text-muted">Güvenlik & Raporlar</li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="security-dashboard.php">
-                                    <i class="bi bi-shield-alt me-3 text-success"></i>Güvenlik Dashboard
+                                    <i class="bi bi-shield-exclamation me-3 text-success"></i>Güvenlik Dashboard
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="logs.php">
-                                    <i class="bi bi-clipboard-list me-3 text-dark"></i>Sistem Logları
+                                    <i class="bi bi-clipboard-data me-3 text-dark"></i>Sistem Logları
                                 </a>
                             </li>
                             <!-- <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="analytics.php">
-                                    <i class="bi bi-chart-bar me-3 text-info"></i>Analitik Raporlar
+                                    <i class="bi bi-bar-chart me-3 text-info"></i>Analitik Raporlar
                                 </a>
                             </li> -->
                             
@@ -662,12 +662,12 @@ $cssPath = '../assets/css/style.css';
                             <li class="dropdown-header small text-uppercase text-muted">Hesap İşlemleri</li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="../user/profile.php">
-                                    <i class="bi bi-user me-3 text-primary"></i>Profil Ayarları
+                                    <i class="bi bi-person me-3 text-primary"></i>Profil Ayarları
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="../user/">
-                                    <i class="bi bi-user-circle me-3 text-secondary"></i>Kullanıcı Paneli
+                                    <i class="bi bi-person-circle me-3 text-secondary"></i>Kullanıcı Paneli
                                 </a>
                             </li>
                             

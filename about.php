@@ -217,7 +217,7 @@ include 'includes/header.php';
                                      alt="<?php echo htmlspecialchars($feature['title']); ?>" 
                                      class="img-fluid" style="height: 60px;">
                             <?php else: ?>
-                                <i class="<?php echo htmlspecialchars($feature['icon'] ?? 'bi bi-cog'); ?>" style="font-size: 3rem; color: #007bff;"></i>
+                                <i class="<?php echo htmlspecialchars($feature['icon'] ?? 'bi bi-gear'); ?>" style="font-size: 3rem; color: #007bff;"></i>
                             <?php endif; ?>
                         </div>
                         <h5 class="fw-bold mb-3"><?php echo htmlspecialchars($feature['title']); ?></h5>
@@ -302,7 +302,7 @@ include 'includes/header.php';
         </p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
             <a href="tel:+905551234567" class="btn btn-light btn-lg">
-                <i class="bi bi-phone me-2"></i>Hemen Ara
+                <i class="bi bi-telephone-fill me-2"></i>Hemen Ara
             </a>
             <a href="mailto:<?php echo SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
                 <i class="bi bi-envelope me-2"></i>E-posta Gönder
@@ -314,7 +314,7 @@ include 'includes/header.php';
         
         <div class="row mt-5 text-center">
             <div class="col-md-4">
-                <i class="bi bi-shield-alt fa-2x mb-3"></i>
+                <i class="bi bi-shield-exclamation fa-2x mb-3"></i>
                 <h5 style="color: #fff !important;">Güvenli İşlem</h5>
                 <p style="color: #fff !important;">Aracınızın garantisi bozulmaz</p>
             </div>

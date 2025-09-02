@@ -235,7 +235,7 @@ include '../includes/admin_sidebar.php';
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-light">
                         <h6 class="mb-0">
-                            <i class="bi bi-user me-2"></i>
+                            <i class="bi bi-person me-2"></i>
                             <?php echo $fileType === 'additional' ? 'Dosya Bilgileri' : 'Kullanıcı Bilgileri'; ?>
                         </h6>
                     </div>

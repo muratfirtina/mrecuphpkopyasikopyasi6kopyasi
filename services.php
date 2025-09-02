@@ -602,7 +602,7 @@ include 'includes/header.php';
                 <div class="d-flex flex-column gap-2">
                     <?php if (!isLoggedIn()): ?>
                         <a href="register.php" class="btn btn-light btn-lg">
-                            <i class="bi bi-user-plus me-2"></i>Ücretsiz Kayıt Ol
+                            <i class="bi bi-person-plus me-2"></i>Ücretsiz Kayıt Ol
                         </a>
                         <a href="login.php" class="btn btn-outline-light">
                             <i class="bi bi-sign-in-alt me-2"></i>Giriş Yap
@@ -612,7 +612,7 @@ include 'includes/header.php';
                             <i class="bi bi-upload me-2"></i>Dosya Yükle
                         </a>
                         <a href="user/" class="btn btn-outline-light">
-                            <i class="bi bi-tachometer-alt me-2"></i>Panel
+                            <i class="bi bi-speedometer me-2"></i>Panel
                         </a>
                     <?php endif; ?>
                 </div>

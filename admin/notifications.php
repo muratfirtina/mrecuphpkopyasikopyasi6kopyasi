@@ -164,7 +164,7 @@ include '../includes/admin_sidebar.php';
         <?php if (isset($installUrl)): ?>
             <div class="mt-3">
                 <a href="<?php echo $installUrl; ?>" class="btn btn-sm btn-outline-light">
-                    <i class="bi bi-cog me-1"></i>Kurulum Scriptini Çalıştır
+                    <i class="bi bi-gear me-1"></i>Kurulum Scriptini Çalıştır
                 </a>
                 <a href="../config/check-notification-system.php" class="btn btn-sm btn-outline-light">
                     <i class="bi bi-check me-1"></i>Sistem Durumunu Kontrol Et
@@ -475,7 +475,7 @@ include '../includes/admin_sidebar.php';
 <!-- Kurulum Gerekli Uyarısı -->
 <div class="card admin-card">
     <div class="card-body text-center py-5">
-        <i class="bi bi-cog fa-4x text-muted mb-4"></i>
+        <i class="bi bi-gear fa-4x text-muted mb-4"></i>
         <h4>Bildirim Sistemi Kurulum Gerekli</h4>
         <p class="text-muted mb-4">Bildirim sistemini kullanabilmek için önce kurulum yapmanız gerekiyor.</p>
         

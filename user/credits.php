@@ -349,7 +349,7 @@ include '../includes/user_header.php';
                         <!-- İstatistikler -->
                         <div class="credit-stats mt-3">
                             <div class="stat-item">
-                                <i class="bi bi-chart-line text-info"></i>
+                                <i class="bi bi bar-chart-line text-info"></i>
                                 <span>Toplam İşlem: <strong><?php echo $totalTransactions; ?></strong></span>
                             </div>
                             <div class="stat-item">
@@ -749,7 +749,7 @@ include '../includes/user_header.php';
                                                 <?php echo date('d.m.Y H:i', strtotime($transaction['created_at'])); ?>
                                                 <?php if ($transaction['admin_username']): ?>
                                                     <span class="admin-info ms-2">
-                                                        <i class="bi bi-user-cog me-1"></i>
+                                                        <i class="bi bi-person-fill me-1"></i>
                                                         <?php echo htmlspecialchars($transaction['admin_username']); ?>
                                                     </span>
                                                 <?php endif; ?>
@@ -890,7 +890,7 @@ include '../includes/user_header.php';
                                 </a>
                                 
                                 <a href="tel:+905551234567" class="support-option">
-                                    <i class="bi bi-phone"></i>
+                                    <i class="bi bi-telephone-fill"></i>
                                     <span>Telefon Desteği</span>
                                 </a>
                                 
@@ -2274,7 +2274,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="transaction-date">
                                 <i class="bi bi-calendar-alt me-1"></i>
                                 ${formatDate(transaction.created_at)}
-                                ${transaction.admin_username ? `<span class="admin-info ms-2"><i class="bi bi-user-cog me-1"></i>${transaction.admin_username}</span>` : ''}
+                                ${transaction.admin_username ? `<span class="admin-info ms-2"><i class="bi bi-person-fill me-1"></i>${transaction.admin_username}</span>` : ''}
                             </div>
                         </div>
                         <div class="transaction-amount">

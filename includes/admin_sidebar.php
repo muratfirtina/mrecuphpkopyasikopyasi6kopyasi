@@ -40,11 +40,11 @@
                         <div class="nav-section">Dashboard</div>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Admin Panel' || $pageTitle == 'Dashboard') ? 'active' : ''; ?>" href="index.php">
-                            <i class="bi bi-tachometer-alt"></i>Genel Bakış
+                            <i class="bi bi-speedometer"></i>Genel Bakış
                         </a>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Raporlar') ? 'active' : ''; ?>" href="reports.php">
-                            <i class="bi bi-chart-bar"></i>Raporlar
+                            <i class="bi bi-bar-chart"></i>Raporlar
                         </a>
                         
                         <!-- Dosya Yönetimi -->
@@ -248,15 +248,15 @@
                         </a>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Sistem Ayarları') ? 'active' : ''; ?>" href="settings.php">
-                            <i class="bi bi-cog"></i>Ayarlar
+                            <i class="bi bi-gear"></i>Ayarlar
                         </a>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Güvenlik Dashboard') ? 'active' : ''; ?>" href="security-dashboard.php">
-                            <i class="bi bi-shield-alt"></i>Güvenlik
+                            <i class="bi bi-shield-exclamation"></i>Güvenlik
                         </a>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Sistem Logları') ? 'active' : ''; ?>" href="logs.php">
-                            <i class="bi bi-clipboard-list"></i>Loglar
+                            <i class="bi bi-clipboard-data"></i>Loglar
                         </a>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Debug Tools') ? 'active' : ''; ?>" href="debug.php">
@@ -266,12 +266,12 @@
                         <!-- Diğer İşlemler -->
                         <div class="nav-section">Diğer</div>
                         
-                        <a class="nav-link text-info" href="../design/contact.php">
-                            <i class="bi bi-phone-alt"></i>İletişim Yönetimi
+                        <a class="nav-link text-info" href="../design">
+                            <i class="bi bi-window-sidebar"></i>Design Paneli
                         </a>
                         
                         <a class="nav-link text-warning" href="../user/">
-                            <i class="bi bi-user"></i>Kullanıcı Paneli
+                            <i class="bi bi-person"></i>Kullanıcı Paneli
                         </a>
                         
                         <a class="nav-link text-info" href="../index.php" target="_blank">
@@ -309,7 +309,7 @@
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item">
                                         <a href="index.php" class="text-decoration-none">
-                                            <i class="bi bi-tachometer-alt me-1"></i>Dashboard
+                                            <i class="bi bi-speedometer me-1"></i>Dashboard
                                         </a>
                                     </li>
                                     <?php if ($pageTitle != 'Admin Panel' && $pageTitle != 'Dashboard'): ?>

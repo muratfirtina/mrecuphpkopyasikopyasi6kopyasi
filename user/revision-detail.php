@@ -292,7 +292,7 @@ include '../includes/user_header.php';
                                 <?php if ($revision['admin_id']): ?>
                                 <div class="timeline-item completed">
                                     <div class="timeline-marker">
-                                        <i class="bi bi-user-cog"></i>
+                                        <i class="bi bi-person-fill"></i>
                                     </div>
                                     <div class="timeline-content">
                                         <h6>Admin Atandı</h6>
@@ -311,7 +311,7 @@ include '../includes/user_header.php';
                                 <?php if ($revision['status'] === 'in_progress'): ?>
                                 <div class="timeline-item active">
                                     <div class="timeline-marker">
-                                        <i class="bi bi-cog fa-spin"></i>
+                                        <i class="bi bi-gear fa-spin"></i>
                                     </div>
                                     <div class="timeline-content">
                                         <h6>Revize İşleniyor</h6>
@@ -380,7 +380,7 @@ include '../includes/user_header.php';
                     <div class="card mb-4">
                         <div class="card-header bg-light">
                             <h5 class="card-title mb-0">
-                                <i class="bi bi-user-cog me-2"></i>Admin Yanıtı
+                                <i class="bi bi-person-fill me-2"></i>Admin Yanıtı
                                 <?php if (($revision['admin_username'] ?? 'Admin bilgisi yok')): ?>
                                     <small class="text-muted">- <?php echo htmlspecialchars(($revision['admin_username'] ?? 'Admin bilgisi yok')); ?></small>
                                 <?php endif; ?>
@@ -398,7 +398,7 @@ include '../includes/user_header.php';
                     <div class="card mb-4">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="bi bi-folder2-open-alt me-2"></i>Dosya Bilgileri
+                                <i class="bi bi-folder2-open me-2"></i>Dosya Bilgileri
                             </h5>
                         </div>
                         <div class="card-body">
@@ -654,7 +654,7 @@ include '../includes/user_header.php';
                 </div>
                 
                 <div class="info-section">
-                    <h6><i class="bi bi-cog me-2"></i>Süreç Nasıl İşler?</h6>
+                    <h6><i class="bi bi-gear me-2"></i>Süreç Nasıl İşler?</h6>
                     <ol class="ps-3">
                         <li>Revize talebiniz sisteme kaydedilir</li>
                         <li>Uzman admin tarafından incelenir</li>
@@ -716,7 +716,7 @@ include '../includes/user_header.php';
                         <i class="bi bi-times me-1"></i>İptal
                     </button>
                     <button type="submit" class="btn btn-warning" id="submitRevisionBtn">
-                        <i class="bi bi-paper-plane me-1"></i>Revize Talebi Gönder
+                        <i class="bi bi-send me-1"></i>Revize Talebi Gönder
                     </button>
                 </div>
             </form>
@@ -971,7 +971,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (xhr.readyState === 4) {
                     // Buton durumunu eski haline getir
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="bi bi-paper-plane me-1"></i>Revize Talebi Gönder';
+                    submitBtn.innerHTML = '<i class="bi bi-send me-1"></i>Revize Talebi Gönder';
                     
                     if (xhr.status === 200) {
                         try {
@@ -1015,7 +1015,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('newRevisionModal').addEventListener('hidden.bs.modal', function() {
             revisionNotes.value = '';
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="bi bi-paper-plane me-1"></i>Revize Talebi Gönder';
+            submitBtn.innerHTML = '<i class="bi bi-send me-1"></i>Revize Talebi Gönder';
         });
     }
 });
@@ -1114,7 +1114,7 @@ var openRevisionFileModal = function(revisionFileId, fileName) {
             if (xhr.readyState === 4) {
                 // Buton durumunu eski haline getir
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="bi bi-paper-plane me-1"></i>Revize Talebi Gönder';
+                submitBtn.innerHTML = '<i class="bi bi-send me-1"></i>Revize Talebi Gönder';
                 
                 if (xhr.status === 200) {
                     try {

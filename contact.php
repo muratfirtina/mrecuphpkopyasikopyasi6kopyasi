@@ -409,7 +409,7 @@ textarea.form-control {
                 <div class="form-container">
                     <div class="form-header">
                         <h3>
-                            <i class="bi bi-paper-plane me-2"></i>
+                            <i class="bi bi-send me-2"></i>
                             <?php echo htmlspecialchars($form_settings['form_title'] ?? 'Bize Mesaj Gönderin'); ?>
                         </h3>
                         <p><?php echo htmlspecialchars($form_settings['form_subtitle'] ?? 'İhtiyacınız olan her şey için buradayız.'); ?></p>

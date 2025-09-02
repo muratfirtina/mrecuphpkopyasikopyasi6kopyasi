@@ -72,8 +72,8 @@ if (isset($_SESSION['user_id'])) {
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -599,7 +599,7 @@ if (isset($_SESSION['user_id'])) {
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="javascript:void(0)" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="user-avatar me-2">
-                                <i class="bi bi-user-circle fa-lg"></i>
+                                <i class="bi bi-person-circle fa-lg"></i>
                             </div>
                             <div class="user-info">
                                 <span class="fw-semibold"><?php echo htmlspecialchars(!empty($_SESSION['username']) ? $_SESSION['username'] : ($_SESSION['email'] ?? 'Kullanıcı')); ?></span>
@@ -609,7 +609,7 @@ if (isset($_SESSION['user_id'])) {
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdown">
                             <li class="dropdown-header">
                                 <div class="d-flex align-items-center">
-                                    <i class="bi bi-user-circle fa-2x text-muted me-2"></i>
+                                    <i class="bi bi-person-circle fa-2x text-muted me-2"></i>
                                     <div>
                                         <div class="fw-semibold"><?php echo htmlspecialchars(!empty($_SESSION['username']) ? $_SESSION['username'] : ($_SESSION['email'] ?? 'Kullanıcı')); ?></div>
                                         <small class="text-muted"><?php echo htmlspecialchars($_SESSION['email'] ?? ''); ?></small>
@@ -623,7 +623,7 @@ if (isset($_SESSION['user_id'])) {
                             <li class="dropdown-header small text-uppercase text-muted">Hesap İşlemleri</li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="profile.php">
-                                    <i class="bi bi-user me-3 text-primary"></i>Profil Ayarları
+                                    <i class="bi bi-person me-3 text-primary"></i>Profil Ayarları
                                 </a>
                             </li>
                             <li>
@@ -668,7 +668,7 @@ if (isset($_SESSION['user_id'])) {
                                 <li class="dropdown-header small text-uppercase text-muted">Yönetim</li>
                                 <li>
                                     <a class="dropdown-item d-flex align-items-center py-2" href="../admin/">
-                                        <i class="bi bi-cog me-3 text-danger"></i>Admin Panel
+                                        <i class="bi bi-gear me-3 text-danger"></i>Admin Panel
                                     </a>
                                 </li>
                             <?php endif; ?>

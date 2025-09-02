@@ -122,7 +122,7 @@ while ($row = $status_stmt->fetch()) {
 // Quick actions
 $quickActions = [
     ['text' => 'Tüm Mesajları Görüntüle', 'url' => 'contact-messages.php', 'icon' => 'bi bi-list', 'class' => 'outline-primary'],
-    ['text' => 'İletişim Ayarları', 'url' => '../design/contact.php', 'icon' => 'bi bi-cog', 'class' => 'outline-secondary'],
+    ['text' => 'İletişim Ayarları', 'url' => '../design/contact.php', 'icon' => 'bi bi-gear', 'class' => 'outline-secondary'],
     ['text' => 'İletişim Sayfası', 'url' => '../contact.php', 'icon' => 'bi bi-external-link-alt', 'class' => 'outline-success']
 ];
 
@@ -409,7 +409,7 @@ include '../includes/admin_sidebar.php';
                                         <small class="text-muted"><?= htmlspecialchars($msg['email']) ?></small>
                                         <?php if ($msg['phone']): ?>
                                             <br><small class="text-muted">
-                                                <i class="bi bi-phone me-1"></i><?= htmlspecialchars($msg['phone']) ?>
+                                                <i class="bi bi-telephone-fill me-1"></i><?= htmlspecialchars($msg['phone']) ?>
                                             </small>
                                         <?php endif; ?>
                                     </td>
@@ -453,7 +453,7 @@ include '../includes/admin_sidebar.php';
                                             <div class="btn-group" style="position: relative;">
                                                 <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle"
                                                         data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i class="bi bi-cog"></i>
+                                                    <i class="bi bi-gear"></i>
                                                 </button>
                                                 <ul class="dropdown-menu">
                                                     <li><a class="dropdown-item" href="mailto:<?= htmlspecialchars($msg['email']) ?>">

@@ -45,7 +45,7 @@ if (isset($_POST['clear_logs'])) {
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="bi bi-folder2-open-alt me-2 text-info"></i>Email Test Logları
+                        <i class="bi bi-folder2-open me-2 text-info"></i>Email Test Logları
                     </h1>
                     <p class="text-muted mb-0">
                         Test modunda gönderilen email'lerin logları
@@ -66,7 +66,7 @@ if (isset($_POST['clear_logs'])) {
                     </form>
                     <?php endif; ?>
                     <a href="email-settings.php" class="btn btn-outline-primary">
-                        <i class="bi bi-cog me-1"></i>Email Ayarları
+                        <i class="bi bi-gear me-1"></i>Email Ayarları
                     </a>
                 </div>
             </div>
@@ -109,7 +109,7 @@ if (isset($_POST['clear_logs'])) {
                                     <h5>Henüz email log kaydı yok</h5>
                                     <p>Test email gönderdiğinizde loglar burada görünecek.</p>
                                     <a href="email-settings.php" class="btn btn-primary">
-                                        <i class="bi bi-paper-plane me-1"></i>Test Email Gönder
+                                        <i class="bi bi-send me-1"></i>Test Email Gönder
                                     </a>
                                 </div>
                             <?php else: ?>

@@ -26,6 +26,11 @@ function getFlashMessage() {
     return null;
 }
 
+// Boş değerleri NULL'a çeviren yardımcı fonksiyon
+function nullable($value) {
+    return $value === '' || $value === null ? null : $value;
+}
+
 // Sayfa bilgileri
 $pageTitle = 'Hero Slider Yönetimi';
 $pageDescription = 'Ana sayfa hero slider\'larını düzenleyin';
@@ -65,14 +70,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     $stmt->execute([
                         $id,
-                        $_POST['title'],
-                        $_POST['subtitle'],
-                        $_POST['description'],
-                        $_POST['button_text'],
-                        $_POST['button_link'],
-                        $_POST['background_image'],
-                        $_POST['background_color'],
-                        $_POST['text_color'],
+                        nullable($_POST['title']),
+                        nullable($_POST['subtitle']),
+                        nullable($_POST['description']),
+                        nullable($_POST['button_text']),
+                        nullable($_POST['button_link']),
+                        nullable($_POST['background_image']),
+                        $_POST['background_color'] ?? '#667eea',
+                        $_POST['text_color'] ?? '#ffffff',
                         isset($_POST['is_active']) ? 1 : 0,
                         (int)$_POST['sort_order']
                     ]);
@@ -91,14 +96,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ");
                     
                     $stmt->execute([
-                        $_POST['title'],
-                        $_POST['subtitle'],
-                        $_POST['description'],
-                        $_POST['button_text'],
-                        $_POST['button_link'],
-                        $_POST['background_image'],
-                        $_POST['background_color'],
-                        $_POST['text_color'],
+                        nullable($_POST['title']),
+                        nullable($_POST['subtitle']),
+                        nullable($_POST['description']),
+                        nullable($_POST['button_text']),
+                        nullable($_POST['button_link']),
+                        nullable($_POST['background_image']),
+                        $_POST['background_color'] ?? '#667eea',
+                        $_POST['text_color'] ?? '#ffffff',
                         isset($_POST['is_active']) ? 1 : 0,
                         (int)$_POST['sort_order'],
                         $_POST['id']
@@ -215,21 +220,21 @@ include '../includes/design_header.php';
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <img src="../<?php echo htmlspecialchars($slider['background_image']); ?>" 
-                                                 alt="<?php echo htmlspecialchars($slider['title']); ?>"
+                                            <img src="../<?php echo htmlspecialchars($slider['background_image'] ?? ''); ?>" 
+                                                 alt="<?php echo htmlspecialchars($slider['title'] ?? 'Slider'); ?>"
                                                  class="rounded" style="width: 60px; height: 40px; object-fit: cover;"
                                                  onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA2MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjhmOWZhIi8+Cjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNmM3NTdkIiBmb250LXNpemU9IjEwIj7inYw8L3RleHQ+Cjwvc3ZnPg=='">
                                         </div>
                                     </td>
                                     <td>
                                         <div>
-                                            <strong><?php echo htmlspecialchars($slider['title']); ?></strong>
+                                            <strong><?php echo htmlspecialchars($slider['title'] ?? 'Başlıksız'); ?></strong>
                                             <small class="d-block text-muted">
-                                                <?php echo htmlspecialchars(substr($slider['description'], 0, 50)) . '...'; ?>
+                                                <?php echo htmlspecialchars(substr($slider['description'] ?? '', 0, 50)) . '...'; ?>
                                             </small>
                                         </div>
                                     </td>
-                                    <td><?php echo htmlspecialchars($slider['subtitle']); ?></td>
+                                    <td><?php echo htmlspecialchars($slider['subtitle'] ?? '-'); ?></td>
                                     <td>
                                         <form method="POST" style="display: inline;">
                                             <input type="hidden" name="action" value="toggle_status">
@@ -289,30 +294,30 @@ include '../includes/design_header.php';
                     
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="title" class="form-label">Ana Başlık *</label>
-                            <input type="text" class="form-control" id="title" name="title" required>
+                            <label for="title" class="form-label">Ana Başlık</label>
+                            <input type="text" class="form-control" id="title" name="title">
                         </div>
                         <div class="col-md-6">
-                            <label for="subtitle" class="form-label">Alt Başlık *</label>
-                            <input type="text" class="form-control" id="subtitle" name="subtitle" required>
+                            <label for="subtitle" class="form-label">Alt Başlık</label>
+                            <input type="text" class="form-control" id="subtitle" name="subtitle">
                         </div>
                         <div class="col-12">
-                            <label for="description" class="form-label">Açıklama *</label>
-                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                            <label for="description" class="form-label">Açıklama</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                         </div>
                         <div class="col-md-6">
-                            <label for="button_text" class="form-label">Buton Metni *</label>
-                            <input type="text" class="form-control" id="button_text" name="button_text" required>
+                            <label for="button_text" class="form-label">Buton Metni</label>
+                            <input type="text" class="form-control" id="button_text" name="button_text">
                         </div>
                         <div class="col-md-6">
-                            <label for="button_link" class="form-label">Buton Linki *</label>
-                            <input type="text" class="form-control" id="button_link" name="button_link" required>
+                            <label for="button_link" class="form-label">Buton Linki</label>
+                            <input type="text" class="form-control" id="button_link" name="button_link">
                         </div>
                         <div class="col-12">
-                            <label for="background_image" class="form-label">Arkaplan Resmi *</label>
+                            <label for="background_image" class="form-label">Arkaplan Resmi</label>
                             
                             <!-- Ana background image field (gizli) -->
-                            <input type="hidden" id="background_image" name="background_image" required>
+                            <input type="hidden" id="background_image" name="background_image">
                             
                             <!-- Dosya Yükleme Alanı -->
                             <div class="upload-area" id="imageUploadArea">
@@ -380,8 +385,8 @@ include '../includes/design_header.php';
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <label for="sort_order" class="form-label">Sıra Numarası *</label>
-                            <input type="number" class="form-control" id="sort_order" name="sort_order" min="1" value="1" required>
+                            <label for="sort_order" class="form-label">Sıra Numarası</label>
+                            <input type="number" class="form-control" id="sort_order" name="sort_order" min="1" value="1">
                         </div>
                         <div class="col-md-6">
                             <div class="form-check mt-4">
@@ -430,20 +435,20 @@ function editSlider(id) {
     document.getElementById('formAction').value = 'edit';
     document.getElementById('modalTitle').textContent = 'Slider Düzenle';
     document.getElementById('sliderId').value = slider.id;
-    document.getElementById('title').value = slider.title;
-    document.getElementById('subtitle').value = slider.subtitle;
-    document.getElementById('description').value = slider.description;
-    document.getElementById('button_text').value = slider.button_text;
-    document.getElementById('button_link').value = slider.button_link;
+    document.getElementById('title').value = slider.title || '';
+    document.getElementById('subtitle').value = slider.subtitle || '';
+    document.getElementById('description').value = slider.description || '';
+    document.getElementById('button_text').value = slider.button_text || '';
+    document.getElementById('button_link').value = slider.button_link || '';
     
-    // Mevcut resmi göster (sadece önizleme için)
+    // Mevcut resmi göster
     if (slider.background_image) {
         showExistingImage(slider.background_image);
     }
     
-    document.getElementById('background_color').value = slider.background_color;
-    document.getElementById('text_color').value = slider.text_color;
-    document.getElementById('sort_order').value = slider.sort_order;
+    document.getElementById('background_color').value = slider.background_color || '#667eea';
+    document.getElementById('text_color').value = slider.text_color || '#ffffff';
+    document.getElementById('sort_order').value = slider.sort_order || 1;
     document.getElementById('is_active').checked = slider.is_active == 1;
     
     updateColorPreview(document.getElementById('background_color'), document.getElementById('bgColorPreview'));
@@ -454,10 +459,8 @@ function editSlider(id) {
 function showExistingImage(imageUrl) {
     console.log('showExistingImage called with:', imageUrl);
     
-    // Ana field'a mevcut URL'i set et
     document.getElementById('background_image').value = imageUrl;
     
-    // Elements
     const preview = document.getElementById('currentImagePreview');
     const container = document.getElementById('imagePreviewContainer');
     const nameDisplay = document.getElementById('currentImageName');
@@ -465,14 +468,17 @@ function showExistingImage(imageUrl) {
     const pathDisplay = document.getElementById('currentImagePath');
     const spinner = document.getElementById('imageLoadingSpinner');
     
-    // Show container and spinner
+    let fullImageUrl = imageUrl;
+    if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
+        fullImageUrl = '../' + imageUrl;
+    }
+    
     container.style.display = 'block';
     spinner.style.display = 'block';
     preview.style.display = 'none';
     
-    // Resim yükleme events
     preview.onerror = function() {
-        console.error('Mevcut resim yüklenemedi:', imageUrl);
+        console.error('Mevcut resim yüklenemedi:', fullImageUrl);
         spinner.style.display = 'none';
         nameDisplay.textContent = 'Resim yüklenemedi';
         sizeDisplay.textContent = 'Hata';
@@ -481,13 +487,12 @@ function showExistingImage(imageUrl) {
     };
     
     preview.onload = function() {
-        console.log('Mevcut resim başarıyla yüklendi:', imageUrl);
+        console.log('Mevcut resim başarıyla yüklendi:', fullImageUrl);
         spinner.style.display = 'none';
         preview.style.display = 'block';
     };
     
-    // Set data
-    preview.src = imageUrl;
+    preview.src = fullImageUrl;
     nameDisplay.textContent = 'Mevcut resim';
     sizeDisplay.textContent = 'Var olan dosya';
     pathDisplay.textContent = imageUrl;
@@ -497,10 +502,8 @@ function showExistingImage(imageUrl) {
 function setUploadedImage(imageUrl, fileName, fileSize) {
     console.log('setUploadedImage called with:', imageUrl, fileName, fileSize);
     
-    // Ana field'a URL'i set et
     document.getElementById('background_image').value = imageUrl;
     
-    // Elements
     const preview = document.getElementById('currentImagePreview');
     const container = document.getElementById('imagePreviewContainer');
     const nameDisplay = document.getElementById('currentImageName');
@@ -508,28 +511,15 @@ function setUploadedImage(imageUrl, fileName, fileSize) {
     const pathDisplay = document.getElementById('currentImagePath');
     const spinner = document.getElementById('imageLoadingSpinner');
     
-    if (!preview || !container) {
-        console.error('Preview elementleri bulunamadı!');
-        return;
-    }
-    
-    // Full URL oluştur - Eğer relative path ise full path yap
     let fullImageUrl = imageUrl;
     if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
-        // design/ klasöründen assets/ klasörüne erişim için ../
         fullImageUrl = '../' + imageUrl;
     }
     
-    console.log('Full image URL:', fullImageUrl);
-    
-    // Show container and spinner
     container.style.display = 'block';
-    if (spinner) {
-        spinner.style.display = 'block';
-    }
+    if (spinner) spinner.style.display = 'block';
     preview.style.display = 'none';
     
-    // Resim yükleme events
     preview.onerror = function() {
         console.error('Yüklenen resim görüntülenemedi:', fullImageUrl);
         if (spinner) spinner.style.display = 'none';
@@ -546,7 +536,6 @@ function setUploadedImage(imageUrl, fileName, fileSize) {
         showToast('Resim başarıyla yüklendi!', 'success');
     };
     
-    // Set data
     preview.src = fullImageUrl;
     if (nameDisplay) nameDisplay.textContent = fileName;
     if (sizeDisplay) sizeDisplay.textContent = formatFileSize(fileSize);
@@ -556,34 +545,16 @@ function setUploadedImage(imageUrl, fileName, fileSize) {
 // Resim temizleme
 function clearImage() {
     console.log('clearImage called');
-    
-    // Ana field'ı temizle
     document.getElementById('background_image').value = '';
-    
-    // Preview container'ı gizle
     document.getElementById('imagePreviewContainer').style.display = 'none';
-    
-    // Preview elements'leri sıfırla
-    const preview = document.getElementById('currentImagePreview');
-    const spinner = document.getElementById('imageLoadingSpinner');
-    const nameDisplay = document.getElementById('currentImageName');
-    const sizeDisplay = document.getElementById('currentImageSize');
-    const pathDisplay = document.getElementById('currentImagePath');
-    
-    preview.src = '';
-    preview.style.display = 'none';
-    spinner.style.display = 'none';
-    nameDisplay.textContent = '-';
-    sizeDisplay.textContent = '-';
-    pathDisplay.textContent = '-';
-    
-    // Upload area'yı sıfırla
-    const uploadArea = document.getElementById('imageUploadArea');
-    uploadArea.classList.remove('dragover');
-    
-    // Progress'i gizle
+    document.getElementById('currentImagePreview').src = '';
+    document.getElementById('currentImagePreview').style.display = 'none';
+    document.getElementById('imageLoadingSpinner').style.display = 'none';
+    document.getElementById('currentImageName').textContent = '-';
+    document.getElementById('currentImageSize').textContent = '-';
+    document.getElementById('currentImagePath').textContent = '-';
+    document.getElementById('imageUploadArea').classList.remove('dragover');
     document.getElementById('uploadProgress').style.display = 'none';
-    
     showToast('Resim kaldırıldı', 'info');
 }
 
@@ -608,7 +579,6 @@ function initImageUpload() {
     const uploadArea = document.getElementById('imageUploadArea');
     const fileInput = document.getElementById('imageFileInput');
     
-    // Drag & Drop events
     uploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
         uploadArea.classList.add('dragover');
@@ -622,19 +592,16 @@ function initImageUpload() {
     uploadArea.addEventListener('drop', (e) => {
         e.preventDefault();
         uploadArea.classList.remove('dragover');
-        
         const files = e.dataTransfer.files;
         if (files.length > 0) {
             handleFileUpload(files[0]);
         }
     });
     
-    // Click to upload
     uploadArea.addEventListener('click', () => {
         fileInput.click();
     });
     
-    // File input change
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
             handleFileUpload(e.target.files[0]);
@@ -644,7 +611,6 @@ function initImageUpload() {
 
 // Dosya yükleme işlemi
 function handleFileUpload(file) {
-    // Dosya validasyonu
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     const maxSize = 5 * 1024 * 1024; // 5MB
     
@@ -658,22 +624,18 @@ function handleFileUpload(file) {
         return;
     }
     
-    // Progress göster
     const progressContainer = document.getElementById('uploadProgress');
     const progressBar = progressContainer.querySelector('.progress-bar');
     
     progressContainer.style.display = 'block';
     progressBar.style.width = '0%';
     
-    // FormData oluştur
     const formData = new FormData();
     formData.append('action', 'upload_image');
     formData.append('image', file);
     
-    // AJAX upload
     const xhr = new XMLHttpRequest();
     
-    // Progress tracking
     xhr.upload.addEventListener('progress', (e) => {
         if (e.lengthComputable) {
             const percentComplete = (e.loaded / e.total) * 100;
@@ -681,35 +643,25 @@ function handleFileUpload(file) {
         }
     });
     
-    // Upload complete
     xhr.addEventListener('load', () => {
         progressContainer.style.display = 'none';
-        
         try {
             const response = JSON.parse(xhr.responseText);
-            console.log('Upload Response:', response); // DEBUG
-            
             if (response.success) {
-                // Upload başarılı - direkt set et
-                console.log('Setting uploaded image:', response.url); // DEBUG
                 setUploadedImage(response.url, response.original_name, response.size);
             } else {
-                console.error('Upload failed:', response.message); // DEBUG
                 showToast('Yükleme başarısız: ' + response.message, 'error');
             }
         } catch (e) {
-            console.error('JSON Parse Error:', e, 'Response:', xhr.responseText); // DEBUG
             showToast('Yükleme sırasında bir hata oluştu!', 'error');
         }
     });
     
-    // Upload error
     xhr.addEventListener('error', () => {
         progressContainer.style.display = 'none';
         showToast('Yükleme başarısız!', 'error');
     });
     
-    // Start upload
     xhr.open('POST', 'ajax.php');
     xhr.send(formData);
 }
@@ -719,7 +671,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateColorPreview(document.getElementById('background_color'), document.getElementById('bgColorPreview'));
     updateColorPreview(document.getElementById('text_color'), document.getElementById('textColorPreview'));
     
-    // Color preview events
     document.getElementById('background_color').addEventListener('change', function() {
         updateColorPreview(this, document.getElementById('bgColorPreview'));
     });
@@ -728,20 +679,10 @@ document.addEventListener('DOMContentLoaded', function() {
         updateColorPreview(this, document.getElementById('textColorPreview'));
     });
     
-    // Initialize upload functionality
     initImageUpload();
     
-    // Form validation
+    // Form submit: Artık hiçbir zorunlu alan yok
     document.getElementById('sliderForm').addEventListener('submit', function(e) {
-        const backgroundImage = document.getElementById('background_image').value.trim();
-        
-        if (!backgroundImage) {
-            e.preventDefault();
-            showToast('Lütfen bilgisayarınızdan bir resim yükleyin!', 'error');
-            return false;
-        }
-        
-        // Form gönderilmeden önce buton'ı disable et
         const submitBtn = this.querySelector('button[type="submit"]');
         if (submitBtn) {
             submitBtn.disabled = true;
@@ -749,74 +690,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Flash message'ları otomatik kapat (5 saniye sonra)
     const flashAlert = document.querySelector('.alert-dismissible');
     if (flashAlert) {
         setTimeout(() => {
             const closeBtn = flashAlert.querySelector('.btn-close');
-            if (closeBtn) {
-                closeBtn.click();
-            }
+            if (closeBtn) closeBtn.click();
         }, 5000);
     }
 });
-
-// Mevcut resmi gösterme (düzenleme için)
-function showExistingImage(imageUrl) {
-    console.log('showExistingImage called with:', imageUrl);
-    
-    // Ana field'a mevcut URL'i set et
-    document.getElementById('background_image').value = imageUrl;
-    
-    // Elements
-    const preview = document.getElementById('currentImagePreview');
-    const container = document.getElementById('imagePreviewContainer');
-    const nameDisplay = document.getElementById('currentImageName');
-    const sizeDisplay = document.getElementById('currentImageSize');
-    const pathDisplay = document.getElementById('currentImagePath');
-    const spinner = document.getElementById('imageLoadingSpinner');
-    
-    if (!preview || !container) {
-        console.error('showExistingImage: Preview elementleri bulunamadı!');
-        return;
-    }
-    
-    // Full URL oluştur
-    let fullImageUrl = imageUrl;
-    if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
-        // design/ klasöründen assets/ klasörüne erişim için ../
-        fullImageUrl = '../' + imageUrl;
-    }
-    
-    console.log('showExistingImage: Full URL:', fullImageUrl);
-    
-    // Show container and spinner
-    container.style.display = 'block';
-    if (spinner) spinner.style.display = 'block';
-    preview.style.display = 'none';
-    
-    // Resim yükleme events
-    preview.onerror = function() {
-        console.error('Mevcut resim yüklenemedi:', fullImageUrl);
-        if (spinner) spinner.style.display = 'none';
-        if (nameDisplay) nameDisplay.textContent = 'Resim yüklenemedi';
-        if (sizeDisplay) sizeDisplay.textContent = 'Hata';
-        if (pathDisplay) pathDisplay.textContent = imageUrl;
-        showToast('Mevcut resim görüntülenemedi', 'warning');
-    };
-    
-    preview.onload = function() {
-        console.log('Mevcut resim başarıyla yüklendi:', fullImageUrl);
-        if (spinner) spinner.style.display = 'none';
-        preview.style.display = 'block';
-    };
-    
-    // Set data
-    preview.src = fullImageUrl;
-    if (nameDisplay) nameDisplay.textContent = 'Mevcut resim';
-    if (sizeDisplay) sizeDisplay.textContent = 'Var olan dosya';
-    if (pathDisplay) pathDisplay.textContent = imageUrl;
-}
 
 // Toast bildirimi
 function showToast(message, type = 'info') {
@@ -824,18 +705,12 @@ function showToast(message, type = 'info') {
     
     const toast = document.createElement('div');
     toast.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
-    toast.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
+    toast.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
     
     toastContainer.appendChild(toast);
     
-    // 5 saniye sonra otomatik kapat
     setTimeout(() => {
-        if (toast.parentNode) {
-            toast.remove();
-        }
+        if (toast.parentNode) toast.remove();
     }, 5000);
 }
 

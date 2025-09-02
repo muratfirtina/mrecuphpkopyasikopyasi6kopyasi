@@ -220,7 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
 
 $pageTitle = 'Kullanıcı Detayları - ' . $userDetails['first_name'] . ' ' . $userDetails['last_name'];
 $pageDescription = 'Kullanıcı detay bilgileri ve işlemleri';
-$pageIcon = 'bi bi-user';
+$pageIcon = 'bi bi-person';
 
 // Hızlı eylemler
 $quickActions = [
@@ -275,13 +275,13 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="bi bi-user me-2"></i>Kullanıcı Bilgileri
+                    <i class="bi bi-person me-2"></i>Kullanıcı Bilgileri
                 </h5>
             </div>
             <div class="card-body">
                 <div class="text-center mb-4">
                     <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                        <i class="bi bi-user fa-2x text-primary"></i>
+                        <i class="bi bi-person fa-2x text-primary"></i>
                     </div>
                     <h4 class="mt-3 mb-1"><?php echo htmlspecialchars($userDetails['first_name'] . ' ' . $userDetails['last_name']); ?></h4>
                     <span class="badge bg-<?php echo $userDetails['role'] === 'admin' ? 'danger' : 'primary'; ?>">
@@ -377,7 +377,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card mt-4">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="bi bi-chart-bar me-2"></i>İstatistikler
+                    <i class="bi bi-bar-chart me-2"></i>İstatistikler
                 </h6>
             </div>
             <div class="card-body">
@@ -409,7 +409,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card mt-4">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="bi bi-chart-pie me-2"></i>Kredi İstatistikleri
+                    <i class="bi bi-pie-chart me-2"></i>Kredi İstatistikleri
                 </h6>
             </div>
             <div class="card-body">

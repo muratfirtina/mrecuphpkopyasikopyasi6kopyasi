@@ -321,7 +321,7 @@ $quickActions = [
     [
         'text' => 'Yeni Kullanıcı',
         'url' => '#',
-        'icon' => 'bi bi-user-plus',
+        'icon' => 'bi bi-person-plus',
         'class' => 'success',
         'data-bs-toggle' => 'modal',
         'data-bs-target' => '#addUserModal'
@@ -335,7 +335,7 @@ $quickActions = [
     [
         'text' => 'İstatistikler',
         'url' => 'reports.php?type=users',
-        'icon' => 'bi bi-chart-bar',
+        'icon' => 'bi bi-bar-chart',
         'class' => 'warning'
     ]
 ];
@@ -445,7 +445,7 @@ function deleteUser(userId, username) {
                     <small class="text-muted"><?php echo number_format($stats['inactive_count']); ?> pasif</small>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-user-check text-success fa-lg"></i>
+                    <i class="bi bi-person-check text-success fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -460,7 +460,7 @@ function deleteUser(userId, username) {
                     <small class="text-muted"><?php echo number_format($stats['user_count']); ?> normal kullanıcı</small>
                 </div>
                 <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-user-shield text-warning fa-lg"></i>
+                    <i class="bi bi-person-fill-gear text-warning fa-lg"></i>
                 </div>
             </div>
         </div>
@@ -497,7 +497,7 @@ function deleteUser(userId, username) {
             
             <div class="col-md-2">
                 <label for="role" class="form-label">
-                    <i class="bi bi-user-tag me-1"></i>Rol
+                    <i class="bi bi-person me-1"></i>Rol
                 </label>
                 <select class="form-select" id="role" name="role">
                     <option value="">Tüm Roller</option>
@@ -519,7 +519,7 @@ function deleteUser(userId, username) {
             
             <div class="col-md-2">
                 <label for="sort" class="form-label">
-                    <i class="bi bi-sort me-1"></i>Sıralama
+                    <i class="bi bi-funnel me-1"></i>Sıralama
                 </label>
                 <select class="form-select" id="sort" name="sort">
                     <option value="created_at" <?php echo $sortBy === 'created_at' ? 'selected' : ''; ?>>Kayıt Tarihi</option>
@@ -584,7 +584,7 @@ function deleteUser(userId, username) {
         <?php if (!empty($users)): ?>
             <div class="dropdown">
                 <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="bi bi-cog me-1"></i>Toplu İşlemler
+                    <i class="bi bi-gear me-1"></i>Toplu İşlemler
                 </button>
                 <ul class="dropdown-menu">
                     <li><h6 class="dropdown-header">Seçili kullanıcılar için:</h6></li>
@@ -646,7 +646,7 @@ function deleteUser(userId, username) {
                                     <div class="d-flex align-items-center">
                                         <div class="user-avatar me-3">
                                             <div class="bg-primary bg-opacity-10 rounded-circle p-2">
-                                                <i class="bi bi-user text-primary"></i>
+                                                <i class="bi bi-person text-primary"></i>
                                             </div>
                                         </div>
                                         <div>
@@ -666,7 +666,7 @@ function deleteUser(userId, username) {
                                         </div>
                                         <?php if ($userData['phone']): ?>
                                             <div>
-                                                <i class="bi bi-phone me-1 text-muted"></i>
+                                                <i class="bi bi-telephone-fill me-1 text-muted"></i>
                                                 <small><?php echo htmlspecialchars($userData['phone']); ?></small>
                                             </div>
                                         <?php endif; ?>
@@ -904,7 +904,7 @@ function deleteUser(userId, username) {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="bi bi-user-plus me-2"></i>Yeni Kullanıcı Ekle
+                    <i class="bi bi-person-plus me-2"></i>Yeni Kullanıcı Ekle
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>

@@ -903,7 +903,7 @@ if ($fileType === 'response') {
     $pageDescription = 'Dosya detaylarını görüntüleyin ve yönetin';
 }
 
-$pageIcon = 'bi bi-folder2-open-alt';
+$pageIcon = 'bi bi-folder2-open';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -953,7 +953,7 @@ include '../includes/admin_sidebar.php';
             <div class="d-flex gap-2">
                 <?php if ($fileType === 'response'): ?>
                     <a href="file-detail.php?id=<?php echo $uploadId; ?>" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-folder2-open-alt me-1"></i>Orijinal Dosyayı Görüntüle
+                        <i class="bi bi-folder2-open me-1"></i>Orijinal Dosyayı Görüntüle
                     </a>
                     <a href="file-detail.php?id=<?php echo $uploadId; ?>#response-files" class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-list me-1"></i>Tüm Yanıtları Görüntüle
@@ -1026,7 +1026,7 @@ include '../includes/admin_sidebar.php';
                     <div class="revision-upload-section mb-4 p-3 border rounded bg-light">
                         <div class="revision-info mb-3">
                             <h6 class="text-primary">
-                                <i class="bi bi-user me-1"></i>
+                                <i class="bi bi-person me-1"></i>
                                 <?php echo htmlspecialchars($revision['first_name'] . ' ' . $revision['last_name']); ?>
                                 (@<?php echo htmlspecialchars($revision['username']); ?>)
                             </h6>
@@ -1184,7 +1184,7 @@ include '../includes/admin_sidebar.php';
                                     <!-- Hangi Dosyaya Revizyon Talep Edildi -->
                                     <div class="mb-3">
                                         <h6 class="text-primary mb-2">
-                                            <i class="bi bi-folder2-open-alt me-2"></i>Revizyon Talep Edilen Dosya:
+                                            <i class="bi bi-folder2-open me-2"></i>Revizyon Talep Edilen Dosya:
                                         </h6>
                                         <div class="file-reference-box p-3 bg-white rounded border">
                                             <?php if (!empty($revision['response_file_name'])): ?>
@@ -1620,7 +1620,7 @@ include '../includes/admin_sidebar.php';
 
                         <div class="d-grid gap-2">
                             <a href="user-details.php?id=<?php echo $upload['user_id']; ?>" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-user me-1"></i>Kullanıcı Profili
+                                <i class="bi bi-person me-1"></i>Kullanıcı Profili
                             </a>
                             <a href="uploads.php?user_id=<?php echo $upload['user_id']; ?>" class="btn btn-outline-secondary btn-sm">
                                 <i class="bi bi-folder2-opens me-1"></i>Diğer Dosyalar
@@ -2050,7 +2050,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 'user_upload' => ['icon' => 'bi bi-upload text-primary', 'color' => 'primary'],
                                 'admin_response' => ['icon' => 'bi bi-reply text-success', 'color' => 'success'],
                                 'user_revision_request' => ['icon' => 'bi bi-pencil-square text-warning', 'color' => 'warning'],
-                                'admin_revision_response' => ['icon' => 'bi bi-user-shield text-info', 'color' => 'info']
+                                'admin_revision_response' => ['icon' => 'bi bi-person-fill-gear text-info', 'color' => 'info']
                             ];
                             $config = $typeConfig[$comm['type']] ?? ['icon' => 'bi bi-comment text-secondary', 'color' => 'secondary'];
                             ?>
@@ -2062,11 +2062,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <h6 class="mb-1">
                                         <?php if ($comm['type'] === 'user_upload'): ?>
                                             <span class="badge bg-primary">
-                                                <i class="bi bi-user me-1"></i>Kullanıcının Yükleme Notu
+                                                <i class="bi bi-person me-1"></i>Kullanıcının Yükleme Notu
                                             </span>
                                         <?php elseif ($comm['type'] === 'admin_response'): ?>
                                             <span class="badge bg-success">
-                                                <i class="bi bi-user-shield me-1"></i>Admin'in Yanıt Dosyası Notu
+                                                <i class="bi bi-person-fill-gear me-1"></i>Admin'in Yanıt Dosyası Notu
                                             </span>
                                         <?php elseif ($comm['type'] === 'user_revision_request'): ?>
                                             <span class="badge bg-warning" style="background-color: #ffc107 !important; color: #212529 !important; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px;">
@@ -2097,7 +2097,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                         <?php if (isset($comm['admin_username']) && !empty($comm['admin_username'])): ?>
                                             <span class="ms-2">
-                                                <i class="bi bi-user-shield me-1"></i>
+                                                <i class="bi bi-person-fill-gear me-1"></i>
                                                 Admin: <?php echo htmlspecialchars($comm['admin_username']); ?>
                                             </span>
                                         <?php endif; ?>
@@ -2193,7 +2193,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <h6 class="mb-1 text-warning">
-                                                <i class="bi bi-folder2-open-alt me-2"></i>
+                                                <i class="bi bi-folder2-open me-2"></i>
                                                 Kullanıcının Revizyon Talep Ettiği Dosya
                                             </h6>
                                             <div class="file-details">
@@ -2340,7 +2340,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                 <div class="revision-note user-note mb-3">
                                     <div class="note-header">
-                                        <i class="bi bi-user me-2 text-primary"></i>
+                                        <i class="bi bi-person me-2 text-primary"></i>
                                         <strong>
                                             <?php if ($comm['type'] === 'user_upload'): ?>
                                                 Kullanıcının yükleme sırasında yazdığı notlar:
@@ -2368,7 +2368,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <?php if (!empty($comm['admin_notes'])): ?>
                                 <div class="revision-note admin-note mb-2">
                                     <div class="note-header">
-                                        <i class="bi bi-user-shield me-2 text-success"></i>
+                                        <i class="bi bi-person-fill-gear me-2 text-success"></i>
                                         <strong>
                                             <?php if ($comm['type'] === 'admin_response'): ?>
                                                 Admin'in yanıt dosyası notları:
@@ -2493,7 +2493,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- İletişim Özeti -->
             <div class="communication-summary mt-4 p-3 bg-light rounded">
                 <h6 class="mb-2">
-                    <i class="bi bi-chart-line me-2 text-info"></i>İletişim Özeti
+                    <i class="bi bi-diagram-3 me-2 text-info"></i>İletişim Özeti
                 </h6>
                 <div class="row text-center">
                     <?php
@@ -2634,7 +2634,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <?php if (!empty($revision['admin_notes']) && filterAdminNotes($revision['admin_notes'])): ?>
                                     <div class="revision-note admin-note mb-2">
                                         <div class="note-header">
-                                            <i class="bi bi-user-shield me-2 text-success"></i>
+                                            <i class="bi bi-person-fill-gear me-2 text-success"></i>
                                             <strong>Admin Cevabı:</strong>
                                             <?php if (!empty($revision['admin_username'])): ?>
                                                 <small class="text-muted">
@@ -2760,7 +2760,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div class="align-self-end">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-paper-plane"></i>
+                                <i class="bi bi-send"></i>
                             </button>
                         </div>
                     </form>
@@ -3301,7 +3301,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 <div class="revision-details">
                     <h6 class="text-primary mb-3">
-                        <i class="bi bi-user me-2"></i>
+                        <i class="bi bi-person me-2"></i>
                         Talep Eden Kullanıcı
                     </h6>
                     <div class="user-info bg-light p-3 rounded mb-4">
@@ -3365,7 +3365,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 <div class="file-info bg-light p-3 rounded mb-4">
                     <h6 class="text-primary mb-3">
-                        <i class="bi bi-folder2-open-alt me-2"></i>
+                        <i class="bi bi-folder2-open me-2"></i>
                         Dosya Bilgileri
                     </h6>
                     <div class="row">
@@ -3437,7 +3437,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     <div class="file-info bg-light p-3 rounded mb-3">
                         <h6 class="text-danger mb-2">
-                            <i class="bi bi-folder2-open-alt me-2"></i>
+                            <i class="bi bi-folder2-open me-2"></i>
                             İptal Edilecek Dosya
                         </h6>
                         <div class="row">

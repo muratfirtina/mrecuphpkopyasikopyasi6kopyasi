@@ -350,7 +350,7 @@ require_once '../includes/design_header.php';
                 <!-- Yayınlama Ayarları -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header">
-                        <h6 class="mb-0"><i class="bi bi-cog me-2"></i>Yayınlama</h6>
+                        <h6 class="mb-0"><i class="bi bi-gear me-2"></i>Yayınlama</h6>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">

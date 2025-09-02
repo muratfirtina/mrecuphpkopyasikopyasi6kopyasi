@@ -456,7 +456,7 @@ include '../includes/admin_sidebar.php';
                     <small class="text-muted"><?php echo number_format($creditStats['total_quota'] > 0 ? ($creditStats['total_used'] / $creditStats['total_quota']) * 100 : 0, 1); ?>% kullanım</small>
                 </div>
                 <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-chart-line text-warning fa-lg"></i>
+                    <i class="bi bi bar-chart-line text-warning fa-lg"></i>
                 </div>
             </div>
         </div>

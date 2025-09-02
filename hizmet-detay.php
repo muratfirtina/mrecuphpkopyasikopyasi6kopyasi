@@ -571,7 +571,7 @@ include 'includes/header.php';
                             </a>
                         <?php else: ?>
                             <a href="register.php" class="btn btn-primary btn-lg">
-                                <i class="bi bi-user-plus me-2"></i>Kayıt Ol & Hizmet Al
+                                <i class="bi bi-person-plus me-2"></i>Kayıt Ol & Hizmet Al
                             </a>
                         <?php endif; ?>
                     </div>
@@ -598,12 +598,12 @@ include 'includes/header.php';
                         <!-- Telefon - ID: 1 -->
                         <?php if (isset($contactCardsById[1])): ?>
                             <div class="d-flex align-items-center mb-2">
-                                <i class="<?php echo $contactCardsById[1]['icon'] ?: 'bi bi-phone'; ?> text-primary me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?> !important;"></i>
+                                <i class="<?php echo $contactCardsById[1]['icon'] ?: 'bi bi-telephone-fill'; ?> text-primary me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?> !important;"></i>
                                 <span><?php echo $contactCardsById[1]['contact_info'] ?: '+90 (555) 123 45 67'; ?></span>
                             </div>
                         <?php else: ?>
                             <div class="d-flex align-items-center mb-2">
-                                <i class="bi bi-phone text-primary me-2"></i>
+                                <i class="bi bi-telephone-fill text-primary me-2"></i>
                                 <span>+90 (555) 123 45 67</span>
                             </div>
                         <?php endif; ?>
@@ -632,7 +632,7 @@ include 'includes/header.php';
                             </a>
                             <?php if (isLoggedIn()): ?>
                                 <a href="user/" class="btn btn-outline-secondary">
-                                    <i class="bi bi-tachometer-alt me-2"></i>Panelim
+                                    <i class="bi bi-speedometer me-2"></i>Panelim
                                 </a>
                             <?php else: ?>
                                 <a href="login.php" class="btn btn-outline-secondary">
@@ -723,11 +723,11 @@ try {
             <!-- Telefon Button - ID: 1 -->
             <?php if (isset($contactCardsById[1])): ?>
                 <a href="<?php echo $contactCardsById[1]['contact_link'] ?: 'tel:+905551234567'; ?>" class="btn btn-light btn-lg">
-                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'bi bi-phone'; ?> me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[1]['button_text'] ?: 'Hemen Ara'; ?>
+                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'bi bi-telephone-fill'; ?> me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[1]['button_text'] ?: 'Hemen Ara'; ?>
                 </a>
             <?php else: ?>
                 <a href="tel:+905551234567" class="btn btn-light btn-lg">
-                    <i class="bi bi-phone me-2"></i>Hemen Ara
+                    <i class="bi bi-telephone-fill me-2"></i>Hemen Ara
                 </a>
             <?php endif; ?>
             
@@ -749,7 +749,7 @@ try {
         
         <div class="row mt-5 text-center">
             <div class="col-md-4">
-                <i class="bi bi-shield-alt fa-2x mb-3"></i>
+                <i class="bi bi-shield-exclamation fa-2x mb-3"></i>
                 <h5>Güvenli İşlem</h5>
                 <p>Aracınızın garantisi bozulmaz</p>
             </div>

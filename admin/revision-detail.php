@@ -406,7 +406,7 @@ include '../includes/admin_sidebar.php';
                     </div>
 
                     <div class="col-md-6">
-                        <h6 class="text-success"><i class="bi bi-user me-2"></i>Kullanıcı Bilgileri</h6>
+                        <h6 class="text-success"><i class="bi bi-person me-2"></i>Kullanıcı Bilgileri</h6>
                         <table class="table table-sm">
                             <tr>
                                 <td><strong>Ad Soyad:</strong></td>
@@ -438,7 +438,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="bi bi-folder2-open-alt me-2"></i>Dosya Bilgileri
+                    <i class="bi bi-folder2-open me-2"></i>Dosya Bilgileri
                 </h5>
             </div>
             <div class="card-body">

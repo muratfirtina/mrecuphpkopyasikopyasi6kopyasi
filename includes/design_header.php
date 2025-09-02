@@ -455,7 +455,7 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
         <!-- User Info -->
         <div class="user-info">
             <div class="user-avatar">
-                <i class="bi bi-user"></i>
+                <i class="bi bi-person"></i>
             </div>
             <p class="user-name"><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></p>
             <p class="user-role"><?php echo ucfirst($_SESSION['role'] ?? $_SESSION['user_role'] ?? 'admin'); ?></p>
@@ -465,11 +465,11 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
         <div class="nav-section">
             <div class="nav-section-title">Ana Panel</div>
             <a href="index.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : ''; ?>">
-                <i class="bi bi-tachometer-alt"></i>
+                <i class="bi bi-speedometer"></i>
                 <span>Dashboard</span>
             </a>
             <a href="../admin/" class="design-nav-link">
-                <i class="bi bi-cog"></i>
+                <i class="bi bi-gear"></i>
                 <span>Admin Panel</span>
             </a>
         </div>
@@ -505,7 +505,7 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
                 <span>Hakkımızda</span>
             </a>
             <a href="contact.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'contact.php') ? 'active' : ''; ?>">
-                <i class="bi bi-phone"></i>
+                <i class="bi bi-telephone-fill"></i>
                 <span>İletişim</span>
             </a>
         </div>

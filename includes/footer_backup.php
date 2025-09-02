@@ -252,7 +252,7 @@ $basePath = isset($basePath) ? $basePath : '/';
 
                     if ($phoneData && !empty($phoneData['contact_info'])): ?>
                         <li class="mb-2">
-                            <i class="bi bi-phone me-2 text-primary"></i>
+                            <i class="bi bi-telephone-fill me-2 text-primary"></i>
                             <a href="<?php echo htmlspecialchars($phoneData['contact_link']); ?>"
                                 class="text-light text-decoration-none footer-link">
                                 <?php echo htmlspecialchars($phoneData['contact_info']); ?>

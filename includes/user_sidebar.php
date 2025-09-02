@@ -36,7 +36,7 @@ if (isset($_SESSION['user_id'])) {
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'active' : ''; ?>" href="index.php">
                     <div class="nav-icon">
-                        <i class="bi bi-tachometer-alt"></i>
+                        <i class="bi bi-speedometer"></i>
                     </div>
                     <span>Dashboard</span>
                 </a>
@@ -170,13 +170,13 @@ if (isset($_SESSION['user_id'])) {
         <!-- Hesap Yönetimi -->
         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
             <span>Hesap Yönetimi</span>
-            <i class="bi bi-user-cog"></i>
+            <i class="bi bi-person-fill"></i>
         </h6>
         <ul class="nav flex-column mb-2">
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'profile.php' ? 'active' : ''; ?>" href="profile.php">
                     <div class="nav-icon bg-secondary">
-                        <i class="bi bi-user"></i>
+                        <i class="bi bi-person"></i>
                     </div>
                     <span>Profil Ayarları</span>
                 </a>

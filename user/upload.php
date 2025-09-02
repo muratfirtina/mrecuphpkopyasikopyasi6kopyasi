@@ -580,7 +580,7 @@ try {
                                         <div class="mb-4" id="fileInfo" style="display: none;">
                                             <div class="file-preview">
                                                 <div class="file-icon">
-                                                    <i class="bi bi-folder2-open-alt"></i>
+                                                    <i class="bi bi-folder2-open"></i>
                                                 </div>
                                                 <div class="file-details">
                                                     <div class="file-name" id="fileName"></div>
@@ -692,7 +692,7 @@ try {
                                                 <i class="bi bi-arrow-left me-2"></i>Geri
                                             </button>
                                             <button type="submit" class="btn btn-success btn-modern btn-lg">
-                                                <i class="bi bi-paper-plane me-2"></i>Dosyayı Yükle ve Gönder
+                                                <i class="bi bi-send me-2"></i>Dosyayı Yükle ve Gönder
                                             </button>
                                         </div>
                                     </div>

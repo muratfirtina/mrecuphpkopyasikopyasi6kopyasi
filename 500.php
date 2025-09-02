@@ -72,7 +72,7 @@ http_response_code(500);
                         </div>
                         
                         <div class="col-md-4 mb-3">
-                            <i class="bi bi-chart-line text-success mb-2" style="font-size: 2rem;"></i>
+                            <i class="bi bi bar-chart-line text-success mb-2" style="font-size: 2rem;"></i>
                             <h6>Durum</h6>
                             <p class="small text-muted">Sistem durumu takibi</p>
                             <span class="badge bg-warning">Bakım</span>

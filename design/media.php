@@ -187,7 +187,7 @@ include '../includes/design_header.php';
             <div class="d-flex align-items-center">
                 <div class="flex-shrink-0">
                     <div class="stat-icon bg-success text-white rounded-circle p-3">
-                        <i class="bi bi-chart-bar fa-xl"></i>
+                        <i class="bi bi-bar-chart fa-xl"></i>
                     </div>
                 </div>
                 <div class="flex-grow-1 ms-3">

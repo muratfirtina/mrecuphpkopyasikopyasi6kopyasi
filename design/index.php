@@ -56,7 +56,7 @@ try {
         <div class="design-card">
             <div class="design-card-header">
                 <h5 class="mb-0">
-                    <i class="bi bi-chart-line me-2"></i>Design Panel Dashboard
+                    <i class="bi bi bar-chart-line me-2"></i>Design Panel Dashboard
                 </h5>
             </div>
             <div class="card-body">
@@ -105,7 +105,7 @@ try {
             <div class="d-flex align-items-center">
                 <div class="flex-shrink-0">
                     <div class="stat-icon bg-info text-white rounded-circle p-3">
-                        <i class="bi bi-cog fa-xl"></i>
+                        <i class="bi bi-gear fa-xl"></i>
                     </div>
                 </div>
                 <div class="flex-grow-1 ms-3">
@@ -268,14 +268,14 @@ try {
                     </div>
                     <div class="col-6">
                         <div class="border rounded p-2">
-                            <i class="bi bi-shield-alt text-success"></i>
+                            <i class="bi bi-shield-exclamation text-success"></i>
                             <small class="d-block">Güvenlik</small>
                             <small class="text-success">Güvenli</small>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="border rounded p-2">
-                            <i class="bi bi-tachometer-alt text-warning"></i>
+                            <i class="bi bi-speedometer text-warning"></i>
                             <small class="d-block">Performans</small>
                             <small class="text-warning">İyi</small>
                         </div>

@@ -64,7 +64,7 @@ define('NOTIFICATION_TEMPLATES', [
     'file_status_update' => [
         'title' => 'Dosya Durumu Güncellendi',
         'message' => '{filename} dosyasının durumu {status} olarak güncellendi.',
-        'icon' => 'bi bi-folder2-open-alt',
+        'icon' => 'bi bi-folder2-open',
         'level' => 'info'
     ],
     'revision_request' => [
@@ -88,7 +88,7 @@ define('NOTIFICATION_TEMPLATES', [
     'user_registration' => [
         'title' => 'Yeni Kullanıcı Kaydı',
         'message' => '{username} kullanıcısı sisteme kaydoldu.',
-        'icon' => 'bi bi-user-plus',
+        'icon' => 'bi bi-person-plus',
         'level' => 'info'
     ],
     'credit_update' => [

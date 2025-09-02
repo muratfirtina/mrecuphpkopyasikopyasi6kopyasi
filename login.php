@@ -91,7 +91,7 @@ include 'includes/header.php';
                             <h3 class="fw-bold mb-3">Hoş Geldiniz</h3>
                             <p style="opacity: 0.9;">Hesabınıza giriş yapın ve ECU hizmetlerinden faydalanmaya başlayın.</p>
                             <button type="button" class="btn btn-light mt-4" onclick="flipCard(true)" style="align-self: center;">
-                                <i class="bi bi-user-plus me-2"></i> Kayıt Ol
+                                <i class="bi bi-person-plus me-2"></i> Kayıt Ol
                             </button>
                         </div>
 
@@ -113,7 +113,7 @@ include 'includes/header.php';
                             backdrop-filter: blur(10px);
                             border: 1px solid rgba(255,255,255,0.1);
                         ">
-                            <i class="bi bi-user-plus" style="font-size: 5rem; margin-bottom: 1rem; opacity: 0.8;"></i>
+                            <i class="bi bi-person-plus" style="font-size: 5rem; margin-bottom: 1rem; opacity: 0.8;"></i>
                             <h3 class="fw-bold mb-3">Hesap Oluştur</h3>
                             <p style="opacity: 0.9;">Yeni bir hesapla tüm özelliklerden faydalanın.</p>
                             <a href="register.php" class="btn btn-outline-light mt-4" style="align-self: center;">

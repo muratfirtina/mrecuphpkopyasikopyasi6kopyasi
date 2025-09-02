@@ -741,12 +741,12 @@ include 'includes/header.php';
                             <!-- Telefon Button - ID: 1 -->
                             <?php if (isset($contactCardsById[1])): ?>
                                 <a href="<?php echo $contactCardsById[1]['contact_link'] ?: 'tel:' . CONTACT_PHONE; ?>" class="contact-btn contact-btn-primary">
-                                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'bi bi-phone'; ?>" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i>
+                                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'bi bi-telephone-fill'; ?>" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i>
                                     <?php echo $contactCardsById[1]['button_text'] ?: 'Hemen Ara'; ?>
                                 </a>
                             <?php else: ?>
                                 <a href="tel:<?php echo CONTACT_PHONE; ?>" class="contact-btn contact-btn-primary">
-                                    <i class="bi bi-phone"></i>
+                                    <i class="bi bi-telephone-fill"></i>
                                     Hemen Ara
                                 </a>
                             <?php endif; ?>

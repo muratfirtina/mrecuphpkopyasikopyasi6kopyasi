@@ -135,7 +135,7 @@ include '../includes/admin_header.php';
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="bi bi-cog me-2"></i>SMTP Ayarları
+                                <i class="bi bi-gear me-2"></i>SMTP Ayarları
                             </h5>
                         </div>
                         <div class="card-body">
@@ -184,7 +184,7 @@ include '../includes/admin_header.php';
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="bi bi-paper-plane me-2"></i>Email Test
+                                <i class="bi bi-send me-2"></i>Email Test
                             </h5>
                         </div>
                         <div class="card-body">
@@ -197,7 +197,7 @@ include '../includes/admin_header.php';
                                 </div>
                                 
                                 <button type="submit" name="send_test_email" class="btn btn-success">
-                                    <i class="bi bi-paper-plane me-1"></i>Test Email Gönder
+                                    <i class="bi bi-send me-1"></i>Test Email Gönder
                                 </button>
                             </form>
                             
@@ -239,7 +239,7 @@ include '../includes/admin_header.php';
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="bi bi-folder2-open-alt me-2"></i>Email Şablonları
+                                <i class="bi bi-folder2-open me-2"></i>Email Şablonları
                             </h5>
                         </div>
                         <div class="card-body">

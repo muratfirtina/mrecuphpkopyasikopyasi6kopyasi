@@ -600,7 +600,7 @@ include '../includes/admin_sidebar.php';
                                                 <?php endif; ?>
                                                 <?php if (!empty($revision['engine_name'])): ?>
                                                     <br><small class="text-muted">
-                                                        <i class="bi bi-cog me-1"></i>
+                                                        <i class="bi bi-gear me-1"></i>
                                                         Motor: <?php echo htmlspecialchars($revision['engine_name']); ?>
                                                     </small>
                                                 <?php endif; ?>

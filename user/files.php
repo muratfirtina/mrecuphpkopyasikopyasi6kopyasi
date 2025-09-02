@@ -434,7 +434,7 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-primary"><?php echo $stats['total']; ?></div>
                                     <div class="stat-label">Toplam Dosya</div>
                                     <div class="stat-trend">
-                                        <i class="bi bi-chart-line text-success"></i>
+                                        <i class="bi bi bar-chart-line text-success"></i>
                                         <span class="text-success">Aktif koleksiyon</span>
                                     </div>
                                 </div>
@@ -627,7 +627,7 @@ include '../includes/user_header.php';
                             <thead>
                                 <tr>
                                     <th width="40">
-                                        <i class="bi bi-folder2-open-alt"></i>
+                                        <i class="bi bi-folder2-open"></i>
                                     </th>
                                     <th>Dosya Adı</th>
                                     <th>Araç Bilgileri</th>
@@ -642,7 +642,7 @@ include '../includes/user_header.php';
                                     <tr class="file-row" data-file-id="<?php echo $file['id']; ?>">
                                         <td>
                                             <div class="file-icon">
-                                                <i class="bi bi-folder2-open-alt text-primary"></i>
+                                                <i class="bi bi-folder2-open text-primary"></i>
                                             </div>
                                         </td>
                                         <td>
@@ -650,7 +650,7 @@ include '../includes/user_header.php';
                                                 <?php if (isset($file['processing_type']) && $file['processing_type'] === 'revision'): ?>
                                                     <!-- Revize İşlenen Dosya Görünümü -->
                                                     <h6 class="file-name mb-1">
-                                                        <i class="bi bi-folder2-open-alt text-primary me-1"></i>
+                                                        <i class="bi bi-folder2-open text-primary me-1"></i>
                                                         <strong>Ana Dosya:</strong> <?php echo htmlspecialchars($file['original_name']); ?>
                                                         <span class="badge bg-info ms-2">
                                                             <i class="bi bi-sync-alt me-1"></i>Revize İşleniyor
@@ -714,7 +714,7 @@ include '../includes/user_header.php';
                                                         <?php endif; ?>
                                                         <?php if (!empty($file['engine_name'])): ?>
                                                             <br><small class="text-muted">
-                                                                <i class="bi bi-cog me-1"></i>
+                                                                <i class="bi bi-gear me-1"></i>
                                                                 Motor: <?php echo htmlspecialchars($file['engine_name']); ?>
                                                             </small>
                                                         <?php endif; ?>
@@ -957,7 +957,7 @@ include '../includes/user_header.php';
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
                     <button type="submit" class="btn btn-warning">
-                        <i class="bi bi-paper-plane me-2"></i>Revize Talebi Gönder
+                        <i class="bi bi-send me-2"></i>Revize Talebi Gönder
                     </button>
                 </div>
             </form>
@@ -1020,7 +1020,7 @@ include '../includes/user_header.php';
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
                 <button type="button" class="btn btn-danger" onclick="submitCancellation()">
-                    <i class="bi bi-paper-plane me-2"></i>İptal Talebi Gönder
+                    <i class="bi bi-send me-2"></i>İptal Talebi Gönder
                 </button>
             </div>
         </div>

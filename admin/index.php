@@ -74,7 +74,7 @@ $systemStatus = [
 
 $pageTitle = 'Dashboard';
 $pageDescription = 'Sistem genel durumu ve istatistikler';
-$pageIcon = 'bi bi-tachometer-alt';
+$pageIcon = 'bi bi-speedometer';
 
 // Sidebar için istatistikler
 $totalUsers = $userCount;
@@ -85,7 +85,7 @@ $quickActions = [
     [
         'text' => 'Yeni Kullanıcı',
         'url' => 'users.php?action=create',
-        'icon' => 'bi bi-user-plus',
+        'icon' => 'bi bi-person-plus',
         'class' => 'success'
     ],
     [
@@ -97,7 +97,7 @@ $quickActions = [
     [
         'text' => 'Sistem Ayarları',
         'url' => 'settings.php',
-        'icon' => 'bi bi-cog',
+        'icon' => 'bi bi-gear',
         'class' => 'secondary'
     ]
 ];
@@ -253,7 +253,7 @@ include '../includes/admin_sidebar.php';
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2">
-                                                    <i class="bi bi-user text-primary"></i>
+                                                    <i class="bi bi-person text-primary"></i>
                                                 </div>
                                                 <span class="fw-medium"><?php echo htmlspecialchars($upload['username'] ?? 'Bilinmiyor'); ?></span>
                                             </div>
@@ -368,7 +368,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card mb-4">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="bi bi-chart-pie me-2"></i>Hızlı İstatistikler
+                    <i class="bi bi-pie-chart me-2"></i>Hızlı İstatistikler
                 </h6>
             </div>
             <div class="card-body">
@@ -416,19 +416,19 @@ include '../includes/admin_sidebar.php';
                     </a>
                     
                     <a href="users.php?filter=new" class="btn btn-info btn-sm">
-                        <i class="bi bi-user-plus me-2"></i>Yeni Kullanıcılar
+                        <i class="bi bi-person-plus me-2"></i>Yeni Kullanıcılar
                     </a>
                     
                     <a href="reports.php" class="btn btn-success btn-sm">
-                        <i class="bi bi-chart-bar me-2"></i>Günlük Rapor
+                        <i class="bi bi-bar-chart me-2"></i>Günlük Rapor
                     </a>
                     
                     <a href="settings.php" class="btn btn-secondary btn-sm">
-                        <i class="bi bi-cog me-2"></i>Sistem Ayarları
+                        <i class="bi bi-gear me-2"></i>Sistem Ayarları
                     </a>
                     
                     <a href="logs.php" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-clipboard-list me-2"></i>Sistem Logları
+                        <i class="bi bi-clipboard-data me-2"></i>Sistem Logları
                     </a>
                 </div>
             </div>
@@ -442,7 +442,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="bi bi-chart-line me-2"></i>Son 7 Günlük Aktivite
+                    <i class="bi bi bar-chart-line me-2"></i>Son 7 Günlük Aktivite
                 </h5>
             </div>
             <div class="card-body">

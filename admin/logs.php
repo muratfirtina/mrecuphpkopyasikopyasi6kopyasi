@@ -250,7 +250,7 @@ include '../includes/admin_sidebar.php';
                     <i class="bi bi-folder2-open-csv me-2"></i>CSV Olarak
                 </a></li>
                 <li><a class="dropdown-item" href="#" onclick="exportLogs('txt')">
-                    <i class="bi bi-folder2-open-alt me-2"></i>TXT Olarak
+                    <i class="bi bi-folder2-open me-2"></i>TXT Olarak
                 </a></li>
             </ul>
         </div>

@@ -209,95 +209,70 @@ include 'includes/header.php';
                                 <div class="row align-items-center text-white h-100">
                                     <?php if ($index === 0): ?>
                                         <!-- İlk Slider: Standart İçerik -->
-                                        <div class="col-lg-8">
-                                            <h1 class="display-3 fw-bold mb-3 slide-title" style="font-weight: 600 !important;"><?php echo htmlspecialchars($slider['title']); ?></h1>
+                                        <div class="col-lg-8 <?php echo (!empty($slider['button_link']) && empty($slider['button_text'])) ? 'slide-clickable' : ''; ?>"
+                                            <?php if (!empty($slider['button_link']) && empty($slider['button_text'])): ?>
+                                            onclick="window.location.href='<?php echo htmlspecialchars($slider['button_link'], ENT_QUOTES); ?>';"
+                                            style="cursor: pointer;"
+                                            <?php endif; ?>>
+                                            <h1 class="display-3 fw-bold mb-3 slide-title" style="font-weight: 600 !important;">
+                                                <?php echo htmlspecialchars($slider['title'] ?? ''); ?>
+                                            </h1>
 
                                             <?php if ($typewriterEnabled): ?>
                                                 <h2 class="display-5 fw-bold mb-4" style="background: linear-gradient(45deg, #e91c1cff, #fd6060ff, #ff5261ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
                                                     <span id="typewriter-text"><?php echo htmlspecialchars($typewriterWords[0]); ?></span><span class="typewriter-cursor">|</span>
                                                 </h2>
                                             <?php else: ?>
-                                                <h2 class="display-5 fw-bold mb-4" style="color: <?php echo htmlspecialchars($slider['text_color']); ?>;">
-                                                    <?php echo htmlspecialchars($slider['subtitle']); ?>
+                                                <h2 class="display-5 fw-bold mb-4" style="color: <?php echo htmlspecialchars($slider['text_color'] ?? '#fff'); ?>;">
+                                                    <?php echo htmlspecialchars($slider['subtitle'] ?? ''); ?>
                                                 </h2>
                                             <?php endif; ?>
 
                                             <p class="lead mb-4">
-                                                <?php echo htmlspecialchars($slider['description']); ?>
+                                                <?php echo htmlspecialchars($slider['description'] ?? ''); ?>
                                             </p>
 
                                             <div class="d-flex gap-3 mb-5">
-                                                <a href="<?php echo htmlspecialchars($slider['button_link']); ?>" class="btn btn-danger btn-lg px-4">
-                                                    <i class="bi bi-search me-2"></i><?php echo htmlspecialchars($slider['button_text']); ?>
-                                                </a>
-                                                <!-- <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
-                                                    <a href="user/upload.php" class="btn btn-outline-light btn-lg px-4">
-                                                        <i class="bi bi-upload me-2"></i>Dosya Yükle
+                                                <?php if (!empty($slider['button_link']) && !empty($slider['button_text'])): ?>
+                                                    <a href="<?php echo htmlspecialchars($slider['button_link']); ?>" class="btn btn-danger btn-lg px-4">
+                                                        <i class="bi bi-search me-2"></i><?php echo htmlspecialchars($slider['button_text']); ?>
                                                     </a>
-                                                <?php else: ?>
-                                                    <a href="register.php" class="btn btn-outline-light btn-lg px-4">
-                                                        <i class="bi bi-upload me-2"></i>Dosya Yükle
-                                                    </a>
-                                                <?php endif; ?> -->
+                                                <?php endif; ?>
+                                                <!-- Diğer butonlar (örneğin Dosya Yükle) buraya -->
                                             </div>
                                         </div>
-                                        <!-- <div class="col-lg-4">
-                                            <div class="text-center">
-                                                <i class="bi bi-cpu" style="font-size: 10rem; opacity: 0.2;"></i>
-                                            </div>
-                                        </div> -->
                                     <?php else: ?>
-                                        <!-- Diğer Slider'lar: Orijinal İçerik -->
-                                        <div class="col-lg-8">
-                                            <h1 class="display-3 fw-bold mb-3 slide-title"><?php echo htmlspecialchars($slider['title']); ?></h1>
+                                        <!-- Diğer slider'lar için aynı mantık -->
+                                        <div class="col-lg-8 <?php echo (!empty($slider['button_link']) && empty($slider['button_text'])) ? 'slide-clickable' : ''; ?>"
+                                            <?php if (!empty($slider['button_link']) && empty($slider['button_text'])): ?>
+                                            onclick="window.location.href='<?php echo htmlspecialchars($slider['button_link'], ENT_QUOTES); ?>';"
+                                            style="cursor: pointer;"
+                                            <?php endif; ?>>
+                                            <h1 class="display-3 fw-bold mb-3 slide-title"><?php echo htmlspecialchars($slider['title'] ?? ''); ?></h1>
 
                                             <?php if ($index === 0 && $typewriterEnabled): ?>
                                                 <h2 class="display-5 fw-bold mb-4" style="background: linear-gradient(45deg, #e91c1cff, #fd6060ff, #ff5261ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
                                                     <span id="typewriter-text"><?php echo htmlspecialchars($typewriterWords[0]); ?></span><span class="typewriter-cursor">|</span>
                                                 </h2>
                                             <?php else: ?>
-                                                <h2 class="display-5 fw-bold mb-4" style="color: <?php echo htmlspecialchars($slider['text_color']); ?>;">
-                                                    <?php echo htmlspecialchars($slider['subtitle']); ?>
+                                                <h2 class="display-5 fw-bold mb-4" style="color: <?php echo htmlspecialchars($slider['text_color'] ?? '#fff'); ?>;">
+                                                    <?php echo htmlspecialchars($slider['subtitle'] ?? ''); ?>
                                                 </h2>
                                             <?php endif; ?>
 
                                             <p class="lead mb-4">
-                                                <?php echo htmlspecialchars($slider['description']); ?>
+                                                <?php echo htmlspecialchars($slider['description'] ?? ''); ?>
                                             </p>
 
                                             <div class="d-flex gap-3 mb-5">
-                                                <a href="<?php echo htmlspecialchars($slider['button_link']); ?>" class="btn btn-danger btn-lg px-4">
-                                                    <i class="bi bi-search me-2"></i><?php echo htmlspecialchars($slider['button_text']); ?>
-                                                </a>
-                                                <!-- <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
-                                                    <a href="user/upload.php" class="btn btn-outline-light btn-lg px-4">
-                                                        <i class="bi bi-upload me-2"></i>Dosya Yükle
+                                                <?php if (!empty($slider['button_link']) && !empty($slider['button_text'])): ?>
+                                                    <a href="<?php echo htmlspecialchars($slider['button_link']); ?>" class="btn btn-danger btn-lg px-4">
+                                                        <i class="bi bi-search me-2"></i><?php echo htmlspecialchars($slider['button_text']); ?>
                                                     </a>
-                                                <?php else: ?>
-                                                    <a href="register.php" class="btn btn-outline-light btn-lg px-4">
-                                                        <i class="bi bi-upload me-2"></i>Dosya Yükle
-                                                    </a>
-                                                <?php endif; ?> -->
+                                                <?php endif; ?>
+                                                <!-- Diğer butonlar -->
                                             </div>
                                         </div>
-                                        <!-- div class="col-lg-4">
-                                            <div class="text-center">
-                                                <?php
-                                                // Slider'a göre icon belirleme
-                                                $icon = 'bi bi-cpu';
-                                                if (strpos(strtolower($slider['title']), 'performans') !== false) {
-                                                    $icon = 'bi bi-tachometer-alt';
-                                                } elseif (strpos(strtolower($slider['title']), 'güvenlik') !== false) {
-                                                    $icon = 'bi bi-key';
-                                                } elseif (strpos(strtolower($slider['title']), 'şanzıman') !== false) {
-                                                    $icon = 'bi bi-gear-wide-connected';
-                                                } elseif (strpos(strtolower($slider['title']), 'destek') !== false) {
-                                                    $icon = 'bi bi-headset';
-                                                }
-                                                ?>
-                                                <i class="<?php echo $icon; ?>" style="font-size: 10rem; opacity: 0.2;"></i>
-                                            </div>
-                                        </div> -->
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -384,7 +359,7 @@ include 'includes/header.php';
                 } elseif (strpos($categoryName, 'adblue') !== false) {
                     $icon = 'bi bi-tint';
                 } elseif (strpos($categoryName, 'chip') !== false || strpos($categoryName, 'tuning') !== false) {
-                    $icon = 'bi bi-tachometer-alt';
+                    $icon = 'bi bi-speedometer';
                 }
             ?>
 
@@ -450,7 +425,7 @@ include 'includes/header.php';
                                     </a>
                                 <?php else: ?>
                                     <a href="register.php" class="flip-back-link" onclick="event.stopPropagation();">
-                                        REGISTER & UPLOAD <i class="bi bi-user-plus"></i>
+                                        REGISTER & UPLOAD <i class="bi bi-person-plus"></i>
                                     </a>
                                 <?php endif; ?>
                             </div>
@@ -677,9 +652,9 @@ include 'includes/header.php';
                     'bi bi-cpu',
                     'bi bi-gear-wide-connected',
                     'bi bi-key',
-                    'bi bi-tachometer-alt',
+                    'bi bi-speedometer',
                     'bi bi-tools',
-                    'bi bi-shield-alt'
+                    'bi bi-shield-exclamation'
                 ];
 
                 foreach ($services as $index => $service):
@@ -905,7 +880,7 @@ include 'includes/header.php';
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon mb-3">
-                                <i class="bi bi-shield-alt text-primary" style="font-size: 3rem;"></i>
+                                <i class="bi bi-shield-exclamation text-primary" style="font-size: 3rem;"></i>
                             </div>
                             <h5 class="card-title">Güvenlik</h5>
                             <p class="card-text">
@@ -1040,7 +1015,7 @@ include 'includes/header.php';
         </p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
             <a href="tel:+905551234567" class="btn btn-light btn-lg">
-                <i class="bi bi-phone me-2"></i>Hemen Ara
+                <i class="bi bi-telephone-fill me-2"></i>Hemen Ara
             </a>
             <a href="mailto:<?php echo SITE_EMAIL; ?>" class="btn btn-outline-light btn-lg">
                 <i class="bi bi-envelope me-2"></i>E-posta Gönder
@@ -1052,7 +1027,7 @@ include 'includes/header.php';
 
         <div class="row mt-5 text-center">
             <div class="col-md-4">
-                <i class="bi bi-shield-alt fa-2x mb-3"></i>
+                <i class="bi bi-shield-exclamation fa-2x mb-3"></i>
                 <h5>Güvenli İşlem</h5>
                 <p>Aracınızın garantisi bozulmaz</p>
             </div>
@@ -2405,14 +2380,15 @@ include 'includes/footer.php';
             border-radius: 10px;
         }
     }
+
     .contact-cta {
-    background: linear-gradient(135deg, #dc3545, #c82333);
-    color: white;
-    padding: 3rem 0;
-    border-radius: 15px;
-    text-align: center;
-    margin: 3rem 0;
-}
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        padding: 3rem 0;
+        border-radius: 15px;
+        text-align: center;
+        margin: 3rem 0;
+    }
 </style>
 
 <?php if ($typewriterEnabled && !empty($typewriterWords)): ?>

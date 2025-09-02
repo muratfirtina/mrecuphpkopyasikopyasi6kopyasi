@@ -448,7 +448,7 @@ include '../includes/admin_sidebar.php';
             <div class="modal-body text-center py-4">
                 <div class="mb-4">
                     <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ff6b6b, #ffa500); border-radius: 50%;">
-                        <i class="bi bi-folder2-open-alt text-white fa-2x"></i>
+                        <i class="bi bi-folder2-open text-white fa-2x"></i>
                     </div>
                     <h6 class="mb-2 text-dark">Bu dosyayı işleme almak istediğinizden emin misiniz?</h6>
                     <p class="text-muted mb-0">Bu işlem dosyanın durumunu "İşleniyor" olarak değiştirecek ve dosya detay sayfasına yönlendirecektir.</p>
@@ -580,7 +580,7 @@ include '../includes/admin_sidebar.php';
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="file-icon me-3">
-                                            <i class="bi bi-folder2-open-alt fa-2x text-primary"></i>
+                                            <i class="bi bi-folder2-open fa-2x text-primary"></i>
                                         </div>
                                         <div>
                                             <h6 class="mb-1 text-truncate" style="max-width: 200px;" 
@@ -633,7 +633,7 @@ include '../includes/admin_sidebar.php';
                                                 </span>
                                                 <?php if (!empty($upload['kilometer'])): ?>
                                                     <span class="badge bg-secondary text-white ms-1">
-                                                        <i class="bi bi-tachometer-alt me-1"></i>
+                                                        <i class="bi bi-speedometer me-1"></i>
                                                         <?php echo number_format($upload['kilometer']); ?> km
                                                     </span>
                                                 <?php endif; ?>

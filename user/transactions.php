@@ -212,7 +212,7 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-primary"><?php echo $totalTransactions; ?></div>
                                     <div class="stat-label">Toplam İşlem</div>
                                     <div class="stat-trend">
-                                        <i class="bi bi-chart-line text-primary"></i>
+                                        <i class="bi bi bar-chart-line text-primary"></i>
                                         <span class="text-primary">Tüm zamanlar</span>
                                     </div>
                                 </div>
@@ -428,7 +428,7 @@ include '../includes/user_header.php';
                                                             
                                                             <?php if ($transaction['admin_username']): ?>
                                                                 <span class="meta-item">
-                                                                    <i class="bi bi-user-cog me-1"></i>
+                                                                    <i class="bi bi-person-fill me-1"></i>
                                                                     <?php echo htmlspecialchars($transaction['admin_username']); ?>
                                                                 </span>
                                                             <?php endif; ?>
@@ -548,7 +548,7 @@ include '../includes/user_header.php';
                                     <?php foreach (array_slice($recentFiles, 0, 5) as $file): ?>
                                         <div class="recent-file-item">
                                             <div class="file-icon">
-                                                <i class="bi bi-folder2-open-alt"></i>
+                                                <i class="bi bi-folder2-open"></i>
                                             </div>
                                             <div class="file-details">
                                                 <div class="file-name" title="<?php echo htmlspecialchars($file['file_name'] ?? 'Bilinmeyen dosya'); ?>">

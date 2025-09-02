@@ -64,7 +64,7 @@ include 'includes/header.php';
                     box-shadow: 0 20px 50px rgba(0,0,0,0.2);
                 ">
                     <div class="card-header text-center py-4" style="background: linear-gradient(45deg, #28a745, #20c997); color: white;">
-                        <h3 class="mb-0"><i class="bi bi-user-plus me-2"></i> Hesap Oluştur</h3>
+                        <h3 class="mb-0"><i class="bi bi-person-plus me-2"></i> Hesap Oluştur</h3>
                         <p class="mb-0 mt-1" style="opacity: 0.85;">Ücretsiz üye olun</p>
                     </div>
                     <div class="card-body p-5">
@@ -131,7 +131,7 @@ include 'includes/header.php';
 
                                 <button type="submit" class="btn btn-success btn-lg w-100 mt-4 rounded-4 py-3 fw-bold"
                                         style="background: linear-gradient(135deg, #28a745, #20c997); border: none;">
-                                    <i class="bi bi-user-plus me-2"></i> Hesap Oluştur
+                                    <i class="bi bi-person-plus me-2"></i> Hesap Oluştur
                                 </button>
                             </form>
                         <?php endif; ?>
@@ -157,7 +157,7 @@ include 'includes/header.php';
                     <div class="card-body p-4">
                         <h4 class="text-white mb-4">Neden <?php echo SITE_NAME; ?>?</h4>
                         <div class="d-flex align-items-start mb-4 text-white">
-                            <i class="bi bi-shield-alt fa-2x me-3 opacity-75"></i>
+                            <i class="bi bi-shield-exclamation fa-2x me-3 opacity-75"></i>
                             <div>
                                 <h6>Güvenli Platform</h6>
                                 <small>SSL şifreleme ile korunan tüm verileriniz.</small>

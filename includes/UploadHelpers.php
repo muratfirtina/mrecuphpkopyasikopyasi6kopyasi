@@ -234,7 +234,7 @@ function renderFileDetailsHTML($fileData) {
     $html .= '</table>';
     
     if (!empty($details['technical']['details_list'])) {
-        $html .= '<h6><i class="bi bi-cog me-2"></i>Teknik Detaylar</h6>';
+        $html .= '<h6><i class="bi bi-gear me-2"></i>Teknik Detaylar</h6>';
         $html .= '<ul class="list-unstyled">';
         foreach ($details['technical']['details_list'] as $detail) {
             $html .= '<li><small>' . $detail . '</small></li>';

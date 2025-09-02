@@ -230,7 +230,7 @@ include '../includes/user_header.php';
                                     <div class="stat-number text-primary"><?php echo $totalRevisionCount; ?></div>
                                     <div class="stat-label">Toplam Talep</div>
                                     <div class="stat-trend">
-                                        <i class="bi bi-chart-line text-success"></i>
+                                        <i class="bi bi bar-chart-line text-success"></i>
                                         <span class="text-success">Tüm talepleriniz</span>
                                     </div>
                                 </div>
@@ -506,7 +506,7 @@ include '../includes/user_header.php';
                                                         <?php endif; ?>
                                                         <?php if (!empty($revision['engine_name'])): ?>
                                                             <br><small class="text-muted">
-                                                                <i class="bi bi-cog me-1"></i>
+                                                                <i class="bi bi-gear me-1"></i>
                                                                 Motor: <?php echo htmlspecialchars($revision['engine_name']); ?>
                                                             </small>
                                                         <?php endif; ?>
@@ -564,7 +564,7 @@ include '../includes/user_header.php';
                                             <td>
                                                 <?php if ($revision['admin_username']): ?>
                                                     <div class="d-flex align-items-center">
-                                                        <i class="bi bi-user-cog text-secondary me-1"></i>
+                                                        <i class="bi bi-person-fill text-secondary me-1"></i>
                                                         <span class="text-truncate" style="max-width: 80px;" 
                                                               title="<?php echo htmlspecialchars($revision['admin_username']); ?>">
                                                             <?php echo htmlspecialchars($revision['admin_username']); ?>
@@ -673,7 +673,7 @@ include '../includes/user_header.php';
                 </div>
                 
                 <div class="info-section">
-                    <h6><i class="bi bi-cog me-2"></i>Nasıl Çalışır?</h6>
+                    <h6><i class="bi bi-gear me-2"></i>Nasıl Çalışır?</h6>
                     <ol class="ps-3">
                         <li>Tamamlanmış dosyalarınızdan birini seçin</li>
                         <li>Revize talep et butonuna tıklayın</li>

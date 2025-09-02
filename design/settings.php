@@ -111,7 +111,7 @@ include '../includes/design_header.php';
             <div class="design-card h-100">
                 <div class="design-card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-cog me-2"></i>Genel Ayarlar
+                        <i class="bi bi-gear me-2"></i>Genel Ayarlar
                     </h5>
                 </div>
                 <div class="card-body">
@@ -315,7 +315,7 @@ include '../includes/design_header.php';
             <div class="design-card h-100">
                 <div class="design-card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-chart-bar me-2"></i>Analytics & Tracking
+                        <i class="bi bi-bar-chart me-2"></i>Analytics & Tracking
                     </h5>
                 </div>
                 <div class="card-body">

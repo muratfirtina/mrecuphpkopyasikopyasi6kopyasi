@@ -9,7 +9,7 @@ require_once '../config/database.php';
 
 // Sayfa ayarları
 $pageTitle = 'İletişim İçerik Yönetimi';
-$pageIcon = 'bi bi-phone';
+$pageIcon = 'bi bi-telephone-fill';
 $breadcrumbs = [
     ['title' => 'Dashboard', 'url' => 'index.php'],
     ['title' => 'İletişim Yönetimi']
@@ -328,7 +328,7 @@ include '../includes/design_header.php';
                     <nav>
                         <div class="nav nav-tabs px-3 pt-3" id="nav-tab" role="tablist">
                             <button class="nav-link active" id="nav-settings-tab" data-bs-toggle="tab" data-bs-target="#nav-settings" type="button">
-                                <i class="bi bi-cog me-2"></i>Genel Ayarlar
+                                <i class="bi bi-gear me-2"></i>Genel Ayarlar
                             </button>
                             <button class="nav-link" id="nav-cards-tab" data-bs-toggle="tab" data-bs-target="#nav-cards" type="button">
                                 <i class="bi bi-address-card me-2"></i>İletişim Kartları
@@ -405,7 +405,7 @@ include '../includes/design_header.php';
                                         <!-- Yayınlama Ayarları -->
                                         <div class="card shadow-sm mb-4">
                                             <div class="card-header">
-                                                <h6 class="mb-0"><i class="bi bi-cog me-2"></i>Ayarlar</h6>
+                                                <h6 class="mb-0"><i class="bi bi-gear me-2"></i>Ayarlar</h6>
                                             </div>
                                             <div class="card-body">
                                                 <div class="form-check mb-3">
@@ -509,10 +509,10 @@ include '../includes/design_header.php';
                                                     <label class="form-label fw-bold">Icon *</label>
                                                     <div class="input-group">
                                                         <span class="input-group-text bg-light">
-                                                            <i id="cardIconPreview" class="bi bi-phone fs-4"></i>
+                                                            <i id="cardIconPreview" class="bi bi-telephone-fill fs-4"></i>
                                                         </span>
                                                         <input type="text" class="form-control" name="card_icon" id="cardIcon" 
-                                                               value="bi bi-phone" required placeholder="bi bi-phone">
+                                                               value="bi bi-telephone-fill" required placeholder="bi bi-telephone-fill">
                                                     </div>
                                                 </div>
                                                 
@@ -640,7 +640,7 @@ include '../includes/design_header.php';
                                         <!-- Ayarlar -->
                                         <div class="card shadow-sm mb-4">
                                             <div class="card-header">
-                                                <h6 class="mb-0"><i class="bi bi-cog me-2"></i>Ayarlar</h6>
+                                                <h6 class="mb-0"><i class="bi bi-gear me-2"></i>Ayarlar</h6>
                                             </div>
                                             <div class="card-body">
                                                 <div class="form-check mb-3">
@@ -728,7 +728,7 @@ include '../includes/design_header.php';
                                         <!-- Form Ayarları -->
                                         <div class="card shadow-sm mb-4">
                                             <div class="card-header">
-                                                <h6 class="mb-0"><i class="bi bi-cog me-2"></i>Form Ayarları</h6>
+                                                <h6 class="mb-0"><i class="bi bi-gear me-2"></i>Form Ayarları</h6>
                                             </div>
                                             <div class="card-body">
                                                 <div class="form-check mb-3">
@@ -819,7 +819,7 @@ include '../includes/design_header.php';
 <script>
 // Icon önizleme
 document.getElementById('cardIcon').addEventListener('input', function() {
-    document.getElementById('cardIconPreview').className = this.value.trim() || 'bi bi-phone fs-4';
+    document.getElementById('cardIconPreview').className = this.value.trim() || 'bi bi-telephone-fill fs-4';
 });
 
 // Konu seçeneği ekleme/silme
@@ -878,8 +878,8 @@ function resetContactCardForm() {
     document.getElementById('contactCardForm').reset();
     document.getElementById('cardAction').value = 'add_contact_card';
     document.getElementById('cardId').value = '';
-    document.getElementById('cardIcon').value = 'bi bi-phone';
-    document.getElementById('cardIconPreview').className = 'bi bi-phone fs-4';
+    document.getElementById('cardIcon').value = 'bi bi-telephone-fill';
+    document.getElementById('cardIconPreview').className = 'bi bi-telephone-fill fs-4';
     document.getElementById('cardSubmitBtn').innerHTML = '<i class="bi bi-plus me-2"></i>Kart Ekle';
     document.getElementById('cardCancelBtn').classList.add('d-none');
 }

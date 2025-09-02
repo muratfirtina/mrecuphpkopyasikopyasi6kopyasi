@@ -146,7 +146,7 @@ include '../includes/user_header.php';
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
                     <h1 class="h2 mb-0">
-                        <i class="bi bi-user-cog me-2 text-primary"></i>Profil Ayarları
+                        <i class="bi bi-person-fill me-2 text-primary"></i>Profil Ayarları
                     </h1>
                     <p class="text-muted mb-0">Hesap bilgilerinizi görüntüleyin ve güncelleyin</p>
                 </div>
@@ -189,7 +189,7 @@ include '../includes/user_header.php';
                 <div class="profile-content">
                     <div class="profile-avatar">
                         <div class="avatar-circle">
-                            <i class="bi bi-user"></i>
+                            <i class="bi bi-person"></i>
                         </div>
                         <div class="status-indicator <?php echo ($userData['is_active'] ?? 1) ? 'active' : 'inactive'; ?>"></div>
                     </div>
@@ -241,7 +241,7 @@ include '../includes/user_header.php';
                     <div class="settings-card mb-4">
                         <div class="settings-header">
                             <h5 class="mb-0">
-                                <i class="bi bi-user me-2"></i>Kişisel Bilgiler
+                                <i class="bi bi-person me-2"></i>Kişisel Bilgiler
                             </h5>
                             <p class="text-muted mb-0">Profil bilgilerinizi güncelleyin</p>
                         </div>
@@ -253,7 +253,7 @@ include '../includes/user_header.php';
                                 <div class="form-grid">
                                     <div class="form-group">
                                         <label for="first_name" class="form-label">
-                                            <i class="bi bi-user me-1"></i>Ad <span class="required">*</span>
+                                            <i class="bi bi-person me-1"></i>Ad <span class="required">*</span>
                                         </label>
                                         <input type="text" class="form-control form-control-modern" 
                                                id="first_name" name="first_name" 
@@ -263,7 +263,7 @@ include '../includes/user_header.php';
                                     
                                     <div class="form-group">
                                         <label for="last_name" class="form-label">
-                                            <i class="bi bi-user me-1"></i>Soyad <span class="required">*</span>
+                                            <i class="bi bi-person me-1"></i>Soyad <span class="required">*</span>
                                         </label>
                                         <input type="text" class="form-control form-control-modern" 
                                                id="last_name" name="last_name" 
@@ -298,7 +298,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="form-group">
                                     <label for="phone" class="form-label">
-                                        <i class="bi bi-phone me-1"></i>Telefon Numarası
+                                        <i class="bi bi-telephone-fill me-1"></i>Telefon Numarası
                                     </label>
                                     <input type="tel" class="form-control form-control-modern" 
                                            id="phone" name="phone" 
@@ -374,7 +374,7 @@ include '../includes/user_header.php';
                     <div class="settings-card">
                         <div class="settings-header">
                             <h5 class="mb-0">
-                                <i class="bi bi-shield-alt me-2"></i>Güvenlik Ayarları
+                                <i class="bi bi-shield-exclamation me-2"></i>Güvenlik Ayarları
                             </h5>
                             <p class="text-muted mb-0">Hesabınızın güvenliğini artırın</p>
                         </div>
@@ -443,7 +443,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="form-actions">
                                     <button type="submit" class="btn btn-warning btn-modern">
-                                        <i class="bi bi-shield-alt me-2"></i>Şifremi Değiştir
+                                        <i class="bi bi-shield-exclamation me-2"></i>Şifremi Değiştir
                                     </button>
                                 </div>
                             </form>
@@ -457,7 +457,7 @@ include '../includes/user_header.php';
                     <div class="info-card mb-4">
                         <div class="info-header">
                             <h5 class="mb-0">
-                                <i class="bi bi-chart-pie me-2"></i>Hesap İstatistikleri
+                                <i class="bi bi-pie-chart me-2"></i>Hesap İstatistikleri
                             </h5>
                         </div>
                         <div class="info-body">

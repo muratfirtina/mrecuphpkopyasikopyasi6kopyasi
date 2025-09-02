@@ -100,7 +100,7 @@ try {
 
 $pageTitle = 'Raporlar';
 $pageDescription = 'Sistem performansı ve kullanım istatistikleri';
-$pageIcon = 'bi bi-chart-bar';
+$pageIcon = 'bi bi-bar-chart';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';
@@ -180,13 +180,13 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="bi bi-chart-line me-2"></i>Günlük Dosya Yükleme Aktivitesi (Son 30 Gün)
+                    <i class="bi bi bar-chart-line me-2"></i>Günlük Dosya Yükleme Aktivitesi (Son 30 Gün)
                 </h5>
             </div>
             <div class="card-body">
                 <?php if (empty($daily_activity)): ?>
                     <div class="text-center py-4">
-                        <i class="bi bi-chart-line text-muted" style="font-size: 3rem;"></i>
+                        <i class="bi bi bar-chart-line text-muted" style="font-size: 3rem;"></i>
                         <p class="text-muted mt-3">Son 30 günde aktivite yok</p>
                     </div>
                 <?php else: ?>
@@ -203,7 +203,7 @@ include '../includes/admin_sidebar.php';
         <div class="card admin-card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="bi bi-chart-pie me-2"></i>Dosya Durumları
+                    <i class="bi bi-pie-chart me-2"></i>Dosya Durumları
                 </h5>
             </div>
             <div class="card-body">
@@ -234,7 +234,7 @@ include '../includes/admin_sidebar.php';
             <div class="card-body">
                 <?php if (empty($popular_brands)): ?>
                     <div class="text-center py-3">
-                        <i class="bi bi-chart-bar text-muted fa-3x"></i>
+                        <i class="bi bi-bar-chart text-muted fa-3x"></i>
                         <p class="text-muted mt-3">Henüz marka verisi yok</p>
                     </div>
                 <?php else: ?>
@@ -292,7 +292,7 @@ include '../includes/admin_sidebar.php';
                     <h6>Hızlı İşlemler:</h6>
                     <div class="d-flex gap-2 flex-wrap">
                         <a href="settings.php" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-cog me-1"></i>Ayarlar
+                            <i class="bi bi-gear me-1"></i>Ayarlar
                         </a>
                         <a href="logs.php" class="btn btn-sm btn-outline-info">
                             <i class="bi bi-list me-1"></i>Loglar

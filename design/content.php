@@ -143,7 +143,7 @@ include '../includes/design_header.php';
                 <div class="card-body">
                     <?php if (empty($contentsBySection)): ?>
                         <div class="text-center py-5">
-                            <i class="bi bi-folder2-open-alt text-muted" style="font-size: 4rem;"></i>
+                            <i class="bi bi-folder2-open text-muted" style="font-size: 4rem;"></i>
                             <h4 class="text-muted mt-3">Henüz içerik bulunmuyor</h4>
                             <p class="text-muted">İlk içeriğinizi oluşturmak için "Yeni İçerik" butonuna tıklayın.</p>
                             <button type="button" class="btn btn-design-primary" data-bs-toggle="modal" data-bs-target="#contentModal" onclick="resetForm()">

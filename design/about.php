@@ -615,7 +615,7 @@ include '../includes/design_header.php';
                                         <!-- Yayınlama Ayarları -->
                                         <div class="card shadow-sm mb-4">
                                             <div class="card-header">
-                                                <h6 class="mb-0"><i class="bi bi-cog me-2"></i>Ayarlar</h6>
+                                                <h6 class="mb-0"><i class="bi bi-gear me-2"></i>Ayarlar</h6>
                                             </div>
                                             <div class="card-body">
                                                 <div class="form-check mb-3">
@@ -897,10 +897,10 @@ include '../includes/design_header.php';
                                                     <label class="form-label fw-bold">FontAwesome Icon</label>
                                                     <div class="input-group">
                                                         <span class="input-group-text bg-light">
-                                                            <i id="sfIconPreview" class="bi bi-cog fs-4"></i>
+                                                            <i id="sfIconPreview" class="bi bi-gear fs-4"></i>
                                                         </span>
                                                         <input type="text" class="form-control" name="sf_icon" id="sfIcon" 
-                                                               value="bi bi-cog" placeholder="bi bi-cog">
+                                                               value="bi bi-gear" placeholder="bi bi-gear">
                                                     </div>
                                                     <small class="form-text text-muted">Resim yoksa bu icon kullanılır</small>
                                                 </div>
@@ -1047,7 +1047,7 @@ include '../includes/design_header.php';
                                         <!-- Yayınlama Ayarları -->
                                         <div class="card shadow-sm mb-4">
                                             <div class="card-header">
-                                                <h6 class="mb-0"><i class="bi bi-cog me-2"></i>Ayarlar</h6>
+                                                <h6 class="mb-0"><i class="bi bi-gear me-2"></i>Ayarlar</h6>
                                             </div>
                                             <div class="card-body">
                                                 <div class="form-check mb-3">
@@ -1177,7 +1177,7 @@ document.getElementById('cvIcon').addEventListener('input', function() {
 });
 
 document.getElementById('sfIcon').addEventListener('input', function() {
-    document.getElementById('sfIconPreview').className = this.value.trim() || 'bi bi-cog fs-4';
+    document.getElementById('sfIconPreview').className = this.value.trim() || 'bi bi-gear fs-4';
 });
 
 // Resim önizlemeleri
@@ -1246,7 +1246,7 @@ function editServiceFeature(feature) {
     document.getElementById('sfId').value = feature.id;
     document.getElementById('sfTitle').value = feature.title;
     document.getElementById('sfDescription').value = feature.description;
-    document.getElementById('sfIcon').value = feature.icon || 'bi bi-cog';
+    document.getElementById('sfIcon').value = feature.icon || 'bi bi-gear';
     document.getElementById('sfOrderNo').value = feature.order_no;
     document.getElementById('sfIsActive').checked = feature.is_active == 1;
     document.getElementById('currentSfImage').value = feature.icon_url || '';
@@ -1262,7 +1262,7 @@ function editServiceFeature(feature) {
     }
     
     // Icon önizlemesini güncelle
-    document.getElementById('sfIconPreview').className = (feature.icon || 'bi bi-cog') + ' fs-4';
+    document.getElementById('sfIconPreview').className = (feature.icon || 'bi bi-gear') + ' fs-4';
     
     document.getElementById('sfSubmitBtn').innerHTML = '<i class="bi bi-save me-2"></i>Güncelle';
     document.getElementById('sfCancelBtn').classList.remove('d-none');
@@ -1276,8 +1276,8 @@ function resetServiceFeatureForm() {
     document.getElementById('serviceFeatureForm').reset();
     document.getElementById('sfAction').value = 'add_service_feature';
     document.getElementById('sfId').value = '';
-    document.getElementById('sfIcon').value = 'bi bi-cog';
-    document.getElementById('sfIconPreview').className = 'bi bi-cog fs-4';
+    document.getElementById('sfIcon').value = 'bi bi-gear';
+    document.getElementById('sfIconPreview').className = 'bi bi-gear fs-4';
     document.getElementById('currentSfImage').value = '';
     document.getElementById('currentSfImageContainer').style.display = 'none';
     document.getElementById('sfImagePreview').style.display = 'none';

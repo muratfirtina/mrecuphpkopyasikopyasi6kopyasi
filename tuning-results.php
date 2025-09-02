@@ -327,7 +327,7 @@ include 'includes/header.php';
                 <div class="position-relative">
                     <i class="bi bi-car fa-8x" style="opacity: 0.3;"></i>
                     <div class="position-absolute top-50 start-50 translate-middle">
-                        <i class="bi bi-tachometer-alt fa-4x text-warning"></i>
+                        <i class="bi bi-speedometer fa-4x text-warning"></i>
                     </div>
                 </div>
             </div>
@@ -505,11 +505,11 @@ include 'includes/header.php';
             <!-- Telefon Button - ID: 1 -->
             <?php if (isset($contactCardsById[1])): ?>
                 <a href="<?php echo $contactCardsById[1]['contact_link'] ?: 'tel:+905551234567'; ?>" class="btn btn-light btn-lg">
-                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'bi bi-phone'; ?> me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[1]['button_text'] ?: 'Hemen Ara'; ?>
+                    <i class="<?php echo $contactCardsById[1]['icon'] ?: 'bi bi-telephone-fill'; ?> me-2" style="color: <?php echo $contactCardsById[1]['icon_color'] ?: ''; ?>;"></i><?php echo $contactCardsById[1]['button_text'] ?: 'Hemen Ara'; ?>
                 </a>
             <?php else: ?>
                 <a href="tel:+905551234567" class="btn btn-light btn-lg">
-                    <i class="bi bi-phone me-2"></i>Hemen Ara
+                    <i class="bi bi-telephone-fill me-2"></i>Hemen Ara
                 </a>
             <?php endif; ?>
             
@@ -531,7 +531,7 @@ include 'includes/header.php';
         
         <div class="row mt-5 text-center">
             <div class="col-md-4">
-                <i class="bi bi-shield-alt fa-2x mb-3"></i>
+                <i class="bi bi-shield-exclamation fa-2x mb-3"></i>
                 <h5>Güvenli İşlem</h5>
                 <p>Aracınızın garantisi bozulmaz</p>
             </div>

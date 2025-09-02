@@ -81,7 +81,7 @@ foreach ($defaultSettings as $key => $defaultValue) {
 
 $pageTitle = 'Sistem Ayarları';
 $pageDescription = 'Sistem ayarlarını yönetin';
-$pageIcon = 'bi bi-cog';
+$pageIcon = 'bi bi-gear';
 
 // Header ve Sidebar include
 include '../includes/admin_header.php';

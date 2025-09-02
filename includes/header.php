@@ -610,7 +610,7 @@ if (!isset($pageTitle)) {
                 <!-- Data Files Animation -->
                 <!-- <div class="data-files">
                     <div class="data-file" style="--delay: 0s">
-                        <i class="bi bi-folder2-open-alt"></i>
+                        <i class="bi bi-folder2-open"></i>
                     </div>
                     <div class="data-file" style="--delay: 0.5s">
                         <i class="bi bi-folder2-open-code"></i>

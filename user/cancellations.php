@@ -167,7 +167,7 @@ include '../includes/user_header.php';
                                             
                                             <?php if ($cancellation['status'] !== 'pending' && !empty($cancellation['admin_notes'])): ?>
                                                 <h6 class="text-info mb-2">
-                                                    <i class="bi bi-user-shield me-1"></i>
+                                                    <i class="bi bi-person-fill-gear me-1"></i>
                                                     Admin Yanıtı:
                                                 </h6>
                                                 <div class="alert alert-light border-start border-info border-3">
