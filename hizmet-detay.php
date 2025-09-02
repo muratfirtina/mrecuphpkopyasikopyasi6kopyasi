@@ -544,8 +544,8 @@ include 'includes/header.php';
                         <ul class="mb-0">
                             <li>Tüm işlemlerimiz için %100 memnuniyet garantisi veriyoruz</li>
                             <li>Orijinal dosyanızın yedeğini saklarız</li>
-                            <li>7/24 teknik destek hizmetimiz mevcuttur</li>
-                            <li>İşlem süresi genellikle 2-24 saat arasındadır</li>
+                            <li>Mesai saatleri içerisinde teknik destek hizmetimiz mevcuttur</li>
+                            <li>İşlem süresi dosya boyutuna ve talebe göre değişmektedir.</li>
                         </ul>
                     </div>
                 </div>

@@ -291,11 +291,11 @@ include '../includes/design_header.php';
                         </div>
                     </div>
                     <div class="col-lg-3 preview-column">
-                        <h6><i class="bi bi-map-marker-alt me-2"></i>İletişim</h6>
+                        <h6><i class="bi bi-geo-alt me-2"></i>İletişim</h6>
                         <div style="font-size: 0.85rem;">
                             <?php if ($officeInfo && $officeInfo['address']): ?>
                                 <div style="margin-bottom: 0.5rem;">
-                                    <i class="bi bi-map-marker-alt me-1 text-primary"></i>
+                                    <i class="bi bi-geo-alt me-1 text-primary"></i>
                                     <?php echo htmlspecialchars($officeInfo['address']); ?>
                                 </div>
                             <?php endif; ?>
@@ -335,7 +335,7 @@ include '../includes/design_header.php';
                 </li>
                 <li class="nav-item" role="presentation">
                 <button class="nav-link text-white" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab">
-                <i class="bi bi-map-marker-alt me-2"></i>İletişim
+                <i class="bi bi-geo-alt me-2"></i>İletişim
                 </button>
                 </li>
                 <li class="nav-item" role="presentation">

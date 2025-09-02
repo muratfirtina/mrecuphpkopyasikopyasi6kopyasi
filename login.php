@@ -147,7 +147,7 @@ include 'includes/header.php';
                         <form method="POST" action="" id="loginForm">
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">E-posta</label>
-                                <input type="email" name="email" class="form-control form-control-lg rounded-4" 
+                                <input type="email" name="email" class="form-control form-control-lg" 
                                        placeholder="ornek@email.com" required
                                        value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
                             </div>
@@ -155,7 +155,7 @@ include 'includes/header.php';
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">Şifre</label>
                                 <div class="input-group">
-                                    <input type="password" name="password" id="password" class="form-control form-control-lg rounded-4"
+                                    <input type="password" name="password" id="password" class="form-control form-control-lg"
                                            placeholder="••••••••" required>
                                     <button type="button" class="btn btn-outline-secondary" onclick="togglePassword()">
                                         <i class="bi bi-eye" id="toggleIcon"></i>

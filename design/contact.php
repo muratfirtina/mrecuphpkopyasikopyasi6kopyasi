@@ -562,7 +562,7 @@ include '../includes/design_header.php';
                                                 <div class="mb-3">
                                                     <label class="form-label fw-bold">Kullanılabilirlik Metni</label>
                                                     <input type="text" class="form-control" name="card_availability_text" id="cardAvailabilityText" 
-                                                           placeholder="7/24 Aktif" maxlength="255">
+                                                           placeholder="" maxlength="255">
                                                 </div>
                                                 
                                                 <div class="mb-3">

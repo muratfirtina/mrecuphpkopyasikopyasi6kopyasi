@@ -583,8 +583,8 @@ include '../includes/admin_sidebar.php';
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="edit_price" class="form-label">Fiyat (TL) *</label>
-                                        <input type="number" class="form-control" id="edit_price" name="price" step="0.01" min="0" required>
+                                        <label for="edit_price" class="form-label">Fiyat (TL)</label>
+                                        <input type="number" class="form-control" id="edit_price" name="price" step="0.01" min="0">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -881,8 +881,8 @@ include '../includes/admin_sidebar.php';
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="add_price" class="form-label">Fiyat (TL) <span class="text-danger">*</span></label>
-                                        <input type="number" class="form-control" name="price" id="add_price" step="0.01" min="0" required>
+                                        <label for="add_price" class="form-label">Fiyat (TL)</label>
+                                        <input type="number" class="form-control" name="price" id="add_price" step="0.01" min="0">
                                     </div>
                                 </div>
                                 <div class="col-md-6">

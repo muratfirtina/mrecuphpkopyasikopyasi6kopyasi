@@ -86,7 +86,7 @@ try {
     ];
 
     $contactInfo = 'E-posta: info@mrecu.com\nTelefon: +90 (555) 123 45 67';
-    $officeData = ['address' => 'İstanbul, Türkiye', 'working_hours' => '7/24 Teknik Destek'];
+    $officeData = ['address' => 'İstanbul, Türkiye', 'working_hours' => 'Teknik Destek'];
     $whatsappData = ['contact_info' => '+90 (555) 123 45 67']; // Varsayılan WhatsApp numarası
 }
 
@@ -262,12 +262,12 @@ $basePath = isset($basePath) ? $basePath : '/';
             <!-- İletişim Bilgileri -->
             <div class="col-lg-3 col-md-6">
                 <h6 class="text-white mb-3 footer-heading">
-                    <i class="fas fa-map-marker-alt me-2"></i>İletişim Bilgileri
+                    <i class="bi bi-geo-alt me-2"></i>İletişim Bilgileri
                 </h6>
                 <ul class="list-unstyled footer-contact">
                     <?php if (!empty($officeData['address'])): ?>
                         <li class="mb-2">
-                            <i class="fas fa-map-marker-alt me-2 text-primary"></i>
+                            <i class="bi bi-geo-alt me-2 text-primary"></i>
                             <span class="text-light"><?php echo htmlspecialchars($officeData['address']); ?></span>
                         </li>
                     <?php endif; ?>
@@ -281,7 +281,7 @@ $basePath = isset($basePath) ? $basePath : '/';
 
                     if ($phoneData && !empty($phoneData['contact_info'])): ?>
                         <li class="mb-2">
-                            <i class="fas fa-phone me-2 text-primary"></i>
+                            <i class="bi bi-telephone me-2 text-primary"></i>
                             <a href="<?php echo htmlspecialchars($phoneData['contact_link']); ?>"
                                 class="text-light text-decoration-none footer-link">
                                 <?php echo htmlspecialchars($phoneData['contact_info']); ?>
@@ -298,7 +298,7 @@ $basePath = isset($basePath) ? $basePath : '/';
 
                     if ($emailData && !empty($emailData['contact_info'])): ?>
                         <li class="mb-2">
-                            <i class="fas fa-envelope me-2 text-primary"></i>
+                            <i class="bi bi-envelope-at me-2 text-primary"></i>
                             <a href="<?php echo htmlspecialchars($emailData['contact_link']); ?>"
                                 class="text-light text-decoration-none footer-link">
                                 <?php echo htmlspecialchars($emailData['contact_info']); ?>
@@ -308,7 +308,7 @@ $basePath = isset($basePath) ? $basePath : '/';
 
                     <?php if (!empty($officeData['working_hours'])): ?>
                         <li class="mb-2">
-                            <i class="fas fa-clock me-2 text-primary"></i>
+                            <i class="bi bi-clock me-2 text-primary"></i>
                             <span class="text-light"><?php echo htmlspecialchars($officeData['working_hours']); ?></span>
                         </li>
                     <?php endif; ?>

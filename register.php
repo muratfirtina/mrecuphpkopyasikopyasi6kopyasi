@@ -167,14 +167,14 @@ include 'includes/header.php';
                             <i class="bi bi-rocket fa-2x me-3 opacity-75"></i>
                             <div>
                                 <h6>Hızlı İşlem</h6>
-                                <small>ECU dosyalarınız 24 saat içinde işlenir.</small>
+                                <small>ECU dosyalarınız en kısa sürede işlenir.</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-start mb-4 text-white">
                             <i class="bi bi-headset fa-2x me-3 opacity-75"></i>
                             <div>
-                                <h6>7/24 Destek</h6>
-                                <small>Uzman ekibimiz her zaman yanınızda.</small>
+                                <h6>Destek</h6>
+                                <small>Mesai satleri içerisinde devamlı yanınızdayız.</small>
                             </div>
                         </div>
                     </div>

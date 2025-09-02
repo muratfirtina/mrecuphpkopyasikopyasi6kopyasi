@@ -372,13 +372,13 @@ textarea.form-control {
             <?php foreach ($contact_cards as $card): ?>
                 <div class="col-lg-4 col-md-6">
                     <div class="contact-card">
-                        <div class="card-body text-center">
+                        <div class="card-body text-center" style="padding: 0 30px 20px 30px;">
                             <div class="contact-icon">
                                 <i class="<?php echo htmlspecialchars($card['icon']); ?>"></i>
                             </div>
                             <h5><?php echo htmlspecialchars($card['title']); ?></h5>
                             <p class="text-muted"><?php echo nl2br(htmlspecialchars($card['description'])); ?></p>
-                            <div class="contact-details">
+                            <div class="contact-details" style="margin: 0px 20px 0 20px;">
                                 <h6><?php echo htmlspecialchars($card['contact_info']); ?></h6>
                                 <?php if ($card['availability_text']): ?>
                                     <small><?php echo htmlspecialchars($card['availability_text']); ?></small>
@@ -387,7 +387,8 @@ textarea.form-control {
                             <?php if ($card['contact_link'] && $card['button_text']): ?>
                                 <a href="<?php echo htmlspecialchars($card['contact_link']); ?>"
                                    class="btn btn-sm"
-                                   target="_blank">
+                                   target="_blank"
+                                    style="margin: 20px 0 0 0px">
                                     <i class="<?php echo htmlspecialchars($card['icon']); ?> me-1"></i>
                                     <?php echo htmlspecialchars($card['button_text']); ?>
                                 </a>
@@ -494,7 +495,7 @@ textarea.form-control {
                     <p class="text-muted"><?php echo nl2br(htmlspecialchars($office_info['description'])); ?></p>
 
                     <div class="info-item">
-                        <div class="info-icon bg-primary"><i class="bi bi-map-marker-alt"></i></div>
+                        <div class="info-icon bg-primary"><i class="bi bi-geo-alt"></i></div>
                         <div class="info-content">
                             <h6>Adres</h6>
                             <p><?php echo nl2br(htmlspecialchars($office_info['address'])); ?></p>
@@ -522,7 +523,7 @@ textarea.form-control {
                     <?php if ($office_info['google_maps_link']): ?>
                         <a href="<?php echo htmlspecialchars($office_info['google_maps_link']); ?>" target="_blank"
                            class="btn btn-outline-primary mt-3">
-                            <i class="bi bi-map-marker-alt me-2"></i>Yol Tarifi Al
+                            <i class="bi bi-geo-alt me-2"></i>Yol Tarifi Al
                         </a>
                     <?php endif; ?>
                 </div>

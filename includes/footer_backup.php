@@ -69,7 +69,7 @@ try {
     ];
 
     $contactInfo = 'E-posta: info@mrecu.com\nTelefon: +90 (555) 123 45 67';
-    $officeData = ['address' => 'İstanbul, Türkiye', 'working_hours' => '7/24 Teknik Destek'];
+    $officeData = ['address' => 'İstanbul, Türkiye', 'working_hours' => 'Teknik Destek'];
 }
 
 // Base path ayarlama
@@ -225,7 +225,7 @@ $basePath = isset($basePath) ? $basePath : '/';
             <!-- İletişim Bilgileri -->
             <div class="col-lg-3 col-md-6">
                 <h6 class="text-white mb-3 footer-heading">
-                    <i class="bi bi-map-marker-alt me-2"></i>İletişim Bilgileri
+                    <i class="bi bi-geo-alt me-2"></i>İletişim Bilgileri
                 </h6>
                 <ul class="list-unstyled footer-contact">
                     <!-- <?php if (!empty($contactInfo)): ?>
@@ -238,7 +238,7 @@ $basePath = isset($basePath) ? $basePath : '/';
 
                     <?php if (!empty($officeData['address'])): ?>
                         <li class="mb-2">
-                            <i class="bi bi-map-marker-alt me-2 text-primary"></i>
+                            <i class="bi bi-geo-alt me-2 text-primary"></i>
                             <span class="text-light"><?php echo htmlspecialchars($officeData['address']); ?></span>
                         </li>
                     <?php endif; ?>

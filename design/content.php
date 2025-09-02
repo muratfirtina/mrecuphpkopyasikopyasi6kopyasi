@@ -460,7 +460,7 @@ function createTemplate(templateType) {
                 {section: 'contact', key_name: 'office_address', value: 'İstanbul, Türkiye', type: 'text'},
                 {section: 'contact', key_name: 'phone_number', value: '+90 (555) 123 45 67', type: 'text'},
                 {section: 'contact', key_name: 'email_address', value: 'info@mrecu.com', type: 'text'},
-                {section: 'contact', key_name: 'working_hours', value: '7/24 Hizmet', type: 'text'}
+                {section: 'contact', key_name: 'working_hours', value: ' Hizmet', type: 'text'}
             ];
             break;
     }

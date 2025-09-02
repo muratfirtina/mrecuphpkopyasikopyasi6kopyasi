@@ -8,6 +8,11 @@
  * @global PDO|null $pdo Global database connection
  */
 
+// Production/Development auto-switcher - TEMPORARILY DISABLED
+// if (file_exists(__DIR__ . '/environment.php')) {
+//     require_once __DIR__ . '/environment.php';
+// }
+
 // Site ayarları
 define('SITE_NAME', 'Mr ECU');
 define('SITE_URL', 'http://localhost:8888/mrecuphpkopyasikopyasi6kopyasi/');

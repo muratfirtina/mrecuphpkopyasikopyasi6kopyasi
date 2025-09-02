@@ -353,7 +353,7 @@ include 'includes/header.php';
                 } elseif (strpos($categoryName, 'immobilizer') !== false || strpos($categoryName, 'anahtar') !== false) {
                     $icon = 'bi bi-key';
                 } elseif (strpos($categoryName, 'emülatör') !== false || strpos($categoryName, 'şanzıman') !== false) {
-                    $icon = 'bi bi-car-rear';
+                    $icon = 'bi bi-car-front-fill';
                 } elseif (strpos($categoryName, 'dpf') !== false || strpos($categoryName, 'egr') !== false) {
                     $icon = 'bi bi-filter';
                 } elseif (strpos($categoryName, 'adblue') !== false) {
@@ -409,7 +409,7 @@ include 'includes/header.php';
                                 <div class="jet-box-icon">
                                     <i class="bi bi-upload"></i>
                                 </div>
-                                <h4 class="jet-box-title">DOSYA YÜKLEME</h4>
+                                <h4 class="jet-box-title" style="margin-bottom: inherit;">DOSYA YÜKLEME</h4>
                                 <h5 class="jet-box-subtitle"></h5>
                             </div>
                             <!-- Back Side (Siyah) -->
@@ -970,7 +970,7 @@ include 'includes/header.php';
                 <ul class="list-unstyled">
                     <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>10+ yıl deneyim</li>
                     <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Profesyonel ekip</li>
-                    <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>7/24 teknik destek</li>
+                    <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Teknik destek</li>
                     <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Güncel teknoloji</li>
                 </ul>
             </div>
@@ -1610,7 +1610,7 @@ include 'includes/footer.php';
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 40px 0 20px 0;
+        margin: 40px 0 auto 0;
         backdrop-filter: blur(10px);
         border: 2px solid rgba(255, 255, 255, 0.3);
     }
@@ -1627,7 +1627,7 @@ include 'includes/footer.php';
         letter-spacing: 2px;
         color: white;
         white-space: normal !important;
-        margin-top: 30px;
+        margin: 30px 0px auto 0px;
     }
 
     .jet-box-subtitle {
