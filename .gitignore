@@ -148,3 +148,4 @@ typings/
 
 # Serverless directories
 .serverless
+.htaccess.production

@@ -191,6 +191,14 @@ if (isset($_SESSION['success'])) {
     unset($_SESSION['success']);
 }
 
+// GÜVENLİK KONTROLÜ: Kota 0 olan kullanıcılar dosya yükleyemez (sadece session mesajı yoksa)
+if (empty($error)) {
+    $creditCheckResult = $user->canUserUploadFile($_SESSION['user_id']);
+    if (!$creditCheckResult['can_upload']) {
+        $error = $creditCheckResult['message'];
+    }
+}
+
 // TERS KREDİ SİSTEMİ: Dosya yükleme kredi kontrolü
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
     error_log('User file upload attempt started');

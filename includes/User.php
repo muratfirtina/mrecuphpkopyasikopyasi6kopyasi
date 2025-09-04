@@ -504,13 +504,13 @@ class User
         try {
             $creditDetails = $this->getUserCreditDetails($userId);
 
-            // Eğer kredi kota sıfır ise yine de yüklemeye izin ver (admin henüz kota vermemiş)
+            // GÜVENLIK: Kredi kotası 0 olan kullanıcılar dosya yükleyemez
             if ($creditDetails['credit_quota'] == 0) {
-                return [
-                    'can_upload' => true,
-                    'message' => 'Kredi kota henüz belirlenmiş. Yükleme yapılabilir.',
-                    'available_credits' => 0
-                ];
+            return [
+            'can_upload' => false,
+            'message' => 'Kredi kotanız belirlenmemiş veya sıfır. Dosya yüklemek için yöneticiden kredi kotası talep edin.',
+            'available_credits' => 0
+            ];
             }
 
             // Kullanılabilir kredi kontrol et
