@@ -360,7 +360,7 @@ include '../includes/user_header.php';
                                 
                                 <div class="form-actions">
                                     <button type="reset" class="btn btn-outline-secondary btn-modern">
-                                        <i class="bi bi-undo me-2"></i>Sıfırla
+                                        <i class="bi bi-arrow-counterclockwise me-2"></i>Sıfırla
                                     </button>
                                     <button type="submit" class="btn btn-primary btn-modern">
                                         <i class="bi bi-save me-2"></i>Bilgileri Güncelle

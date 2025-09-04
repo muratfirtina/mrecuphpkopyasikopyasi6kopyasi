@@ -220,7 +220,7 @@ include '../includes/admin_sidebar.php';
             
             <div class="col-md-2">
                 <a href="transactions.php" class="btn btn-outline-secondary w-100">
-                    <i class="bi bi-undo me-1"></i>Temizle
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Temizle
                 </a>
             </div>
             

@@ -226,7 +226,7 @@ include '../includes/admin_sidebar.php';
             
             <div class="col-md-1">
                 <a href="logs.php" class="btn btn-outline-secondary w-100">
-                    <i class="bi bi-undo"></i>
+                    <i class="bi bi-arrow-counterclockwise"></i>
                 </a>
             </div>
         </form>

@@ -17,11 +17,16 @@ if (!function_exists('generateUUID')) {
     }
 }
 
+
 class FileManager {
     private $pdo;
     
     public function __construct($database) {
         $this->pdo = $database;
+    }
+    
+    public function getCurrentDateTime() {
+        return date('Y-m-d H:i:s');
     }
     
     // Araç markalarını getir

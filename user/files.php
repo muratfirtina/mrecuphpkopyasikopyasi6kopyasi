@@ -561,7 +561,7 @@ include '../includes/user_header.php';
                                     <i class="bi bi-search me-1"></i>Filtrele
                                 </button>
                                 <a href="files.php" class="btn btn-outline-secondary btn-modern">
-                                    <i class="bi bi-undo me-1"></i><?php echo $filterId ? 'Tüm Dosyalar' : 'Temizle'; ?>
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i><?php echo $filterId ? 'Tüm Dosyalar' : 'Temizle'; ?>
                                 </a>
                                 <div class="dropdown">
                                     <button class="btn btn-outline-info btn-modern dropdown-toggle" type="button" data-bs-toggle="dropdown">

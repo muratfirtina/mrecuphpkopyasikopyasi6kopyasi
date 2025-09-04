@@ -83,8 +83,8 @@ $pageImage = !empty($productImages) ? BASE_URL . '/' . $productImages[0]['image_
 
 // Breadcrumb
 $breadcrumb = [
-    ['text' => 'Ana Sayfa', 'url' => '/mrecuphpkopyasikopyasi6kopyasi/'],
-    ['text' => 'Ürünler', 'url' => '/mrecuphpkopyasikopyasi6kopyasi/urunler'],
+    ['text' => 'Ana Sayfa', 'url' => '<?php echo BASE_URL; ?>/'],
+    ['text' => 'Ürünler', 'url' => '<?php echo BASE_URL; ?>/urunler'],
 ];
 
 if ($product['category_name']) {
@@ -670,14 +670,14 @@ include 'includes/header.php';
                 <!-- Resimler -->
                 <div class="image-gallery">
                     <?php if (!empty($productImages)): ?>
-                        <img src="/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($productImages[0]['image_path']); ?>"
+                        <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($productImages[0]['image_path']); ?>"
                             alt="<?php echo htmlspecialchars($product['name']); ?>"
                             class="main-image" id="mainImage">
 
                         <?php if (count($productImages) > 1): ?>
                             <div class="thumbnail-container">
                                 <?php foreach ($productImages as $index => $image): ?>
-                                    <img src="/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($image['image_path']); ?>"
+                                    <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($image['image_path']); ?>"
                                         alt="Görsel <?php echo $index + 1; ?>"
                                         class="thumbnail <?php echo $index === 0 ? 'active' : ''; ?>"
                                         onclick="changeImage(this)">
@@ -698,7 +698,7 @@ include 'includes/header.php';
                     <?php if ($product['brand_name']): ?>
                         <a href="<?php echo BASE_URL; ?>/marka/<?php echo $product['brand_slug']; ?>" class="product-brand">
                             <?php if ($product['brand_logo']): ?>
-                                <img src="/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($product['brand_logo']); ?>"
+                                <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($product['brand_logo']); ?>"
                                     alt="<?php echo htmlspecialchars($product['brand_name']); ?>">
                             <?php endif; ?>
                             <?php echo htmlspecialchars($product['brand_name']); ?>

@@ -1,0 +1,42 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://www.mrecutuning.com/sitemap.xml
+
+# Block admin areas
+Disallow: /admin/
+Disallow: /config/
+Disallow: /includes/
+Disallow: /classes/
+Disallow: /security/
+Disallow: /logs/
+Disallow: /database/
+Disallow: /debug/
+Disallow: /sql/
+Disallow: /vendor/
+Disallow: /fixes/
+
+# Block sensitive files
+Disallow: *.env*
+Disallow: *.log
+Disallow: *.sql
+Disallow: *.json
+Disallow: *.md
+Disallow: *.backup
+Disallow: *.bak
+Disallow: *.old
+
+# Block PHP files in uploads
+Disallow: /uploads/*.php
+
+# Allow important directories
+Allow: /assets/
+Allow: /uploads/products/
+Allow: /uploads/brands/
+
+# Crawl delay
+Crawl-delay: 1
+
+# Host directive
+Host: https://www.mrecutuning.com

@@ -63,10 +63,10 @@ try {
         
         // Smart path detection
         $paths = [
-            $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/user_files/' . $upload['filename'],
-            $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/user_files/' . basename($upload['filename']),
-            $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/' . $upload['filename'],
-            $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/' . basename($upload['filename'])
+            $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/user_files/' . $upload['filename'],
+            $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/user_files/' . basename($upload['filename']),
+            $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/' . $upload['filename'],
+            $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/' . basename($upload['filename'])
         ];
         
         foreach ($paths as $path) {
@@ -96,7 +96,7 @@ try {
             exit('Revision file not found');
         }
         
-        $fullPath = $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/revision_files/' . $revisionFile['filename'];
+        $fullPath = $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/revision_files/' . $revisionFile['filename'];
         $fileName = 'revision_' . ($revisionFile['original_name'] ?? $revisionFile['filename']);
         
         if (!file_exists($fullPath)) {
@@ -117,7 +117,7 @@ try {
             exit('Response file not found');
         }
         
-        $fullPath = $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/response_files/' . $response['filename'];
+        $fullPath = $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/response_files/' . $response['filename'];
         $fileName = 'processed_' . ($response['original_name'] ?? $response['filename']);
         
         if (!file_exists($fullPath)) {

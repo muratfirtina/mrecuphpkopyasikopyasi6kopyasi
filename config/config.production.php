@@ -1,7 +1,8 @@
 <?php
 /**
  * Mr ECU - Production-Ready Global Configuration
- * Environment-based güvenli konfigürasyon sistemi
+ * Environment-based güvenli konfigürasyon sistemi - Production için özelleştirildi
+ * Domain: mrecutuning.com
  * 
  * @global SecurityManager|null $security Global security manager instance
  * @global SecureDatabase|null $secureDb Global secure database wrapper
@@ -41,13 +42,14 @@ function env($key, $default = null) {
 }
 
 // ==========================================
-# 🌐 SİTE AYARLARI (Environment-based)
+# 🌐 SİTE AYARLARI - PRODUCTION (mrecutuning.com)
 // ==========================================
 
 define('SITE_NAME', env('SITE_NAME', 'Mr ECU'));
-define('SITE_URL', rtrim(env('SITE_URL', 'http://localhost'), '/') . '/');
-define('BASE_URL', rtrim(env('BASE_URL', 'http://localhost'), '/'));
-define('SITE_EMAIL', env('SITE_EMAIL', 'info@example.com'));
+define('SITE_URL', rtrim(env('SITE_URL', 'https://www.mrecutuning.com'), '/') . '/');
+define('BASE_URL', rtrim(env('BASE_URL', 'https://www.mrecutuning.com'), '/'));
+define('SITE_EMAIL', env('SITE_EMAIL', 'mr.ecu@outlook.com'));
+define('ADMIN_EMAIL', env('SITE_EMAIL', 'mr.ecu@outlook.com'));
 
 // ==========================================
 # 📊 SEO VE META AYARLARI
@@ -55,7 +57,7 @@ define('SITE_EMAIL', env('SITE_EMAIL', 'info@example.com'));
 
 define('DEFAULT_META_TITLE', env('DEFAULT_META_TITLE', 'Mr ECU - Profesyonel ECU Programlama ve Chip Tuning'));
 define('DEFAULT_META_DESCRIPTION', env('DEFAULT_META_DESCRIPTION', 'ECU programlama, chip tuning ve otomotiv yazılım çözümleri. Profesyonel araçlar ve güvenilir hizmet.'));
-define('DEFAULT_META_KEYWORDS', env('DEFAULT_META_KEYWORDS', 'ecu programlama, chip tuning, autotuner, kess, otomotiv yazılım'));
+define('DEFAULT_META_KEYWORDS', env('DEFAULT_META_KEYWORDS', 'ecu programlama, chip tuning, autotuner, kess, otomotiv yazılım, mr ecu, mrecutuning'));
 
 // ==========================================
 # 🛍️ ÜRÜN SİSTEMİ AYARLARI
@@ -76,7 +78,7 @@ define('PRODUCT_IMAGE_SIZES', [
 ]);
 
 // ==========================================
-# 📞 İLETİŞİM BİLGİLERİ
+# 📞 İLETİŞİM BİLGİLERİ - PRODUCTION
 // ==========================================
 
 define('CONTACT_PHONE', env('CONTACT_PHONE', '+90 XXX XXX XX XX'));
@@ -95,7 +97,7 @@ define('SOCIAL_YOUTUBE', env('SOCIAL_YOUTUBE', ''));
 define('SOCIAL_LINKEDIN', env('SOCIAL_LINKEDIN', ''));
 
 // ==========================================
-# 🐛 DEBUG VE ERROR AYARLARI (Environment-based)
+# 🐛 DEBUG VE ERROR AYARLARI - PRODUCTION
 // ==========================================
 
 // ⚠️ PRODUCTION'DA MUTLAKA FALSE!
@@ -104,7 +106,7 @@ define('ERROR_REPORTING', filter_var(env('ERROR_REPORTING', 'false'), FILTER_VAL
 define('LOG_ERRORS', filter_var(env('LOG_ERRORS', 'true'), FILTER_VALIDATE_BOOLEAN));
 define('DISPLAY_ERRORS', filter_var(env('DISPLAY_ERRORS', 'false'), FILTER_VALIDATE_BOOLEAN));
 
-// Error reporting ayarları
+// Production error reporting ayarları
 if (DEBUG && ERROR_REPORTING) {
     error_reporting(E_ALL);
     ini_set('display_errors', DISPLAY_ERRORS ? 1 : 0);
@@ -113,42 +115,42 @@ if (DEBUG && ERROR_REPORTING) {
     ini_set('display_errors', 0);
 }
 
-ini_set('display_startup_errors', DISPLAY_ERRORS ? 1 : 0);
+ini_set('display_startup_errors', 0);
 ini_set('log_errors', LOG_ERRORS ? 1 : 0);
 ini_set('error_log', __DIR__ . '/../logs/error.log');
 
 // ==========================================
-# 📁 DOSYA YÜKLEME AYARLARI
+# 📁 DOSYA YÜKLEME AYARLARI - PRODUCTION
 // ==========================================
 
 define('UPLOAD_DIR', __DIR__ . '/../uploads/');
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
 define('MAX_FILE_SIZE', (int)env('MAX_FILE_SIZE', 100 * 1024 * 1024)); // 100MB
-define('ALLOWED_EXTENSIONS', []); // Tüm dosya türlerine izin ver
+define('ALLOWED_EXTENSIONS', ['bin', 'hex', 'ori', 'mod', 'edc', 'zip', 'rar', 'pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'webp']); // ECU dosyaları için
 
 // Görüntü dosyası formatları
 define('IMAGE_EXTENSIONS', ['jpeg', 'jpg', 'png', 'avif', 'webp', 'heic', 'gif', 'bmp', 'svg']);
 
 // ==========================================
-# 📧 EMAIL AYARLARI (Environment-based)
+# 📧 EMAIL AYARLARI - PRODUCTION (Outlook)
 // ==========================================
 
 define('SMTP_HOST', env('SMTP_HOST', 'smtp-mail.outlook.com'));
 define('SMTP_PORT', (int)env('SMTP_PORT', 587));
-define('SMTP_USERNAME', env('SMTP_USERNAME', ''));
-define('SMTP_PASSWORD', env('SMTP_PASSWORD', '')); // Production'da .env'den alınacak
+define('SMTP_USERNAME', env('SMTP_USERNAME', 'mr.ecu@outlook.com'));
+define('SMTP_PASSWORD', env('SMTP_PASSWORD', 'Agucuk93')); // Production'da .env'den alınıyor
 define('SMTP_ENCRYPTION', env('SMTP_ENCRYPTION', 'tls'));
-define('SMTP_FROM_EMAIL', env('SMTP_FROM_EMAIL', ''));
+define('SMTP_FROM_EMAIL', env('SMTP_FROM_EMAIL', 'mr.ecu@outlook.com'));
 define('SMTP_FROM_NAME', env('SMTP_FROM_NAME', 'Mr ECU'));
 
 // Email test modu (Production'da false)
 define('EMAIL_TEST_MODE', filter_var(env('EMAIL_TEST_MODE', 'false'), FILTER_VALIDATE_BOOLEAN));
 
 // ==========================================
-# 🔒 GÜVENLİK AYARLARI (Environment-based)
+# 🔒 GÜVENLİK AYARLARI - PRODUCTION
 // ==========================================
 
-define('SECURE_SALT', env('SECURE_SALT', 'default_salt_change_this_now'));
+define('SECURE_SALT', env('SECURE_SALT', 'MrECU_2025_PROD_mrecutuning_com_xyz789_SECURE_SALT_2309Mf1983'));
 define('SESSION_TIMEOUT', (int)env('SESSION_TIMEOUT', 3600)); // 1 saat
 define('ADMIN_SESSION_TIMEOUT', (int)env('ADMIN_SESSION_TIMEOUT', 1800)); // 30 dakika
 define('CSRF_TOKEN_LIFETIME', (int)env('CSRF_TOKEN_LIFETIME', 3600));
@@ -156,7 +158,7 @@ define('SECURITY_ENABLED', filter_var(env('SECURITY_ENABLED', 'true'), FILTER_VA
 define('CSP_STRICT_MODE', filter_var(env('CSP_STRICT_MODE', 'true'), FILTER_VALIDATE_BOOLEAN)); // Production'da true
 
 // ==========================================
-# 🚦 RATE LIMİTİNG AYARLARI
+# 🚦 RATE LIMİTİNG AYARLARI - PRODUCTION
 // ==========================================
 
 define('MAX_LOGIN_ATTEMPTS', (int)env('MAX_LOGIN_ATTEMPTS', 5));
@@ -182,16 +184,16 @@ date_default_timezone_set($timezone);
 setlocale(LC_TIME, $locale);
 
 // ==========================================
-# 🔐 SESSION GÜVENLİK AYARLARI
+# 🔐 SESSION GÜVENLİK AYARLARI - PRODUCTION
 // ==========================================
 
 if (session_status() == PHP_SESSION_NONE) {
     ini_set('session.cookie_httponly', 1);
-    ini_set('session.cookie_secure', filter_var(env('SECURE_COOKIES', 'false'), FILTER_VALIDATE_BOOLEAN) ? 1 : 0);
+    ini_set('session.cookie_secure', 1); // HTTPS için true
     ini_set('session.use_strict_mode', 1);
     ini_set('session.cookie_samesite', 'Strict');
     ini_set('session.gc_maxlifetime', SESSION_TIMEOUT);
-    ini_set('session.name', 'MRECU_SESSION');
+    ini_set('session.name', 'MRECU_SECURE_SESSION');
     
     // Session başlat
     session_start();
@@ -203,11 +205,12 @@ if (session_status() == PHP_SESSION_NONE) {
         $_SESSION['user_ip'] = $_SERVER['REMOTE_ADDR'] ?? '';
         $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
     } else {
-        // Session hijacking kontrolü (gevşek kontrol - IP değişikliklerini tolere et)
+        // Session hijacking kontrolü (IP değişikliği için sıkı kontrol)
         if (isset($_SESSION['user_agent']) && 
             $_SESSION['user_agent'] !== ($_SERVER['HTTP_USER_AGENT'] ?? '')) {
-            // Sadece log at, session sonlandırma
-            error_log('Potential session hijacking detected - User Agent changed');
+            error_log('Potential session hijacking detected - User Agent changed from: ' . $_SESSION['user_agent'] . ' to: ' . ($_SERVER['HTTP_USER_AGENT'] ?? ''));
+            session_destroy();
+            session_start();
         }
     }
 }
@@ -286,7 +289,7 @@ if (SECURITY_ENABLED && class_exists('SecurityManager')) {
 }
 
 // ==========================================
-# 🔧 HELPER FUNCTIONS (Güvenlik Entegrasyonlu)
+# 🔧 HELPER FUNCTIONS (Güvenlik Entegrasyonlu) - PRODUCTION
 // ==========================================
 
 function sanitize($data, $type = 'general') {
@@ -305,13 +308,15 @@ function sanitize($data, $type = 'general') {
 }
 
 function redirect($url) {
-    // URL güvenlik kontrolü
+    // URL güvenlik kontrolü - production için sıkı
     global $security;
     
     if ($security && SECURITY_ENABLED) {
         // Güvenli redirect kontrolü
         $parsedUrl = parse_url($url);
-        if (isset($parsedUrl['host']) && $parsedUrl['host'] !== parse_url(SITE_URL, PHP_URL_HOST)) {
+        $allowedHosts = ['mrecutuning.com', 'www.mrecutuning.com'];
+        
+        if (isset($parsedUrl['host']) && !in_array($parsedUrl['host'], $allowedHosts)) {
             $security->logSecurityEvent('unsafe_redirect_attempt', $url, $security->getClientIp());
             $url = SITE_URL; // Güvenli URL'e yönlendir
         }
@@ -407,6 +412,13 @@ function validateFileUpload($file, $allowedTypes = null, $maxSize = null) {
         $errors[] = 'Dosya boyutu çok büyük (' . formatFileSize($maxSize) . ' maksimum).';
     }
     
+    $allowedTypes = $allowedTypes ?: ALLOWED_EXTENSIONS;
+    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    
+    if (!in_array($extension, $allowedTypes)) {
+        $errors[] = 'Desteklenmeyen dosya formatı. İzin verilen formatlar: ' . implode(', ', $allowedTypes);
+    }
+    
     return [
         'valid' => empty($errors),
         'errors' => $errors,
@@ -422,7 +434,14 @@ function sendEmail($to, $subject, $message, $isHTML = true) {
         return false;
     }
     
-    $headers = "From: " . SITE_EMAIL . "\r\n";
+    if (EMAIL_TEST_MODE) {
+        error_log("Test Email - To: $to, Subject: $subject");
+        return true;
+    }
+    
+    // PHPMailer veya mail() fonksiyonu kullanılabilir
+    $headers = "From: " . SMTP_FROM_EMAIL . "\r\n";
+    $headers .= "Reply-To: " . SMTP_FROM_EMAIL . "\r\n";
     if ($isHTML) {
         $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
     }
@@ -497,11 +516,18 @@ if (SECURITY_ENABLED) {
             'file' => basename($exception->getFile()),
             'line' => $exception->getLine()
         ]);
+        
+        // Production'da kullanıcıya hata gösterme
+        if (!DEBUG) {
+            header('HTTP/1.1 500 Internal Server Error');
+            include __DIR__ . '/../500.php';
+            exit;
+        }
     });
 }
 
 // ==========================================
-# 🎯 UTILITY FUNCTIONS
+# 🎯 UTILITY FUNCTIONS - PRODUCTION
 // ==========================================
 
 function renderSecurityMeta() {
@@ -509,7 +535,7 @@ function renderSecurityMeta() {
     echo '<meta name="csrf-token" content="' . ($_SESSION['csrf_token'] ?? '') . '">' . "\n";
     echo '<meta http-equiv="X-UA-Compatible" content="IE=edge">' . "\n";
     if (!DEBUG) {
-        echo '<meta name="robots" content="noindex, nofollow">' . "\n";
+        echo '<meta name="robots" content="index, follow">' . "\n";
     }
     return $nonce;
 }
@@ -522,12 +548,41 @@ function includeSecurityScript() {
 }
 
 // ==========================================
-# 💻 ENVIRONMENT INFO (Debug için)
+# 🌟 PRODUCTION OPTIMIZATIONS
+// ==========================================
+
+// Output buffering for production
+if (!DEBUG) {
+    ob_start('ob_gzhandler');
+}
+
+// Gzip compression
+if (!ob_get_level() && extension_loaded('zlib') && !headers_sent()) {
+    ini_set('zlib.output_compression', 'On');
+}
+
+// ==========================================
+# 💻 ENVIRONMENT INFO (Production Log)
 // ==========================================
 
 if (DEBUG) {
-    error_log('Mr ECU Config Loaded - Environment: ' . (DEBUG ? 'Development' : 'Production'));
+    error_log('Mr ECU Config Loaded - Environment: Production');
     error_log('Site URL: ' . SITE_URL);
     error_log('Security Enabled: ' . (SECURITY_ENABLED ? 'Yes' : 'No'));
+} else {
+    // Production'da sadece başlatma kaydı
+    error_log('Mr ECU Production Environment Started - ' . date('Y-m-d H:i:s'));
 }
+
+// ==========================================
+# 🏁 PRODUCTION READY CONFIRMATION
+// ==========================================
+
+if (!defined('MRECU_CONFIG_LOADED')) {
+    define('MRECU_CONFIG_LOADED', true);
+    define('MRECU_ENVIRONMENT', 'production');
+    define('MRECU_VERSION', '1.0.0');
+    define('MRECU_DOMAIN', 'mrecutuning.com');
+}
+
 ?>

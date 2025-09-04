@@ -69,7 +69,7 @@ include 'includes/header.php';
                 </nav>
             </div>
             <div class="col-lg-4 text-center">
-                <img src="/mrecuphpkopyasikopyasi6kopyasi/assets/images/mreculogomini.png" alt="MR ECU Logo" style="width: 250px;">
+                <img src="<?php echo BASE_URL; ?>/assets/images/mreculogomini.png" alt="MR ECU Logo" style="width: 250px;">
             </div>
         </div>
     </div>
@@ -324,7 +324,7 @@ include 'includes/header.php';
                 <p style="color: #fff !important;">24 saat içinde dosyanız hazır</p>
             </div>
             <div class="col-md-4">
-                <i class="bi bi-undo fa-2x mb-3"></i>
+                <i class="bi bi-arrow-counterclockwise fa-2x mb-3"></i>
                 <h5 style="color: #fff !important;">Geri Dönüş Garantisi</h5>
                 <p style="color: #fff !important;">İstediğiniz zaman eski haline döndürülebilir</p>
             </div>

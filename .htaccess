@@ -1,10 +1,10 @@
-# Mr ECU - Apache Configuration for MAMP
+# Mr ECU - Apache Configuration for Production
 
 # Enable URL Rewriting
 RewriteEngine On
 
-# Set the base directory for MAMP
-RewriteBase /mrecuphpkopyasikopyasi6kopyasi/
+# Set the base directory for Production (root)
+RewriteBase /
 
 # Prevent directory browsing
 Options -Indexes
@@ -14,10 +14,13 @@ Options -Indexes
     Require all denied
 </FilesMatch>
 
-# Basic security
+# Basic security for production
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options nosniff
     Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
 # URL Rewrite Rules for SEO-friendly URLs

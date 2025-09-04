@@ -512,7 +512,7 @@ include '../includes/admin_sidebar.php';
             
             <div class="col-md-2">
                 <a href="credits.php" class="btn btn-outline-secondary w-100">
-                    <i class="bi bi-undo me-1"></i>Temizle
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Temizle
                 </a>
             </div>
 
@@ -649,7 +649,7 @@ include '../includes/admin_sidebar.php';
                                         <button type="button" class="btn btn-danger" 
                                                 onclick="openCreditModal('deduct', '<?php echo $userItem['id']; ?>', '<?php echo htmlspecialchars(addslashes($userItem['first_name'] . ' ' . $userItem['last_name'])); ?>', '<?php echo $userItem['credit_quota']; ?>', '<?php echo $userItem['credit_used']; ?>', '<?php echo $userItem['available_credits']; ?>')"
                                                 title="Kredi İadesi">
-                                            <i class="bi bi-undo me-1"></i>İade
+                                            <i class="bi bi-arrow-counterclockwise me-1"></i>İade
                                         </button>
                                         <a href="user-details.php?id=<?php echo $userItem['id']; ?>" class="btn btn-outline-primary" title="Detaylar">
                                             <i class="bi bi-eye"></i>

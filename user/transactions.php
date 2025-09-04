@@ -289,7 +289,7 @@ include '../includes/user_header.php';
                                     <i class="bi bi-search me-1"></i>Filtrele
                                 </button>
                                 <a href="transactions.php" class="btn btn-outline-secondary btn-modern">
-                                    <i class="bi bi-undo me-1"></i>Temizle
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Temizle
                                 </a>
                             </div>
                         </div>

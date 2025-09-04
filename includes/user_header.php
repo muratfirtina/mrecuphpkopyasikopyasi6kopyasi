@@ -497,49 +497,56 @@ if (isset($_SESSION['user_id'])) {
 
                                 <!-- Sistem Bildirimleri -->
                                 <?php foreach ($userNotifications as $notification): ?>
-                                    <li>
-                                        <a class="dropdown-item py-3 <?php echo $notification['is_read'] ? '' : 'bg-custom-warning'; ?>"
-                                            href="<?php echo $notification['action_url'] ? $notification['action_url'] : 'javascript:void(0)'; ?>">
-                                            <div class="d-flex align-items-start">
-                                                <div class="me-3">
-                                                    <div class="<?php
-                                                                switch ($notification['type']) {
-                                                                    case 'file_status_update':
-                                                                        echo 'bg-success bg-opacity-10 p-2 rounded-circle';
-                                                                        break;
-                                                                    case 'revision_response':
-                                                                        echo 'bg-info bg-opacity-10 p-2 rounded-circle';
-                                                                        break;
-                                                                    default:
-                                                                        echo 'bg-primary bg-opacity-10 p-2 rounded-circle';
-                                                                }
-                                                                ?>">
-                                                        <i class="<?php
-                                                                    switch ($notification['type']) {
-                                                                        case 'file_status_update':
-                                                                            echo 'bi bi-check-circle text-success';
-                                                                            break;
-                                                                        case 'revision_response':
-                                                                            echo 'bi bi-reply text-info';
-                                                                            break;
-                                                                        default:
-                                                                            echo 'bi bi-info-circle text-primary';
-                                                                    }
-                                                                    ?>"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <div class="fw-semibold"><?php echo htmlspecialchars($notification['title']); ?></div>
-                                                    <div class="text-muted small"><?php echo htmlspecialchars(substr($notification['message'], 0, 100)); ?><?php echo strlen($notification['message']) > 100 ? '...' : ''; ?></div>
-                                                    <div class="text-muted small mt-1">
+                                <li>
+                                <a class="dropdown-item py-3 <?php echo $notification['is_read'] ? '' : 'bg-custom-warning'; ?>"
+                                href="<?php echo $notification['action_url'] ? $notification['action_url'] : 'javascript:void(0)'; ?>"
+                                onclick="markNotificationAsRead('<?php echo $notification['id']; ?>', this); <?php echo $notification['action_url'] ? 'setTimeout(() => { window.location.href = \'' . $notification['action_url'] . '\'; }, 100);' : ''; ?> return false;">
+                                <div class="d-flex align-items-start">
+                                <div class="me-3">
+                                <div class="<?php
+                                switch ($notification['type']) {
+                                case 'file_status_update':
+                                echo 'bg-success bg-opacity-10 p-2 rounded-circle';
+                                    break;
+                                case 'revision_response':
+                                echo 'bg-info bg-opacity-10 p-2 rounded-circle';
+                                    break;
+                                case 'file_response_uploaded':
+                                        echo 'bg-primary bg-opacity-10 p-2 rounded-circle';
+                                        break;
+                                            default:
+                                    echo 'bg-primary bg-opacity-10 p-2 rounded-circle';
+                                }
+                                ?>">
+                                <i class="<?php
+                                switch ($notification['type']) {
+                                case 'file_status_update':
+                                echo 'bi bi-check-circle text-success';
+                                    break;
+                                case 'revision_response':
+                                        echo 'bi bi-reply text-info';
+                                        break;
+                                                    case 'file_response_uploaded':
+                                                            echo 'bi bi-file-earmark-check text-primary';
+                                                            break;
+                                                    default:
+                                                        echo 'bi bi-info-circle text-primary';
+                                                }
+                                            ?>"></i>
+                                </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                        <div class="fw-semibold"><?php echo htmlspecialchars($notification['title']); ?></div>
+                                            <div class="text-muted small"><?php echo htmlspecialchars(substr($notification['message'], 0, 100)); ?><?php echo strlen($notification['message']) > 100 ? '...' : ''; ?></div>
+                                                <div class="text-muted small mt-1">
                                                         <i class="bi bi-clock me-1"></i>
-                                                        <?php echo date('d.m.Y H:i', strtotime($notification['created_at'])); ?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                <?php endforeach; ?>
+                                        <?php echo date('d.m.Y H:i', strtotime($notification['created_at'])); ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
 
                                 <!-- Tamamlanan Dosyalar -->
                                 <?php if ($completedFiles > 0): ?>
@@ -1027,6 +1034,98 @@ if (isset($_SESSION['user_id'])) {
 
     <!-- Kredi Gösterim Tooltip & Animasyon JavaScript -->
     <script>
+        // Bildirim sistemi için JavaScript fonksiyonları
+        function markAllNotificationsRead() {
+            fetch('../ajax/notification-actions.php?action=mark_all_read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Badge'i güncelle
+                    updateNotificationBadge();
+                    
+                    // Dropdown'daki bildirimleri güncelle  
+                    const unreadItems = document.querySelectorAll('.bg-custom-warning');
+                    unreadItems.forEach(item => {
+                        item.classList.remove('bg-custom-warning');
+                    });
+                    
+                    // Başarı mesajı
+                    showNotification('Tüm bildirimler okundu olarak işaretlendi', 'success');
+                } else {
+                    showNotification('Hata: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Bildirim güncelleme hatası:', error);
+                showNotification('Bir hata oluştu', 'error');
+            });
+        }
+        
+        function markNotificationAsRead(notificationId, element) {
+            fetch('../ajax/notification-actions.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=mark_read&notification_id=${notificationId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Bu bildirimi okundu olarak işaretle
+                    if (element && element.classList.contains('bg-custom-warning')) {
+                        element.classList.remove('bg-custom-warning');
+                    }
+                    
+                    // Badge'i güncelle
+                    updateNotificationBadge();
+                }
+            })
+            .catch(error => {
+                console.error('Bildirim okundu işaretleme hatası:', error);
+            });
+        }
+        
+        function updateNotificationBadge() {
+            fetch('../ajax/notification-actions.php?action=get_count')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const badge = document.getElementById('notification-badge');
+                    if (badge) {
+                        if (data.unread_count > 0) {
+                            badge.textContent = data.unread_count;
+                            badge.style.display = 'inline';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Badge güncelleme hatası:', error);
+            });
+        }
+        
+        function showNotification(message, type = 'info') {
+            // Basit notification gösterimi
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+            notification.style.cssText = 'top: 80px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // 3 saniye sonra kaldır
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
         // Bootstrap JavaScript yüklenene kadar bekle
         function initializeHeaderComponents() {
             console.log('Header components initializing...');

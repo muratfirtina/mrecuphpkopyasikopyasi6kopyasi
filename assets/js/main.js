@@ -3,13 +3,15 @@
  * Site geneli JavaScript fonksiyonları
  */
 
-// Global değişkenler
-const MrEcu = {
-    baseUrl: window.location.origin + '/',
-    currentUser: null,
-    csrf_token: null,
-    ecuSpinner: null
-};
+// Global değişkenler - Check if already defined in header
+if (typeof window.MrEcu === 'undefined') {
+    window.MrEcu = {
+        baseUrl: window.location.origin,  // Production için dinamik
+        currentUser: null,
+        csrf_token: null,
+        ecuSpinner: null
+    };
+}
 
 // Sayfa yüklendiğinde çalışacak fonksiyonlar
 document.addEventListener('DOMContentLoaded', function() {

@@ -12,7 +12,7 @@ if (!isset($_GET['file'])) {
 }
 
 $filename = $_GET['file'];
-$fullPath = $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/user_files/' . $filename;
+$fullPath = $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/user_files/' . $filename;
 
 echo "<h3>Simple Download Test</h3>";
 echo "Requested file: " . htmlspecialchars($filename) . "<br>";

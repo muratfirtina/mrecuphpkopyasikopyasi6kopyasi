@@ -68,10 +68,10 @@ if ($upload) {
     
     // Smart path detection test
     $possiblePaths = [
-        $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/user_files/' . $upload['filename'],
-        $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/user_files/' . basename($upload['filename']),
-        $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/' . $upload['filename'],
-        $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/' . basename($upload['filename']),
+        $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/user_files/' . $upload['filename'],
+        $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/user_files/' . basename($upload['filename']),
+        $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/' . $upload['filename'],
+        $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/' . basename($upload['filename']),
     ];
     
     $foundPath = null;

@@ -268,7 +268,7 @@ include '../includes/admin_header.php';
                                     <i class="bi bi-search me-1"></i>Filtrele
                                 </button>
                                 <a href="file-cancellations.php" class="btn btn-outline-secondary">
-                                    <i class="bi bi-undo me-1"></i>Temizle
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Temizle
                                 </a>
                             </div>
                         </div>

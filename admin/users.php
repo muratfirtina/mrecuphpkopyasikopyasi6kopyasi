@@ -536,7 +536,7 @@ function deleteUser(userId, username) {
                         <i class="bi bi-search me-1"></i>Filtrele
                     </button>
                     <a href="users.php" class="btn btn-outline-secondary">
-                        <i class="bi bi-undo me-1"></i>Temizle
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>Temizle
                     </a>
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
                         <i class="bi bi-plus me-1"></i>Yeni

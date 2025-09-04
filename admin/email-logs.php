@@ -149,7 +149,7 @@ if (isset($_POST['clear_logs'])) {
                                 <div class="col-md-6">
                                     <h6>Seçenek 1: PHPMailer Kurulumu</h6>
                                     <p class="small text-muted">Composer ile PHPMailer kurarak gerçek SMTP kullanın:</p>
-                                    <pre class="bg-light p-2 small"><code>cd /Applications/MAMP/htdocs/mrecuphpkopyasikopyasi6kopyasi
+                                    <pre class="bg-light p-2 small"><code>cd /Applications/MAMP/htdocs<?php echo BASE_URL; ?>
 composer require phpmailer/phpmailer</code></pre>
                                 </div>
                                 <div class="col-md-6">

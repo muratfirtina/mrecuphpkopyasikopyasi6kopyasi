@@ -166,14 +166,14 @@ try {
 
 // Breadcrumb oluştur
 $breadcrumb = [
-    ['text' => 'Ana Sayfa', 'url' => '/mrecuphpkopyasikopyasi6kopyasi/']
+    ['text' => 'Ana Sayfa', 'url' => '<?php echo BASE_URL; ?>/']
 ];
 
 if ($selectedCategory) {
-$breadcrumb[] = ['text' => 'Ürünler', 'url' => '/mrecuphpkopyasikopyasi6kopyasi/urunler'];
+$breadcrumb[] = ['text' => 'Ürünler', 'url' => '<?php echo BASE_URL; ?>/urunler'];
 $breadcrumb[] = ['text' => $selectedCategory['name'], 'url' => '', 'active' => true];
 } elseif ($selectedBrand) {
-$breadcrumb[] = ['text' => 'Ürünler', 'url' => '/mrecuphpkopyasikopyasi6kopyasi/urunler'];
+$breadcrumb[] = ['text' => 'Ürünler', 'url' => '<?php echo BASE_URL; ?>/urunler'];
 $breadcrumb[] = ['text' => $selectedBrand['name'], 'url' => '', 'active' => true];
 } elseif (!empty($searchQuery)) {
 $breadcrumb[] = ['text' => 'Arama: ' . $searchQuery, 'url' => '', 'active' => true];
@@ -552,7 +552,7 @@ include 'includes/header.php';
                                         <a href="<?php echo BASE_URL; ?>/marka/<?php echo htmlspecialchars($brand['slug']); ?>"
                                            class="filter-link <?php echo $brandSlug === $brand['slug'] ? 'active' : ''; ?>">
                                             <?php if ($brand['logo']): ?>
-                                                <img src="/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($brand['logo']); ?>" 
+                                                <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($brand['logo']); ?>" 
                                                      alt="<?php echo htmlspecialchars($brand['name']); ?>"
                                                      class="product-brand-logo">
                                             <?php endif; ?>
@@ -618,9 +618,9 @@ include 'includes/header.php';
                             <div class="col-lg-4 col-md-6 mb-4">
                                 <div class="product-card">
                                     <div class="product-image-container">
-                                        <a href="/mrecuphpkopyasikopyasi6kopyasi/urun/<?php echo $product['slug']; ?>">
+                                        <a href="<?php echo BASE_URL; ?>/urun/<?php echo $product['slug']; ?>">
                                             <?php if ($product['primary_image']): ?>
-                                                <img src="/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($product['primary_image']); ?>" 
+                                                <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($product['primary_image']); ?>" 
                                                      alt="<?php echo htmlspecialchars($product['name']); ?>" 
                                                      class="product-image">
                                             <?php else: ?>
@@ -658,7 +658,7 @@ include 'includes/header.php';
                                             </a>
                                         <?php endif; ?>
                                         
-                                        <a href="/mrecuphpkopyasikopyasi6kopyasi/urun/<?php echo $product['slug']; ?>" class="product-title">
+                                        <a href="<?php echo BASE_URL; ?>/urun/<?php echo $product['slug']; ?>" class="product-title">
                                             <?php echo htmlspecialchars($product['name']); ?>
                                         </a>
                                         
@@ -684,7 +684,7 @@ include 'includes/header.php';
                                                 <?php endif; ?>
                                             </div>
                                             
-                                            <a href="/mrecuphpkopyasikopyasi6kopyasi/urun/<?php echo $product['slug']; ?>" class="contact-button">
+                                            <a href="<?php echo BASE_URL; ?>/urun/<?php echo $product['slug']; ?>" class="contact-button">
                                                 <i class="bi bi-info-circle me-2"></i>Detayları Görüntüle
                                             </a>
                                         </div>
@@ -773,7 +773,7 @@ include 'includes/header.php';
                             </a>
                         <?php else: ?>
                             <p class="text-muted mb-4">Seçilen kriterlerde ürün bulunmamaktadır.</p>
-                            <a href="/mrecuphpkopyasikopyasi6kopyasi/urunler" class="btn btn-primary">
+                            <a href="<?php echo BASE_URL; ?>/urunler" class="btn btn-primary">
                                 <i class="bi bi-refresh me-2"></i>Filtreleri Temizle
                             </a>
                         <?php endif; ?>

@@ -39,7 +39,7 @@ if (!isset($pageTitle)) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.css" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link href="<?php echo isset($cssPath) ? $cssPath : '/mrecuphpkopyasikopyasi6kopyasi/assets/css/style.css'; ?>" rel="stylesheet">
+    <link href="<?php echo BASE_URL; ?>/assets/css/style.css" rel="stylesheet">
     
     <!-- Modern Navigation Styles -->
     <?php 
@@ -578,8 +578,23 @@ if (!isset($pageTitle)) {
     <?php endif; ?>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/mrecuphpkopyasikopyasi6kopyasi/assets/images/favicon.svg">
-    <link rel="shortcut icon" href="/mrecuphpkopyasikopyasi6kopyasi/assets/images/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="<?php echo BASE_URL; ?>/assets/images/favicon.svg">
+    <link rel="shortcut icon" href="<?php echo BASE_URL; ?>/assets/images/favicon.svg">
+    
+    <!-- Dynamic BASE_URL Setup for JavaScript -->
+    <script>
+        // Set BASE_URL for JavaScript before any other scripts load
+        if (typeof window.MrEcu === 'undefined') {
+            window.MrEcu = {
+                baseUrl: '<?php echo BASE_URL; ?>',
+                currentUser: null,
+                csrf_token: null,
+                ecuSpinner: null
+            };
+        } else {
+            window.MrEcu.baseUrl = '<?php echo BASE_URL; ?>';
+        }
+    </script>
 </head>
 <body class="<?php echo isset($bodyClass) ? $bodyClass . ' ' : ''; ?><?php echo $bodyPaddingClass; ?>">
     
@@ -625,11 +640,7 @@ if (!isset($pageTitle)) {
 
                 <!-- ECU Logo -->
                 <div class="ecu-screen">
-                    <img src="/mrecuphpkopyasikopyasi6kopyasi/assets/images/mreculogomini.png" alt="ECU Image" class="ecu-image">
-                </div>
-                
-                <div class="ecu-screen">
-                    <img src="/mrecuphpkopyasikopyasi6kopyasi/assets/images/mreculogomini.png" alt="ECU Image" class="ecu-image">
+                    <img src="<?php echo BASE_URL; ?>/assets/images/mreculogomini.png" alt="ECU Image" class="ecu-image">
                 </div>
                 
                 <!-- Progress Bars -->
@@ -688,9 +699,9 @@ if (!isset($pageTitle)) {
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark modern-navbar fixed-top">
         <div class="container">
-            <a class="navbar-brand modern-brand" href="/mrecuphpkopyasikopyasi6kopyasi/">
+            <a class="navbar-brand modern-brand" href="<?php echo BASE_URL; ?>/">
                 <div class="brand-icon">
-                    <img src="/mrecuphpkopyasikopyasi6kopyasi/assets/images/mreculogomini.png" alt="MR ECU Logo" class="brand-logo-img">
+                    <img src="<?php echo BASE_URL; ?>/assets/images/mreculogomini.png" alt="MR ECU Logo" class="brand-logo-img">
                 </div>
             </a>
             
@@ -703,7 +714,7 @@ if (!isset($pageTitle)) {
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link modern-nav-link <?php echo ($pageTitle == 'Ana Sayfa') ? 'active' : ''; ?>" href="/mrecuphpkopyasikopyasi6kopyasi/">
+                        <a class="nav-link modern-nav-link <?php echo ($pageTitle == 'Ana Sayfa') ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/">
                             <i class="bi bi-house-door-fill"></i>
                             <span>ANA SAYFA</span>
                         </a>
@@ -734,7 +745,7 @@ if (!isset($pageTitle)) {
                                     foreach ($headerCategories as $headerCategory):
                             ?>
                             <li>
-                                <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/kategori/<?php echo $headerCategory['slug']; ?>">
+                                <a class="dropdown-item" href="<?php echo BASE_URL; ?>/kategori/<?php echo $headerCategory['slug']; ?>">
                                     <i class="bi bi-tag-fill me-2"></i>
                                     <?php echo htmlspecialchars($headerCategory['name']); ?>
                                 </a>
@@ -751,23 +762,23 @@ if (!isset($pageTitle)) {
                             }
                             ?>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item fw-bold" href="/mrecuphpkopyasikopyasi6kopyasi/urunler">Tüm Ürünler <i class="bi bi-arrow-right ms-1"></i></a></li>
+                            <li><a class="dropdown-item fw-bold" href="<?php echo BASE_URL; ?>/urunler">Tüm Ürünler <i class="bi bi-arrow-right ms-1"></i></a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/services.php">
+                        <a class="nav-link modern-nav-link" href="<?php echo BASE_URL; ?>/services.php">
                             <i class="bi bi-gear-fill"></i>
                             <span>HİZMETLERİMİZ</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/about.php">
+                        <a class="nav-link modern-nav-link" href="<?php echo BASE_URL; ?>/about.php">
                             <i class="bi bi-info-circle-fill"></i>
                             <span>HAKKIMIZDA</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link modern-nav-link" href="/mrecuphpkopyasikopyasi6kopyasi/contact.php">
+                        <a class="nav-link modern-nav-link" href="<?php echo BASE_URL; ?>/contact.php">
                             <i class="bi bi-envelope-fill"></i>
                             <span>İLETİŞİM</span>
                         </a>
@@ -776,7 +787,7 @@ if (!isset($pageTitle)) {
                     <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
                         <!-- Giriş yapan kullanıcılar için ek menü öğeleri -->
                         <li class="nav-item">
-                            <a class="nav-link modern-nav-link upload-link" href="/mrecuphpkopyasikopyasi6kopyasi/user/upload.php">
+                            <a class="nav-link modern-nav-link upload-link" href="<?php echo BASE_URL; ?>/user/upload.php">
                                 <i class="bi bi-upload"></i>
                                 <span>DOSYA YÜKLE</span>
                             </a>
@@ -795,7 +806,7 @@ if (!isset($pageTitle)) {
                             </a>
                             <ul class="dropdown-menu modern-dropdown dropdown-menu-end">
                                 <li><h6 class="dropdown-header">Bildirimler</h6></li>
-                                <li><a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/admin/notifications.php">Tüm Bildirimleri Gör</a></li>
+                                <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>/admin/notifications.php">Tüm Bildirimleri Gör</a></li>
                             </ul>
                         </li>
                         
@@ -814,35 +825,35 @@ if (!isset($pageTitle)) {
                             <ul class="dropdown-menu modern-dropdown dropdown-menu-end">
                                 <?php if (function_exists('isAdmin') && isAdmin()): ?>
                                     <li>
-                                        <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/admin/">
+                                        <a class="dropdown-item" href="<?php echo BASE_URL; ?>/admin/">
                                             <i class="bi bi-gear-fill me-2"></i>Admin Panel
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/migration-dashboard.php">
+                                        <a class="dropdown-item" href="<?php echo BASE_URL; ?>/migration-dashboard.php">
                                             <i class="bi bi-arrow-left-right me-2"></i>Migration Dashboard
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
                                 <?php endif; ?>
                                 <li>
-                                    <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/user/">
+                                    <a class="dropdown-item" href="<?php echo BASE_URL; ?>/user/">
                                         <i class="bi bi-speedometer2 me-2"></i>Panel
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/user/files.php">
+                                    <a class="dropdown-item" href="<?php echo BASE_URL; ?>/user/files.php">
                                         <i class="bi bi-folder2-open-earmark-fill me-2"></i>Dosyalarım
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/user/profile.php">
+                                    <a class="dropdown-item" href="<?php echo BASE_URL; ?>/user/profile.php">
                                         <i class="bi bi-person-fill me-2"></i>Profil
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item" href="/mrecuphpkopyasikopyasi6kopyasi/logout.php">
+                                    <a class="dropdown-item" href="<?php echo BASE_URL; ?>/logout.php">
                                         <i class="bi bi-box-arrow-right me-2"></i>Çıkış
                                     </a>
                                 </li>
@@ -850,13 +861,13 @@ if (!isset($pageTitle)) {
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
-                            <a class="nav-link modern-nav-link login-btn" href="/mrecuphpkopyasikopyasi6kopyasi/login.php">
+                            <a class="nav-link modern-nav-link login-btn" href="<?php echo BASE_URL; ?>/login.php">
                                 <i class="bi bi-box-arrow-in-right"></i>
                                 <span>Panele Giriş</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link modern-nav-link register-btn" href="/mrecuphpkopyasikopyasi6kopyasi/register.php">
+                            <a class="nav-link modern-nav-link register-btn" href="<?php echo BASE_URL; ?>/register.php">
                                 <i class="bi bi-person-plus-fill"></i>
                                 <span>Kayıt</span>
                             </a>

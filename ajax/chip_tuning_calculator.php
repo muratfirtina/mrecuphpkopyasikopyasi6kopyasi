@@ -68,6 +68,7 @@ try {
                 break;
             }
             
+            // Hosting'deki VIEW yapısına uygun sorgu
             $stmt = $pdo->prepare("
                 SELECT DISTINCT e.id, e.name, e.fuel_type,
                        s.original_power, s.tuning_power, s.difference_power,
@@ -89,17 +90,17 @@ try {
                 break;
             }
             
-            // Motor ve marka bilgilerini al
+            // Motor ve marka bilgilerini al - Hosting VIEW alias'ına uygun
             $stmt = $pdo->prepare("
                 SELECT 
                     e.*,
-                    s.name as series_name,
-                    s.year_range,
+                    se.name as series_name,
+                    se.year_range,
                     m.name as model_name,
                     b.name as brand_name
                 FROM engines e
-                JOIN series s ON e.series_id = s.id
-                JOIN models m ON s.model_id = m.id
+                JOIN series se ON e.series_id = se.id
+                JOIN models m ON se.model_id = m.id
                 JOIN brands b ON m.brand_id = b.id
                 WHERE e.id = ?
             ");

@@ -649,7 +649,7 @@ include '../includes/user_header.php';
                                             <i class="bi bi-search me-1"></i>Filtrele
                                         </button>
                                         <a href="credits.php" class="btn btn-outline-secondary btn-sm">
-                                            <i class="bi bi-undo me-1"></i>Temizle
+                                            <i class="bi bi-arrow-counterclockwise me-1"></i>Temizle
                                         </a>
                                         <?php if (isset($_GET['show_debug']) || (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin')): ?>
                                         <a href="credits.php?debug=1<?php echo $type ? '&type=' . urlencode($type) : ''; ?><?php echo $dateFrom ? '&date_from=' . urlencode($dateFrom) : ''; ?><?php echo $dateTo ? '&date_to=' . urlencode($dateTo) : ''; ?>&limit=<?php echo $limit; ?>" class="btn btn-outline-info btn-sm" title="Debug">

@@ -759,7 +759,7 @@ try {
                 <p>24 saat içinde dosyanız hazır</p>
             </div>
             <div class="col-md-4">
-                <i class="bi bi-undo fa-2x mb-3"></i>
+                <i class="bi bi-arrow-counterclockwise fa-2x mb-3"></i>
                 <h5>Geri Dönüş Garantisi</h5>
                 <p>İstediğiniz zaman eski haline döndürülebilir</p>
             </div>

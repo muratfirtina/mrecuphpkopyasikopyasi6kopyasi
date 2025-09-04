@@ -4,7 +4,7 @@
  * Upload klasörlerini kontrol et ve oluştur
  */
 
-$baseUploadDir = $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads';
+$baseUploadDir = $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads';
 $userFilesDir = $baseUploadDir . '/user_files';
 $responseFilesDir = $baseUploadDir . '/response_files';
 

@@ -805,9 +805,9 @@ function checkFilePath($filePath)
 
     // Path düzeltmeleri
     if (strpos($fullPath, '../uploads/') === 0) {
-        $fullPath = str_replace('../uploads/', $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/', $fullPath);
+        $fullPath = str_replace('../uploads/', $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/', $fullPath);
     } elseif (strpos($fullPath, $_SERVER['DOCUMENT_ROOT']) !== 0) {
-        $fullPath = $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/' . ltrim($fullPath, '/');
+        $fullPath = $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/' . ltrim($fullPath, '/');
     }
 
     return [
@@ -826,7 +826,7 @@ function checkFileByName($filename, $type = 'user')
     }
 
     $subdir = $type === 'response' ? 'response_files' : 'user_files';
-    $fullPath = $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/' . $subdir . '/' . $filename;
+    $fullPath = $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/' . $subdir . '/' . $filename;
 
     $exists = file_exists($fullPath);
 

@@ -163,7 +163,7 @@ class NotificationManager {
             $message .= " Admin notu: {$adminNotes}";
         }
         
-        $actionUrl = "../user/files.php?id={$uploadId}";
+        $actionUrl = "files.php?id={$uploadId}";
         
         return $this->createNotification(
             $userId,
@@ -194,7 +194,7 @@ class NotificationManager {
             $message .= " Admin yanıtı: {$adminResponse}";
         }
         
-        $actionUrl = "../user/revisions.php?id={$revisionId}";
+        $actionUrl = "revisions.php?id={$revisionId}";
         
         return $this->createNotification(
             $userId,
@@ -338,7 +338,7 @@ class NotificationManager {
                 // Bildirim oluştur
                 $title = "Yeni Dosya Yüklendi";
                 $message = "{$user['first_name']} {$user['last_name']} tarafından yeni dosya yüklendi: {$fileName}";
-                $actionUrl = "uploads.php?id={$uploadId}";
+                $actionUrl = "file-detail.php?id={$uploadId}";
                 
                 $this->createNotification(
                     $admin['id'], 
@@ -384,7 +384,7 @@ class NotificationManager {
                 // Bildirim oluştur
                 $title = "Yeni Revize Talebi";
                 $message = "{$user['first_name']} {$user['last_name']} tarafından '{$originalFileName}' için revize talebi oluşturuldu.";
-                $actionUrl = "revisions.php?id={$revisionId}";
+                $actionUrl = "revision-detail.php?id={$revisionId}";
                 
                 $notificationResult = $this->createNotification(
                     $admin['id'], 

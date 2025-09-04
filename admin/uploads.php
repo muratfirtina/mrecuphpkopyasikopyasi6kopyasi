@@ -401,7 +401,7 @@ include '../includes/admin_sidebar.php';
                         <i class="bi bi-search"></i>
                     </button>
                     <a href="uploads.php" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-undo"></i>
+                        <i class="bi bi-arrow-counterclockwise"></i>
                     </a>
                 </div>
             </div>
@@ -1469,8 +1469,6 @@ function showCancelModal(fileId, fileType, fileName) {
 function updateFileStatus(uploadId, status, notes, redirectToDetail) {
     notes = notes || '';
     redirectToDetail = redirectToDetail || false;
-    
-    console.log('UpdateFileStatus başlatıldı:', uploadId, status, notes, redirectToDetail);
     
     var formData = new FormData();
     formData.append('update_status', '1');

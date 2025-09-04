@@ -185,7 +185,7 @@ include 'includes/header.php';
                         ?>
 
                         <div class="hero-slide" style="
-                        background: linear-gradient(rgba(44, 62, 80, 0.3), rgba(3, 9, 191, 0.4)), url('/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($slider['background_image']); ?>') center/cover no-repeat;
+                        background: linear-gradient(rgba(44, 62, 80, 0.3), rgba(3, 9, 191, 0.4)), url('<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($slider['background_image']); ?>') center/cover no-repeat;
                         background-size: cover;
                         background-position: center;
                         height: 750px;
@@ -1037,7 +1037,7 @@ include 'includes/header.php';
                 <p>24 saat içinde dosyanız hazır</p>
             </div>
             <div class="col-md-4">
-                <i class="bi bi-undo fa-2x mb-3"></i>
+                <i class="bi bi-arrow-counterclockwise fa-2x mb-3"></i>
                 <h5>Geri Dönüş Garantisi</h5>
                 <p>İstediğiniz zaman eski haline döndürülebilir</p>
             </div>
@@ -2448,7 +2448,6 @@ include 'includes/footer.php';
             const heroCarousel = document.querySelector('#heroCarousel');
             if (heroCarousel) {
                 // Hero carousel is ready - no special typewriter handling needed since calculator is now separate
-                console.log('Hero carousel initialized');
             }
 
             // Initialize Calculator Typewriter
@@ -3095,7 +3094,6 @@ include 'includes/footer.php';
 
             observer.observe(brandsCarousel);
 
-            console.log('Brands carousel initialized successfully');
         }
     </script>
 <?php endif; ?>

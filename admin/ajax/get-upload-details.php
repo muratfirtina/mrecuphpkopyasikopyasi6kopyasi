@@ -68,7 +68,7 @@ try {
     // Dosya path'i kontrol et
     $fileExists = false;
     if (!empty($upload['filename'])) {
-        $fullPath = $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/user_files/' . $upload['filename'];
+        $fullPath = $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/user_files/' . $upload['filename'];
         $fileExists = file_exists($fullPath);
     }
     
@@ -249,7 +249,7 @@ try {
                             <?php if (!empty($responseFiles)): ?>
                                 <?php foreach ($responseFiles as $response): ?>
                                     <?php 
-                                    $responseFilePath = $_SERVER['DOCUMENT_ROOT'] . '/mrecuphpkopyasikopyasi6kopyasi/uploads/response_files/' . $response['filename'];
+                                    $responseFilePath = $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/response_files/' . $response['filename'];
                                     $responseExists = file_exists($responseFilePath);
                                     ?>
                                     <div class="mb-1">

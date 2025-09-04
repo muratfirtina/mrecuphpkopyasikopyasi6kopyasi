@@ -281,7 +281,7 @@ include '../includes/admin_sidebar.php';
                         <i class="bi bi-search me-1"></i>Filtrele
                     </button>
                     <a href="notifications.php" class="btn btn-outline-secondary">
-                        <i class="bi bi-undo me-1"></i>Sıfırla
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>Sıfırla
                     </a>
                 </div>
             </div>

@@ -114,9 +114,9 @@ $pageDescription = $brand['meta_description'] ?: $category['name'] . ' kategoris
 
 // Breadcrumb
 $breadcrumb = [
-    ['text' => 'Ana Sayfa', 'url' => '/mrecuphpkopyasikopyasi6kopyasi/'],
-    ['text' => 'Ürünler', 'url' => '/mrecuphpkopyasikopyasi6kopyasi/urunler'],
-    ['text' => $category['name'], 'url' => '/mrecuphpkopyasikopyasi6kopyasi/kategori/' . $category['slug']],
+    ['text' => 'Ana Sayfa', 'url' => '<?php echo BASE_URL; ?>/'],
+    ['text' => 'Ürünler', 'url' => '<?php echo BASE_URL; ?>/urunler'],
+    ['text' => $category['name'], 'url' => '<?php echo BASE_URL; ?>/kategori/' . $category['slug']],
     ['text' => $brand['name'], 'url' => '', 'active' => true]
 ];
 
@@ -609,12 +609,12 @@ include 'includes/header.php';
 
 <main>
     <!-- Hero Section -->
-<section class="brand-category-hero" style="background-image: url('/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($brand['logo'] ?: 'assets/images/default-brand-bg.jpg'); ?>');">
+<section class="brand-category-hero" style="background-image: url('<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($brand['logo'] ?: 'assets/images/default-brand-bg.jpg'); ?>');">
     <div class="overlay"></div> <!-- Karartma katmanı -->
     <div class="container">
         <div class="hero-content">
             <!-- <?php if ($brand['logo']): ?>
-                <img src="/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($brand['logo']); ?>" 
+                <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($brand['logo']); ?>" 
                      alt="<?php echo htmlspecialchars($brand['name']); ?>" 
                      class="brand-logo-large">
             <?php else: ?>
@@ -707,10 +707,10 @@ include 'includes/header.php';
             <!-- Products Grid -->
             <div class="products-grid">
                 <?php foreach ($products as $product): ?>
-                    <div class="product-card" onclick="window.location.href='/mrecuphpkopyasikopyasi6kopyasi/urun/<?php echo $product['slug']; ?>'" style="cursor: pointer;">
+                    <div class="product-card" onclick="window.location.href='<?php echo BASE_URL; ?>/urun/<?php echo $product['slug']; ?>'" style="cursor: pointer;">
                         <div class="product-image-container">
                             <?php if ($product['primary_image']): ?>
-                                <img src="/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($product['primary_image']); ?>" 
+                                <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($product['primary_image']); ?>" 
                                      alt="<?php echo htmlspecialchars($product['name']); ?>" 
                                      class="product-image">
                             <?php else: ?>
@@ -765,7 +765,7 @@ include 'includes/header.php';
                             </div>
                             
                             <div class="product-actions">
-                                <a href="/mrecuphpkopyasikopyasi6kopyasi/urun/<?php echo $product['slug']; ?>" class="btn-detail">
+                                <a href="<?php echo BASE_URL; ?>/urun/<?php echo $product['slug']; ?>" class="btn-detail">
                                     <i class="bi bi-eye"></i>
                                     Detayları Görüntüle
                                 </a>
@@ -822,7 +822,7 @@ include 'includes/header.php';
                 <i class="bi bi-box-open"></i>
                 <h3>Bu kombinasyonda ürün bulunamadı</h3>
                 <p><?php echo htmlspecialchars($brand['name']); ?> markasının <?php echo htmlspecialchars($category['name']); ?> kategorisinde henüz ürün bulunmuyor.</p>
-                <a href="/mrecuphpkopyasikopyasi6kopyasi/kategori/<?php echo $category['slug']; ?>" class="btn btn-primary btn-lg">
+                <a href="<?php echo BASE_URL; ?>/kategori/<?php echo $category['slug']; ?>" class="btn btn-primary btn-lg">
                     <i class="bi bi-arrow-left me-2"></i>
                     <?php echo htmlspecialchars($category['name']); ?> Kategorisine Dön
                 </a>
@@ -845,10 +845,10 @@ include 'includes/header.php';
                 <div class="row">
                     <?php foreach ($relatedBrands as $relatedBrand): ?>
                         <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-3">
-                            <a href="/mrecuphpkopyasikopyasi6kopyasi/kategori/<?php echo $category['slug']; ?>/marka/<?php echo $relatedBrand['slug']; ?>" 
+                            <a href="<?php echo BASE_URL; ?>/kategori/<?php echo $category['slug']; ?>/marka/<?php echo $relatedBrand['slug']; ?>" 
                                class="related-brand-card">
                                 <?php if ($relatedBrand['logo']): ?>
-                                    <img src="/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($relatedBrand['logo']); ?>" 
+                                    <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($relatedBrand['logo']); ?>" 
                                          alt="<?php echo htmlspecialchars($relatedBrand['name']); ?>" 
                                          class="related-brand-logo">
                                 <?php else: ?>
@@ -937,7 +937,7 @@ $jsonLD = [
     "mainEntity" => [
         "@type" => "Brand",
         "name" => $brand['name'],
-        "image" => BASE_URL . '/mrecuphpkopyasikopyasi6kopyasi/' . ($brand['logo'] ?: 'assets/images/default-brand-logo.png'),
+        "image" => BASE_URL . '<?php echo BASE_URL; ?>/' . ($brand['logo'] ?: 'assets/images/default-brand-logo.png'),
         "url" => BASE_URL . "/kategori/{$category['slug']}/marka/{$brand['slug']}"
     ]
 ];

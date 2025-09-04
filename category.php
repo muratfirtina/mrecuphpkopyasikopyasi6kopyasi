@@ -83,8 +83,8 @@ $pageKeywords = $category['name'] . ', ' . implode(', ', array_column($brands, '
 
 // Breadcrumb
 $breadcrumb = [
-    ['text' => 'Ana Sayfa', 'url' => '/mrecuphpkopyasikopyasi6kopyasi/'],
-    ['text' => 'Ürünler', 'url' => '/mrecuphpkopyasikopyasi6kopyasi/urunler'],
+    ['text' => 'Ana Sayfa', 'url' => '<?php echo BASE_URL; ?>/'],
+    ['text' => 'Ürünler', 'url' => '<?php echo BASE_URL; ?>/urunler'],
     ['text' => $category['name'], 'url' => '', 'active' => true]
 ];
 
@@ -442,7 +442,7 @@ include 'includes/header.php';
 <main>
     
     <!-- Category Hero -->
-    <section class="category-hero" style="background-image: url('/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($category['image'] ?: 'assets/images/default-category-bg.jpg'); ?>');">    
+    <section class="category-hero" style="background-image: url('<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($category['image'] ?: 'assets/images/default-category-bg.jpg'); ?>');">    
         <div class="overlay"></div>
         <div class="container">
             <div class="row justify-content-center text-center">
@@ -506,9 +506,9 @@ include 'includes/header.php';
                 <div class="row">
                     <?php foreach ($brands as $brand): ?>
                         <div class="col-lg-4 col-md-6 mb-4">
-                            <a href="/mrecuphpkopyasikopyasi6kopyasi/kategori/<?php echo $category['slug']; ?>/marka/<?php echo $brand['slug']; ?>" class="brand-card">
+                            <a href="<?php echo BASE_URL; ?>/kategori/<?php echo $category['slug']; ?>/marka/<?php echo $brand['slug']; ?>" class="brand-card">
                                 <?php if ($brand['logo']): ?>
-                                    <img src="/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($brand['logo']); ?>" 
+                                    <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($brand['logo']); ?>" 
                                          alt="<?php echo htmlspecialchars($brand['name']); ?>" 
                                          class="brand-logo">
                                 <?php else: ?>
@@ -560,9 +560,9 @@ include 'includes/header.php';
                 <div class="row">
                     <?php foreach ($featuredProducts as $product): ?>
                         <div class="col-lg-4 col-md-6 mb-4">
-                            <a href="/mrecuphpkopyasikopyasi6kopyasi/urun/<?php echo $product['slug']; ?>" class="product-card">
+                            <a href="<?php echo BASE_URL; ?>/urun/<?php echo $product['slug']; ?>" class="product-card">
                                 <?php if ($product['primary_image']): ?>
-                                    <img src="/mrecuphpkopyasikopyasi6kopyasi/<?php echo htmlspecialchars($product['primary_image']); ?>" 
+                                    <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($product['primary_image']); ?>" 
                                          alt="<?php echo htmlspecialchars($product['name']); ?>" 
                                          class="product-image">
                                 <?php else: ?>
@@ -606,7 +606,7 @@ include 'includes/header.php';
                 <p class="cta-description">
                     <?php echo htmlspecialchars($category['name']); ?> kategorisindeki tüm ürünleri görüntülemek için tıklayın
                 </p>
-                <a href="/mrecuphpkopyasikopyasi6kopyasi/urunler?category=<?php echo $category['slug']; ?>" class="cta-button">
+                <a href="<?php echo BASE_URL; ?>/urunler?category=<?php echo $category['slug']; ?>" class="cta-button">
                     <i class="bi bi-th-large"></i>
                     Tüm Ürünleri Görüntüle
                 </a>
