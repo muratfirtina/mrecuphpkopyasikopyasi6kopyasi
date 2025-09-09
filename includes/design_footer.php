@@ -1,15 +1,6 @@
         </div>
     </main>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
     <!-- Design Panel Scripts -->
     <script>
         // Sidebar Toggle
@@ -56,26 +47,78 @@
 
         // Toast notification
         function showToast(message, type = 'info', duration = 3000) {
-            const toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: duration,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
-            });
+            // SweetAlert2 varsa kulllan
+            if (typeof Swal !== 'undefined') {
+                const toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: duration,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
 
-            const icon = type === 'success' ? 'success' : 
-                        type === 'error' ? 'error' : 
-                        type === 'warning' ? 'warning' : 'info';
+                const icon = type === 'success' ? 'success' : 
+                            type === 'error' ? 'error' : 
+                            type === 'warning' ? 'warning' : 'info';
 
-            toast.fire({
-                icon: icon,
-                title: message
-            });
+                toast.fire({
+                    icon: icon,
+                    title: message
+                });
+            } else {
+                // Fallback: Basit browser notification
+                console.log('Toast: ' + message);
+                
+                // Basit HTML toast oluştur
+                const toastContainer = document.getElementById('fallback-toast-container') || 
+                    (function() {
+                        const container = document.createElement('div');
+                        container.id = 'fallback-toast-container';
+                        container.style.cssText = `
+                            position: fixed;
+                            top: 20px;
+                            right: 20px;
+                            z-index: 9999;
+                            max-width: 350px;
+                        `;
+                        document.body.appendChild(container);
+                        return container;
+                    })();
+                
+                const toast = document.createElement('div');
+                const bgColor = type === 'success' ? '#28a745' : 
+                              type === 'error' ? '#dc3545' : 
+                              type === 'warning' ? '#ffc107' : '#007bff';
+                              
+                toast.style.cssText = `
+                    background: ${bgColor};
+                    color: white;
+                    padding: 12px 16px;
+                    border-radius: 6px;
+                    margin-bottom: 10px;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                `;
+                toast.textContent = message;
+                
+                toast.onclick = function() {
+                    toast.remove();
+                };
+                
+                toastContainer.appendChild(toast);
+                
+                // Otomatik kaldırma
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, duration);
+            }
         }
 
         // Confirm delete

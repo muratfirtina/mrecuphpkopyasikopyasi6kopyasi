@@ -1,0 +1,820 @@
+ Database Table Structure
+ Genel Bilgiler
+mrecu_db_guid
+Veritabanı Adı
+66
+Toplam Tablo
+2025-09-05 13:01:50
+Analiz Tarihi
+ Tablo: about_content
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+title	varchar(255)	NO		Neden Biz?		
+subtitle	varchar(500)	YES		NULL		
+description	text	YES		NULL		
+main_content	text	YES		NULL		
+image_url	varchar(500)	YES		NULL		
+features	json	YES		NULL		
+is_active	tinyint(1)	YES		1		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: about_core_values
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+title	varchar(255)	NO				
+description	text	YES		NULL		
+icon	varchar(100)	YES		NULL		
+icon_color	varchar(50)	YES		NULL		
+background_color	varchar(50)	YES		NULL		
+order_no	int	NO		1		
+is_active	tinyint(1)	NO		1		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: about_service_features
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+title	varchar(255)	NO				
+description	text	YES		NULL		
+icon_url	varchar(500)	YES		NULL		
+icon	varchar(100)	YES		NULL		
+order_no	int	NO		1		
+is_active	tinyint(1)	NO		1		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: about_vision
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+title	varchar(255)	NO				
+subtitle	text	YES		NULL		
+description	text	YES		NULL		
+main_content	text	YES		NULL		
+image_url	varchar(500)	YES		NULL		
+features	text	YES		NULL		
+is_active	tinyint(1)	NO		1		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: additional_files
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	varchar(36)	NO	 PRIMARY	uuid()	DEFAULT_GENERATED	Benzersiz tanımlayıcı (UUID)
+related_file_id	varchar(36)	NO	 FOREIGN			
+related_file_type	enum('upload','response','revision')	YES		upload		
+sender_id	varchar(36)	NO	 FOREIGN			
+sender_type	enum('user','admin')	NO				
+receiver_id	varchar(36)	NO	 FOREIGN			
+receiver_type	enum('user','admin')	NO				
+original_name	varchar(255)	NO				Orijinal dosya adı
+file_name	varchar(255)	NO				
+file_path	varchar(500)	NO				Dosya yolu
+file_size	bigint	NO				Dosya boyutu (bytes)
+file_type	varchar(100)	YES		NULL		
+notes	text	YES		NULL		Kullanıcı notları
+credits	decimal(10,2)	YES		0.00		Kullanıcı kredi bakiyesi
+upload_date	timestamp	YES	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+is_read	tinyint(1)	YES	 FOREIGN	NULL		
+read_date	timestamp	YES		NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+is_cancelled	tinyint(1)	YES	 FOREIGN	NULL		İptal edildi mi?
+cancelled_at	timestamp	YES		NULL		İptal edilme tarihi
+cancelled_by	varchar(36)	YES		NULL		İptal eden kullanıcı
+ Tablo: brands
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	varchar(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+name	varchar(100)	NO	 UNIQUE			
+slug	varchar(100)	NO	 UNIQUE			
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: brands_backup
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO				Benzersiz tanımlayıcı (UUID)
+name	varchar(50)	NO				
+logo	varchar(255)	YES		NULL		
+status	enum('active','inactive')	YES		active		Durum bilgisi
+sort_order	int	YES		NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+is_active	tinyint(1)	YES		1		
+ Tablo: categories
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int unsigned	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+name	varchar(255)	NO				
+slug	varchar(255)	NO	 UNIQUE			
+description	text	YES		NULL		
+image	varchar(500)	YES		NULL		
+parent_id	int unsigned	YES	 FOREIGN	NULL		
+sort_order	int	YES	 FOREIGN	NULL		
+is_featured	tinyint(1)	YES	 FOREIGN	NULL		
+is_active	tinyint(1)	YES	 FOREIGN	1		
+meta_title	varchar(255)	YES		NULL		
+meta_description	text	YES		NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: chat_unread_counts
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+file_id	char(36)	NO	 FOREIGN			Dosya ID referansı
+user_id	char(36)	NO	 FOREIGN			Kullanıcı ID referansı
+unread_count	int	YES		NULL		
+last_read_at	timestamp	YES		NULL		
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: contact_cards
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+title	varchar(255)	NO				
+description	text	YES		NULL		
+icon	varchar(100)	NO		fas fa-phone		
+icon_color	varchar(50)	NO		text-primary		
+contact_info	varchar(255)	NO				
+contact_link	varchar(500)	YES		NULL		
+button_text	varchar(100)	YES		NULL		
+button_color	varchar(50)	YES		btn-outline-primary		
+availability_text	varchar(255)	YES		NULL		
+order_no	int	NO		1		
+is_active	tinyint(1)	NO		1		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: contact_form_settings
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+form_title	varchar(255)	NO		Bize Mesaj Gönderin		
+form_subtitle	text	YES		NULL		
+success_message	text	YES		NULL		
+subject_options	text	YES		NULL		
+form_fields	text	YES		NULL		
+enable_privacy_checkbox	tinyint(1)	YES		1		
+is_active	tinyint(1)	NO		1		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: contact_messages
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+name	varchar(255)	NO				
+email	varchar(255)	NO				E-posta adresi
+phone	varchar(50)	YES		NULL		
+subject	varchar(255)	NO				
+message	text	NO				
+status	enum('new','read','replied','archived')	YES		new		Durum bilgisi
+ip_address	varchar(45)	YES		NULL		
+user_agent	text	YES		NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: contact_office
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+title	varchar(255)	NO		Ofisimizi Ziyaret Edin		
+description	text	YES		NULL		
+address	text	NO				
+working_hours	text	NO				
+transportation	text	YES		NULL		
+google_maps_link	varchar(500)	YES		NULL		
+image_url	varchar(500)	YES		NULL		
+is_active	tinyint(1)	NO		1		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: contact_settings
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+page_title	varchar(255)	NO		İletişim		
+page_description	text	YES		NULL		
+header_title	varchar(255)	NO		İletişim		
+header_subtitle	text	YES		NULL		
+google_maps_embed	text	YES		NULL		
+form_success_message	text	YES		NULL		
+privacy_policy_content	text	YES		NULL		
+is_active	tinyint(1)	NO		1		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: content_management
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+section	varchar(50)	NO	 FOREIGN			
+key_name	varchar(100)	NO				
+value	longtext	NO				
+type	enum('text','textarea','image','color','json')	YES		text		
+created_at	timestamp	NO		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	NO		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: credit_transactions
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+user_id	char(36)	NO	 FOREIGN			Kullanıcı ID referansı
+transaction_type	enum('add','deduct','deposit','purchase','withdraw','file_charge','reset','set')	NO	 FOREIGN			
+amount	decimal(10,2)	NO				
+type	varchar(50)	NO		manual		
+description	text	YES		NULL		
+reference_id	char(36)	YES		NULL		
+reference_type	enum('file_upload','payment','manual','file_response','revision')	YES		NULL		
+admin_id	char(36)	YES	 FOREIGN	NULL		Admin kullanıcı ID referansı
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+ Tablo: csrf_tokens
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+token	varchar(64)	NO	 UNIQUE			
+user_id	char(36)	YES	 FOREIGN	NULL		Kullanıcı ID referansı
+expires_at	timestamp	NO	 FOREIGN			
+used_at	timestamp	YES		NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+ Tablo: design_logs
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	varchar(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+user_id	varchar(36)	NO	 FOREIGN			Kullanıcı ID referansı
+action	varchar(100)	NO	 FOREIGN			
+description	text	YES		NULL		
+data	json	YES		NULL		
+ip_address	varchar(45)	YES		NULL		
+user_agent	text	YES		NULL		
+created_at	timestamp	YES	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+ Tablo: design_settings
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	varchar(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+setting_key	varchar(100)	NO	 UNIQUE			
+setting_value	text	YES		NULL		
+description	text	YES		NULL		
+setting_type	varchar(50)	YES		text		
+is_active	tinyint(1)	YES	 FOREIGN	1		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: design_sliders
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	varchar(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+title	varchar(255)	YES		NULL		
+subtitle	varchar(255)	YES		NULL		
+description	text	YES		NULL		
+button_text	varchar(100)	YES		NULL		
+button_link	varchar(500)	YES		NULL		
+background_image	varchar(500)	YES		NULL		
+background_color	varchar(20)	YES		#667eea		
+text_color	varchar(20)	YES		#ffffff		
+is_active	tinyint(1)	YES	 FOREIGN	1		
+sort_order	int	YES	 FOREIGN	NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: devices
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY	uuid()	DEFAULT_GENERATED	Benzersiz tanımlayıcı (UUID)
+name	varchar(100)	NO	 UNIQUE			
+created_at	timestamp	YES	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: ecus
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY	uuid()	DEFAULT_GENERATED	Benzersiz tanımlayıcı (UUID)
+name	varchar(100)	NO	 UNIQUE			
+created_at	timestamp	YES	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: email_queue
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+to_email	varchar(100)	NO				
+subject	varchar(200)	NO				
+body	text	NO				
+priority	enum('high','normal','low')	YES		normal		
+attempts	int	YES		NULL		
+max_attempts	int	YES		3		
+status	enum('pending','sent','failed')	YES		pending		Durum bilgisi
+error_message	text	YES		NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+sent_at	timestamp	YES		NULL		
+ Tablo: email_templates
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+template_key	varchar(100)	NO	 UNIQUE			
+subject	varchar(200)	NO				
+body	text	NO				
+variables	text	YES		NULL		
+is_active	tinyint(1)	YES		1		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: engines
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	varchar(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+series_id	varchar(36)	NO	 FOREIGN			
+name	varchar(100)	NO	 FOREIGN			
+slug	varchar(100)	NO	 FOREIGN			
+fuel_type	enum('Benzin','Diesel','Hybrid','Electric','LPG','CNG','Unknown')	NO	 FOREIGN	Benzin		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: failed_logins
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+ip_address	varchar(45)	NO	 FOREIGN			
+username	varchar(100)	YES	 FOREIGN	NULL		Kullanıcı adı
+email	varchar(255)	YES	 FOREIGN	NULL		E-posta adresi
+user_agent	text	YES		NULL		
+attempt_time	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+blocked_until	timestamp	YES		NULL		
+ Tablo: file_cancellations
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	varchar(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+user_id	varchar(36)	NO	 FOREIGN			Kullanıcı ID referansı
+file_id	varchar(36)	NO	 FOREIGN			Dosya ID referansı
+file_type	enum('upload','response','revision','revision_request','additional')	NO				
+reason	text	NO				
+status	enum('pending','approved','rejected')	YES	 FOREIGN	pending		Durum bilgisi
+admin_id	varchar(36)	YES		NULL		Admin kullanıcı ID referansı
+admin_notes	text	YES		NULL		Admin notları
+credits_to_refund	decimal(10,2)	YES		0.00		İade edilecek kredi
+requested_at	timestamp	YES	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Talep tarihi
+processed_at	timestamp	YES		NULL		İşlenme tarihi
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: file_chats
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+file_id	char(36)	NO	 FOREIGN			Dosya ID referansı
+file_type	enum('upload','response','revision')	NO		upload		
+sender_id	char(36)	NO	 FOREIGN			
+sender_type	enum('user','admin')	NO				
+message	text	NO				
+is_read	tinyint(1)	YES	 FOREIGN	NULL		
+created_at	timestamp	YES	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: file_responses
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+upload_id	char(36)	NO	 FOREIGN			Dosya yükleme ID referansı
+admin_id	char(36)	NO	 FOREIGN			Admin kullanıcı ID referansı
+filename	varchar(255)	NO				Sunucudaki dosya adı
+original_name	varchar(255)	NO				Orijinal dosya adı
+file_size	int	NO				Dosya boyutu (bytes)
+file_type	varchar(50)	YES		NULL		
+credits_charged	decimal(10,2)	NO				Düşürülen kredi miktarı
+admin_notes	text	YES		NULL		Admin notları
+upload_date	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+downloaded	tinyint(1)	YES		NULL		
+download_date	timestamp	YES		NULL		
+is_cancelled	tinyint(1)	YES	 FOREIGN	NULL		İptal edildi mi?
+cancelled_at	timestamp	YES		NULL		İptal edilme tarihi
+cancelled_by	varchar(36)	YES		NULL		İptal eden kullanıcı
+ Tablo: file_security_scans
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+file_path	varchar(500)	NO	 FOREIGN			Dosya yolu
+file_hash	varchar(64)	YES	 FOREIGN	NULL		
+scan_type	enum('upload','periodic','manual')	NO	 FOREIGN			
+threats_found	json	YES		NULL		
+status	enum('clean','infected','suspicious','error')	NO	 FOREIGN			Durum bilgisi
+scanned_by	char(36)	YES	 FOREIGN	NULL		
+scanned_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+ Tablo: file_uploads
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+user_id	char(36)	NO	 FOREIGN			Kullanıcı ID referansı
+brand_id	varchar(36)	YES	 FOREIGN	NULL		
+model_id	varchar(36)	YES	 FOREIGN	NULL		
+series_id	char(36)	YES	 FOREIGN	NULL		
+engine_id	char(36)	YES	 FOREIGN	NULL		
+device_id	char(36)	YES	 FOREIGN	NULL		
+ecu_id	char(36)	YES	 FOREIGN	NULL		
+year	int	NO				
+gearbox_type	enum('Manual','Automatic','CVT','DSG')	YES		Manual		
+fuel_type	enum('Benzin','Dizel','LPG','Hybrid','Electric')	YES		Benzin		
+hp_power	int	YES		NULL		
+nm_torque	int	YES		NULL		
+kilometer	varchar(50)	YES		NULL		
+plate	varchar(20)	YES		NULL		
+filename	varchar(255)	NO				Sunucudaki dosya adı
+updated_file_link	varchar(500)	YES		NULL		
+original_name	varchar(255)	NO				Orijinal dosya adı
+file_size	int	NO				Dosya boyutu (bytes)
+file_type	varchar(50)	YES		NULL		
+upload_notes	text	YES		NULL		
+code	varchar(50)	YES		NULL		
+status	enum('pending','processing','completed','rejected','ready','downloaded')	YES		pending		Durum bilgisi
+status_text	varchar(100)	YES		NULL		
+admin_notes	text	YES		NULL		Admin notları
+credits_charged	decimal(10,2)	YES		0.00		Düşürülen kredi miktarı
+price	decimal(10,2)	YES		0.00		
+upload_date	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+completed_at	datetime	YES		NULL		Tamamlanma tarihi
+processed_date	timestamp	YES		NULL		
+revision_count	int	YES		NULL		
+notified	tinyint(1)	YES		NULL		
+file_path	varchar(500)	NO				Dosya yolu
+mime_type	varchar(100)	YES		NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+is_cancelled	tinyint(1)	YES	 FOREIGN	NULL		İptal edildi mi?
+cancelled_at	timestamp	YES		NULL		İptal edilme tarihi
+cancelled_by	varchar(36)	YES		NULL		İptal eden kullanıcı
+ Tablo: ip_security
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+ip_address	varchar(45)	NO	 UNIQUE			
+type	enum('whitelist','blacklist')	NO				
+reason	text	YES		NULL		
+expires_at	timestamp	YES	 FOREIGN	NULL		
+created_by	char(36)	YES	 FOREIGN	NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: legacy_ticket_admin
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+admin_id	char(36)	NO	 FOREIGN			Admin kullanıcı ID referansı
+ticket_id	char(36)	NO	 FOREIGN			
+comment	text	NO				
+file_link	varchar(500)	YES		NULL		
+created_date	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+ Tablo: legacy_ticket_user
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+ticket_id	char(36)	NO	 FOREIGN			
+user_id	char(36)	NO	 FOREIGN			Kullanıcı ID referansı
+comment	text	NO				
+file_link	varchar(500)	YES		NULL		
+created_date	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+ Tablo: legacy_tickets
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+title	varchar(255)	NO				
+user_id	char(36)	NO	 FOREIGN			Kullanıcı ID referansı
+file_id	char(36)	YES	 FOREIGN	NULL		Dosya ID referansı
+status	tinyint	YES	 FOREIGN	NULL		Durum bilgisi
+status_text	varchar(100)	YES		NULL		
+ticket_code	varchar(50)	NO	 FOREIGN			
+created_date	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+updated_date	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	
+ Tablo: legacy_wallet_log
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+user_id	char(36)	NO	 FOREIGN			Kullanıcı ID referansı
+old_wallet	decimal(10,2)	NO				
+new_wallet	decimal(10,2)	NO				
+comment	text	YES		NULL		
+created_date	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+ Tablo: media_files
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+filename	varchar(255)	NO				Sunucudaki dosya adı
+original_name	varchar(255)	NO				Orijinal dosya adı
+file_path	varchar(500)	NO				Dosya yolu
+file_size	int	NO				Dosya boyutu (bytes)
+mime_type	varchar(100)	NO				
+file_type	enum('image','video','document','other')	NO				
+alt_text	varchar(255)	YES		NULL		
+caption	text	YES		NULL		
+used_in	json	YES		NULL		
+created_at	timestamp	NO		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+ Tablo: models
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	varchar(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+brand_id	varchar(36)	NO	 FOREIGN			
+name	varchar(100)	NO	 FOREIGN			
+slug	varchar(100)	NO	 FOREIGN			
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: models_backup
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO				Benzersiz tanımlayıcı (UUID)
+brand_id	char(36)	NO				
+name	varchar(100)	NO				
+year_start	int	YES		NULL		
+year_end	int	YES		NULL		
+status	enum('active','inactive')	YES		active		Durum bilgisi
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+is_active	tinyint(1)	YES		1		
+ Tablo: notifications
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+user_id	char(36)	NO	 FOREIGN			Kullanıcı ID referansı
+type	varchar(50)	NO				
+title	varchar(200)	NO				
+message	text	NO				
+related_id	char(36)	YES		NULL		
+related_type	enum('file_upload','revision','credit_transaction')	YES		NULL		
+action_url	varchar(500)	YES		NULL		
+is_read	tinyint(1)	YES		NULL		
+is_email_sent	tinyint(1)	YES		NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+read_at	timestamp	YES		NULL		
+is_websocket_sent	tinyint(1)	YES		NULL		
+ Tablo: product_attributes
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int unsigned	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+product_id	int unsigned	NO	 FOREIGN			
+attribute_name	varchar(100)	NO	 FOREIGN			
+attribute_value	text	NO				
+sort_order	int	YES		NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+ Tablo: product_brands
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int unsigned	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+name	varchar(100)	NO				
+slug	varchar(100)	NO	 UNIQUE			
+description	text	YES		NULL		
+logo	varchar(500)	YES		NULL		
+website	varchar(255)	YES		NULL		
+is_featured	tinyint(1)	YES	 FOREIGN	NULL		
+is_active	tinyint(1)	YES	 FOREIGN	1		
+sort_order	int	YES	 FOREIGN	NULL		
+meta_title	varchar(255)	YES		NULL		
+meta_description	text	YES		NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: product_images
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int unsigned	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+product_id	int unsigned	NO	 FOREIGN			
+image_path	varchar(500)	NO				
+alt_text	varchar(255)	YES		NULL		
+sort_order	int	YES	 FOREIGN	NULL		
+is_primary	tinyint(1)	YES	 FOREIGN	NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+ Tablo: products
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int unsigned	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+name	varchar(255)	NO				
+slug	varchar(255)	NO	 UNIQUE			
+description	text	YES		NULL		
+short_description	text	YES		NULL		
+sku	varchar(100)	YES	 UNIQUE	NULL		
+price	decimal(10,2)	YES		0.00		
+sale_price	decimal(10,2)	YES		NULL		
+stock_quantity	int	YES		NULL		
+manage_stock	tinyint(1)	YES		1		
+stock_status	enum('in_stock','out_of_stock','on_backorder')	YES	 FOREIGN	in_stock		
+weight	decimal(8,2)	YES		NULL		
+dimensions	varchar(100)	YES		NULL		
+category_id	int unsigned	NO	 FOREIGN			
+brand_id	int unsigned	YES	 FOREIGN	NULL		
+featured	tinyint(1)	YES	 FOREIGN	NULL		
+is_active	tinyint(1)	YES	 FOREIGN	1		
+meta_title	varchar(255)	YES		NULL		
+meta_description	text	YES		NULL		
+views	int	YES		NULL		
+sort_order	int	YES	 FOREIGN	NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: rate_limits
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+identifier	varchar(255)	NO	 FOREIGN			
+action	varchar(100)	NO				
+request_count	int	YES		1		
+window_start	timestamp	YES	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+last_request	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+ Tablo: revision_files
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+revision_id	char(36)	NO	 FOREIGN			
+upload_id	char(36)	NO	 FOREIGN			Dosya yükleme ID referansı
+admin_id	char(36)	YES	 FOREIGN	NULL		Admin kullanıcı ID referansı
+filename	varchar(255)	NO				Sunucudaki dosya adı
+original_name	varchar(255)	NO				Orijinal dosya adı
+file_size	int	NO				Dosya boyutu (bytes)
+file_type	varchar(50)	YES		NULL		
+admin_notes	text	YES		NULL		Admin notları
+upload_date	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+downloaded	tinyint(1)	YES		NULL		
+download_date	timestamp	YES		NULL		
+is_cancelled	tinyint(1)	YES	 FOREIGN	NULL		İptal edildi mi?
+cancelled_at	timestamp	YES		NULL		İptal edilme tarihi
+cancelled_by	varchar(36)	YES	 FOREIGN	NULL		İptal eden kullanıcı
+ Tablo: revisions
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+upload_id	char(36)	NO	 FOREIGN			Dosya yükleme ID referansı
+user_id	char(36)	NO	 FOREIGN			Kullanıcı ID referansı
+admin_id	char(36)	YES	 FOREIGN	NULL		Admin kullanıcı ID referansı
+request_notes	text	NO				
+admin_notes	text	YES		NULL		Admin notları
+credits_charged	decimal(10,2)	YES		0.00		Düşürülen kredi miktarı
+status	enum('pending','in_progress','completed','rejected')	YES		pending		Durum bilgisi
+is_cancelled	tinyint(1)	YES		NULL		İptal edildi mi?
+cancelled_at	timestamp	YES		NULL		İptal edilme tarihi
+cancelled_by	char(36)	YES	 FOREIGN	NULL		İptal eden kullanıcı
+requested_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Talep tarihi
+completed_at	timestamp	YES		NULL		Tamamlanma tarihi
+response_id	varchar(36)	YES	 FOREIGN	NULL		
+request_type	enum('upload','response')	YES		upload		
+updated_at	timestamp	NO		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+revision_file_id	varchar(36)	YES	 FOREIGN	NULL		
+parent_revision_id	varchar(36)	YES	 FOREIGN	NULL		
+ Tablo: security_config
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+config_key	varchar(100)	NO	 UNIQUE			
+config_value	text	NO				
+description	text	YES		NULL		
+updated_by	char(36)	YES	 FOREIGN	NULL		
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: security_logs
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+event_type	varchar(100)	NO	 FOREIGN			
+ip_address	varchar(45)	NO	 FOREIGN			
+user_agent	text	YES		NULL		
+request_uri	text	YES		NULL		
+details	json	YES		NULL		
+user_id	char(36)	YES	 FOREIGN	NULL		Kullanıcı ID referansı
+created_at	timestamp	YES	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+ Tablo: seo_settings
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+page	varchar(50)	NO	 UNIQUE			
+meta_title	varchar(200)	YES		NULL		
+meta_description	text	YES		NULL		
+meta_keywords	text	YES		NULL		
+og_title	varchar(200)	YES		NULL		
+og_description	text	YES		NULL		
+og_image	varchar(255)	YES		NULL		
+schema_markup	json	YES		NULL		
+canonical_url	varchar(255)	YES		NULL		
+created_at	timestamp	NO		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	NO		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: series
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	varchar(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+model_id	varchar(36)	NO	 FOREIGN			
+name	varchar(100)	NO	 FOREIGN			
+year_range	varchar(50)	NO	 FOREIGN			
+slug	varchar(100)	NO	 FOREIGN			
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: service_contacts
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+service_id	int	NO	 FOREIGN			
+service_name	varchar(255)	NO				
+contact_name	varchar(100)	NO				
+contact_email	varchar(150)	NO				
+contact_phone	varchar(20)	YES		NULL		
+contact_company	varchar(100)	YES		NULL		
+contact_message	text	NO				
+ip_address	varchar(45)	YES		NULL		
+user_agent	text	YES		NULL		
+status	enum('new','read','replied')	YES	 FOREIGN	new		Durum bilgisi
+created_at	timestamp	NO	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	NO		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: services
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+name	varchar(100)	NO				
+slug	varchar(100)	NO	 UNIQUE			
+description	text	NO				
+detailed_content	longtext	YES		NULL		
+features	json	YES		NULL		
+image	varchar(255)	YES		NULL		
+icon_picture	varchar(255)	YES		NULL		
+icon	varchar(50)	YES		NULL		
+price_from	decimal(10,2)	YES		NULL		
+is_featured	tinyint(1)	YES		NULL		
+status	enum('active','inactive')	YES		active		Durum bilgisi
+sort_order	int	YES		NULL		
+created_at	timestamp	NO		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	NO		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: settings
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+setting_key	varchar(100)	NO	 UNIQUE			
+setting_value	text	YES		NULL		
+description	text	YES		NULL		
+type	enum('text','number','boolean','json')	YES		text		
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: stages
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	varchar(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+engine_id	varchar(36)	NO	 FOREIGN			
+stage_name	varchar(50)	NO	 FOREIGN	Stage1		
+fullname	varchar(255)	NO	 FOREIGN			
+original_power	int	NO	 FOREIGN			
+tuning_power	int	NO	 FOREIGN			
+difference_power	int	NO				
+original_torque	int	NO	 FOREIGN			
+tuning_torque	int	NO				
+difference_torque	int	NO				
+ecu	text	YES		NULL		
+notes	text	YES		NULL		Kullanıcı notları
+price	decimal(10,2)	YES		NULL		
+is_active	tinyint(1)	YES	 FOREIGN	1		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: system_logs
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+user_id	char(36)	YES	 FOREIGN	NULL		Kullanıcı ID referansı
+action	varchar(100)	NO				
+description	text	YES		NULL		
+ip_address	varchar(45)	YES		NULL		
+user_agent	text	YES		NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+ Tablo: temp_brand_mapping
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+legacy_name	varchar(100)	NO	 PRIMARY			
+guid_id	char(36)	NO				
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+ Tablo: temp_model_mapping
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+legacy_brand	varchar(100)	NO	 FOREIGN			
+legacy_model	varchar(100)	NO				
+guid_brand_id	char(36)	NO				
+guid_model_id	char(36)	NO				
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+ Tablo: temp_user_mapping
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+legacy_id	varchar(100)	NO	 PRIMARY			
+guid_id	char(36)	NO				
+username	varchar(100)	NO				Kullanıcı adı
+email	varchar(100)	NO				E-posta adresi
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+ Tablo: tuning_search_view
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+stage_id	varchar(36)	NO				
+brand_id	varchar(36)	NO				
+brand_name	varchar(100)	NO				
+model_id	varchar(36)	NO				
+model_name	varchar(100)	NO				
+series_id	varchar(36)	NO				
+series_name	varchar(100)	NO				
+year_range	varchar(50)	NO				
+engine_id	varchar(36)	NO				
+engine_name	varchar(100)	NO				
+fuel_type	enum('Benzin','Diesel','Hybrid','Electric','LPG','CNG','Unknown')	NO		Benzin		
+stage_name	varchar(50)	NO		Stage1		
+fullname	varchar(255)	NO				
+original_power	int	NO				
+tuning_power	int	NO				
+difference_power	int	NO				
+original_torque	int	NO				
+tuning_torque	int	NO				
+difference_torque	int	NO				
+ecu	text	YES		NULL		
+price	decimal(10,2)	YES		NULL		
+is_active	tinyint(1)	YES		1		
+search_text	varchar(302)	NO				
+ Tablo: user_credits
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+user_id	char(36)	NO	 FOREIGN			Kullanıcı ID referansı
+amount	decimal(10,2)	NO				
+transaction_type	enum('deposit','withdraw','file_charge','refund','bonus','credit_purchase','file_upload','manual')	NO	 FOREIGN			
+description	text	YES		NULL		
+reference_id	char(36)	YES		NULL		
+reference_type	enum('file_upload','payment','manual','file_response','revision','file_download')	YES		NULL		
+admin_id	char(36)	YES	 FOREIGN	NULL		Admin kullanıcı ID referansı
+created_at	timestamp	YES	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+ Tablo: user_permissions
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+user_id	int	NO	 FOREIGN			Kullanıcı ID referansı
+permission	varchar(50)	NO				
+granted_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+ Tablo: users
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+username	varchar(50)	NO	 UNIQUE			Kullanıcı adı
+email	varchar(100)	NO	 UNIQUE			E-posta adresi
+password	varchar(255)	NO				Şifrelenmiş parola
+first_name	varchar(50)	NO				
+last_name	varchar(50)	NO				
+phone	varchar(20)	YES		NULL		
+credits	decimal(10,2)	YES		0.00		Kullanıcı kredi bakiyesi
+wallet	decimal(10,2)	YES		0.00		
+role	enum('user','admin','design')	YES		user		Kullanıcı rolü (user/admin)
+status	enum('active','inactive','banned')	YES		active		Durum bilgisi
+email_verified	tinyint(1)	YES		NULL		
+is_confirm	tinyint(1)	YES		NULL		
+verification_token	varchar(255)	YES		NULL		
+reset_token	varchar(255)	YES		NULL		
+reset_token_expires	timestamp	YES		NULL		
+remember_token	varchar(255)	YES	 FOREIGN	NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+deleted_date	timestamp	YES		NULL		
+last_login	timestamp	YES		NULL		
+credit_used	decimal(10,2)	YES		0.00		
+credit_quota	decimal(10,2)	YES		0.00		
+ Tablo: waf_rules
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+rule_name	varchar(100)	NO				
+rule_type	enum('sql_injection','xss','path_traversal','file_inclusion','command_injection','custom')	NO	 FOREIGN			
+pattern	text	NO				
+severity	enum('low','medium','high','critical')	NO	 FOREIGN	medium		
+action	enum('log','block','redirect')	NO		log		
+is_active	tinyint(1)	YES	 FOREIGN	1		
+description	text	YES		NULL		
+created_by	char(36)	YES	 FOREIGN	NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: websocket_config
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+config_key	varchar(100)	NO	 UNIQUE			
+config_value	text	NO				
+description	text	YES		NULL		
+is_active	tinyint(1)	YES		1		
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: websocket_logs
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+event_type	enum('connection','disconnection','message_sent','error')	NO				
+client_info	text	YES		NULL		
+user_id	char(36)	YES	 FOREIGN	NULL		Kullanıcı ID referansı
+message	text	YES		NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+
+
+Toplam Tablo: 66
+
+Veritabanı: mrecu_db_guid
+
+Bu dosya sadece tablo yapılarını gösterir, herhangi bir veri içermez.

@@ -189,6 +189,14 @@ if (isset($_SESSION['user_id'])) {
                     <span>Kredi İşlemleri</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'email-preferences.php' ? 'active' : ''; ?>" href="email-preferences.php">
+                    <div class="nav-icon bg-info">
+                        <i class="bi bi-envelope-gear"></i>
+                    </div>
+                    <span>Email Tercihlerim</span>
+                </a>
+            </li>
             <!-- <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'transactions.php' ? 'active' : ''; ?>" href="transactions.php">
                     <div class="nav-icon bg-info">

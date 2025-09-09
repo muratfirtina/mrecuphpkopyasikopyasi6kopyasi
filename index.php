@@ -444,8 +444,8 @@ include 'includes/header.php';
             <div class="row">
                 <div class="col-12 text-center mb-5" style="color: #d32734;">
                     <h2 class="display-5 fw-bold">Öne Çıkan Ürünlerimiz</h2>
-                    <p class="lead text-muted" style="color: #fff !important;">En popüler ve kaliteli ECU ürünlerimizi keşfedin</p>
-                </div>
+<!--                     <p class="lead text-muted" style="color: #fff !important;">En popüler ve kaliteli ECU ürünlerimizi keşfedin</p>
+ -->                </div>
             </div>
 
             <!-- Horizontal Scroll Container -->
@@ -816,8 +816,8 @@ include 'includes/header.php';
         <div class="container">
             <div class="row">
                 <div class="col-12 text-center mb-5">
-                    <h2 class="display-5 fw-bold">Güvenilen Markalar</h2>
-                    <p class="lead text-muted">Dünya çapında tanınmış markalarla çalışıyoruz</p>
+                    <h2 class="display-5 fw-bold">Çözüm Ortağı Olduğumuz Markalar</h2>
+                    <p class="lead text-muted">Mr.Ecu Güvencesi ile</p>
                 </div>
             </div>
 
@@ -957,7 +957,7 @@ include 'includes/header.php';
     </section> -->
 
 <!-- About Section -->
-<section id="about" class="py-5 bg-light">
+<!-- <section id="about" class="py-5 bg-light">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6 mb-4 mb-lg-0">
@@ -1004,12 +1004,12 @@ include 'includes/header.php';
             </div>
         </div>
     </div>
-</section>
+</section> -->
 
 <!-- Call to Action -->
 <div class="container">
     <div class="contact-cta">
-        <h2 class="mb-4">Aracınızın Performansını Artırmaya Hazır mısınız?</h2>
+        <h2 class="mb-4">Servisinizin Performansını Artırmaya Hazır mısınız?</h2>
         <p class="lead mb-4">
             Profesyonel ekibimiz ile iletişime geçin ve aracınız için en uygun chip tuning çözümünü keşfedin.
         </p>
@@ -1034,7 +1034,7 @@ include 'includes/header.php';
             <div class="col-md-4">
                 <i class="bi bi-clock fa-2x mb-3"></i>
                 <h5>Hızlı Teslimat</h5>
-                <p>24 saat içinde dosyanız hazır</p>
+                <p>Dakikalar içinde dosyanız hazır</p>
             </div>
             <div class="col-md-4">
                 <i class="bi bi-arrow-counterclockwise fa-2x mb-3"></i>

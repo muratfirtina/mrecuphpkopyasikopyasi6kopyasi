@@ -83,8 +83,8 @@ $pageKeywords = $category['name'] . ', ' . implode(', ', array_column($brands, '
 
 // Breadcrumb
 $breadcrumb = [
-    ['text' => 'Ana Sayfa', 'url' => '<?php echo BASE_URL; ?>/'],
-    ['text' => 'Ürünler', 'url' => '<?php echo BASE_URL; ?>/urunler'],
+    ['text' => 'Ana Sayfa', 'url' => BASE_URL . '/'],
+    ['text' => 'Ürünler', 'url' => BASE_URL . '/urunler'],
     ['text' => $category['name'], 'url' => '', 'active' => true]
 ];
 
@@ -454,7 +454,7 @@ include 'includes/header.php';
                         </p>
                     <?php endif; ?>
                     
-                    <div class="category-stats">
+<!--                     <div class="category-stats">
                         <div class="stat-item">
                             <span class="stat-number"><?php echo count($brands); ?></span>
                             <span class="stat-label">Marka</span>
@@ -463,7 +463,7 @@ include 'includes/header.php';
                             <span class="stat-number"><?php echo $totalProducts; ?></span>
                             <span class="stat-label">Ürün</span>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -518,10 +518,10 @@ include 'includes/header.php';
                                 <?php endif; ?>
                                 
                                 <!-- <h3 class="brand-name"><?php echo htmlspecialchars($brand['name']); ?></h3> -->
-                                <p class="brand-product-count">
+<!--                                 <p class="brand-product-count">
                                     <i class="bi bi-box me-1"></i>
                                     <?php echo $brand['product_count']; ?> ürün
-                                </p>
+                                </p> -->
                                 
                                 <span class="brand-view-products">
                                     Ürünleri Görüntüle

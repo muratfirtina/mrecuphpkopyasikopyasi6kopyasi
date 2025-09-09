@@ -62,7 +62,7 @@ class SecurityHeaders {
                    "connect-src 'self'; " .
                    "media-src 'self'; " .
                    "object-src 'none'; " .
-                   "frame-src 'none'; " .
+                   "frame-src 'self' https://www.google.com https://maps.google.com; " .
                    "base-uri 'self'; " .
                    "form-action 'self'";
         } else {
@@ -74,7 +74,8 @@ class SecurityHeaders {
                    "font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com; " .
                    "connect-src 'self' https:; " .
                    "media-src 'self'; " .
-                   "object-src 'none'";
+                   "object-src 'none'; " .
+                   "frame-src 'self' https://www.google.com https://maps.google.com";
         }
         
         header("Content-Security-Policy: $csp");

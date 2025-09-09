@@ -131,15 +131,15 @@ $basePath = isset($basePath) ? $basePath : '/';
                 <div class="footer-brand mb-3">
                     <img src="<?php echo $basePath; ?>assets/images/mreculogomini.png"
                         alt="<?php echo defined('SITE_NAME') ? SITE_NAME : 'Mr ECU'; ?>"
-                        class="footer-logo mb-3" style="max-height: 60px;">
-                    <h5 class="text-white mb-3">
+                        class="footer-logo mb-3" style="max-height: 160px;">
+<!--                     <h5 class="text-white mb-3">
                         <?php echo defined('SITE_NAME') ? SITE_NAME : 'Mr ECU'; ?>
-                    </h5>
+                    </h5> -->
                 </div>
-                <p class="text-light mb-3" style="font-size: 0.9rem; line-height: 1.6;">
+<!--                 <p class="text-light mb-3" style="font-size: 0.9rem; line-height: 1.6;">
                     Profesyonel ECU hizmetleri ile araçlarınızın performansını maksimuma çıkarın.
                     Güvenli, hızlı ve kaliteli çözümler için bizi tercih edin.
-                </p>
+                </p> -->
                 <div class="social-links">
                     <a href="#" class="text-white me-3 footer-social-link" title="Facebook">
                         <i class="bi bi-facebook"></i>

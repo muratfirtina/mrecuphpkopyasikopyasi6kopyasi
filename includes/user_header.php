@@ -360,12 +360,11 @@ if (isset($_SESSION['user_id'])) {
     <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-primary shadow-sm">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center" href="../index.php">
-                <div class="navbar-brand-icon me-2">
-                    <i class="bi bi-cpu"></i>
-                </div>
                 <div>
-                    <span class="fw-bold"><?php echo SITE_NAME; ?></span>
-                    <small class="d-block text-white-50" style="font-size: 0.7rem;">Kullanıcı Paneli</small>
+                    <img src="<?php echo $basePath; ?>assets/images/mreculogomini.png"
+                        alt="<?php echo defined('SITE_NAME') ? SITE_NAME : 'Mr ECU'; ?>"
+                        class="navbar-logo"
+                        style="height: 80px; padding-left: 40px;">
                 </div>
             </a>
 

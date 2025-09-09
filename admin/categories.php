@@ -214,23 +214,7 @@ $parentCategories = array_filter($categories, function($cat) {
     return $cat['parent_id'] === null;
 });
 
-// Slug oluşturma fonksiyonu
-function createSlug($text) {
-    $text = trim($text);
-    $text = mb_strtolower($text, 'UTF-8');
-    
-    // Türkçe karakterleri değiştir
-    $tr = array('ş','Ş','ı','I','İ','ğ','Ğ','ü','Ü','ö','Ö','Ç','ç');
-    $en = array('s','s','i','i','i','g','g','u','u','o','o','c','c');
-    $text = str_replace($tr, $en, $text);
-    
-    // Sadece harf, rakam ve tire bırak
-    $text = preg_replace('/[^a-z0-9\-]/', '-', $text);
-    $text = preg_replace('/-+/', '-', $text);
-    $text = trim($text, '-');
-    
-    return $text;
-}
+// createSlug fonksiyonu config.php dosyasından kullanılıyor
 
 $pageTitle = 'Kategori Yönetimi';
 $pageDescription = 'Ürün kategorilerini yönetin';

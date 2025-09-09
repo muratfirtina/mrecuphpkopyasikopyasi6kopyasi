@@ -233,7 +233,44 @@
                         </a>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Markalar') ? 'active' : ''; ?>" href="brands.php">
-                            <i class="bi bi-certificate"></i>Araçlar
+                            <i class="bi bi-car-front-fill"></i>Araçlar
+                        </a>
+                        
+                        <!-- Email Sistemi -->
+                        <div class="nav-section">Email Sistemi</div>
+                        
+                        <a class="nav-link <?php echo ($pageTitle == 'Email Dashboard') ? 'active' : ''; ?>" href="email-dashboard-fixed.php">
+                            <i class="bi bi-speedometer2"></i>Email Dashboard
+                        </a>
+                        
+                        <a class="nav-link <?php echo ($pageTitle == 'Email Ayarları') ? 'active' : ''; ?>" href="email-settings.php">
+                            <i class="bi bi-envelope-gear"></i>Email Ayarları
+                        </a>
+                        
+                        <a class="nav-link <?php echo ($pageTitle == 'Email Analytics') ? 'active' : ''; ?>" href="email-analytics.php">
+                            <i class="bi bi-graph-up"></i>Email Analytics
+                            <?php
+                            // Bekleyen email sayısını al
+                            try {
+                                $pendingEmailsStmt = $pdo->prepare("SELECT COUNT(*) FROM email_queue WHERE status = 'pending'");
+                                $pendingEmailsStmt->execute();
+                                $pendingEmailsCount = $pendingEmailsStmt->fetchColumn();
+                                
+                                if ($pendingEmailsCount > 0) {
+                                    echo '<span class="badge bg-warning ms-2">' . $pendingEmailsCount . '</span>';
+                                }
+                            } catch(Exception $e) {
+                                // Hata durumunda badge gösterme
+                            }
+                            ?>
+                        </a>
+                        
+                        <a class="nav-link <?php echo ($pageTitle == 'Email Template Yönetimi') ? 'active' : ''; ?>" href="email-templates.php">
+                            <i class="bi bi-file-earmark-text"></i>Email Template'leri
+                        </a>
+                        
+                        <a class="nav-link <?php echo ($pageTitle == 'Email Sistemi Test') ? 'active' : ''; ?>" href="../email-test.php">
+                            <i class="bi bi-bug"></i>Email Test
                         </a>
                         
                         <!-- Sistem Yönetimi -->

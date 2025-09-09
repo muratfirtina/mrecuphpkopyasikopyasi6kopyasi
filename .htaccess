@@ -4,7 +4,7 @@
 RewriteEngine On
 
 # Set the base directory for Production (root)
-RewriteBase /
+RewriteBase /mrecuphpkopyasikopyasi6kopyasi/
 
 # Prevent directory browsing
 Options -Indexes

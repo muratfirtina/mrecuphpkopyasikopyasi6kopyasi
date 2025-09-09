@@ -1,0 +1,344 @@
+# ==========================================
+# Mr ECU - Production .htaccess 
+# NATRO HOSTİNG & mrecutuning.com İÇİN GÜVENLİK ODAKLI
+# ==========================================
+
+# Enable URL Rewriting
+RewriteEngine On
+
+# Production ortamı için base directory (domain root)
+# mrecutuning.com için root dizin
+# Mr ECU - Apache Configuration for Production
+
+# Default index file
+DirectoryIndex index.php index.html
+
+# Enable URL Rewriting
+RewriteEngine On
+
+# Force www to non-www (or vice versa)
+RewriteCond %{HTTP_HOST} ^www\.mrecutuning\.com$ [NC]
+RewriteRule ^(.*)$ https://mrecutuning.com/$1 [R=301,L]
+
+# Set the base directory for Production (root)
+RewriteBase /
+
+# ==========================================
+# 🔄 AJAX VE API İZİNLERİ
+# ==========================================
+
+# AJAX klasörüne tam erişim izni
+<Directory "ajax">
+    Require all granted
+    Options +Indexes
+    AllowOverride All
+    
+    # AJAX dosyalarına özel izinler
+    <FilesMatch "\.(php)$">
+        Require all granted
+    </FilesMatch>
+</Directory>
+
+# User klasörüne erişim (upload.php için)
+<Directory "user">
+    Require all granted
+    
+    <FilesMatch "upload\.php$">
+        Require all granted
+    </FilesMatch>
+</Directory>
+
+# Specific AJAX files
+<Files "chip_tuning_calculator.php">
+    Require all granted
+</Files>
+
+
+# ==========================================
+# 🛡️ GÜVENLİK KORUMASI
+# ==========================================
+
+# Prevent directory browsing (MUTLAKA)
+Options -Indexes -MultiViews
+Options +FollowSymLinks
+
+# Hide sensitive files - KRİTİK GÜVENLİK
+<FilesMatch "\.(env|ini|log|conf|sql|md|json|lock|git|gitignore|htpasswd|htaccess|bak|backup|old|tmp|temp|orig|swp|swo|~)$">
+    Require all denied
+</FilesMatch>
+
+# .env dosyasını özellikle koru
+<Files ".env">
+    Require all denied
+</Files>
+
+# Konfigürasyon klasörlerini koru
+<DirectoryMatch "^.*(config|security|includes|classes|vendor|logs|debug|sql|database|fixes|temp).*">
+    Require all denied
+</DirectoryMatch>
+
+# PHP dosyalarına direkt erişimi engelle (uploads klasöründe)
+<Directory "uploads">
+    <FilesMatch "\.php$">
+        Require all denied
+    </FilesMatch>
+</Directory>
+
+# Composer ve Node.js dosyalarını koru
+<FilesMatch "(composer\.(json|lock)|package(-lock)?\.json|yarn\.lock)$">
+    Require all denied
+</FilesMatch>
+
+# ==========================================
+# 🚀 HTTPS ZORLAMASI (SSL Sertifikası için)
+# ==========================================
+
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# www'lu istekleri www'suz yönlendirme (SEO için)
+RewriteCond %{HTTP_HOST} ^www\.mrecutuning\.com [NC]
+RewriteRule ^(.*)$ https://mrecutuning.com/$1 [L,R=301]
+
+# ==========================================
+# 🚀 PERFORMANS OPTİMİZASYONU
+# ==========================================
+
+# Gzip compression (hosting destekliyorsa)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+</IfModule>
+
+# Cache headers
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/avif "access plus 1 month"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+</IfModule>
+
+# ==========================================
+# 🔒 PRODUCTION GÜVENLİK HEADERS (UPDATED FOR GOOGLE MAPS)
+# ==========================================
+
+<IfModule mod_headers.c>
+    # XSS Protection
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # HTTPS Headers (SSL için)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    
+    # Content Security Policy (GOOGLE MAPS DESTEĞİ İLE)
+    Header always set Content-Security-Policy "default-src 'self' https://mrecutuning.com https://www.mrecutuning.com; style-src 'self' 'unsafe-inline' https://mrecutuning.com https://www.mrecutuning.com https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://mrecutuning.com https://www.mrecutuning.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; img-src 'self' data: https: http:; connect-src 'self' https: http:; frame-src 'self' https://www.google.com https://maps.google.com; object-src 'none';"
+    
+    # Feature Policy
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), accelerometer=(), gyroscope=()"
+    
+    # Remove server information
+    Header unset Server
+    Header unset X-Powered-By
+    Header unset X-Pingback
+</IfModule>
+
+# ==========================================
+# 🌐 URL REWRITE RULES (SEO)
+# ==========================================
+
+# Ana sayfa
+RewriteRule ^anasayfa/?$ index.php [L,QSA]
+RewriteRule ^home/?$ index.php [L,QSA]
+
+# Hakkımızda
+RewriteRule ^hakkimizda/?$ about.php [L,QSA]
+RewriteRule ^about/?$ about.php [L,QSA]
+
+# İletişim
+RewriteRule ^iletisim/?$ contact.php [L,QSA]
+RewriteRule ^contact/?$ contact.php [L,QSA]
+
+# Hizmetler
+RewriteRule ^hizmetler/?$ services.php [L,QSA]
+RewriteRule ^services/?$ services.php [L,QSA]
+
+# Hizmet detay: /hizmet/service-slug -> hizmet-detay.php?slug=service-slug
+RewriteRule ^hizmet/([a-zA-Z0-9-]+)/?$ hizmet-detay.php?slug=$1 [L,QSA]
+RewriteRule ^service/([a-zA-Z0-9-]+)/?$ hizmet-detay.php?slug=$1 [L,QSA]
+
+# Ürünler
+RewriteRule ^urunler/?$ products.php [L,QSA]
+RewriteRule ^products/?$ products.php [L,QSA]
+
+# Kategori sayfası: /kategori/kategori-slug -> category.php?slug=kategori-slug
+RewriteRule ^kategori/([a-zA-Z0-9-]+)/?$ category.php?slug=$1 [L,QSA]
+RewriteRule ^category/([a-zA-Z0-9-]+)/?$ category.php?slug=$1 [L,QSA]
+
+# Kategori-Marka ürünleri: /kategori/kategori-slug/marka/marka-slug
+RewriteRule ^kategori/([a-zA-Z0-9-]+)/marka/([a-zA-Z0-9-]+)/?$ category-brand-products.php?category=$1&brand=$2 [L,QSA]
+RewriteRule ^category/([a-zA-Z0-9-]+)/brand/([a-zA-Z0-9-]+)/?$ category-brand-products.php?category=$1&brand=$2 [L,QSA]
+
+# Ürün detay: /urun/urun-slug -> product-detail.php?slug=urun-slug
+RewriteRule ^urun/([a-zA-Z0-9-]+)/?$ product-detail.php?slug=$1 [L,QSA]
+RewriteRule ^product/([a-zA-Z0-9-]+)/?$ product-detail.php?slug=$1 [L,QSA]
+
+# Marka ürünleri: /marka/marka-slug -> products.php?brand=marka-slug
+RewriteRule ^marka/([a-zA-Z0-9-]+)/?$ products.php?brand=$1 [L,QSA]
+RewriteRule ^brand/([a-zA-Z0-9-]+)/?$ products.php?brand=$1 [L,QSA]
+
+# Kullanıcı kayıt/giriş
+RewriteRule ^kayit/?$ register.php [L,QSA]
+RewriteRule ^register/?$ register.php [L,QSA]
+RewriteRule ^giris/?$ login.php [L,QSA]
+RewriteRule ^login/?$ login.php [L,QSA]
+RewriteRule ^cikis/?$ logout.php [L,QSA]
+RewriteRule ^logout/?$ logout.php [L,QSA]
+
+# Şifre işlemleri
+RewriteRule ^sifremi-unuttum/?$ forgot-password.php [L,QSA]
+RewriteRule ^forgot-password/?$ forgot-password.php [L,QSA]
+RewriteRule ^sifre-sifirla/?$ reset-password.php [L,QSA]
+RewriteRule ^reset-password/?$ reset-password.php [L,QSA]
+
+# Doğrulama
+RewriteRule ^dogrulama/?$ verify.php [L,QSA]
+RewriteRule ^verify/?$ verify.php [L,QSA]
+
+# ==========================================
+# 🚫 AKILLI BOT VE SCRAPER KORUMALARI
+# ==========================================
+
+# AJAX isteklerini bot korumasından muaf tut (ÖNCE)
+RewriteCond %{REQUEST_URI} ^/ajax/ [OR]
+RewriteCond %{REQUEST_URI} ^/user/upload\.php [OR]  
+RewriteCond %{REQUEST_URI} ^/user/.*\.php$
+RewriteRule .* - [S=12]
+
+# Zararlı botları engelle (AJAX'tan sonra)
+RewriteCond %{HTTP_USER_AGENT} (libwww-perl|wget|curl|python-requests|scrapy|beautifulsoup|mechanize) [NC]
+RewriteRule .* - [F,L]
+
+# SQL Injection koruması (KRİTİK - Kaldırma!)
+RewriteCond %{QUERY_STRING} (union|select|insert|drop|delete|update|cast|create|char|convert|alter|declare) [NC]
+RewriteRule .* - [F,L]
+
+# XSS koruması (KRİTİK - Kaldırma!)
+RewriteCond %{QUERY_STRING} (<|%3C).*script.*(>|%3E) [NC]
+RewriteRule .* - [F,L]
+
+# Diğer güvenlik kuralları
+RewriteCond %{QUERY_STRING} GLOBALS(=|[|%[0-9A-Z]{0,2}) [OR]
+RewriteCond %{QUERY_STRING} _REQUEST(=|[|%[0-9A-Z]{0,2}) [OR]
+RewriteCond %{QUERY_STRING} ^.*(\[|\]|\(|\)|<|>|ê|"|;|\?|\*|=$).* [NC,OR]
+RewriteCond %{QUERY_STRING} ^.*("|'|<|>|\|).* [NC,OR]
+RewriteCond %{QUERY_STRING} ^.*(%0|%A|%B|%C|%D|%E|%F).* [NC]
+RewriteRule .* - [F,L]
+
+# DDoS koruması - aynı IP'den çok fazla istek
+RewriteCond %{HTTP:X-Forwarded-For} !^$
+RewriteCond %{HTTP:X-Forwarded-For} !^127\.0\.0\.1
+RewriteCond %{REQUEST_METHOD} ^(GET|POST)$ [NC]
+RewriteRule ^(.*)$ - [E=CLIENTIP:%{HTTP:X-Forwarded-For}]
+RewriteCond %{ENV:CLIENTIP} !^$
+RewriteRule ^(.*)$ - [E=CLIENTIP:%{REMOTE_ADDR}]
+
+# ==========================================
+# 📱 MOBILE & RESPONSIVE
+# ==========================================
+
+# Mobile detection (optional)
+RewriteCond %{HTTP_USER_AGENT} "android|blackberry|googlebot-mobile|iemobile|iphone|ipod|opera mobile|palmos|webos" [NC]
+RewriteRule ^$ index.php?mobile=1 [QSA,L]
+
+# ==========================================
+# ⚡ PHP AYARLARI (Hosting izin veriyorsa)
+# ==========================================
+
+<IfModule mod_php7.c>
+    php_flag display_errors Off
+    php_flag log_errors On
+    php_value error_log logs/error.log
+    php_value max_execution_time 300
+    php_value max_input_time 300
+    php_value memory_limit 256M
+    php_value upload_max_filesize 100M
+    php_value post_max_size 100M
+    php_value session.cookie_httponly 1
+    php_value session.cookie_secure 1
+    php_value session.use_only_cookies 1
+    php_value session.cookie_samesite Strict
+</IfModule>
+
+<IfModule mod_php8.c>
+    php_flag display_errors Off
+    php_flag log_errors On
+    php_value error_log logs/error.log
+    php_value max_execution_time 300
+    php_value max_input_time 300
+    php_value memory_limit 256M
+    php_value upload_max_filesize 100M
+    php_value post_max_size 100M
+    php_value session.cookie_httponly 1
+    php_value session.cookie_secure 1
+    php_value session.use_only_cookies 1
+    php_value session.cookie_samesite Strict
+</IfModule>
+
+# ==========================================
+# 🌍 TÜRKÇE KARAKTER DESTEĞİ
+# ==========================================
+
+AddDefaultCharset UTF-8
+
+# ==========================================
+# 📄 CUSTOM ERROR PAGES
+# ==========================================
+
+ErrorDocument 403 /403.php
+ErrorDocument 404 /404.php
+ErrorDocument 500 /500.php
+
+# ==========================================
+# 🔧 MAINTENANCE MODE (Gerekirse aktif et)
+# ==========================================
+
+# Maintenance mode için şu satırları aktif edin:
+# RewriteCond %{REMOTE_ADDR} !^YOUR_IP_ADDRESS$
+# RewriteCond %{REQUEST_URI} !/bakim.php$
+# RewriteRule ^(.*)$ /bakim.php [R=503,L]
+
+# ==========================================
+# 📊 SITEMAP VE SEO
+# ==========================================
+
+# Sitemap.xml yönlendirmesi
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+RewriteRule ^robots\.txt$ robots.php [L]
+
+# ==========================================
+# NOTLAR:
+# 1. Bu dosya mrecutuning.com için özelleştirildi
+# 2. HTTPS zorlaması aktif
+# 3. www'dan www'suz yönlendirme var
+# 4. Güvenlik başlıkları production seviyede
+# 5. Bot koruması aktif
+# 6. Cache ayarları optimize edildi
+# 7. ✅ Google Maps frame-src desteği eklendi
+# ==========================================

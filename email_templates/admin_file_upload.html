@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{site_name}} - Yeni Dosya Yüklendi</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: #333;
+            padding: 25px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 30px;
+        }
+        .file-info {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+            width: 40%;
+        }
+        .info-value {
+            color: #212529;
+            width: 55%;
+            text-align: right;
+        }
+        .user-info {
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .action-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 10px 10px 10px 0;
+            text-align: center;
+        }
+        .secondary-button {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+        .priority {
+            background-color: #dc3545;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            .content {
+                padding: 20px;
+            }
+            .info-row {
+                flex-direction: column;
+            }
+            .info-value {
+                text-align: left;
+                margin-top: 5px;
+                font-weight: 600;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📁 Yeni Dosya Yüklendi</h1>
+            <p>{{site_name}} Admin Paneli</p>
+        </div>
+        
+        <div class="content">
+            <p><strong>Merhaba Admin,</strong></p>
+            
+            <p>Sistemde yeni bir dosya yüklendi ve işlenmek üzere bekleniyor.</p>
+            
+            <div class="user-info">
+                <strong>👤 Kullanıcı Bilgileri:</strong><br>
+                <strong>Ad:</strong> {{user_name}}<br>
+                <strong>Email:</strong> {{user_email}}<br>
+                <strong>Yükleme Zamanı:</strong> {{upload_time}}
+            </div>
+            
+            <div class="file-info">
+                <h3 style="margin-top: 0; color: #495057;">📋 Dosya Detayları</h3>
+                
+                <div class="info-row">
+                    <span class="info-label">Dosya Adı:</span>
+                    <span class="info-value">{{file_name}}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Marka:</span>
+                    <span class="info-value">{{brand}}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Model:</span>
+                    <span class="info-value">{{model}}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Yıl:</span>
+                    <span class="info-value">{{year}}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Motor:</span>
+                    <span class="info-value">{{engine}}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Yakıt Tipi:</span>
+                    <span class="info-value">{{fuel_type}}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Vites Tipi:</span>
+                    <span class="info-value">{{gearbox_type}}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Upload ID:</span>
+                    <span class="info-value"><code>{{upload_id}}</code></span>
+                </div>
+            </div>
+            
+            {{#if upload_notes}}
+            <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                <strong>📝 Kullanıcı Notları:</strong><br>
+                {{upload_notes}}
+            </div>
+            {{/if}}
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{admin_url}}" class="action-button">
+                    🔧 Dosyayı İşle
+                </a>
+                <a href="{{admin_dashboard_url}}" class="action-button secondary-button">
+                    📊 Admin Panel
+                </a>
+            </div>
+            
+            <div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                <strong>⚡ Hızlı Eylemler:</strong><br>
+                • Dosyayı indirin ve analiz edin<br>
+                • Gerekli düzenlemeleri yapın<br>
+                • Yanıt dosyasını yükleyin<br>
+                • Kullanıcıya bildirim gönderilsin
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            
+            <p style="font-size: 14px; color: #666;">
+                <strong>🔗 Direkt Bağlantı:</strong><br>
+                <span style="background-color: #f8f9fa; padding: 5px; border-radius: 3px; font-family: monospace; word-break: break-all;">{{admin_url}}</span>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>{{site_name}}</strong> - Admin Bildirim Sistemi</p>
+            <p style="font-size: 12px;">
+                Bu email otomatik olarak gönderilmiştir.<br>
+                Gönderim zamanı: {{current_datetime}}<br>
+                © 2024 {{site_name}} - Admin Panel
+            </p>
+        </div>
+    </div>
+</body>
+</html>

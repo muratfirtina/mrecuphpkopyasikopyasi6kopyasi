@@ -114,9 +114,9 @@ $pageDescription = $brand['meta_description'] ?: $category['name'] . ' kategoris
 
 // Breadcrumb
 $breadcrumb = [
-    ['text' => 'Ana Sayfa', 'url' => '<?php echo BASE_URL; ?>/'],
-    ['text' => 'Ürünler', 'url' => '<?php echo BASE_URL; ?>/urunler'],
-    ['text' => $category['name'], 'url' => '<?php echo BASE_URL; ?>/kategori/' . $category['slug']],
+    ['text' => 'Ana Sayfa', 'url' => BASE_URL . '/'],
+    ['text' => 'Ürünler', 'url' => BASE_URL . '/urunler'],
+    ['text' => $category['name'], 'url' => BASE_URL . '/kategori/' . $category['slug']],
     ['text' => $brand['name'], 'url' => '', 'active' => true]
 ];
 
@@ -629,10 +629,10 @@ include 'includes/header.php';
             </p> -->
             
             <div class="hero-stats">
-                <div class="hero-stat">
+                <!-- <div class="hero-stat">
                     <span class="hero-stat-number"><?php echo $totalProducts; ?></span>
                     <span class="hero-stat-label">Ürün</span>
-                </div>
+                </div> -->
                 <div class="hero-stat">
                     <span class="hero-stat-number"><?php echo htmlspecialchars($category['name']); ?></span>
                     <span class="hero-stat-label">Kategori</span>
@@ -937,7 +937,7 @@ $jsonLD = [
     "mainEntity" => [
         "@type" => "Brand",
         "name" => $brand['name'],
-        "image" => BASE_URL . '<?php echo BASE_URL; ?>/' . ($brand['logo'] ?: 'assets/images/default-brand-logo.png'),
+        "image" => BASE_URL . '/' . ($brand['logo'] ?: 'assets/images/default-brand-logo.png'),
         "url" => BASE_URL . "/kategori/{$category['slug']}/marka/{$brand['slug']}"
     ]
 ];

@@ -1,17 +1,24 @@
 <?php
 
 /**
- * Mr ECU - User Class (GUID System) - CLEAN VERSION
- * GUID tabanlı kullanıcı işlemleri sınıfı - Duplicate metotlar temizlendi
+ * Mr ECU - User Class (GUID System) - CLEAN VERSION with Email System
+ * GUID tabanlı kullanıcı işlemleri sınıfı - Email sistemi ile
  */
 
 class User
 {
     private $pdo;
+    private $emailManager;
 
     public function __construct($database)
     {
         $this->pdo = $database;
+        
+        // EmailManager'ı include et ve oluştur
+        if (file_exists(__DIR__ . '/EmailManager.php')) {
+            require_once __DIR__ . '/EmailManager.php';
+            $this->emailManager = new EmailManager($database);
+        }
     }
 
     // Kullanıcıyı ID ile getir (GUID ID ile) - TERS KREDİ SİSTEMİ ile
@@ -250,6 +257,11 @@ class User
             $user = $stmt->fetch();
 
             if ($user && password_verify($password, $user['password'])) {
+                // Email doğrulaması kontrolü
+                if (!$user['email_verified']) {
+                    return ['success' => false, 'message' => 'Email adresinizi doğrulamanız gerekiyor. Lütfen email kutunuzu kontrol edin.'];
+                }
+
                 // Tüm kullanıcı bilgilerini session'a kaydet
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username']; // Orjinal değer, fallback yok
@@ -271,18 +283,18 @@ class User
                 // Log kaydı
                 $this->logAction($user['id'], 'login', 'Kullanıcı sisteme giriş yaptı');
 
-                return true;
+                return ['success' => true, 'message' => 'Giriş başarılı.'];
             }
 
             error_log('Login failed for email: ' . $email);
-            return false;
+            return ['success' => false, 'message' => 'Email veya şifre hatalı.'];
         } catch (PDOException $e) {
             error_log('Login error: ' . $e->getMessage());
-            return false;
+            return ['success' => false, 'message' => 'Veritabanı hatası oluştu.'];
         }
     }
 
-    // Kullanıcı kayıt
+    // Kullanıcı kayıt (Email doğrulaması ile)
     public function register($data, $isAdmin = false)
     {
         try {
@@ -302,9 +314,12 @@ class User
             $role = $isAdmin && isset($data['role']) ? $data['role'] : 'user';
             $credits = $isAdmin && isset($data['credits']) ? $data['credits'] : DEFAULT_CREDITS;
 
+            // Email doğrulaması gerekli mi?
+            $emailVerified = $isAdmin ? 1 : 0; // Admin tarafından oluşturulan hesaplar doğrulanmış sayılır
+
             $stmt = $this->pdo->prepare("
-                INSERT INTO users (id, username, email, password, first_name, last_name, phone, role, credits, verification_token, created_at) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                INSERT INTO users (id, username, email, password, first_name, last_name, phone, role, credits, verification_token, email_verified, terms_accepted, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
             ");
             
             $result = $stmt->execute([
@@ -317,14 +332,23 @@ class User
                 $data['phone'] ?? '',
                 $role,
                 $credits,
-                $verificationToken
+                $emailVerified ? null : $verificationToken,
+                $emailVerified,
+                $isAdmin ? 1 : (isset($data['terms_accepted']) ? 1 : 1) // Admin veya terms kabul edilmişse 1
             ]);
 
             if ($result) {
                 // Log kaydı
                 $this->logAction($userId, 'register', 'Yeni kullanıcı kaydı');
 
-                return ['success' => true, 'message' => 'Kayıt başarılı.', 'user_id' => $userId];
+                // Email doğrulama maili gönder (admin değilse)
+                if (!$isAdmin && $this->emailManager) {
+                    $fullName = trim($data['first_name'] . ' ' . $data['last_name']);
+                    $this->emailManager->sendVerificationEmail($data['email'], $fullName, $verificationToken);
+                }
+
+                $message = $isAdmin ? 'Kullanıcı başarıyla oluşturuldu.' : 'Kayıt başarılı. Email adresinizi doğrulamak için email kutunuzu kontrol edin.';
+                return ['success' => true, 'message' => $message, 'user_id' => $userId];
             }
 
             return ['success' => false, 'message' => 'Kayıt sırasında bir hata oluştu.'];
@@ -337,64 +361,146 @@ class User
     public function verifyEmail($token)
     {
         try {
-            $stmt = $this->pdo->prepare("UPDATE users SET email_verified = TRUE, verification_token = NULL WHERE verification_token = ?");
+            $stmt = $this->pdo->prepare("
+                UPDATE users 
+                SET email_verified = 1, verification_token = NULL, updated_at = NOW() 
+                WHERE verification_token = ? AND email_verified = 0
+            ");
             $result = $stmt->execute([$token]);
 
-            return $result && $stmt->rowCount() > 0;
+            if ($result && $stmt->rowCount() > 0) {
+                // Kullanıcı bilgilerini al
+                $stmt2 = $this->pdo->prepare("SELECT id, email, CONCAT(first_name, ' ', last_name) as full_name FROM users WHERE email_verified = 1 AND verification_token IS NULL ORDER BY updated_at DESC LIMIT 1");
+                $stmt2->execute();
+                $user = $stmt2->fetch(PDO::FETCH_ASSOC);
+
+                if ($user) {
+                    $this->logAction($user['id'], 'email_verified', 'Email adresi doğrulandı');
+                }
+
+                return ['success' => true, 'message' => 'Email adresiniz başarıyla doğrulandı. Artık giriş yapabilirsiniz.'];
+            }
+
+            return ['success' => false, 'message' => 'Geçersiz veya süresi dolmuş doğrulama kodu.'];
         } catch (PDOException $e) {
-            return false;
+            error_log('verifyEmail error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Doğrulama sırasında bir hata oluştu.'];
         }
     }
 
-    // Şifre sıfırlama isteği
+    // Şifre sıfırlama isteği (KOD TABANLI SİSTEM)
     public function requestPasswordReset($email)
     {
         try {
-            $stmt = $this->pdo->prepare("SELECT id FROM users WHERE email = ? AND status = 'active'");
+            // GÜVENLİK: Her durumda başarılı mesaj döndür
+            $stmt = $this->pdo->prepare("SELECT id, CONCAT(first_name, ' ', last_name) as full_name FROM users WHERE email = ? AND status = 'active'");
             $stmt->execute([$email]);
             $user = $stmt->fetch();
 
             if ($user) {
-                $resetToken = generateToken();
-                $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
+                // 6 haneli rastgele kod oluştur
+                $resetCode = sprintf('%06d', mt_rand(100000, 999999));
+                $expiresAt = date('Y-m-d H:i:s', strtotime('+15 minutes'));
 
-                $stmt = $this->pdo->prepare("UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?");
-                $stmt->execute([$resetToken, $expiresAt, $user['id']]);
+                $stmt = $this->pdo->prepare("UPDATE users SET reset_token = ?, reset_token_expires = ?, updated_at = NOW() WHERE id = ?");
+                $stmt->execute([$resetCode, $expiresAt, $user['id']]);
 
-                return true;
+                // Reset email gönder
+                if ($this->emailManager) {
+                    $this->emailManager->sendPasswordResetEmail($email, $user['full_name'], $resetCode);
+                }
+
+                // Log kaydı
+                $this->logAction($user['id'], 'password_reset_requested', 'Şifre sıfırlama kodu istendi - IP: ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
             }
-            return false;
+
+            // GÜVENLİK: Email kayıtlı olsun veya olmasın hep aynı mesajı döndür
+            return ['success' => true, 'message' => 'Şifre sıfırlama kodu email adresinize gönderildi.'];
+
         } catch (PDOException $e) {
-            return false;
+            error_log('requestPasswordReset error: ' . $e->getMessage());
+            return ['success' => true, 'message' => 'Şifre sıfırlama kodu email adresinize gönderildi.'];
         }
     }
 
-    // Şifre sıfırlama
-    public function resetPassword($token, $newPassword)
+    // Şifre sıfırlama kodu doğrulama
+    public function verifyResetCode($code)
     {
         try {
             $stmt = $this->pdo->prepare("
-                SELECT id FROM users 
+                SELECT id, email, CONCAT(first_name, ' ', last_name) as full_name 
+                FROM users 
                 WHERE reset_token = ? AND reset_token_expires > NOW() AND status = 'active'
             ");
-            $stmt->execute([$token]);
+            $stmt->execute([$code]);
             $user = $stmt->fetch();
 
             if ($user) {
-                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-
-                $stmt = $this->pdo->prepare("
-                    UPDATE users 
-                    SET password = ?, reset_token = NULL, reset_token_expires = NULL 
-                    WHERE id = ?
-                ");
-                $stmt->execute([$hashedPassword, $user['id']]);
-
-                return true;
+                return ['success' => true, 'message' => 'Kod geçerli.', 'user' => $user];
             }
-            return false;
+
+            return ['success' => false, 'message' => 'Geçersiz veya süresi dolmuş kod.'];
         } catch (PDOException $e) {
-            return false;
+            error_log('verifyResetCode error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Kod doğrulama sırasında hata oluştu.'];
+        }
+    }
+
+    // Şifre sıfırlama (kod ile)
+    public function resetPasswordWithCode($code, $newPassword)
+    {
+        try {
+            // Kodu doğrula
+            $verifyResult = $this->verifyResetCode($code);
+            if (!$verifyResult['success']) {
+                return $verifyResult;
+            }
+
+            $user = $verifyResult['user'];
+            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+            $stmt = $this->pdo->prepare("
+                UPDATE users 
+                SET password = ?, reset_token = NULL, reset_token_expires = NULL, updated_at = NOW() 
+                WHERE id = ?
+            ");
+            $result = $stmt->execute([$hashedPassword, $user['id']]);
+
+            if ($result) {
+                // Log kaydı
+                $this->logAction($user['id'], 'password_reset_completed', 'Şifre başarıyla sıfırlandı');
+
+                return ['success' => true, 'message' => 'Şifreniz başarıyla güncellendi.'];
+            }
+
+            return ['success' => false, 'message' => 'Şifre güncellenirken hata oluştu.'];
+        } catch (PDOException $e) {
+            error_log('resetPasswordWithCode error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Şifre sıfırlama sırasında hata oluştu.'];
+        }
+    }
+
+    // Email yeniden gönder
+    public function resendVerificationEmail($email)
+    {
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT id, CONCAT(first_name, ' ', last_name) as full_name, verification_token 
+                FROM users 
+                WHERE email = ? AND email_verified = 0 AND verification_token IS NOT NULL
+            ");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
+
+            if ($user && $this->emailManager) {
+                $this->emailManager->sendVerificationEmail($email, $user['full_name'], $user['verification_token']);
+                return ['success' => true, 'message' => 'Doğrulama emaili yeniden gönderildi.'];
+            }
+
+            return ['success' => false, 'message' => 'Email adresi bulunamadı veya zaten doğrulanmış.'];
+        } catch (PDOException $e) {
+            error_log('resendVerificationEmail error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Email gönderme sırasında hata oluştu.'];
         }
     }
 
@@ -445,7 +551,7 @@ class User
 
             // LIMIT ve OFFSET için direkt sayısal değerler kullan
             $query = "
-                SELECT id, username, email, first_name, last_name, phone, credits, role, status, created_at, last_login,
+                SELECT id, username, email, first_name, last_name, phone, credits, role, status, email_verified, created_at, last_login,
                        (SELECT COUNT(*) FROM file_uploads WHERE user_id = users.id) as total_uploads
                 FROM users 
                 ORDER BY created_at DESC 

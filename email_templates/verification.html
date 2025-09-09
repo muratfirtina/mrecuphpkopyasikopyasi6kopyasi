@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{site_name}} - Email Doğrulama</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 30px;
+        }
+        .welcome-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .verify-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 20px 0;
+            transition: transform 0.2s;
+        }
+        .verify-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+        .social-links {
+            margin: 15px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #667eea;
+            text-decoration: none;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{site_name}}</h1>
+            <p>Hoş geldiniz! Email adresinizi doğrulayın</p>
+        </div>
+        
+        <div class="content">
+            <div class="welcome-text">
+                <strong>Merhaba {{user_name}},</strong>
+            </div>
+            
+            <p>{{site_name}} ailesine hoş geldiniz! Hesabınızı aktifleştirmek ve tüm özelliklerden faydalanabilmek için email adresinizi doğrulamanız gerekmektedir.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{verification_url}}" class="verify-button">
+                    ✉️ Email Adresimi Doğrula
+                </a>
+            </div>
+            
+            <div class="info-box">
+                <strong>📋 Hesap Bilgileriniz:</strong><br>
+                <strong>Kullanıcı Adı:</strong> {{user_name}}<br>
+                <strong>Email:</strong> Email adresi gizli tutulmuştur<br>
+                <strong>Kayıt Tarihi:</strong> {{current_date}}
+            </div>
+            
+            <p><strong>⚠️ Önemli Güvenlik Bilgisi:</strong></p>
+            <ul>
+                <li>Bu doğrulama bağlantısı 24 saat geçerlidir</li>
+                <li>Bağlantı yalnızca tek kullanımlıktır</li>
+                <li>Eğer bu email size gönderilmediyse, lütfen dikkate almayın</li>
+            </ul>
+            
+            <p>Email doğrulama işleminden sonra sisteme giriş yapabilir ve ECU dosya işlemlerinizi gerçekleştirebilirsiniz.</p>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            
+            <p style="font-size: 14px; color: #666;">
+                <strong>Bağlantı çalışmıyor mu?</strong><br>
+                Aşağıdaki adresi tarayıcınıza kopyalayıp yapıştırın:<br>
+                <span style="background-color: #f8f9fa; padding: 5px; border-radius: 3px; font-family: monospace; word-break: break-all;">{{verification_url}}</span>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>{{site_name}}</strong> - Profesyonel ECU Hizmetleri</p>
+            <div class="social-links">
+                <a href="mailto:{{contact_email}}">📧 İletişim</a>
+                <a href="{{site_url}}">🌐 Web Sitesi</a>
+            </div>
+            <p style="font-size: 12px; margin-top: 15px;">
+                Bu email otomatik olarak gönderilmiştir. Lütfen yanıtlamayın.<br>
+                © 2024 {{site_name}} - Tüm hakları saklıdır.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

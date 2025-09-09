@@ -296,7 +296,7 @@ include 'includes/header.php';
 <!-- Call to Action -->
 <div class="container">
     <div class="contact-cta">
-        <h2 class="mb-4" style="color: #fff !important;">Aracınızın Performansını Artırmaya Hazır mısınız?</h2>
+        <h2 class="mb-4" style="color: #fff !important;">Servisinizin Performansını Artırmaya Hazır mısınız?</h2>
         <p class="lead mb-4" style="color: #fff !important;">
             Profesyonel ekibimiz ile iletişime geçin ve aracınız için en uygun chip tuning çözümünü keşfedin.
         </p>
@@ -321,7 +321,7 @@ include 'includes/header.php';
             <div class="col-md-4">
                 <i class="bi bi-clock fa-2x mb-3"></i>
                 <h5 style="color: #fff !important;">Hızlı Teslimat</h5>
-                <p style="color: #fff !important;">24 saat içinde dosyanız hazır</p>
+                <p style="color: #fff !important;">Dakikalar içinde dosyanız hazır</p>
             </div>
             <div class="col-md-4">
                 <i class="bi bi-arrow-counterclockwise fa-2x mb-3"></i>

@@ -12,6 +12,9 @@ if (isLoggedIn()) {
 $error = '';
 $success = '';
 
+$showEmailVerificationInfo = false;
+$registeredEmail = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = [
         'username' => sanitize($_POST['username']),
@@ -20,7 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'confirm_password' => $_POST['confirm_password'],
         'first_name' => sanitize($_POST['first_name']),
         'last_name' => sanitize($_POST['last_name']),
-        'phone' => sanitize($_POST['phone'])
+        'phone' => sanitize($_POST['phone']),
+        'terms_accepted' => isset($_POST['terms']) ? 1 : 0
     ];
 
     if (empty($data['username']) || empty($data['email']) || empty($data['password']) || 
@@ -32,11 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Şifre en az 6 karakter olmalıdır.';
     } elseif ($data['password'] !== $data['confirm_password']) {
         $error = 'Şifreler eşleşmiyor.';
+    } elseif (!isset($_POST['terms'])) {
+        $error = 'Kullanım şartları ve gizlilik politikasını kabul etmelisiniz.';
     } else {
         $user = new User($pdo);
         $result = $user->register($data);
         if ($result['success']) {
             $success = $result['message'];
+            $showEmailVerificationInfo = true;
+            $registeredEmail = $data['email'];
         } else {
             $error = $result['message'];
         }
@@ -78,9 +86,36 @@ include 'includes/header.php';
                             <div class="alert alert-success border-0 rounded-4 text-center">
                                 <i class="bi bi-check-circle me-2"></i> <?php echo $success; ?>
                             </div>
+                            
+                            <?php if ($showEmailVerificationInfo): ?>
+                            <div class="alert alert-info border-0 rounded-4 mt-3">
+                                <div class="text-center">
+                                    <i class="bi bi-envelope-check" style="font-size: 2rem; color: #0dcaf0;"></i>
+                                    <h5 class="mt-2 mb-3">Email Doğrulama Gerekli</h5>
+                                    <p class="mb-3">
+                                        <strong><?php echo htmlspecialchars($registeredEmail); ?></strong><br>
+                                        adresine doğrulama emaili gönderildi.
+                                    </p>
+                                    <p class="small text-muted">
+                                        Email kutunuzu kontrol edin ve doğrulama bağlantısına tıklayın.
+                                        Spam klasörünü de kontrol etmeyi unutmayın.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-3">
+                                <a href="verify.php" class="btn btn-info rounded-4 px-4 me-2">
+                                    <i class="bi bi-envelope-check me-1"></i>Email Doğrula
+                                </a>
+                                <a href="login.php" class="btn btn-outline-success rounded-4 px-4">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i>Giriş Yap
+                                </a>
+                            </div>
+                            <?php else: ?>
                             <div class="text-center mt-3">
                                 <a href="login.php" class="btn btn-success rounded-4 px-4">Giriş Yap</a>
                             </div>
+                            <?php endif; ?>
                         <?php else: ?>
                             <form method="POST" action="" id="registerForm">
                                 <div class="row g-3">
@@ -124,9 +159,13 @@ include 'includes/header.php';
                                 <div class="form-check mt-4">
                                     <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
                                     <label class="form-check-label" for="terms">
-                                        <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" class="text-decoration-none text-primary">Kullanım Şartları</a> ve
-                                        <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal" class="text-decoration-none text-primary">Gizlilik Politikası</a>'nı kabul ediyorum.
+                                        <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" class="text-decoration-none text-primary fw-bold">Kullanım Şartları</a> ve
+                                        <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal" class="text-decoration-none text-primary fw-bold">Gizlilik Politikası</a>'nı okudum, anladım ve kabul ediyorum.
+                                        <span class="text-danger">*</span>
                                     </label>
+                                    <small class="form-text text-muted d-block mt-1">
+                                        Bağlantılara tıklayarak ayrıntılı bilgileri okuyabilirsiniz.
+                                    </small>
                                 </div>
 
                                 <button type="submit" class="btn btn-success btn-lg w-100 mt-4 rounded-4 py-3 fw-bold"
@@ -185,8 +224,59 @@ include 'includes/header.php';
 </section>
 
 <!-- Terms & Privacy Modals -->
-<div class="modal fade" id="termsModal">...</div>
-<div class="modal fade" id="privacyModal">...</div>
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content" style="margin-top: 120px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">
+                    <i class="bi bi-file-text me-2"></i>Kullanım Şartları
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="termsContent">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Yüklüyor...</span>
+                        </div>
+                        <p class="mt-2">Kullanım Şartları yüklüyor...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-primary" onclick="acceptTerms()">Anlaşıldı ve Kabul Ediyorum</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content"style="margin-top: 120px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="privacyModalLabel">
+                    <i class="bi bi-shield-lock me-2"></i>Gizlilik Politikası
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="privacyContent">
+                    <div class="text-center">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Yüklüyor...</span>
+                        </div>
+                        <p class="mt-2">Gizlilik politikası yüklüyor...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-success" onclick="acceptPrivacy()">Anlaşıldı ve Kabul Ediyorum</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 document.getElementById('confirm_password').addEventListener('input', function () {
@@ -194,6 +284,152 @@ document.getElementById('confirm_password').addEventListener('input', function (
     this.classList.toggle('is-invalid', !match && this.value);
     this.classList.toggle('is-valid', match && this.value);
 });
+
+// Modal içerik yükleme
+document.addEventListener('DOMContentLoaded', function() {
+    // Terms modal açıldığında içeriği yükle
+    document.getElementById('termsModal').addEventListener('shown.bs.modal', function () {
+        loadTermsContent();
+    });
+    
+    // Privacy modal açıldığında içeriği yükle
+    document.getElementById('privacyModal').addEventListener('shown.bs.modal', function () {
+        loadPrivacyContent();
+    });
+});
+
+// Kullanım şartları içeriğini yükle
+function loadTermsContent() {
+    fetch('ajax/get_terms_content.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('termsContent').innerHTML = data.content;
+                document.getElementById('termsModalLabel').textContent = data.title;
+            } else {
+                document.getElementById('termsContent').innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Kullanım şartları şu anda yüklenemiyor. Lütfen daha sonra tekrar deneyin.
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading terms:', error);
+            document.getElementById('termsContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-x-circle me-2"></i>
+                    Kullanım şartları yüklenirken bir hata oluştu.
+                </div>
+            `;
+        });
+}
+
+// Gizlilik politikası içeriğini yükle
+function loadPrivacyContent() {
+    fetch('ajax/get_privacy_content.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('privacyContent').innerHTML = data.content;
+                document.getElementById('privacyModalLabel').textContent = data.title;
+            } else {
+                document.getElementById('privacyContent').innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Gizlilik politikası şu anda yüklenemiyor. Lütfen daha sonra tekrar deneyin.
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading privacy:', error);
+            document.getElementById('privacyContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-x-circle me-2"></i>
+                    Gizlilik politikası yüklenirken bir hata oluştu.
+                </div>
+            `;
+        });
+}
+
+// Kullanım şartlarını kabul et
+function acceptTerms() {
+    document.getElementById('terms').checked = true;
+    
+    // Checkbox'u güncelle
+    const termsCheckbox = document.getElementById('terms');
+    termsCheckbox.classList.remove('is-invalid');
+    termsCheckbox.classList.add('is-valid');
+    
+    // Modal'u kapat
+    const termsModal = bootstrap.Modal.getInstance(document.getElementById('termsModal'));
+    termsModal.hide();
+    
+    // Bildirim göster
+    showToast('Kullanım şartları kabul edildi', 'success');
+}
+
+// Gizlilik politikasını kabul et
+function acceptPrivacy() {
+    document.getElementById('terms').checked = true;
+    
+    // Checkbox'u güncelle
+    const termsCheckbox = document.getElementById('terms');
+    termsCheckbox.classList.remove('is-invalid');
+    termsCheckbox.classList.add('is-valid');
+    
+    // Modal'u kapat
+    const privacyModal = bootstrap.Modal.getInstance(document.getElementById('privacyModal'));
+    privacyModal.hide();
+    
+    // Bildirim göster
+    showToast('Gizlilik politikası kabul edildi', 'success');
+}
+
+// Toast bildirim fonksiyonu
+function showToast(message, type = 'success') {
+    // Toast container oluştur (yoksa)
+    let toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toastContainer';
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '9999';
+        document.body.appendChild(toastContainer);
+    }
+    
+    // Toast oluştur
+    const toastId = 'toast_' + Date.now();
+    const toastHtml = `
+        <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="bi bi-check-circle text-${type} me-2"></i>
+                <strong class="me-auto">Bildirim</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        </div>
+    `;
+    
+    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+    
+    // Toast'u göster
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement, {
+        autohide: true,
+        delay: 3000
+    });
+    toast.show();
+    
+    // Toast kapandıktan sonra DOM'dan kaldır
+    toastElement.addEventListener('hidden.bs.toast', function () {
+        toastElement.remove();
+    });
+}
 </script>
 
 <style>

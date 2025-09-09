@@ -81,6 +81,9 @@ switch($action) {
         ];
         
         // Dosyayı yükle
+        error_log('AJAX additional_files: Starting file upload process');
+        error_log('AJAX additional_files: Params - RelatedFileId: ' . $relatedFileId . ', SenderId: ' . $userId . ' (' . $userType . '), ReceiverId: ' . $receiverId . ' (' . $receiverType . ')');
+        
         $result = $fileManager->uploadAdditionalFile(
             $relatedFileId,
             $relatedFileType,
@@ -92,6 +95,8 @@ switch($action) {
             $notes,
             $credits
         );
+        
+        error_log('AJAX additional_files: Upload result - ' . ($result['success'] ? 'SUCCESS' : 'FAILED') . ': ' . $result['message']);
         
         echo json_encode($result);
         break;

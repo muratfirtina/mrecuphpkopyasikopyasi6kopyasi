@@ -249,12 +249,12 @@ try {
     }
 
     // Navigasyon menüsü
-    echo "<div class='navigation'>";
+    /* echo "<div class='navigation'>";
     echo "<h4>📋 Tablolar</h4>";
     foreach ($tables as $table) {
         $recordCount = $pdo->query("SELECT COUNT(*) FROM `$table`")->fetchColumn();
         echo "<a href='#table_$table'>$table ($recordCount kayıt)</a>";
-    }
+    } */
     echo "</div>";
 
     // Her tablo için detaylı analiz
@@ -262,7 +262,7 @@ try {
         echo "<h2 id='table_$table'>📋 Tablo: $table</h2>";
         
         // Tablo genel bilgileri
-        $recordCount = $pdo->query("SELECT COUNT(*) FROM `$table`")->fetchColumn();
+        /* $recordCount = $pdo->query("SELECT COUNT(*) FROM `$table`")->fetchColumn();
         $tableStatus = $pdo->query("SHOW TABLE STATUS LIKE '$table'")->fetch(PDO::FETCH_ASSOC);
         
         echo "<div class='table-info'>";
@@ -272,10 +272,10 @@ try {
         if ($tableStatus['Data_length']) {
             echo " | <strong>Boyut:</strong> " . formatBytes($tableStatus['Data_length']);
         }
-        echo "</div>";
+        echo "</div>"; */
 
         // Kolonlar
-        echo "<h3>🔧 Kolonlar</h3>";
+        /* echo "<h3>🔧 Kolonlar</h3>"; */
         $stmt = $pdo->query("DESCRIBE `$table`");
         $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
@@ -321,7 +321,7 @@ try {
         echo "</table>";
 
         // İndeksler
-        try {
+        /* try {
             $stmt = $pdo->query("SHOW INDEX FROM `$table`");
             $indexes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
@@ -342,7 +342,7 @@ try {
             }
         } catch (Exception $e) {
             echo "<div class='export-info'>⚠️ İndeks bilgileri alınamadı: " . $e->getMessage() . "</div>";
-        }
+        } */
 
         // Foreign Key'ler
         try {
@@ -377,7 +377,7 @@ try {
                 echo "</table>";
             }
         } catch (Exception $e) {
-            echo "<div class='export-info'>⚠️ Foreign Key bilgileri alınamadı: " . $e->getMessage() . "</div>";
+            /* echo "<div class='export-info'>⚠️ Foreign Key bilgileri alınamadı: " . $e->getMessage() . "</div>"; */
         }
 
         echo "<hr style='margin: 30px 0; border: none; height: 2px; background: linear-gradient(90deg, #3498db, #2980b9);'>";

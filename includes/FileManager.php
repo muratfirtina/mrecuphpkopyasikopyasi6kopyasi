@@ -17,12 +17,18 @@ if (!function_exists('generateUUID')) {
     }
 }
 
-
 class FileManager {
     private $pdo;
+    private $emailManager;
     
     public function __construct($database) {
         $this->pdo = $database;
+        
+        // EmailManager'ı include et ve oluştur
+        if (file_exists(__DIR__ . '/EmailManager.php')) {
+            require_once __DIR__ . '/EmailManager.php';
+            $this->emailManager = new EmailManager($database);
+        }
     }
     
     public function getCurrentDateTime() {
@@ -498,6 +504,31 @@ class FileManager {
             ]);
             
             if ($result) {
+                // Email bildirimi gönder - Admin'e dosya yükleme bildirimi
+                try {
+                    $uploadData = [
+                        'user_id' => $userId,
+                        'original_name' => $fileData['name'],
+                        'brand_id' => $vehicleData['brand_id'],
+                        'model_id' => $vehicleData['model_id'],
+                        'series_id' => $vehicleData['series_id'],
+                        'engine_id' => $vehicleData['engine_id'],
+                        'year' => $vehicleData['year'],
+                        'fuel_type' => $vehicleData['fuel_type'],
+                        'gearbox_type' => $vehicleData['gearbox_type'],
+                        'upload_notes' => $notes
+                    ];
+                    
+                    $emailResult = $this->sendFileUploadNotificationToAdmin($uploadData);
+                    if ($emailResult) {
+                        error_log('Upload notification email sent successfully for upload: ' . $uploadId);
+                    } else {
+                        error_log('Failed to send upload notification email for upload: ' . $uploadId);
+                    }
+                } catch (Exception $e) {
+                    error_log('Email notification error after file upload: ' . $e->getMessage());
+                }
+                
                 // Bildirim sistemi entegrasyonu
                 try {
                     if (!class_exists('NotificationManager')) {
@@ -539,98 +570,6 @@ class FileManager {
         return generateUUID() . '.' . $extension;
     }
     
-    /**
-     * Revizyon talebi oluştur (Bildirim Entegrasyonu ile)
-     * @param string $uploadId - Upload ID
-     * @param string $userId - Kullanıcı ID
-     * @param string $requestNotes - Talep notları
-     * @param string $responseId - Yanıt dosyası ID (opsiyonel)
-     * @return array - Başarı durumu ve mesaj
-     */
-    public function requestRevision($uploadId, $userId, $requestNotes, $responseId = null) {
-        try {
-            if (!isValidUUID($uploadId) || !isValidUUID($userId)) {
-                return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
-            }
-            
-            if (empty(trim($requestNotes))) {
-                return ['success' => false, 'message' => 'Revize talebi notları gereklidir.'];
-            }
-            
-            // Upload'ın kullanıcıya ait olup olmadığını kontrol et
-            $stmt = $this->pdo->prepare("SELECT * FROM file_uploads WHERE id = ? AND user_id = ?");
-            $stmt->execute([$uploadId, $userId]);
-            $upload = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            if (!$upload) {
-                return ['success' => false, 'message' => 'Dosya bulunamadı veya yetkiniz yok.'];
-            }
-            
-            // Mevcut bekleyen revizyon var mı kontrol et
-            $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM revisions WHERE upload_id = ? AND status = 'pending'");
-            $stmt->execute([$uploadId]);
-            $pendingCount = $stmt->fetchColumn();
-            
-            if ($pendingCount > 0) {
-                return ['success' => false, 'message' => 'Bu dosya için zaten bekleyen bir revizyon talebi bulunuyor.'];
-            }
-            
-            // Yeni revizyon talebi oluştur
-            $revisionId = generateUUID();
-            
-            $stmt = $this->pdo->prepare("
-                INSERT INTO revisions (id, upload_id, user_id, request_notes, response_id, status, requested_at) 
-                VALUES (?, ?, ?, ?, ?, 'pending', NOW())
-            ");
-            
-            $result = $stmt->execute([
-                $revisionId,
-                $uploadId,
-                $userId,
-                $requestNotes,
-                $responseId
-            ]);
-            
-            if ($result) {
-                // Admin'lere bildirim gönder
-                try {
-                    if (!class_exists('NotificationManager')) {
-                        require_once __DIR__ . '/NotificationManager.php';
-                    }
-                    
-                    $notificationManager = new NotificationManager($this->pdo);
-                    $notificationResult = $notificationManager->notifyRevisionRequest(
-                        $revisionId, 
-                        $userId, 
-                        $uploadId, 
-                        $upload['original_name'], 
-                        $requestNotes
-                    );
-                    
-                    if ($notificationResult) {
-                        error_log("Revizyon talebi bildirimi gönderildi: $revisionId");
-                    } else {
-                        error_log("Revizyon talebi bildirimi gönderilemedi: $revisionId");
-                    }
-                } catch(Exception $e) {
-                    error_log('Revizyon bildirim hatası: ' . $e->getMessage());
-                    // Bildirim hatası revizyon oluşturmayı etkilemesin
-                }
-                
-                return [
-                    'success' => true, 
-                    'message' => 'Revizyon talebi başarıyla gönderildi. Admin tarafından incelenecektir.',
-                    'revision_id' => $revisionId
-                ];
-            } else {
-                return ['success' => false, 'message' => 'Revizyon talebi oluşturulamadı.'];
-            }
-            
-        } catch(PDOException $e) {
-            error_log('requestRevision error: ' . $e->getMessage());
-            return ['success' => false, 'message' => 'Veritabanı hatası oluştu.'];
-        }
-    }
     
     /**
      * Yanıt dosyası için revizyon talebi oluştur
@@ -999,6 +938,25 @@ class FileManager {
                     }
                     
                     error_log('uploadResponseFile: Credits charged successfully: ' . $creditsCharged);
+                }
+                
+                // Email bildirimi gönder - Kullanıcıya yanıt dosyası hazır bildirimi
+                try {
+                    $responseData = [
+                        'upload_id' => $uploadId,
+                        'original_name' => $fileData['name'],
+                        'admin_notes' => $responseNotes,
+                        'id' => $responseId
+                    ];
+                    
+                    $emailResult = $this->sendFileResponseNotificationToUser($responseData);
+                    if ($emailResult) {
+                        error_log('Response notification email sent successfully for response: ' . $responseId);
+                    } else {
+                        error_log('Failed to send response notification email for response: ' . $responseId);
+                    }
+                } catch (Exception $e) {
+                    error_log('Email notification error after response upload: ' . $e->getMessage());
                 }
                 
                 // Bildirim sistemi entegrasyonu
@@ -1460,6 +1418,53 @@ class FileManager {
             $result = $stmt->execute([$status, $adminNotes, $uploadId]);
             
             if ($result) {
+                // Email bildirimi gönder - Durum değişikliği için kullanıcıya
+                if ($sendNotification) {
+                    try {
+                        // Sadece önemli durum değişikliklerinde email gönder
+                        if (in_array($status, ['processing', 'completed', 'rejected'])) {
+                            $statusMessages = [
+                                'processing' => 'Dosyanız işleme alındı',
+                                'completed' => 'Dosyanız tamamlandı',
+                                'rejected' => 'Dosyanız reddedildi'
+                            ];
+                            
+                            // Kullanıcı email bilgilerini al
+                            $stmt = $this->pdo->prepare("
+                                SELECT u.email, CONCAT(u.first_name, ' ', u.last_name) as full_name
+                                FROM users u
+                                JOIN file_uploads f ON f.user_id = u.id
+                                WHERE f.id = ?
+                            ");
+                            $stmt->execute([$uploadId]);
+                            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                            
+                            if ($user && $this->emailManager) {
+                                $emailData = [
+                                    'user_name' => $user['full_name'],
+                                    'user_email' => $user['email'],
+                                    'file_name' => $upload['original_name'],
+                                    'status' => $status,
+                                    'status_message' => $statusMessages[$status],
+                                    'admin_notes' => $adminNotes,
+                                    'update_time' => date('d.m.Y H:i:s'),
+                                    'user_dashboard_url' => (getenv('SITE_URL') ?: 'http://localhost') . '/user/files.php',
+                                    'contact_url' => (getenv('SITE_URL') ?: 'http://localhost') . '/contact.php'
+                                ];
+                                
+                                $emailResult = $this->sendFileStatusUpdateNotificationToUser($emailData);
+                                if ($emailResult) {
+                                    error_log('Status update email sent successfully for upload: ' . $uploadId);
+                                } else {
+                                    error_log('Failed to send status update email for upload: ' . $uploadId);
+                                }
+                            }
+                        }
+                    } catch (Exception $e) {
+                        error_log('Email notification error after status update: ' . $e->getMessage());
+                    }
+                }
+                
                 // Sadece bildirim gönderilmesi isteniyorsa gönder
                 if ($sendNotification) {
                     try {
@@ -1583,76 +1588,689 @@ class FileManager {
         }
     }
     
+    
     /**
-     * Ek dosya yükleme (Admin veya User tarafından)
-     * @param string $relatedFileId - İlgili dosya ID (upload, response veya revision)
-     * @param string $relatedFileType - İlgili dosya tipi
+     * Dosya durumunu güncelle ve kullanıcıya bildirim gönder
+     * @param string $uploadId - Dosya ID
+     * @param string $newStatus - Yeni durum
+     * @param string $adminNotes - Admin notları
+     * @param string $adminId - Admin ID
+     * @return array - Sonuç
+     */
+    public function updateFileStatus($uploadId, $newStatus, $adminNotes = '', $adminId = null) {
+        try {
+            // Validasyon
+            if (!isValidUUID($uploadId)) {
+                return ['success' => false, 'message' => 'Geçersiz dosya ID formatı.'];
+            }
+            
+            $allowedStatuses = ['pending', 'processing', 'completed', 'rejected', 'revision_requested'];
+            if (!in_array($newStatus, $allowedStatuses)) {
+                return ['success' => false, 'message' => 'Geçersiz durum.'];
+            }
+            
+            // Dosya bilgilerini al
+            $stmt = $this->pdo->prepare("
+                SELECT fu.*, u.email, u.first_name, u.last_name
+                FROM file_uploads fu
+                LEFT JOIN users u ON fu.user_id = u.id
+                WHERE fu.id = ?
+            ");
+            $stmt->execute([$uploadId]);
+            $file = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$file) {
+                return ['success' => false, 'message' => 'Dosya bulunamadı.'];
+            }
+            
+            // Durumu güncelle
+            $this->pdo->beginTransaction();
+            
+            try {
+                $stmt = $this->pdo->prepare("
+                    UPDATE file_uploads 
+                    SET status = ?, admin_notes = ?, updated_at = NOW()
+                    WHERE id = ?
+                ");
+                $stmt->execute([$newStatus, $adminNotes, $uploadId]);
+                
+                // Eğer revizyon talebi varsa ve durum değişiyorsa, revizyon talebini güncelle
+                if ($newStatus === 'processing' || $newStatus === 'completed') {
+                    $stmt = $this->pdo->prepare("
+                        UPDATE revision_requests 
+                        SET status = 'processed', updated_at = NOW()
+                        WHERE upload_id = ? AND status = 'pending'
+                    ");
+                    $stmt->execute([$uploadId]);
+                }
+                
+                // Kullanıcıya bildirim gönder
+                try {
+                    $statusMessages = [
+                        'pending' => 'Dosyanız beklemede',
+                        'processing' => 'Dosyanız işleniyor',
+                        'completed' => 'Dosyanız tamamlandı',
+                        'rejected' => 'Dosyanız reddedildi',
+                        'revision_requested' => 'Revizyon talebi alındı'
+                    ];
+                    
+                    $statusData = [
+                        'user_name' => $file['first_name'] . ' ' . $file['last_name'],
+                        'user_email' => $file['email'],
+                        'file_name' => $file['original_name'],
+                        'status' => $newStatus,
+                        'status_message' => $statusMessages[$newStatus],
+                        'admin_notes' => $adminNotes,
+                        'update_time' => date('d.m.Y H:i:s')
+                    ];
+                    
+                    $this->sendFileStatusUpdateNotificationToUser($statusData);
+                    
+                } catch(Exception $e) {
+                    error_log('Status update notification error: ' . $e->getMessage());
+                }
+                
+                $this->pdo->commit();
+                
+                return [
+                    'success' => true,
+                    'message' => 'Dosya durumu başarıyla güncellendi.',
+                    'new_status' => $newStatus
+                ];
+                
+            } catch(Exception $e) {
+                $this->pdo->rollBack();
+                throw $e;
+            }
+            
+        } catch (Exception $e) {
+            error_log('updateFileStatus error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Sistem hatası: ' . $e->getMessage()];
+        }
+    }
+    
+    /**
+     * Revizyon talebine cevap olarak dosya yükle
+     * @param string $revisionId - Revizyon talebi ID
+     * @param array $fileData - Dosya verileri
+     * @param string $adminNotes - Admin notları
+     * @param string $adminId - Admin ID
+     * @return array - Sonuç
+     */
+    public function uploadRevisionResponse($revisionId, $fileData, $adminNotes = '', $adminId = null) {
+        try {
+            // Validasyon
+            if (!isValidUUID($revisionId)) {
+                return ['success' => false, 'message' => 'Geçersiz revizyon ID formatı.'];
+            }
+            
+            // Revizyon talebini al
+            $stmt = $this->pdo->prepare("
+                SELECT rr.*, fu.user_id, fu.original_name,
+                       u.email, u.first_name, u.last_name
+                FROM revision_requests rr
+                LEFT JOIN file_uploads fu ON rr.upload_id = fu.id
+                LEFT JOIN users u ON fu.user_id = u.id
+                WHERE rr.id = ? AND rr.status = 'pending'
+            ");
+            $stmt->execute([$revisionId]);
+            $revision = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$revision) {
+                return ['success' => false, 'message' => 'Revizyon talebi bulunamadı veya zaten işlenmiş.'];
+            }
+            
+            // Dosya kontrolleri
+            $maxSize = 50 * 1024 * 1024; // 50MB
+            if ($fileData['size'] > $maxSize) {
+                return ['success' => false, 'message' => 'Dosya boyutu çok büyük (Max: 50MB).'];
+            }
+            
+            // Upload dizini oluştur
+            $uploadDir = __DIR__ . '/../uploads/revision_files/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            
+            // Dosya adı oluştur
+            $fileExtension = pathinfo($fileData['name'], PATHINFO_EXTENSION);
+            $newFileName = generateUUID() . '_revision.' . $fileExtension;
+            $uploadPath = $uploadDir . $newFileName;
+            
+            // Dosyayı taşı
+            if (!move_uploaded_file($fileData['tmp_name'], $uploadPath)) {
+                return ['success' => false, 'message' => 'Dosya yükleme başarısız.'];
+            }
+            
+            // Veritabanına kaydet
+            $this->pdo->beginTransaction();
+            
+            try {
+                $responseFileId = generateUUID();
+                
+                // Revizyon yanıt dosyasını kaydet
+                $stmt = $this->pdo->prepare("
+                    INSERT INTO revision_response_files (
+                        id, revision_id, original_name, file_name, file_path, 
+                        file_size, file_type, admin_notes, uploaded_by, upload_date
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                ");
+                
+                $stmt->execute([
+                    $responseFileId,
+                    $revisionId,
+                    $fileData['name'],
+                    $newFileName,
+                    $uploadPath,
+                    $fileData['size'],
+                    $fileData['type'],
+                    $adminNotes,
+                    $adminId
+                ]);
+                
+                // Revizyon talebini tamamlanmış olarak işaretle
+                $stmt = $this->pdo->prepare("
+                    UPDATE revision_requests 
+                    SET status = 'completed', updated_at = NOW()
+                    WHERE id = ?
+                ");
+                $stmt->execute([$revisionId]);
+                
+                // Ana dosyanın durumunu tamamlanmış olarak güncelle
+                $stmt = $this->pdo->prepare("
+                    UPDATE file_uploads 
+                    SET status = 'completed', admin_notes = ?, updated_at = NOW()
+                    WHERE id = ?
+                ");
+                $stmt->execute([$adminNotes, $revision['upload_id']]);
+                
+                // Kullanıcıya email bildirim gönder
+                try {
+                    $emailData = [
+                        'user_name' => $revision['first_name'] . ' ' . $revision['last_name'],
+                        'user_email' => $revision['email'],
+                        'original_file_name' => $revision['original_name'],
+                        'response_file_name' => $fileData['name'],
+                        'admin_notes' => $adminNotes,
+                        'response_time' => date('d.m.Y H:i:s'),
+                        'download_url' => (getenv('SITE_URL') ?: 'http://localhost') . '/user/revisions.php'
+                    ];
+                    
+                    $this->sendFileResponseNotificationToUser($emailData, $revision['email']);
+                    
+                } catch(Exception $e) {
+                    error_log('Revision response notification error: ' . $e->getMessage());
+                }
+                
+                $this->pdo->commit();
+                
+                return [
+                    'success' => true,
+                    'message' => 'Revizyon yanıtı başarıyla yüklendi.',
+                    'response_file_id' => $responseFileId
+                ];
+                
+            } catch(Exception $e) {
+                $this->pdo->rollBack();
+                
+                // Yüklenen dosyayı sil
+                if (file_exists($uploadPath)) {
+                    unlink($uploadPath);
+                }
+                
+                throw $e;
+            }
+            
+        } catch (Exception $e) {
+            error_log('uploadRevisionResponse error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Sistem hatası: ' . $e->getMessage()];
+        }
+    }
+    
+    /**
+     * Tüm ek dosyaları getir (Admin için)
+     * @param int $page - Sayfa numarası
+     * @param int $limit - Sayfa başına dosya sayısı
+     * @param string $search - Arama terimi
+     * @return array - Ek dosyalar listesi
+     */
+    public function getAllAdditionalFiles($page = 1, $limit = 20, $search = '') {
+        try {
+            $offset = ($page - 1) * $limit;
+            $whereClause = "WHERE 1=1";
+            $params = [];
+            
+            if ($search) {
+                $whereClause .= " AND (af.original_name LIKE ? OR af.notes LIKE ? OR sender.first_name LIKE ? OR receiver.first_name LIKE ?)";
+                $searchTerm = "%$search%";
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+            }
+            
+            $sql = "
+                SELECT af.*, 
+                       sender.username as sender_username, sender.first_name as sender_first_name, sender.last_name as sender_last_name,
+                       receiver.username as receiver_username, receiver.first_name as receiver_first_name, receiver.last_name as receiver_last_name,
+                       fu.original_name as related_file_name
+                FROM additional_files af
+                LEFT JOIN users sender ON af.sender_id = sender.id
+                LEFT JOIN users receiver ON af.receiver_id = receiver.id
+                LEFT JOIN file_uploads fu ON af.related_file_id = fu.id
+                {$whereClause}
+                ORDER BY af.upload_date DESC
+                LIMIT " . intval($limit) . " OFFSET " . intval($offset);
+            
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch(PDOException $e) {
+            error_log('getAllAdditionalFiles error: ' . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Tüm ek dosya sayısını getir (Admin için)
+     * @param string $search - Arama terimi
+     * @return int - Toplam dosya sayısı
+     */
+    public function getAllAdditionalFilesCount($search = '') {
+        try {
+            $whereClause = "WHERE 1=1";
+            $params = [];
+            
+            if ($search) {
+                $whereClause .= " AND (af.original_name LIKE ? OR af.notes LIKE ? OR sender.first_name LIKE ? OR receiver.first_name LIKE ?)";
+                $searchTerm = "%$search%";
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+                $params[] = $searchTerm;
+            }
+            
+            $sql = "
+                SELECT COUNT(*) as count
+                FROM additional_files af
+                LEFT JOIN users sender ON af.sender_id = sender.id
+                LEFT JOIN users receiver ON af.receiver_id = receiver.id
+                {$whereClause}
+            ";
+            
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['count'] ?? 0;
+            
+        } catch(PDOException $e) {
+            error_log('getAllAdditionalFilesCount error: ' . $e->getMessage());
+            return 0;
+        }
+    }
+    
+    /**
+     * Araç bilgilerini al
+     * @param array $uploadData - Yükleme verileri
+     * @return array - Araç bilgileri
+     */
+    private function getVehicleInfo($uploadData) {
+        $vehicleInfo = [
+            'brand' => 'Bilinmiyor',
+            'model' => 'Bilinmiyor',
+            'series' => 'Bilinmiyor',
+            'engine' => 'Bilinmiyor'
+        ];
+        
+        try {
+            // Marka adını al
+            if (!empty($uploadData['brand_id'])) {
+                $stmt = $this->pdo->prepare("SELECT name FROM brands WHERE id = ?");
+                $stmt->execute([$uploadData['brand_id']]);
+                $brand = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($brand) $vehicleInfo['brand'] = $brand['name'];
+            }
+            
+            // Model adını al
+            if (!empty($uploadData['model_id'])) {
+                $stmt = $this->pdo->prepare("SELECT name FROM models WHERE id = ?");
+                $stmt->execute([$uploadData['model_id']]);
+                $model = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($model) $vehicleInfo['model'] = $model['name'];
+            }
+            
+            // Seri adını al
+            if (!empty($uploadData['series_id'])) {
+                $stmt = $this->pdo->prepare("SELECT name FROM series WHERE id = ?");
+                $stmt->execute([$uploadData['series_id']]);
+                $series = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($series) $vehicleInfo['series'] = $series['name'];
+            }
+            
+            // Motor adını al
+            if (!empty($uploadData['engine_id'])) {
+                $stmt = $this->pdo->prepare("SELECT name FROM engines WHERE id = ?");
+                $stmt->execute([$uploadData['engine_id']]);
+                $engine = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($engine) $vehicleInfo['engine'] = $engine['name'];
+            }
+            
+        } catch (Exception $e) {
+            error_log('getVehicleInfo error: ' . $e->getMessage());
+        }
+        
+        return $vehicleInfo;
+    }
+    
+    /**
+     * Admin email adreslerini getir
+     * @return array - Admin email listesi
+     */
+    private function getAdminEmails() {
+        try {
+            $stmt = $this->pdo->prepare("SELECT email FROM users WHERE role = 'admin' AND status = 'active' AND email_verified = 1");
+            $stmt->execute();
+            
+            $emails = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $emails[] = $row['email'];
+            }
+            
+            // Fallback admin email
+            if (empty($emails)) {
+                $emails[] = 'admin@mrecu.com'; // Varsayılan admin email
+            }
+            
+            return $emails;
+            
+        } catch(PDOException $e) {
+            error_log('getAdminEmails error: ' . $e->getMessage());
+            return ['admin@mrecu.com']; // Fallback
+        }
+    }
+    
+    /**
+     * Kullanıcı dosya yüklediğinde admin'e email gönder
+     * @param array $uploadData - Yükleme verileri
+     * @return bool - Başarı durumu
+     */
+    public function sendFileUploadNotificationToAdmin($uploadData) {
+        if (!$this->emailManager) {
+            error_log('EmailManager not available for file upload notification');
+            return false;
+        }
+        
+        try {
+            // Kullanıcı bilgilerini al
+            $stmt = $this->pdo->prepare("
+                SELECT email, first_name, last_name, phone 
+                FROM users WHERE id = ?
+            ");
+            $stmt->execute([$uploadData['user_id']]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$user) {
+                error_log('User not found for file upload notification: ' . $uploadData['user_id']);
+                return false;
+            }
+            
+            // Araç bilgilerini al
+            $vehicleInfo = $this->getVehicleInfo($uploadData);
+            
+            // Admin email adresini al
+            $adminEmails = $this->getAdminEmails();
+            
+            $emailData = [
+                'user_name' => $user['first_name'] . ' ' . $user['last_name'],
+                'user_email' => $user['email'],
+                'user_phone' => $user['phone'] ?? '',
+                'file_name' => $uploadData['original_name'],
+                'vehicle_brand' => $vehicleInfo['brand'],
+                'vehicle_model' => $vehicleInfo['model'],
+                'vehicle_series' => $vehicleInfo['series'],
+                'vehicle_engine' => $vehicleInfo['engine'],
+                'vehicle_year' => $uploadData['year'] ?? '',
+                'fuel_type' => $uploadData['fuel_type'] ?? '',
+                'gearbox_type' => $uploadData['gearbox_type'] ?? '',
+                'upload_notes' => $uploadData['upload_notes'] ?? '',
+                'upload_time' => date('d.m.Y H:i:s'),
+                'admin_url' => (getenv('SITE_URL') ?: 'http://localhost') . '/admin/uploads.php'
+            ];
+            
+            // Tüm admin'lere email gönder
+            $success = true;
+            foreach ($adminEmails as $adminEmail) {
+                $result = $this->emailManager->sendFileUploadNotificationToAdmin($emailData, $adminEmail);
+                if (!$result) {
+                    $success = false;
+                    error_log('Failed to send upload notification to admin: ' . $adminEmail);
+                }
+            }
+            
+            return $success;
+            
+        } catch (Exception $e) {
+            error_log('sendFileUploadNotificationToAdmin error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Admin dosya yanıtladığında kullanıcıya bildirim gönder
+     * @param array $responseData - Yanıt verileri
+     * @return bool - Başarı durumu
+     */
+    public function sendFileResponseNotificationToUser($responseData) {
+        if (!$this->emailManager) {
+            error_log('EmailManager not available for file response notification');
+            return false;
+        }
+        
+        try {
+            // Orijinal dosya ve kullanıcı bilgilerini al
+            $stmt = $this->pdo->prepare("
+                SELECT fu.original_name as original_file, fu.user_id,
+                       u.email, u.first_name, u.last_name
+                FROM file_uploads fu
+                INNER JOIN users u ON fu.user_id = u.id
+                WHERE fu.id = ?
+            ");
+            $stmt->execute([$responseData['upload_id']]);
+            $uploadInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$uploadInfo) {
+                error_log('Upload info not found for response notification');
+                return false;
+            }
+            
+            $emailData = [
+                'user_name' => $uploadInfo['first_name'] . ' ' . $uploadInfo['last_name'],
+                'original_file_name' => $uploadInfo['original_file'],
+                'response_file_name' => $responseData['original_name'],
+                'admin_notes' => $responseData['admin_notes'] ?? '',
+                'response_time' => date('d.m.Y H:i:s'),
+                'download_url' => (getenv('SITE_URL') ?: 'http://localhost') . '/user/files.php'
+            ];
+            
+            return $this->emailManager->sendFileResponseNotificationToUser($emailData, $uploadInfo['email']);
+            
+        } catch (Exception $e) {
+            error_log('sendFileResponseNotificationToUser error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Kullanıcı revizyon talep ettiğinde admin'e bildirim gönder
+     * @param array $revisionData - Revizyon verileri
+     * @return bool - Başarı durumu
+     */
+    public function sendRevisionRequestNotificationToAdmin($revisionData) {
+        if (!$this->emailManager) {
+            error_log('EmailManager not available for revision notification');
+            return false;
+        }
+        
+        try {
+            // Kullanıcı ve dosya bilgilerini al
+            $stmt = $this->pdo->prepare("
+                SELECT fu.original_name, fu.user_id,
+                       u.email, u.first_name, u.last_name
+                FROM file_uploads fu
+                INNER JOIN users u ON fu.user_id = u.id
+                WHERE fu.id = ?
+            ");
+            $stmt->execute([$revisionData['upload_id']]);
+            $uploadInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$uploadInfo) {
+                error_log('Upload info not found for revision notification');
+                return false;
+            }
+            
+            // Admin email adreslerini al
+            $adminEmails = $this->getAdminEmails();
+            
+            $emailData = [
+                'user_name' => $uploadInfo['first_name'] . ' ' . $uploadInfo['last_name'],
+                'user_email' => $uploadInfo['email'],
+                'file_name' => $uploadInfo['original_name'],
+                'revision_notes' => $revisionData['request_notes'] ?? '',
+                'request_time' => date('d.m.Y H:i:s'),
+                'admin_url' => (getenv('SITE_URL') ?: 'http://localhost') . '/admin/revisions.php'
+            ];
+            
+            // Tüm admin'lere email gönder
+            $success = true;
+            foreach ($adminEmails as $adminEmail) {
+                $result = $this->emailManager->sendRevisionRequestNotificationToAdmin($emailData, $adminEmail);
+                if (!$result) {
+                    $success = false;
+                    error_log('Failed to send revision notification to admin: ' . $adminEmail);
+                }
+            }
+            
+            return $success;
+            
+        } catch (Exception $e) {
+            error_log('sendRevisionRequestNotificationToAdmin error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Dosya durumu güncellendiğinde kullanıcıya bildirim gönder
+     * @param array $statusData - Durum verileri
+     * @return bool - Başarı durumu
+     */
+    public function sendFileStatusUpdateNotificationToUser($statusData) {
+        if (!$this->emailManager) {
+            error_log('EmailManager not available for status update notification');
+            return false;
+        }
+        
+        try {
+            // Gerekli alanları kontrol et
+            if (!isset($statusData['user_email']) || !isset($statusData['file_name'])) {
+                error_log('Missing required fields for status update notification');
+                return false;
+            }
+            
+            // Varsayılan değerleri ayarla
+            if (!isset($statusData['status_message'])) {
+                $statusMessages = [
+                    'pending' => 'Dosyanız beklemede',
+                    'processing' => 'Dosyanız işleniyor',
+                    'completed' => 'Dosyanız tamamlandı',
+                    'rejected' => 'Dosyanız reddedildi'
+                ];
+                $statusData['status_message'] = $statusMessages[$statusData['status']] ?? 'Dosya durumu güncellendi';
+            }
+            
+            if (!isset($statusData['update_time'])) {
+                $statusData['update_time'] = date('d.m.Y H:i:s');
+            }
+            
+            if (!isset($statusData['user_dashboard_url'])) {
+                $statusData['user_dashboard_url'] = (getenv('SITE_URL') ?: 'http://localhost') . '/user/files.php';
+            }
+            
+            if (!isset($statusData['contact_url'])) {
+                $statusData['contact_url'] = (getenv('SITE_URL') ?: 'http://localhost') . '/contact.php';
+            }
+            
+            // EmailManager'a yönlendir
+            return $this->emailManager->sendFileStatusUpdateNotificationToUser($statusData);
+            
+        } catch (Exception $e) {
+            error_log('FileManager::sendFileStatusUpdateNotificationToUser error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Ek dosya yükle
+     * @param string $relatedFileId - İlgili dosya ID
+     * @param string $relatedFileType - İlgili dosya tipi (upload/response)
      * @param string $senderId - Gönderen ID
      * @param string $senderType - Gönderen tipi (user/admin)
      * @param string $receiverId - Alıcı ID
      * @param string $receiverType - Alıcı tipi (user/admin)
-     * @param array $fileData - Dosya bilgileri ($_FILES['file'])
+     * @param array $fileData - Dosya verileri
      * @param string $notes - Notlar
-     * @param float $credits - Ücret (sadece admin için)
-     * @return array - Başarı durumu ve mesaj
+     * @param float $credits - Kredi miktarı
+     * @return array - Sonuç
      */
     public function uploadAdditionalFile($relatedFileId, $relatedFileType, $senderId, $senderType, $receiverId, $receiverType, $fileData, $notes = '', $credits = 0) {
         try {
-            // ID kontrolleri
+            // Validasyon
             if (!isValidUUID($relatedFileId) || !isValidUUID($senderId) || !isValidUUID($receiverId)) {
                 return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
             }
             
-            // Dosya kontrolü
-            if (!isset($fileData['tmp_name']) || !is_uploaded_file($fileData['tmp_name'])) {
-                return ['success' => false, 'message' => 'Dosya yükleme hatası.'];
+            // Dosya kontrolleri
+            $allowedTypes = ['application/zip', 'application/x-zip-compressed', 'application/octet-stream', 'text/plain', 'image/jpeg', 'image/png', 'image/gif'];
+            $maxSize = 50 * 1024 * 1024; // 50MB
+            
+            if ($fileData['size'] > $maxSize) {
+                return ['success' => false, 'message' => 'Dosya boyutu çok büyük (Max: 50MB).'];
             }
             
-            if ($fileData['error'] !== UPLOAD_ERR_OK) {
-                return ['success' => false, 'message' => 'Dosya yükleme hatası: ' . $fileData['error']];
-            }
-            
-            // Dosya boyut kontrolü
-            if ($fileData['size'] > MAX_FILE_SIZE) {
-                return ['success' => false, 'message' => 'Dosya boyutu çok büyük. Maksimum ' . formatFileSize(MAX_FILE_SIZE) . ' olabilir.'];
-            }
-            
-            // Dosya uzantı kontrolü kaldırıldı - TÜM DOSYA TÜRLERİNE İZİN VER
-            $fileExtension = strtolower(pathinfo($fileData['name'], PATHINFO_EXTENSION));
-            // Artık tüm dosya formatlarına izin veriliyor - kontrol yok
-            
-            // Benzersiz dosya adı oluştur
-            $fileName = generateUUID() . '_additional.' . $fileExtension;
-            $uploadDir = UPLOAD_PATH . 'additional_files/';
-            $uploadPath = $uploadDir . $fileName;
-            
-            // Upload dizinini oluştur
+            // Upload dizini oluştur
+            $uploadDir = __DIR__ . '/../uploads/additional_files/';
             if (!is_dir($uploadDir)) {
-                if (!mkdir($uploadDir, 0755, true)) {
-                    return ['success' => false, 'message' => 'Upload dizini oluşturulamadı.'];
-                }
+                mkdir($uploadDir, 0755, true);
             }
+            
+            // Dosya adı oluştur
+            $fileExtension = pathinfo($fileData['name'], PATHINFO_EXTENSION);
+            $newFileName = generateUUID() . '_additional.' . $fileExtension;
+            $uploadPath = $uploadDir . $newFileName;
             
             // Dosyayı taşı
             if (!move_uploaded_file($fileData['tmp_name'], $uploadPath)) {
-                return ['success' => false, 'message' => 'Dosya yükleme sırasında hata oluştu.'];
+                return ['success' => false, 'message' => 'Dosya yükleme başarısız.'];
             }
             
-            // Transaction başlat
+            // Veritabanına kaydet
             $this->pdo->beginTransaction();
             
             try {
-                // Veritabanına kaydet
                 $additionalFileId = generateUUID();
+                
                 $stmt = $this->pdo->prepare("
                     INSERT INTO additional_files (
-                        id, related_file_id, related_file_type, sender_id, sender_type,
-                        receiver_id, receiver_type, original_name, file_name, file_path,
-                        file_size, file_type, notes, credits, upload_date, is_read
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 0)
+                        id, related_file_id, related_file_type, 
+                        sender_id, sender_type, receiver_id, receiver_type,
+                        original_name, file_name, file_path, file_size, file_type,
+                        notes, credits, upload_date, is_read, is_cancelled
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 0, 0)
                 ");
                 
-                $result = $stmt->execute([
+                $stmt->execute([
                     $additionalFileId,
                     $relatedFileId,
                     $relatedFileType,
@@ -1661,71 +2279,158 @@ class FileManager {
                     $receiverId,
                     $receiverType,
                     $fileData['name'],
-                    $fileName,
+                    $newFileName,
                     $uploadPath,
                     $fileData['size'],
-                    $fileExtension,
+                    $fileData['type'],
                     $notes,
                     $credits
                 ]);
                 
-                if (!$result) {
-                    throw new Exception('Veritabanı kaydı oluşturulamadı.');
-                }
-                
-                // Eğer admin user'a dosya gönderdiyse ve ücret belirlenmişse kredi düşür
-                if ($senderType === 'admin' && $receiverType === 'user' && $credits > 0) {
+                // Kredi düşürme işlemi (eğer belirtilmişse ve gönderen admin ise)
+                if ($credits > 0 && $senderType === 'admin') {
+                    // User sınıfını dahil et
                     if (!class_exists('User')) {
                         require_once __DIR__ . '/User.php';
                     }
                     
                     $user = new User($this->pdo);
                     
-                    // Ters kredi sistemi - kredi_used'ı artır
+                    // Kullanıcıdan kredi düşür
                     $creditResult = $user->addCreditDirectSimple(
-                        $receiverId,
-                        $credits,
-                        'additional_file_charge',
-                        'Ek dosya ücreti: ' . $fileData['name'] . ($notes ? ' - ' . $notes : '')
+                        $receiverId, 
+                        $credits, 
+                        'additional_file_charge', 
+                        'Ek dosya ücreti: ' . $fileData['name'] . ' (Gönderen: ' . ($senderType === 'admin' ? 'Admin' : 'Kullanıcı') . ')'
                     );
                     
                     if (!$creditResult) {
-                        throw new Exception('Kredi düşürme işlemi başarısız.');
+                        // Kredi düşürülemezse işlemi geri al
+                        $this->pdo->rollBack();
+                        
+                        // Yüklenen dosyayı sil
+                        if (file_exists($uploadPath)) {
+                            unlink($uploadPath);
+                        }
+                        
+                        return ['success' => false, 'message' => 'Kredi düşürme işlemi başarısız. Yetersiz bakiye.'];
                     }
+                    
+                    error_log('uploadAdditionalFile: Credits charged successfully: ' . $credits . ' to user: ' . $receiverId);
                 }
                 
-                // Bildirim gönder
+                // İlgili dosya adını al
+                $relatedFileName = 'Bilinmiyor';
                 try {
-                    if (!class_exists('NotificationManager')) {
-                        require_once __DIR__ . '/NotificationManager.php';
+                    if ($relatedFileType === 'upload') {
+                        $stmt = $this->pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
+                        $stmt->execute([$relatedFileId]);
+                        $related = $stmt->fetch(PDO::FETCH_ASSOC);
+                        if ($related) $relatedFileName = $related['original_name'];
                     }
-                    
+                    error_log('uploadAdditionalFile: Related file name: ' . $relatedFileName);
+                } catch(Exception $e) {
+                    error_log('uploadAdditionalFile: Related file name fetch error: ' . $e->getMessage());
+                }
+                
+                // Bildirim gönder (sistem bildirimi) - DETAYLI DEBUG
+                error_log('uploadAdditionalFile: Starting notification process...');
+                error_log('uploadAdditionalFile: Sender: ' . $senderId . ' (' . $senderType . '), Receiver: ' . $receiverId . ' (' . $receiverType . ')');
+                
+                if (!class_exists('NotificationManager')) {
+                    error_log('uploadAdditionalFile: Including NotificationManager.php');
+                    require_once __DIR__ . '/NotificationManager.php';
+                }
+                
+                try {
                     $notificationManager = new NotificationManager($this->pdo);
+                    error_log('uploadAdditionalFile: NotificationManager created successfully');
                     
-                    $notificationTitle = $senderType === 'admin' ? 'Admin size dosya gönderdi' : 'Kullanıcı size dosya gönderdi';
-                    $notificationMessage = 'Yeni bir dosya aldınız: ' . $fileData['name'];
-                    if ($notes) {
-                        $notificationMessage .= ' - Not: ' . $notes;
+                    // Gönderici ve alıcı tipine göre doğru bildirimi gönder
+                    if ($senderType === 'user' && $receiverType === 'admin') {
+                        // Kullanıcıdan Admin'e
+                        error_log('uploadAdditionalFile: Sending notification from user to admin');
+                        $notificationResult = $notificationManager->notifyAdditionalFileToAdmin(
+                            $additionalFileId,
+                            $senderId,
+                            $fileData['name'],
+                            $notes,
+                            $relatedFileName,
+                            $relatedFileId
+                        );
+                        error_log('uploadAdditionalFile: User to admin notification result: ' . ($notificationResult ? 'success' : 'failed'));
+                        
+                    } elseif ($senderType === 'admin' && $receiverType === 'user') {
+                        // Admin'den Kullanıcıya
+                        error_log('uploadAdditionalFile: Sending notification from admin to user');
+                        $notificationResult = $notificationManager->notifyAdditionalFileToUser(
+                            $additionalFileId,
+                            $receiverId,
+                            $fileData['name'],
+                            $notes,
+                            $credits,
+                            $relatedFileName,
+                            $relatedFileId
+                        );
+                        error_log('uploadAdditionalFile: Admin to user notification result: ' . ($notificationResult ? 'success' : 'failed'));
+                        
+                    } else {
+                        // Diğer durumlar için genel bildirim
+                        error_log('uploadAdditionalFile: Sending generic notification');
+                        $notificationTitle = 'Yeni Ek Dosya';
+                        $notificationMessage = 'Yeni ek dosya aldınız: ' . $fileData['name'];
+                        
+                        if ($notes) {
+                            $notificationMessage .= ' - Not: ' . $notes;
+                        }
+                        
+                        if ($credits > 0) {
+                            $notificationMessage .= ' (Ücret: ' . $credits . ' kredi)';
+                        }
+                        
+                        $notificationResult = $notificationManager->createNotification(
+                            $receiverId,
+                            'additional_file',
+                            $notificationTitle,
+                            $notificationMessage,
+                            $additionalFileId,
+                            'additional_file',
+                            'additional-files.php'
+                        );
+                        error_log('uploadAdditionalFile: Generic notification result: ' . ($notificationResult ? 'success' : 'failed'));
                     }
-                    if ($credits > 0) {
-                        $notificationMessage .= ' (Ücret: ' . $credits . ' kredi)';
+                    
+                    if ($notificationResult) {
+                        error_log('uploadAdditionalFile: Notification sent successfully to: ' . $receiverId);
+                    } else {
+                        error_log('uploadAdditionalFile: Notification failed to send to: ' . $receiverId);
+                        // Manuel notification database kontrolü
+                        try {
+                            $stmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)");
+                            $stmt->execute([$receiverId]);
+                            $recentNotifCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+                            error_log('uploadAdditionalFile: Recent notifications for user ' . $receiverId . ': ' . $recentNotifCount);
+                        } catch(Exception $e) {
+                            error_log('uploadAdditionalFile: Error checking recent notifications: ' . $e->getMessage());
+                        }
                     }
                     
-                    $actionUrl = $receiverType === 'admin' ? 
-                        'admin/file-detail.php?id=' . $relatedFileId : 
-                        'user/file-detail.php?id=' . $relatedFileId;
-                    
-                    $notificationManager->createNotification(
-                        $receiverId,
-                        'additional_file_received',
-                        $notificationTitle,
-                        $notificationMessage,
+                } catch(Exception $e) {
+                    error_log('uploadAdditionalFile: Notification error: ' . $e->getMessage());
+                    error_log('uploadAdditionalFile: Notification error stack: ' . $e->getTraceAsString());
+                    // Bildirim hatası ana işlemi etkilemesin
+                }
+                
+                // Email bildirim gönder
+                try {
+                    $this->sendAdditionalFileNotification(
+                        $additionalFileId,
                         $relatedFileId,
                         'additional_file',
-                        $actionUrl
+                        $senderId . '/' . $senderType
                     );
                 } catch(Exception $e) {
-                    error_log('Additional file notification error: ' . $e->getMessage());
+                    error_log('Additional file email notification error: ' . $e->getMessage());
                 }
                 
                 // Transaction commit
@@ -1733,7 +2438,7 @@ class FileManager {
                 
                 return [
                     'success' => true,
-                    'message' => 'Dosya başarıyla gönderildi.',
+                    'message' => 'Ek dosya başarıyla yüklendi.',
                     'file_id' => $additionalFileId
                 ];
                 
@@ -1779,12 +2484,12 @@ class FileManager {
                 LEFT JOIN users sender ON af.sender_id = sender.id
                 LEFT JOIN users receiver ON af.receiver_id = receiver.id
                 WHERE af.related_file_id = ?
-                AND ((af.sender_id = ? AND af.sender_type = ?) OR (af.receiver_id = ? AND af.receiver_type = ?))
+                AND ((af.sender_id = ? AND af.sender_type = ?) OR (af.receiver_id = ? AND af.receiver_type = ?) OR ? = 'admin')
                 {$cancelledCondition}
                 ORDER BY af.upload_date DESC
             ");
             
-            $stmt->execute([$relatedFileId, $userId, $userType, $userId, $userType]);
+            $stmt->execute([$relatedFileId, $userId, $userType, $userId, $userType, $userType]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
             
         } catch(PDOException $e) {
@@ -1812,10 +2517,10 @@ class FileManager {
             $stmt = $this->pdo->prepare("
                 SELECT * FROM additional_files
                 WHERE id = ?
-                AND ((sender_id = ? AND sender_type = ?) OR (receiver_id = ? AND receiver_type = ?))
+                AND ((sender_id = ? AND sender_type = ?) OR (receiver_id = ? AND receiver_type = ?) OR ? = 'admin')
                 {$cancelledCondition}
             ");
-            $stmt->execute([$fileId, $userId, $userType, $userId, $userType]);
+            $stmt->execute([$fileId, $userId, $userType, $userId, $userType, $userType]);
             $file = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if (!$file) {
@@ -1880,6 +2585,218 @@ class FileManager {
         } catch(PDOException $e) {
             error_log('getUnreadAdditionalFilesCount error: ' . $e->getMessage());
             return 0;
+        }
+    }
+    
+    /**
+     * Ek dosya bildirimini gönder
+     * @param string $fileId - Ek dosya ID
+     * @param string $relatedFileId - İlgili dosya ID
+     * @param string $notificationType - Bildirim tipi
+     * @param string $actionUrl - Eylem URL'i
+     * @return bool - Başarı durumu
+     */
+    public function sendAdditionalFileNotification($fileId, $relatedFileId, $notificationType, $actionUrl) {
+        try {
+            if (!$this->emailManager) {
+                error_log('EmailManager not available for additional file notification');
+                return false;
+            }
+            
+            // Ek dosya bilgilerini al
+            $stmt = $this->pdo->prepare("
+                SELECT af.*, 
+                       sender.email as sender_email, sender.first_name as sender_first_name, sender.last_name as sender_last_name,
+                       receiver.email as receiver_email, receiver.first_name as receiver_first_name, receiver.last_name as receiver_last_name
+                FROM additional_files af
+                LEFT JOIN users sender ON af.sender_id = sender.id
+                LEFT JOIN users receiver ON af.receiver_id = receiver.id
+                WHERE af.id = ?
+            ");
+            $stmt->execute([$fileId]);
+            $fileData = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$fileData) {
+                error_log('Additional file not found for notification: ' . $fileId);
+                return false;
+            }
+            
+            // İlgili dosya adını al
+            $relatedFileName = 'Bilinmiyor';
+            if ($fileData['related_file_type'] === 'upload') {
+                $stmt = $this->pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
+                $stmt->execute([$relatedFileId]);
+                $related = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($related) $relatedFileName = $related['original_name'];
+            }
+            
+            $emailData = [
+                'sender_name' => $fileData['sender_first_name'] . ' ' . $fileData['sender_last_name'],
+                'sender_email' => $fileData['sender_email'],
+                'receiver_name' => $fileData['receiver_first_name'] . ' ' . $fileData['receiver_last_name'],
+                'receiver_email' => $fileData['receiver_email'],
+                'file_name' => $fileData['original_name'],
+                'notes' => $fileData['notes'] ?? '',
+                'related_file_name' => $relatedFileName,
+                'upload_time' => date('d.m.Y H:i:s'),
+                'admin_url' => (getenv('SITE_URL') ?: 'http://localhost') . '/admin/additional-files.php',
+                'download_url' => (getenv('SITE_URL') ?: 'http://localhost') . '/user/additional-files.php'
+            ];
+            
+            // Alıcıya göre email gönder
+            $isToAdmin = ($fileData['receiver_type'] === 'admin');
+            return $this->emailManager->sendAdditionalFileNotification($emailData, $isToAdmin);
+            
+        } catch (Exception $e) {
+            error_log('sendAdditionalFileNotification error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+ * Revizyon talebi oluştur
+ * @param string $uploadId - Dosya ID
+ * @param string $userId - Kullanıcı ID
+ * @param string $revisionNotes - Revizyon notları
+ * @param string $responseId - Yanıt dosyası ID (opsiyonel)
+ * @return array - Sonuç
+ */
+public function requestRevision($uploadId, $userId, $revisionNotes, $responseId = null) {
+    try {
+        // Validasyon
+        if (!isValidUUID($uploadId) || !isValidUUID($userId)) {
+            return ['success' => false, 'message' => 'Geçersiz ID formatı.'];
+        }
+        
+        if (empty(trim($revisionNotes))) {
+            return ['success' => false, 'message' => 'Revizyon notları gereklidir.'];
+        }
+        
+        // Dosyanın kullanıcıya ait olup olmadığını kontrol et
+        $stmt = $this->pdo->prepare("SELECT * FROM file_uploads WHERE id = ? AND user_id = ?");
+        $stmt->execute([$uploadId, $userId]);
+        $file = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$file) {
+            return ['success' => false, 'message' => 'Dosya bulunamadı veya yetkiniz yok.'];
+        }
+        
+        // Dosyanın durumunu kontrol et
+        if ($file['status'] !== 'completed') {
+            return ['success' => false, 'message' => 'Sadece tamamlanmış dosyalar için revizyon talebi oluşturulabilir.'];
+        }
+        
+        // Aktif revizyon talebi var mı kontrol et
+        $stmt = $this->pdo->prepare("
+            SELECT COUNT(*) as count 
+            FROM revisions 
+            WHERE upload_id = ? AND status = 'pending'
+        ");
+        $stmt->execute([$uploadId]);
+        $activeRequests = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        
+        if ($activeRequests > 0) {
+            return ['success' => false, 'message' => 'Bu dosya için zaten aktif bir revizyon talebi var.'];
+        }
+        
+        // Revizyon talebi oluştur
+        $this->pdo->beginTransaction();
+        
+        try {
+            $revisionId = generateUUID();
+            
+            $stmt = $this->pdo->prepare("
+                INSERT INTO revisions (
+                    id, upload_id, user_id, request_notes, 
+                    status, requested_at, response_id
+                ) VALUES (?, ?, ?, ?, 'pending', NOW(), ?)
+            ");
+            
+            $stmt->execute([$revisionId, $uploadId, $userId, $revisionNotes, $responseId]);
+            
+            // Ana dosyanın revizyon sayısını artır
+            $stmt = $this->pdo->prepare("
+                UPDATE file_uploads 
+                SET revision_count = COALESCE(revision_count, 0) + 1
+                WHERE id = ?
+            ");
+            $stmt->execute([$uploadId]);
+            
+            // Admin'e bildirim gönder
+            try {
+                // NotificationManager ile bildirim
+                if (!class_exists('NotificationManager')) {
+                    require_once __DIR__ . '/NotificationManager.php';
+                }
+                
+                $notificationManager = new NotificationManager($this->pdo);
+                $notificationManager->notifyRevisionRequest($revisionId, $userId, $uploadId, $file['original_name'], $revisionNotes);
+                
+                // Ekstra: Eski fonksiyonla mail gönderimi
+                $this->sendRevisionRequestNotificationToAdmin([
+                    'upload_id' => $uploadId,
+                    'request_notes' => $revisionNotes
+                ]);
+                
+            } catch(Exception $e) {
+                error_log('Revision notification error: ' . $e->getMessage());
+            }
+            
+            $this->pdo->commit();
+            
+            return [
+                'success' => true,
+                'message' => 'Revizyon talebi başarıyla oluşturuldu.',
+                'revision_id' => $revisionId
+            ];
+            
+        } catch(Exception $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
+        
+    } catch (Exception $e) {
+        error_log('requestRevision error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Sistem hatası: ' . $e->getMessage()];
+    }
+}
+    
+    /**
+     * Kullanıcının revizyon taleplerini getir
+     * @param string $userId - Kullanıcı ID
+     * @param string $status - Durum filtresi (opsiyonel)
+     * @return array - Revizyon talepleri
+     */
+    public function getUserRevisions($userId, $status = null) {
+        try {
+            if (!isValidUUID($userId)) {
+                return [];
+            }
+            
+            $whereClause = "WHERE r.user_id = ?";
+            $params = [$userId];
+            
+            if ($status) {
+                $whereClause .= " AND r.status = ?";
+                $params[] = $status;
+            }
+            
+            $stmt = $this->pdo->prepare("
+                SELECT r.*, fu.original_name, fu.status as file_status,
+                       admin.first_name as admin_first_name, admin.last_name as admin_last_name
+                FROM revisions r
+                LEFT JOIN file_uploads fu ON r.upload_id = fu.id
+                LEFT JOIN users admin ON r.admin_id = admin.id
+                {$whereClause}
+                ORDER BY r.requested_at DESC
+            ");
+            
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch(PDOException $e) {
+            error_log('getUserRevisions error: ' . $e->getMessage());
+            return [];
         }
     }
 }

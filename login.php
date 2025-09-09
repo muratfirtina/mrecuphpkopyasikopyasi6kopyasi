@@ -12,6 +12,8 @@ if (isLoggedIn()) {
 
 $error = '';
 $success = '';
+$showEmailVerification = false;
+$userEmail = '';
 
 // URL parametrelerinden hata mesajlarını al
 if (isset($_GET['error'])) {
@@ -39,10 +41,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Email ve şifre alanları zorunludur.';
     } else {
         $user = new User($pdo);
+        $loginResult = $user->login($email, $password);
         
-        if ($user->login($email, $password)) {
+        if ($loginResult['success']) {
             if ($remember) {
-                $rememberToken = generateRandomString(32);
+                $rememberToken = generateToken();
                 $user->setRememberToken($_SESSION['user_id'], $rememberToken);
                 setcookie('remember_token', $rememberToken, time() + (30 * 24 * 60 * 60), '/', '', false, true);
             }
@@ -50,7 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $redirect = isset($_GET['redirect']) ? $_GET['redirect'] : (isAdmin() ? 'admin/' : 'user/');
             redirect($redirect);
         } else {
-            $error = 'Email veya şifre hatalı.';
+            $error = $loginResult['message'];
+            // Email doğrulama gerekiyorsa özel mesaj
+            if (strpos($error, 'Email adresinizi doğrula') !== false) {
+                $showEmailVerification = true;
+                $userEmail = $email;
+            }
         }
     }
 }
@@ -142,6 +150,30 @@ include 'includes/header.php';
                             <div class="alert alert-danger border-0 rounded-4 text-center" style="background: #f8d7da; color: #721c24;">
                                 <i class="bi bi-exclamation-triangle me-2"></i> <?php echo $error; ?>
                             </div>
+                            
+                            <?php if ($showEmailVerification): ?>
+                            <div class="alert alert-info border-0 rounded-4 mt-3" style="background: #d1ecf1; color: #0c5460;">
+                                <div class="text-center">
+                                    <i class="bi bi-envelope-check" style="font-size: 2rem; color: #0dcaf0;"></i>
+                                    <h6 class="mt-2 mb-3">Email Doğrulama Gerekli</h6>
+                                    <p class="mb-3 small">
+                                        Hesabınıza giriş yapabilmek için email adresinizi doğrulamanız gerekmektedir.
+                                    </p>
+                                    <div class="d-grid gap-2">
+                                        <a href="verify.php" class="btn btn-info btn-sm">
+                                            <i class="bi bi-envelope-check me-1"></i>Email Doğrula
+                                        </a>
+                                        <form method="POST" action="verify.php" style="display: inline;">
+                                            <input type="hidden" name="resend_email" value="1">
+                                            <input type="hidden" name="email" value="<?php echo htmlspecialchars($userEmail); ?>">
+                                            <button type="submit" class="btn btn-outline-info btn-sm w-100">
+                                                <i class="bi bi-send me-1"></i>Doğrulama Emaili Yeniden Gönder
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endif; ?>
                         <?php endif; ?>
 
                         <form method="POST" action="" id="loginForm">

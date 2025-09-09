@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{site_name}} - Revizyon Talebi</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 30px;
+        }
+        .user-info {
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .revision-request {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .action-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 10px 10px 10px 0;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 Revizyon Talebi</h1>
+            <p>{{site_name}} Admin Paneli</p>
+        </div>
+        
+        <div class="content">
+            <p><strong>Merhaba Admin,</strong></p>
+            
+            <p>Bir kullanıcıdan revizyon talebi geldi. Lütfen detayları inceleyin ve gerekli işlemleri yapın.</p>
+            
+            <div class="user-info">
+                <strong>👤 Kullanıcı Bilgileri:</strong><br>
+                <strong>Ad:</strong> {{user_name}}<br>
+                <strong>Email:</strong> {{user_email}}<br>
+                <strong>Talep Zamanı:</strong> {{request_time}}
+            </div>
+            
+            <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #495057;">📋 Dosya Bilgileri</h3>
+                <strong>Orijinal Dosya:</strong> {{original_file_name}}<br>
+                <strong>Revizyon ID:</strong> <code>{{revision_id}}</code>
+            </div>
+            
+            <div class="revision-request">
+                <strong>📝 Revizyon Talep Notları:</strong><br>
+                {{request_notes}}
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{admin_url}}" class="action-button">
+                    🔧 Revizyon İşle
+                </a>
+            </div>
+            
+            <div style="background-color: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                <strong>⚡ Yapılacaklar:</strong><br>
+                • Kullanıcının talebini değerlendirin<br>
+                • Gerekli düzenlemeleri yapın<br>
+                • Revize edilmiş dosyayı yükleyin<br>
+                • Kullanıcıya bildirim gönderilsin
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            
+            <p style="font-size: 14px; color: #666;">
+                <strong>🔗 Direkt Bağlantı:</strong><br>
+                <span style="background-color: #f8f9fa; padding: 5px; border-radius: 3px; font-family: monospace; word-break: break-all;">{{admin_url}}</span>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>{{site_name}}</strong> - Admin Bildirim Sistemi</p>
+            <p style="font-size: 12px;">
+                Bu email otomatik olarak gönderilmiştir.<br>
+                © 2024 {{site_name}} - Admin Panel
+            </p>
+        </div>
+    </div>
+</body>
+</html>

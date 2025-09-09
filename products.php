@@ -166,14 +166,14 @@ try {
 
 // Breadcrumb oluştur
 $breadcrumb = [
-    ['text' => 'Ana Sayfa', 'url' => '<?php echo BASE_URL; ?>/']
+    ['text' => 'Ana Sayfa', 'url' => BASE_URL . '/']
 ];
 
 if ($selectedCategory) {
-$breadcrumb[] = ['text' => 'Ürünler', 'url' => '<?php echo BASE_URL; ?>/urunler'];
+$breadcrumb[] = ['text' => 'Ürünler', 'url' => BASE_URL . '/urunler'];
 $breadcrumb[] = ['text' => $selectedCategory['name'], 'url' => '', 'active' => true];
 } elseif ($selectedBrand) {
-$breadcrumb[] = ['text' => 'Ürünler', 'url' => '<?php echo BASE_URL; ?>/urunler'];
+$breadcrumb[] = ['text' => 'Ürünler', 'url' => BASE_URL . '/urunler'];
 $breadcrumb[] = ['text' => $selectedBrand['name'], 'url' => '', 'active' => true];
 } elseif (!empty($searchQuery)) {
 $breadcrumb[] = ['text' => 'Arama: ' . $searchQuery, 'url' => '', 'active' => true];
@@ -516,7 +516,7 @@ include 'includes/header.php';
                             </h5>
                             <ul class="filter-list">
                                 <li class="filter-item">
-                                    <a href="/urunler" 
+                                    <a href="<?php echo BASE_URL; ?>/urunler" 
                                        class="filter-link <?php echo empty($categorySlug) ? 'active' : ''; ?>">
                                         Tüm Kategoriler
                                     </a>
@@ -542,7 +542,7 @@ include 'includes/header.php';
                             </h5>
                             <ul class="filter-list">
                                 <li class="filter-item">
-                                    <a href="/urunler" 
+                                    <a href="<?php echo BASE_URL; ?>/urunler" 
                                        class="filter-link <?php echo empty($brandSlug) ? 'active' : ''; ?>">
                                         Tüm Markalar
                                     </a>
@@ -647,10 +647,10 @@ include 'includes/header.php';
                                     
                                     <div class="product-info">
                                         <?php if ($product['brand_name']): ?>
-                                            <a href="/marka/<?php echo $product['brand_slug']; ?>" 
+                                            <a href="<?php echo BASE_URL; ?>/marka/<?php echo $product['brand_slug']; ?>" 
                                                class="product-brand">
                                                 <?php if ($product['brand_logo']): ?>
-                                                    <img src="../<?php echo htmlspecialchars($product['brand_logo']); ?>" 
+                                                    <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($product['brand_logo']); ?>" 
                                                          alt="<?php echo htmlspecialchars($product['brand_name']); ?>"
                                                          class="product-brand-logo">
                                                 <?php endif; ?>
@@ -768,7 +768,7 @@ include 'includes/header.php';
                             <p class="text-muted mb-4">
                                 "<strong><?php echo htmlspecialchars($searchQuery); ?></strong>" için arama sonucu bulunamadı.
                             </p>
-                            <a href="/urunler" class="btn btn-primary">
+                            <a href="<?php echo BASE_URL; ?>/urunler" class="btn btn-primary">
                                 <i class="bi bi-arrow-left me-2"></i>Tüm Ürünleri Görüntüle
                             </a>
                         <?php else: ?>

@@ -83,8 +83,8 @@ $pageImage = !empty($productImages) ? BASE_URL . '/' . $productImages[0]['image_
 
 // Breadcrumb
 $breadcrumb = [
-    ['text' => 'Ana Sayfa', 'url' => '<?php echo BASE_URL; ?>/'],
-    ['text' => 'Ürünler', 'url' => '<?php echo BASE_URL; ?>/urunler'],
+    ['text' => 'Ana Sayfa', 'url' => BASE_URL . '/'],
+    ['text' => 'Ürünler', 'url' => BASE_URL . '/urunler'],
 ];
 
 if ($product['category_name']) {

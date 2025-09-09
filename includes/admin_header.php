@@ -415,8 +415,10 @@ $cssPath = '../assets/css/style.css';
     <nav class="navbar navbar-expand-lg navbar-dark admin-navbar">
         <div class="container-fluid">
             <a class="navbar-brand" href="../index.php">
-                <i class="bi bi-cpu me-2"></i>
-                <?php echo SITE_NAME; ?> - Admin
+                <img src="<?php echo $basePath; ?>assets/images/mreculogomini.png"
+                    alt="<?php echo defined('SITE_NAME') ? SITE_NAME : 'Mr ECU'; ?>"
+                    class="navbar-logo"
+                    style="height: 60px; padding-left: 60px;">
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">

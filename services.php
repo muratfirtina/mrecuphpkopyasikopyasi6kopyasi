@@ -518,11 +518,26 @@ include 'includes/header.php';
     <div class="container">
         <div class="row">
             <div class="col-12 text-center mb-5">
-                <h2 class="display-5 fw-bold">Nasıl Çalışır?</h2>
+                <h2 class="display-5 fw-bold">Online Chiptuning Dosya Servisi</h2>
                 <p class="lead text-muted">4 basit adımda profesyonel hizmet alın</p>
             </div>
         </div>
         <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="process-step">
+                    <div class="position-relative">
+                        <div class="process-step-icon">
+                            <span class="step-number">1</span>
+                            <i class="bi bi-person-plus"></i>
+                        </div>
+                    </div>
+                    <h5>Kayıt Ol</h5>
+                    <p class="text-muted">
+                        Sistemimize ücretsiz kayıt oluşturun
+                        ve bizimle iletişime geçin
+                    </p>
+                </div>
+            </div>
             <div class="col-lg-3 col-md-6">
                 <div class="process-step">
                     <div class="position-relative">
@@ -548,23 +563,8 @@ include 'includes/header.php';
                     </div>
                     <h5>Uzman İncelemesi</h5>
                     <p class="text-muted">
-                        Deneyimli teknisyenlerimiz dosyanızı inceler
+                        Deneyimli ekibimiz dosyanızı inceler
                         ve gerekli optimizasyonları yapar.
-                    </p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="process-step">
-                    <div class="position-relative">
-                        <div class="process-step-icon">
-                            <span class="step-number">3</span>
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                    </div>
-                    <h5>Kalite Kontrolü</h5>
-                    <p class="text-muted">
-                        İşlenmiş dosya kapsamlı testlerden geçer
-                        ve kalite kontrolünden onay alır.
                     </p>
                 </div>
             </div>
@@ -592,7 +592,7 @@ include 'includes/header.php';
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <h3 class="mb-3">Aracınızın Performansını Artırın!</h3>
+                <h3 class="mb-3">MrEcu Chiptuning ile İşinizi Büyütün!</h3>
                 <p class="mb-0 lead">
                     Profesyonel ECU hizmetlerimizle aracınızın gizli gücünü ortaya çıkarın.
                     Hemen başlayın ve farkı yaşayın.

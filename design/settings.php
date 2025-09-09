@@ -17,40 +17,130 @@ $breadcrumbs = [
 // Form işlemleri
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
+        // AJAX isteği kontrolü - daha güvenilir yöntem
+        $isAjax = (
+            !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
+        ) || (
+            isset($_SERVER['CONTENT_TYPE']) && 
+            strpos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') !== false &&
+            isset($_POST['save_settings'])
+        );
+        
         if (isset($_POST['save_settings'])) {
+            $updatedCount = 0;
+            $errorCount = 0;
+            
             foreach ($_POST as $key => $value) {
                 if ($key !== 'save_settings') {
-                    // Mevcut ayar var mı kontrol et
-                    $checkStmt = $pdo->prepare("SELECT id FROM design_settings WHERE setting_key = ?");
-                    $checkStmt->execute([$key]);
-                    $existing = $checkStmt->fetch();
-                    
-                    if ($existing) {
-                        // Güncelle
-                        $stmt = $pdo->prepare("UPDATE design_settings SET setting_value = ?, updated_at = NOW() WHERE setting_key = ?");
-                        $stmt->execute([$value, $key]);
-                    } else {
-                        // Yeni ekle
-                        $id = sprintf(
-                            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-                            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-                            mt_rand(0, 0xffff),
-                            mt_rand(0, 0x0fff) | 0x4000,
-                            mt_rand(0, 0x3fff) | 0x8000,
-                            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
-                        );
+                    try {
+                        // String değeri olarak sakla
+                        $value = (string) $value;
                         
-                        $stmt = $pdo->prepare("INSERT INTO design_settings (id, setting_key, setting_value, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())");
-                        $stmt->execute([$id, $key, $value]);
+                        // Mevcut ayar var mı kontrol et
+                        $checkStmt = $pdo->prepare("SELECT id FROM design_settings WHERE setting_key = ?");
+                        $checkStmt->execute([$key]);
+                        $existing = $checkStmt->fetch();
+                        
+                        if ($existing) {
+                            // Güncelle
+                            $stmt = $pdo->prepare("UPDATE design_settings SET setting_value = ?, updated_at = NOW() WHERE setting_key = ?");
+                            $result = $stmt->execute([$value, $key]);
+                            if ($result) $updatedCount++;
+                        } else {
+                            // Yeni ekle
+                            $id = sprintf(
+                                '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+                                mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+                                mt_rand(0, 0xffff),
+                                mt_rand(0, 0x0fff) | 0x4000,
+                                mt_rand(0, 0x3fff) | 0x8000,
+                                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+                            );
+                            
+                            $stmt = $pdo->prepare("INSERT INTO design_settings (id, setting_key, setting_value, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())");
+                            $result = $stmt->execute([$id, $key, $value]);
+                            if ($result) $updatedCount++;
+                        }
+                    } catch (PDOException $e) {
+                        error_log("Settings update error for $key: " . $e->getMessage());
+                        $errorCount++;
                     }
                 }
             }
             
-            header('Location: settings.php?success=Ayarlar başarıyla kaydedildi');
-            exit;
+            // Checkbox'lar için özel işlem (işaretli değilse POST'da gelmez)
+            $checkboxFields = [
+                'site_maintenance_mode',
+                'hero_typewriter_enable'
+            ];
+            
+            foreach ($checkboxFields as $checkboxField) {
+                if (!isset($_POST[$checkboxField])) {
+                    try {
+                        // Checkbox işaretli değil, 0 olarak kaydet
+                        $checkStmt = $pdo->prepare("SELECT id FROM design_settings WHERE setting_key = ?");
+                        $checkStmt->execute([$checkboxField]);
+                        $existing = $checkStmt->fetch();
+                        
+                        if ($existing) {
+                            $stmt = $pdo->prepare("UPDATE design_settings SET setting_value = '0', updated_at = NOW() WHERE setting_key = ?");
+                            $result = $stmt->execute([$checkboxField]);
+                            if ($result) $updatedCount++;
+                        } else {
+                            $id = sprintf(
+                                '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+                                mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+                                mt_rand(0, 0xffff),
+                                mt_rand(0, 0x0fff) | 0x4000,
+                                mt_rand(0, 0x3fff) | 0x8000,
+                                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+                            );
+                            
+                            $stmt = $pdo->prepare("INSERT INTO design_settings (id, setting_key, setting_value, created_at, updated_at) VALUES (?, ?, '0', NOW(), NOW())");
+                            $result = $stmt->execute([$id, $checkboxField]);
+                            if ($result) $updatedCount++;
+                        }
+                    } catch (PDOException $e) {
+                        error_log("Checkbox update error for $checkboxField: " . $e->getMessage());
+                        $errorCount++;
+                    }
+                }
+            }
+            
+            // Sonuç mesajı
+            if ($errorCount === 0) {
+                $message = "Ayarlar başarıyla kaydedildi. ($updatedCount ayar güncellendi)";
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => true, 'message' => $message]);
+                    exit;
+                } else {
+                    header('Location: settings.php?success=' . urlencode($message));
+                    exit;
+                }
+            } else {
+                $message = "Bazı ayarlar kaydedilemedi. ($errorCount hata, $updatedCount başarılı)";
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => $message]);
+                    exit;
+                } else {
+                    $error = $message;
+                }
+            }
         }
     } catch (Exception $e) {
-        $error = $e->getMessage();
+        error_log('Settings save error: ' . $e->getMessage());
+        $message = 'Ayarlar kaydedilirken bir hata oluştu: ' . $e->getMessage();
+        
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => $message]);
+            exit;
+        } else {
+            $error = $message;
+        }
     }
 }
 
@@ -89,7 +179,11 @@ $defaults = [
     'site_maintenance_mode' => '0',
     'site_analytics_code' => '',
     'custom_css' => '',
-    'custom_js' => ''
+    'custom_js' => '',
+    'terms_of_service_title' => 'Kullanım Şartları',
+    'terms_of_service_content' => '',
+    'privacy_policy_title' => 'Gizlilik Politikası',
+    'privacy_policy_content' => ''
 ];
 
 // Ayarları default değerlerle birleştir
@@ -329,6 +423,64 @@ include '../includes/design_header.php';
             </div>
         </div>
         
+        <!-- Kullanım Şartları ve Gizlilik Politikası -->
+        <div class="col-12">
+            <div class="design-card">
+                <div class="design-card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-shield-check me-2"></i>Kullanım Şartları ve Gizlilik Politikası
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Kullanım Şartları -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="terms_of_service_title" class="form-label">Kullanım Şartları Başlığı</label>
+                                <input type="text" class="form-control" id="terms_of_service_title" name="terms_of_service_title" 
+                                       value="<?php echo htmlspecialchars($settings['terms_of_service_title']); ?>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="terms_of_service_content" class="form-label">Kullanım Şartları İçeriği</label>
+                                <textarea class="form-control" id="terms_of_service_content" name="terms_of_service_content" rows="15" 
+                                          placeholder="Kullanım şartlarınızı buraya yazın..."><?php echo htmlspecialchars($settings['terms_of_service_content']); ?></textarea>
+                                <small class="form-text text-muted">HTML etiketleri kullanabilirsiniz</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Gizlilik Politikası -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="privacy_policy_title" class="form-label">Gizlilik Politikası Başlığı</label>
+                                <input type="text" class="form-control" id="privacy_policy_title" name="privacy_policy_title" 
+                                       value="<?php echo htmlspecialchars($settings['privacy_policy_title']); ?>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="privacy_policy_content" class="form-label">Gizlilik Politikası İçeriği</label>
+                                <textarea class="form-control" id="privacy_policy_content" name="privacy_policy_content" rows="15" 
+                                          placeholder="Gizlilik politikanızı buraya yazın..."><?php echo htmlspecialchars($settings['privacy_policy_content']); ?></textarea>
+                                <small class="form-text text-muted">HTML etiketleri kullanabilirsiniz</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Önizleme Butonları -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-info btn-sm" onclick="previewTerms()">
+                                    <i class="bi bi-eye me-1"></i>Kullanım Şartları Önizleme
+                                </button>
+                                <button type="button" class="btn btn-outline-info btn-sm" onclick="previewPrivacy()">
+                                    <i class="bi bi-eye me-1"></i>Gizlilik Politikası Önizleme
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Özel CSS & JS -->
         <div class="col-12">
             <div class="design-card">
@@ -500,9 +652,68 @@ document.getElementById('settingsForm').addEventListener('input', scheduleAutoSa
 // Form submission
 document.getElementById('settingsForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    submitForm('settingsForm', 'settings.php', function() {
-        showToast('Ayarlar başarıyla kaydedildi', 'success');
-    });
+    
+    // jQuery'nin hazır olmasını bekle
+    window.waitForjQuery(function() {
+        // Form verilerini topla
+        const formData = new FormData(document.getElementById('settingsForm'));
+        formData.append('save_settings', '1');
+        
+        // Submit butonunu bul ve loading state'e al
+        const submitBtn = document.getElementById('settingsForm').querySelector('[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        // AJAX ile kaydet (jQuery veya fallback kullan)
+        const ajaxOptions = {
+            url: 'settings.php',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            beforeSend: function() {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-spinner-border spinner-border-sm me-2"></i>Kaydediliyor...';
+            },
+            success: function(response) {
+                showToast('Ayarlar başarıyla kaydedildi', 'success');
+                
+                // Sayfa yeniden yükle (sadece settings.php'ye yönlendir)
+                setTimeout(() => {
+                    window.location.href = 'settings.php';
+                }, 1000);
+            },
+            error: function(xhr) {
+                let errorMsg = 'Kaydetme sırasında bir hata oluştu';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                } else if (xhr.responseText) {
+                    // HTML response'dan hata mesajını çıkarmaya çalış
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(xhr.responseText, 'text/html');
+                    const errorAlert = doc.querySelector('.alert-danger');
+                    if (errorAlert) {
+                        errorMsg = errorAlert.textContent.trim();
+                    }
+                }
+                showToast(errorMsg, 'error');
+            },
+            complete: function() {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        };
+        
+        // jQuery varsa kulllan, yoksa fallback AJAX kullan
+        if (typeof $ !== 'undefined' && typeof $.ajax === 'function') {
+            $.ajax(ajaxOptions);
+        } else {
+            // Fallback AJAX çağrısı (window.$ fallback fonksiyonu)
+            window.$.ajax(ajaxOptions);
+        }
+    }, 10000); // 10 saniye timeout
 });
 
 // Initialize color previews
@@ -514,6 +725,66 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Kullanım Şartları önizleme
+function previewTerms() {
+    const title = document.getElementById('terms_of_service_title').value;
+    const content = document.getElementById('terms_of_service_content').value;
+    
+    const previewWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
+    previewWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${title}</title>
+            <meta charset="utf-8">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+                .container { margin-top: 2rem; }
+                h1 { color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>${title}</h1>
+                <div class="content">${content}</div>
+            </div>
+        </body>
+        </html>
+    `);
+    previewWindow.document.close();
+}
+
+// Gizlilik politikası önizleme
+function previewPrivacy() {
+    const title = document.getElementById('privacy_policy_title').value;
+    const content = document.getElementById('privacy_policy_content').value;
+    
+    const previewWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
+    previewWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${title}</title>
+            <meta charset="utf-8">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+                .container { margin-top: 2rem; }
+                h1 { color: #333; border-bottom: 3px solid #28a745; padding-bottom: 10px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>${title}</h1>
+                <div class="content">${content}</div>
+            </div>
+        </body>
+        </html>
+    `);
+    previewWindow.document.close();
+}
 </script>
 
 <?php

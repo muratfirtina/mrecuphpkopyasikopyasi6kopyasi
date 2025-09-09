@@ -48,7 +48,7 @@ class SecurityManager {
                "connect-src 'self'; " .
                "media-src 'self'; " .
                "object-src 'none'; " .
-               "frame-src 'none'";
+               "frame-src 'self' https://www.google.com https://maps.google.com";
         header("Content-Security-Policy: $csp");
     }
     

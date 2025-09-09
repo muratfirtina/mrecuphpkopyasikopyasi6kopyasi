@@ -6,6 +6,11 @@
 require_once 'config/config.php';
 require_once 'config/database.php';
 
+// Google Maps iframe için özel güvenlik ayarları
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com; connect-src 'self'; frame-src 'self' https://www.google.com https://maps.google.com; object-src 'none';");
+// Bu sayfa iframe'de açılabilir ama sadece kendi iframe'lerimiz için
+header("X-Frame-Options: SAMEORIGIN");
+
 $error = '';
 $success = '';
 
@@ -540,7 +545,7 @@ textarea.form-control {
 
 <!-- Privacy Modal -->
 <?php if ($form_settings['enable_privacy_checkbox']): ?>
-<div class="modal fade" id="privacyModal" tabindex="-1">
+<div class="modal fade" id="privacyModal" tabindex="-1" style="margin-top: 200px;display: block;">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">

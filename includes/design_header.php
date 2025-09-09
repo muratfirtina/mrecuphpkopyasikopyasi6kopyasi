@@ -42,10 +42,147 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
     <meta name="author" content="<?php echo SITE_NAME; ?>">
     
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     
      <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" crossorigin="anonymous">
+    
+    <!-- jQuery (CSP uyumlu CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" crossorigin="anonymous"></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" crossorigin="anonymous"></script>
+    
+    <!-- jQuery Yüklenme Kontrol -->
+    <script>
+        // jQuery yüklenme kontrolü ve fallback
+        (function() {
+            function checkjQuery() {
+                if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
+                    console.error('jQuery yüklenemedi! CSP uyumlu fallback yükleniyor...');
+                    
+                    // CSP uyumlu fallback - script element ile yükleme
+                    var script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js';
+                    script.crossOrigin = 'anonymous';
+                    script.async = false;
+                    script.onload = function() {
+                        console.log('jQuery fallback başarıyla yüklendi');
+                        window.jQueryReady = true;
+                    };
+                    script.onerror = function() {
+                        console.error('jQuery fallback da yüklenemedi!');
+                        // Son çare olarak yerel kopya
+                        loadLocalJQuery();
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    console.log('jQuery başarıyla yüklendi');
+                    window.jQueryReady = true;
+                }
+            }
+            
+            function loadLocalJQuery() {
+                // Eğer lokal jQuery dosyası varsa
+                var localScript = document.createElement('script');
+                localScript.src = '../assets/js/jquery.min.js';
+                localScript.onload = function() {
+                    console.log('Yerel jQuery yüklendi');
+                    window.jQueryReady = true;
+                };
+                localScript.onerror = function() {
+                    console.error('Hiçbir jQuery kaynağı yüklenemedi!');
+                    // jQuery olmadan çalışacak basit fonksiyonlar sağla
+                    providejQueryFallback();
+                };
+                document.head.appendChild(localScript);
+            }
+            
+            function providejQueryFallback() {
+                // Basit AJAX fonksiyonu sağla
+                window.$ = function(selector) {
+                    if (typeof selector === 'function') {
+                        // Document ready
+                        if (document.readyState === 'loading') {
+                            document.addEventListener('DOMContentLoaded', selector);
+                        } else {
+                            selector();
+                        }
+                        return;
+                    }
+                    return document.querySelector(selector);
+                };
+                
+                window.$.ajax = function(options) {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open(options.method || 'GET', options.url, true);
+                    
+                    if (options.headers) {
+                        for (var header in options.headers) {
+                            xhr.setRequestHeader(header, options.headers[header]);
+                        }
+                    }
+                    
+                    xhr.onload = function() {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            if (options.success) options.success(xhr.responseText);
+                        } else {
+                            if (options.error) options.error(xhr);
+                        }
+                        if (options.complete) options.complete();
+                    };
+                    
+                    xhr.onerror = function() {
+                        if (options.error) options.error(xhr);
+                        if (options.complete) options.complete();
+                    };
+                    
+                    if (options.beforeSend) options.beforeSend();
+                    
+                    if (options.data instanceof FormData) {
+                        xhr.send(options.data);
+                    } else if (options.data) {
+                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                        xhr.send(new URLSearchParams(options.data).toString());
+                    } else {
+                        xhr.send();
+                    }
+                };
+                
+                console.log('jQuery fallback fonksiyonları sağlandı');
+                window.jQueryReady = true;
+            }
+            
+            // Sayfa yüklendikten sonra kontrol et
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', checkjQuery);
+            } else {
+                checkjQuery();
+            }
+            
+            // Global hazır olma kontrolü
+            window.waitForjQuery = function(callback, timeout) {
+                timeout = timeout || 5000;
+                var startTime = Date.now();
+                
+                function check() {
+                    if (window.jQueryReady || typeof jQuery !== 'undefined') {
+                        callback();
+                    } else if (Date.now() - startTime < timeout) {
+                        setTimeout(check, 100);
+                    } else {
+                        console.error('jQuery yükleme zaman aşımı!');
+                        callback(); // Yine de devam et
+                    }
+                }
+                
+                check();
+            };
+        })();
+    </script>
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?php echo $basePath; ?>assets/css/style.css">

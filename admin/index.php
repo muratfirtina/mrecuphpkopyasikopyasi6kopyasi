@@ -436,6 +436,125 @@ include '../includes/admin_sidebar.php';
     </div>
 </div>
 
+<!-- Email Sistemi Widget -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card admin-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-envelope-gear me-2"></i>Email Sistemi
+                </h5>
+                <div>
+                    <a href="email-dashboard-fixed.php" class="btn btn-primary btn-sm">
+                        <i class="bi bi-speedometer2 me-1"></i>Email Dashboard
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <?php
+                // Email sistem durumu kontrolü
+                $emailStatus = [
+                    'email_manager' => file_exists('../includes/EmailManager.php'),
+                    'email_tables' => false,
+                    'templates' => file_exists('../email_templates/verification.html'),
+                    'smtp_config' => !empty(getenv('SMTP_HOST'))
+                ];
+                
+                // Email tabloları kontrolü
+                try {
+                    $stmt = $pdo->query("SHOW TABLES LIKE 'email_queue'");
+                    $emailStatus['email_tables'] = $stmt->rowCount() > 0;
+                } catch (Exception $e) {
+                    $emailStatus['email_tables'] = false;
+                }
+                
+                $emailOverallStatus = array_sum($emailStatus) / count($emailStatus) * 100;
+                ?>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>📊 Sistem Durumu</h6>
+                        <div class="progress mb-3" style="height: 8px;">
+                            <div class="progress-bar <?php echo $emailOverallStatus >= 75 ? 'bg-success' : ($emailOverallStatus >= 50 ? 'bg-warning' : 'bg-danger'); ?>" 
+                                 role="progressbar" style="width: <?php echo $emailOverallStatus; ?>%"></div>
+                        </div>
+                        <small class="text-muted"><?php echo round($emailOverallStatus); ?>% Tamamlandı</small>
+                        
+                        <div class="mt-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge <?php echo $emailStatus['email_manager'] ? 'bg-success' : 'bg-danger'; ?> me-2">●</span>
+                                <small>Email Manager</small>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge <?php echo $emailStatus['email_tables'] ? 'bg-success' : 'bg-warning'; ?> me-2">●</span>
+                                <small>Email Tabloları</small>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge <?php echo $emailStatus['templates'] ? 'bg-success' : 'bg-warning'; ?> me-2">●</span>
+                                <small>Email Templates</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge <?php echo $emailStatus['smtp_config'] ? 'bg-success' : 'bg-warning'; ?> me-2">●</span>
+                                <small>SMTP Ayarları</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6>🚀 Hızlı Eylemler</h6>
+                        <div class="d-grid gap-2">
+                            <?php if ($emailOverallStatus < 100): ?>
+                                <a href="../email-setup.php" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-tools me-1"></i>Email Sistemi Kurulumu
+                                </a>
+                                
+                                <a href="../create-email-tables-simple.php" class="btn btn-warning btn-sm">
+                                    <i class="bi bi-database-add me-1"></i>Eksik Tabloları Oluştur
+                                </a>
+                            <?php endif; ?>
+                            
+                            <a href="../email-system-test.php" class="btn btn-success btn-sm">
+                                <i class="bi bi-bug me-1"></i>Sistem Testleri
+                            </a>
+                            
+                            <a href="../smtp-test.php" class="btn btn-info btn-sm">
+                                <i class="bi bi-gear me-1"></i>SMTP Test & Ayarlar
+                            </a>
+                            
+                            <a href="../email-test-simple.php" class="btn btn-warning btn-sm">
+                                <i class="bi bi-envelope me-1"></i>Email Test Gönder
+                            </a>
+                            
+                            <div class="btn-group" role="group">
+                                <a href="email-settings.php" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-gear me-1"></i>Ayarlar
+                                </a>
+                                <a href="email-analytics.php" class="btn btn-outline-info btn-sm">
+                                    <i class="bi bi-graph-up me-1"></i>Analytics
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <?php if ($emailOverallStatus >= 75): ?>
+                            <div class="alert alert-success mt-3 mb-0">
+                                <small><i class="bi bi-check-circle me-1"></i><strong>Email sistemi hazır!</strong> Tüm özellikler kullanılabilir.</small>
+                            </div>
+                        <?php elseif ($emailOverallStatus >= 50): ?>
+                            <div class="alert alert-warning mt-3 mb-0">
+                                <small><i class="bi bi-exclamation-triangle me-1"></i><strong>Email sistemi kısmen hazır.</strong> Kurulumu tamamlayın.</small>
+                            </div>
+                        <?php else: ?>
+                            <div class="alert alert-danger mt-3 mb-0">
+                                <small><i class="bi bi-x-circle me-1"></i><strong>Email sistemi kurulmamış.</strong> Kurulumu başlatın.</small>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Grafik Alanı -->
 <div class="row mt-4">
     <div class="col-12">

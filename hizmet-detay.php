@@ -416,10 +416,10 @@ include 'includes/header.php';
                 <nav aria-label="breadcrumb" class="mb-4">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="index.php"><i class="bi bi-home me-1"></i>Ana Sayfa</a>
+                            <a href="<?php echo BASE_URL; ?>/"><i class="bi bi-home me-1"></i>Ana Sayfa</a>
                         </li>
                         <li class="breadcrumb-item">
-                            <a href="services.php">Hizmetlerimiz</a>
+                            <a href="<?php echo BASE_URL; ?>/services.php">Hizmetlerimiz</a>
                         </li>
                         <li class="breadcrumb-item active" aria-current="page">
                             <?php echo htmlspecialchars($service['name']); ?>
@@ -700,7 +700,7 @@ try {
                                 <span class="h6 text-danger fw-bold"><?php echo number_format($relatedService['price_from'], 2); ?> TL</span>
                             </div>
                         <?php endif; ?>
-                        <a href="hizmet/<?php echo urlencode($relatedService['slug']); ?>" class="btn btn-outline-danger btn-sm px-4">
+                        <a href="<?php echo BASE_URL; ?>/hizmet/<?php echo urlencode($relatedService['slug']); ?>" class="btn btn-outline-danger btn-sm px-4">
                             <i class="bi bi-eye me-1"></i>İncele
                         </a>
                     </div>
@@ -715,7 +715,7 @@ try {
 <!-- Call to Action -->
 <div class="container">
     <div class="contact-cta">
-        <h2 class="mb-4">Aracınızın Performansını Artırmaya Hazır mısınız?</h2>
+        <h2 class="mb-4">Servisinizin Performansını Artırmaya Hazır mısınız?</h2>
         <p class="lead mb-4">
             Profesyonel ekibimiz ile iletişime geçin ve aracınız için en uygun chip tuning çözümünü keşfedin.
         </p>
@@ -742,7 +742,7 @@ try {
                 </a>
             <?php endif; ?>
             
-            <a href="../register.php" class="btn btn-warning btn-lg">
+            <a href="<?php echo BASE_URL; ?>/register.php" class="btn btn-warning btn-lg">
                 <i class="bi bi-upload me-2"></i>Dosya Yükle
             </a>
         </div>
@@ -756,7 +756,7 @@ try {
             <div class="col-md-4">
                 <i class="bi bi-clock fa-2x mb-3"></i>
                 <h5>Hızlı Teslimat</h5>
-                <p>24 saat içinde dosyanız hazır</p>
+                <p>Dakikalar içinde dosyanız hazır</p>
             </div>
             <div class="col-md-4">
                 <i class="bi bi-arrow-counterclockwise fa-2x mb-3"></i>
