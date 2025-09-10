@@ -8,7 +8,7 @@ require_once '../config/config.php';
 require_once '../config/database.php';
 
 // Admin auth kontrolü
-session_start();
+
 if (!isset($_SESSION['user_id']) || !function_exists('isLoggedIn')) {
     if (!isset($_SESSION['admin_logged_in'])) {
         if (($_POST['admin_password'] ?? '') === 'admin123') {

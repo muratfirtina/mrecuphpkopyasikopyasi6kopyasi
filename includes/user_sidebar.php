@@ -1,6 +1,6 @@
 <?php
 // Ters kredi sistemi için kullanıcı kredi bilgilerini al
-if (isset($_SESSION['user_id'])) {
+if (isset($_SESSION['user_id']) && isset($pdo)) {
     try {
         $stmt = $pdo->prepare("SELECT credit_quota, credit_used FROM users WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
@@ -25,6 +25,7 @@ if (isset($_SESSION['user_id'])) {
     $sidebarCreditUsed = 0;
     $sidebarAvailableCredits = 0;
     $sidebarUsagePercentage = 0;
+    $_SESSION['credits'] = 0;
 }
 ?>
 
@@ -165,6 +166,15 @@ if (isset($_SESSION['user_id'])) {
                     ?>
                 </a>
             </li>
+            <li class="nav-item">
+    <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'legacy-files.php' ? 'active' : ''; ?>" href="legacy-files.php">
+        <div class="nav-icon bg-info">
+            <i class="bi bi-archive"></i>
+        </div>
+        <span>Eski Dosyalarım</span>
+        
+    </a>
+</li>
         </ul>
 
         <!-- Hesap Yönetimi -->
@@ -189,13 +199,13 @@ if (isset($_SESSION['user_id'])) {
                     <span>Kredi İşlemleri</span>
                 </a>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'email-preferences.php' ? 'active' : ''; ?>" href="email-preferences.php">
                     <div class="nav-icon bg-info">
                         <i class="bi bi-envelope-gear"></i>
                     </div>
                     <span>Email Tercihlerim</span>
-                </a>
+                </a> -->
             </li>
             <!-- <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'transactions.php' ? 'active' : ''; ?>" href="transactions.php">

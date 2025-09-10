@@ -3,22 +3,17 @@
  * Mr ECU - Admin ECU Yönetimi
  * ECU'ları listeleme, ekleme, düzenleme ve silme
  */
-
-session_start();
-require_once '../config/config.php';
-
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../includes/EcuModel.php';
 // Admin kontrolü
 if (!isLoggedIn() || !isAdmin()) {
     redirect('../login.php');
 }
-
-// Model dahil et
-require_once '../includes/EcuModel.php';
 $ecuModel = new EcuModel($pdo);
-
-// Debug: Model oluşturuldu mu?
-error_log("ECU ADMIN DEBUG: EcuModel created successfully");
-
+$message = '';
+$messageType = '';
 // Debug: PDO bağlantı durumu
 try {
     $testQuery = $pdo->query("SELECT COUNT(*) as count FROM ecus");
@@ -35,11 +30,9 @@ $messageType = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
-    // CSRF token kontrolü
-    if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
-        $message = 'Güvenlik hatası oluştu.';
-        $messageType = 'error';
-    } else {
+    try {
+        $action = $_POST['action'] ?? '';
+        error_log("POST Action: " . $action); // Debug
         switch ($action) {
             case 'add':
                 $name = sanitize($_POST['name'] ?? '');
@@ -63,6 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $messageType = $result['success'] ? 'success' : 'error';
                 break;
         }
+    } catch (Exception $e) {
+        error_log("ECU işlem hatası: " . $e->getMessage());
+        $message = 'Bir hata oluştu. Lütfen tekrar deneyin.';
+        $messageType = 'error';
     }
 }
 

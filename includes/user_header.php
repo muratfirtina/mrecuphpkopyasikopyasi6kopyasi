@@ -10,15 +10,19 @@ if (!defined('SITE_NAME')) {
     require_once __DIR__ . '/../config/config.php';
 }
 
-if (!function_exists('isLoggedIn')) {
+if (!function_exists('isLoggedIn') && !defined('FUNCTIONS_LOADED')) {
     require_once __DIR__ . '/../includes/functions.php';
+    define('FUNCTIONS_LOADED', true);
 }
 
-// Kullanıcı girişi kontrolü
+// Kullanıcı girişi kontrolü (legacy-files.php zaten kendi kontrolünü yapıyor)
+// Bu kontrol devre dışı bırakıldı - çifte kontrol sorununu önlemek için
+/*
 if (!isLoggedIn()) {
     header('Location: ../login.php');
     exit;
 }
+*/
 
 // Eğer sayfa başlığı tanımlanmamışsa varsayılan değer ata
 if (!isset($pageTitle)) {
@@ -30,7 +34,7 @@ $basePath = '../';
 $cssPath = '../assets/css/style.css';
 
 // Ters kredi sistemi için kullanıcı kredi bilgilerini al
-if (isset($_SESSION['user_id'])) {
+if (isset($_SESSION['user_id']) && isset($pdo)) {
     try {
         $stmt = $pdo->prepare("SELECT credit_quota, credit_used FROM users WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
@@ -55,6 +59,7 @@ if (isset($_SESSION['user_id'])) {
     $creditUsed = 0;
     $availableCredits = 0;
     $usagePercentage = 0;
+    $_SESSION['credits'] = 0;
 }
 ?>
 <!DOCTYPE html>

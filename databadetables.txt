@@ -2,9 +2,9 @@
  Genel Bilgiler
 mrecu_db_guid
 Veritabanı Adı
-66
+74
 Toplam Tablo
-2025-09-05 13:01:50
+2025-09-10 11:15:58
 Analiz Tarihi
  Tablo: about_content
 Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
@@ -259,6 +259,60 @@ id	char(36)	NO	 PRIMARY	uuid()	DEFAULT_GENERATED	Benzersiz tanımlayıcı (UUID)
 name	varchar(100)	NO	 UNIQUE			
 created_at	timestamp	YES	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
 updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: email_bounces
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+email	varchar(255)	NO	 UNIQUE			E-posta adresi
+bounce_type	enum('hard','soft')	NO	 FOREIGN			
+bounce_reason	varchar(500)	YES		NULL		
+bounce_count	int	YES		1		
+last_bounce_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+is_blocked	tinyint(1)	YES	 FOREIGN	NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: email_campaigns
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+name	varchar(255)	NO				
+subject	varchar(255)	NO				
+content	longtext	NO				
+status	enum('draft','scheduled','sending','sent','paused')	YES	 FOREIGN	draft		Durum bilgisi
+scheduled_at	timestamp	YES	 FOREIGN	NULL		
+sent_at	timestamp	YES		NULL		
+recipient_count	int	YES		NULL		
+sent_count	int	YES		NULL		
+failed_count	int	YES		NULL		
+open_count	int	YES		NULL		
+click_count	int	YES		NULL		
+created_by	int	NO	 FOREIGN			
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: email_config
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+smtp_host	varchar(255)	NO				
+smtp_port	int	NO		587		
+smtp_username	varchar(255)	NO				
+smtp_password	varchar(255)	NO				
+smtp_encryption	enum('none','ssl','tls')	YES		tls		
+from_email	varchar(255)	NO				
+from_name	varchar(255)	NO				
+is_active	tinyint(1)	YES		1		
+daily_limit	int	YES		1000		
+hourly_limit	int	YES		100		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: email_logs
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+email_type	varchar(50)	NO	 FOREIGN			
+recipient_email	varchar(255)	NO				
+subject	varchar(255)	NO				
+status	enum('sent','failed','pending')	YES	 FOREIGN	pending		Durum bilgisi
+smtp_response	text	YES		NULL		
+error_message	text	YES		NULL		
+sent_at	timestamp	YES		NULL		
+created_at	timestamp	YES	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
  Tablo: email_queue
 Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
 id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
@@ -272,6 +326,18 @@ status	enum('pending','sent','failed')	YES		pending		Durum bilgisi
 error_message	text	YES		NULL		
 created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
 sent_at	timestamp	YES		NULL		
+ Tablo: email_statistics
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+date	date	NO	 FOREIGN			
+email_type	varchar(50)	NO	 FOREIGN			
+sent_count	int	YES		NULL		
+failed_count	int	YES		NULL		
+bounce_count	int	YES		NULL		
+open_count	int	YES		NULL		
+click_count	int	YES		NULL		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
  Tablo: email_templates
 Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
 id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
@@ -282,6 +348,17 @@ variables	text	YES		NULL
 is_active	tinyint(1)	YES		1		
 created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
 updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: email_test_logs
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+test_email	varchar(255)	NO				
+test_type	varchar(50)	NO	 FOREIGN			
+status	enum('success','failed')	NO	 FOREIGN			Durum bilgisi
+response_message	text	YES		NULL		
+test_duration	decimal(10,3)	YES		NULL		
+smtp_host	varchar(255)	YES		NULL		
+smtp_port	int	YES		NULL		
+created_at	timestamp	YES	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
  Tablo: engines
 Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
 id	varchar(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
@@ -404,6 +481,20 @@ expires_at	timestamp	YES	 FOREIGN	NULL
 created_by	char(36)	YES	 FOREIGN	NULL		
 created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
 updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
+ Tablo: legacy_files
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	varchar(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
+user_id	varchar(36)	NO	 FOREIGN			Kullanıcı ID referansı
+plate_number	varchar(50)	NO	 FOREIGN			
+original_filename	varchar(255)	NO				
+stored_filename	varchar(255)	NO				
+file_path	varchar(500)	NO				Dosya yolu
+file_size	bigint	NO				Dosya boyutu (bytes)
+file_type	varchar(100)	NO				
+uploaded_by_admin	varchar(36)	NO	 FOREIGN			
+upload_date	datetime	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+created_at	datetime	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	datetime	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
  Tablo: legacy_ticket_admin
 Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
 id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
@@ -474,17 +565,15 @@ is_active	tinyint(1)	YES		1
 Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
 id	char(36)	NO	 PRIMARY			Benzersiz tanımlayıcı (UUID)
 user_id	char(36)	NO	 FOREIGN			Kullanıcı ID referansı
-type	varchar(50)	NO				
-title	varchar(200)	NO				
+type	varchar(50)	NO	 FOREIGN			
+title	varchar(255)	NO				
 message	text	NO				
 related_id	char(36)	YES		NULL		
-related_type	enum('file_upload','revision','credit_transaction')	YES		NULL		
-action_url	varchar(500)	YES		NULL		
-is_read	tinyint(1)	YES		NULL		
-is_email_sent	tinyint(1)	YES		NULL		
-created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+related_type	varchar(50)	YES		NULL		
+action_url	varchar(255)	YES		NULL		
+is_read	tinyint(1)	YES	 FOREIGN	NULL		
+created_at	timestamp	YES	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
 read_at	timestamp	YES		NULL		
-is_websocket_sent	tinyint(1)	YES		NULL		
  Tablo: product_attributes
 Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
 id	int unsigned	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
@@ -751,6 +840,19 @@ reference_id	char(36)	YES		NULL
 reference_type	enum('file_upload','payment','manual','file_response','revision','file_download')	YES		NULL		
 admin_id	char(36)	YES	 FOREIGN	NULL		Admin kullanıcı ID referansı
 created_at	timestamp	YES	 FOREIGN	 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+ Tablo: user_email_preferences
+Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
+id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
+user_id	int	NO	 UNIQUE			Kullanıcı ID referansı
+email_notifications	tinyint(1)	YES		1		
+file_upload_notifications	tinyint(1)	YES		1		
+file_ready_notifications	tinyint(1)	YES		1		
+revision_notifications	tinyint(1)	YES		1		
+promotional_emails	tinyint(1)	YES		NULL		
+security_notifications	tinyint(1)	YES		1		
+email_frequency	enum('immediate','daily','weekly')	YES		immediate		
+created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+updated_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP	Son güncelleme tarihi
  Tablo: user_permissions
 Kolon Adı	Veri Tipi	Null	Key	Default	Extra	Açıklama
 id	int	NO	 PRIMARY		auto_increment	Benzersiz tanımlayıcı (UUID)
@@ -766,6 +868,7 @@ password	varchar(255)	NO				Şifrelenmiş parola
 first_name	varchar(50)	NO				
 last_name	varchar(50)	NO				
 phone	varchar(20)	YES		NULL		
+terms_accepted	tinyint(1)	NO	 FOREIGN	0		
 credits	decimal(10,2)	YES		0.00		Kullanıcı kredi bakiyesi
 wallet	decimal(10,2)	YES		0.00		
 role	enum('user','admin','design')	YES		user		Kullanıcı rolü (user/admin)
@@ -811,9 +914,10 @@ client_info	text	YES		NULL
 user_id	char(36)	YES	 FOREIGN	NULL		Kullanıcı ID referansı
 message	text	YES		NULL		
 created_at	timestamp	YES		 CURRENT_TIMESTAMP	DEFAULT_GENERATED	Kayıt oluşturulma tarihi
+💾 Export Bilgileri
+Oluşturulma Tarihi: 2025-09-10 11:15:58
 
-
-Toplam Tablo: 66
+Toplam Tablo: 74
 
 Veritabanı: mrecu_db_guid
 

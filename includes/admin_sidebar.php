@@ -47,6 +47,10 @@
                             <i class="bi bi-bar-chart"></i>Raporlar
                         </a>
                         
+                        <a class="nav-link text-info" href="../design">
+                            <i class="bi bi-window-sidebar"></i>Design Paneli
+                        </a>
+                        
                         <!-- Dosya Yönetimi -->
                         <div class="nav-section">Dosya Yönetimi</div>
                         
@@ -148,6 +152,11 @@
                             ?>
                         </a>
 
+                        <a class="nav-link <?php echo ($pageTitle == 'Eski Dosyalar Yönetimi') ? 'active' : ''; ?>" href="legacy-files.php">
+                            <i class="bi bi-archive"></i>Eski Dosyalar
+                            
+                        </a>
+
                         <a class="nav-link <?php echo ($pageTitle == 'Bildirimler') ? 'active' : ''; ?>" href="notifications.php">
                             <i class="bi bi-bell"></i>Bildirimler
                             <?php
@@ -238,13 +247,27 @@
                         
                         <!-- Email Sistemi -->
                         <div class="nav-section">Email Sistemi</div>
+
                         
-                        <a class="nav-link <?php echo ($pageTitle == 'Email Dashboard') ? 'active' : ''; ?>" href="email-dashboard-fixed.php">
-                            <i class="bi bi-speedometer2"></i>Email Dashboard
+                        
+                        
+                        <!-- Sistem Yönetimi -->
+                        <div class="nav-section">Sistem</div>
+                        
+                        <a class="nav-link <?php echo ($pageTitle == 'ECU Yönetimi') ? 'active' : ''; ?>" href="ecus.php">
+                            <i class="bi bi-cpu"></i>ECU Yönetimi
                         </a>
                         
+                        <a class="nav-link <?php echo ($pageTitle == 'Device Yönetimi') ? 'active' : ''; ?>" href="devices.php">
+                            <i class="bi bi-tools"></i>Device Yönetimi
+                        </a>
+                        
+                        <a class="nav-link <?php echo ($pageTitle == 'Sistem Ayarları') ? 'active' : ''; ?>" href="settings.php">
+                            <i class="bi bi-gear"></i>Ayarlar
+                        </a>
+
                         <a class="nav-link <?php echo ($pageTitle == 'Email Ayarları') ? 'active' : ''; ?>" href="email-settings.php">
-                            <i class="bi bi-envelope-gear"></i>Email Ayarları
+                            <i class="bi bi-envelope-at"></i>Email Ayarları
                         </a>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Email Analytics') ? 'active' : ''; ?>" href="email-analytics.php">
@@ -269,25 +292,6 @@
                             <i class="bi bi-file-earmark-text"></i>Email Template'leri
                         </a>
                         
-                        <a class="nav-link <?php echo ($pageTitle == 'Email Sistemi Test') ? 'active' : ''; ?>" href="../email-test.php">
-                            <i class="bi bi-bug"></i>Email Test
-                        </a>
-                        
-                        <!-- Sistem Yönetimi -->
-                        <div class="nav-section">Sistem</div>
-                        
-                        <a class="nav-link <?php echo ($pageTitle == 'ECU Yönetimi') ? 'active' : ''; ?>" href="ecus.php">
-                            <i class="bi bi-cpu"></i>ECU Yönetimi
-                        </a>
-                        
-                        <a class="nav-link <?php echo ($pageTitle == 'Device Yönetimi') ? 'active' : ''; ?>" href="devices.php">
-                            <i class="bi bi-tools"></i>Device Yönetimi
-                        </a>
-                        
-                        <a class="nav-link <?php echo ($pageTitle == 'Sistem Ayarları') ? 'active' : ''; ?>" href="settings.php">
-                            <i class="bi bi-gear"></i>Ayarlar
-                        </a>
-                        
                         <a class="nav-link <?php echo ($pageTitle == 'Güvenlik Dashboard') ? 'active' : ''; ?>" href="security-dashboard.php">
                             <i class="bi bi-shield-exclamation"></i>Güvenlik
                         </a>
@@ -302,10 +306,6 @@
                         
                         <!-- Diğer İşlemler -->
                         <div class="nav-section">Diğer</div>
-                        
-                        <a class="nav-link text-info" href="../design">
-                            <i class="bi bi-window-sidebar"></i>Design Paneli
-                        </a>
                         
                         <a class="nav-link text-warning" href="../user/">
                             <i class="bi bi-person"></i>Kullanıcı Paneli

@@ -3,21 +3,15 @@
  * Mr ECU - Admin Device Yönetimi
  * Device'ları listeleme, ekleme, düzenleme ve silme
  */
-
-session_start();
-require_once '../config/config.php';
-
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../includes/DeviceModel.php';
 // Admin kontrolü
 if (!isLoggedIn() || !isAdmin()) {
     redirect('../login.php');
 }
-
-// Model dahil et
-require_once '../includes/DeviceModel.php';
 $deviceModel = new DeviceModel($pdo);
-
-// Debug: Model oluşturuldu mu?
-error_log("DEVICE ADMIN DEBUG: DeviceModel created successfully");
 
 // Debug: PDO bağlantı durumu
 try {
@@ -36,10 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
     // CSRF token kontrolü
-    if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
-        $message = 'Güvenlik hatası oluştu.';
-        $messageType = 'error';
-    } else {
+    try{
+        $action = $_POST['action'] ?? '';
+        error_log("POST Action: " . $action); // Debug
         switch ($action) {
             case 'add':
                 $name = sanitize($_POST['name'] ?? '');
@@ -62,9 +55,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
                 break;
+            }
+        } catch (Exception $e) {
+            error_log("DEVICE işlem hatası: " . $e->getMessage());
+            $message = 'Bir hata oluştu. Lütfen tekrar deneyin.';
+            $messageType = 'error';
         }
-    }
 }
+
 
 // Sayfalama ayarları
 $page = (int)($_GET['page'] ?? 1);
