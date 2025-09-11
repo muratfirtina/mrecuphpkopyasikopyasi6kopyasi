@@ -62,6 +62,15 @@ try {
     $socialStmt->execute();
     $socialLinks = $socialStmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // Design ayarlarını al (Terms ve Privacy için)
+    $settingsQuery = "SELECT setting_key, setting_value FROM design_settings WHERE setting_key IN ('terms_of_service_title', 'terms_of_service_content', 'privacy_policy_title', 'privacy_policy_content')";
+    $settingsStmt = $pdo->prepare($settingsQuery);
+    $settingsStmt->execute();
+    $designSettings = [];
+    while ($settingRow = $settingsStmt->fetch(PDO::FETCH_ASSOC)) {
+        $designSettings[$settingRow['setting_key']] = $settingRow['setting_value'];
+    }
+    
     // Eğer WhatsApp kaydı bulunamazsa, telefon numarasını kullan
     if (!$whatsappData) {
         $phoneQuery = "SELECT contact_info FROM contact_cards WHERE contact_link LIKE '%tel:%' LIMIT 1";
@@ -100,6 +109,14 @@ try {
         ['name' => 'Facebook', 'icon' => 'bi-facebook', 'url' => ''],
         ['name' => 'Instagram', 'icon' => 'bi-instagram', 'url' => ''],
         ['name' => 'LinkedIn', 'icon' => 'bi-linkedin', 'url' => '']
+    ];
+    
+    // Varsayılan design ayarları
+    $designSettings = [
+        'terms_of_service_title' => 'Kullanım Şartları',
+        'terms_of_service_content' => '',
+        'privacy_policy_title' => 'Gizlilik Politikası',
+        'privacy_policy_content' => ''
     ];
 }
 
