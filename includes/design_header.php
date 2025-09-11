@@ -641,6 +641,10 @@ if (strpos($_SERVER['REQUEST_URI'], '/design/') === false) {
                 <i class="bi bi-info-circle"></i>
                 <span>Hakkımızda</span>
             </a>
+            <a href="testimonials.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'testimonials.php') ? 'active' : ''; ?>">
+                <i class="bi bi-chat-left-text"></i>
+                <span>Yorumlar</span>
+            </a>
             <a href="contact.php" class="design-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'contact.php') ? 'active' : ''; ?>">
                 <i class="bi bi-telephone-fill"></i>
                 <span>İletişim</span>

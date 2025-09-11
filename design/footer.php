@@ -7,18 +7,6 @@
 require_once '../config/config.php';
 require_once '../config/database.php';
 
-// Admin auth kontrolü
-session_start();
-if (!isset($_SESSION['user_id']) || !function_exists('isLoggedIn')) {
-    if (!isset($_SESSION['admin_logged_in'])) {
-        if (($_POST['admin_password'] ?? '') === 'admin123') {
-            $_SESSION['admin_logged_in'] = true;
-        } else {
-            header('Location: ../login.php?error=admin_required');
-            exit;
-        }
-    }
-}
 
 // Sayfa ayarları
 $pageTitle = 'Footer Yönetimi';
@@ -91,6 +79,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = '✅ Kategori silindi!';
                 $messageType = 'success';
                 break;
+                
+            case 'add_social':
+                $stmt = $pdo->prepare("INSERT INTO social_media_links (name, icon, url, display_order, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())");
+                $stmt->execute([$_POST['social_name'], $_POST['social_icon'], $_POST['social_url'] ?: null, $_POST['display_order'] ?? 0, isset($_POST['is_active']) ? 1 : 0]);
+                $message = '✅ Yeni sosyal medya platformu eklendi!';
+                $messageType = 'success';
+                break;
+                
+            case 'update_social':
+                $stmt = $pdo->prepare("UPDATE social_media_links SET name = ?, icon = ?, url = ?, display_order = ?, is_active = ?, updated_at = NOW() WHERE id = ?");
+                $stmt->execute([$_POST['social_name'], $_POST['social_icon'], $_POST['social_url'] ?: null, $_POST['display_order'], isset($_POST['is_active']) ? 1 : 0, $_POST['social_id']]);
+                $message = '✅ Sosyal medya platformu güncellendi!';
+                $messageType = 'success';
+                break;
+                
+            case 'delete_social':
+                $stmt = $pdo->prepare("DELETE FROM social_media_links WHERE id = ?");
+                $stmt->execute([$_POST['social_id']]);
+                $message = '✅ Sosyal medya platformu silindi!';
+                $messageType = 'success';
+                break;
+                
+            case 'toggle_social_status':
+                $stmt = $pdo->prepare("UPDATE social_media_links SET is_active = NOT is_active, updated_at = NOW() WHERE id = ?");
+                $stmt->execute([$_POST['social_id']]);
+                $message = '✅ Sosyal medya durumu güncellendi!';
+                $messageType = 'success';
+                break;
         }
     } catch (Exception $e) {
         $message = '❌ Hata: ' . $e->getMessage();
@@ -124,11 +140,18 @@ try {
     $officeStmt->execute();
     $officeInfo = $officeStmt->fetch(PDO::FETCH_ASSOC);
     
+    // Sosyal medya linklerini al
+    $socialQuery = "SELECT * FROM social_media_links ORDER BY display_order ASC, name ASC";
+    $socialStmt = $pdo->prepare($socialQuery);
+    $socialStmt->execute();
+    $socialLinks = $socialStmt->fetchAll(PDO::FETCH_ASSOC);
+    
 } catch (Exception $e) {
     $services = [];
     $categories = [];
     $contactCard = null;
     $officeInfo = null;
+    $socialLinks = [];
 }
 
 // Design header include
@@ -339,6 +362,11 @@ include '../includes/design_header.php';
                 </button>
                 </li>
                 <li class="nav-item" role="presentation">
+                <button class="nav-link text-white" id="social-tab" data-bs-toggle="tab" data-bs-target="#social" type="button" role="tab">
+                <i class="bi bi-share me-2"></i>Sosyal Medya
+                </button>
+                </li>
+                <li class="nav-item" role="presentation">
                 <button class="nav-link text-white" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab">
                 <i class="bi bi-gear me-2"></i>Ayarlar
                 </button>
@@ -532,6 +560,126 @@ include '../includes/design_header.php';
                     </div>
                 </div>
 
+                <!-- Sosyal Medya Tab -->
+                <div class="tab-pane fade" id="social" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h6 class="mb-0">Footer'da Gösterilecek Sosyal Medya Platformları</h6>
+                        <button class="btn-design-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addSocialModal">
+                            <i class="bi bi-plus me-2"></i>Platform Ekle
+                        </button>
+                    </div>
+                    
+                    <div class="row">
+                        <?php if (!empty($socialLinks)): ?>
+                            <?php foreach ($socialLinks as $social): ?>
+                                <div class="col-lg-6 mb-3">
+                                    <div class="service-item">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <i class="<?php echo htmlspecialchars($social['icon']); ?> me-2" style="font-size: 1.5rem; color: #071e3d;"></i>
+                                                    <h6 class="mb-0"><?php echo htmlspecialchars($social['name']); ?></h6>
+                                                    <span class="badge bg-<?php echo $social['is_active'] ? 'success' : 'secondary'; ?> ms-2">
+                                                        <?php echo $social['is_active'] ? 'Aktif' : 'Pasif'; ?>
+                                                    </span>
+                                                </div>
+                                                <?php if ($social['url']): ?>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-link-45deg me-2 text-primary"></i>
+                                                        <a href="<?php echo htmlspecialchars($social['url']); ?>" target="_blank" class="text-decoration-none" style="font-size: 0.85rem;">
+                                                            <?php 
+                                                            $displayUrl = $social['url'];
+                                                            if (strlen($displayUrl) > 40) {
+                                                                $displayUrl = substr($displayUrl, 0, 40) . '...';
+                                                            }
+                                                            echo htmlspecialchars($displayUrl);
+                                                            ?>
+                                                        </a>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <small class="text-muted"><i class="bi bi-exclamation-triangle me-1"></i>URL henüz eklenmemiş</small>
+                                                <?php endif; ?>
+                                                <div class="mt-2">
+                                                    <small class="text-muted">Sıralama: <?php echo $social['display_order']; ?></small>
+                                                </div>
+                                            </div>
+                                            <div class="custom-dropdown">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                                        onclick="toggleCustomDropdown('social-<?php echo $social['id']; ?>')">
+                                                    <i class="bi bi-ellipsis-v"></i>
+                                                </button>
+                                                <div id="dropdown-social-<?php echo $social['id']; ?>" class="custom-dropdown-menu">
+                                                    <button onclick="editSocial(<?php echo htmlspecialchars(json_encode($social)); ?>)">
+                                                        <i class="bi bi-pencil-square me-2"></i>Düzenle
+                                                    </button>
+                                                    <form method="POST" style="margin: 0;">
+                                                        <input type="hidden" name="action" value="toggle_social_status">
+                                                        <input type="hidden" name="social_id" value="<?php echo $social['id']; ?>">
+                                                        <button type="submit">
+                                                            <i class="bi bi-<?php echo $social['is_active'] ? 'eye-slash' : 'eye'; ?> me-2"></i>
+                                                            <?php echo $social['is_active'] ? 'Pasif Yap' : 'Aktif Yap'; ?>
+                                                        </button>
+                                                    </form>
+                                                    <form method="POST" style="margin: 0;" onsubmit="return confirm('Bu sosyal medya platformunu silmek istediğinizden emin misiniz?')">
+                                                        <input type="hidden" name="action" value="delete_social">
+                                                        <input type="hidden" name="social_id" value="<?php echo $social['id']; ?>">
+                                                        <button type="submit" style="color: #dc3545;">
+                                                            <i class="bi bi-trash me-2"></i>Sil
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="col-12">
+                                <div class="text-center py-5">
+                                    <i class="bi bi-share fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Henüz sosyal medya platformu eklenmemiş.</p>
+                                    <button class="btn-design-primary" data-bs-toggle="modal" data-bs-target="#addSocialModal">
+                                        <i class="bi bi-plus me-2"></i>İlk Platformu Ekle
+                                    </button>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <!-- Footer Sosyal Medya Önizleme -->
+                    <?php if (!empty($socialLinks)): ?>
+                    <div class="mt-4">
+                        <div class="design-card">
+                            <div class="design-card-header">
+                                <h6 class="mb-0"><i class="bi bi-eye me-2"></i>Footer Sosyal Medya Önizleme</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="p-3 rounded" style="background-color: #071e3d;">
+                                    <div class="social-links d-flex">
+                                        <?php foreach (array_filter($socialLinks, function($link) { return $link['is_active']; }) as $link): ?>
+                                            <?php if ($link['url']): ?>
+                                                <a href="<?php echo htmlspecialchars($link['url']); ?>" target="_blank" 
+                                                   class="text-white me-3 footer-social-link" title="<?php echo htmlspecialchars($link['name']); ?>" 
+                                                   style="font-size: 1.2rem; transition: all 0.3s ease; text-decoration: none;">
+                                                    <i class="<?php echo htmlspecialchars($link['icon']); ?>"></i>
+                                                </a>
+                                            <?php else: ?>
+                                                <span class="text-white me-3 footer-social-link opacity-50" 
+                                                      title="<?php echo htmlspecialchars($link['name']); ?> (Link yok)" 
+                                                      style="font-size: 1.2rem;">
+                                                    <i class="<?php echo htmlspecialchars($link['icon']); ?>"></i>
+                                                </span>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                                <small class="text-muted mt-2 d-block">Bu önizleme footer'da nasıl görüneceğini gösterir</small>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+
                 <!-- Ayarlar Tab -->
                 <div class="tab-pane fade" id="settings" role="tabpanel">
                     <div class="row">
@@ -571,42 +719,127 @@ include '../includes/design_header.php';
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="col-lg-4">
-                            <div class="design-card">
-                                <div class="design-card-header">
-                                    <h6 class="mb-0"><i class="bi bi-share-alt me-2"></i>Sosyal Medya</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="mb-3">
-                                        <label class="form-label">Facebook</label>
-                                        <input type="url" class="form-control" placeholder="https://facebook.com/..." disabled>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">Instagram</label>
-                                        <input type="url" class="form-control" placeholder="https://instagram.com/..." disabled>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">LinkedIn</label>
-                                        <input type="url" class="form-control" placeholder="https://linkedin.com/..." disabled>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">YouTube</label>
-                                        <input type="url" class="form-control" placeholder="https://youtube.com/..." disabled>
-                                    </div>
-                                    
-                                    <div class="alert alert-info">
-                                        <small><i class="bi bi-info-circle me-2"></i>Sosyal medya yönetimi gelecek versiyonda eklenecek.</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Social Media Modal -->
+<div class="modal fade" id="addSocialModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yeni Sosyal Medya Platformu Ekle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST">
+                <input type="hidden" name="action" value="add_social">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Platform Adı *</label>
+                        <input type="text" name="social_name" class="form-control" required placeholder="Örn: Facebook">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bootstrap Icon *</label>
+                        <select name="social_icon" class="form-select" required>
+                            <option value="">Seçiniz...</option>
+                            <option value="bi-facebook">Facebook (bi-facebook)</option>
+                            <option value="bi-instagram">Instagram (bi-instagram)</option>
+                            <option value="bi-linkedin">LinkedIn (bi-linkedin)</option>
+                            <option value="bi-twitter">Twitter (bi-twitter)</option>
+                            <option value="bi-youtube">YouTube (bi-youtube)</option>
+                            <option value="bi-whatsapp">WhatsApp (bi-whatsapp)</option>
+                            <option value="bi-telegram">Telegram (bi-telegram)</option>
+                            <option value="bi-tiktok">TikTok (bi-tiktok)</option>
+                            <option value="bi-pinterest">Pinterest (bi-pinterest)</option>
+                            <option value="bi-snapchat">Snapchat (bi-snapchat)</option>
+                            <option value="bi-discord">Discord (bi-discord)</option>
+                            <option value="bi-twitch">Twitch (bi-twitch)</option>
+                        </select>
+                        <div class="form-text">Platformun ikonunu seçin</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">URL (Opsiyonel)</label>
+                        <input type="url" name="social_url" class="form-control" placeholder="https://facebook.com/yourpage">
+                        <div class="form-text">Boş bırakılırsa sadece ikon gösterilir</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sıralama</label>
+                        <input type="number" name="display_order" class="form-control" value="0" min="0">
+                        <div class="form-text">Düşük sayı önce gösterilir</div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="is_active" class="form-check-input" id="addSocialActive" checked>
+                        <label class="form-check-label" for="addSocialActive">Aktif</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn-design-primary">
+                        <i class="bi bi-plus me-2"></i>Platformu Ekle
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Social Media Modal -->
+<div class="modal fade" id="editSocialModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sosyal Medya Platformu Düzenle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST">
+                <input type="hidden" name="action" value="update_social">
+                <input type="hidden" name="social_id" id="editSocialId">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Platform Adı *</label>
+                        <input type="text" name="social_name" id="editSocialName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bootstrap Icon *</label>
+                        <select name="social_icon" id="editSocialIcon" class="form-select" required>
+                            <option value="">Seçiniz...</option>
+                            <option value="bi-facebook">Facebook (bi-facebook)</option>
+                            <option value="bi-instagram">Instagram (bi-instagram)</option>
+                            <option value="bi-linkedin">LinkedIn (bi-linkedin)</option>
+                            <option value="bi-twitter">Twitter (bi-twitter)</option>
+                            <option value="bi-youtube">YouTube (bi-youtube)</option>
+                            <option value="bi-whatsapp">WhatsApp (bi-whatsapp)</option>
+                            <option value="bi-telegram">Telegram (bi-telegram)</option>
+                            <option value="bi-tiktok">TikTok (bi-tiktok)</option>
+                            <option value="bi-pinterest">Pinterest (bi-pinterest)</option>
+                            <option value="bi-snapchat">Snapchat (bi-snapchat)</option>
+                            <option value="bi-discord">Discord (bi-discord)</option>
+                            <option value="bi-twitch">Twitch (bi-twitch)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">URL (Opsiyonel)</label>
+                        <input type="url" name="social_url" id="editSocialUrl" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sıralama</label>
+                        <input type="number" name="display_order" id="editSocialOrder" class="form-control" min="0">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="is_active" id="editSocialActive" class="form-check-input">
+                        <label class="form-check-label" for="editSocialActive">Aktif</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn-design-primary">
+                        <i class="bi bi-save me-2"></i>Değişiklikleri Kaydet
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -792,6 +1025,18 @@ function editCategory(category) {
     document.getElementById('editCategoryDescription').value = category.description || '';
     
     const modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+    modal.show();
+}
+
+function editSocial(social) {
+    document.getElementById('editSocialId').value = social.id;
+    document.getElementById('editSocialName').value = social.name;
+    document.getElementById('editSocialIcon').value = social.icon;
+    document.getElementById('editSocialUrl').value = social.url || '';
+    document.getElementById('editSocialOrder').value = social.display_order;
+    document.getElementById('editSocialActive').checked = social.is_active == 1;
+    
+    const modal = new bootstrap.Modal(document.getElementById('editSocialModal'));
     modal.show();
 }
 

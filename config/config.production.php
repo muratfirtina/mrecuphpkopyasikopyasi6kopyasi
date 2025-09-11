@@ -333,7 +333,7 @@ function isLoggedIn() {
 function isAdmin() {
     // Role tabanlı kontrol (öncelik)
     if (isset($_SESSION['role'])) {
-        return $_SESSION['role'] === 'admin';
+        return in_array($_SESSION['role'], ['admin', 'design']);
     }
     
     // Fallback: is_admin tabanlı kontrol

@@ -268,7 +268,7 @@ class User
                 $_SESSION['email'] = $user['email'];
                 $_SESSION['role'] = $user['role'];
                 $_SESSION['user_role'] = $user['role']; // Design panel uyumluluğu için
-                $_SESSION['is_admin'] = ($user['role'] === 'admin') ? 1 : 0;
+                $_SESSION['is_admin'] = in_array($user['role'], ['admin', 'design']) ? 1 : 0;
                 $_SESSION['credits'] = $user['credits'] ?? 0;
                 $_SESSION['first_name'] = $user['first_name'] ?? '';
                 $_SESSION['last_name'] = $user['last_name'] ?? '';

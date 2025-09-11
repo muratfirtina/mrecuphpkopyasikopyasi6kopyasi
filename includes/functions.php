@@ -62,7 +62,7 @@ if (!function_exists('isLoggedIn')) {
 
 if (!function_exists('isAdmin')) {
     function isAdmin() {
-        return isLoggedIn() && isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+        return isLoggedIn() && isset($_SESSION['role']) && in_array($_SESSION['role'], ['admin', 'design']);
     }
 }
 
@@ -262,7 +262,7 @@ if (!function_exists('isLoggedIn')) {
 
 if (!function_exists('isAdmin')) {
     function isAdmin() {
-        return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+        return isset($_SESSION['role']) && in_array($_SESSION['role'], ['admin', 'design']);
     }
 }
 

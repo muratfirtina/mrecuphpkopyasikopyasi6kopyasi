@@ -826,19 +826,19 @@ if (!isset($pageTitle)) {
                                 <?php if (function_exists('isAdmin') && isAdmin()): ?>
                                     <li>
                                         <a class="dropdown-item" href="<?php echo BASE_URL; ?>/admin/">
-                                            <i class="bi bi-gear-fill me-2"></i>Admin Panel
+                                            <i class="bi bi-gear-fill me-2"></i>Admin Paneli
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="<?php echo BASE_URL; ?>/migration-dashboard.php">
-                                            <i class="bi bi-arrow-left-right me-2"></i>Migration Dashboard
+                                        <a class="dropdown-item" href="<?php echo BASE_URL; ?>/design/">
+                                            <i class="bi bi-arrow-left-right me-2"></i>Dizayn Paneli
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
                                 <?php endif; ?>
                                 <li>
                                     <a class="dropdown-item" href="<?php echo BASE_URL; ?>/user/">
-                                        <i class="bi bi-speedometer2 me-2"></i>Panel
+                                        <i class="bi bi-speedometer2 me-2"></i>Kullanıcı Paneli
                                     </a>
                                 </li>
                                 <li>

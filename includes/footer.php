@@ -56,6 +56,12 @@ try {
     $whatsappStmt->execute();
     $whatsappData = $whatsappStmt->fetch(PDO::FETCH_ASSOC);
     
+    // Sosyal medya linklerini al
+    $socialQuery = "SELECT name, icon, url FROM social_media_links WHERE is_active = 1 ORDER BY display_order ASC, name ASC";
+    $socialStmt = $pdo->prepare($socialQuery);
+    $socialStmt->execute();
+    $socialLinks = $socialStmt->fetchAll(PDO::FETCH_ASSOC);
+    
     // Eğer WhatsApp kaydı bulunamazsa, telefon numarasını kullan
     if (!$whatsappData) {
         $phoneQuery = "SELECT contact_info FROM contact_cards WHERE contact_link LIKE '%tel:%' LIMIT 1";
@@ -88,6 +94,13 @@ try {
     $contactInfo = 'E-posta: info@mrecu.com\nTelefon: +90 (555) 123 45 67';
     $officeData = ['address' => 'İstanbul, Türkiye', 'working_hours' => 'Teknik Destek'];
     $whatsappData = ['contact_info' => '+90 (555) 123 45 67']; // Varsayılan WhatsApp numarası
+    
+    // Varsayılan sosyal medya linkleri
+    $socialLinks = [
+        ['name' => 'Facebook', 'icon' => 'bi-facebook', 'url' => ''],
+        ['name' => 'Instagram', 'icon' => 'bi-instagram', 'url' => ''],
+        ['name' => 'LinkedIn', 'icon' => 'bi-linkedin', 'url' => '']
+    ];
 }
 
 // Base path ayarlama
@@ -141,15 +154,32 @@ $basePath = isset($basePath) ? $basePath : '/';
                     Güvenli, hızlı ve kaliteli çözümler için bizi tercih edin.
                 </p> -->
                 <div class="social-links">
-                    <a href="#" class="text-white me-3 footer-social-link" title="Facebook">
-                        <i class="bi bi-facebook"></i>
-                    </a>
-                    <a href="#" class="text-white me-3 footer-social-link" title="Instagram">
-                        <i class="bi bi-instagram"></i>
-                    </a>
-                    <a href="#" class="text-white me-3 footer-social-link" title="LinkedIn">
-                        <i class="bi bi-linkedin"></i>
-                    </a>
+                    <?php if (!empty($socialLinks)): ?>
+                        <?php foreach ($socialLinks as $link): ?>
+                            <?php if (!empty($link['url'])): ?>
+                                <a href="<?php echo htmlspecialchars($link['url']); ?>" target="_blank" rel="noopener noreferrer"
+                                   class="text-white me-3 footer-social-link" title="<?php echo htmlspecialchars($link['name']); ?>">
+                                    <i class="<?php echo htmlspecialchars($link['icon']); ?>"></i>
+                                </a>
+                            <?php else: ?>
+                                <span class="text-white me-3 footer-social-link opacity-50" 
+                                      title="<?php echo htmlspecialchars($link['name']); ?> (Link henüz eklenmemiş)">
+                                    <i class="<?php echo htmlspecialchars($link['icon']); ?>"></i>
+                                </span>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <!-- Varsayılan sosyal medya linkleri -->
+                        <a href="#" class="text-white me-3 footer-social-link" title="Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" class="text-white me-3 footer-social-link" title="Instagram">
+                            <i class="bi bi-instagram"></i>
+                        </a>
+                        <a href="#" class="text-white me-3 footer-social-link" title="LinkedIn">
+                            <i class="bi bi-linkedin"></i>
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
 

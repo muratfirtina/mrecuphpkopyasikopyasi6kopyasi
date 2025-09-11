@@ -117,6 +117,20 @@ $animationSpeed = isset($designSettings['hero_animation_speed']) ? (int)$designS
 // Calculator Typewriter kelimeleri
 $calculatorTypewriterWords = ['Optimize Edin', 'Güçlendirin', 'Geliştirin'];
 
+// Testimonials verilerini al
+try {
+    $stmt = $pdo->query("
+        SELECT * FROM testimonials 
+        WHERE is_active = 1 
+        ORDER BY display_order ASC, created_at DESC
+        LIMIT 6
+    ");
+    $testimonials = $stmt->fetchAll();
+} catch (Exception $e) {
+    $testimonials = [];
+    error_log('Index.php - Testimonials query error: ' . $e->getMessage());
+}
+
 // Header include
 include 'includes/header.php';
 ?>
@@ -1005,6 +1019,172 @@ include 'includes/header.php';
         </div>
     </div>
 </section> -->
+
+<!-- Testimonials Section -->
+<?php if (!empty($testimonials)): ?>
+<section class="testimonials-section py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold text-dark mb-3">Gerçek Kullanıcı Yorumları</h2>
+                <p class="lead text-muted">Memnun müşterilerimizin deneyimlerini okuyun</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <?php foreach (array_slice($testimonials, 0, 3) as $testimonial): ?>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="testimonial-card h-100 p-4 bg-white rounded-4 shadow-sm border-0 position-relative">
+                    <!-- Rating Stars -->
+                    <div class="testimonial-rating mb-3">
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <i class="bi bi-star<?php echo $i <= $testimonial['rating'] ? '-fill' : ''; ?> text-warning"></i>
+                        <?php endfor; ?>
+                    </div>
+                    
+                    <!-- Testimonial Text -->
+                    <div class="testimonial-text mb-4">
+                        <p class="text-muted mb-0 lh-lg">
+                            "<?php echo htmlspecialchars($testimonial['comment']); ?>"
+                        </p>
+                    </div>
+                    
+                    <!-- Customer Info -->
+                    <div class="testimonial-author d-flex align-items-center">
+                        <div class="author-avatar me-3">
+                            <?php if ($testimonial['avatar_url']): ?>
+                                <img src="<?php echo htmlspecialchars($testimonial['avatar_url']); ?>" 
+                                     alt="<?php echo htmlspecialchars($testimonial['name']); ?>" 
+                                     class="rounded-circle" width="50" height="50">
+                            <?php else: ?>
+                                <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 50px; height: 50px; background: linear-gradient(135deg, #dc3545, #e74c3c); color: white; font-weight: bold; font-size: 1.1rem;">
+                                    <?php echo strtoupper(substr($testimonial['name'], 0, 2)); ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="author-info">
+                            <h6 class="mb-0 fw-bold text-dark"><?php echo htmlspecialchars($testimonial['name']); ?></h6>
+                            <small class="text-muted"><?php echo htmlspecialchars($testimonial['position']); ?></small>
+                        </div>
+                    </div>
+                    
+                    <!-- Decorative Quote Icon -->
+                    <div class="position-absolute top-0 end-0 mt-3 me-3">
+                        <i class="bi bi-quote text-primary opacity-25" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        
+        <!-- View All Reviews Button -->
+        <?php if (count($testimonials) > 3): ?>
+        <div class="row">
+            <div class="col-12 text-center mt-4">
+                <button class="btn btn-outline-primary btn-lg" id="showMoreTestimonials">
+                    <i class="bi bi-plus-circle me-2"></i>Daha Fazla Yorum Gör
+                </button>
+            </div>
+        </div>
+        
+        <!-- Hidden Testimonials -->
+        <div class="row d-none" id="moreTestimonials">
+            <?php foreach (array_slice($testimonials, 3) as $testimonial): ?>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="testimonial-card h-100 p-4 bg-white rounded-4 shadow-sm border-0 position-relative">
+                    <!-- Rating Stars -->
+                    <div class="testimonial-rating mb-3">
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <i class="bi bi-star<?php echo $i <= $testimonial['rating'] ? '-fill' : ''; ?> text-warning"></i>
+                        <?php endfor; ?>
+                    </div>
+                    
+                    <!-- Testimonial Text -->
+                    <div class="testimonial-text mb-4">
+                        <p class="text-muted mb-0 lh-lg">
+                            "<?php echo htmlspecialchars($testimonial['comment']); ?>"
+                        </p>
+                    </div>
+                    
+                    <!-- Customer Info -->
+                    <div class="testimonial-author d-flex align-items-center">
+                        <div class="author-avatar me-3">
+                            <?php if ($testimonial['avatar_url']): ?>
+                                <img src="<?php echo htmlspecialchars($testimonial['avatar_url']); ?>" 
+                                     alt="<?php echo htmlspecialchars($testimonial['name']); ?>" 
+                                     class="rounded-circle" width="50" height="50">
+                            <?php else: ?>
+                                <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 50px; height: 50px; background: linear-gradient(135deg, #dc3545, #e74c3c); color: white; font-weight: bold; font-size: 1.1rem;">
+                                    <?php echo strtoupper(substr($testimonial['name'], 0, 2)); ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="author-info">
+                            <h6 class="mb-0 fw-bold text-dark"><?php echo htmlspecialchars($testimonial['name']); ?></h6>
+                            <small class="text-muted"><?php echo htmlspecialchars($testimonial['position']); ?></small>
+                        </div>
+                    </div>
+                    
+                    <!-- Decorative Quote Icon -->
+                    <div class="position-absolute top-0 end-0 mt-3 me-3">
+                        <i class="bi bi-quote text-primary opacity-25" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+</section>
+
+<!-- Testimonials JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const showMoreBtn = document.getElementById('showMoreTestimonials');
+        const moreTestimonials = document.getElementById('moreTestimonials');
+        
+        if (showMoreBtn && moreTestimonials) {
+            showMoreBtn.addEventListener('click', function() {
+                moreTestimonials.classList.remove('d-none');
+                showMoreBtn.style.display = 'none';
+                
+                // Smooth scroll to new content
+                setTimeout(() => {
+                    moreTestimonials.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest'
+                    });
+                }, 100);
+            });
+        }
+        
+        // Animate testimonials on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all testimonial cards
+        document.querySelectorAll('.testimonial-card').forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+            observer.observe(card);
+        });
+    });
+</script>
+<?php endif; ?>
 
 <!-- Call to Action -->
 <div class="container">
