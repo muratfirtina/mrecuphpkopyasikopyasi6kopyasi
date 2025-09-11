@@ -47,6 +47,9 @@ $cssPath = '../assets/css/style.css';
     <!-- Chart.js for admin charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <!-- jQuery from allowed CDN (CSP Compatible) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
     <!-- Custom CSS -->
     <link href="<?php echo $cssPath; ?>" rel="stylesheet">
     
@@ -726,8 +729,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // AJAX ile bildirimi orundu olarak işaretle
-        fetch('ajax/mark_notification_read.php', {
+        // AJAX ile bildirimi okundu olarak işaretle
+        fetch('../ajax/mark_notification_read.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -788,7 +791,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // AJAX ile tüm bildirimleri okundu olarak işaretle
-        fetch('ajax/mark_all_notifications_read.php', {
+        fetch('../ajax/mark_all_notifications_read.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -835,7 +838,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Notification Badge güncelleme fonksiyonunu global scope'a ata
     window.updateNotificationBadge = function() {
         // Okunmamış bildirim sayısını güncelle
-        fetch('ajax/get_notification_count.php')
+        fetch('../ajax/get_notification_count.php')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -974,7 +977,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.updateTotalNotificationCount = function() {
         Promise.all([
             fetch('ajax/get-chat-notifications.php?action=count').then(r => r.json()),
-            fetch('ajax/get_notification_count.php').then(r => r.json())
+            fetch('../ajax/get_notification_count.php').then(r => r.json())
         ])
         .then(([chatData, generalData]) => {
             const chatCount = (chatData.success ? chatData.count : 0) || 0;
