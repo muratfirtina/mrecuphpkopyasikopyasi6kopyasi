@@ -162,12 +162,165 @@ include 'includes/header.php';
         margin-top: -150px !important;
         padding-top: 150px !important;
     }
+    
+    /* Mobil Hero Slider Düzeltmeleri - Header'dan sonra başlamalı */
+    @media (max-width: 991.98px) {
+        .hero-slider {
+            margin-top: 0px !important;
+            padding-top: 120px !important;
+            min-height: 520px !important;
+        }
+        
+        .hero-slide {
+            height: 520px !important;
+            min-height: 520px !important;
+            background-size: cover !important;
+            background-position: center center !important;
+        }
+        
+        .carousel-inner {
+            height: 520px !important;
+        }
+        
+        .carousel-item {
+            height: 520px !important;
+        }
+        
+        .display-3 {
+            font-size: 2.2rem !important;
+        }
+        
+        .display-5 {
+            font-size: 1.6rem !important;
+        }
+        
+        .lead {
+            font-size: 1rem !important;
+            margin-bottom: 2rem !important;
+        }
+        
+        .container.py-5 {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+    }
+    
+    @media (max-width: 767.98px) {
+        .hero-slider {
+            margin-top: 0px !important;
+            padding-top: 100px !important;
+            min-height: 480px !important;
+        }
+        
+        .hero-slide {
+            height: 480px !important;
+            min-height: 480px !important;
+            background-size: cover !important;
+            background-position: center center !important;
+        }
+        
+        .carousel-inner {
+            height: 480px !important;
+        }
+        
+        .carousel-item {
+            height: 480px !important;
+        }
+        
+        .display-3 {
+            font-size: 2rem !important;
+            line-height: 1.2 !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .display-5 {
+            font-size: 1.4rem !important;
+            line-height: 1.3 !important;
+            margin-bottom: 1.5rem !important;
+        }
+        
+        .lead {
+            font-size: 0.95rem !important;
+            line-height: 1.5 !important;
+            margin-bottom: 1.5rem !important;
+        }
+        
+        .btn-lg {
+            font-size: 0.9rem !important;
+            padding: 0.6rem 1.2rem !important;
+        }
+        
+        .container.py-5 {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+    }
+    
+    @media (max-width: 575.98px) {
+        .hero-slider {
+            margin-top: 0px !important;
+            padding-top: 90px !important;
+            min-height: 320px !important;
+        }
+        
+        .hero-slide {
+            height: 320px !important;
+            min-height: 320px !important;
+            background-size: cover !important;
+            background-position: center center !important;
+        }
+        
+        .carousel-inner {
+            margin-top: 48px !important;
+            height: 320px !important;
+        }
+        
+        .carousel-item {
+            height: 320px !important;
+        }
+        
+        .display-3 {
+            font-size: 1.8rem !important;
+            line-height: 1.2 !important;
+            margin-bottom: 0.8rem !important;
+        }
+        
+        .display-5 {
+            font-size: 1.2rem !important;
+            line-height: 1.3 !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .lead {
+            font-size: 0.85rem !important;
+            line-height: 1.4 !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .btn-lg {
+            font-size: 0.8rem !important;
+            padding: 0.5rem 1rem !important;
+        }
+        
+        .container.py-5 {
+            padding-left: 0.8rem !important;
+            padding-right: 0.8rem !important;
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
+        
+        .d-flex.gap-3 {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 0.8rem !important;
+        }
+    }
 </style>
 
 <!-- Sale Badge CSS -->
 <link rel="stylesheet" href="sale_badge_styles.css">
 
-<section class="hero-slider" style="position: relative; min-height: 750px; z-index: 1040;">
+<section class="hero-slider" style="position: relative; min-height: 750px; z-index: 1;">
     <?php if (!empty($sliders)): ?>
         <!-- DEBUG: Slider verilerini kontrol et -->
         <?php
@@ -178,7 +331,7 @@ include 'includes/header.php';
         echo " -->";
         ?>
 
-        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="<?php echo $animationSpeed; ?>" style="height: 750px;">
+        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="<?php echo $animationSpeed; ?>">
             <!-- Slide Indicators -->
             <!-- <div class="carousel-indicators">
                 <?php foreach ($sliders as $index => $slider): ?>
@@ -377,7 +530,7 @@ include 'includes/header.php';
                 }
             ?>
 
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-3 col-md-6 col-6">
                     <div class="jet-box" data-animation="fadeInUp" data-delay="<?php echo $delay; ?>">
                         <div class="flip-card" onclick="window.location.href='<?php echo BASE_URL; ?>/kategori/<?php echo urlencode($category['slug']); ?>'" style="cursor: pointer;">
                             <div class="flip-card-inner">
@@ -411,7 +564,7 @@ include 'includes/header.php';
             ?>
 
             <!-- Upload Card (4. kart) -->
-            <div class="col-lg-3 col-md-6">
+            <div class="col-lg-3 col-md-6 col-6">
                 <div class="jet-box" data-animation="fadeInUp" data-delay="0.4">
                     <?php
                     $uploadUrl = (function_exists('isLoggedIn') && isLoggedIn()) ? 'user/upload.php' : 'register.php';
@@ -1413,29 +1566,64 @@ include 'includes/footer.php';
         }
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .hero-slide {
-            height: 650px !important;
+    /* Mobile-specific carousel control adjustments */
+    @media (max-width: 767.98px) {
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 8%;
         }
-
-        .hero-slider {
-            margin-top: -120px !important;
-            padding-top: 120px !important;
-        }
-
-        .display-3 {
-            font-size: 2.5rem;
-        }
-
-        .display-5 {
-            font-size: 2rem;
-        }
-
+        
         .carousel-control-prev-icon,
         .carousel-control-next-icon {
             width: 2rem;
             height: 2rem;
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        
+        .carousel-indicators {
+            bottom: 10px;
+        }
+        
+        .carousel-indicators button {
+            width: 10px;
+            height: 10px;
+        }
+    }
+    
+    @media (max-width: 575.98px) {
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 10%;
+        }
+        
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+        
+        /* Additional mobile carousel improvements */
+        .row.align-items-center {
+            align-items: flex-start !important;
+            padding-top: 1rem;
+        }
+        
+        .col-lg-8 {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+        
+        /* Better text shadows for mobile */
+        .slide-title {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7) !important;
+        }
+        
+        .display-5 {
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6) !important;
+        }
+        
+        .lead {
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6) !important;
         }
     }
 
@@ -1533,8 +1721,8 @@ include 'includes/footer.php';
 
     @media (max-width: 576px) {
         .service-card-wrapper {
-            height: 280px;
-            min-height: 280px;
+            height: 220px;
+            min-height: 220px;
         }
 
         .service-content {
@@ -1706,9 +1894,31 @@ include 'includes/footer.php';
         background: transparent;
         padding: 0;
         position: relative;
-        z-index: 1050;
+        z-index: 2;
         margin-top: -200px;
         padding-bottom: 80px;
+    }
+    
+    /* Mobile adjustments for jet-animated-boxes */
+    @media (max-width: 991.98px) {
+        .jet-animated-boxes {
+            margin-top: -180px;
+            padding-bottom: 60px;
+        }
+    }
+    
+    @media (max-width: 767.98px) {
+        .jet-animated-boxes {
+            margin-top: -150px;
+            padding-bottom: 50px;
+        }
+    }
+    
+    @media (max-width: 575.98px) {
+        .jet-animated-boxes {
+            margin-top: -120px;
+            padding-bottom: 40px;
+        }
     }
 
     .jet-box {
@@ -1953,6 +2163,73 @@ include 'includes/footer.php';
 
         .flip-card-back {
             padding: 30px 20px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .jet-animated-boxes {
+            margin-top: -100px;
+            padding-bottom: 40px;
+        }
+        
+        .row.g-4 {
+            margin: 0px 0px !important;
+        }
+
+        .flip-card {
+            height: 220px;
+            margin-bottom: 15px;
+        }
+        
+        .flip-card-front,
+        .flip-card-back {
+            height: 220px;
+        }
+
+        .jet-box {
+           margin-bottom: -20px;
+        }
+
+        .jet-box-icon {
+            width: 45px;
+            height: 45px;
+            margin: 20px 0 10px 0;
+        }
+
+        .jet-box-icon i {
+            font-size: 1.5rem;
+        }
+
+        .jet-box-title {
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            margin: 10px 0px auto 0px;
+        }
+
+        .jet-box-subtitle {
+            font-size: 0.6rem;
+        }
+
+        .flip-back-title {
+            font-size: 0.9rem;
+        }
+
+        .flip-back-subtitle {
+            font-size: 0.6rem;
+        }
+
+        .flip-back-description {
+            font-size: 0.7rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .flip-card-back {
+            padding: 20px 15px;
+        }
+        
+        .flip-back-link {
+            font-size: 0.7rem;
         }
     }
 
@@ -2430,7 +2707,7 @@ include 'includes/footer.php';
     .featured-products-container {
         position: relative;
         padding: 0 60px;
-        width: 1420px;
+        width: 1320px;
     }
 
     .featured-products-scroll {
@@ -2454,6 +2731,38 @@ include 'includes/footer.php';
     .featured-product-item {
         flex: 0 0 240px;
         height: 320px;
+    }
+    
+    /* Mobil Featured Products Grid */
+    @media (max-width: 768px) {
+        .featured-products-container {
+            padding: 0;
+            width: 100%;
+        }
+        
+        .featured-products-scroll {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            overflow: visible;
+            padding: 0;
+        }
+        
+        .featured-product-item {
+            flex: none;
+            height: 280px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .featured-products-scroll {
+            gap: 10px;
+            padding: 0 10px;
+        }
+        
+        .featured-product-item {
+            height: 260px;
+        }
     }
 
     .scroll-btn {
@@ -2495,46 +2804,8 @@ include 'includes/footer.php';
 
     /* Mobile adjustments for horizontal scroll */
     @media (max-width: 768px) {
-        .featured-products-container {
-            padding: 0 50px;
-        }
-
-        .featured-product-item {
-            flex: 0 0 250px;
-            height: 280px;
-        }
-
-        .scroll-btn {
-            width: 40px;
-            height: 40px;
-            font-size: 1rem;
-        }
-
-        .scroll-btn-left {
-            left: 5px;
-        }
-
-        .scroll-btn-right {
-            right: 5px;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .featured-products-container {
-            padding: 0;
-        }
-
         .scroll-btn {
             display: none !important;
-        }
-
-        .featured-products-scroll {
-            padding: 10px 15px;
-        }
-
-        .featured-product-item {
-            flex: 0 0 220px;
-            height: 260px;
         }
     }
 

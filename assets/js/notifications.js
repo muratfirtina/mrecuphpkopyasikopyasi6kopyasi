@@ -6,7 +6,7 @@
 // Bildirim işaretleme fonksiyonları
 function markNotificationRead(notificationId) {
     // AJAX ile bildirimi okundu olarak işaretle
-    fetch('../ajax/mark_notification_read.php', {
+    fetch('ajax/mark_notification_read.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -30,7 +30,7 @@ function markNotificationRead(notificationId) {
 
 function markAllNotificationsRead() {
     // AJAX ile tüm bildirimleri okundu olarak işaretle
-    fetch('../ajax/mark_all_notifications_read.php', {
+    fetch('ajax/mark_all_notifications_read.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ function markAllNotificationsRead() {
 
 function updateNotificationBadge() {
     // Okunmamış bildirim sayısını güncelle
-    fetch('../ajax/get_notification_count.php')
+    fetch('ajax/get_notification_count.php')
     .then(response => response.json())
     .then(data => {
         if (data.success) {
@@ -96,7 +96,7 @@ function sendTestEmail(toEmail) {
         if (!toEmail) return;
     }
     
-    fetch('../ajax/send-test-email.php', {
+    fetch('ajax/send-test-email.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -189,7 +189,7 @@ function playNotificationSound() {
 // Real-time bildirim kontrolü (basit polling)
 function startNotificationPolling() {
     setInterval(function() {
-        fetch('../ajax/get_notification_count.php')
+        fetch('ajax/get_notification_count.php')
         .then(response => response.json())
         .then(data => {
             if (data.success && data.count > 0) {

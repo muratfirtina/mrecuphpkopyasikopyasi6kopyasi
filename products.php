@@ -361,6 +361,151 @@ include 'includes/header.php';
     padding: 2rem;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     margin-bottom: 2rem;
+    position: relative;
+    display: none; /* Başlangıçta kapalı */
+    transition: all 0.3s ease;
+}
+
+.filters-sidebar.show {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.filters-toggle {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,123,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+
+.filters-toggle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.filters-toggle:hover::before {
+    left: 100%;
+}
+
+.toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+.filters-toggle.active .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.filters-toggle:hover {
+    background: linear-gradient(135deg, #0056b3, #004494);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,123,255,0.3);
+}
+
+.filters-toggle.active {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+}
+
+.filters-toggle.active:hover {
+    background: linear-gradient(135deg, #c82333, #a71e2a);
+}
+
+/* Mobil için responsive ayarlar */
+@media (max-width: 991.98px) {
+    .filters-sidebar {
+        position: fixed;
+        top: 120px; /* Header yüksekliği kadar aşağıdan başlat */
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 120px); /* Header yüksekliğini çıkar */
+        z-index: 10500; /* Header'dan daha yüksek z-index */
+        overflow-y: auto;
+        border-radius: 0;
+        margin-bottom: 0;
+        padding: 2rem 1rem 1rem 1rem;
+    }
+    
+    .filters-sidebar.show {
+        animation: slideInLeft 0.3s ease;
+    }
+    
+    @keyframes slideInLeft {
+        from {
+            transform: translateX(-100%);
+        }
+        to {
+            transform: translateX(0);
+        }
+    }
+    
+    .sidebar-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        z-index: 10600; /* En üstte olsun */
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-close:hover {
+        background: #c82333;
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    }
+    
+    .filters-overlay {
+        position: fixed;
+        top: 120px; /* Header yüksekliği kadar aşağıdan başlat */
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 120px); /* Header yüksekliğini çıkar */
+        background: rgba(0,0,0,0.7);
+        z-index: 10400; /* Sidebar'dan düşük ama header'dan yüksek */
+        display: none;
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+    }
+    
+    .filters-overlay.show {
+        display: block;
+    }
 }
 
 .filter-section {
@@ -457,6 +602,43 @@ include 'includes/header.php';
     .sort-select {
         width: 100%;
     }
+    
+    /* Küçük mobil ekranlar için daha düşük header yüksekliği */
+    .filters-sidebar {
+        top: 100px !important;
+        height: calc(100vh - 100px) !important;
+    }
+    
+    .filters-overlay {
+        top: 100px !important;
+        height: calc(100vh - 100px) !important;
+    }
+}
+
+/* Tablet boyutları için özel ayarlar */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .filters-sidebar {
+        top: 140px !important;
+        height: calc(100vh - 140px) !important;
+    }
+    
+    .filters-overlay {
+        top: 140px !important;
+        height: calc(100vh - 140px) !important;
+    }
+}
+
+/* Büyük mobil ekranlar için */
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .filters-sidebar {
+        top: 110px !important;
+        height: calc(100vh - 110px) !important;
+    }
+    
+    .filters-overlay {
+        top: 110px !important;
+        height: calc(100vh - 110px) !important;
+    }
 }
 </style>
 
@@ -484,7 +666,21 @@ include 'includes/header.php';
         <div class="row">
             <!-- Filters Sidebar -->
             <div class="col-lg-3">
-                <div class="filters-sidebar">
+                <!-- Filters Toggle Button -->
+                <button class="btn filters-toggle w-100" id="filtersToggle" type="button">
+                    <i class="bi bi-funnel me-2"></i>
+                    <span class="toggle-text">Filtreleri Göster</span>
+                    <i class="bi bi-chevron-down ms-auto toggle-icon"></i>
+                </button>
+                
+                <!-- Mobile Overlay -->
+                <div class="filters-overlay" id="filtersOverlay"></div>
+                
+                <div class="filters-sidebar" id="filtersSidebar">
+                    <!-- Mobile Close Button -->
+                    <button class="sidebar-close d-lg-none" id="sidebarClose" type="button">
+                        <i class="bi bi-x"></i>
+                    </button>
                     <!-- Search -->
                     <div class="filter-section">
                         <h5 class="filter-title">
@@ -832,6 +1028,96 @@ function buildProductURL($params = []) {
 ?>
 
 <script>
+// Filters Toggle Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const filtersToggle = document.getElementById('filtersToggle');
+    const filtersSidebar = document.getElementById('filtersSidebar');
+    const filtersOverlay = document.getElementById('filtersOverlay');
+    const sidebarClose = document.getElementById('sidebarClose');
+    const toggleText = filtersToggle.querySelector('.toggle-text');
+    const toggleIcon = filtersToggle.querySelector('.toggle-icon');
+    
+    let isFiltersOpen = false;
+    
+    // Toggle filters sidebar
+    function toggleFilters() {
+        isFiltersOpen = !isFiltersOpen;
+        
+        if (isFiltersOpen) {
+            // Önce overlay'i göster (mobilde)
+            if (window.innerWidth <= 991) {
+                filtersOverlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            // Sidebar'i göster
+            setTimeout(() => {
+                filtersSidebar.classList.add('show');
+            }, 50);
+            
+            filtersToggle.classList.add('active');
+            toggleText.textContent = 'Filtreleri Gizle';
+            
+        } else {
+            // Sidebar'i gizle
+            filtersSidebar.classList.remove('show');
+            filtersToggle.classList.remove('active');
+            toggleText.textContent = 'Filtreleri Göster';
+            
+            // Animasyon bittikten sonra overlay'i gizle
+            setTimeout(() => {
+                filtersOverlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }, 300);
+        }
+    }
+    
+    // Close filters
+    function closeFilters() {
+        if (isFiltersOpen) {
+            toggleFilters();
+        }
+    }
+    
+    // Event listeners
+    filtersToggle.addEventListener('click', toggleFilters);
+    sidebarClose?.addEventListener('click', closeFilters);
+    filtersOverlay?.addEventListener('click', closeFilters);
+    
+    // ESC tuşu ile kapatma
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && isFiltersOpen) {
+            closeFilters();
+        }
+    });
+    
+    // Ekran boyutu değiştiğinde overlay'i temizle
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 991) {
+            filtersOverlay?.classList.remove('show');
+            document.body.style.overflow = '';
+            // Desktop'ta filtreleri açık bırak
+            if (isFiltersOpen) {
+                filtersSidebar.classList.add('show');
+            }
+        }
+    });
+    
+    // Sayfa yüklenirken mobil kontrolü
+    function handleInitialLoad() {
+        if (window.innerWidth <= 991) {
+            // Mobilde filtreleri kapat
+            filtersSidebar.classList.remove('show');
+            filtersOverlay?.classList.remove('show');
+            isFiltersOpen = false;
+            filtersToggle.classList.remove('active');
+            toggleText.textContent = 'Filtreleri Göster';
+        }
+    }
+    
+    handleInitialLoad();
+});
+
 // Sort functionality
 document.getElementById('sortProducts').addEventListener('change', function() {
     const value = this.value.split('-');

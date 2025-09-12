@@ -108,8 +108,8 @@ function loadDevelopmentConfig() {
     
     // Basic development constants
     define('SITE_NAME', env('SITE_NAME', 'Mr ECU'));
-    define('SITE_URL', env('SITE_URL', 'http://localhost:8888<?php echo BASE_URL; ?>/'));
-    define('BASE_URL', env('BASE_URL', 'http://localhost:8888<?php echo BASE_URL; ?>'));
+    define('BASE_URL', env('BASE_URL', 'http://localhost:8888/mrecuphpkopyasikopyasi6kopyasi'));
+    define('SITE_URL', env('SITE_URL', BASE_URL . '/'));
     define('SITE_EMAIL', env('SITE_EMAIL', 'info@localhost.com'));
     define('DEBUG', true);
     define('ERROR_REPORTING', true);
@@ -148,8 +148,8 @@ function loadDevelopmentConfig() {
 function loadEmergencyConfig() {
     // Minimum required constants
     if (!defined('SITE_NAME')) define('SITE_NAME', 'Mr ECU');
-    if (!defined('SITE_URL')) define('SITE_URL', 'https://www.mrecutuning.com/');
-    if (!defined('BASE_URL')) define('BASE_URL', 'https://www.mrecutuning.com');
+    if (!defined('BASE_URL')) define('BASE_URL', 'http://localhost:8888/mrecuphpkopyasikopyasi6kopyasi');
+    if (!defined('SITE_URL')) define('SITE_URL', BASE_URL . '/');
     if (!defined('SITE_EMAIL')) define('SITE_EMAIL', 'mr.ecu@outlook.com');
     if (!defined('DEBUG')) define('DEBUG', false);
     if (!defined('ERROR_REPORTING')) define('ERROR_REPORTING', false);

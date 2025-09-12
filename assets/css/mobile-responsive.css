@@ -1,0 +1,505 @@
+/* 
+ * Mr ECU - Mobile Responsive CSS
+ * Mobil cihazlar için özel düzenlemeler
+ */
+
+/* === HERO SLIDER MOBILE === */
+@media (max-width: 768px) {
+    .hero-slider {
+        margin-top: -100px !important;
+        padding-top: 100px !important;
+        min-height: 400px !important;
+    }
+    
+    .hero-slide {
+        height: 400px !important;
+        min-height: 400px !important;
+        background-size: cover !important;
+        background-position: center 30% !important;
+        background-repeat: no-repeat !important;
+    }
+    
+    /* Slider background override */
+    .carousel-item .hero-slide[style] {
+        background-size: cover !important;
+        background-position: center 30% !important;
+        background-repeat: no-repeat !important;
+    }
+    
+    /* Mobilde overlay'i güçlendir - metin daha iyi okunur */
+    .hero-slide > div[style*="linear-gradient"] {
+        background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.1) 100%) !important;
+    }
+    
+    .carousel-inner {
+        height: 400px !important;
+    }
+    
+    .carousel-item {
+        height: 400px !important;
+    }
+    
+    .display-3 {
+        font-size: 1.8rem !important;
+    }
+    
+    .display-5 {
+        font-size: 1.3rem !important;
+    }
+    
+    .lead {
+        font-size: 0.9rem !important;
+    }
+    
+    /* Carousel controls ve indicators */
+    .carousel-indicators {
+        display: none;
+    }
+    
+    .carousel-control-prev,
+    .carousel-control-next {
+        display: none;
+    }
+}
+
+/* === EXTRA SMALL MOBILE === */
+@media (max-width: 480px) {
+    .hero-slide {
+        background-size: cover !important;
+        background-position: center 20% !important;
+    }
+    
+    .display-3 {
+        font-size: 1.6rem !important;
+    }
+    
+    .display-5 {
+        font-size: 1.2rem !important;
+    }
+    
+    .lead {
+        font-size: 0.9rem !important;
+    }
+    
+    /* Carousel kontrolleri gizle */
+    .carousel-control-prev,
+    .carousel-control-next {
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-slider {
+        margin-top: -80px !important;
+        padding-top: 80px !important;
+        min-height: 350px !important;
+    }
+    
+    .hero-slide {
+        height: 350px !important;
+        min-height: 350px !important;
+        background-size: cover !important;
+        background-position: center 25% !important;
+        background-repeat: no-repeat !important;
+    }
+    
+    /* Küçük ekran slider background override */
+    .carousel-item .hero-slide[style] {
+        background-size: cover !important;
+        background-position: center 25% !important;
+        background-repeat: no-repeat !important;
+    }
+    
+    /* Küçük ekranlarda overlay'i güçlendir */
+    .hero-slide > div[style*="linear-gradient"] {
+        background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.2) 100%) !important;
+    }
+    
+    .carousel-inner {
+        height: 320px !important;
+    }
+    
+    .carousel-item {
+        height: 320px !important;
+    }
+    
+    .display-3 {
+        font-size: 1.6rem !important;
+    }
+    
+    .display-5 {
+        font-size: 1.2rem !important;
+    }
+    
+    /* Carousel kontrolleri gizle */
+    .carousel-control-prev,
+    .carousel-control-next {
+        display: none;
+    }
+}
+
+/* === CATEGORY BOXES MOBILE === */
+@media (max-width: 768px) {
+    .jet-animated-boxes {
+        margin-top: -120px;
+        padding-bottom: 60px;
+    }
+
+    .flip-card {
+        height: 260px;
+        margin-bottom: 20px;
+    }
+
+    .jet-box-icon {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 15px;
+    }
+
+    .jet-box-icon i {
+        font-size: 2rem;
+    }
+
+    .jet-box-title {
+        font-size: 1.5rem;
+    }
+
+    .flip-back-title {
+        font-size: 1.4rem;
+    }
+
+    .flip-card-back {
+        padding: 30px 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .jet-animated-boxes {
+        margin-top: -80px;
+        padding-bottom: 40px;
+    }
+    
+    .row.g-4 {
+            margin: 0px 5px !important;
+    }
+
+    .flip-card {
+        height: 220px;
+        margin-bottom: 15px;
+    }
+    
+    .flip-card-front,
+    .flip-card-back {
+        height: 220px;
+    }
+
+    .jet-box-icon {
+        width: 45px;
+        height: 45px;
+        margin: 20px 0 10px 0;
+    }
+
+    .jet-box-icon i {
+        font-size: 1.5rem;
+    }
+
+    .jet-box-title {
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        margin: 10px 0px auto 0px;
+    }
+
+    .flip-back-title {
+        font-size: 0.9rem;
+    }
+
+    .flip-back-description {
+        font-size: 0.7rem;
+        margin-bottom: 15px;
+        line-height: 1.4;
+    }
+
+    .flip-card-back {
+        padding: 20px 15px;
+    }
+    
+    .flip-back-link {
+        font-size: 0.7rem;
+    }
+}
+
+/* === FEATURED PRODUCTS MOBILE === */
+@media (max-width: 768px) {
+    .featured-products-container {
+        padding: 0;
+        width: 100%;
+    }
+    
+    .featured-products-scroll {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        overflow: visible;
+        padding: 0;
+    }
+    
+    .featured-product-item {
+        flex: none;
+        height: 280px;
+    }
+    
+    .scroll-btn {
+        display: none !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .featured-products-scroll {
+        gap: 10px;
+        padding: 0 10px;
+    }
+    
+    .featured-product-item {
+        height: 260px;
+    }
+}
+
+/* === SERVICES SECTION MOBILE === */
+@media (max-width: 768px) {
+    .service-card-wrapper {
+        height: 300px;
+        min-height: 300px;
+        margin-bottom: 20px;
+    }
+
+    .service-content {
+        padding: 15px !important;
+    }
+
+    .service-title {
+        font-size: 1rem !important;
+    }
+
+    .service-description {
+        font-size: 0.85rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .service-card-wrapper {
+        height: 280px;
+        min-height: 280px;
+    }
+
+    .service-content {
+        padding: 12px !important;
+    }
+
+    .service-title {
+        font-size: 0.95rem !important;
+    }
+
+    .service-description {
+        font-size: 0.8rem !important;
+    }
+
+    .service-icon-small img {
+        width: 35px !important;
+        height: 35px !important;
+    }
+
+    .service-icon-small i {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* === CALCULATOR MOBILE === */
+@media (max-width: 768px) {
+    .chip-tuning-calculator {
+        padding: 2rem 1rem;
+        margin: 0 1rem;
+    }
+
+    .calculator-header h2 {
+        font-size: 2rem;
+    }
+
+    .tuning-select,
+    .tuning-calculate-btn {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .calculator-header h2 {
+        font-size: 1.8rem;
+    }
+
+    .calculator-header h3 {
+        font-size: 1rem;
+    }
+
+    .tuning-select,
+    .tuning-calculate-btn {
+        padding: 0.7rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* === BRANDS CAROUSEL MOBILE === */
+@media (max-width: 768px) {
+    .brand-card {
+        width: 140px;
+        height: 90px;
+        padding: 12px;
+    }
+
+    .brands-carousel-track {
+        gap: 15px;
+        animation-duration: 20s;
+    }
+}
+
+@media (max-width: 576px) {
+    .brand-card {
+        width: 100%;
+        height: 80px;
+        padding: 10px;
+    }
+
+    .brands-carousel-track {
+        gap: 12px;
+        animation-duration: 18s;
+    }
+
+    .brands-carousel-container {
+        mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+    }
+}
+
+/* === NAVBAR MOBILE === */
+@media (max-width: 991.98px) {
+    .modern-navbar {
+        padding: 2.5rem 0;
+    }
+    
+    .modern-navbar.scrolled {
+        padding: 1.25rem 0;
+    }
+    
+    .brand-text {
+        display: none;
+    }
+    
+    .modern-nav-link span {
+        display: none;
+    }
+    
+    .user-info {
+        display: none;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .modern-navbar {
+        padding: 2rem 0;
+    }
+    
+    .modern-navbar.scrolled {
+        padding: 1rem 0;
+    }
+    
+    .navbar-collapse {
+        background: rgba(0, 0, 0, 0.9);
+        border-radius: 12px;
+        margin-top: 1rem;
+        padding: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    
+    .modern-nav-link {
+        margin: 0.25rem 0;
+        justify-content: flex-start;
+    }
+    
+    .modern-nav-link span {
+        display: inline;
+    }
+    
+    .user-dropdown {
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .user-info {
+        display: flex;
+    }
+}
+
+/* === GENERAL MOBILE UTILITIES === */
+@media (max-width: 576px) {
+    .container {
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+    }
+    
+    h1, .h1 {
+        font-size: 1.8rem !important;
+    }
+    
+    h2, .h2 {
+        font-size: 1.5rem !important;
+    }
+    
+    h3, .h3 {
+        font-size: 1.3rem !important;
+    }
+    
+    .btn-lg {
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+    }
+    
+    .btn {
+        font-size: 0.9rem;
+    }
+}
+
+/* === ACCESSIBILITY & TOUCH IMPROVEMENTS === */
+@media (hover: none) and (pointer: coarse) {
+    .flip-card:active .flip-card-inner {
+        transform: rotateX(180deg);
+    }
+    
+    .flip-card-inner {
+        transition: transform 0.6s ease;
+    }
+    
+    .product-overlay {
+        opacity: 1 !important;
+    }
+    
+    .product-info {
+        transform: translateY(0) !important;
+    }
+}
+
+/* === PERFORMANCE OPTIMIZATIONS === */
+@media (prefers-reduced-motion: reduce) {
+    .brands-carousel-track {
+        animation-duration: 60s;
+    }
+    
+    .flip-card-inner {
+        transition-duration: 0.2s;
+    }
+    
+    * {
+        animation-duration: 0.2s !important;
+        transition-duration: 0.2s !important;
+    }
+}

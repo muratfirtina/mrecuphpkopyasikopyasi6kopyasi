@@ -41,6 +41,9 @@ if (!isset($pageTitle)) {
     <!-- Custom CSS -->
     <link href="<?php echo BASE_URL; ?>/assets/css/style.css" rel="stylesheet">
     
+    <!-- Mobile Responsive CSS -->
+    <link href="<?php echo BASE_URL; ?>/assets/css/mobile-responsive.css" rel="stylesheet">
+    
     <!-- Modern Navigation Styles -->
     <?php 
     // PHP değişkenlerini CSS bloğundan önce tanımla
@@ -115,7 +118,7 @@ if (!isset($pageTitle)) {
         transition: all 0.3s ease;
         padding: 1.1rem 0;
         position: fixed;
-        z-index: 9999;
+        z-index: 10000;
         width: 100%;
         top: 0;
         left: 0;
@@ -411,23 +414,22 @@ if (!isset($pageTitle)) {
         padding-top: 0px;
     }
     
-    /* Responsive */
+    /* Responsive için navbar ayarları */
     @media (max-width: 991.98px) {
         .modern-navbar {
-            padding: 2.5rem 0;
+            padding: 1.5rem 0;
+            background: #071e3d !important; /* Mobilde solid background */
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
         }
         
         .modern-navbar.scrolled {
-            padding: 1.25rem 0;
+            padding: 1rem 0;
+            background: #071e3d !important;
         }
         
         .brand-text {
             display: none;
-        }
-        
-        .brand-logo-img {
-            width: 100%;
-            height: 100%;
         }
         
         .modern-nav-link span {
@@ -441,11 +443,15 @@ if (!isset($pageTitle)) {
     
     @media (max-width: 767.98px) {
         .modern-navbar {
-            padding: 2rem 0;
+            padding: 1rem 0;
+            background: #071e3d !important; /* Mobilde solid background */
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
         }
         
         .modern-navbar.scrolled {
-            padding: 1rem 0;
+            padding: 0.8rem 0;
+            background: #071e3d !important;
         }
         
         .navbar-collapse {
@@ -960,9 +966,28 @@ if (!isset($pageTitle)) {
         // Initialize scroll effect
         handleScroll();
         
-        // Close mobile menu when clicking on a link
-        document.querySelectorAll('.modern-nav-link').forEach(link => {
+        // Close mobile menu when clicking on a link (except dropdowns)
+        document.querySelectorAll('.modern-nav-link:not(.dropdown-toggle)').forEach(link => {
             link.addEventListener('click', function() {
+                if (window.innerWidth < 992) {
+                    const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                        toggle: false
+                    });
+                    bsCollapse.hide();
+                }
+            });
+        });
+        
+        // Prevent dropdown toggle from closing mobile menu
+        document.querySelectorAll('.dropdown-toggle').forEach(dropdownToggle => {
+            dropdownToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        });
+        
+        // Close mobile menu when clicking on dropdown items
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function() {
                 if (window.innerWidth < 992) {
                     const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
                         toggle: false

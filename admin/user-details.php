@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Mr ECU - Admin Kullanıcı Detay Sayfası
  */
@@ -54,7 +55,7 @@ try {
     $stmt->bindValue(3, $creditsOffset, PDO::PARAM_INT);
     $stmt->execute();
     $creditTransactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch(PDOException $e) {
+} catch (PDOException $e) {
     $creditTransactions = [];
 }
 
@@ -64,7 +65,7 @@ try {
     $stmt->execute([$userId]);
     $totalCredits = $stmt->fetchColumn();
     $totalCreditsPages = ceil($totalCredits / $perPage);
-} catch(PDOException $e) {
+} catch (PDOException $e) {
     $totalCredits = 0;
     $totalCreditsPages = 0;
 }
@@ -89,7 +90,7 @@ try {
     ");
     $stmt->execute([$userId]);
     $creditStats = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     // İşlem türlerine göre dağılım
     $stmt = $pdo->prepare("
         SELECT 
@@ -107,7 +108,7 @@ try {
     ");
     $stmt->execute([$userId]);
     $creditBreakdown = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     // Aylık kredi hareketleri (Son 12 ay)
     $stmt = $pdo->prepare("
         SELECT 
@@ -123,8 +124,7 @@ try {
     ");
     $stmt->execute([$userId]);
     $monthlyStats = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-} catch(PDOException $e) {
+} catch (PDOException $e) {
     $creditStats = [
         'total_quota_given' => 0,
         'total_refunds' => 0,
@@ -154,7 +154,7 @@ try {
     ");
     $stmt->execute([$userId]);
     $userStats = $stmt->fetch(PDO::FETCH_ASSOC);
-} catch(PDOException $e) {
+} catch (PDOException $e) {
     $userStats = [
         'total_uploads' => 0,
         'completed_uploads' => 0,
@@ -167,17 +167,17 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_credit'])) {
     $amount = floatval($_POST['amount']);
     $description = sanitize($_POST['description']);
-    
+
     if ($amount <= 0) {
         $error = 'Kredi miktarı 0\'dan büyük olmalıdır.';
     } else {
         try {
             $pdo->beginTransaction();
-            
+
             // Kullanıcının kredisini güncelle
             $stmt = $pdo->prepare("UPDATE users SET credits = credits + ? WHERE id = ?");
             $stmt->execute([$amount, $userId]);
-            
+
             // İşlem kaydı oluştur
             $transactionId = generateUUID();
             $stmt = $pdo->prepare("
@@ -185,15 +185,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_credit'])) {
                 VALUES (?, ?, ?, 'deposit', ?, ?, NOW())
             ");
             $stmt->execute([$transactionId, $userId, $_SESSION['user_id'], $amount, $description]);
-            
+
             $pdo->commit();
             $success = number_format($amount, 2) . ' TL kredi başarıyla eklendi.';
-            
+
             // Sayfayı yenile
             header("Location: user-details.php?id=$userId&success=" . urlencode($success));
             exit;
-            
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             $pdo->rollback();
             $error = 'Kredi ekleme sırasında hata oluştu.';
         }
@@ -203,17 +202,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_credit'])) {
 // Kullanıcı durumu güncelleme
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $status = sanitize($_POST['status']);
-    
+
     try {
         $stmt = $pdo->prepare("UPDATE users SET status = ? WHERE id = ?");
         $result = $stmt->execute([$status, $userId]);
-        
+
         if ($result) {
             $success = 'Kullanıcı durumu güncellendi.';
             // Kullanıcı bilgilerini yenile
             $userDetails = $user->getUserById($userId);
         }
-    } catch(PDOException $e) {
+    } catch (PDOException $e) {
         $error = 'Durum güncelleme sırasında hata oluştu.';
     }
 }
@@ -288,22 +287,22 @@ include '../includes/admin_sidebar.php';
                         <?php echo $userDetails['role'] === 'admin' ? 'Admin' : 'Kullanıcı'; ?>
                     </span>
                 </div>
-                
+
                 <div class="row mb-3">
                     <div class="col-sm-6"><strong>Kullanıcı Adı:</strong></div>
                     <div class="col-sm-6"><?php echo htmlspecialchars($userDetails['username']); ?></div>
                 </div>
-                
+
                 <div class="row mb-3">
                     <div class="col-sm-6"><strong>E-posta:</strong></div>
                     <div class="col-sm-6"><?php echo htmlspecialchars($userDetails['email']); ?></div>
                 </div>
-                
+
                 <div class="row mb-3">
                     <div class="col-sm-6"><strong>Telefon:</strong></div>
                     <div class="col-sm-6"><?php echo htmlspecialchars($userDetails['phone'] ?? 'Belirtilmemiş'); ?></div>
                 </div>
-                
+
                 <div class="row mb-3">
                     <div class="col-sm-6"><strong>Tanımlı Kota:</strong></div>
                     <div class="col-sm-6">
@@ -312,7 +311,7 @@ include '../includes/admin_sidebar.php';
                         </span>
                     </div>
                 </div>
-                
+
                 <div class="row mb-3">
                     <div class="col-sm-6"><strong>Mevcut Kullanım:</strong></div>
                     <div class="col-sm-6">
@@ -321,19 +320,19 @@ include '../includes/admin_sidebar.php';
                         </span>
                     </div>
                 </div>
-                
+
                 <div class="row mb-3">
                     <div class="col-sm-6"><strong>Kalan Kullanım:</strong></div>
                     <div class="col-sm-6">
                         <span class="badge bg-success">
-                            <?php 
+                            <?php
                             $availableCredit = ($userDetails['credit_quota'] ?? 0) - ($userDetails['credit_used'] ?? 0);
-                            echo number_format($availableCredit, 2); 
+                            echo number_format($availableCredit, 2);
                             ?> TL
                         </span>
                     </div>
                 </div>
-                
+
                 <div class="row mb-3">
                     <div class="col-sm-6"><strong>Durum:</strong></div>
                     <div class="col-sm-6">
@@ -342,19 +341,19 @@ include '../includes/admin_sidebar.php';
                         </span>
                     </div>
                 </div>
-                
+
                 <div class="row mb-3">
                     <div class="col-sm-6"><strong>Kayıt Tarihi:</strong></div>
                     <div class="col-sm-6"><?php echo date('d.m.Y H:i', strtotime($userDetails['created_at'])); ?></div>
                 </div>
-                
+
                 <div class="row mb-3">
                     <div class="col-sm-6"><strong>Son Giriş:</strong></div>
                     <div class="col-sm-6">
                         <?php echo $userDetails['last_login'] ? date('d.m.Y H:i', strtotime($userDetails['last_login'])) : 'Hiç giriş yapmamış'; ?>
                     </div>
                 </div>
-                
+
                 <!-- Durum Güncelleme -->
                 <hr>
                 <h6><i class="bi bi-pencil-square me-2"></i>Durum Güncelle</h6>
@@ -372,7 +371,7 @@ include '../includes/admin_sidebar.php';
                 </form>
             </div>
         </div>
-        
+
         <!-- İstatistikler -->
         <div class="card admin-card mt-4">
             <div class="card-header">
@@ -404,7 +403,7 @@ include '../includes/admin_sidebar.php';
                 </div>
             </div>
         </div>
-        
+
         <!-- Kredi İstatistikleri -->
         <div class="card admin-card mt-4">
             <div class="card-header">
@@ -428,7 +427,7 @@ include '../includes/admin_sidebar.php';
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row g-3 mb-4">
                     <div class="col-6">
                         <div class="text-center p-2 bg-info bg-opacity-10 rounded">
@@ -443,7 +442,7 @@ include '../includes/admin_sidebar.php';
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- İleri İstatistikler -->
                 <hr class="my-3">
                 <div class="row g-2 text-center">
@@ -460,126 +459,134 @@ include '../includes/admin_sidebar.php';
                         <small class="text-muted">İade İşlemi</small>
                     </div>
                 </div>
-                
+
                 <!-- Tarih Bilgileri -->
                 <?php if ($creditStats['first_transaction_date']): ?>
-                <hr class="my-3">
-                <div class="row g-2">
-                    <div class="col-6">
-                        <small class="text-muted">İlk İşlem:</small><br>
-                        <small class="fw-bold"><?php echo date('d.m.Y', strtotime($creditStats['first_transaction_date'])); ?></small>
+                    <hr class="my-3">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <small class="text-muted">İlk İşlem:</small><br>
+                            <small class="fw-bold"><?php echo date('d.m.Y', strtotime($creditStats['first_transaction_date'])); ?></small>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Son İşlem:</small><br>
+                            <small class="fw-bold"><?php echo date('d.m.Y H:i', strtotime($creditStats['last_transaction_date'])); ?></small>
+                        </div>
                     </div>
-                    <div class="col-6">
-                        <small class="text-muted">Son İşlem:</small><br>
-                        <small class="fw-bold"><?php echo date('d.m.Y H:i', strtotime($creditStats['last_transaction_date'])); ?></small>
-                    </div>
-                </div>
                 <?php endif; ?>
             </div>
         </div>
-        
+
         <!-- İşlem Türleri Analizi -->
         <?php if (!empty($creditBreakdown)): ?>
-        <div class="card admin-card mt-4">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="bi bi-list me-2"></i>İşlem Türleri
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Tür</th>
-                                <th class="text-end">Adet</th>
-                                <th class="text-end">Toplam</th>
-                                <th class="text-end">Ortalama</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($creditBreakdown as $breakdown): ?>
-                            <tr>
-                                <td>
-                                    <span class="badge bg-<?php 
-                                        echo $breakdown['transaction_type'] === 'add' ? 'success' : 
-                                            ($breakdown['type'] === 'refund' ? 'info' : 'warning'); 
-                                    ?> badge-sm">
-                                        <?php 
-                                        $typeLabels = [
-                                            'quota_add' => 'Kota Artırma',
-                                            'quota_reset' => 'Kota Sıfırlama',
-                                            'quota_set' => 'Kota Yenileme',
-                                            'refund' => 'Kredi İadesi',
-                                            'manual' => 'Manuel Kullanım',
-                                            'file_charge' => 'Dosya Ücreti'
-                                        ];
-                                        echo $typeLabels[$breakdown['type']] ?? $breakdown['type'];
-                                        ?>
-                                    </span>
-                                </td>
-                                <td class="text-end"><?php echo $breakdown['count']; ?></td>
-                                <td class="text-end"><?php echo number_format($breakdown['total_amount'], 2); ?> TL</td>
-                                <td class="text-end"><?php echo number_format($breakdown['avg_amount'], 2); ?> TL</td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+            <div class="card admin-card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-list me-2"></i>İşlem Türleri
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Tür</th>
+                                    <th class="text-end">Adet</th>
+                                    <th class="text-end">Toplam</th>
+                                    <th class="text-end">Ortalama</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($creditBreakdown as $breakdown): ?>
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-<?php
+                                                                    echo $breakdown['transaction_type'] === 'add' ? 'success' : ($breakdown['type'] === 'refund' ? 'info' : 'warning');
+                                                                    ?> badge-sm">
+                                                <?php
+                                                $typeLabels = [
+                                                    'quota_add' => 'Kota Artırma',
+                                                    'quota_reset' => 'Kota Sıfırlama',
+                                                    'quota_set' => 'Kota Yenileme',
+                                                    'refund' => 'Kredi İadesi',
+                                                    'manual' => 'Manuel Kullanım',
+                                                    'file_charge' => 'Dosya Ücreti'
+                                                ];
+                                                echo $typeLabels[$breakdown['type']] ?? $breakdown['type'];
+                                                ?>
+                                            </span>
+                                        </td>
+                                        <td class="text-end"><?php echo $breakdown['count']; ?></td>
+                                        <td class="text-end"><?php echo number_format($breakdown['total_amount'], 2); ?> TL</td>
+                                        <td class="text-end"><?php echo number_format($breakdown['avg_amount'], 2); ?> TL</td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
         <?php endif; ?>
-        
+
         <!-- Aylık Kredi Hareketleri -->
         <?php if (!empty($monthlyStats)): ?>
-        <div class="card admin-card mt-4">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="bi bi-calendar me-2"></i>Aylık Hareketler (Son 12 Ay)
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Ay</th>
-                                <th class="text-end">Verilen Kota</th>
-                                <th class="text-end">Harcama</th>
-                                <th class="text-end">İşlem Sayısı</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($monthlyStats as $monthly): ?>
-                            <tr>
-                                <td>
-                                    <?php 
-                                    $monthNames = [
-                                        '01' => 'Ocak', '02' => 'Şubat', '03' => 'Mart', '04' => 'Nisan',
-                                        '05' => 'Mayıs', '06' => 'Haziran', '07' => 'Temmuz', '08' => 'Ağustos',
-                                        '09' => 'Eylül', '10' => 'Ekim', '11' => 'Kasım', '12' => 'Aralık'
-                                    ];
-                                    $monthParts = explode('-', $monthly['month_year']);
-                                    echo $monthNames[$monthParts[1]] . ' ' . $monthParts[0];
-                                    ?>
-                                </td>
-                                <td class="text-end text-success">
-                                    <?php echo $monthly['quota_added'] > 0 ? '+' . number_format($monthly['quota_added'], 2) . ' TL' : '-'; ?>
-                                </td>
-                                <td class="text-end text-danger">
-                                    <?php echo $monthly['amount_spent'] > 0 ? '-' . number_format($monthly['amount_spent'], 2) . ' TL' : '-'; ?>
-                                </td>
-                                <td class="text-end"><?php echo $monthly['transaction_count']; ?></td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+            <div class="card admin-card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-calendar me-2"></i>Aylık Hareketler (Son 12 Ay)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Ay</th>
+                                    <th class="text-end">Verilen Kota</th>
+                                    <th class="text-end">Harcama</th>
+                                    <th class="text-end">İşlem Sayısı</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($monthlyStats as $monthly): ?>
+                                    <tr>
+                                        <td>
+                                            <?php
+                                            $monthNames = [
+                                                '01' => 'Ocak',
+                                                '02' => 'Şubat',
+                                                '03' => 'Mart',
+                                                '04' => 'Nisan',
+                                                '05' => 'Mayıs',
+                                                '06' => 'Haziran',
+                                                '07' => 'Temmuz',
+                                                '08' => 'Ağustos',
+                                                '09' => 'Eylül',
+                                                '10' => 'Ekim',
+                                                '11' => 'Kasım',
+                                                '12' => 'Aralık'
+                                            ];
+                                            $monthParts = explode('-', $monthly['month_year']);
+                                            echo $monthNames[$monthParts[1]] . ' ' . $monthParts[0];
+                                            ?>
+                                        </td>
+                                        <td class="text-end text-success">
+                                            <?php echo $monthly['quota_added'] > 0 ? '+' . number_format($monthly['quota_added'], 2) . ' TL' : '-'; ?>
+                                        </td>
+                                        <td class="text-end text-danger">
+                                            <?php echo $monthly['amount_spent'] > 0 ? '-' . number_format($monthly['amount_spent'], 2) . ' TL' : '-'; ?>
+                                        </td>
+                                        <td class="text-end"><?php echo $monthly['transaction_count']; ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
         <?php endif; ?>
     </div>
-    
+
     <div class="col-lg-8">
         <!-- Dosyalar -->
         <div class="card admin-card mb-4">
@@ -618,15 +625,13 @@ include '../includes/admin_sidebar.php';
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="badge bg-<?php 
-                                                echo $upload['status'] === 'completed' ? 'success' : 
-                                                    ($upload['status'] === 'pending' ? 'warning' : 
-                                                    ($upload['status'] === 'processing' ? 'info' : 'danger')); 
-                                            ?>">
-                                                <?php 
+                                            <span class="badge bg-<?php
+                                                                    echo $upload['status'] === 'completed' ? 'success' : ($upload['status'] === 'pending' ? 'warning' : ($upload['status'] === 'processing' ? 'info' : 'danger'));
+                                                                    ?>">
+                                                <?php
                                                 $statusText = [
                                                     'pending' => 'Bekliyor',
-                                                    'processing' => 'İşleniyor', 
+                                                    'processing' => 'İşleniyor',
                                                     'completed' => 'Tamamlandı',
                                                     'rejected' => 'Reddedildi'
                                                 ];
@@ -642,9 +647,9 @@ include '../includes/admin_sidebar.php';
                                                     <i class="bi bi-eye me-1"></i>Görüntüle
                                                 </a>
                                                 <?php if (!isset($upload['is_cancelled']) || !$upload['is_cancelled']): ?>
-                                                    <button type="button" class="btn btn-warning btn-sm" 
-                                                            onclick="showCancelModal('<?php echo $upload['id']; ?>', 'upload', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')" 
-                                                            title="Dosyayı İptal Et">
+                                                    <button type="button" class="btn btn-warning btn-sm"
+                                                        onclick="showCancelModal('<?php echo $upload['id']; ?>', 'upload', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')"
+                                                        title="Dosyayı İptal Et">
                                                         <i class="bi bi-times"></i>
                                                     </button>
                                                 <?php else: ?>
@@ -659,7 +664,7 @@ include '../includes/admin_sidebar.php';
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <!-- Pagination -->
                     <?php if ($totalUploadsPages > 1): ?>
                         <div class="d-flex justify-content-center mt-3">
@@ -673,7 +678,7 @@ include '../includes/admin_sidebar.php';
                                             </a>
                                         </li>
                                     <?php endif; ?>
-                                    
+
                                     <!-- Sayfa numaraları -->
                                     <?php for ($i = 1; $i <= $totalUploadsPages; $i++): ?>
                                         <li class="page-item <?php echo $i == $uploadsPage ? 'active' : ''; ?>">
@@ -682,7 +687,7 @@ include '../includes/admin_sidebar.php';
                                             </a>
                                         </li>
                                     <?php endfor; ?>
-                                    
+
                                     <!-- Sonraki sayfa -->
                                     <?php if ($uploadsPage < $totalUploadsPages): ?>
                                         <li class="page-item">
@@ -698,137 +703,9 @@ include '../includes/admin_sidebar.php';
                 <?php endif; ?>
             </div>
         </div>
-        
-        <!-- Kredi İşlemleri -->
-        <div class="card admin-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="bi bi-coin me-2"></i>Son Kredi İşlemleri
-                </h5>
-                <button type="button" class="btn btn-sm btn-success" onclick="document.getElementById('addCreditModal').style.display='block'">
-                    <i class="bi bi-plus me-1"></i>Kredi Ekle
-                </button>
-            </div>
-            <div class="card-body p-0">
-                <?php if (empty($creditTransactions)): ?>
-                    <div class="text-center py-4">
-                        <i class="bi bi-coin fa-3x text-muted mb-3"></i>
-                        <h6 class="text-muted">Henüz kredi işlemi yok</h6>
-                    </div>
-                <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Tip</th>
-                                    <th>Miktar</th>
-                                    <th>Açıklama</th>
-                                    <th>Tarih</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($creditTransactions as $transaction): ?>
-                                    <tr>
-                                        <td>
-                                            <span class="badge bg-<?php 
-                                                echo in_array($transaction['type'], ['deposit', 'refund']) ? 'success' : 'warning'; 
-                                            ?>">
-                                                <?php 
-                                                $typeText = [
-                                                    'deposit' => 'Yükleme',
-                                                    'withdraw' => 'Düşürme',
-                                                    'file_charge' => 'Dosya Ücreti',
-                                                    'refund' => 'İade'
-                                                ];
-                                                echo $typeText[$transaction['type']] ?? $transaction['type'];
-                                                ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="text-<?php echo in_array($transaction['type'], ['deposit', 'refund']) ? 'success' : 'danger'; ?>">
-                                                <?php echo in_array($transaction['type'], ['deposit', 'refund']) ? '+' : '-'; ?>
-                                                <?php echo number_format($transaction['amount'], 2); ?> TL
-                                            </span>
-                                        </td>
-                                        <td><?php echo htmlspecialchars($transaction['description'] ?? 'Açıklama yok'); ?></td>
-                                        <td><?php echo date('d.m.Y H:i', strtotime($transaction['created_at'])); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    <?php if ($totalCreditsPages > 1): ?>
-                        <div class="d-flex justify-content-center mt-3">
-                            <nav>
-                                <ul class="pagination pagination-sm">
-                                    <!-- Önceki sayfa -->
-                                    <?php if ($creditsPage > 1): ?>
-                                        <li class="page-item">
-                                            <a class="page-link" href="?id=<?php echo $userId; ?>&uploads_page=<?php echo $uploadsPage; ?>&credits_page=<?php echo $creditsPage - 1; ?>">
-                                                <i class="bi bi-chevron-left"></i>
-                                            </a>
-                                        </li>
-                                    <?php endif; ?>
-                                    
-                                    <!-- Sayfa numaraları -->
-                                    <?php for ($i = 1; $i <= $totalCreditsPages; $i++): ?>
-                                        <li class="page-item <?php echo $i == $creditsPage ? 'active' : ''; ?>">
-                                            <a class="page-link" href="?id=<?php echo $userId; ?>&uploads_page=<?php echo $uploadsPage; ?>&credits_page=<?php echo $i; ?>">
-                                                <?php echo $i; ?>
-                                            </a>
-                                        </li>
-                                    <?php endfor; ?>
-                                    
-                                    <!-- Sonraki sayfa -->
-                                    <?php if ($creditsPage < $totalCreditsPages): ?>
-                                        <li class="page-item">
-                                            <a class="page-link" href="?id=<?php echo $userId; ?>&uploads_page=<?php echo $uploadsPage; ?>&credits_page=<?php echo $creditsPage + 1; ?>">
-                                                <i class="bi bi-chevron-right"></i>
-                                            </a>
-                                        </li>
-                                    <?php endif; ?>
-                                </ul>
-                            </nav>
-                        </div>
-                    <?php endif; ?>
-                <?php endif; ?>
-            </div>
-        </div>
     </div>
 </div>
 
-<!-- Kredi Ekleme Modal -->
-<div id="addCreditModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
-    <div style="background-color: #fefefe; margin: 10% auto; padding: 20px; border-radius: 10px; width: 400px;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5><i class="bi bi-plus me-2"></i>Kredi Ekle</h5>
-            <button type="button" onclick="document.getElementById('addCreditModal').style.display='none'" class="btn-close"></button>
-        </div>
-        
-        <form method="POST">
-            <div class="mb-3">
-                <label for="amount" class="form-label">Kredi Miktarı (TL)</label>
-                <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0.01" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="description" class="form-label">Açıklama</label>
-                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Kredi ekleme sebebini yazın..."></textarea>
-            </div>
-            
-            <div class="d-flex gap-2">
-                <button type="submit" name="add_credit" class="btn btn-success">
-                    <i class="bi bi-plus me-1"></i>Kredi Ekle
-                </button>
-                <button type="button" onclick="document.getElementById('addCreditModal').style.display='none'" class="btn btn-secondary">
-                    İptal
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
 
 <?php
 // Footer include
@@ -851,7 +728,7 @@ include '../includes/admin_footer.php';
                     <input type="hidden" name="admin_cancel_file" value="1">
                     <input type="hidden" name="file_id" id="cancelFileId">
                     <input type="hidden" name="file_type" id="cancelFileType">
-                    
+
                     <div class="mb-4">
                         <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 50%;">
                             <i class="bi bi-times text-white fa-2x"></i>
@@ -865,14 +742,14 @@ include '../includes/admin_footer.php';
                             <small>Bu işlem dosyayı gizleyecek ve varsa ücret iadesi yapacaktır.</small>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="adminCancelNotes" class="form-label">
                             <i class="bi bi-sticky-note me-1"></i>
                             İptal Sebebi (Opsiyonel)
                         </label>
-                        <textarea class="form-control" id="adminCancelNotes" name="admin_notes" rows="3" 
-                                  placeholder="İptal sebebinizi yazabilirsiniz..."></textarea>
+                        <textarea class="form-control" id="adminCancelNotes" name="admin_notes" rows="3"
+                            placeholder="İptal sebebinizi yazabilirsiniz..."></textarea>
                         <small class="text-muted">Bu not kullanıcıya gönderilecek bildirimde yer alacaktır.</small>
                     </div>
                 </div>
@@ -890,9 +767,9 @@ include '../includes/admin_footer.php';
 </div>
 
 <style>
-.bg-gradient-danger {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
-}
+    .bg-gradient-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    }
 </style>
 
 <script>
@@ -902,7 +779,7 @@ include '../includes/admin_footer.php';
         document.getElementById('cancelFileType').value = fileType;
         document.getElementById('cancelFileName').textContent = fileName;
         document.getElementById('adminCancelNotes').value = '';
-        
+
         var modal = new bootstrap.Modal(document.getElementById('adminCancelModal'));
         modal.show();
     }

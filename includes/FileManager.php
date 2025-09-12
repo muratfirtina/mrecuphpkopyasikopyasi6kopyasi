@@ -29,6 +29,16 @@ class FileManager {
             require_once __DIR__ . '/EmailManager.php';
             $this->emailManager = new EmailManager($database);
         }
+        
+        // NotificationManager'ı include et (Bildirim entegrasyonu için)
+        if (file_exists(__DIR__ . '/NotificationManager.php')) {
+            require_once __DIR__ . '/NotificationManager.php';
+        }
+        
+        // Notification integration fonksiyonlarını include et
+        if (file_exists(__DIR__ . '/notification-integration.php')) {
+            require_once __DIR__ . '/notification-integration.php';
+        }
     }
     
     public function getCurrentDateTime() {

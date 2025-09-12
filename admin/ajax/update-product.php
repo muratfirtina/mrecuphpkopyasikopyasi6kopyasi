@@ -1,122 +1,33 @@
 <?php
 /**
- * AJAX - Ürün Güncelleme
+ * AJAX - Ürün Güncelleme (FULL VERSION)
  */
 
+// Hata raporlama
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+
+// JSON header
 header('Content-Type: application/json');
 
-require_once '../../config/config.php';
-require_once '../../config/database.php';
-
-// Slug oluşturma fonksiyonu
-function createSlug($text) {
-    $text = trim($text);
-    $text = mb_strtolower($text, 'UTF-8');
-    
-    // Türkçe karakterleri değiştir
-    $tr = array('ş','Ş','ı','I','İ','ğ','Ğ','ü','Ü','ö','Ö','Ç','ç');
-    $en = array('s','s','i','i','i','g','g','u','u','o','o','c','c');
-    $text = str_replace($tr, $en, $text);
-    
-    // Sadece harf, rakam ve tire bırak
-    $text = preg_replace('/[^a-z0-9\-]/', '-', $text);
-    $text = preg_replace('/-+/', '-', $text);
-    $text = trim($text, '-');
-    
-    return $text;
-}
-
-// Benzersiz slug oluşturma fonksiyonu
-function createUniqueSlug($pdo, $text, $excludeId = null) {
-    $baseSlug = createSlug($text);
-    $slug = $baseSlug;
-    $counter = 1;
-    
-    // Benzersiz slug bulana kadar dene
-    while (!isSlugUnique($pdo, $slug, $excludeId)) {
-        $slug = $baseSlug . '-' . $counter;
-        $counter++;
-    }
-    
-    return $slug;
-}
-
-// Slug benzersizlik kontrolü
-function isSlugUnique($pdo, $slug, $excludeId = null) {
-    $sql = "SELECT id FROM products WHERE slug = ?";
-    $params = [$slug];
-    
-    if ($excludeId) {
-        $sql .= " AND id != ?";
-        $params[] = $excludeId;
-    }
-    
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    
-    return $stmt->fetch() === false;
-}
-
-// Otomatik SKU üretme fonksiyonu
-function generateUniqueSKU($pdo, $productName = '', $excludeId = null) {
-    // Ürün adından basit bir prefix oluştur
-    $prefix = '';
-    if (!empty($productName)) {
-        $words = explode(' ', $productName);
-        foreach ($words as $word) {
-            if (strlen($word) > 0) {
-                $prefix .= strtoupper(substr($word, 0, 1));
-            }
-            if (strlen($prefix) >= 3) break;
-        }
-    }
-    
-    if (empty($prefix)) {
-        $prefix = 'PRD';
-    }
-    
-    // Benzersiz SKU bulana kadar dene
-    $attempts = 0;
-    do {
-        $randomNumber = str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
-        $sku = $prefix . '-' . $randomNumber;
-        
-        // Bu SKU kullanılıyor mu kontrol et
-        $sql = "SELECT COUNT(*) FROM products WHERE sku = ?";
-        $params = [$sku];
-        
-        if ($excludeId) {
-            $sql .= " AND id != ?";
-            $params[] = $excludeId;
-        }
-        
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        $exists = $stmt->fetchColumn() > 0;
-        
-        $attempts++;
-        if ($attempts > 100) {
-            // Çok fazla deneme yapıldı, timestamp ekle
-            $sku = $prefix . '-' . time() . '-' . mt_rand(100, 999);
-            break;
-        }
-    } while ($exists);
-    
-    return $sku;
-}
-
-// Admin kontrolü
-if (!isLoggedIn() || !isAdmin()) {
-    echo json_encode(['success' => false, 'message' => 'Yetkisiz erişim']);
-    exit;
-}
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['success' => false, 'message' => 'Sadece POST istekleri kabul edilir']);
-    exit;
-}
-
 try {
+    require_once '../../config/config.php';
+    require_once '../../config/database.php';
+    require_once '../../includes/functions.php';
+    
+    // Admin kontrolü
+    if (!isLoggedIn() || !isAdmin()) {
+        echo json_encode(['success' => false, 'message' => 'Yetkisiz erişim']);
+        exit;
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        echo json_encode(['success' => false, 'message' => 'Sadece POST istekleri kabul edilir']);
+        exit;
+    }
+
+    // POST verilerini al
     $productId = intval($_POST['product_id'] ?? 0);
     $name = sanitize($_POST['name'] ?? '');
     $slug = sanitize($_POST['slug'] ?? '');
@@ -147,28 +58,16 @@ try {
         exit;
     }
     
-    // SKU boşsa otomatik üret
-    if (empty($sku)) {
-        $sku = generateUniqueSKU($pdo, $name, $productId);
-    } else {
-        // Kullanıcı SKU girdi, duplicate kontrolu yap (mevcut ürün hariç)
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM products WHERE sku = ? AND id != ?");
-        $stmt->execute([$sku, $productId]);
-        if ($stmt->fetchColumn() > 0) {
-            echo json_encode(['success' => false, 'message' => 'Bu SKU zaten başka bir ürün tarafından kullanılmakta.']);
-            exit;
-        }
+    // Slug oluştur/kontrol et
+    if (empty($slug)) {
+        // Basit slug oluşturma
+        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name)));
     }
     
-    // Benzersiz slug oluştur (mevcut ürün ID'si hariç)
-    if (empty($slug)) {
-        $slug = createUniqueSlug($pdo, $name, $productId);
-    } else {
-        // Manuel slug girildi, benzersizlik kontrolü yap
-        if (!isSlugUnique($pdo, $slug, $productId)) {
-            echo json_encode(['success' => false, 'message' => 'Bu slug zaten kullanımda']);
-            exit;
-        }
+    // SKU kontrolü
+    if (empty($sku)) {
+        // Basit SKU oluşturma
+        $sku = 'PRD-' . str_pad($productId, 5, '0', STR_PAD_LEFT);
     }
     
     // Ürünü güncelle
@@ -183,7 +82,7 @@ try {
         WHERE id = ?
     ");
     
-    $stmt->execute([
+    $result = $stmt->execute([
         $name, $slug, $categoryId, $brandId, 
         $shortDescription, $description, $sku, 
         $price, $salePrice, $stockQuantity, 
@@ -191,9 +90,17 @@ try {
         $sortOrder, $metaTitle, $metaDescription, $productId
     ]);
     
-    echo json_encode(['success' => true, 'message' => 'Ürün başarıyla güncellendi']);
+    if ($result) {
+        echo json_encode(['success' => true, 'message' => 'Ürün başarıyla güncellendi']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Güncelleme başarısız']);
+    }
     
+} catch (PDOException $e) {
+    error_log('AJAX PDO Error: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Veritabanı hatası: ' . $e->getMessage()]);
 } catch (Exception $e) {
+    error_log('AJAX General Error: ' . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Hata: ' . $e->getMessage()]);
 }
 ?>

@@ -3,10 +3,33 @@
  * AJAX - Ürün Detayları Getir
  */
 
-header('Content-Type: application/json');
+// Hata raporlamayı aç ve hataları yakala
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // AJAX'ta görüntülemeyi kapat ama loglama devam etsin
+ini_set('log_errors', 1);
 
-require_once '../../config/config.php';
-require_once '../../config/database.php';
+// Output buffer başlat
+ob_start();
+
+try {
+    header('Content-Type: application/json');
+    
+    require_once '../../config/config.php';
+    require_once '../../config/database.php';
+    require_once '../../includes/functions.php';
+    
+    // Buffer'daki istenmeyen çıktıları temizle
+    $output = ob_get_clean();
+    if (!empty($output)) {
+        error_log('AJAX Warning: Unexpected output detected: ' . $output);
+    }
+    
+} catch (Exception $e) {
+    // Buffer temizle
+    ob_clean();
+    echo json_encode(['success' => false, 'message' => 'Config loading error: ' . $e->getMessage()]);
+    exit;
+}
 
 // Admin kontrolü
 if (!isLoggedIn() || !isAdmin()) {

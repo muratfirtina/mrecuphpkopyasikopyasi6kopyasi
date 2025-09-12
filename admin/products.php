@@ -1274,6 +1274,48 @@ function refreshProductImages() {
 
 console.log('Products.js yüklendi - tüm fonksiyonlar hazır!');
 
+// Test fonksiyonu - AJAX endpoint'lerini test etmek için
+window.testAjaxEndpoint = function() {
+    console.log('Testing AJAX endpoint...');
+    
+    fetch('ajax/test-ajax.php', {
+        method: 'GET'
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        return response.text();
+    })
+    .then(text => {
+        console.log('Response text:', text);
+        try {
+            const data = JSON.parse(text);
+            console.log('Parsed JSON:', data);
+            alert('Test sonucu: ' + JSON.stringify(data, null, 2));
+        } catch (e) {
+            console.error('JSON Parse Error:', e);
+            alert('Test hatası - Response JSON değil: ' + text);
+        }
+    })
+    .catch(error => {
+        console.error('Test Error:', error);
+        alert('Test hatası: ' + error.message);
+    });
+};
+
+// Debug için: Test butonunu sayfaya ekle
+if (window.location.search.includes('debug=1')) {
+    const testBtn = document.createElement('button');
+    testBtn.textContent = 'AJAX Test';
+    testBtn.className = 'btn btn-warning';
+    testBtn.onclick = testAjaxEndpoint;
+    testBtn.style.position = 'fixed';
+    testBtn.style.top = '10px';
+    testBtn.style.right = '10px';
+    testBtn.style.zIndex = '9999';
+    document.body.appendChild(testBtn);
+}
+
 // CKEditor için basit konfigürasyon
 if (typeof ClassicEditor !== 'undefined') {
     ClassicEditor
