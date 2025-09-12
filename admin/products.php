@@ -157,6 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
     
     $price = floatval($_POST['price']);
     $salePrice = !empty($_POST['sale_price']) ? floatval($_POST['sale_price']) : null;
+    $currency = !empty($_POST['currency']) ? sanitize($_POST['currency']) : 'TL';
     $stockQuantity = intval($_POST['stock_quantity']);
     $categoryId = !empty($_POST['category_id']) ? sanitize($_POST['category_id']) : null;
     $brandId = !empty($_POST['brand_id']) ? sanitize($_POST['brand_id']) : null;
@@ -178,8 +179,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
             $slug = createUniqueSlug($pdo, $name);
             
             // Ürün ekle
-            $stmt = $pdo->prepare("INSERT INTO products (name, slug, description, short_description, sku, price, sale_price, stock_quantity, category_id, brand_id, weight, dimensions, featured, is_active, sort_order, meta_title, meta_description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $result = $stmt->execute([$name, $slug, $description, $shortDescription, $sku, $price, $salePrice, $stockQuantity, $categoryId, $brandId, $weight, $dimensions, $isFeatured, $isActive, $sortOrder, $metaTitle, $metaDescription]);
+            $stmt = $pdo->prepare("INSERT INTO products (name, slug, description, short_description, sku, price, sale_price, currency, stock_quantity, category_id, brand_id, weight, dimensions, featured, is_active, sort_order, meta_title, meta_description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $result = $stmt->execute([$name, $slug, $description, $shortDescription, $sku, $price, $salePrice, $currency, $stockQuantity, $categoryId, $brandId, $weight, $dimensions, $isFeatured, $isActive, $sortOrder, $metaTitle, $metaDescription]);
             
             if ($result) {
                 $productId = $pdo->lastInsertId();
@@ -227,6 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_product'])) {
     if (empty($error)) {
         $price = floatval($_POST['price']);
         $salePrice = !empty($_POST['sale_price']) ? floatval($_POST['sale_price']) : null;
+        $currency = !empty($_POST['currency']) ? sanitize($_POST['currency']) : 'TL';
         $stockQuantity = intval($_POST['stock_quantity']);
         $categoryId = !empty($_POST['category_id']) ? sanitize($_POST['category_id']) : null;
         $brandId = !empty($_POST['brand_id']) ? sanitize($_POST['brand_id']) : null;
@@ -244,8 +246,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_product'])) {
         // Benzersiz slug oluştur (mevcut ürün ID'si hariç)
         $slug = createUniqueSlug($pdo, $name, $productId);
         
-        $stmt = $pdo->prepare("UPDATE products SET name = ?, slug = ?, description = ?, short_description = ?, sku = ?, price = ?, sale_price = ?, stock_quantity = ?, category_id = ?, brand_id = ?, weight = ?, dimensions = ?, featured = ?, is_active = ?, sort_order = ?, meta_title = ?, meta_description = ? WHERE id = ?");
-        $result = $stmt->execute([$name, $slug, $description, $shortDescription, $sku, $price, $salePrice, $stockQuantity, $categoryId, $brandId, $weight, $dimensions, $isFeatured, $isActive, $sortOrder, $metaTitle, $metaDescription, $productId]);
+        $stmt = $pdo->prepare("UPDATE products SET name = ?, slug = ?, description = ?, short_description = ?, sku = ?, price = ?, sale_price = ?, currency = ?, stock_quantity = ?, category_id = ?, brand_id = ?, weight = ?, dimensions = ?, featured = ?, is_active = ?, sort_order = ?, meta_title = ?, meta_description = ? WHERE id = ?");
+        $result = $stmt->execute([$name, $slug, $description, $shortDescription, $sku, $price, $salePrice, $currency, $stockQuantity, $categoryId, $brandId, $weight, $dimensions, $isFeatured, $isActive, $sortOrder, $metaTitle, $metaDescription, $productId]);
         
         // Yeni resimler eklendi mi kontrol et
         if (isset($_FILES['product_images']) && !empty($_FILES['product_images']['tmp_name'][0])) {
@@ -565,16 +567,26 @@ include '../includes/admin_sidebar.php';
                         
                         <div class="col-md-6">
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label for="edit_price" class="form-label">Fiyat (TL)</label>
+                                        <label for="edit_price" class="form-label">Fiyat</label>
                                         <input type="number" class="form-control" id="edit_price" name="price" step="0.01" min="0">
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label for="edit_sale_price" class="form-label">İndirimli Fiyat (TL)</label>
+                                        <label for="edit_sale_price" class="form-label">İndirimli Fiyat</label>
                                         <input type="number" class="form-control" id="edit_sale_price" name="sale_price" step="0.01" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="edit_currency" class="form-label">Para Birimi *</label>
+                                        <select class="form-select" id="edit_currency" name="currency" required>
+                                            <option value="TL">TL (Türk Lirası)</option>
+                                            <option value="USD">USD (Amerikan Doları)</option>
+                                            <option value="EUR">EUR (Euro)</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -780,11 +792,15 @@ include '../includes/admin_sidebar.php';
                                 </td>
                                 <td>
                                     <div>
-                                        <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
-                                            <del class="text-muted"><?php echo number_format($product['price'], 2); ?> TL</del><br>
-                                            <strong class="text-danger"><?php echo number_format($product['sale_price'], 2); ?> TL</strong>
+                                        <?php if ($product['price'] > 0): ?>
+                                            <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
+                                                <del class="text-muted"><?php echo number_format($product['price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?></del><br>
+                                                <strong class="text-danger"><?php echo number_format($product['sale_price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?></strong>
+                                            <?php else: ?>
+                                                <strong><?php echo number_format($product['price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?></strong>
+                                            <?php endif; ?>
                                         <?php else: ?>
-                                            <strong><?php echo number_format($product['price'], 2); ?> TL</strong>
+                                            <span class="text-muted">Fiyat belirtilmemiş</span>
                                         <?php endif; ?>
                                     </div>
                                 </td>
@@ -863,16 +879,26 @@ include '../includes/admin_sidebar.php';
                         
                         <div class="col-md-6">
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label for="add_price" class="form-label">Fiyat (TL)</label>
+                                        <label for="add_price" class="form-label">Fiyat</label>
                                         <input type="number" class="form-control" name="price" id="add_price" step="0.01" min="0">
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label for="add_sale_price" class="form-label">İndirimli Fiyat (TL)</label>
+                                        <label for="add_sale_price" class="form-label">İndirimli Fiyat</label>
                                         <input type="number" class="form-control" name="sale_price" id="add_sale_price" step="0.01" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="add_currency" class="form-label">Para Birimi *</label>
+                                        <select class="form-select" name="currency" id="add_currency" required>
+                                            <option value="TL" selected>TL (Türk Lirası)</option>
+                                            <option value="USD">USD (Amerikan Doları)</option>
+                                            <option value="EUR">EUR (Euro)</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -1075,6 +1101,7 @@ window.editProduct = function(productId) {
                 document.getElementById('edit_description').value = product.description || '';
                 document.getElementById('edit_price').value = product.price || '';
                 document.getElementById('edit_sale_price').value = product.sale_price || '';
+                document.getElementById('edit_currency').value = product.currency || 'TL';
                 document.getElementById('edit_stock_quantity').value = product.stock_quantity || 0;
                 document.getElementById('edit_weight').value = product.weight || '';
                 document.getElementById('edit_dimensions').value = product.dimensions || '';

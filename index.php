@@ -167,7 +167,7 @@ include 'includes/header.php';
     @media (max-width: 991.98px) {
         .hero-slider {
             margin-top: 0px !important;
-            padding-top: 120px !important;
+            padding-top: 152px !important;
             min-height: 520px !important;
         }
         
@@ -259,7 +259,7 @@ include 'includes/header.php';
     @media (max-width: 575.98px) {
         .hero-slider {
             margin-top: 0px !important;
-            padding-top: 90px !important;
+            padding-top: 66px !important;
             min-height: 320px !important;
         }
         
@@ -310,7 +310,6 @@ include 'includes/header.php';
         }
         
         .d-flex.gap-3 {
-            flex-direction: column !important;
             align-items: flex-start !important;
             gap: 0.8rem !important;
         }

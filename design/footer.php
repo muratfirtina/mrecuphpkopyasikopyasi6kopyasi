@@ -275,7 +275,7 @@ include '../includes/design_header.php';
             <div class="footer-preview">
                 <div class="row">
                     <div class="col-lg-3 preview-column">
-                        <img src="../assets/images/mreculogomini.png" alt="Logo" style="max-height: 40px; margin-bottom: 1rem;">
+                        <img src="../assets/images/mrecutuning.png" alt="Logo" style="max-height: 40px; margin-bottom: 1rem;">
                         <h6><?php echo defined('SITE_NAME') ? SITE_NAME : 'Mr ECU'; ?></h6>
                         <p style="font-size: 0.9rem; opacity: 0.8;">Profesyonel ECU hizmetleri...</p>
                     </div>
@@ -698,7 +698,7 @@ include '../includes/design_header.php';
                                         <label class="form-label">Logo Dosyası</label>
                                         <div class="input-group">
                                             <span class="input-group-text">assets/images/</span>
-                                            <input type="text" class="form-control" value="mreculogomini.png" readonly>
+                                            <input type="text" class="form-control" value="mrecutuning.png" readonly>
                                             <button class="btn btn-outline-secondary" type="button">
                                                 <i class="bi bi-folder-open"></i>
                                             </button>

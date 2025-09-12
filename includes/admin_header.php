@@ -418,7 +418,7 @@ $cssPath = '../assets/css/style.css';
     <nav class="navbar navbar-expand-lg navbar-dark admin-navbar">
         <div class="container-fluid">
             <a class="navbar-brand" href="../index.php">
-                <img src="<?php echo $basePath; ?>assets/images/mreculogomini.png"
+                <img src="<?php echo $basePath; ?>assets/images/mrecutuning.png"
                     alt="<?php echo defined('SITE_NAME') ? SITE_NAME : 'Mr ECU'; ?>"
                     class="navbar-logo"
                     style="height: 60px; padding-left: 60px;">

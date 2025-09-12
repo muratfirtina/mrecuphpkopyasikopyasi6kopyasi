@@ -69,7 +69,7 @@ include 'includes/header.php';
                 </nav>
             </div>
             <div class="col-lg-4 text-center">
-                <img src="<?php echo BASE_URL; ?>/assets/images/mreculogomini.png" alt="MR ECU Logo" style="width: 250px;">
+                <img src="<?php echo BASE_URL; ?>/assets/images/mrecutuning.png" alt="MR ECU Logo" style="width: 250px;">
             </div>
         </div>
     </div>

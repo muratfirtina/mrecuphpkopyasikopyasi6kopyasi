@@ -366,7 +366,7 @@ if (isset($_SESSION['user_id']) && isset($pdo)) {
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center" href="../index.php">
                 <div>
-                    <img src="<?php echo $basePath; ?>assets/images/mreculogomini.png"
+                    <img src="<?php echo $basePath; ?>assets/images/mrecutuning.png"
                         alt="<?php echo defined('SITE_NAME') ? SITE_NAME : 'Mr ECU'; ?>"
                         class="navbar-logo"
                         style="height: 80px; padding-left: 40px;">

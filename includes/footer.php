@@ -159,7 +159,7 @@ $basePath = isset($basePath) ? $basePath : '/';
             <!-- Logo ve Açıklama -->
             <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
                 <div class="footer-brand mb-3">
-                    <img src="<?php echo $basePath; ?>assets/images/mreculogomini.png"
+                    <img src="<?php echo $basePath; ?>assets/images/mrecutuning.png"
                         alt="<?php echo defined('SITE_NAME') ? SITE_NAME : 'Mr ECU'; ?>"
                         class="footer-logo mb-3" style="max-height: 160px;">
 <!--                     <h5 class="text-white mb-3">
