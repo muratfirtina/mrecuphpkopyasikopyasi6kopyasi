@@ -443,14 +443,14 @@ if (!isset($pageTitle)) {
     
     @media (max-width: 767.98px) {
         .modern-navbar {
-            padding: 1rem 0;
+            padding: 0.3rem 0;
             background: #071e3d !important; /* Mobilde solid background */
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
         }
         
         .modern-navbar.scrolled {
-            padding: 0.8rem 0;
+            padding: 0rem 0;
             background: #071e3d !important;
         }
         
@@ -646,7 +646,7 @@ if (!isset($pageTitle)) {
 
                 <!-- ECU Logo -->
                 <div class="ecu-screen">
-                    <img src="<?php echo BASE_URL; ?>/assets/images/mreculogomini.png" alt="ECU Image" class="ecu-image">
+                    <img src="<?php echo BASE_URL; ?>/assets/images/mrecutuning.png" alt="ECU Image" class="ecu-image">
                 </div>
                 
                 <!-- Progress Bars -->
@@ -707,7 +707,7 @@ if (!isset($pageTitle)) {
         <div class="container">
             <a class="navbar-brand modern-brand" href="<?php echo BASE_URL; ?>/">
                 <div class="brand-icon">
-                    <img src="<?php echo BASE_URL; ?>/assets/images/mreculogomini.png" alt="MR ECU Logo" class="brand-logo-img">
+                    <img src="<?php echo BASE_URL; ?>/assets/images/mrecutuning.png" alt="MR ECU Logo" class="brand-logo-img">
                 </div>
             </a>
             

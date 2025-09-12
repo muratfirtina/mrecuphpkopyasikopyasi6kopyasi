@@ -293,16 +293,18 @@ include '../includes/admin_sidebar.php';
                     <!-- Fiyat Bilgisi -->
                     <div class="mb-3">
                         <h5 class="text-success mb-1">
-                            <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
-                                <del class="text-muted me-2"><?php echo number_format($product['price'], 2); ?> TL</del>
-                                <?php echo number_format($product['sale_price'], 2); ?> TL
-                                <?php 
-                                $discount = round((($product['price'] - $product['sale_price']) / $product['price']) * 100);
-                                echo "<small class='text-danger'>({$discount}% indirim)</small>";
-                                ?>
-                            <?php else: ?>
-                                <?php echo number_format($product['price'], 2); ?> TL
-                            <?php endif; ?>
+                            <?php if ($product['price'] > 0): ?>
+                    <div class="price-container">
+                        <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
+                            <span class="current-price"><?php echo number_format($product['sale_price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?></span>
+                            <span class="original-price"><?php echo number_format($product['price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?></span>
+                            <?php $discount = round((($product['price'] - $product['sale_price']) / $product['price']) * 100); ?>
+                            <span class="discount-badge">-%<?php echo $discount; ?></span>
+                        <?php else: ?>
+                            <span class="current-price"><?php echo number_format($product['price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
                         </h5>
                     </div>
                     
@@ -455,16 +457,26 @@ include '../includes/admin_sidebar.php';
                         
                         <div class="col-md-6">
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label for="edit_price" class="form-label">Fiyat (TL) *</label>
+                                        <label for="edit_price" class="form-label">Fiyat *</label>
                                         <input type="number" class="form-control" id="edit_price" name="price" step="0.01" min="0" required>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label for="edit_sale_price" class="form-label">İndirimli Fiyat (TL)</label>
+                                        <label for="edit_sale_price" class="form-label">İndirimli Fiyat</label>
                                         <input type="number" class="form-control" id="edit_sale_price" name="sale_price" step="0.01" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="edit_currency" class="form-label">Para Birimi *</label>
+                                        <select class="form-select" id="edit_currency" name="currency" required>
+                                            <option value="TL">TL (Türk Lirası)</option>
+                                            <option value="USD">USD (Amerikan Doları)</option>
+                                            <option value="EUR">EUR (Euro)</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -664,6 +676,7 @@ function editProduct(productId) {
                 document.getElementById('edit_description').value = product.description || '';
                 document.getElementById('edit_price').value = product.price || '';
                 document.getElementById('edit_sale_price').value = product.sale_price || '';
+                document.getElementById('edit_currency').value = product.currency || 'TL';
                 document.getElementById('edit_stock_quantity').value = product.stock_quantity || 0;
                 document.getElementById('edit_weight').value = product.weight || '';
                 document.getElementById('edit_dimensions').value = product.dimensions || '';

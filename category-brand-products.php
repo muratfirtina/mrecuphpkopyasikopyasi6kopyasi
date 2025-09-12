@@ -745,13 +745,14 @@ include 'includes/header.php';
                                 </p>
                             <?php endif; ?>
                             
+                            <?php if ($product['price'] > 0): ?>
                             <div class="product-price">
                                 <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
                                     <span class="current-price">
-                                        <?php echo number_format($product['sale_price'], 2); ?> TL
+                                        <?php echo number_format($product['sale_price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?>
                                     </span>
                                     <span class="original-price">
-                                        <?php echo number_format($product['price'], 2); ?> TL
+                                        <?php echo number_format($product['price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?>
                                     </span>
                                     <?php 
                                     $discount = round((($product['price'] - $product['sale_price']) / $product['price']) * 100);
@@ -759,10 +760,11 @@ include 'includes/header.php';
                                     <span class="discount-percentage">-%<?php echo $discount; ?></span>
                                 <?php else: ?>
                                     <span class="current-price">
-                                        <?php echo number_format($product['price'], 2); ?> TL
+                                        <?php echo number_format($product['price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?>
                                     </span>
                                 <?php endif; ?>
                             </div>
+                            <?php endif; ?>
                             
                             <div class="product-actions">
                                 <a href="<?php echo BASE_URL; ?>/urun/<?php echo $product['slug']; ?>" class="btn-detail">

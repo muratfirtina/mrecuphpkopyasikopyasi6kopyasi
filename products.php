@@ -865,20 +865,22 @@ include 'includes/header.php';
                                         <?php endif; ?>
                                         
                                         <div class="product-price-container">
+                                            <?php if ($product['price'] > 0): ?>
                                             <div class="product-price">
-                                                <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
-                                                    <span class="current-price">
-                                                        <?php echo number_format($product['sale_price'], 2); ?> TL
-                                                    </span>
-                                                    <span class="original-price">
-                                                        <?php echo number_format($product['price'], 2); ?> TL
-                                                    </span>
-                                                <?php else: ?>
-                                                    <span class="current-price">
-                                                        <?php echo number_format($product['price'], 2); ?> TL
-                                                    </span>
+                                            <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
+                                            <span class="current-price">
+                                                <?php echo number_format($product['sale_price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?>
+                                            </span>
+                                            <span class="original-price">
+                                                <?php echo number_format($product['price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?>
+                                                </span>
+                                            <?php else: ?>
+                                            <span class="current-price">
+                                                <?php echo number_format($product['price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?>
+                                                </span>
                                                 <?php endif; ?>
-                                            </div>
+                            </div>
+                            <?php endif; ?>
                                             
                                             <a href="<?php echo BASE_URL; ?>/urun/<?php echo $product['slug']; ?>" class="contact-button">
                                                 <i class="bi bi-info-circle me-2"></i>Detayları Görüntüle

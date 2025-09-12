@@ -709,16 +709,18 @@ include 'includes/header.php';
                         <p class="lead text-muted mb-4"><?php echo htmlspecialchars($product['short_description']); ?></p>
                     <?php endif; ?>
 
+                    <?php if ($product['price'] > 0): ?>
                     <div class="price-container">
                         <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
-                            <span class="current-price"><?php echo number_format($product['sale_price'], 2); ?> TL</span>
-                            <span class="original-price"><?php echo number_format($product['price'], 2); ?> TL</span>
+                            <span class="current-price"><?php echo number_format($product['sale_price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?></span>
+                            <span class="original-price"><?php echo number_format($product['price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?></span>
                             <?php $discount = round((($product['price'] - $product['sale_price']) / $product['price']) * 100); ?>
                             <span class="discount-badge">-%<?php echo $discount; ?></span>
                         <?php else: ?>
-                            <span class="current-price"><?php echo number_format($product['price'], 2); ?> TL</span>
+                            <span class="current-price"><?php echo number_format($product['price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?></span>
                         <?php endif; ?>
                     </div>
+                    <?php endif; ?>
 
                     <div class="features">
                         <h5><i class="bi bi-check-circle"></i> Ürün Özellikleri</h5>
@@ -853,14 +855,16 @@ include 'includes/header.php';
                                                 <small><i class="bi bi-award me-1"></i><?php echo htmlspecialchars($relatedProduct['brand_name']); ?></small>
                                             </p>
                                         <?php endif; ?>
+                                        <?php if ($relatedProduct['price'] > 0): ?>
                                         <div class="related-product-price">
                                             <?php if ($relatedProduct['sale_price'] && $relatedProduct['sale_price'] < $relatedProduct['price']): ?>
                                                 <span class="text-muted text-decoration-line-through me-2">
-                                                    <?php echo number_format($relatedProduct['price'], 2); ?> TL
+                                                    <?php echo number_format($relatedProduct['price'], 2); ?> <?php echo $relatedProduct['currency'] ?? 'TL'; ?>
                                                 </span>
                                             <?php endif; ?>
-                                            <?php echo number_format($relatedProduct['sale_price'] ?: $relatedProduct['price'], 2); ?> TL
+                                            <?php echo number_format($relatedProduct['sale_price'] ?: $relatedProduct['price'], 2); ?> <?php echo $relatedProduct['currency'] ?? 'TL'; ?>
                                         </div>
+                                        <?php endif; ?>
                                     </div>
                                 </a>
                             </div>

@@ -38,6 +38,7 @@ try {
     $sku = sanitize($_POST['sku'] ?? '');
     $price = floatval($_POST['price'] ?? 0);
     $salePrice = floatval($_POST['sale_price'] ?? 0) ?: null;
+    $currency = sanitize($_POST['currency'] ?? 'TL');
     $stockQuantity = intval($_POST['stock_quantity'] ?? 0);
     $weight = floatval($_POST['weight'] ?? 0) ?: null;
     $dimensions = sanitize($_POST['dimensions'] ?? '');
@@ -53,7 +54,7 @@ try {
         exit;
     }
     
-    if ($price <= 0) {
+    if ($price < 0) {
         echo json_encode(['success' => false, 'message' => 'Geçerli bir fiyat girin']);
         exit;
     }
@@ -75,7 +76,7 @@ try {
         UPDATE products SET 
         name = ?, slug = ?, category_id = ?, brand_id = ?, 
         short_description = ?, description = ?, sku = ?, 
-        price = ?, sale_price = ?, stock_quantity = ?, 
+        price = ?, sale_price = ?, currency = ?, stock_quantity = ?, 
         weight = ?, dimensions = ?, featured = ?, is_active = ?, 
         sort_order = ?, meta_title = ?, meta_description = ?,
         updated_at = CURRENT_TIMESTAMP
@@ -85,7 +86,7 @@ try {
     $result = $stmt->execute([
         $name, $slug, $categoryId, $brandId, 
         $shortDescription, $description, $sku, 
-        $price, $salePrice, $stockQuantity, 
+        $price, $salePrice, $currency, $stockQuantity, 
         $weight, $dimensions, $featured, $isActive, 
         $sortOrder, $metaTitle, $metaDescription, $productId
     ]);
