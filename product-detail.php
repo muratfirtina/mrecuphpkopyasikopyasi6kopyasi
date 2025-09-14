@@ -1009,42 +1009,26 @@ include 'includes/header.php';
             <p class="product-short-description"><?php echo htmlspecialchars($product['short_description']); ?></p>
         <?php endif; ?>
 
-        <?php if ($product['price'] > 0): ?>
-            <div class="price-section">
-                <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
-                    <span class="current-price"><?php echo number_format($product['sale_price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?></span>
-                    <span class="original-price"><?php echo number_format($product['price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?></span>
-                    <?php $discount = round((($product['price'] - $product['sale_price']) / $product['price']) * 100); ?>
-                    <span class="discount-badge">-%<?php echo $discount; ?></span>
-                <?php else: ?>
-                    <span class="current-price"><?php echo number_format($product['price'], 2); ?> <?php echo $product['currency'] ?? 'TL'; ?></span>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
+                    <div class="price-container">
+                        <?php if ($product['sale_price'] && $product['sale_price'] < $product['price']): ?>
+                            <span class="current-price"><?php echo number_format($product['sale_price'], 2); ?> TL</span>
+                            <span class="original-price"><?php echo number_format($product['price'], 2); ?> TL</span>
+                            <?php $discount = round((($product['price'] - $product['sale_price']) / $product['price']) * 100); ?>
+                            <span class="discount-badge">-%<?php echo $discount; ?></span>
+                        <?php else: ?>
+                            <span class="current-price"><?php echo number_format($product['price'], 2); ?> TL</span>
+                        <?php endif; ?>
+                    </div>
 
-        <div class="features-quick-list">
-            <div class="features-title">
-                <i class="bi bi-check-circle-fill"></i>
-                Ürün Avantajları
-            </div>
-            <div class="feature-item">
-                <div class="feature-check">✓</div>
-                <span>Orijinal ve kaliteli üretim</span>
-            </div>
-            <div class="feature-item">
-                <div class="feature-check">✓</div>
-                <span>2 yıl üretici garantisi</span>
-            </div>
-            <div class="feature-item">
-                <div class="feature-check">✓</div>
-                <span>Hızlı kargo (1-2 iş günü)</span>
-            </div>
-            <div class="feature-item">
-                <div class="feature-check">✓</div>
-                <span>Teknik destek hizmeti</span>
-            </div>
-        </div>
-    </div>
+                    <div class="features">
+                        <h5><i class="bi bi-check-circle"></i> Ürün Özellikleri</h5>
+                        <ul class="feature-list">
+                            <li class="feature-item">Orijinal ve kaliteli üretim</li>
+                            <li class="feature-item">2 yıl üretici garantisi</li>
+                            <li class="feature-item">Hızlı kargo (1-2 iş günü)</li>
+                            <li class="feature-item">Teknik destek hizmeti</li>
+                        </ul>
+                    </div>
 
     <!-- Fixed Bottom Contact Section -->
     <div class="fixed-bottom-section">
@@ -1150,44 +1134,50 @@ include 'includes/header.php';
         </table>
     </div>
 
-    <!-- Related Products Section -->
-    <?php if (!empty($relatedProducts)): ?>
-        <div class="related-products-section">
-            <h3 class="section-title">
-                <i class="bi bi-boxes"></i>
-                İlgili Ürünler
-            </h3>
-            <div class="related-products-grid">
-                <?php foreach ($relatedProducts as $relatedProduct): ?>
-                    <a href="<?php echo BASE_URL; ?>/urun/<?php echo htmlspecialchars($relatedProduct['slug']); ?>"
-                        class="related-product-card touch-feedback">
-                        <?php if ($relatedProduct['primary_image']): ?>
-                            <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($relatedProduct['primary_image']); ?>"
-                                alt="<?php echo htmlspecialchars($relatedProduct['name']); ?>"
-                                class="related-product-image">
-                        <?php else: ?>
-                            <div class="related-product-image d-flex align-items-center justify-content-center">
-                                <i class="bi bi-image text-muted"></i>
+            <!-- İlgili Ürünler -->
+            <?php if (!empty($relatedProducts)): ?>
+                <div class="container related-products">
+                    <h3 class="text-center mb-5">
+                        <i class="bi bi-boxes me-2"></i>İlgili Ürünler
+                    </h3>
+                    <div class="row">
+                        <?php foreach ($relatedProducts as $relatedProduct): ?>
+                            <div class="col-lg-4 col-md-6 mb-4">
+                                <a href="<?php echo BASE_URL; ?>/urun/<?php echo htmlspecialchars($relatedProduct['slug']); ?>" class="related-product-card">
+                                    <?php if ($relatedProduct['primary_image']): ?>
+                                        <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($relatedProduct['primary_image']); ?>"
+                                            alt="<?php echo htmlspecialchars($relatedProduct['name']); ?>"
+                                            class="related-product-image">
+                                    <?php else: ?>
+                                        <div class="related-product-image bg-light d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-image text-muted fa-2x"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="related-product-info">
+                                        <h5 class="related-product-title"><?php echo htmlspecialchars($relatedProduct['name']); ?></h5>
+                                        <?php if ($relatedProduct['brand_name']): ?>
+                                            <p class="text-muted mb-2">
+                                                <small><i class="bi bi-award me-1"></i><?php echo htmlspecialchars($relatedProduct['brand_name']); ?></small>
+                                            </p>
+                                        <?php endif; ?>
+                                        <div class="related-product-price">
+                                            <?php if ($relatedProduct['sale_price'] && $relatedProduct['sale_price'] < $relatedProduct['price']): ?>
+                                                <span class="text-muted text-decoration-line-through me-2">
+                                                    <?php echo number_format($relatedProduct['price'], 2); ?> TL
+                                                </span>
+                                            <?php endif; ?>
+                                            <?php echo number_format($relatedProduct['sale_price'] ?: $relatedProduct['price'], 2); ?> TL
+                                        </div>
+                                    </div>
+                                </a>
                             </div>
-                        <?php endif; ?>
-                        <div class="related-product-info">
-                            <div class="related-product-title"><?php echo htmlspecialchars($relatedProduct['name']); ?></div>
-                            <?php if ($relatedProduct['brand_name']): ?>
-                                <div class="related-product-brand"><?php echo htmlspecialchars($relatedProduct['brand_name']); ?></div>
-                            <?php endif; ?>
-                            <?php if ($relatedProduct['price'] > 0): ?>
-                                <div class="related-product-price">
-                                    <?php echo number_format($relatedProduct['sale_price'] ?: $relatedProduct['price'], 2); ?> <?php echo $relatedProduct['currency'] ?? 'TL'; ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </a>
-                <?php endforeach; ?>
-            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
-    <?php endif; ?>
-
-</div>
+    </div>
+</main>
 
 <script>
     // Image Gallery Functions
