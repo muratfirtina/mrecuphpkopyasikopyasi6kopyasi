@@ -717,7 +717,7 @@ if ($phoneCallData && !empty($phoneCallData['contact_info'])): ?>
     .phone-floating-btn {
         position: fixed;
         bottom: 95px; /* WhatsApp butonunun üstüne yerleştir */
-        right: 20px;
+        right: 25px;
         z-index: 9999;
         transition: all 0.3s ease;
     }
