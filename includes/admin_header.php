@@ -35,6 +35,7 @@ $cssPath = '../assets/css/style.css';
     <meta name="description" content="<?php echo isset($pageDescription) ? $pageDescription : 'Mr ECU Admin Paneli - Sistem yönetimi ve kontrolü'; ?>">
     <meta name="keywords" content="<?php echo isset($pageKeywords) ? $pageKeywords : 'admin panel, yönetim, sistem kontrolü'; ?>">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="csrf-token" content="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
     
     <title><?php echo $pageTitle . ' - Admin Panel - ' . SITE_NAME; ?></title>
     

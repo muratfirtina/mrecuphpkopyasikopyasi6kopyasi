@@ -11,8 +11,35 @@ if (!isLoggedIn() || !isAdmin()) {
     redirect('../login.php');
 }
 
+// CSRF token oluştur
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = generateCsrfToken();
+}
+
 $error = '';
 $success = '';
+
+// URL'den gelen success mesajını kontrol et
+if (isset($_GET['success'])) {
+    $success = sanitize($_GET['success']);
+}
+
+// Session'dan success mesajını kontrol et
+if (isset($_SESSION['success_message'])) {
+    $success = sanitize($_SESSION['success_message']);
+    unset($_SESSION['success_message']); // Mesajı tek seferlik göster
+}
+
+// URL'den gelen error mesajını kontrol et
+if (isset($_GET['error'])) {
+    $error = sanitize($_GET['error']);
+}
+
+// Session'dan error mesajını kontrol et
+if (isset($_SESSION['error_message'])) {
+    $error = sanitize($_SESSION['error_message']);
+    unset($_SESSION['error_message']); // Mesajı tek seferlik göster
+}
 
 // Resim yükleme fonksiyonu
 function uploadProductImages($files, $productId) {
@@ -271,9 +298,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_product'])) {
     }
 }
 
-// Ürün silme
-if (isset($_GET['delete']) && !empty($_GET['delete'])) {
-    $productId = sanitize($_GET['delete']);
+// POST ile ürün silme
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_product'])) {
+    $productId = sanitize($_POST['delete_product']);
+    
+    // CSRF token kontrolü
+    if (!isset($_POST['csrf_token']) || !validateCsrfToken($_POST['csrf_token'])) {
+        $_SESSION['error_message'] = 'Güvenlik token hatası.';
+        echo '<script>window.location.href = "products.php";</script>';
+        exit;
+    }
     
     try {
         $pdo->beginTransaction();
@@ -299,17 +333,34 @@ if (isset($_GET['delete']) && !empty($_GET['delete'])) {
         $pdo->commit();
         
         if ($result) {
-            $success = 'Ürün başarıyla silindi.';
+            // Başarı mesajını session'a kaydet
+            $_SESSION['success_message'] = 'Ürün başarıyla silindi.';
+            
+            // JavaScript ile redirect yap
+            echo '<script>window.location.href = "products.php";</script>';
+            echo '<noscript><meta http-equiv="refresh" content="0;url=products.php"></noscript>';
+            exit;
         }
     } catch(PDOException $e) {
         $pdo->rollBack();
-        $error = 'Ürün silinirken hata oluştu.';
+        // Hata mesajını session'a kaydet ve redirect yap
+        $_SESSION['error_message'] = 'Ürün silinirken hata oluştu.';
+        echo '<script>window.location.href = "products.php";</script>';
+        echo '<noscript><meta http-equiv="refresh" content="0;url=products.php"></noscript>';
+        exit;
     }
 }
 
-// Ürün resmini silme
-if (isset($_GET['delete_image']) && !empty($_GET['delete_image'])) {
-    $imageId = sanitize($_GET['delete_image']);
+// POST ile ürün resmi silme
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_image'])) {
+    $imageId = sanitize($_POST['delete_image']);
+    
+    // CSRF token kontrolü
+    if (!isset($_POST['csrf_token']) || !validateCsrfToken($_POST['csrf_token'])) {
+        $_SESSION['error_message'] = 'Güvenlik token hatası.';
+        echo '<script>window.location.href = "products.php";</script>';
+        exit;
+    }
     
     try {
         $stmt = $pdo->prepare("SELECT image_path FROM product_images WHERE id = ?");
@@ -324,10 +375,18 @@ if (isset($_GET['delete_image']) && !empty($_GET['delete_image'])) {
         $result = $stmt->execute([$imageId]);
         
         if ($result) {
-            $success = 'Resim başarıyla silindi.';
+            // Başarı mesajını session'a kaydet ve redirect yap
+            $_SESSION['success_message'] = 'Resim başarıyla silindi.';
+            echo '<script>window.location.href = "products.php";</script>';
+            echo '<noscript><meta http-equiv="refresh" content="0;url=products.php"></noscript>';
+            exit;
         }
     } catch(PDOException $e) {
-        $error = 'Resim silinirken hata oluştu.';
+        // Hata mesajını session'a kaydet ve redirect yap
+        $_SESSION['error_message'] = 'Resim silinirken hata oluştu.';
+        echo '<script>window.location.href = "products.php";</script>';
+        echo '<noscript><meta http-equiv="refresh" content="0;url=products.php"></noscript>';
+        exit;
     }
 }
 
@@ -829,11 +888,14 @@ include '../includes/admin_sidebar.php';
                                                 onclick="editProduct(<?php echo $product['id']; ?>)">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
-                                        <a href="?delete=<?php echo $product['id']; ?>" 
-                                           class="btn btn-outline-danger"
-                                           onclick="return confirm('Bu ürünü ve tüm resimlerini silmek istediğinizden emin misiniz?')">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
+                                        <!-- Ürün Silme Formu -->
+                                        <form method="POST" style="display: inline;" onsubmit="return confirm('Bu ürünü ve tüm resimlerini silmek istediğinizden emin misiniz?')">
+                                            <input type="hidden" name="delete_product" value="<?php echo $product['id']; ?>">
+                                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
+                                            <button type="submit" class="btn btn-outline-danger" title="Ürünü Sil">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -1231,32 +1293,21 @@ window.addNewProductImages = function() {
     });
 };
 
-// Fotoğrafı sil
+// Fotoğrafı sil - POST form ile
 window.deleteProductImage = function(imageId) {
     if (!confirm('Bu resmi silmek istediğinizden emin misiniz?')) {
         return;
     }
     
-    fetch('ajax/delete-product-image.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: 'image_id=' + imageId
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            refreshProductImages();
-        } else {
-            alert('Hata: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Resim silme hatası:', error);
-        alert('Bir hata oluştu.');
-    });
+    // POST form oluştur ve gönder
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.innerHTML = 
+        '<input type="hidden" name="delete_image" value="' + imageId + '">' +
+        '<input type="hidden" name="csrf_token" value="' + (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '') + '">';
+    
+    document.body.appendChild(form);
+    form.submit();
 };
 
 // Ana resim belirle

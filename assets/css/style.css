@@ -197,7 +197,7 @@ body {
 .ecu-screen {
     position: absolute;
     top: 50%;
-    left: 43%;
+    left: 46%;
     transform: translate(-50%, -50%);
     z-index: 15;
     display: flex;
@@ -213,8 +213,8 @@ body {
 }
 
 .ecu-image {
-    max-width: 200px;
-    max-height: 200px;
+    max-width: 150px;
+    max-height: 150px;
     width: auto;
     height: auto;
     object-fit: contain;
@@ -450,8 +450,8 @@ body {
     }
     
     .ecu-image {
-        max-width: 60px;
-        max-height: 45px;
+        max-width: 90px;
+        max-height: 90px;
     }
     
     .ecu-screen {
@@ -492,8 +492,8 @@ body {
     }
     
     .ecu-image {
-        max-width: 50px;
-        max-height: 35px;
+        max-width: 75px;
+        max-height: 75px;
     }
     
     .ecu-screen {

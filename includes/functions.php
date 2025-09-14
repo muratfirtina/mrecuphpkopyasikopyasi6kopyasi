@@ -358,4 +358,25 @@ if (!function_exists('createSlug')) {
     }
 }
 
+// CSRF Token oluşturma
+if (!function_exists('generateCsrfToken')) {
+    function generateCsrfToken() {
+        if (!isset($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
+    }
+}
+
+// CSRF Token doğrulama
+if (!function_exists('validateCsrfToken')) {
+    function validateCsrfToken($token) {
+        if (!isset($_SESSION['csrf_token']) || empty($token)) {
+            return false;
+        }
+        
+        return hash_equals($_SESSION['csrf_token'], $token);
+    }
+}
+
 ?>

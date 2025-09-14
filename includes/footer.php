@@ -145,6 +145,23 @@ $basePath = isset($basePath) ? $basePath : '/';
     </div>
 <?php endif; ?>
 
+<!-- Phone Floating Button -->
+<?php 
+// Telefon numarasını al
+$phoneQuery = "SELECT contact_info, contact_link FROM contact_cards WHERE id = 1 AND is_active = 1";
+$phoneStmt = $pdo->prepare($phoneQuery);
+$phoneStmt->execute();
+$phoneCallData = $phoneStmt->fetch(PDO::FETCH_ASSOC);
+
+if ($phoneCallData && !empty($phoneCallData['contact_info'])): ?>
+    <div class="phone-floating-btn">
+        <a href="<?php echo htmlspecialchars($phoneCallData['contact_link']); ?>" class="phone-btn" title="Telefon ile Ara">
+            <i class="bi bi-telephone"></i>
+            <span class="phone-tooltip">Telefon ile Ara</span>
+        </a>
+    </div>
+<?php endif; ?>
+
 <!-- Scroll to Top Button -->
 <div class="scroll-to-top-btn" id="scrollToTopBtn">
     <button type="button" class="scroll-btn" onclick="scrollToTop()" title="Sayfa Başına Git">
@@ -469,8 +486,8 @@ $basePath = isset($basePath) ? $basePath : '/';
     /* Scroll to Top Button */
     .scroll-to-top-btn {
         position: fixed;
-        bottom: 25px;
-        left: 25px;
+        bottom: 50px;
+        left: 50px;
         z-index: 9998;
         opacity: 0;
         visibility: hidden;
@@ -608,10 +625,6 @@ $basePath = isset($basePath) ? $basePath : '/';
             right: 20px;
         }
 
-        .whatsapp-btn {
-            width: 55px;
-            height: 55px;
-        }
 
         .whatsapp-btn i {
             font-size: 24px;
@@ -627,8 +640,18 @@ $basePath = isset($basePath) ? $basePath : '/';
             height: 45px;
         }
 
-        .whatsapp-tooltip {
+        .whatsapp-tooltip,
+        .phone-tooltip {
             display: none;
+        }
+
+        .phone-floating-btn {
+            bottom: 85px; /* Mobilde WhatsApp butonunun üstünde */
+            right: 20px;
+        }
+
+        .phone-btn i {
+            font-size: 24px;
         }
 
         footer {
@@ -688,6 +711,97 @@ $basePath = isset($basePath) ? $basePath : '/';
 
     .whatsapp-btn {
         animation: whatsappPulse 2s ease-in-out infinite;
+    }
+
+    /* Phone Floating Button */
+    .phone-floating-btn {
+        position: fixed;
+        bottom: 95px; /* WhatsApp butonunun üstüne yerleştir */
+        right: 20px;
+        z-index: 9999;
+        transition: all 0.3s ease;
+    }
+
+    .phone-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white !important;
+        border-radius: 50%;
+        text-decoration: none !important;
+        box-shadow: 0 4px 20px rgba(0, 123, 255, 0.4);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .phone-btn i {
+        font-size: 28px;
+        transition: transform 0.3s ease;
+    }
+
+    .phone-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 25px rgba(0, 123, 255, 0.6);
+        color: white !important;
+    }
+
+    .phone-btn:hover i {
+        transform: scale(1.1);
+    }
+
+    .phone-tooltip {
+        position: absolute;
+        right: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        white-space: nowrap;
+        margin-right: 15px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        pointer-events: none;
+    }
+
+    .phone-tooltip::after {
+        content: '';
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        border: 5px solid transparent;
+        border-left-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .phone-btn:hover .phone-tooltip {
+        opacity: 1;
+        visibility: visible;
+        margin-right: 10px;
+    }
+
+    /* Phone button pulse animation */
+    @keyframes phonePulse {
+        0% {
+            box-shadow: 0 4px 20px rgba(0, 123, 255, 0.4);
+        }
+        50% {
+            box-shadow: 0 4px 20px rgba(0, 123, 255, 0.8);
+        }
+        100% {
+            box-shadow: 0 4px 20px rgba(0, 123, 255, 0.4);
+        }
+    }
+
+    .phone-btn {
+        animation: phonePulse 2.5s ease-in-out infinite;
     }
 </style>
 
@@ -803,6 +917,23 @@ $basePath = isset($basePath) ? $basePath : '/';
                 }
             });
         }
+
+        // Phone Button Click Analytics (optional)
+        const phoneBtn = document.querySelector('.phone-btn');
+        if (phoneBtn) {
+            phoneBtn.addEventListener('click', function() {
+                // Buraya analytics kodu ekleyebilirsiniz
+                console.log('Phone button clicked');
+                
+                // Google Analytics event örneği (eğer GA kuruluysa)
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'click', {
+                        'event_category': 'Phone',
+                        'event_label': 'Floating Button'
+                    });
+                }
+            });
+        }
     });
 
     // Form validation helper
@@ -856,6 +987,14 @@ $basePath = isset($basePath) ? $basePath : '/';
             const whatsappBtn = document.querySelector('.whatsapp-btn');
             if (whatsappBtn) {
                 whatsappBtn.click();
+            }
+        }
+        
+        // Alt + P for Phone
+        if (e.altKey && e.key === 'p') {
+            const phoneBtn = document.querySelector('.phone-btn');
+            if (phoneBtn) {
+                phoneBtn.click();
             }
         }
         
