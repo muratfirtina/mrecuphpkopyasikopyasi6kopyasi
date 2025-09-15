@@ -95,7 +95,7 @@ include 'includes/header.php';
 <style>
 /* Modern Hero Section with Background Image */
 .category-hero {
-    height: 340px;
+    height: 300px;
     position: relative;
     background-size: cover;
     background-position: center;
@@ -405,6 +405,9 @@ include 'includes/header.php';
 @media (max-width: 768px) {
     .category-title {
         font-size: 2.5rem;
+    }
+    .category-hero {
+        height: 240px;
     }
     
     .category-description {

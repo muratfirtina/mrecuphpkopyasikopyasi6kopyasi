@@ -747,6 +747,7 @@ include 'includes/header.php';
         }
 
         .fixed-bottom-section {
+            display: none;
             position: fixed;
             bottom: 0;
             left: 0;

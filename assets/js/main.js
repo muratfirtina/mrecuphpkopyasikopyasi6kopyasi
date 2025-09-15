@@ -545,10 +545,38 @@ function initializeECUSpinner() {
 }
 
 /**
- * Setup page navigation spinner
+ * Setup page navigation spinner with enhanced back button support
  */
 function setupPageNavigationSpinner() {
-    // Navigation links için basit spinner setup
+    // Enhanced navigation handling with back button support
+    
+    // Handle popstate events (back/forward buttons)
+    window.addEventListener('popstate', function(event) {
+        console.log('Main.js - Popstate event detected');
+        
+        // Use global ECU spinner control if available
+        if (window.ECUSpinnerControl) {
+            window.ECUSpinnerControl.show(1500);
+        } else {
+            showECUSpinner('Sayfa Yükleniyor...');
+        }
+    });
+    
+    // Handle pageshow events (cache loads)
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            console.log('Main.js - Page loaded from cache');
+            
+            // Brief spinner for cache loads
+            if (window.ECUSpinnerControl) {
+                window.ECUSpinnerControl.show(800);
+            } else {
+                showECUSpinnerFor(800, 'Sayfa Hazırlanıyor...');
+            }
+        }
+    });
+    
+    // Enhanced navigation link handling
     const navLinks = document.querySelectorAll('a[href]:not([href^="#"]):not([target="_blank"]):not([data-bs-toggle])');
     
     navLinks.forEach(link => {
@@ -557,27 +585,58 @@ function setupPageNavigationSpinner() {
             
             // External links, anchors ve modals için spinner gösterme
             if (href.startsWith('#') || 
-                href.startsWith('http') && !href.includes(window.location.hostname) ||
+                href.startsWith('javascript:') ||
+                href.startsWith('mailto:') ||
+                href.startsWith('tel:') ||
+                (href.startsWith('http') && !href.includes(window.location.hostname)) ||
                 this.hasAttribute('data-bs-toggle') ||
-                this.hasAttribute('target')) {
+                this.hasAttribute('target') ||
+                this.classList.contains('dropdown-toggle')) {
                 return;
             }
             
-            // Basit spinner göster
-            const spinner = document.getElementById('ecuSpinner');
-            if (spinner) {
-                spinner.style.display = 'flex';
-                spinner.style.opacity = '1';
-                document.body.style.overflow = 'hidden';
+            console.log('Main.js - Navigation link clicked:', href);
+            
+            // Use global ECU spinner control if available
+            if (window.ECUSpinnerControl) {
+                window.ECUSpinnerControl.show(2000);
+            } else {
+                showECUSpinner('Sayfa Yükleniyor...');
             }
         });
+    });
+    
+    // Handle form submissions
+    document.addEventListener('submit', function(event) {
+        const form = event.target;
+        
+        // Skip for certain form types
+        if (form.hasAttribute('data-no-spinner') || form.target === '_blank') {
+            return;
+        }
+        
+        console.log('Main.js - Form submitted');
+        
+        // Use global ECU spinner control if available
+        if (window.ECUSpinnerControl) {
+            window.ECUSpinnerControl.show(2000);
+        } else {
+            showECUSpinner('İşlem Yapılıyor...');
+        }
     });
 }
 
 /**
- * Show ECU Spinner - Simplified
+ * Show ECU Spinner - Enhanced with global control integration
  */
 function showECUSpinner(text = 'Sistem Yükleniyor...') {
+    // Use global ECU spinner control if available
+    if (window.ECUSpinnerControl) {
+        window.ECUSpinnerControl.show(1500);
+        return;
+    }
+    
+    // Fallback to manual control
     const spinner = document.getElementById('ecuSpinner');
     
     if (spinner) {
@@ -594,9 +653,16 @@ function showECUSpinner(text = 'Sistem Yükleniyor...') {
 }
 
 /**
- * Hide ECU Spinner - Simplified
+ * Hide ECU Spinner - Enhanced with global control integration
  */
 function hideECUSpinner() {
+    // Use global ECU spinner control if available
+    if (window.ECUSpinnerControl) {
+        window.ECUSpinnerControl.hide();
+        return;
+    }
+    
+    // Fallback to manual control
     const spinner = document.getElementById('ecuSpinner');
     
     if (spinner) {
@@ -610,9 +676,16 @@ function hideECUSpinner() {
 }
 
 /**
- * Show ECU Spinner for specific duration
+ * Show ECU Spinner for specific duration - Enhanced
  */
 function showECUSpinnerFor(duration = 2000, text = 'Sistem Yükleniyor...') {
+    // Use global ECU spinner control if available
+    if (window.ECUSpinnerControl) {
+        window.ECUSpinnerControl.show(duration);
+        return;
+    }
+    
+    // Fallback to manual control
     showECUSpinner(text);
     
     setTimeout(() => {

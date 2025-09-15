@@ -51,9 +51,9 @@ include 'includes/header.php';
 ?>
 
 <!-- Page Header -->
-<section class="page-header bg-primary text-white py-5">
+<section class="page-header bg-primary text-white py-2">
     <div class="container">
-        <div class="row align-items-center">
+        <div class="row" style="display: contents;">
             <div class="col-lg-8">
                 <h1 class="display-4 fw-bold mb-3" style="color: #fff! important;">Hakkımızda</h1>
                 <p class="lead mb-4" style="color: #fff! important;">Mr. ECU Teknoloji ve Otomotiv Çözümleri</p>
@@ -69,7 +69,7 @@ include 'includes/header.php';
                 </nav>
             </div>
             <div class="col-lg-4 text-center">
-                <img src="<?php echo BASE_URL; ?>/assets/images/mrecutuning.png" alt="MR ECU Logo" style="width: 250px;">
+                <img src="<?php echo BASE_URL; ?>/assets/images/mrecutuning.png" alt="MR ECU Logo" class="about-header-image">
             </div>
         </div>
     </div>
@@ -334,6 +334,10 @@ include 'includes/header.php';
 
 <style>
 /* About Page Styles */
+.about-header-image {
+    max-width: 250px;
+}
+
 .hover-card {
     transition: all 0.3s ease;
 }
@@ -413,13 +417,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 .page-header {
     border-radius: 0 0 30px 30px;
-    height: 340px;
+    height: 300px;
     position: relative;
     overflow: hidden;
 }
 .page-header .container {
     position: relative;
     z-index: 2;
+    height: 100%;
+    display: flex;
+    align-items: center;
 }
 .page-header::before {
     content: '';
@@ -436,6 +443,12 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 768px) {
     .display-5 {
         font-size: 2rem;
+    }
+    .about-header-image {
+        display: none;
+    }
+    .page-header {
+        height: 240px;
     }
     
     .service-feature {

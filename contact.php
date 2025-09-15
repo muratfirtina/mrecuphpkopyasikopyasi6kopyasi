@@ -104,7 +104,7 @@ include 'includes/header.php';
     background: linear-gradient(135deg, var(--primary), #003366);
     color: white;
     border-radius: 0 0 40px 40px;
-    height: 380px;
+    height: 300px;
     position: relative;
     overflow: hidden;
 }
@@ -345,11 +345,14 @@ textarea.form-control {
     .form-body, .office-info { padding: 1.5rem; }
     .contact-card .btn { margin-left: 1rem; }
     .info-icon { width: 44px; height: 44px; font-size: 1rem; }
+    .page-header {
+        height: 240px;
+    }
 }
 </style>
 
 <!-- Page Header -->
-<section class="page-header">
+<section class="page-header bg-primary text-white py-2">
     <div class="container">
         <div class="row">
             <div class="col-lg-8">

@@ -1,4 +1,4 @@
-/* ===== MINIMAL ECU SPINNER STYLES ===== */
+/* ===== ECU SPINNER STYLES ===== */
 .ecu-spinner-overlay {
     position: fixed;
     top: 0;
@@ -34,7 +34,7 @@
     gap: 3rem;
 }
 
-/* ECU Device Container - Simplified */
+/* ECU Device Container */
 .ecu-device {
     position: relative;
     width: 200px;
@@ -44,74 +44,325 @@
     align-items: center;
 }
 
-/* ECU Logo/Image - Clean and Simple */
-.ecu-screen {
+/* ECU Chip */
+.ecu-chip {
     position: relative;
+    width: 120px;
+    height: 80px;
+    background: linear-gradient(145deg, #0a2a5c, #0f3569);
+    border-radius: 8px;
+    border: 2px solid #1e40af;
+    box-shadow: 
+        0 0 20px rgba(30, 64, 175, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    animation: ecuPulse 2s ease-in-out infinite;
+}
+
+.chip-inner {
+    font-size: 2rem;
+    color: #60a5fa;
+    text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+    animation: chipGlow 2s ease-in-out infinite alternate;
+}
+
+/* Chip Pins */
+.chip-pins {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.chip-pins-left {
+    left: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.chip-pins-right {
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.pin {
+    width: 16px;
+    height: 3px;
+    background: linear-gradient(90deg, #94a3b8, #cbd5e1);
+    border-radius: 2px;
+    animation: pinGlow 1.5s ease-in-out infinite;
+}
+
+.chip-pins-left .pin:nth-child(odd) {
+    animation-delay: 0.2s;
+}
+
+.chip-pins-right .pin:nth-child(even) {
+    animation-delay: 0.4s;
+}
+
+/* Data Files Animation */
+.data-files {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.data-file {
+    position: absolute;
+    font-size: 1.2rem;
+    color: #10b981;
+    opacity: 0;
+    animation: dataFileFlow 3s linear infinite;
+    animation-delay: var(--delay);
+}
+
+.data-file:nth-child(1) {
+    top: 20%;
+    left: -20px;
+}
+
+.data-file:nth-child(2) {
+    top: 30%;
+    right: -20px;
+}
+
+.data-file:nth-child(3) {
+    bottom: 30%;
+    left: -20px;
+}
+
+.data-file:nth-child(4) {
+    bottom: 20%;
+    right: -20px;
+}
+
+/* ECU Logo/Image */
+.ecu-screen {
+    position: absolute;
+    top: 50%;
+    left: 46%;
+    transform: translate(-50%, -50%);
     z-index: 15;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+
+
+    padding: 10px;
+
+    animation: logoFloat 3s ease-in-out infinite;
+    width: 250px;
+    height: 250px;
 }
 
 .ecu-image {
-    max-width: 120px;
-    max-height: 90px;
+    max-width: 150px;
+    max-height: 150px;
     width: auto;
     height: auto;
     object-fit: contain;
-    opacity: 0;
-    animation: imageReveal 2s ease-in-out infinite;
-    filter: grayscale(100%) brightness(0.3);
+    filter: brightness(1.7) contrast(1.1);
+    animation: logoGlow 1s ease-in-out infinite alternate;
 }
 
-/* Loading Text - Red Gradient */
+/* Progress Bars */
+.ecu-progress {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+}
+
+.progress-bar {
+    margin-top: -50px;
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #b91010, #d33434);
+    border-radius: 2px;
+    animation: progressFill 2s ease-in-out infinite;
+}
+
+.progress-1::before {
+    animation-delay: 0s;
+}
+
+.progress-2::before {
+    animation-delay: 0.3s;
+}
+
+.progress-3::before {
+    animation-delay: 0.6s;
+}
+
+/* Spinner Text */
 .spinner-text {
     text-align: center;
 }
 
-.loading-text {
+.spinner-text h4 {
     font-size: 2rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #dc3545, #ff4757, #ff6b7a);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    color: transparent;
-    text-shadow: 0 0 30px rgba(220, 53, 69, 0.5);
-    animation: textPulse 1.5s ease-in-out infinite;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    color: #60a5fa;
+    text-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
+    animation: textGlow 2s ease-in-out infinite alternate;
+}
+
+.spinner-text p {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 400;
+}
+
+/* Loading Dots */
+.loading-dots {
+    
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 1rem;
+}
+
+.loading-dots span {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: dotBounce 1.4s ease-in-out infinite both;
+}
+
+.loading-dots span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.loading-dots span:nth-child(2) {
+    animation-delay: -0.16s;
 }
 
 /* ===== ANIMATIONS ===== */
 
-@keyframes imageReveal {
-    0% {
-        opacity: 0;
-        filter: grayscale(100%) brightness(0.3);
-        transform: translateY(20px);
+@keyframes ecuPulse {
+    0%, 100% {
+        box-shadow: 
+            0 0 20px rgba(30, 64, 175, 0.4),
+            inset 0 2px 4px rgba(255, 255, 255, 0.1);
     }
     50% {
-        opacity: 0.7;
-        filter: grayscale(50%) brightness(0.7);
-        transform: translateY(0px);
-    }
-    100% {
-        opacity: 1;
-        filter: grayscale(0%) brightness(1.2);
-        transform: translateY(-5px);
+        box-shadow: 
+            0 0 30px rgba(30, 64, 175, 0.8),
+            inset 0 2px 4px rgba(255, 255, 255, 0.2);
     }
 }
 
-@keyframes textPulse {
+@keyframes chipGlow {
+    0% {
+        color: #60a5fa;
+        text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+    }
+    100% {
+        color: #93c5fd;
+        text-shadow: 0 0 20px rgba(147, 197, 253, 0.8);
+    }
+}
+
+@keyframes pinGlow {
     0%, 100% {
-        transform: scale(1);
-        text-shadow: 0 0 30px rgba(220, 53, 69, 0.5);
+        background: linear-gradient(90deg, #94a3b8, #cbd5e1);
+        box-shadow: none;
     }
     50% {
-        transform: scale(1.05);
-        text-shadow: 0 0 40px rgba(220, 53, 69, 0.8);
+        background: linear-gradient(90deg, #fbbf24, #f59e0b);
+        box-shadow: 0 0 5px rgba(251, 191, 36, 0.5);
+    }
+}
+
+@keyframes dataFileFlow {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    80% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8) translateX(50px) translateY(-20px);
+    }
+}
+
+@keyframes progressFill {
+    0% {
+        width: 0%;
+    }
+    50% {
+        width: 100%;
+    }
+    100% {
+        width: 0%;
+    }
+}
+
+@keyframes textGlow {
+    0% {
+        text-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
+    }
+    100% {
+        text-shadow: 0 0 30px rgba(96, 165, 250, 0.6);
+    }
+}
+
+@keyframes dotBounce {
+    0%, 80%, 100% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+
+@keyframes logoFloat {
+    0%, 100% {
+        transform: translate(-50%, -50%) translateY(0px);
+    }
+    50% {
+        transform: translate(-50%, -50%) translateY(-10px);
+    }
+}
+
+@keyframes logoGlow {
+    0% {
+        filter: brightness(1.2) contrast(1.1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+    }
+    100% {
+        filter: brightness(1.4) contrast(1.2) drop-shadow(0 0 15px rgba(255, 255, 255, 0.6));
     }
 }
 
@@ -122,17 +373,39 @@
         height: 150px;
     }
     
-    .ecu-image {
-        max-width: 90px;
-        max-height: 70px;
+    .ecu-chip {
+        width: 90px;
+        height: 60px;
     }
     
-    .loading-text {
+    .chip-inner {
         font-size: 1.5rem;
     }
     
+    .spinner-text h4 {
+        font-size: 1.5rem;
+    }
+    
+    .spinner-text p {
+        font-size: 1rem;
+    }
+    
+    .data-file {
+        font-size: 1rem;
+    }
+    
+    .progress-bar {
+        width: 30px;
+        height: 3px;
+    }
+    
+    .ecu-image {
+        max-width: 90px;
+        max-height: 90px;
+    }
+    
     .ecu-screen {
-        padding: 15px;
+        padding: 8px;
     }
 }
 
@@ -146,24 +419,40 @@
         height: 120px;
     }
     
-    .ecu-image {
-        max-width: 70px;
-        max-height: 50px;
+    .ecu-chip {
+        width: 70px;
+        height: 45px;
     }
     
-    .loading-text {
+    .chip-inner {
+        font-size: 1.2rem;
+    }
+    
+    .pin {
+        width: 12px;
+        height: 2px;
+    }
+    
+    .spinner-text h4 {
         font-size: 1.3rem;
-        letter-spacing: 1px;
+    }
+    
+    .data-file {
+        font-size: 0.9rem;
+    }
+    
+    .ecu-image {
+        max-width: 75px;
+        max-height: 75px;
     }
     
     .ecu-screen {
-        padding: 10px;
+        padding: 6px;
     }
 }
-
 /* Body scroll control for spinner */
 body.spinner-active {
     overflow: hidden !important;
 }
 
-/* ===== END MINIMAL ECU SPINNER STYLES ===== */
+/* ===== END ECU SPINNER STYLES ===== */

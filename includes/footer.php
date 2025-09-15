@@ -424,7 +424,7 @@ if ($phoneCallData && !empty($phoneCallData['contact_info'])): ?>
         justify-content: center;
         width: 60px;
         height: 60px;
-        background: linear-gradient(135deg, #25d366, #128c7e);
+        background: #25d366;
         color: white !important;
         border-radius: 50%;
         text-decoration: none !important;
@@ -435,7 +435,7 @@ if ($phoneCallData && !empty($phoneCallData['contact_info'])): ?>
     }
 
     .whatsapp-btn i {
-        font-size: 28px;
+        font-size: 30px;
         transition: transform 0.3s ease;
     }
 
@@ -621,13 +621,13 @@ if ($phoneCallData && !empty($phoneCallData['contact_info'])): ?>
     /* Responsive Improvements */
     @media (max-width: 768px) {
         .whatsapp-floating-btn {
-            bottom: 20px;
-            right: 20px;
+            bottom: 25px;
+            right: 25px;
         }
 
 
         .whatsapp-btn i {
-            font-size: 24px;
+            font-size: 30px;
         }
 
         .scroll-to-top-btn {
@@ -646,8 +646,8 @@ if ($phoneCallData && !empty($phoneCallData['contact_info'])): ?>
         }
 
         .phone-floating-btn {
-            bottom: 85px; /* Mobilde WhatsApp butonunun üstünde */
-            right: 20px;
+            bottom: 95px; /* Mobilde WhatsApp butonunun üstünde */
+            right: 25px;
         }
 
         .phone-btn i {

@@ -31,8 +31,8 @@ include 'includes/header.php';
 <style>
     /* === Page Header (Sadece height ve border-radius korundu) === */
     .page-header {
+        height: 300px;
         border-radius: 0 0 30px 30px;
-        height: 340px;
         position: relative;
         overflow: hidden;
     }
@@ -374,7 +374,10 @@ include 'includes/header.php';
     /* === Responsive === */
     @media (max-width: 768px) {
         .page-header {
-            height: 340px;
+            height: 240px;
+        }
+        .gear-icon {
+            display: none;
         }
 
         .service-card .card-body {
@@ -408,7 +411,7 @@ include 'includes/header.php';
 </style>
 
 <!-- Page Header -->
-<section class="page-header bg-primary text-white py-5">
+<section class="page-header bg-primary text-white py-2">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
@@ -428,7 +431,7 @@ include 'includes/header.php';
                     </ol>
                 </nav>
             </div>
-            <div class="col-lg-4 text-center">
+            <div class="gear-icon col-lg-4 text-center">
                 <i class="bi bi-gear-wide-connected" style="font-size: 8rem; opacity: 0.3;"></i>
             </div>
         </div>

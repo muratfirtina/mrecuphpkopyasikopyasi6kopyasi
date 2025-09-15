@@ -24,6 +24,15 @@ if (!isset($pageTitle)) {
     <meta name="description" content="<?php echo isset($pageDescription) ? $pageDescription : 'Profesyonel ECU hizmetleri - Güvenli, hızlı ve kaliteli ECU yazılım çözümleri'; ?>">
     <meta name="keywords" content="<?php echo isset($pageKeywords) ? $pageKeywords : 'ECU, chip tuning, ECU yazılım, immobilizer, TCU'; ?>">
     
+    <!-- Cache Control -->
+    <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <!-- Better Browser Compatibility -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="format-detection" content="telephone=no">
+    
     <title><?php echo $pageTitle . ' - ' . SITE_NAME; ?></title>
     
     <!-- Bootstrap CSS -->
@@ -40,6 +49,9 @@ if (!isset($pageTitle)) {
     
     <!-- Custom CSS -->
     <link href="<?php echo BASE_URL; ?>/assets/css/style.css" rel="stylesheet">
+    
+    <!-- ECU Spinner CSS -->
+    <link href="<?php echo BASE_URL; ?>/assets/css/ecu-spinner.css" rel="stylesheet">
     
     <!-- Mobile Responsive CSS -->
     <link href="<?php echo BASE_URL; ?>/assets/css/mobile-responsive.css" rel="stylesheet">
@@ -69,18 +81,18 @@ if (!isset($pageTitle)) {
         /* Ana sayfa dışındaki sayfalar için responsive padding */
         @media (max-width: 991.98px) {
             body.inner-page-body {
-                padding-top: 120px !important;
+                padding-top: 153px !important;
             }
         }
         
         @media (max-width: 767.98px) {
             body.inner-page-body {
-                padding-top: 100px !important;
+                padding-top: 114px !important;
             }
         }
         
         body.inner-page-body {
-            padding-top: 140px !important;
+            padding-top: 140px;
         }';
     } else {
         $responsiveBodyCSS = '
@@ -667,38 +679,156 @@ if (!isset($pageTitle)) {
         </div>
     </div>
     
-    <!-- ECU Spinner Script - Simple and Reliable -->
+    <!-- ECU Spinner Script - Enhanced with Back Button Support -->
     <script>
-    // Simple ECU Spinner Control
+    // Enhanced ECU Spinner Control with Back Button Support
     (function() {
-        // Show spinner immediately
-        const spinner = document.getElementById('ecuSpinner');
+        let spinnerTimeout;
+        let isNavigating = false;
+        let isInitialLoad = true;
+        let hasShownInitialSpinner = false;
         
-        if (spinner) {
+        function showECUSpinnerInternal(duration = 1000) {
+            const spinner = document.getElementById('ecuSpinner');
+            if (!spinner) return;
+            
+            // Clear any existing timeout
+            if (spinnerTimeout) {
+                clearTimeout(spinnerTimeout);
+            }
+            
             // Show spinner
             spinner.style.display = 'flex';
             spinner.style.opacity = '1';
             document.body.style.overflow = 'hidden';
             
-            // Hide after 1 second
-            setTimeout(function() {
-                spinner.style.opacity = '0';
-                
-                setTimeout(function() {
-                    spinner.style.display = 'none';
-                    document.body.style.overflow = '';
-                }, 300);
-            }, 1000);
-            
-            // Emergency click to close
-            spinner.addEventListener('click', function() {
-                this.style.opacity = '0';
-                setTimeout(() => {
-                    this.style.display = 'none';
-                    document.body.style.overflow = '';
-                }, 300);
-            });
+            // Auto hide after duration
+            spinnerTimeout = setTimeout(function() {
+                hideECUSpinnerInternal();
+            }, duration);
         }
+        
+        function hideECUSpinnerInternal() {
+            const spinner = document.getElementById('ecuSpinner');
+            if (!spinner) return;
+            
+            spinner.style.opacity = '0';
+            
+            setTimeout(function() {
+                spinner.style.display = 'none';
+                document.body.style.overflow = '';
+                isNavigating = false;
+                isInitialLoad = false;
+            }, 300);
+        }
+        
+        // Show spinner ONLY on initial load
+        if (!hasShownInitialSpinner) {
+            showECUSpinnerInternal(1000);
+            hasShownInitialSpinner = true;
+        }
+        
+        // Handle browser back/forward button (popstate)
+        window.addEventListener('popstate', function(event) {
+            console.log('🔄 BACK/FORWARD BUTTON DETECTED - Header.php');
+            console.log('Event:', event);
+            console.log('Current URL:', window.location.href);
+            isNavigating = true;
+            showECUSpinnerInternal(1500);
+        });
+        
+        // Handle page show event (when page is loaded from cache) - FIXED LOGIC
+        window.addEventListener('pageshow', function(event) {
+            console.log('📦 PAGE SHOW EVENT - Header.php:', event.persisted ? 'from cache' : 'fresh load');
+            console.log('Event:', event);
+            console.log('isNavigating:', isNavigating);
+            console.log('isInitialLoad:', isInitialLoad);
+            console.log('hasShownInitialSpinner:', hasShownInitialSpinner);
+            
+            // ONLY show spinner for cache loads AND navigation events
+            // Do NOT show for initial page loads
+            if (event.persisted && isNavigating && !isInitialLoad) {
+                console.log('📦 Showing spinner for cache load');
+                showECUSpinnerInternal(800);
+            } else {
+                console.log('📦 Skipping spinner - not a cache navigation');
+            }
+        });
+        
+        // Handle page hide event (when user navigates away)
+        window.addEventListener('pagehide', function(event) {
+            console.log('Page hide event');
+            // Don't show spinner for page hide
+        });
+        
+        // Enhanced navigation link handling
+        document.addEventListener('click', function(event) {
+            const link = event.target.closest('a[href]');
+            
+            if (!link) return;
+            
+            const href = link.getAttribute('href');
+            
+            // Skip for certain link types
+            if (
+                href.startsWith('#') ||
+                href.startsWith('javascript:') ||
+                href.startsWith('mailto:') ||
+                href.startsWith('tel:') ||
+                (href.startsWith('http') && !href.includes(window.location.hostname)) ||
+                link.hasAttribute('data-bs-toggle') ||
+                link.hasAttribute('target') ||
+                link.classList.contains('dropdown-toggle')
+            ) {
+                return;
+            }
+            
+            // Show spinner for internal navigation
+            console.log('🔗 NAVIGATION LINK CLICKED - Header.php:', href);
+            isNavigating = true;
+            showECUSpinnerInternal(2000);
+        });
+        
+        // Form submission handling
+        document.addEventListener('submit', function(event) {
+            const form = event.target;
+            
+            // Skip for certain form types
+            if (
+                form.hasAttribute('data-no-spinner') ||
+                form.target === '_blank'
+            ) {
+                return;
+            }
+            
+            console.log('Form submitted');
+            isNavigating = true;
+            showECUSpinnerInternal(2000);
+        });
+        
+        // Emergency click to close
+        document.addEventListener('click', function(event) {
+            if (event.target.id === 'ecuSpinner') {
+                console.log('Emergency close clicked');
+                hideECUSpinnerInternal();
+            }
+        });
+        
+        // Global error handler to hide spinner
+        window.addEventListener('error', function(event) {
+            console.log('Error detected, hiding spinner');
+            hideECUSpinnerInternal();
+        });
+        
+        // Expose global control functions
+        window.ECUSpinnerControl = {
+            show: function(duration) { 
+                isNavigating = true;
+                showECUSpinnerInternal(duration || 1500); 
+            },
+            hide: function() { hideECUSpinnerInternal(); }
+        };
+        
     })();
     </script>
     
