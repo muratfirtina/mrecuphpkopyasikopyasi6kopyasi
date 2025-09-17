@@ -122,13 +122,13 @@ if (!isset($pageTitle)) {
     
     /* Modern Navigation Styles */
     .modern-navbar {
-        /* background: <?php echo $navbarBackground; ?> !important; */
+        background: <?php echo $navbarBackground; ?> !important;
         /* backdrop-filter: blur(15px); */
         /* -webkit-backdrop-filter: blur(15px);
         box-shadow: <?php echo $navbarBoxShadow; ?>;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1); */
         transition: all 0.3s ease;
-        padding: 1.1rem 0;
+        padding: 1.2rem 0;
         position: fixed;
         z-index: 10000;
         width: 100%;

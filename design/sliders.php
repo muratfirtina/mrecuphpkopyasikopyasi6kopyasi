@@ -369,7 +369,7 @@ include '../includes/design_header.php';
                         
                         <!-- Desktop Resmi -->
                         <div class="col-md-4">
-                            <label class="form-label">🖥️ Desktop Resmi <small class="text-muted">(1920x800px)</small></label>
+                            <label class="form-label">🖥️ Desktop Resmi <small class="text-muted">(2000x900px)</small></label>
                             <input type="hidden" id="background_image" name="background_image">
                             <div class="responsive-image-upload" data-target="background_image" data-type="desktop">
                                 <div class="upload-area" id="desktopUploadArea">
