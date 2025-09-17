@@ -27,9 +27,9 @@
     }
     
     /* Mobilde overlay'i güçlendir - metin daha iyi okunur */
-    .hero-slide > div[style*="linear-gradient"] {
-        background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.1) 100%) !important;
-    }
+    /* .hero-slide > div[style*="linear-gradient"] {
+        background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.3) 10%, rgba(0,0,0,0.2) 20%, rgba(0,0,0,0.1) 40%) !important;
+    } */
     
     .carousel-inner {
         height: 400px !important;
@@ -111,9 +111,9 @@
     }
     
     /* Küçük ekranlarda overlay'i güçlendir */
-    .hero-slide > div[style*="linear-gradient"] {
-        background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.2) 100%) !important;
-    }
+    /* .hero-slide > div[style*="linear-gradient"] {
+        background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.3) 10%, rgba(0,0,0,0.2) 20%, rgba(0,0,0,0.1) 40%) !important;
+    } */
     
     .carousel-inner {
         height: 320px !important;

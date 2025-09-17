@@ -200,7 +200,10 @@ if (session_status() == PHP_SESSION_NONE) {
     
     // Session güvenlik kontrolü
     if (!isset($_SESSION['initialized'])) {
-        session_regenerate_id(true);
+        // AJAX upload işlemlerinde session regeneration'ı skip et
+        if (!defined('AJAX_SESSION_LOCK')) {
+            session_regenerate_id(true);
+        }
         $_SESSION['initialized'] = true;
         $_SESSION['user_ip'] = $_SERVER['REMOTE_ADDR'] ?? '';
         $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
@@ -472,12 +475,14 @@ function turkishToEnglish($text) {
     return str_replace($search, $replace, $text);
 }
 
-function createSlug($text) {
-    $text = turkishToEnglish($text);
-    $text = strtolower($text);
-    $text = preg_replace('/[^a-z0-9]+/', '-', $text);
-    $text = trim($text, '-');
-    return $text;
+if (!function_exists('createSlug')) {
+    function createSlug($text) {
+        $text = turkishToEnglish($text);
+        $text = strtolower($text);
+        $text = preg_replace('/[^a-z0-9]+/', '-', $text);
+        $text = trim($text, '-');
+        return $text;
+    }
 }
 
 function isImageFile($filename) {

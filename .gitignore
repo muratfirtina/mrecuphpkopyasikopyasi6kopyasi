@@ -12,6 +12,7 @@ uploads/user_files/*
 uploads/response_files/*
 !uploads/user_files/.gitkeep
 !uploads/response_files/.gitkeep
+assets/images/
 
 # Log files
 *.log

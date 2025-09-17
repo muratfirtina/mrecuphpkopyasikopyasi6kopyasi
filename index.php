@@ -137,6 +137,15 @@ include 'includes/header.php';
 
 <!-- Hero Section Slider -->
 <style>
+    .neon-text {
+        color: yellow;
+        font-weight: 400;
+        text-shadow:
+            0 0 5px rgba(255, 255, 255, 0.8),
+            0 0 10px rgba(255, 255, 255, 0.6),
+            0 0 20px rgba(255, 255, 255, 0.4),
+            0 0 30px rgba(255, 255, 255, 0.2);
+    }
     /* Carousel Debug CSS */
     .carousel-item {
         display: none !important;
@@ -314,6 +323,66 @@ include 'includes/header.php';
             gap: 0.8rem !important;
         }
     }
+    
+    /* Modern Picture Element Hero Slides */
+    .hero-image-container {
+        top: 0;
+        left: 0;
+        z-index: 1;
+    }
+    
+    .hero-responsive-img {
+        transition: transform 0.3s ease;
+    }
+    
+    .hero-slide:hover .hero-responsive-img {
+        transform: scale(1.02);
+    }
+    
+    /* Responsive optimizasyonlar */
+    @media (max-width: 768px) {
+        .hero-slide {
+            height: 620px !important;
+            min-height: 620px !important;
+        }
+        
+        .hero-image-container {
+            height: 620px !important;
+        }
+        
+        .hero-responsive-img {
+            height: 620px !important;
+            object-position: center center !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .hero-slide {
+            height: 320px !important;
+            min-height: 320px !important;
+        }
+        
+        .hero-image-container {
+            height: 320px !important;
+        }
+        
+        .hero-responsive-img {
+            height: 320px !important;
+        }
+    }
+    
+    /* Picture element responsive fallback */
+    picture {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+    
+    picture img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 </style>
 
 <!-- Sale Badge CSS -->
@@ -350,28 +419,41 @@ include 'includes/header.php';
                         echo "<!-- DEBUG Slide {$index}: Image={$slider['background_image']}, Exists={$imageExists}, FullPath={$fullImagePath} -->";
                         ?>
 
-                        <div class="hero-slide" style="
-                        background: linear-gradient(rgba(44, 62, 80, 0.3), rgba(3, 9, 191, 0.4)), url('<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($slider['background_image']); ?>') center/cover no-repeat;
-                        background-size: cover;
-                        background-position: center;
+                        <div class="hero-slide responsive-hero-slide position-relative d-flex align-items-center" style="
                         height: 750px;
                         min-height: 750px;
-                        position: relative;
-                        display: flex;
-                        align-items: center;
                         width: 100%;
+                        overflow: hidden;
                     ">
+                            <!-- Responsive Hero Image -->
+                            <div class="hero-image-container position-absolute w-100 h-100">
+                                <picture class="w-100 h-100">
+                                    <!-- Mobile Image (768px ve altı) -->
+                                    <?php if (!empty($slider['mobile_image'])): ?>
+                                    <source media="(max-width: 768px)" srcset="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($slider['mobile_image']); ?>">
+                                    <?php endif; ?>
+                                    
+                                    <!-- Tablet Image (1024px ve altı) -->
+                                    <?php if (!empty($slider['tablet_image'])): ?>
+                                    <source media="(max-width: 1024px)" srcset="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($slider['tablet_image']); ?>">
+                                    <?php endif; ?>
+                                    
+                                    <!-- Desktop Image (fallback) -->
+                                    <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($slider['background_image'] ?? 'assets/images/default-hero.svg'); ?>" 
+                                         alt="<?php echo htmlspecialchars($slider['title'] ?? 'Hero Slider'); ?>"
+                                         class="hero-responsive-img w-100 h-100"
+                                         style="object-fit: cover; object-position: center;"
+                                         loading="<?php echo $index === 0 ? 'eager' : 'lazy'; ?>">
+                                </picture>
+                            </div>
+                            
+                            
                             <!-- Üstten aşağıya gradient karartma overlay -->
-                            <div style="
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0) 100%);
-                            z-index: 1;
-                        "></div>
-                            <div class="container py-5 h-100" style="position: relative; z-index: 2;">
+<!--                             <div class="additional-overlay position-absolute w-100 h-100" style="
+                                background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0) 100%);
+                                z-index: 3;
+                            "></div> -->
+                            <div class="container py-5 h-100 position-relative" style="z-index: 4;">
                                 <div class="row align-items-center text-white h-100">
                                     <?php if ($index === 0): ?>
                                         <!-- İlk Slider: Standart İçerik -->
@@ -394,7 +476,7 @@ include 'includes/header.php';
                                                 </h2>
                                             <?php endif; ?>
 
-                                            <p class="lead mb-4">
+                                            <p class="lead mb-4 neon-text">
                                                 <?php echo htmlspecialchars($slider['description'] ?? ''); ?>
                                             </p>
 
@@ -459,18 +541,24 @@ include 'includes/header.php';
         </div>
     <?php else: ?>
         <!-- Fallback eğer slider yoksa -->
-        <div class="hero-slide" style="background: linear-gradient(rgba(44, 62, 80, 0.8), rgb(3 9 191 / 0.5)), url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop') center/cover; height: 750px; position: relative;">
-            <!-- Üstten aşağıya gradient karartma overlay -->
-            <div style="
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0) 100%);
-                z-index: 1;
-            "></div>
-            <div class="container py-5 h-100" style="position: relative; z-index: 2;">
+        <div class="hero-slide position-relative d-flex align-items-center" style="height: 750px; overflow: hidden;">
+            <!-- Default Hero Image -->
+            <div class="hero-image-container position-absolute w-100 h-100">
+                <picture class="w-100 h-100">
+                    <img src="assets/images/default-hero.svg" 
+                         alt="Profesyonel ECU Hizmetleri"
+                         class="hero-responsive-img w-100 h-100"
+                         style="object-fit: cover; object-position: center;"
+                         loading="eager">
+                </picture>
+            </div>
+            
+            <!-- <div class="additional-overlay position-absolute w-100 h-100" style="
+                background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0) 100%);
+                z-index: 3;
+            "></div> -->
+            
+            <div class="container py-5 h-100 position-relative" style="z-index: 4;">
                 <div class="row align-items-center text-white h-100">
                     <div class="col-lg-8">
                         <h1 class="display-3 fw-bold mb-3">Profesyonel ECU Hizmetleri</h1>
@@ -1377,6 +1465,99 @@ include 'includes/header.php';
     </div>
 </div>
 
+<!-- Modern Picture Element JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Picture element ile artık responsive logic native olarak browser'da çalışıyor
+    // Sadece debug ve lazy loading optimizasyonları yapalım
+    
+    const heroSlides = document.querySelectorAll('.responsive-hero-slide');
+    
+    // Debug: Picture element durumunu kontrol et
+    heroSlides.forEach((slide, index) => {
+        const picture = slide.querySelector('picture');
+        const img = slide.querySelector('.hero-responsive-img');
+        const sources = slide.querySelectorAll('source');
+        
+        if (picture && img) {
+            console.log(`Hero Slide ${index + 1}:`, {
+                hasPicture: true,
+                sourcesCount: sources.length,
+                imgSrc: img.src,
+                imgAlt: img.alt,
+                loading: img.loading
+            });
+            
+            // Image load event
+            img.addEventListener('load', function() {
+                console.log(`Hero image ${index + 1} loaded successfully`);
+                slide.classList.add('image-loaded');
+            });
+            
+            img.addEventListener('error', function() {
+                console.warn(`Hero image ${index + 1} failed to load:`, img.src);
+                // Fallback görseli göster - relative path kullan
+                if (img.src.indexOf('default-hero.svg') === -1) {
+                    img.src = 'assets/images/default-hero.svg';
+                }
+            });
+        }
+    });
+    
+    // Carousel değişikliğinde lazy loading optimizasyonu
+    const carousel = document.getElementById('heroCarousel');
+    if (carousel) {
+        carousel.addEventListener('slid.bs.carousel', function (e) {
+            const activeSlide = e.relatedTarget;
+            const activeImg = activeSlide.querySelector('.hero-responsive-img');
+            
+            if (activeImg && activeImg.loading === 'lazy') {
+                // Aktif slide'ın resmini eager yap
+                activeImg.loading = 'eager';
+                console.log('Switched to eager loading for active slide');
+            }
+        });
+    }
+    
+    // Intersection Observer ile lazy loading optimizasyonu
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.loading === 'lazy') {
+                        img.loading = 'eager';
+                        imageObserver.unobserve(img);
+                    }
+                }
+            });
+        }, {
+            rootMargin: '50px'
+        });
+        
+        // Tüm lazy loading hero resimlerini observe et
+        document.querySelectorAll('.hero-responsive-img[loading="lazy"]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
+    
+    // Modern browser support kontrolü
+    const supportsPicture = 'HTMLPictureElement' in window;
+    const supportsSrcset = 'srcset' in document.createElement('img');
+    
+    console.log('Browser support:', {
+        picture: supportsPicture,
+        srcset: supportsSrcset,
+        webp: document.createElement('canvas').toDataURL('image/webp').indexOf('webp') > -1
+    });
+    
+    if (!supportsPicture) {
+        console.warn('Browser does not support Picture element. Using fallback img.');
+        // Eski browser'lar için polyfill eklenebilir
+    }
+});
+</script>
+
 <?php
 // Footer include
 include 'includes/footer.php';
@@ -1894,7 +2075,7 @@ include 'includes/footer.php';
         padding: 0;
         position: relative;
         z-index: 2;
-        margin-top: -200px;
+        margin-top: -150px;
         padding-bottom: 80px;
     }
     

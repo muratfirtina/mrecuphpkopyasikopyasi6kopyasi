@@ -6,6 +6,11 @@
 require_once '../config/config.php';
 require_once '../config/database.php';
 
+// AJAX işlemleri için session regeneration'dan koruma
+if (!defined('AJAX_SESSION_LOCK')) {
+    define('AJAX_SESSION_LOCK', true);
+}
+
 // CORS ve JSON header'ları
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -17,11 +22,31 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+// Session debug
+error_log('AJAX Session Debug: ' . json_encode([
+    'session_id' => session_id(),
+    'user_id' => $_SESSION['user_id'] ?? 'not_set',
+    'role' => $_SESSION['role'] ?? 'not_set',
+    'user_role' => $_SESSION['user_role'] ?? 'not_set',
+    'all_session' => $_SESSION,
+    'action' => $_POST['action'] ?? 'no_action'
+]));
+
 // Yetkili kullanıcı kontrolü
 $userRole = $_SESSION['role'] ?? $_SESSION['user_role'] ?? null;
 if (!isset($_SESSION['user_id']) || !in_array($userRole, ['admin', 'design'])) {
+    error_log('AJAX Authorization failed: user_id=' . ($_SESSION['user_id'] ?? 'none') . ', role=' . ($userRole ?? 'none'));
     http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Yetkisiz erişim']);
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Yetkisiz erişim',
+        'debug' => [
+            'session_exists' => !empty($_SESSION),
+            'user_id' => $_SESSION['user_id'] ?? null,
+            'role' => $userRole,
+            'session_id' => session_id()
+        ]
+    ]);
     exit;
 }
 
@@ -33,9 +58,15 @@ try {
         
         switch ($action) {
             case 'upload_image':
+            case 'upload_responsive_image':
+                // Debug log
+                error_log('Upload action received: ' . $action);
+                error_log('FILES data: ' . print_r($_FILES, true));
+                error_log('POST data: ' . print_r($_POST, true));
+                
                 if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                     $file = $_FILES['image'];
-                    $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                    $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif'];
                     
                     if (!in_array($file['type'], $allowedTypes)) {
                         throw new Exception('Sadece JPEG, PNG ve WebP formatları desteklenir');
@@ -52,7 +83,8 @@ try {
                     
                     // Güvenli dosya adı oluştur
                     $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-                    $filename = 'slider_' . uniqid() . '_' . time() . '.' . $extension;
+                    $imageType = $_POST['type'] ?? 'desktop'; // desktop, tablet, mobile
+                    $filename = 'slider_' . $imageType . '_' . uniqid() . '_' . time() . '.' . $extension;
                     $filePath = $uploadPath . $filename;
                     $webPath = 'assets/images/' . $filename;
                     
@@ -97,7 +129,9 @@ try {
                                 'upload_path' => $uploadPath,
                                 'file_path' => $filePath,
                                 'web_path' => $webPath,
-                                'file_exists' => file_exists($filePath)
+                                'file_exists' => file_exists($filePath),
+                                'session_id' => session_id(),
+                                'user_id' => $_SESSION['user_id'] ?? null
                             ]
                         ];
                     } else {

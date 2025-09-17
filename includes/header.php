@@ -122,11 +122,11 @@ if (!isset($pageTitle)) {
     
     /* Modern Navigation Styles */
     .modern-navbar {
-        background: <?php echo $navbarBackground; ?> !important;
+        /* background: <?php echo $navbarBackground; ?> !important; */
         /* backdrop-filter: blur(15px); */
-        -webkit-backdrop-filter: blur(15px);
+        /* -webkit-backdrop-filter: blur(15px);
         box-shadow: <?php echo $navbarBoxShadow; ?>;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1); */
         transition: all 0.3s ease;
         padding: 1.1rem 0;
         position: fixed;
@@ -270,8 +270,8 @@ if (!isset($pageTitle)) {
     
     /* Special Link Styles */
     .upload-link {
-        background: rgba(40, 167, 69, 0.1) !important;
-        color: #28a745 !important;
+        background: rgba(40, 167, 69, 0.2) !important;
+        color: #0cff43 !important;
         border: 1px solid rgba(40, 167, 69, 0.3);
     }
     
@@ -282,8 +282,8 @@ if (!isset($pageTitle)) {
     }
     
     .login-btn {
-        background: rgba(0, 123, 255, 0.1) !important;
-        color: #007bff !important;
+        background: rgba(0, 123, 255, 0.4) !important;
+        color: #00e3ff !important;
         border: 1px solid rgba(0, 123, 255, 0.3);
     }
     
@@ -312,7 +312,7 @@ if (!isset($pageTitle)) {
         align-items: center;
         gap: 0.75rem;
         padding: 0.5rem 1rem !important;
-        background: rgba(255, 255, 255, 0.05);
+        background: rgb(255 255 255 / 20%);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 25px;
     }
@@ -935,7 +935,7 @@ if (!isset($pageTitle)) {
                 <ul class="navbar-nav">
                     <?php if (function_exists('isLoggedIn') && isLoggedIn()): ?>
                         <!-- Notification icon -->
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link modern-nav-link notification-link" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-bell-fill"></i>
                                 <span class="notification-badge" style="display: none;">0</span>
@@ -944,7 +944,7 @@ if (!isset($pageTitle)) {
                                 <li><h6 class="dropdown-header">Bildirimler</h6></li>
                                 <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>/admin/notifications.php">Tüm Bildirimleri Gör</a></li>
                             </ul>
-                        </li>
+                        </li> -->
                         
                         <li class="nav-item dropdown">
                             <a class="nav-link modern-nav-link dropdown-toggle user-dropdown" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -953,9 +953,9 @@ if (!isset($pageTitle)) {
                                 </div>
                                 <div class="user-info">
                                     <span class="username"><?php echo isset($_SESSION['username']) ? $_SESSION['username'] : 'Kullanıcı'; ?></span>
-                                    <?php if (isset($_SESSION['credits'])): ?>
+                                    <!-- <?php if (isset($_SESSION['credits'])): ?>
                                         <small class="credits"><?php echo $_SESSION['credits']; ?> Kredi</small>
-                                    <?php endif; ?>
+                                    <?php endif; ?> -->
                                 </div>
                             </a>
                             <ul class="dropdown-menu modern-dropdown dropdown-menu-end">
