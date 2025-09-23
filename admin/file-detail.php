@@ -427,7 +427,7 @@ try {
                 SELECT fr.*, fu.user_id, fu.original_name as original_upload_name,
                        fu.brand_id, fu.model_id, fu.series_id, fu.engine_id, fu.year, fu.plate, fu.kilometer, fu.ecu_id, fu.device_id,
                        fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
-                       b.name as brand_name, m.name as model_name, s.name as series_name, e.name as engine_name,
+                       b.name as brand_name, m.name as model_name, s.name as series_name, e.name as engine_name, ecu.name as ecu_name,
                        a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
                        u.username, u.email, u.first_name, u.last_name
                 FROM file_responses fr
@@ -436,6 +436,7 @@ try {
                 LEFT JOIN models m ON fu.model_id = m.id
                 LEFT JOIN series s ON fu.series_id = s.id
                 LEFT JOIN engines e ON fu.engine_id = e.id
+                LEFT JOIN ecus ecu ON fu.ecu_id = ecu.id
                 LEFT JOIN users a ON fr.admin_id = a.id
                 LEFT JOIN users u ON fu.user_id = u.id
                 WHERE fr.id = ? AND fr.upload_id = ?
@@ -447,7 +448,7 @@ try {
                 SELECT fr.*, fu.user_id, fu.original_name as original_upload_name,
                        fu.brand_id, fu.model_id, fu.series_id, fu.engine_id, fu.year, fu.plate, fu.kilometer, fu.ecu_id, fu.device_id,
                        fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
-                       b.name as brand_name, m.name as model_name, s.name as series_name, e.name as engine_name,
+                       b.name as brand_name, m.name as model_name, s.name as series_name, e.name as engine_name, ecu.name as ecu_name,
                        a.username as admin_username, a.first_name as admin_first_name, a.last_name as admin_last_name,
                        u.username, u.email, u.first_name, u.last_name
                 FROM file_responses fr
@@ -456,6 +457,7 @@ try {
                 LEFT JOIN models m ON fu.model_id = m.id
                 LEFT JOIN series s ON fu.series_id = s.id
                 LEFT JOIN engines e ON fu.engine_id = e.id
+                LEFT JOIN ecus ecu ON fu.ecu_id = ecu.id
                 LEFT JOIN users a ON fr.admin_id = a.id
                 LEFT JOIN users u ON fu.user_id = u.id
                 WHERE fr.upload_id = ?
@@ -499,7 +501,7 @@ try {
             SELECT fu.*, 
                    u.username, u.email, u.first_name, u.last_name,
                    b.name as brand_name, m.name as model_name, s.name as series_name, e.name as engine_name,
-                   d.name as device_name
+                   d.name as device_name, ecu.name as ecu_name
             FROM file_uploads fu
             LEFT JOIN users u ON fu.user_id = u.id
             LEFT JOIN brands b ON fu.brand_id = b.id
@@ -507,6 +509,7 @@ try {
             LEFT JOIN series s ON fu.series_id = s.id
             LEFT JOIN engines e ON fu.engine_id = e.id
             LEFT JOIN devices d ON fu.device_id = d.id
+            LEFT JOIN ecus ecu ON fu.ecu_id = ecu.id
             WHERE fu.id = ?
         ");
         $stmt->execute([$uploadId]);
