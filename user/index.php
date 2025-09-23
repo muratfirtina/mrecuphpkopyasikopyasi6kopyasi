@@ -84,15 +84,8 @@ include '../includes/user_header.php';
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <div>
-                    <h1 class="h2 mb-0">Dashboard</h1>
+                    <h1 class="h2 mb-0">Kullanıcı Sayfası</h1>
                     <p class="text-muted mb-0">Hoşgeldiniz, <?php echo htmlspecialchars(!empty($_SESSION['username']) ? $_SESSION['username'] : ($_SESSION['email'] ?? 'Kullanıcı')); ?>! Hesabınızın genel durumunu buradan takip edebilirsiniz.</p>
-                </div>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <div class="btn-group me-2">
-                        <a href="upload.php" class="btn btn-primary">
-                            <i class="bi bi-upload me-1"></i>Dosya Yükle
-                        </a>
-                    </div>
                 </div>
             </div>
 
@@ -122,7 +115,7 @@ include '../includes/user_header.php';
             </div>
 
             <!-- İstatistik Kartları -->
-            <div class="row g-4 mb-4">
+            <!-- <div class="row g-4 mb-4">
                 <div class="col-lg-3 col-md-6">
                     <div class="stat-card">
                         <div class="stat-card-body">
@@ -216,11 +209,11 @@ include '../includes/user_header.php';
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <div class="row g-4">
                 <!-- Son Dosyalar -->
-                <div class="col-lg-8">
+                <div class="col-lg-12">
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
                             <h5 class="mb-0">
@@ -320,8 +313,8 @@ include '../includes/user_header.php';
                 </div>
 
                 <!-- Yan Panel -->
-                <div class="col-lg-4">
-                    <!-- Hızlı İşlemler -->
+                <!-- <div class="col-lg-4">
+                    
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-white border-0 py-3">
                             <h5 class="mb-0">
@@ -349,7 +342,7 @@ include '../includes/user_header.php';
                         </div>
                     </div>
 
-                    <!-- Hesap Durumu -->
+                    
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-white border-0 py-3">
                             <h6 class="mb-0">
@@ -400,7 +393,7 @@ include '../includes/user_header.php';
                         </div>
                     </div>
 
-                    <!-- Son İşlemler -->
+                    
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white border-0 py-3">
                             <h6 class="mb-0">
@@ -450,7 +443,7 @@ include '../includes/user_header.php';
                             <?php endif; ?>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </main>
     </div>
