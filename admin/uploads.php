@@ -666,10 +666,23 @@ include '../includes/admin_sidebar.php';
                                         'completed' => 'check-circle',
                                         'rejected' => 'times-circle'
                                     ];
+                                    
+                                    // İptal edilmiş dosyalar için durum kontrolü
+                                    if (isset($upload['is_cancelled']) && $upload['is_cancelled']) {
+                                        $displayStatus = 'cancelled';
+                                        $displayClass = 'secondary';
+                                        $displayText = 'İptal Edildi';
+                                        $displayIcon = 'x-circle';
+                                    } else {
+                                        $displayStatus = $upload['status'];
+                                        $displayClass = $statusClass[$upload['status']] ?? 'secondary';
+                                        $displayText = $statusText[$upload['status']] ?? 'Bilinmiyor';
+                                        $displayIcon = $statusIcon[$upload['status']] ?? 'question';
+                                    }
                                     ?>
-                                    <span class="badge bg-<?php echo $statusClass[$upload['status']] ?? 'secondary'; ?> d-flex align-items-center" style="width: fit-content;">
-                                        <i class="bi bi-<?php echo $statusIcon[$upload['status']] ?? 'question'; ?> me-1"></i>
-                                        <?php echo $statusText[$upload['status']] ?? 'Bilinmiyor'; ?>
+                                    <span class="badge bg-<?php echo $displayClass; ?> d-flex align-items-center" style="width: fit-content;">
+                                        <i class="bi bi-<?php echo $displayIcon; ?> me-1"></i>
+                                        <?php echo $displayText; ?>
                                     </span>
                                     
                                     <?php if (!empty($upload['admin_notes'])): ?>
@@ -702,7 +715,7 @@ include '../includes/admin_sidebar.php';
                                             </button>
                                         <?php endif; ?>
                                         
-                                        <?php if ($upload['status'] === 'pending'): ?>
+                                        <?php if ($upload['status'] === 'pending' && (!isset($upload['is_cancelled']) || !$upload['is_cancelled'])): ?>
                                             <button type="button" class="btn btn-outline-success btn-sm" 
                                                     onclick="processFile('<?php echo $upload['id']; ?>')">
                                                 <i class="bi bi-play me-1"></i>İşleme Al

@@ -84,7 +84,7 @@ if (isset($_SESSION['user_id']) && isset($pdo)) {
                     <span>Bekleyen Dosyalar</span>
                     <?php
                     try {
-                        $stmt = $pdo->prepare("SELECT COUNT(*) FROM file_uploads WHERE user_id = ? AND status = 'pending'");
+                        $stmt = $pdo->prepare("SELECT COUNT(*) FROM file_uploads WHERE user_id = ? AND status = 'pending' AND (is_cancelled IS NULL OR is_cancelled = 0)");
                         $stmt->execute([$_SESSION['user_id']]);
                         $pendingFiles = $stmt->fetchColumn();
                         if ($pendingFiles > 0) {
