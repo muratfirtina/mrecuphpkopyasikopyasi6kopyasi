@@ -1034,11 +1034,11 @@ include 'includes/header.php';
             </div>
             <div class="feature-item">
                 <div class="feature-check">✓</div>
-                <span>2 yıl üretici garantisi</span>
+                <span>1 yıl üretici garantisi</span>
             </div>
             <div class="feature-item">
                 <div class="feature-check">✓</div>
-                <span>Hızlı kargo (1-2 iş günü)</span>
+                <span>Hızlı kargo (Aynı gün kargo)</span>
             </div>
             <div class="feature-item">
                 <div class="feature-check">✓</div>

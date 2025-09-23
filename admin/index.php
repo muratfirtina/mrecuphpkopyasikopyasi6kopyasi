@@ -108,7 +108,7 @@ include '../includes/admin_sidebar.php';
 ?>
 
 <!-- Ana İstatistikler -->
-<div class="row g-4 mb-4">
+<!-- <div class="row g-4 mb-4">
     <div class="col-lg-3 col-md-6">
         <div class="stat-widget">
             <div class="d-flex justify-content-between align-items-start">
@@ -176,7 +176,7 @@ include '../includes/admin_sidebar.php';
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <!-- Dosya İstatistikleri -->
 <div class="row g-4 mb-4">
@@ -219,7 +219,7 @@ include '../includes/admin_sidebar.php';
 
 <div class="row g-4">
     <!-- Son Yüklenen Dosyalar -->
-    <div class="col-lg-8">
+    <div class="col-lg-12">
         <div class="card admin-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
@@ -312,132 +312,10 @@ include '../includes/admin_sidebar.php';
         </div>
     </div>
 
-    <!-- Sistem Durumu ve Hızlı İşlemler -->
-    <div class="col-lg-4">
-        <!-- Sistem Durumu -->
-        <div class="card admin-card mb-4">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="bi bi-server me-2"></i>Sistem Durumu
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span>Veritabanı</span>
-                    <span class="badge bg-<?php echo $systemStatus['database'] ? 'success' : 'danger'; ?>">
-                        <?php echo $systemStatus['database'] ? 'Aktif' : 'Hata'; ?>
-                    </span>
-                </div>
-                
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span>Upload Dizini</span>
-                    <span class="badge bg-<?php echo $systemStatus['uploads_dir'] ? 'success' : 'danger'; ?>">
-                        <?php echo $systemStatus['uploads_dir'] ? 'Yazılabilir' : 'Hata'; ?>
-                    </span>
-                </div>
-                
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span>Log Dizini</span>
-                    <span class="badge bg-<?php echo $systemStatus['logs_dir'] ? 'success' : 'danger'; ?>">
-                        <?php echo $systemStatus['logs_dir'] ? 'Yazılabilir' : 'Hata'; ?>
-                    </span>
-                </div>
-                
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span>PHP Sürümü</span>
-                    <span class="badge bg-<?php echo $systemStatus['php_version'] ? 'success' : 'warning'; ?>">
-                        <?php echo PHP_VERSION; ?>
-                    </span>
-                </div>
-                
-                <div class="d-flex justify-content-between align-items-center">
-                    <span>Disk Kullanımı</span>
-                    <span class="badge bg-info">
-                        <?php 
-                        $diskFree = disk_free_space('../');
-                        $diskTotal = disk_total_space('../');
-                        $diskUsed = (($diskTotal - $diskFree) / $diskTotal) * 100;
-                        echo number_format($diskUsed, 1) . '%';
-                        ?>
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Hızlı İstatistikler -->
-        <div class="card admin-card mb-4">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="bi bi-pie-chart me-2"></i>Hızlı İstatistikler
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-6 border-end">
-                        <h4 class="text-primary mb-1"><?php echo number_format($totalCategories); ?></h4>
-                        <small class="text-muted">Kategori</small>
-                    </div>
-                    <div class="col-6">
-                        <h4 class="text-success mb-1"><?php echo number_format($activeCategories); ?></h4>
-                        <small class="text-muted">Aktif</small>
-                    </div>
-                </div>
-                
-                <hr>
-                
-                <div class="row text-center">
-                    <div class="col-4">
-                        <h5 class="text-info mb-1"><?php echo number_format($featuredProducts); ?></h5>
-                        <small class="text-muted">Öne Çıkan</small>
-                    </div>
-                    <div class="col-4">
-                        <h5 class="text-warning mb-1"><?php echo number_format($todayUploads); ?></h5>
-                        <small class="text-muted">Bugün</small>
-                    </div>
-                    <div class="col-4">
-                        <h5 class="text-secondary mb-1"><?php echo number_format($todayUsers); ?></h5>
-                        <small class="text-muted">Yeni Üye</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Hızlı Eylemler -->
-        <div class="card admin-card">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="bi bi-bolt me-2"></i>Hızlı Eylemler
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="uploads.php?status=pending" class="btn btn-warning btn-sm">
-                        <i class="bi bi-clock me-2"></i>Bekleyen Dosyalar (<?php echo $fileStats['pending'] ?? 0; ?>)
-                    </a>
-                    
-                    <a href="users.php?filter=new" class="btn btn-info btn-sm">
-                        <i class="bi bi-person-plus me-2"></i>Yeni Kullanıcılar
-                    </a>
-                    
-                    <a href="reports.php" class="btn btn-success btn-sm">
-                        <i class="bi bi-bar-chart me-2"></i>Günlük Rapor
-                    </a>
-                    
-                    <a href="settings.php" class="btn btn-secondary btn-sm">
-                        <i class="bi bi-gear me-2"></i>Sistem Ayarları
-                    </a>
-                    
-                    <a href="logs.php" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-clipboard-data me-2"></i>Sistem Logları
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Email Sistemi Widget -->
-<div class="row mt-4">
+<!-- <div class="row mt-4">
     <div class="col-12">
         <div class="card admin-card">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -553,10 +431,10 @@ include '../includes/admin_sidebar.php';
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <!-- Grafik Alanı -->
-<div class="row mt-4">
+<!-- <div class="row mt-4">
     <div class="col-12">
         <div class="card admin-card">
             <div class="card-header">
@@ -569,7 +447,7 @@ include '../includes/admin_sidebar.php';
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <?php
 // Sayfa özel JavaScript

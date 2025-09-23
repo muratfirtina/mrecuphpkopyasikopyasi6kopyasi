@@ -445,32 +445,7 @@ include 'includes/header.php';
 <main>
     
     <!-- Category Hero -->
-    <section class="category-hero" style="background-image: url('<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($category['image'] ?: 'assets/images/default-category-bg.jpg'); ?>');">    
-        <div class="overlay"></div>
-        <div class="container">
-            <div class="row justify-content-center text-center">
-                <div class="col-lg-10">
-                    <h1 class="category-title"><?php echo htmlspecialchars($category['name']); ?></h1>
-                    <?php if ($category['description']): ?>
-                        <p class="category-description">
-                            <?php echo htmlspecialchars($category['description']); ?>
-                        </p>
-                    <?php endif; ?>
-                    
-<!--                     <div class="category-stats">
-                        <div class="stat-item">
-                            <span class="stat-number"><?php echo count($brands); ?></span>
-                            <span class="stat-label">Marka</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number"><?php echo $totalProducts; ?></span>
-                            <span class="stat-label">Ürün</span>
-                        </div>
-                    </div> -->
-                </div>
-            </div>
-        </div>
-    </section>
+  
     <!-- Breadcrumb -->
     <div class="container">
         <nav aria-label="breadcrumb" class="mt-3">

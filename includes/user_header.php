@@ -296,24 +296,7 @@ if (isset($_SESSION['user_id']) && isset($pdo)) {
         }
 
         /* Dark Mode Support */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background-color: #1a1a1a;
-                color: #e9ecef;
-            }
-
-            .card {
-                background: #2d3748;
-                color: #e9ecef;
-            }
-
-            .form-control,
-            .form-select {
-                background: #2d3748;
-                border-color: #4a5568;
-                color: #e9ecef;
-            }
-        }
+        
 
         /* Print Styles */
         @media print {

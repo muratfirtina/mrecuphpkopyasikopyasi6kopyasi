@@ -306,14 +306,14 @@ include 'includes/header.php';
 
 .product-image-container {
     position: relative;
-    height: 200px;
+    height: 300px;
     overflow: hidden;
 }
 
 .product-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     transition: transform 0.5s ease;
 }
 
@@ -608,39 +608,6 @@ include 'includes/header.php';
 </style>
 
 <main>
-    <!-- Hero Section -->
-<section class="brand-category-hero" style="background-image: url('<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($brand['logo'] ?: 'assets/images/default-brand-bg.jpg'); ?>');">
-    <div class="overlay"></div> <!-- Karartma katmanı -->
-    <div class="container">
-        <div class="hero-content">
-            <!-- <?php if ($brand['logo']): ?>
-                <img src="<?php echo BASE_URL; ?>/<?php echo htmlspecialchars($brand['logo']); ?>" 
-                     alt="<?php echo htmlspecialchars($brand['name']); ?>" 
-                     class="brand-logo-large">
-            <?php else: ?>
-                <div class="brand-logo-large d-flex align-items-center justify-content-center bg-white">
-                    <i class="bi bi-award text-primary fa-3x"></i>
-                </div>
-            <?php endif; ?> -->
-            
-            <h1 class="hero-title"><?php echo htmlspecialchars($brand['name']); ?></h1>
-            <!-- <p class="hero-subtitle">
-                <?php echo htmlspecialchars($category['name']); ?> kategorisindeki tüm ürünler
-            </p> -->
-            
-            <div class="hero-stats">
-                <!-- <div class="hero-stat">
-                    <span class="hero-stat-number"><?php echo $totalProducts; ?></span>
-                    <span class="hero-stat-label">Ürün</span>
-                </div> -->
-                <div class="hero-stat">
-                    <span class="hero-stat-number"><?php echo htmlspecialchars($category['name']); ?></span>
-                    <span class="hero-stat-label">Kategori</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
     <!-- Breadcrumb -->
     <div class="container">

@@ -526,6 +526,36 @@ include '../includes/admin_sidebar.php';
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* TinyMCE Modal içinde z-index sorunu çözümü */
+.ql-toolbar.ql-snow {
+    border-top: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    background: #f8f9fa;
+}
+
+.ql-container.ql-snow {
+    border-bottom: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    height: 200px;
+}
+
+.ql-editor {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Quill tooltip z-index fix for modals */
+.ql-tooltip {
+    z-index: 1070 !important;
+}
+
+.ql-editing {
+    z-index: 1070 !important;
+}
 </style>
 
 <!-- Hata/Başarı Mesajları -->
@@ -676,7 +706,10 @@ include '../includes/admin_sidebar.php';
                         <div class="col-12">
                             <div class="mb-3">
                                 <label for="edit_description" class="form-label">Detaylı Açıklama</label>
-                                <textarea class="form-control" id="edit_description" name="description" rows="8"></textarea>
+                                <div id="edit_description" class="form-control p-0" style="height: auto; min-height: 250px;">
+                                </div>
+                                <input type="hidden" id="edit_description_input" name="description">
+                                <div class="form-text">Metni biçimlendirmek için yukarıdaki araç çubuğunu kullanın. Kalın yazı, renk, bağlantı, liste gibi özellikler ekleyebilirsiniz.</div>
                             </div>
                         </div>
                     </div>
@@ -1001,8 +1034,10 @@ include '../includes/admin_sidebar.php';
                         <div class="col-12">
                             <div class="mb-3">
                                 <label for="add_description" class="form-label">Detaylı Açıklama</label>
-                                <textarea class="form-control" name="description" id="add_description" rows="8"></textarea>
-                                <div class="form-text">HTML etiketleri kullanabilirsiniz. Resimleri drag & drop ile ekleyebilirsiniz.</div>
+                                <div id="add_description" class="form-control p-0" style="height: auto; min-height: 250px;">
+                                </div>
+                                <input type="hidden" id="add_description_input" name="description">
+                                <div class="form-text">Metni biçimlendirmek için yukarıdaki araç çubuğunu kullanın. Kalın yazı, renk, bağlantı, liste gibi özellikler ekleyebilirsiniz.</div>
                             </div>
                         </div>
                     </div>
@@ -1090,8 +1125,9 @@ include '../includes/admin_sidebar.php';
     </div>
 </div>
 
-<!-- CKEditor Scripts -->
-<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+<!-- Quill.js Rich Text Editor -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
 
 <!-- JavaScript Kodları -->
 <script>
@@ -1099,6 +1135,11 @@ include '../includes/admin_sidebar.php';
 // Ürün düzenleme formunu AJAX ile gönder
 document.getElementById('editProductForm').addEventListener('submit', function(e) {
     e.preventDefault(); // Sayfanın yeniden yüklenmesini engelle
+
+    // Quill editör içeriğini hidden input'a kaydet
+    if (window.editQuillEditor) {
+        document.getElementById('edit_description_input').value = window.editQuillEditor.root.innerHTML;
+    }
 
     const formData = new FormData(this);
 
@@ -1152,15 +1193,27 @@ window.editProduct = function(productId) {
     fetch('ajax/get-product-details.php?id=' + productId)
         .then(response => response.json())
         .then(data => {
+            console.log('AJAX Response:', data); // Debug için
+            
             if (data.success) {
                 const product = data.product;
+                console.log('Product Description:', product.description); // Debug için
                 
                 document.getElementById('edit_product_id').value = product.id;
                 document.getElementById('edit_name').value = product.name || '';
                 document.getElementById('edit_slug').value = product.slug || '';
                 document.getElementById('edit_sku').value = product.sku || '';
                 document.getElementById('edit_short_description').value = product.short_description || '';
-                document.getElementById('edit_description').value = product.description || '';
+                // Quill editör için içeriği güvenli şekilde güncelle
+                waitForQuillEditor('editQuillEditor', function(editor) {
+                    if (product.description) {
+                        editor.clipboard.dangerouslyPasteHTML(product.description);
+                        console.log('Quill editöre içerik yüklendi:', product.description.substring(0, 50) + '...');
+                    } else {
+                        editor.setContents([]);
+                        console.log('Quill editör temizlendi (boş içerik)');
+                    }
+                });
                 document.getElementById('edit_price').value = product.price || '';
                 document.getElementById('edit_sale_price').value = product.sale_price || '';
                 document.getElementById('edit_currency').value = product.currency || 'TL';
@@ -1394,19 +1447,157 @@ if (window.location.search.includes('debug=1')) {
     document.body.appendChild(testBtn);
 }
 
-// CKEditor için basit konfigürasyon
-if (typeof ClassicEditor !== 'undefined') {
-    ClassicEditor
-        .create(document.querySelector('#add_description'), {
-            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'outdent', 'indent', '|', 'imageUpload', 'blockQuote', 'insertTable', 'mediaEmbed', '|', 'undo', 'redo'],
-            image: {
-                toolbar: ['imageTextAlternative', 'imageStyle:full', 'imageStyle:side']
-            }
-        })
-        .catch(error => {
-            console.error('CKEditor yüklenemedi:', error);
-        });
+// Test fonksiyonu - Browser console'dan kullanılabilir
+window.testQuillEditor = function() {
+    console.log('=== Quill Editör Test ===');
+    console.log('addQuillEditor:', window.addQuillEditor);
+    console.log('editQuillEditor:', window.editQuillEditor);
+    
+    if (window.editQuillEditor) {
+        console.log('Edit editör mevcut içerik:', window.editQuillEditor.root.innerHTML);
+        console.log('Edit editör Delta formatı:', window.editQuillEditor.getContents());
+        
+        // Test HTML yükle
+        window.editQuillEditor.clipboard.dangerouslyPasteHTML('<p><strong>Test</strong> <em>içeriği</em> yüklendi!</p>');
+        console.log('Test içerik yüklendi');
+    } else {
+        console.log('Edit editör bulunamadı!');
+    }
+};
+function waitForQuillEditor(editorName, callback, maxAttempts = 20) {
+    let attempts = 0;
+    
+    function checkEditor() {
+        attempts++;
+        
+        if (window[editorName] && window[editorName].root) {
+            // Editör hazır, callback'ı çağır
+            callback(window[editorName]);
+        } else if (attempts < maxAttempts) {
+            // Henüz hazır değil, 100ms sonra tekrar dene
+            setTimeout(checkEditor, 100);
+        } else {
+            console.error('Quill editörü yüklenemedi: ' + editorName);
+        }
+    }
+    
+    checkEditor();
 }
+var addQuillEditor;
+var editQuillEditor;
+
+function initQuillEditors() {
+    if (typeof Quill !== 'undefined') {
+        // Toolbar konfigürasyonu
+        const toolbarOptions = [
+            ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+            ['blockquote', 'code-block'],
+            
+            [{ 'header': 1 }, { 'header': 2 }],               // custom button values
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
+            [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+            [{ 'direction': 'rtl' }],                         // text direction
+            
+            [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            
+            [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+            [{ 'font': [] }],
+            [{ 'align': [] }],
+            
+            ['clean'],                                         // remove formatting button
+            ['link', 'image']                                 // link and image
+        ];
+
+        // Ekleme formu için Quill editörü
+        if (document.getElementById('add_description')) {
+            addQuillEditor = new Quill('#add_description', {
+                theme: 'snow',
+                placeholder: 'Ürünün detaylı açıklamasını yazın...',
+                modules: {
+                    toolbar: toolbarOptions
+                }
+            });
+            
+            // Global'e kaydet
+            window.addQuillEditor = addQuillEditor;
+        }
+
+        // Düzenleme formu için Quill editörü
+        if (document.getElementById('edit_description')) {
+            editQuillEditor = new Quill('#edit_description', {
+                theme: 'snow',
+                placeholder: 'Ürünün detaylı açıklamasını yazın...',
+                modules: {
+                    toolbar: toolbarOptions
+                }
+            });
+            
+            // Global'e kaydet
+            window.editQuillEditor = editQuillEditor;
+        }
+        
+        console.log('Quill.js editörleri başarıyla yüklendi!');
+    } else {
+        console.error('Quill.js yüklenemedi');
+    }
+}
+
+// Sayfa yüklendiğinde Quill.js editörlerini başlat
+document.addEventListener('DOMContentLoaded', function() {
+    // Quill.js'nin yüklenmesini bekle
+    if (typeof Quill !== 'undefined') {
+        initQuillEditors();
+    } else {
+        // Quill.js henüz yüklenmemişse, biraz bekle ve tekrar dene
+        setTimeout(function() {
+            initQuillEditors();
+        }, 500);
+    }
+
+    // Ekleme formu submit edilmeden önce Quill içeriğini kaydet
+    const addProductForm = document.querySelector('#addProductModal form');
+    if (addProductForm) {
+        addProductForm.addEventListener('submit', function(e) {
+            // Quill editör içeriğini hidden input'a kaydet
+            if (window.addQuillEditor) {
+                document.getElementById('add_description_input').value = window.addQuillEditor.root.innerHTML;
+            }
+        });
+    }
+
+    // Modal kapatıldığında editörleri temizle
+    const addModal = document.getElementById('addProductModal');
+    if (addModal) {
+        addModal.addEventListener('hidden.bs.modal', function () {
+            if (window.addQuillEditor) {
+                window.addQuillEditor.setContents([]);
+                document.getElementById('add_description_input').value = '';
+            }
+        });
+    }
+
+    const editModal = document.getElementById('editProductModal');
+    if (editModal) {
+        // Modal açıldığında editörün hazır olduğundan emin ol
+        editModal.addEventListener('shown.bs.modal', function () {
+            // Editör henüz yüklenmemişse tekrar dene
+            if (!window.editQuillEditor) {
+                setTimeout(function() {
+                    initQuillEditors();
+                }, 100);
+            }
+        });
+        
+        editModal.addEventListener('hidden.bs.modal', function () {
+            if (window.editQuillEditor) {
+                window.editQuillEditor.setContents([]);
+                document.getElementById('edit_description_input').value = '';
+            }
+        });
+    }
+});
 </script>
 
 <?php include '../includes/admin_footer.php'; ?>

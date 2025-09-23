@@ -329,7 +329,7 @@
                     <!-- Sayfa Başlığı -->
                     <div class="admin-header">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div>
+                            <!-- <div>
                                 <h1 class="h3 mb-2">
                                     <?php if (isset($pageIcon)): ?>
                                         <i class="<?php echo $pageIcon; ?> me-2 text-primary"></i>
@@ -339,14 +339,14 @@
                                 <?php if (isset($pageDescription)): ?>
                                     <p class="text-muted mb-0"><?php echo $pageDescription; ?></p>
                                 <?php endif; ?>
-                            </div>
-                            
+                            </div> -->
+
                             <!-- Breadcrumb -->
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item">
                                         <a href="index.php" class="text-decoration-none">
-                                            <i class="bi bi-speedometer me-1"></i>Dashboard
+                                            <i class="bi bi-speedometer me-1"></i>Admin Paneli
                                         </a>
                                     </li>
                                     <?php if ($pageTitle != 'Admin Panel' && $pageTitle != 'Dashboard'): ?>
@@ -356,42 +356,7 @@
                             </nav>
                         </div>
                         
-                        <!-- Hızlı Eylemler (varsa) -->
-                        <?php if (isset($quickActions) && is_array($quickActions)): ?>
-                            <div class="mt-3">
-                                <div class="btn-group" role="group">
-                                    <?php foreach ($quickActions as $action): ?>
-                                        <a href="<?php echo $action['url']; ?>" 
-                                           class="btn btn-<?php echo $action['class'] ?? 'primary'; ?> btn-sm">
-                                            <?php if (isset($action['icon'])): ?>
-                                                <i class="<?php echo $action['icon']; ?> me-1"></i>
-                                            <?php endif; ?>
-                                            <?php echo $action['text']; ?>
-                                        </a>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        <?php endif; ?>
                     </div>
                     
-                    <!-- Sistem Durumu (Ana sayfada göster) -->
-                    <?php if ($pageTitle == 'Admin Panel' || $pageTitle == 'Dashboard'): ?>
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="alert alert-admin alert-info">
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-info-circle me-3 fa-lg"></i>
-                                        <div class="flex-grow-1">
-                                            <strong>Sistem Durumu:</strong> Tüm sistemler normal çalışıyor.
-                                            <br><small class="text-muted">Son güncelleme: <?php echo date('d.m.Y H:i'); ?></small>
-                                        </div>
-                                        <div>
-                                            <span class="badge bg-success">Aktif</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endif; ?>
                     
                     <!-- Sayfa İçeriği Başlangıcı -->

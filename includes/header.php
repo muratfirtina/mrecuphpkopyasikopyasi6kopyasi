@@ -64,8 +64,8 @@ if (!isset($pageTitle)) {
     
     // CSS için değişkenleri hazırla
     if ($isHomePage) {
-        $navbarBackground = 'rgba(7, 30, 61, 0.1)';
-        $navbarBoxShadow = '0 2px 15px rgba(0, 0, 0, 0.1)';
+        $navbarBackground = 'rgba(7, 30, 61, 0)';
+        $navbarBoxShadow = '0 2px 15px rgba(0, 0, 0, 0)';
     } else {
         $navbarBackground = '#071e3d';
         $navbarBoxShadow = '0 2px 15px rgba(0, 0, 0, 0.2)';
