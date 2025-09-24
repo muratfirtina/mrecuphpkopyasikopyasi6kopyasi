@@ -384,15 +384,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
-        
+
         // Admin dosya iptal etme
         if (isset($_POST['admin_cancel_file'])) {
             error_log("Admin cancel file request started");
-            
+
             $cancelFileId = sanitize($_POST['file_id']);
             $cancelFileType = sanitize($_POST['file_type']);
             $adminNotes = sanitize($_POST['admin_notes']);
-            
+
             if (!isValidUUID($cancelFileId)) {
                 $error = 'Geçersiz dosya ID formatı.';
                 error_log("Invalid file ID format: " . $cancelFileId);
@@ -400,13 +400,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // FileCancellationManager'ı yükle
                 require_once '../includes/FileCancellationManager.php';
                 $cancellationManager = new FileCancellationManager($pdo);
-                
+
                 $result = $cancellationManager->adminDirectCancellation($cancelFileId, $cancelFileType, $_SESSION['user_id'], $adminNotes);
-                
+
                 if ($result['success']) {
                     $success = $result['message'];
                     $user->logAction($_SESSION['user_id'], 'admin_direct_cancel', "Dosya doğrudan iptal edildi: {$cancelFileId} ({$cancelFileType})");
-                    
+
                     // Başarılı işlem sonrası redirect
                     header("Location: file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
                     exit;
@@ -1000,8 +1000,8 @@ include '../includes/admin_sidebar.php';
                     </a>
                     <!-- Admin İptal Butonu (Response Dosyası) -->
                     <?php if (!isset($upload['is_cancelled']) || !$upload['is_cancelled']): ?>
-                        <button type="button" class="btn btn-danger btn-sm" 
-                                onclick="showCancelModal('<?php echo $responseId; ?>', 'response', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')">
+                        <button type="button" class="btn btn-danger btn-sm"
+                            onclick="showCancelModal('<?php echo $responseId; ?>', 'response', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')">
                             <i class="bi bi-trash3 me-1"></i>İptal Et
                         </button>
                     <?php else: ?>
@@ -1012,8 +1012,8 @@ include '../includes/admin_sidebar.php';
                 <?php else: ?>
                     <!-- Admin İptal Butonu (Ana Dosya) -->
                     <?php if (!isset($upload['is_cancelled']) || !$upload['is_cancelled']): ?>
-                        <button type="button" class="btn btn-danger btn-sm" 
-                                onclick="showCancelModal('<?php echo $uploadId; ?>', 'upload', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')">
+                        <button type="button" class="btn btn-danger btn-sm"
+                            onclick="showCancelModal('<?php echo $uploadId; ?>', 'upload', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')">
                             <i class="bi bi-trash3 me-1"></i>Dosyayı İptal Et
                         </button>
                     <?php else: ?>
@@ -1029,8 +1029,8 @@ include '../includes/admin_sidebar.php';
     <!-- revision-form-html.php dosyasının içeriğini buraya kopyala -->
     <!-- ==================== REVİZYON DOSYASI YÜKLEMESİ ==================== -->
     <!-- <?php
-    try {
-        $stmt = $pdo->prepare("
+            try {
+                $stmt = $pdo->prepare("
         SELECT r.*, fu.original_name, u.username, u.first_name, u.last_name
         FROM revisions r
         LEFT JOIN file_uploads fu ON r.upload_id = fu.id  
@@ -1038,13 +1038,13 @@ include '../includes/admin_sidebar.php';
         WHERE r.upload_id = ? AND r.status = 'in_progress'
         ORDER BY r.requested_at DESC
     ");
-        $stmt->execute([$uploadId]);
-        $activeRevisions = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        $activeRevisions = [];
-        error_log('Revizyon sorgusu hatası: ' . $e->getMessage());
-    }
-    ?>
+                $stmt->execute([$uploadId]);
+                $activeRevisions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (PDOException $e) {
+                $activeRevisions = [];
+                error_log('Revizyon sorgusu hatası: ' . $e->getMessage());
+            }
+            ?>
 
     <?php if (!empty($activeRevisions)): ?>
         <div class="card admin-card mb-4">
@@ -1147,7 +1147,7 @@ include '../includes/admin_sidebar.php';
                         </form>
                     </div>
 
-                    <?php if (false): 
+                    <?php if (false):
                     ?>
                         <hr class="my-4">
                     <?php endif; ?>
@@ -1452,8 +1452,8 @@ include '../includes/admin_sidebar.php';
                         <td>
                             <?php if (!empty($upload['plate'])): ?>
                                 <span class="badge text-white me-1" style="background: #0b5ed7 !important; font-size: 1rem;">
-                                                        <?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
-                                            </span>
+                                    <?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
+                                </span>
                             <?php else: ?>
                                 <span class="text-muted">-</span>
                             <?php endif; ?>
@@ -1500,34 +1500,34 @@ include '../includes/admin_sidebar.php';
                             </span>
                         </td>
                         <td>
-    <?php
-    // Öncelikle is_cancelled kontrolü yap
-    if (isset($upload['is_cancelled']) && $upload['is_cancelled']) {
-        echo '<span class="badge bg-secondary"><i class="bi bi-ban me-1"></i>İptal Edildi</span>';
-    } else {
-        // İptal edilmemişse, mevcut status mantığını kullan
-        if ($fileType === 'response') {
-            echo '<span class="badge bg-success"><i class="bi bi-reply me-1"></i>Yanıt Dosyası</span>';
-        } else {
-            $statusClass = [
-                'pending' => 'warning',
-                'processing' => 'info',
-                'completed' => 'success',
-                'rejected' => 'danger'
-            ];
-            $statusText = [
-                'pending' => 'Bekliyor',
-                'processing' => 'İşleniyor',
-                'completed' => 'Tamamlandı',
-                'rejected' => 'Reddedildi'
-            ];
-            echo '<span class="badge bg-' . ($statusClass[$upload['status']] ?? 'secondary') . '">';
-            echo ($statusText[$upload['status']] ?? 'Bilinmiyor');
-            echo '</span>';
-        }
-    }
-    ?>
-</td>
+                            <?php
+                            // Öncelikle is_cancelled kontrolü yap
+                            if (isset($upload['is_cancelled']) && $upload['is_cancelled']) {
+                                echo '<span class="badge bg-secondary"><i class="bi bi-ban me-1"></i>İptal Edildi</span>';
+                            } else {
+                                // İptal edilmemişse, mevcut status mantığını kullan
+                                if ($fileType === 'response') {
+                                    echo '<span class="badge bg-success"><i class="bi bi-reply me-1"></i>Yanıt Dosyası</span>';
+                                } else {
+                                    $statusClass = [
+                                        'pending' => 'warning',
+                                        'processing' => 'info',
+                                        'completed' => 'success',
+                                        'rejected' => 'danger'
+                                    ];
+                                    $statusText = [
+                                        'pending' => 'Bekliyor',
+                                        'processing' => 'İşleniyor',
+                                        'completed' => 'Tamamlandı',
+                                        'rejected' => 'Reddedildi'
+                                    ];
+                                    echo '<span class="badge bg-' . ($statusClass[$upload['status']] ?? 'secondary') . '">';
+                                    echo ($statusText[$upload['status']] ?? 'Bilinmiyor');
+                                    echo '</span>';
+                                }
+                            }
+                            ?>
+                        </td>
                         <td>
                             <?php if ($totalAmount > 0): ?>
                                 <span class="text-success fw-bold">
@@ -1536,7 +1536,7 @@ include '../includes/admin_sidebar.php';
                                 <!-- <small class="text-muted d-block">
                                     <?php
                                     $breakdownItems = [];
-                                    
+
                                     // Response dosyaları sayısı ve tutarı
                                     if ($fileType !== 'response' && !empty($responseFiles)) {
                                         $responseTotal = 0;
@@ -1555,7 +1555,7 @@ include '../includes/admin_sidebar.php';
                                             $breakdownItems[] = "Yanıt: " . number_format($upload['credits_charged'] ?? 0, 1) . " TL";
                                         }
                                     }
-                                    
+
                                     // Ek dosyalar sayısı ve tutarı
                                     if (!empty($additionalFiles)) {
                                         $additionalTotal = 0;
@@ -1570,7 +1570,7 @@ include '../includes/admin_sidebar.php';
                                             $breakdownItems[] = "Ek: {$additionalCount} dosya (" . number_format($additionalTotal, 1) . " TL)";
                                         }
                                     }
-                                    
+
                                     echo implode(" + ", $breakdownItems);
                                     ?>
                                 </small> -->
@@ -1641,24 +1641,76 @@ include '../includes/admin_sidebar.php';
                                         <?php endif; ?>
                                     <?php endif; ?>
                                 <?php endif; ?>
-                                
+
                                 <!-- Kullanıcı Profili -->
                                 <a href="user-details.php?id=<?php echo $upload['user_id']; ?>" class="btn btn-outline-primary btn-sm" title="Kullanıcı Profili">
                                     <i class="bi bi-person"></i>
                                 </a>
-                                
+
                                 <!-- Dosyayı İşleme Al Butonu -->
                                 <?php if ($fileType !== 'response' && isset($upload['status']) && $upload['status'] === 'pending' && (!isset($upload['is_cancelled']) || !$upload['is_cancelled'])): ?>
-    <button type="button" class="btn btn-warning btn-sm" onclick="showProcessingConfirmModal()" title="Dosyayı İşleme Al">
-        <i class="bi bi-gear-wide-connected"></i>
-    </button>
-<?php endif; ?>
+                                    <button type="button" class="btn btn-warning btn-sm" onclick="showProcessingConfirmModal()" title="Dosyayı İşleme Al">
+                                        <i class="bi bi-gear-wide-connected"></i>
+                                    </button>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
+
         </div>
+        <!-- Ek Bilgiler Satırı -->
+        <?php if (!empty($upload['hp_power']) || !empty($upload['nm_torque']) || !empty($upload['fuel_type']) || !empty($fileDetail['upload_notes'])): ?>
+            <div class="row mt-1 pt-1 border-top">
+                <div class="col-md-12">
+                    <!--                                 <h6 class="text-muted mb-2">
+                                    <i class="bi bi-info-circle me-2"></i>Ek Teknik Bilgiler
+                                </h6>
+                                <div class="row">
+                                    <?php if (!empty($upload['fuel_type'])): ?>
+                                        <div class="col-md-3 mb-2">
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-fuel-pump me-1"></i>
+                                                <?php echo htmlspecialchars($upload['fuel_type']); ?>
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($upload['hp_power'])): ?>
+                                        <div class="col-md-3 mb-2">
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-lightning me-1"></i>
+                                                <?php echo $upload['hp_power']; ?> HP
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($upload['nm_torque'])): ?>
+                                        <div class="col-md-3 mb-2">
+                                            <span class="badge bg-info">
+                                                <i class="bi bi-gear-wide-connected me-1"></i>
+                                                <?php echo $upload['nm_torque']; ?> Nm
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                </div> -->
+
+                    <!-- Kullanıcı Notları -->
+                    <?php if (!empty($upload['upload_notes'])): ?>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <h6 class="text-muted mb-2">
+                                    <i class="bi bi-chat-text me-2"></i>Kullanıcının Notu:
+                                </h6>
+                                <div class="user-notes-content p-3 bg-light rounded" style="padding: 0.5rem !important;">
+                                    <i class="bi bi-quote text-primary me-2"></i>
+                                    <span class="text-dark"><?php echo nl2br(htmlspecialchars($upload['upload_notes'])); ?></span>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -1721,9 +1773,9 @@ include '../includes/admin_sidebar.php';
                                         <?php endif; ?>
                                         <!-- Admin İptal Butonu (Yanıt Dosyası) -->
                                         <?php if (!isset($responseFile['is_cancelled']) || !$responseFile['is_cancelled']): ?>
-                                            <button type="button" class="btn btn-danger btn-sm" 
-                                                    onclick="showCancelModal('<?php echo $responseFile['id']; ?>', 'response', '<?php echo htmlspecialchars($responseFile['original_name'], ENT_QUOTES); ?>')"
-                                                    title="Dosyayı İptal Et">
+                                            <button type="button" class="btn btn-danger btn-sm"
+                                                onclick="showCancelModal('<?php echo $responseFile['id']; ?>', 'response', '<?php echo htmlspecialchars($responseFile['original_name'], ENT_QUOTES); ?>')"
+                                                title="Dosyayı İptal Et">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
                                         <?php else: ?>
@@ -1826,162 +1878,162 @@ include '../includes/admin_sidebar.php';
 <?php
 ?>
 <?php if (!empty($additionalFiles)): ?>
-<div class="card admin-card mb-4">
-    <div class="card-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-0">
-                <i class="bi bi-paperclip me-2"></i>Ek Dosyalar
-                <?php if (!empty($additionalFiles)): ?>
-                    <span class="badge bg-secondary ms-2"><?php echo count($additionalFiles); ?></span>
-                <?php endif; ?>
-            </h6>
+    <div class="card admin-card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">
+                    <i class="bi bi-paperclip me-2"></i>Ek Dosyalar
+                    <?php if (!empty($additionalFiles)): ?>
+                        <span class="badge bg-secondary ms-2"><?php echo count($additionalFiles); ?></span>
+                    <?php endif; ?>
+                </h6>
+            </div>
         </div>
-    </div>
-    <div class="card-body">
-        <?php if (!empty($additionalFiles)): ?>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Dosya Adı</th>
-                            <th>Gönderen</th>
-                            <th>Alıcı</th>
-                            <th>Tarih</th>
-                            <th>Notlar</th>
-                            <th>Ücret</th>
-                            <th>İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($additionalFiles as $file): ?>
-                            <tr class="<?php echo $file['is_read'] ? '' : 'table-warning'; ?>">
-                                <td>
-                                    <i class="bi bi-folder2-open me-1"></i>
-                                    <?php echo htmlspecialchars($file['original_name']); ?>
-                                    <?php if (!$file['is_read'] && $file['receiver_id'] === $_SESSION['user_id']): ?>
-                                        <span class="badge bg-warning ms-2">Yeni</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php if ($file['sender_type'] === 'admin'): ?>
-                                        <span class="badge bg-primary">Admin</span>
-                                        <?php echo htmlspecialchars($file['sender_first_name'] . ' ' . $file['sender_last_name']); ?>
-                                    <?php else: ?>
-                                        <span class="badge bg-success">Kullanıcı</span>
-                                        <?php echo htmlspecialchars($file['sender_first_name'] . ' ' . $file['sender_last_name']); ?>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php if ($file['receiver_type'] === 'admin'): ?>
-                                        <span class="badge bg-primary">Admin</span>
-                                        <?php echo htmlspecialchars($file['receiver_first_name'] . ' ' . $file['receiver_last_name']); ?>
-                                    <?php else: ?>
-                                        <span class="badge bg-success">Kullanıcı</span>
-                                        <?php echo htmlspecialchars($file['receiver_first_name'] . ' ' . $file['receiver_last_name']); ?>
-                                    <?php endif; ?>
-                                </td>
-                                <td><?php echo date('d.m.Y H:i', strtotime($file['upload_date'])); ?></td>
-                                <td>
-                                    <?php if (!empty($file['notes'])): ?>
-                                        <small class="text-muted"><?php echo htmlspecialchars(substr($file['notes'], 0, 50)); ?>...</small>
-                                    <?php else: ?>
-                                        <small class="text-muted">-</small>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php if ($file['credits'] > 0): ?>
-                                        <span class="badge bg-danger"><?php echo $file['credits']; ?> kredi</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary">Ücretsiz</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <div class="d-flex gap-1">
-                                        <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm" title="İndir">
-                                            <i class="bi bi-download"></i>
-                                        </a>
-                                        <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
-                                        <?php if (isImageFile($file['original_name'])): ?>
-                                            <a href="view-image.php?id=<?php echo $file['id']; ?>&type=additional" class="btn btn-info btn-sm" title="Dosyayı Görüntüle">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
+        <div class="card-body">
+            <?php if (!empty($additionalFiles)): ?>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Dosya Adı</th>
+                                <th>Gönderen</th>
+                                <th>Alıcı</th>
+                                <th>Tarih</th>
+                                <th>Notlar</th>
+                                <th>Ücret</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($additionalFiles as $file): ?>
+                                <tr class="<?php echo $file['is_read'] ? '' : 'table-warning'; ?>">
+                                    <td>
+                                        <i class="bi bi-folder2-open me-1"></i>
+                                        <?php echo htmlspecialchars($file['original_name']); ?>
+                                        <?php if (!$file['is_read'] && $file['receiver_id'] === $_SESSION['user_id']): ?>
+                                            <span class="badge bg-warning ms-2">Yeni</span>
                                         <?php endif; ?>
-                                        <!-- Admin İptal Butonu (Ek Dosya) -->
-                                        <?php if (!isset($file['is_cancelled']) || !$file['is_cancelled']): ?>
-                                            <button type="button" class="btn btn-danger btn-sm" 
+                                    </td>
+                                    <td>
+                                        <?php if ($file['sender_type'] === 'admin'): ?>
+                                            <span class="badge bg-primary">Admin</span>
+                                            <?php echo htmlspecialchars($file['sender_first_name'] . ' ' . $file['sender_last_name']); ?>
+                                        <?php else: ?>
+                                            <span class="badge bg-success">Kullanıcı</span>
+                                            <?php echo htmlspecialchars($file['sender_first_name'] . ' ' . $file['sender_last_name']); ?>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($file['receiver_type'] === 'admin'): ?>
+                                            <span class="badge bg-primary">Admin</span>
+                                            <?php echo htmlspecialchars($file['receiver_first_name'] . ' ' . $file['receiver_last_name']); ?>
+                                        <?php else: ?>
+                                            <span class="badge bg-success">Kullanıcı</span>
+                                            <?php echo htmlspecialchars($file['receiver_first_name'] . ' ' . $file['receiver_last_name']); ?>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?php echo date('d.m.Y H:i', strtotime($file['upload_date'])); ?></td>
+                                    <td>
+                                        <?php if (!empty($file['notes'])): ?>
+                                            <small class="text-muted"><?php echo htmlspecialchars(substr($file['notes'], 0, 50)); ?>...</small>
+                                        <?php else: ?>
+                                            <small class="text-muted">-</small>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($file['credits'] > 0): ?>
+                                            <span class="badge bg-danger"><?php echo $file['credits']; ?> kredi</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary">Ücretsiz</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            <a href="../download-additional.php?id=<?php echo $file['id']; ?>" class="btn btn-success btn-sm" title="İndir">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                            <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
+                                            <?php if (isImageFile($file['original_name'])): ?>
+                                                <a href="view-image.php?id=<?php echo $file['id']; ?>&type=additional" class="btn btn-info btn-sm" title="Dosyayı Görüntüle">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            <?php endif; ?>
+                                            <!-- Admin İptal Butonu (Ek Dosya) -->
+                                            <?php if (!isset($file['is_cancelled']) || !$file['is_cancelled']): ?>
+                                                <button type="button" class="btn btn-danger btn-sm"
                                                     onclick="showCancelModal('<?php echo $file['id']; ?>', 'additional', '<?php echo htmlspecialchars($file['original_name'], ENT_QUOTES); ?>')"
                                                     title="Dosyayı İptal Et">
-                                                <i class="bi bi-trash3"></i>
-                                            </button>
-                                        <?php else: ?>
-                                            <span class="btn btn-secondary btn-sm disabled" title="İptal Edilmiş">
-                                                <i class="bi bi-ban"></i>
-                                            </span>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php else: ?>
-            <div class="alert alert-info mb-0">
-                <i class="bi bi-info-circle me-2"></i>
-                Henüz ek dosya bulunmuyor.
-            </div>
-        <?php endif; ?>
+                                                    <i class="bi bi-trash3"></i>
+                                                </button>
+                                            <?php else: ?>
+                                                <span class="btn btn-secondary btn-sm disabled" title="İptal Edilmiş">
+                                                    <i class="bi bi-ban"></i>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else: ?>
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Henüz ek dosya bulunmuyor.
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
-</div>
 <?php endif; ?>
 
 <!-- Ek Dosya JavaScript -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const additionalFileForm = document.getElementById('uploadAdditionalFileForm');
-    if (additionalFileForm) {
-        additionalFileForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            formData.append('action', 'upload_additional_file');
-            
-            // Loading göster
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-1"></i>Yükleniyor...';
-            
-            fetch('../ajax/additional_files.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Form'u temizle
-                    additionalFileForm.reset();
-                    
-                    // Başarı mesajı göster
-                    alert('Dosya başarıyla yüklendi!');
-                    
-                    // Sayfayı yenile
-                    location.reload();
-                } else {
-                    alert('Hata: ' + data.message);
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Dosya yüklenirken bir hata oluştu.');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
+    document.addEventListener('DOMContentLoaded', function() {
+        const additionalFileForm = document.getElementById('uploadAdditionalFileForm');
+        if (additionalFileForm) {
+            additionalFileForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                formData.append('action', 'upload_additional_file');
+
+                // Loading göster
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-1"></i>Yükleniyor...';
+
+                fetch('../ajax/additional_files.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Form'u temizle
+                            additionalFileForm.reset();
+
+                            // Başarı mesajı göster
+                            alert('Dosya başarıyla yüklendi!');
+
+                            // Sayfayı yenile
+                            location.reload();
+                        } else {
+                            alert('Hata: ' + data.message);
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalText;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Dosya yüklenirken bir hata oluştu.');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    });
             });
-        });
-    }
-});
+        }
+    });
 </script>
 
 <!-- Yanıt Dosyası Yükleme (sadece normal dosyalar için) -->
@@ -2711,7 +2763,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
 
-        
+
     </div>
 
     <!-- Sağ Kolon - Chat Sistemi -->
@@ -2719,7 +2771,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="card admin-card" id="chatContainer">
             <div class="card-header">
                 <h6 class="mb-0">
-                    <i class="bi bi-comments me-2"></i>Mesajlaşma
+                    <i class="bi bi-comments me-2"></i>Geri Bildirim
                     <span class="badge bg-secondary ms-2" id="messageCount">0</span>
                 </h6>
             </div>
@@ -3411,12 +3463,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     <input type="hidden" name="admin_cancel_file" value="1">
                     <input type="hidden" id="cancelFileId" name="file_id" value="">
                     <input type="hidden" id="cancelFileType" name="file_type" value="">
-                    
+
                     <div class="alert alert-warning">
                         <i class="bi bi-exclamation-triangle me-2"></i>
                         <strong>Dikkat!</strong> Bu işlem geri alınamaz. Dosya iptal edildikten sonra kullanıcı tarafından erişilemez hale gelecektir.
                     </div>
-                    
+
                     <div class="file-info bg-light p-3 rounded mb-3">
                         <h6 class="text-danger mb-2">
                             <i class="bi bi-folder2-open me-2"></i>
@@ -3431,7 +3483,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="col-sm-8" id="cancelFileTypeText">-</div>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="cancelAdminNotes" class="form-label">
                             <i class="bi bi-comment me-1"></i>
@@ -3441,7 +3493,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             placeholder="Dosyanın neden iptal edildiğini açıklayın..."></textarea>
                         <div class="form-text">Bu mesaj kullanıcıya bildirim olarak gönderilecektir.</div>
                     </div>
-                    
+
                     <div class="alert-info d-flex align-items-center" style="padding: 1rem; border-radius: 0.375rem;">
                         <i class="bi bi-info-circle me-2 fa-lg"></i>
                         <div>
@@ -3594,14 +3646,14 @@ document.addEventListener('DOMContentLoaded', function() {
             form.submit();
         }
     }
-    
+
     // Admin dosya iptal fonksiyonları
     function showCancelModal(fileId, fileType, fileName) {
         // Modal bilgilerini güncelle
         document.getElementById('cancelFileId').value = fileId;
         document.getElementById('cancelFileType').value = fileType;
         document.getElementById('cancelFileName').textContent = fileName;
-        
+
         // Dosya tipi metnini belirle
         const typeTexts = {
             'upload': 'Ana Yüklenen Dosya',
@@ -3610,15 +3662,15 @@ document.addEventListener('DOMContentLoaded', function() {
             'additional': 'Ek Dosya'
         };
         document.getElementById('cancelFileTypeText').textContent = typeTexts[fileType] || 'Bilinmeyen Tip';
-        
+
         // Admin notlarını temizle
         document.getElementById('cancelAdminNotes').value = '';
-        
+
         // Modalı aç
         const modal = new bootstrap.Modal(document.getElementById('adminCancelModal'));
         modal.show();
     }
-    
+
     // Admin cancel form submit event
     document.addEventListener('DOMContentLoaded', function() {
         const adminCancelForm = document.getElementById('adminCancelForm');
@@ -3626,16 +3678,16 @@ document.addEventListener('DOMContentLoaded', function() {
             adminCancelForm.addEventListener('submit', function(e) {
                 const confirmBtn = document.getElementById('confirmCancelBtn');
                 const originalText = confirmBtn.innerHTML;
-                
+
                 // Loading durumunu göster
                 confirmBtn.innerHTML = '<i class="bi bi-spinner fa-spin me-2"></i>İptal Ediliyor...';
                 confirmBtn.disabled = true;
-                
+
                 // Formı normal şekilde submit et (sayfa yenilenir)
                 // return true; // varsayılan davranış
             });
         }
-        
+
         // Modal kapanınca butonları sıfırla
         const adminCancelModal = document.getElementById('adminCancelModal');
         if (adminCancelModal) {

@@ -7,6 +7,7 @@
 class ChatManager {
     private $pdo;
     private $notificationManager;
+    private $emailManager;
     
     public function __construct($pdo) {
         $this->pdo = $pdo;
@@ -15,6 +16,12 @@ class ChatManager {
             require_once __DIR__ . '/NotificationManager.php';
         }
         $this->notificationManager = new NotificationManager($pdo);
+        
+        // EmailManager'ı dahil et
+        if (!class_exists('EmailManager')) {
+            require_once __DIR__ . '/EmailManager.php';
+        }
+        $this->emailManager = new EmailManager($pdo);
     }
     
     /**
@@ -314,7 +321,7 @@ class ChatManager {
     }
     
     /**
-     * Chat mesajı için bildirim gönder
+     * Chat mesajı için bildirim gönder (Sistem içi + Email)
      */
     private function sendChatNotification($fileId, $senderId, $senderType, $message) {
         try {
@@ -343,7 +350,10 @@ class ChatManager {
             $fileName = $fileInfo['original_name'] ?? $fileInfo['filename'] ?? 'Bilinmeyen dosya';
             $senderName = $sender['first_name'] . ' ' . $sender['last_name'];
             
-            // Alıcıları belirle
+            // Site URL'i al
+            $siteUrl = getenv('SITE_URL') ?: 'http://localhost';
+            
+            // Alıcıları belirle ve hem sistem içi hem email bildirimi gönder
             if ($senderType === 'admin') {
                 // Admin mesaj göndermiş, dosya sahibine bildirim gönder
                 $recipientId = $fileInfo['user_id'];
@@ -351,6 +361,7 @@ class ChatManager {
                 $notificationMessage = "Adminlerden {$senderName} size '{$fileName}' dosyası için mesaj gönderdi.";
                 $actionUrl = "../user/file-detail.php?id={$fileId}";
                 
+                // Sistem içi bildirim
                 $this->notificationManager->createNotification(
                     $recipientId,
                     'chat_message',
@@ -360,6 +371,9 @@ class ChatManager {
                     'file_upload',
                     $actionUrl
                 );
+                
+                // Email bildirimini gönder (kullanıcının email tercihleri kontrol edilir)
+                $this->sendChatEmailNotification($recipientId, $fileName, $senderName, $message, 'user', $fileId);
                 
                 error_log("Chat notification sent: Admin {$senderName} -> User {$recipientId} for file {$fileName}");
                 
@@ -374,6 +388,7 @@ class ChatManager {
                 $actionUrl = "file-detail.php?id={$fileId}";
                 
                 foreach ($admins as $adminId) {
+                    // Sistem içi bildirim
                     $this->notificationManager->createNotification(
                         $adminId,
                         'chat_message',
@@ -383,6 +398,9 @@ class ChatManager {
                         'file_upload',
                         $actionUrl
                     );
+                    
+                    // Email bildirimini gönder (adminin email tercihleri kontrol edilir)
+                    $this->sendChatEmailNotification($adminId, $fileName, $senderName, $message, 'admin', $fileId);
                 }
                 
                 error_log("Chat notification sent: User {$senderName} -> " . count($admins) . " admins for file {$fileName}");
@@ -394,6 +412,148 @@ class ChatManager {
             error_log('Chat notification error: ' . $e->getMessage());
             return false;
         }
+    }
+    
+    /**
+     * Chat mesajı için email bildirimi gönder
+     */
+    private function sendChatEmailNotification($recipientId, $fileName, $senderName, $message, $recipientType, $fileId) {
+        try {
+            // Alıcının bilgilerini al
+            $sql = "SELECT u.*, COALESCE(uep.chat_message_notifications, 1) as chat_notifications 
+                    FROM users u 
+                    LEFT JOIN user_email_preferences uep ON u.id = uep.user_id 
+                    WHERE u.id = :recipient_id AND u.email_verified = 1";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':recipient_id' => $recipientId]);
+            $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$recipient || !$recipient['chat_notifications']) {
+                error_log("Chat email not sent - recipient not found or notifications disabled: {$recipientId}");
+                return false;
+            }
+            
+            $recipientEmail = $recipient['email'];
+            $recipientName = $recipient['first_name'] . ' ' . $recipient['last_name'];
+            
+            // Site URL'i al
+            $siteUrl = getenv('SITE_URL') ?: 'http://localhost';
+            
+            // URL'leri oluştur
+            if ($recipientType === 'admin') {
+                $chatUrl = $siteUrl . '/admin/file-detail.php?id=' . $fileId;
+                $subject = 'Yeni Kullanıcı Mesajı - ' . $fileName;
+                $templateKey = 'chat_message_admin';
+            } else {
+                $chatUrl = $siteUrl . '/user/file-detail.php?id=' . $fileId;
+                $subject = 'Yeni Admin Mesajı - ' . $fileName;
+                $templateKey = 'chat_message_user';
+            }
+            
+            // Mesajı güvenli hale getir ve kısalt
+            $safeMessage = htmlspecialchars($message);
+            if (strlen($safeMessage) > 200) {
+                $safeMessage = substr($safeMessage, 0, 200) . '...';
+            }
+            
+            // Email template'ini al (mevcut yapıya uygun)
+            $sql = "SELECT subject, body FROM email_templates WHERE template_key = ? AND is_active = 1";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$templateKey]);
+            $template = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$template) {
+                error_log("Chat email template not found: {$templateKey}");
+                // Template yoksa basit email gönder
+                $emailBody = $this->buildChatEmailTemplate(
+                    $recipientName,
+                    $senderName,
+                    $fileName,
+                    $safeMessage,
+                    $chatUrl,
+                    $recipientType
+                );
+            } else {
+                // Template'i kullan ve değişkenleri değiştir
+                $emailSubject = $template['subject'];
+                $emailBody = $template['body'];
+                
+                // Değişkenleri değiştir
+                $variables = [
+                    '{{file_name}}' => $fileName,
+                    '{{sender_name}}' => $senderName,
+                    '{{user_name}}' => $recipientName,
+                    '{{message}}' => $safeMessage,
+                    '{{chat_url}}' => $chatUrl
+                ];
+                
+                foreach ($variables as $placeholder => $value) {
+                    $emailSubject = str_replace($placeholder, $value, $emailSubject);
+                    $emailBody = str_replace($placeholder, $value, $emailBody);
+                }
+                
+                $subject = $emailSubject;
+            }
+            
+            // Email gönder
+            $emailResult = $this->emailManager->sendEmail($recipientEmail, $subject, $emailBody, true);
+            
+            if ($emailResult) {
+                error_log("Chat email sent successfully: {$senderName} -> {$recipientEmail} for file {$fileName}");
+                return true;
+            } else {
+                error_log("Chat email failed: {$senderName} -> {$recipientEmail} for file {$fileName}");
+                return false;
+            }
+            
+        } catch (Exception $e) {
+            error_log('Chat email notification error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Chat email template oluştur
+     */
+    private function buildChatEmailTemplate($recipientName, $senderName, $fileName, $message, $chatUrl, $recipientType) {
+        $color = ($recipientType === 'admin') ? '#3498db' : '#27ae60';
+        $icon = ($recipientType === 'admin') ? '💬' : '💬';
+        $title = ($recipientType === 'admin') ? 'Yeni Kullanıcı Mesajı' : 'Yeni Admin Mesajı';
+        
+        return "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+            <h2 style='color: {$color}; border-bottom: 2px solid {$color}; padding-bottom: 10px;'>
+                {$icon} {$title}
+            </h2>
+            
+            <div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>
+                <h3 style='color: #2c3e50; margin-top: 0;'>Merhaba {$recipientName},</h3>
+                <p><strong>{$senderName}</strong> size <strong>{$fileName}</strong> dosyası için mesaj gönderdi:</p>
+                
+                <div style='background: white; padding: 15px; border-radius: 5px; border-left: 4px solid {$color}; margin: 15px 0;'>
+                    <p style='margin: 0; color: #2c3e50; font-style: italic;'>\"{$message}\"</p>
+                </div>
+            </div>
+            
+            <div style='text-align: center; margin: 30px 0;'>
+                <a href='{$chatUrl}' 
+                   style='background: {$color}; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                    Mesajı Yanıtla
+                </a>
+            </div>
+            
+            <div style='background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;'>
+                <p style='margin: 0; color: #856404; font-size: 14px;'>
+                    <strong>💡 İpucu:</strong> Bu email bildirimlerini kapatmak için hesap ayarlarınızdan email tercihlerinizi değiştirebilirsiniz.
+                </p>
+            </div>
+            
+            <p style='color: #7f8c8d; font-size: 12px; margin-top: 30px;'>
+                Bu email otomatik olarak gönderilmiştir. Lütfen yanıtlamayınız.<br>
+                <strong>Mr ECU</strong> - Profesyonel ECU Tuning Hizmetleri
+            </p>
+        </div>
+        ";
     }
 }
 ?>

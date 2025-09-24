@@ -28,8 +28,8 @@ function getUserEmailPreferences($pdo, $userId) {
             $stmt = $pdo->prepare("
                 INSERT INTO user_email_preferences 
                 (id, user_id, file_upload_notifications, file_ready_notifications, 
-                 revision_notifications, additional_file_notifications, marketing_emails) 
-                VALUES (?, ?, 1, 1, 1, 1, 0)
+                 revision_notifications, additional_file_notifications, chat_message_notifications, marketing_emails) 
+                VALUES (?, ?, 1, 1, 1, 1, 1, 0)
             ");
             $stmt->execute([$prefId, $userId]);
             
@@ -53,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fileReadyNotifications = isset($_POST['file_ready_notifications']) ? 1 : 0;
         $revisionNotifications = isset($_POST['revision_notifications']) ? 1 : 0;
         $additionalFileNotifications = isset($_POST['additional_file_notifications']) ? 1 : 0;
+        $chatMessageNotifications = isset($_POST['chat_message_notifications']) ? 1 : 0;
         $marketingEmails = isset($_POST['marketing_emails']) ? 1 : 0;
         
         $stmt = $pdo->prepare("
@@ -61,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 file_ready_notifications = ?, 
                 revision_notifications = ?, 
                 additional_file_notifications = ?, 
+                chat_message_notifications = ?,
                 marketing_emails = ?,
                 updated_at = NOW()
             WHERE user_id = ?
@@ -71,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fileReadyNotifications, 
             $revisionNotifications,
             $additionalFileNotifications,
+            $chatMessageNotifications,
             $marketingEmails,
             $userId
         ]);
@@ -180,6 +183,18 @@ include '../includes/user_header.php';
                                             <strong>Ek Dosya Bildirimleri</strong>
                                             <br><small class="text-muted">
                                                 Size ek dosya gönderildiğinde email bildirimi alın
+                                            </small>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="chat_message_notifications" name="chat_message_notifications"
+                                               <?php echo (isset($preferences['chat_message_notifications']) ? $preferences['chat_message_notifications'] : 1) ? 'checked' : ''; ?>>
+                                        <label class="form-check-label" for="chat_message_notifications">
+                                            <strong>💬 Chat Mesajı Bildirimleri</strong>
+                                            <br><small class="text-muted">
+                                                Size chat mesajı gönderildiğinde email bildirimi alın
                                             </small>
                                         </label>
                                     </div>
