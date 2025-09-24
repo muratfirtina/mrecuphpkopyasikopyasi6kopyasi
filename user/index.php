@@ -218,6 +218,7 @@ include '../includes/user_header.php';
                         <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
                             <h5 class="mb-0">
                                 <i class="bi bi-folder me-2 text-primary"></i>Son Yüklenen Dosyalar
+                                <small class="text-muted fw-normal"> - Yatay liste formatında</small>
                             </h5>
                             <a href="files.php" class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-eye me-1"></i>Tümünü Gör
@@ -237,34 +238,73 @@ include '../includes/user_header.php';
                                 </div>
                             <?php else: ?>
                                 <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead class="table-light">
+                                    <table class="table table-striped table-hover file-details-table">
+                                        <thead class="table-dark">
                                             <tr>
-                                                <th class="border-0">Dosya Adı</th>
-                                                <th class="border-0">Durum</th>
-                                                <th class="border-0">Yüklenme Tarihi</th>
-                                                <th class="border-0 text-center">İşlemler</th>
+                                                <th><i class="bi bi-signpost me-1"></i>Plaka</th>
+                                                <th><i class="bi bi-car-front me-1"></i>Marka</th>
+                                                <th><i class="bi bi-car-front-fill me-1"></i>Model</th>
+                                                <th><i class="bi bi-gear me-1"></i>Motor</th>
+                                                <th><i class="bi bi-info-circle me-1"></i>Durum</th>
+                                                <th><i class="bi bi-file-text me-1"></i>Dosya</th>
+                                                <th><i class="bi bi-calendar me-1"></i>Tarih</th>
+                                                <th><i class="bi bi-tools me-1"></i>İşlem</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php foreach (array_slice($userUploads, 0, 5) as $upload): ?>
                                                 <tr>
+                                                                                                        
+                                                    <!-- Plaka -->
                                                     <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="file-icon me-3">
-                                                                <i class="bi bi-folder2-open"></i>
-                                                            </div>
-                                                            <div>
-                                                                <div class="fw-medium"><?php echo htmlspecialchars($upload['original_name'] ?? 'Bilinmeyen dosya'); ?></div>
-                                                                <small class="text-muted">
-                                                                    <?php 
-                                                                    $fileSize = isset($upload['file_size']) ? formatFileSize($upload['file_size']) : 'N/A';
-                                                                    echo $fileSize;
-                                                                    ?>
-                                                                </small>
-                                                            </div>
-                                                        </div>
+                                                        <?php if (!empty($upload['plate'])): ?>
+                                                            <span class="badge bg-dark text-uppercase">
+                                                                <?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
+                                                            </span>
+                                                        <?php else: ?>
+                                                            <span class="text-muted">-</span>
+                                                        <?php endif; ?>
                                                     </td>
+                                                    <!-- Marka -->
+                                                    <td>
+                                                        <strong class="text-primary">
+                                                            <?php echo htmlspecialchars($upload['brand_name'] ?? 'Belirtilmemiş'); ?>
+                                                        </strong>
+                                                    </td>
+                                                    
+                                                    <!-- Model -->
+                                                    <td>
+                                                        <strong class="text-success">
+                                                            <?php echo htmlspecialchars($upload['model_name'] ?? 'Belirtilmemiş'); ?>
+                                                        </strong>
+                                                        <?php if (!empty($upload['year'])): ?>
+                                                            <br><small class="text-muted"><?php echo htmlspecialchars($upload['year']); ?></small>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    
+                                                    <!-- Motor -->
+                                                    <td>
+                                                        <?php if (!empty($upload['engine_name'])): ?>
+                                                            <span class="text-warning fw-bold">
+                                                                <?php echo htmlspecialchars($upload['engine_name']); ?>
+                                                            </span>
+                                                            <?php if (!empty($upload['hp_power']) || !empty($upload['nm_torque'])): ?>
+                                                                <br><small class="text-muted">
+                                                                    <?php if (!empty($upload['hp_power'])): ?>
+                                                                        <i class="bi bi-lightning me-1"></i><?php echo htmlspecialchars($upload['hp_power']); ?>HP
+                                                                    <?php endif; ?>
+                                                                    <?php if (!empty($upload['nm_torque'])): ?>
+                                                                        <?php if (!empty($upload['hp_power'])): ?> • <?php endif; ?>
+                                                                        <?php echo htmlspecialchars($upload['nm_torque']); ?>NM
+                                                                    <?php endif; ?>
+                                                                </small>
+                                                            <?php endif; ?>
+                                                        <?php else: ?>
+                                                            <span class="text-muted">-</span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    
+                                                    <!-- Durum -->
                                                     <td>
                                                         <?php
                                                         $statusConfig = [
@@ -275,20 +315,41 @@ include '../includes/user_header.php';
                                                         ];
                                                         $config = $statusConfig[$upload['status']] ?? ['class' => 'secondary', 'text' => 'Bilinmiyor', 'icon' => 'question'];
                                                         ?>
-                                                        <span class="badge bg-<?php echo $config['class']; ?> badge-modern">
+                                                        <span class="badge bg-<?php echo $config['class']; ?>">
                                                             <i class="bi bi-<?php echo $config['icon']; ?> me-1"></i>
                                                             <?php echo $config['text']; ?>
                                                         </span>
                                                     </td>
+                                                    
+                                                    <!-- Dosya -->
                                                     <td>
-                                                        <div class="text-muted">
-                                                            <?php echo date('d.m.Y', strtotime($upload['upload_date'])); ?>
-                                                            <small class="d-block">
+                                                        <div class="text-truncate" style="max-width: 150px;" title="<?php echo htmlspecialchars($upload['original_name'] ?? 'Bilinmeyen dosya'); ?>">
+                                                            <i class="bi bi-file-earmark-text text-primary me-1"></i>
+                                                            <?php echo htmlspecialchars($upload['original_name'] ?? 'Bilinmeyen dosya'); ?>
+                                                        </div>
+                                                        <small class="text-muted d-block">
+                                                            <i class="bi bi-hdd me-1"></i>
+                                                            <?php 
+                                                            $fileSize = isset($upload['file_size']) ? formatFileSize($upload['file_size']) : 'N/A';
+                                                            echo $fileSize;
+                                                            ?>
+                                                        </small>
+                                                    </td>
+                                                    
+                                                    <!-- Tarih -->
+                                                    <td>
+                                                        <div class="text-nowrap">
+                                                            <small class="text-muted d-block">
+                                                                <?php echo date('d.m.Y', strtotime($upload['upload_date'])); ?>
+                                                            </small>
+                                                            <small class="text-primary">
                                                                 <?php echo date('H:i', strtotime($upload['upload_date'])); ?>
                                                             </small>
                                                         </div>
                                                     </td>
-                                                    <td class="text-center">
+                                                    
+                                                    <!-- İşlemler -->
+                                                    <td>
                                                         <div class="btn-group btn-group-sm">
                                                             <?php if ($upload['status'] === 'completed'): ?>
                                                                 <a href="download.php?id=<?php echo $upload['id']; ?>" 
@@ -643,6 +704,83 @@ include '../includes/user_header.php';
     font-size: 0.9rem;
 }
 
+/* File Details Table Styling - Same as file-detail.php */
+.file-details-table {
+    font-size: 0.9rem;
+}
+
+.file-details-table th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1rem 0.75rem;
+    border: none;
+    background: linear-gradient(135deg, #343a40 0%, #495057 100%) !important;
+    color: #fff;
+}
+
+.file-details-table td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.file-details-table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.file-details-table .badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.4rem 0.6rem;
+}
+
+.file-details-table .text-truncate {
+    max-width: 200px;
+}
+
+/* Vehicle Info Styling */
+.vehicle-info {
+    min-width: 200px;
+}
+
+.vehicle-info .fw-medium {
+    font-size: 0.95rem;
+    line-height: 1.2;
+}
+
+.vehicle-info .text-muted.small {
+    font-size: 0.8rem;
+    line-height: 1.3;
+    margin-bottom: 2px;
+}
+
+.vehicle-info .bi {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+}
+
+.file-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+}
+
 /* Responsive */
 @media (max-width: 767.98px) {
     .welcome-banner {
@@ -661,6 +799,77 @@ include '../includes/user_header.php';
     
     .stat-number {
         font-size: 1.5rem;
+    }
+    
+    /* Mobile table adjustments */
+    .table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .vehicle-info {
+        min-width: auto;
+    }
+    
+    .vehicle-info .fw-medium {
+        font-size: 0.9rem;
+    }
+    
+    .vehicle-info .text-muted.small {
+        font-size: 0.75rem;
+    }
+    
+    .file-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
+    /* Hide some columns on very small screens */
+    @media (max-width: 768px) {
+        /* Hide Motor and Plaka columns on tablet */
+        .file-details-table thead th:nth-child(3),
+        .file-details-table tbody td:nth-child(3),
+        .file-details-table thead th:nth-child(4),
+        .file-details-table tbody td:nth-child(4) {
+            display: none;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        /* Hide Model column on mobile */
+        .file-details-table thead th:nth-child(2),
+        .file-details-table tbody td:nth-child(2) {
+            display: none;
+        }
+        
+        /* Make table more compact */
+        .file-details-table th,
+        .file-details-table td {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.8rem;
+        }
+        
+        .file-details-table .text-truncate {
+            max-width: 100px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        /* Ultra compact for very small screens */
+        .file-details-table {
+            font-size: 0.75rem;
+        }
+        
+        .file-details-table .badge {
+            font-size: 0.65rem;
+            padding: 0.25rem 0.4rem;
+        }
+        
+        .file-details-table .btn-sm {
+            padding: 0.2rem 0.4rem;
+            font-size: 0.7rem;
+        }
     }
 }
 </style>

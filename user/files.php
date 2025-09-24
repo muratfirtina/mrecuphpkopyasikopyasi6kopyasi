@@ -425,7 +425,7 @@ include '../includes/user_header.php';
             <?php endif; ?>
 
             <!-- İstatistik Kartları -->
-            <div class="row g-4 mb-4">
+            <!-- <div class="row g-4 mb-4">
                 <div class="col-lg-3 col-md-6">
                     <div class="stat-card modern">
                         <div class="stat-card-body">
@@ -505,7 +505,7 @@ include '../includes/user_header.php';
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Filtre ve Arama -->
             <div class="filter-card mb-4">
@@ -524,7 +524,7 @@ include '../includes/user_header.php';
                     <i class="bi bi-info-circle me-2"></i>
                     <strong>Belirli dosya görüntüleniyor:</strong> ID: <?php echo htmlspecialchars($filterId); ?>
                     <a href="files.php" class="btn btn-sm btn-outline-primary ms-2">
-                        <i class="bi bi-times me-1"></i>Filtreyi Kaldır
+                        <i class="bi bi-trash3 me-1"></i>Filtreyi Kaldır
                     </a>
                 </div>
             <?php endif; ?>
@@ -632,7 +632,7 @@ include '../includes/user_header.php';
                                     <th>Dosya Adı</th>
                                     <th>Araç Bilgileri</th>
                                     <th>Durum</th>
-                                    <th>Boyut</th>
+                                    <!-- <th>Boyut</th> -->
                                     <th>Tarih</th>
                                     <th width="200" class="text-center">İşlemler</th>
                                 </tr>
@@ -799,9 +799,9 @@ include '../includes/user_header.php';
                                                 </div>
                                             <?php endif; ?>
                                         </td>
-                                        <td>
+                                        <!-- <td>
                                             <span class="file-size"><?php echo formatFileSize($file['file_size'] ?? 0); ?></span>
-                                        </td>
+                                        </td> -->
                                         <td>
                                             <div class="date-info">
                                                 <span class="upload-date"><?php echo date('d.m.Y', strtotime($file['upload_date'])); ?></span>
@@ -823,7 +823,7 @@ include '../includes/user_header.php';
                                                     </a>
                                                 <?php endif; ?>
                                                 
-                                                <?php if ($file['status'] === 'completed'): ?>
+                                                <!-- <?php if ($file['status'] === 'completed'): ?>
                                                     <a href="download.php?id=<?php echo $file['id']; ?>&type=upload" 
                                                        class="btn btn-success btn-sm">
                                                         <i class="bi bi-download me-1"></i>İndir
@@ -840,13 +840,13 @@ include '../includes/user_header.php';
                                                             <i class="bi bi-eye me-1"></i>Revize Takip
                                                         </a>
                                                     <?php endif; ?>
-                                                <?php endif; ?>
+                                                <?php endif; ?> -->
                                                 
                                                 
                                                 <!-- İptal Butonu -->
                                                 <button type="button" class="btn btn-outline-danger btn-sm" 
                                                         onclick="requestCancellation('<?php echo $file['id']; ?>', 'upload', '<?php echo htmlspecialchars($file['original_name']); ?>')">
-                                                    <i class="bi bi-times me-1"></i>İptal
+                                                    <i class="bi bi-trash3 me-1"></i>İptal
                                                 </button>
                                             </div>
                                         </td>

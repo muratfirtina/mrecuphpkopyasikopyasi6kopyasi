@@ -147,7 +147,7 @@ include '../includes/admin_sidebar.php';
                                     <i class="bi bi-search"></i> Ara
                                 </button>
                                 <a href="devices.php" class="btn btn-secondary">
-                                    <i class="bi bi-times"></i> Temizle
+                                    <i class="bi bi-trash3"></i> Temizle
                                 </a>
                             </div>
                         </form>

@@ -329,7 +329,7 @@ include '../includes/admin_sidebar.php';
                 </div>
                 <div class="col-md-3">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-search me-2"></i>Filtrele</button>
-                    <a href="?" class="btn btn-outline-secondary"><i class="bi bi-times"></i></a>
+                    <a href="?" class="btn btn-outline-secondary"><i class="bi bi-trash3"></i></a>
                 </div>
             </form>
         </div>

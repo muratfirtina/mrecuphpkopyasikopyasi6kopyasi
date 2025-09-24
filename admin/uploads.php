@@ -171,6 +171,8 @@ try {
                m.name as model_name,
                s.name as series_name,
                e.name as engine_name,
+               ecu.name as ecu_name,
+               d.name as device_name,
                u.is_cancelled
         FROM file_uploads u
         LEFT JOIN users ON u.user_id = users.id
@@ -178,6 +180,8 @@ try {
         LEFT JOIN models m ON u.model_id = m.id
         LEFT JOIN series s ON u.series_id = s.id
         LEFT JOIN engines e ON u.engine_id = e.id
+        LEFT JOIN ecus ecu ON u.ecu_id = ecu.id
+        LEFT JOIN devices d ON u.device_id = d.id
         $whereClause 
         ORDER BY u.$sortBy $sortOrder 
         LIMIT $limit OFFSET $offset
@@ -202,7 +206,7 @@ try {
             COALESCE(SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END), 0) as pending_count,
             COALESCE(SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END), 0) as processing_count,
             COALESCE(SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END), 0) as completed_count,
-            COALESCE(SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END), 0) as rejected_count,
+            COALESCE(SUM(CASE WHEN is_cancelled = 1 THEN 1 ELSE 0 END), 0) as rejected_count,
             COALESCE(SUM(CASE WHEN upload_date >= DATE_SUB(NOW(), INTERVAL 24 HOUR) THEN 1 ELSE 0 END), 0) as today_uploads,
             COALESCE(AVG(file_size), 0) as avg_file_size
         FROM file_uploads
@@ -332,7 +336,7 @@ include '../includes/admin_sidebar.php';
                 <i class="bi bi-info-circle me-2"></i>
                 <strong>Belirli dosya görüntüleniyor:</strong> ID: <?php echo htmlspecialchars($uploadId); ?>
                 <a href="uploads.php" class="btn btn-sm btn-outline-primary ms-2">
-                    <i class="bi bi-times me-1"></i>Filtreyi Kaldır
+                    <i class="bi bi-trash3 me-1"></i>Filtreyi Kaldır
                 </a>
             </div>
         <?php endif; ?>
@@ -460,7 +464,7 @@ include '../includes/admin_sidebar.php';
             </div>
             <div class="modal-footer border-0 pt-3">
                 <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-                    <i class="bi bi-times me-1"></i>
+                    <i class="bi bi-trash3 me-1"></i>
                     İptal
                 </button>
                 <button type="button" class="btn btn-success px-4" id="confirmProcessBtn" style="box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
@@ -491,7 +495,7 @@ include '../includes/admin_sidebar.php';
                     
                     <div class="mb-4">
                         <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 50%;">
-                            <i class="bi bi-times text-white fa-2x"></i>
+                            <i class="bi bi-trash3 text-white fa-2x"></i>
                         </div>
                         <h6 class="mb-2 text-dark text-center">Bu dosyayı iptal etmek istediğinizden emin misiniz?</h6>
                         <p class="text-muted mb-3 text-center">
@@ -515,7 +519,7 @@ include '../includes/admin_sidebar.php';
                 </div>
                 <div class="modal-footer border-0 pt-3">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-                        <i class="bi bi-times me-1"></i>
+                        <i class="bi bi-trash3 me-1"></i>
                         İptal
                     </button>
                     <button type="submit" class="btn btn-danger px-4" style="box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
@@ -580,16 +584,39 @@ include '../includes/admin_sidebar.php';
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="file-icon me-3">
-                                            <i class="bi bi-folder2-open fa-2x text-primary"></i>
+                                            <?php 
+                                            $fileExtension = strtolower(pathinfo($upload['original_name'], PATHINFO_EXTENSION));
+                                            $iconClass = 'bi-file-earmark';
+                                            $iconColor = 'text-primary';
+                                            ?>
+                                            <i class="bi <?php echo $iconClass; ?> fa-2x <?php echo $iconColor; ?>"></i>
                                         </div>
-                                        <div>
-                                            <h6 class="mb-1 text-truncate" style="max-width: 200px;" 
-                                                title="<?php echo htmlspecialchars($upload['original_name']); ?>">
-                                                <?php echo htmlspecialchars($upload['original_name']); ?>
-                                            </h6>
-                                            <small class="text-muted">
-                                                <?php echo formatFileSize($upload['file_size'] ?? 0); ?>
-                                            </small>
+                                        <div style="min-width: 0; flex: 1;">
+                                            <div class="file-name mb-1">
+                                                <h6 class="mb-0 text-truncate fw-semibold" style="max-width: 250px;" 
+                                                    title="<?php echo htmlspecialchars($upload['original_name']); ?>">
+                                                    <?php echo htmlspecialchars($upload['original_name']); ?>
+                                                </h6>
+                                            </div>
+                                            
+                                            <?php if (!empty($upload['description'])): ?>
+                                                <div class="file-description">
+                                                    <small class="text-muted d-block" style="max-width: 200px;" title="<?php echo htmlspecialchars($upload['description']); ?>">
+                                                        <i class="bi bi-chat-text me-1"></i>
+                                                        <?php echo htmlspecialchars(substr($upload['description'], 0, 50)) . (strlen($upload['description']) > 50 ? '...' : ''); ?>
+                                                    </small>
+                                                </div>
+                                            <?php endif; ?>
+                                            
+                                            <!-- Dosya durum bilgisi -->
+                                            <?php if (!empty($upload['response_file'])): ?>
+                                                <div class="mt-1">
+                                                    <small class="text-success">
+                                                        <i class="bi bi-check-circle me-1"></i>
+                                                        Yanıt dosyası mevcut
+                                                    </small>
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </td>
@@ -608,42 +635,88 @@ include '../includes/admin_sidebar.php';
                                 </td>
                                 <td>
                                     <div>
-                                        <strong><?php echo htmlspecialchars($upload['brand_name'] ?? 'Bilinmiyor'); ?></strong><br>
-                                        <small class="text-muted">
+                                        <div class="vehicle-brand mb-1">
+                                            <span class="badge text-white me-1" style="background: #0b5ed7 !important; font-size: 1rem;">
+                                                        <i class="bi bi-credit-card me-1"></i>
+                                                        <?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="vehicle-details mb-2">
                                             <?php 
                                             $vehicleInfo = [];
+                                            if (!empty($upload['brand_name'])) {
+                                                $vehicleInfo[] = '<strong class="text-primary">'. htmlspecialchars($upload['brand_name'] ?? 'Bilinmiyor').'</strong>';
+                                            }
                                             if (!empty($upload['model_name'])) {
-                                                $vehicleInfo[] = htmlspecialchars($upload['model_name']);
+                                                $vehicleInfo[] = '<span class="fw-semibold">' . htmlspecialchars($upload['model_name']) . '</span>';
                                             }
                                             if (!empty($upload['series_name'])) {
                                                 $vehicleInfo[] = htmlspecialchars($upload['series_name']);
                                             }
                                             if (!empty($upload['engine_name'])) {
-                                                $vehicleInfo[] = htmlspecialchars($upload['engine_name']);
+                                                $vehicleInfo[] = '<em>' . htmlspecialchars($upload['engine_name']) . '</em>';
                                             }
                                             
-                                            echo !empty($vehicleInfo) ? implode(' • ', $vehicleInfo) : 'Model/Seri belirtilmemiş';
+                                            if (!empty($vehicleInfo)) {
+                                                echo '<small class="text-dark">' . implode(' • ', $vehicleInfo) . '</small>';
+                                            } else {
+                                                echo '<small class="text-muted"><i class="bi bi-info-circle me-1"></i>Model/Seri belirtilmemiş</small>';
+                                            }
                                             ?>
-                                        </small>
-                                        <?php if (!empty($upload['plate'])): ?>
-                                            <div class="mt-1">
-                                                <span class="badge bg-dark text-white">
-                                                    <i class="bi bi-id-card me-1"></i>
-                                                    <?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
-                                                </span>
-                                                <?php if (!empty($upload['kilometer'])): ?>
-                                                    <span class="badge bg-secondary text-white ms-1">
-                                                        <i class="bi bi-speedometer me-1"></i>
-                                                        <?php echo number_format($upload['kilometer']); ?> km
-                                                    </span>
-                                                <?php endif; ?>
-                                            </div>
-                                        <?php else: ?>
-                                            <br><small class="text-muted">
-                                                <i class="bi bi-minus-circle me-1"></i>
-                                                Plaka belirtilmemiş
-                                            </small>
-                                        <?php endif; ?>
+                                        </div>
+                                        
+                                        <div class="vehicle-specs">
+                                            <?php if (!empty($upload['plate'])): ?>
+                                                <div class="mb-1">
+                                                    <?php if (!empty($upload['kilometer'])): ?>
+                                                        <span class="badge bg-info text-white">
+                                                            <i class="bi bi-speedometer me-1"></i>
+                                                            <?php echo number_format($upload['kilometer']); ?> km
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                            
+                                            <?php if (!empty($upload['ecu_name']) || !empty($upload['device_name']) || !empty($upload['fuel_type']) || !empty($upload['power'])): ?>
+                                                <div class="additional-specs">
+                                                    <?php if (!empty($upload['ecu_name'])): ?>
+                                                        <span class="badge bg-success text-white me-1">
+                                                            <i class="bi bi-cpu me-1"></i>
+                                                            <?php echo htmlspecialchars($upload['ecu_name']); ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                    
+                                                    <?php if (!empty($upload['device_name'])): ?>
+                                                        <span class="badge bg-secondary text-white me-1">
+                                                            <i class="bi bi-hdd-network me-1"></i>
+                                                            <?php echo htmlspecialchars($upload['device_name']); ?>
+                                                        </span>
+                                                    <?php endif; ?>
+
+                                                    <!-- <?php if (!empty($upload['fuel_type'])): ?>
+                                                        <span class="badge bg-warning text-dark me-1">
+                                                            <i class="bi bi-fuel-pump me-1"></i>
+                                                            <?php echo htmlspecialchars($upload['fuel_type']); ?>
+                                                        </span>
+                                                    <?php endif; ?> -->
+                                                    
+                                                    <?php if (!empty($upload['power'])): ?>
+                                                        <span class="badge bg-danger text-white">
+                                                            <i class="bi bi-lightning me-1"></i>
+                                                            <?php echo htmlspecialchars($upload['power']); ?> HP
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                            
+                                            <?php if (empty($upload['plate']) && empty($upload['year']) && empty($upload['fuel_type']) && empty($upload['power'])): ?>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    Ek araç bilgisi belirtilmemiş
+                                                </small>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                 </td>
                                 <td>
@@ -670,7 +743,7 @@ include '../includes/admin_sidebar.php';
                                     // İptal edilmiş dosyalar için durum kontrolü
                                     if (isset($upload['is_cancelled']) && $upload['is_cancelled']) {
                                         $displayStatus = 'cancelled';
-                                        $displayClass = 'secondary';
+                                        $displayClass = 'cancelled';
                                         $displayText = 'İptal Edildi';
                                         $displayIcon = 'x-circle';
                                     } else {
@@ -680,7 +753,7 @@ include '../includes/admin_sidebar.php';
                                         $displayIcon = $statusIcon[$upload['status']] ?? 'question';
                                     }
                                     ?>
-                                    <span class="badge bg-<?php echo $displayClass; ?> d-flex align-items-center" style="width: fit-content;">
+                                    <span class="badge <?php echo $displayClass === 'cancelled' ? 'badge-cancelled' : 'bg-' . $displayClass; ?> d-flex align-items-center" style="width: fit-content;">
                                         <i class="bi bi-<?php echo $displayIcon; ?> me-1"></i>
                                         <?php echo $displayText; ?>
                                     </span>
@@ -727,7 +800,7 @@ include '../includes/admin_sidebar.php';
                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                     onclick="showCancelModal('<?php echo $upload['id']; ?>', 'upload', '<?php echo htmlspecialchars($upload['original_name']); ?>')" 
                                                     title="Bu dosyayı iptal et">
-                                                <i class="bi bi-times me-1"></i>İptal Et
+                                                <i class="bi bi-trash3 me-1"></i>İptal Et
                                             </button>
                                         <?php else: ?>
                                             <span class="btn btn-secondary btn-sm disabled">
@@ -1080,6 +1153,20 @@ function buildPaginationUrl($page_num) {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* İptal edilmiş dosyalar için özel stil */
+.badge-cancelled {
+    background-color: #dc3545 !important;
+    color: white !important;
+    border: 1px solid #c82333;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.badge-cancelled:hover {
+    background-color: #c82333 !important;
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
 }
 
 /* Modern Process Confirmation Modal Styles */

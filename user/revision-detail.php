@@ -333,7 +333,7 @@ include '../includes/user_header.php';
                                 <?php elseif ($revision['status'] === 'rejected'): ?>
                                 <div class="timeline-item rejected">
                                     <div class="timeline-marker">
-                                        <i class="bi bi-times"></i>
+                                        <i class="bi bi-trash3"></i>
                                     </div>
                                     <div class="timeline-content">
                                         <h6>Revize Reddedildi</h6>
@@ -713,7 +713,7 @@ include '../includes/user_header.php';
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-times me-1"></i>İptal
+                        <i class="bi bi-trash3 me-1"></i>İptal
                     </button>
                     <button type="submit" class="btn btn-warning" id="submitRevisionBtn">
                         <i class="bi bi-send me-1"></i>Revize Talebi Gönder

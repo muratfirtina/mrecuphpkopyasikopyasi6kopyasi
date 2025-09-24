@@ -141,7 +141,7 @@ if ($fileType === 'response') {
     $stmt = $pdo->prepare("
         SELECT fr.*, fu.user_id, fu.original_name as original_upload_name,
                fu.brand_id, fu.model_id, fu.series_id, fu.engine_id, fu.plate, fu.ecu_id, fu.device_id,
-               fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque,
+               fu.gearbox_type, fu.fuel_type, fu.hp_power, fu.nm_torque, fu.kilometer,
                b.name as brand_name, m.name as model_name,
                s.name as series_name,
                eng.name as engine_name,
@@ -494,12 +494,12 @@ include '../includes/user_header.php';
                             </li>
                         </ol>
                     </nav>
-                    <h1 class="h2 mb-0">
+                    <h1 class="h4 mb-0">
                         <i class="bi bi-<?php echo $fileType === 'response' ? 'reply' : 'file-alt'; ?> me-2 text-primary"></i>
                         <?php echo htmlspecialchars($fileDetail['original_name'] ?? 'Bilinmeyen dosya'); ?>
                     </h1>
-                    <p class="text-muted mb-0">
-                        <?php echo $fileType === 'response' ? 'Yanıt dosyası detayları ve bilgileri' : 'Ana dosya detayları, yanıt dosyaları ve revize talepleri'; ?>
+                    <p class="text-muted mb-0" style="font-size: small;">
+                        <?php echo $fileType === 'response' ? 'Yanıt dosyası detayları ve bilgileri' : 'Ana dosya detayları, yanıt dosyaları ve ekdosyalar'; ?>
                     </p>
                 </div>
                 <div class="btn-toolbar mb-2 mb-md-0">
@@ -565,146 +565,198 @@ include '../includes/user_header.php';
                 </div>
 
                 <div class="detail-card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-3">
-                                <i class="bi bi-info-circle me-2"></i>Dosya Bilgileri
-                            </h6>
-                            <div class="detail-list"  style="gap: 0;">
-                                <div class="detail-item">
-                                    <span class="label">Dosya ID:</span>
-                                    <span class="value font-monospace"><?php echo $fileDetail['id']; ?></span>
-                                </div>
-                                <?php if ($totalCreditsSpent > 0): ?>
-                                    <div class="detail-item total-credits-item">
-                                        <span class="label">
-                                            <i class="bi bi-coin text-warning me-1"></i>
-                                            <?php echo $fileType === 'response' ? 'Bu Dosya için Toplam Harcama:' : 'Bu Dosya için Toplam Harcama:'; ?>
+                    <!-- Yatay Liste Formatında Dosya Bilgileri -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover file-details-table">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th><i class="bi bi-signpost me-1"></i>Plaka</th>
+                                    <th><i class="bi bi-car-front me-1"></i>Marka</th>
+                                    <th><i class="bi bi-car-front-fill me-1"></i>Model</th>
+                                    <th><i class="bi bi-gear me-1"></i>Motor</th>
+                                    <th><i class="bi bi-cpu me-1"></i>Ecu</th>
+                                    <th><i class="bi bi-hdd me-1"></i>Cihaz</th>
+                                    <th><i class="bi bi-gear-wide me-1"></i>Şanzıman</th>
+                                    <th><i class="bi bi-speedometer2 me-1"></i>Kilometre</th>
+                                    <th><i class="bi bi-info-circle me-1"></i>Durum</th>
+                                    <th><i class="bi bi-coin me-1"></i>Tutar</th>
+                                    <th><i class="bi bi-file-text me-1"></i>Dosya Adı</th>
+                                    <th><i class="bi bi-calendar me-1"></i>İşlem Tarihi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <?php if (!empty($fileDetail['plate'])): ?>
+                                            <span class="badge bg-dark text-uppercase">
+                                                <?php echo strtoupper(htmlspecialchars($fileDetail['plate'])); ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <strong class="text-primary">
+                                            <?php echo htmlspecialchars($fileDetail['brand_name'] ?? 'Belirtilmemiş'); ?>
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">
+                                            <?php echo htmlspecialchars($fileDetail['model_name'] ?? 'Belirtilmemiş'); ?>
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        <span class="text-warning fw-bold">
+                                            <?php echo htmlspecialchars($fileDetail['engine_name'] ?? '-'); ?>
                                         </span>
-                                        <span class="value total-credits-value">
-                                            <?php echo number_format($totalCreditsSpent, 2); ?> kredi
-                                            <?php if ($totalCreditsSpent != $fileDetail['credits_charged']): ?>
-                                                <small class="text-muted d-block">
-                                                    <?php
-                                                    if ($fileType === 'response') {
-                                                        echo '(Dosya + revizyon talepleri)';
-                                                    } else {
-                                                        echo '(Yanıt + revizyon + ek dosya ücretleri)';
-                                                    }
-                                                    ?>
-                                                </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary text-wrap">
+                                            <?php echo htmlspecialchars($fileDetail['ecu_name'] ?? '-'); ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info text-wrap">
+                                            <?php echo htmlspecialchars($fileDetail['device_name'] ?? 'Belirtilmemiş'); ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-info">
+                                            <?php echo htmlspecialchars($fileDetail['gearbox_type'] ?? '-'); ?>
+                                        </span>
+                                    </td>
+                                    
+                                    <td>
+                                        <span class="text-muted">
+                                            <?php if (!empty($fileDetail['kilometer'])): ?>
+                                                <span class="badge bg-secondary">
+                                                    <i class="bi bi-speedometer2 me-1"></i>
+                                                    <?php echo number_format($fileDetail['kilometer']); ?> km
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="text-muted">-</span>
                                             <?php endif; ?>
                                         </span>
-                                    </div>
-                                <?php endif; ?>
-                                <!-- <div class="detail-item">
-                                    <span class="label">Orijinal Ad:</span>
-                                    <span class="value"><?php echo htmlspecialchars($fileDetail['original_name'] ?? 'Belirtilmemiş'); ?></span>
-                                </div> -->
-                                <div class="detail-item">
-                                    <span class="label">Cihaz Tipi:</span>
-                                    <span class="value"><?php echo htmlspecialchars($fileDetail['device_name'] ?? 'Belirtilmemiş'); ?></span>
-                                </div>
-                                <!-- <div class="detail-item">
-                                    <span class="label">Dosya Boyutu:</span>
-                                    <span class="value"><?php echo formatFileSize($fileDetail['file_size'] ?? 0); ?></span>
-                                </div> -->
-                                <div class="detail-item">
-                                    <span class="label"><?php echo $fileType === 'response' ? 'Oluşturulma' : 'Yüklenme'; ?> Tarihi:</span>
-                                    <span class="value"><?php echo date('d.m.Y H:i', strtotime($fileDetail['upload_date'])); ?></span>
-                                </div>
-                                <?php if (!empty($fileDetail['processed_date']) && $fileType !== 'response'): ?>
-                                    <div class="detail-item">
-                                        <span class="label">Tamamlanma Tarihi:</span>
-                                        <span class="value"><?php echo date('d.m.Y H:i', strtotime($fileDetail['processed_date'])); ?></span>
-                                    </div>
-                                <?php endif; ?>
-                                <!-- <?php if ($fileType === 'response' && !empty($fileDetail['admin_username'])): ?>
-                                    <div class="detail-item">
-                                        <span class="label">Oluşturan Admin:</span>
-                                        <span class="value"><?php echo htmlspecialchars($fileDetail['admin_username']); ?></span>
-                                    </div>
-                                <?php endif; ?> -->
-                                <?php if (($fileType === 'response') || ($fileType === 'upload' && $fileDetail['status'] === 'completed')): ?>
-                                    <div class="d-flex gap-2">
-                                        <a href="download.php?id=<?php echo $fileDetail['id']; ?>&type=<?php echo $fileType; ?>" class="btn btn-success">
-                                            <i class="bi bi-download me-1"></i>İndir
-                                        </a>
-                                        <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
-                                        <?php if (isImageFile($fileDetail['original_name'])): ?>
-                                            <a href="view-image.php?id=<?php echo $fileDetail['id']; ?>&type=<?php echo $fileType; ?>" class="btn btn-info">
-                                                <i class="bi bi-eye me-1"></i>Dosyayı Görüntüle
-                                            </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-<?php echo $config['class']; ?>">
+                                            <i class="bi bi-<?php echo $config['icon']; ?> me-1"></i>
+                                            <?php echo $config['text']; ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <?php if ($totalCreditsSpent > 0): ?>
+                                            <span class="badge bg-danger fs-6">
+                                                <i class="bi bi-coin me-1"></i>
+                                                <?php echo number_format($totalCreditsSpent, 2); ?>
+                                            </span>
+                                            <br><small class="text-muted">kredi</small>
+                                        <?php else: ?>
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-gift me-1"></i>Ücretsiz
+                                            </span>
                                         <?php endif; ?>
-                                        <button type="button" class="btn btn-outline-danger" 
-                                            onclick="requestCancellation('<?php echo $fileDetail['id']; ?>', '<?php echo $fileType; ?>', '<?php echo htmlspecialchars($fileDetail['original_name']); ?>')">
-                                            <i class="bi bi-times me-1"></i>İptal
-                                        </button>
+                                    </td>
+                                    <td>
+                                        <div class="text-truncate" style="max-width: 150px;" title="<?php echo htmlspecialchars($fileDetail['original_name'] ?? 'Bilinmeyen dosya'); ?>">
+                                            <i class="bi bi-file-earmark-text text-primary me-1"></i>
+                                            <?php echo htmlspecialchars($fileDetail['original_name'] ?? 'Bilinmeyen dosya'); ?>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-nowrap">
+                                            <small class="text-muted d-block">
+                                                <?php echo date('d.m.Y', strtotime($fileDetail['upload_date'])); ?>
+                                            </small>
+                                            <small class="text-primary">
+                                                <?php echo date('H:i', strtotime($fileDetail['upload_date'])); ?>
+                                            </small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Ek Bilgiler Satırı -->
+                    <?php if (!empty($fileDetail['hp_power']) || !empty($fileDetail['nm_torque']) || !empty($fileDetail['fuel_type']) || !empty($fileDetail['upload_notes'])): ?>
+                        <div class="row mt-1 pt-1 border-top">
+                            <div class="col-md-12">
+<!--                                 <h6 class="text-muted mb-2">
+                                    <i class="bi bi-info-circle me-2"></i>Ek Teknik Bilgiler
+                                </h6>
+                                <div class="row">
+                                    <?php if (!empty($fileDetail['fuel_type'])): ?>
+                                        <div class="col-md-3 mb-2">
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-fuel-pump me-1"></i>
+                                                <?php echo htmlspecialchars($fileDetail['fuel_type']); ?>
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($fileDetail['hp_power'])): ?>
+                                        <div class="col-md-3 mb-2">
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-lightning me-1"></i>
+                                                <?php echo $fileDetail['hp_power']; ?> HP
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($fileDetail['nm_torque'])): ?>
+                                        <div class="col-md-3 mb-2">
+                                            <span class="badge bg-info">
+                                                <i class="bi bi-gear-wide-connected me-1"></i>
+                                                <?php echo $fileDetail['nm_torque']; ?> Nm
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                </div> -->
+                                
+                                <!-- Kullanıcı Notları -->
+                                <?php if (!empty($fileDetail['upload_notes'])): ?>
+                                    <div class="row mt-2">
+                                        <div class="col-md-12">
+                                            <h6 class="text-muted mb-2">
+                                                <i class="bi bi-chat-text me-2"></i>Yükleme Notlarım
+                                            </h6>
+                                            <div class="user-notes-content p-3 bg-light rounded"style="padding: 0.5rem !important;">
+                                                <i class="bi bi-quote text-primary me-2"></i>
+                                                <span class="text-dark"><?php echo nl2br(htmlspecialchars($fileDetail['upload_notes'])); ?></span>
+                                            </div>
+                                        </div>
                                     </div>
-                                <?php elseif ($fileType === 'upload'): ?>
-                                    <button type="button" class="btn btn-outline-danger" 
-                                        onclick="requestCancellation('<?php echo $fileDetail['id']; ?>', 'upload', '<?php echo htmlspecialchars($fileDetail['original_name']); ?>')">
-                                        <i class="bi bi-times me-1"></i>İptal Et
-                                    </button>
                                 <?php endif; ?>
                             </div>
                         </div>
+                    <?php endif; ?>
 
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-3">
-                                <i class="bi bi-car me-2"></i>Araç Bilgileri
-                            </h6>
-                            <div class="detail-list" style="gap: 0;">
-                                <div class="detail-item">
-                                    <span class="label">Marka:</span>
-                                    <span class="value"><?php echo htmlspecialchars($fileDetail['brand_name'] ?? 'Belirtilmemiş'); ?></span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="label">Model:</span>
-                                    <span class="value"><?php echo htmlspecialchars($fileDetail['model_name'] ?? 'Belirtilmemiş'); ?></span>
-                                </div>
-                                <?php if (!empty($fileDetail['series_name'])): ?>
-                                    <div class="detail-item">
-                                        <span class="label">Seri:</span>
-                                        <span class="value"><?php echo $fileDetail['series_name']; ?></span>
-                                    </div>
-                                <?php endif; ?>
-                                <?php if (!empty($fileDetail['engine_name'])): ?>
-                                    <div class="detail-item">
-                                        <span class="label">Motor:</span>
-                                        <span class="value"><?php echo htmlspecialchars($fileDetail['engine_name']); ?></span>
-                                    </div>
-                                <?php endif; ?>
-                                <?php if (!empty($fileDetail['plate'])): ?>
-                                    <div class="detail-item">
-                                        <span class="label">Plaka:</span>
-                                        <span class="value"><?php echo strtoupper(htmlspecialchars($fileDetail['plate'])); ?></span>
-                                    </div>
-                                <?php endif; ?>
-                                <?php if (!empty($fileDetail['ecu_name'])): ?>
-                                    <div class="detail-item">
-                                        <span class="label">ECU:</span>
-                                        <span class="value"><?php echo htmlspecialchars($fileDetail['ecu_name']); ?></span>
-                                    </div>
-                                <?php endif; ?>
-
-                                <?php if (!empty($fileDetail['fuel_type'])): ?>
-                                    <div class="detail-item">
-                                        <span class="label">Yakıt Tipi:</span>
-                                        <span class="value"><?php echo htmlspecialchars($fileDetail['fuel_type']); ?></span>
-                                    </div>
-                                <?php endif; ?>
-                                <?php if (!empty($fileDetail['hp_power'])): ?>
-                                    <div class="detail-item">
-                                        <span class="label">Güç:</span>
-                                        <span class="value"><?php echo $fileDetail['hp_power']; ?> HP</span>
-                                    </div>
-                                <?php endif; ?>
-                                <?php if (!empty($fileDetail['nm_torque'])): ?>
-                                    <div class="detail-item">
-                                        <span class="label">Tork:</span>
-                                        <span class="value"><?php echo $fileDetail['nm_torque']; ?> Nm</span>
-                                    </div>
+                    <!-- İşlem Butonları -->
+                    <div class="row mt-3 pt-3 border-top">
+                        <div class="col-md-12">
+                            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                <?php if (($fileType === 'response') || ($fileType === 'upload' && $fileDetail['status'] === 'completed')): ?>
+                                    <a href="download.php?id=<?php echo $fileDetail['id']; ?>&type=<?php echo $fileType; ?>" class="btn btn-success">
+                                        <i class="bi bi-download me-1"></i>Orjinal Dosyayı İndir
+                                    </a>
+                                    <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
+                                    <?php if (isImageFile($fileDetail['original_name'])): ?>
+                                        <a href="view-image.php?id=<?php echo $fileDetail['id']; ?>&type=<?php echo $fileType; ?>" class="btn btn-info">
+                                            <i class="bi bi-eye me-1"></i>Dosyayı Görüntüle
+                                        </a>
+                                    <?php endif; ?>
+                                    <!-- <button type="button" class="btn btn-warning" 
+                                            onclick="requestRevision('<?php echo $fileDetail['id']; ?>', '<?php echo $fileType; ?>')">
+                                        <i class="bi bi-redo me-1"></i>Revize Talep Et
+                                    </button> -->
+                                    <button type="button" class="btn btn-outline-danger" 
+                                        onclick="requestCancellation('<?php echo $fileDetail['id']; ?>', '<?php echo $fileType; ?>', '<?php echo htmlspecialchars($fileDetail['original_name']); ?>')">
+                                        <i class="bi bi-trash3 me-1"></i>İptal
+                                    </button>
+                                <?php elseif ($fileType === 'upload'): ?>
+                                    <button type="button" class="btn btn-outline-danger" 
+                                        onclick="requestCancellation('<?php echo $fileDetail['id']; ?>', 'upload', '<?php echo htmlspecialchars($fileDetail['original_name']); ?>')">
+                                        <i class="bi bi-trash3 me-1"></i>İptal Et
+                                    </button>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -771,24 +823,37 @@ include '../includes/user_header.php';
                                             </h6>
                                             <div class="file-meta">
                                                 <span class="meta-item">
-                                                    <i class="bi bi-calendar me-1"></i>
-                                                    <?php echo date('d.m.Y H:i', strtotime($response['upload_date'])); ?>
+                                                <i class="bi bi-calendar me-1"></i>
+                                                <?php echo date('d.m.Y H:i', strtotime($response['upload_date'])); ?>
                                                 </span>
-                                                <span class="meta-item">
-                                                    <i class="bi bi-hdd me-1"></i>
-                                                    <?php echo formatFileSize($response['file_size']); ?>
-                                                </span>
+                                                <!-- <span class="meta-item">
+                                                <i class="bi bi-hdd me-1"></i>
+                                                <?php echo formatFileSize($response['file_size']); ?>
+                                                </span> -->
                                                 <?php if (!empty($response['admin_username'])): ?>
-                                                    <span class="meta-item">
-                                                        <i class="bi bi-person-fill me-1"></i>
-                                                        <?php echo htmlspecialchars($response['admin_username']); ?>
-                                                    </span>
+                                                <span class="meta-item">
+                                                <i class="bi bi-person-fill me-1"></i>
+                                                <?php echo htmlspecialchars($response['admin_username']); ?>
+                                                </span>
                                                 <?php endif; ?>
+                                <?php if (isset($response['credits_charged']) && $response['credits_charged'] > 0): ?>
+                                    <span class="meta-item">
+                                        <i class="bi bi-coin me-1"></i>
+                                        <span class="badge bg-danger"><?php echo $response['credits_charged']; ?> kredi</span>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="meta-item">
+                                        <i class="bi bi-tag me-1"></i>
+                                        <span class="badge bg-secondary">Ücretsiz</span>
+                                    </span>
+                                <?php endif; ?>
                                             </div>
                                             <?php if (!empty($response['admin_notes'])): ?>
                                                 <div class="file-notes mt-2">
                                                     <small class="text-muted">
-                                                        <i class="bi bi-comment-dots me-1"></i>
+                                                        <i class="bi bi-comment-dots me-1">
+                                                            Admin Notu:
+                                                        </i>
                                                         <?php
                                                         if (filterAdminNotes($response['admin_notes'])) {
                                                             echo htmlspecialchars(substr($response['admin_notes'], 0, 100)) . (strlen($response['admin_notes']) > 100 ? '...' : '');
@@ -801,9 +866,9 @@ include '../includes/user_header.php';
                                             <?php endif; ?>
                                         </div>
                                         <div class="file-actions">
-                                            <a href="file-detail.php?id=<?php echo $response['id']; ?>&type=response" class="btn btn-outline-primary btn-sm">
+                                            <!-- <a href="file-detail.php?id=<?php echo $response['id']; ?>&type=response" class="btn btn-outline-primary btn-sm">
                                                 <i class="bi bi-eye me-1"></i>Detay
-                                            </a>
+                                            </a> -->
                                             <a href="download.php?id=<?php echo $response['id']; ?>&type=response" class="btn btn-success btn-sm">
                                                 <i class="bi bi-download me-1"></i>İndir
                                             </a>
@@ -813,13 +878,13 @@ include '../includes/user_header.php';
                                                     <i class="bi bi-eye"></i>
                                                 </a>
                                             <?php endif; ?>
-                                            <button type="button" class="btn btn-outline-warning btn-sm"
+                                            <!-- <button type="button" class="btn btn-outline-warning btn-sm"
                                                 onclick="requestRevision('<?php echo $response['id']; ?>', 'response')">
                                                 <i class="bi bi-redo me-1"></i>Revize
-                                            </button>
+                                            </button> -->
                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                 onclick="requestCancellation('<?php echo $response['id']; ?>', 'response', '<?php echo htmlspecialchars($response['original_name']); ?>')">
-                                                <i class="bi bi-times me-1"></i>İptal
+                                                <i class="bi bi-trash3 me-1"></i>İptal
                                             </button>
                                         </div>
                                     </div>
@@ -830,7 +895,7 @@ include '../includes/user_header.php';
                 <?php endif; ?>
 
                 <!-- Revize Dosyaları -->
-                <?php if (!empty($allRevisionFiles)): ?>
+                <!-- <?php if (!empty($allRevisionFiles)): ?>
                     <div class="detail-card mb-4">
                         <div class="detail-card-header">
                             <h5 class="mb-0">
@@ -892,7 +957,7 @@ include '../includes/user_header.php';
                                             <a href="download-revision.php?id=<?php echo $revFile['id']; ?>" class="btn btn-warning btn-sm">
                                                 <i class="bi bi-download me-1"></i>İndir
                                             </a>
-                                            <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
+                                            
                                             <?php if (isImageFile($revFile['original_name'])): ?>
                                                 <a href="view-image.php?id=<?php echo $revFile['id']; ?>&type=revision" class="btn btn-info btn-sm">
                                                     <i class="bi bi-eye"></i>
@@ -904,7 +969,7 @@ include '../includes/user_header.php';
                                             </button>
                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                 onclick="requestCancellation('<?php echo $revFile['id']; ?>', 'revision', '<?php echo htmlspecialchars($revFile['original_name']); ?>')">
-                                                <i class="bi bi-times me-1"></i>İptal
+                                                <i class="bi bi-trash3 me-1"></i>İptal
                                             </button>
                                         </div>
                                     </div>
@@ -912,7 +977,7 @@ include '../includes/user_header.php';
                             </div>
                         </div>
                     </div>
-                <?php endif; ?>
+                <?php endif; ?> -->
 
 
                 <!-- Ek Dosyalar Bölümü -->
@@ -944,7 +1009,9 @@ include '../includes/user_header.php';
                                             </h6>
                                             <div class="file-meta">
                                                 <span class="meta-item">
-                                                    <i class="bi bi-person me-1"></i>
+                                                    <i class="bi bi-person me-1">
+                                                        Gönderen:
+                                                    </i>
                                                     <?php if ($file['sender_type'] === 'admin'): ?>
                                                         <span class="badge bg-primary">Admin</span>
                                                     <?php else: ?>
@@ -956,10 +1023,10 @@ include '../includes/user_header.php';
                                                     <i class="bi bi-calendar me-1"></i>
                                                     <?php echo date('d.m.Y H:i', strtotime($file['upload_date'])); ?>
                                                 </span>
-                                                <span class="meta-item">
+                                                <!-- <span class="meta-item">
                                                     <i class="bi bi-hdd me-1"></i>
                                                     <?php echo formatFileSize($file['file_size']); ?>
-                                                </span>
+                                                </span> -->
                                                 <?php if ($file['credits'] > 0): ?>
                                                     <span class="meta-item">
                                                         <i class="bi bi-coin me-1"></i>
@@ -993,7 +1060,7 @@ include '../includes/user_header.php';
                                             <?php endif; ?>
                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                 onclick="requestCancellation('<?php echo $file['id']; ?>', 'additional', '<?php echo htmlspecialchars($file['original_name']); ?>')">
-                                                <i class="bi bi-times me-1"></i>İptal
+                                                <i class="bi bi-trash3 me-1"></i>İptal
                                             </button>
                                         </div>
                                     </div>
@@ -1056,7 +1123,7 @@ include '../includes/user_header.php';
                         <div class="detail-card" id="chatContainer" style="height: 100%; display: flex; flex-direction: column;">
                             <div class="card-header">
                                 <h6 class="mb-0">
-                                    <i class="bi bi-comments me-2"></i>Admin ile Mesajlaşma
+                                    <i class="bi bi-comments me-2"></i>Geri Bildirim
                                 </h6>
                             </div>
                             <div class="card-body p-0">
@@ -1474,7 +1541,7 @@ include '../includes/user_header.php';
                 </script>
 
                 <!-- İletişim Geçmişi (Tüm Kullanıcı Admin Etkileşimleri) -->
-                <?php if (!empty($communicationHistory)): ?>
+                <!-- <?php if (!empty($communicationHistory)): ?>
                     <div class="detail-card mb-4">
                         <div class="detail-card-header">
                             <h5 class="mb-0">
@@ -1548,7 +1615,7 @@ include '../includes/user_header.php';
                                                 </div>
                                             </div>
 
-                                            <!-- Hangi dosya için revize talebi olduğunu belirt -->
+                                            
                                             <?php if (!empty($comm['response_file_name'])): ?>
                                                 <div class="mb-3">
                                                     <div class="file-reference">
@@ -1560,13 +1627,13 @@ include '../includes/user_header.php';
                                                 </div>
                                             <?php elseif ($comm['type'] === 'user_revision_request'): ?>
                                                 <?php
-                                                // Eğer bu revize talebinden önce başka revizyon dosyaları varsa, son revizyon dosyasını bul
+                                                
                                                 $targetFileName = 'Ana Dosya';
                                                 $targetFileType = 'Orijinal Yüklenen Dosya';
 
                                                 if (isset($comm['revision_id'])) {
                                                     try {
-                                                        // Bu revize talebinden önce tamamlanmış revize taleplerini bul
+                                                        
                                                         $stmt = $pdo->prepare("
                                         SELECT rf.original_name 
                                         FROM revisions r1
@@ -1610,7 +1677,7 @@ include '../includes/user_header.php';
                                                 </div>
                                             <?php endif; ?>
 
-                                            <!-- Kullanıcı Notları -->
+                                            
                                             <?php if (!empty($comm['user_notes'])): ?>
                                                 <div class="revision-note user-note mb-3">
                                                     <div class="note-header">
@@ -1629,7 +1696,7 @@ include '../includes/user_header.php';
                                                 </div>
                                             <?php endif; ?>
 
-                                            <!-- Admin Cevabı -->
+                                            
                                             <?php if (!empty($comm['admin_notes'])): ?>
                                                 <div class="revision-note admin-note mb-2">
                                                     <div class="note-header">
@@ -1647,7 +1714,7 @@ include '../includes/user_header.php';
                                                     </div>
                                                 </div>
 
-                                                <!-- Admin'in yüklediği revizyon dosyaları -->
+                                                
                                                 <?php if (!empty($comm['revision_files'])): ?>
                                                     <div class="admin-files mt-3">
                                                         <h6 class="text-success mb-2">
@@ -1680,7 +1747,7 @@ include '../includes/user_header.php';
                                                                             </button>
                                                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                                                 onclick="requestCancellation('<?php echo $revFile['id']; ?>', 'revision', '<?php echo htmlspecialchars($revFile['original_name']); ?>')">
-                                                                                <i class="bi bi-times me-1"></i>İptal
+                                                                                <i class="bi bi-trash3 me-1"></i>İptal
                                                                             </button>
                                                                         </div>
                                                                     </div>
@@ -1689,7 +1756,7 @@ include '../includes/user_header.php';
                                                         </div>
                                                     <?php endif; ?>
 
-                                                    <!-- Admin'in yüklediği response dosyaları -->
+                                                    
                                                     <?php if ($comm['type'] === 'admin_response' && !empty($comm['response_id'])): ?>
                                                         <div class="admin-files mt-3">
                                                             <h6 class="text-success mb-2">
@@ -1721,7 +1788,7 @@ include '../includes/user_header.php';
                                                                             </button>
                                                                             <button type="button" class="btn btn-outline-danger btn-sm" 
                                                                                 onclick="requestCancellation('<?php echo $comm['response_id']; ?>', 'response', '<?php echo htmlspecialchars($comm['file_name']); ?>')">
-                                                                                <i class="bi bi-times me-1"></i>İptal
+                                                                                <i class="bi bi-trash3 me-1"></i>İptal
                                                                             </button>
                                                                         </div>
                                                                     </div>
@@ -1745,7 +1812,7 @@ include '../includes/user_header.php';
                                                     <?php endif; ?>
                                                 <?php endif; ?>
 
-                                                <!-- Ek Bilgiler -->
+                                                
                                                 <div class="communication-meta">
                                                     <?php if (isset($comm['credits_charged']) && $comm['credits_charged'] > 0): ?>
                                                         <span class="meta-item text-warning">
@@ -1780,7 +1847,7 @@ include '../includes/user_header.php';
 
 
                             </div>
-                            <!-- İletişim Özeti -->
+                           
                             <div class="communication-summary mt-4 p-3 bg-light rounded">
                                 <h6 class="mb-2">
                                     <i class="bi bi bar-chart-line me-2 text-info"></i>İletişim Özeti
@@ -1809,7 +1876,7 @@ include '../includes/user_header.php';
                             </div>
                         </div>
                     <?php endif; ?>
-                <?php endif; ?>
+                <?php endif; ?> -->
         </main>
     </div>
 </div>
@@ -1911,7 +1978,7 @@ include '../includes/user_header.php';
 
     .detail-card-header {
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        padding: 1.5rem;
+        padding: 1rem;
         border-bottom: 1px solid #e9ecef;
         display: flex;
         justify-content: space-between;
@@ -1925,7 +1992,7 @@ include '../includes/user_header.php';
     }
 
     .detail-card-body {
-        padding: 2rem;
+        padding: 1rem;
     }
 
     .main-file-card .detail-card-header {
@@ -2009,7 +2076,7 @@ include '../includes/user_header.php';
         background: #f8fff9;
         border: 1px solid #d4edda;
         border-radius: 12px;
-        padding: 1.5rem;
+        padding: 1rem;
         display: flex;
         align-items: flex-start;
         gap: 1rem;
@@ -3224,7 +3291,7 @@ include '../includes/user_header.php';
                     <div class="row g-3">
                         <div class="col-6">
                             <button type="button" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">
-                                <i class="bi bi-times me-1"></i>Vazgeç
+                                <i class="bi bi-trash3 me-1"></i>Vazgeç
                             </button>
                         </div>
                         <div class="col-6">

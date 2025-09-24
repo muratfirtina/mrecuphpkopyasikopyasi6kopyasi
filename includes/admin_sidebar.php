@@ -43,9 +43,9 @@
                             <i class="bi bi-speedometer"></i>Genel Bakış
                         </a>
                         
-                        <a class="nav-link <?php echo ($pageTitle == 'Raporlar') ? 'active' : ''; ?>" href="reports.php">
+                        <!-- <a class="nav-link <?php echo ($pageTitle == 'Raporlar') ? 'active' : ''; ?>" href="reports.php">
                             <i class="bi bi-bar-chart"></i>Raporlar
-                        </a>
+                        </a> -->
                         
                         <a class="nav-link text-info" href="../design">
                             <i class="bi bi-window-sidebar"></i>Design Paneli
@@ -55,7 +55,7 @@
                         <div class="nav-section">Dosya Yönetimi</div>
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Dosya Yüklemeleri') ? 'active' : ''; ?>" href="uploads.php">
-                            <i class="bi bi-upload"></i>Yüklemeler
+                            <i class="bi bi-upload"></i>Dosyalar
                             <?php
                             // İşleme alınan dosya sayısını al
                             try {
@@ -108,10 +108,10 @@
                             ?>
                         </a>
                         
-                        <a class="nav-link <?php echo ($pageTitle == 'Revizyon İşlemleri') ? 'active' : ''; ?>" href="revisions.php">
+                        <!-- <a class="nav-link <?php echo ($pageTitle == 'Revizyon İşlemleri') ? 'active' : ''; ?>" href="revisions.php">
                             <i class="bi bi-pencil"></i>Revizyonlar
                             <?php
-                            // Bekleyen ve işleme alınan revizyon sayılarını al
+                            
                             try {
                                 $pendingRevisionsStmt = $pdo->prepare("SELECT COUNT(*) FROM revisions WHERE status = 'pending'");
                                 $pendingRevisionsStmt->execute();
@@ -121,18 +121,16 @@
                                 $processingRevisionsStmt->execute();
                                 $processingRevisionsCount = $processingRevisionsStmt->fetchColumn();
                                 
-                                // Bekleyen revizyonlar için kırmızı badge (öncelikli)
+                                
                                 if ($pendingRevisionsCount > 0) {
                                     echo '<span class="badge bg-danger ms-2">' . $pendingRevisionsCount . '</span>';
                                 } elseif ($processingRevisionsCount > 0) {
-                                    // Eğer bekleyen yoksa işlemdeki revizyonları mavi badge ile göster
                                     echo '<span class="badge bg-info ms-2">' . $processingRevisionsCount . '</span>';
                                 }
                             } catch(Exception $e) {
-                                // Hata durumunda badge gösterme
                             }
                             ?>
-                        </a>
+                        </a> -->
                         
                         <a class="nav-link <?php echo ($pageTitle == 'Dosya İptal Talepleri') ? 'active' : ''; ?>" href="file-cancellations.php">
                             <i class="bi bi-clock-history"></i>İptal Talepleri

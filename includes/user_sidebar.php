@@ -130,7 +130,7 @@ if (isset($_SESSION['user_id']) && isset($pdo)) {
                     ?>
                 </a>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'revisions.php' ? 'active' : ''; ?>" href="revisions.php">
                     <div class="nav-icon bg-orange">
                         <i class="bi bi-pencil-square"></i>
@@ -147,7 +147,7 @@ if (isset($_SESSION['user_id']) && isset($pdo)) {
                     } catch(PDOException $e) {}
                     ?>
                 </a>
-            </li>
+            </li> -->
             <li class="nav-item">
                 <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'cancellations.php' ? 'active' : ''; ?>" href="cancellations.php">
                     <div class="nav-icon bg-danger">
@@ -166,7 +166,24 @@ if (isset($_SESSION['user_id']) && isset($pdo)) {
                     ?>
                 </a>
             </li>
-            <li class="nav-item">
+            <?php
+$hasLegacyFiles = false;
+if (isset($_SESSION['user_id']) && isset($pdo)) {
+    try {
+        // Status kolonu yok, sadece user_id ile kontrol yap
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM legacy_files WHERE user_id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $legacyFileCount = $stmt->fetchColumn();
+        $hasLegacyFiles = $legacyFileCount > 0;
+    } catch(PDOException $e) {
+        error_log('Legacy check failed: ' . $e->getMessage());
+        $hasLegacyFiles = false;
+    }
+}
+?>
+
+            <?php if ($hasLegacyFiles): ?>
+<li class="nav-item">
     <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'legacy-files.php' ? 'active' : ''; ?>" href="legacy-files.php">
         <div class="nav-icon bg-info">
             <i class="bi bi-archive"></i>
@@ -175,6 +192,7 @@ if (isset($_SESSION['user_id']) && isset($pdo)) {
         
     </a>
 </li>
+<?php endif; ?>
         </ul>
 
         <!-- Hesap Yönetimi -->

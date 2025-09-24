@@ -116,10 +116,11 @@ class FileManager {
             $stmt = $this->pdo->query("
                 SELECT 
                     COUNT(*) as total,
-                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
-                    SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as processing,
-                    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
-                    SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+                    SUM(CASE WHEN is_cancelled = 1 THEN 1 ELSE 0 END) as cancelled,
+                    SUM(CASE WHEN status = 'pending' AND (is_cancelled IS NULL OR is_cancelled = 0) THEN 1 ELSE 0 END) as pending,
+                    SUM(CASE WHEN status = 'processing' AND (is_cancelled IS NULL OR is_cancelled = 0) THEN 1 ELSE 0 END) as processing,
+                    SUM(CASE WHEN status = 'completed' AND (is_cancelled IS NULL OR is_cancelled = 0) THEN 1 ELSE 0 END) as completed,
+                    SUM(CASE WHEN status = 'rejected' AND (is_cancelled IS NULL OR is_cancelled = 0) THEN 1 ELSE 0 END) as rejected
                 FROM file_uploads
             ");
             
@@ -128,6 +129,7 @@ class FileManager {
             error_log('getFileStats error: ' . $e->getMessage());
             return [
                 'total' => 0,
+                'cancelled' => 0,
                 'pending' => 0,
                 'processing' => 0,
                 'completed' => 0,
@@ -740,7 +742,8 @@ class FileManager {
                 SELECT fu.*, u.username, u.email, u.first_name, u.last_name,
                        b.name as brand_name, m.name as model_name,
                        s.name as series_name, e.name as engine_name,
-                       d.name as device_name, ecu.name as ecu_name
+                       d.name as device_name, ecu.name as ecu_name,
+                       fu.is_cancelled
                 FROM file_uploads fu
                 LEFT JOIN users u ON fu.user_id = u.id
                 LEFT JOIN brands b ON fu.brand_id = b.id

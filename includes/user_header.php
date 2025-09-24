@@ -645,7 +645,7 @@ if (isset($_SESSION['user_id']) && isset($pdo)) {
                                     <i class="bi bi-folder me-3 text-secondary"></i>Dosyalarım
                                 </a>
                             </li>
-                            <li>
+                            <!-- <li>
                                 <a class="dropdown-item d-flex align-items-center py-2" href="revisions.php">
                                     <i class="bi bi-pencil-square me-3 text-warning"></i>
                                     Revize Taleplerim
@@ -653,7 +653,7 @@ if (isset($_SESSION['user_id']) && isset($pdo)) {
                                         <span class="badge bg-warning ms-auto"><?php echo $pendingUserRevisions; ?></span>
                                     <?php endif; ?>
                                 </a>
-                            </li>
+                            </li> -->
 
                             <?php if (isAdmin()): ?>
                                 <li>

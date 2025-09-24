@@ -595,7 +595,7 @@ try {
                                                     <div class="file-size" id="fileSize"></div>
                                                 </div>
                                                 <button type="button" class="btn btn-sm btn-outline-danger remove-file" onclick="clearFile()">
-                                                    <i class="bi bi-times"></i>
+                                                    <i class="bi bi-trash3"></i>
                                                 </button>
                                             </div>
                                         </div>

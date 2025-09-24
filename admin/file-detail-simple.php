@@ -395,7 +395,7 @@ include '../includes/admin_header.php';
                         <?php if (!isset($fileData['is_cancelled']) || !$fileData['is_cancelled']): ?>
                             <button type="button" class="btn btn-danger" 
                                     onclick="showCancelModal('<?php echo $fileId; ?>', '<?php echo $fileType; ?>', '<?php echo htmlspecialchars($fileData['original_name'] ?? $fileData['filename'] ?? 'Bilinmeyen dosya', ENT_QUOTES); ?>')">
-                                <i class="bi bi-times me-1"></i>Dosyayı İptal Et
+                                <i class="bi bi-trash3 me-1"></i>Dosyayı İptal Et
                             </button>
                         <?php else: ?>
                             <span class="btn btn-secondary disabled">
@@ -436,7 +436,7 @@ include '../includes/admin_header.php';
                     
                     <div class="mb-4">
                         <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 50%;">
-                            <i class="bi bi-times text-white fa-2x"></i>
+                            <i class="bi bi-trash3 text-white fa-2x"></i>
                         </div>
                         <h6 class="mb-2 text-dark text-center">Bu dosyayı iptal etmek istediğinizden emin misiniz?</h6>
                         <p class="text-muted mb-3 text-center">
@@ -460,7 +460,7 @@ include '../includes/admin_header.php';
                 </div>
                 <div class="modal-footer border-0 pt-3">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-                        <i class="bi bi-times me-1"></i>
+                        <i class="bi bi-trash3 me-1"></i>
                         İptal
                     </button>
                     <button type="submit" class="btn btn-danger px-4" style="box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">

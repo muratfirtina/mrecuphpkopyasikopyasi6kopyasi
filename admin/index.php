@@ -105,6 +105,37 @@ $quickActions = [
 // Header ve Sidebar include
 include '../includes/admin_header.php';
 include '../includes/admin_sidebar.php';
+
+// Dosya kontrol fonksiyonları
+if (!function_exists('checkFileByName')) {
+    function checkFileByName($filename, $type = 'user')
+    {
+        if (empty($filename)) {
+            return ['exists' => false, 'path' => ''];
+        }
+
+        $subdir = $type === 'response' ? 'response_files' : 'user_files';
+        $fullPath = '../uploads/' . $subdir . '/' . $filename;
+
+        $exists = file_exists($fullPath);
+
+        return [
+            'exists' => $exists,
+            'path' => $fullPath,
+            'size' => $exists ? filesize($fullPath) : 0
+        ];
+    }
+}
+
+if (!function_exists('isImageFile')) {
+    function isImageFile($filename)
+    {
+        if (empty($filename)) return false;
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+        return in_array($extension, $imageExtensions);
+    }
+}
 ?>
 
 <!-- Ana İstatistikler -->
@@ -180,38 +211,38 @@ include '../includes/admin_sidebar.php';
 
 <!-- Dosya İstatistikleri -->
 <div class="row g-4 mb-4">
-    <div class="col-lg-3 col-md-6">
+    <div class="col-lg-2 col-md-4 col-sm-6">
         <div class="card admin-card border-left-warning">
             <div class="card-body text-center">
                 <h4 class="text-warning mb-1"><?php echo $fileStats['pending'] ?? 0; ?></h4>
-                <small class="text-muted">Bekleyen Dosya</small>
+                <small class="text-muted">Bekleyen</small>
             </div>
         </div>
     </div>
     
-    <div class="col-lg-3 col-md-6">
+    <div class="col-lg-2 col-md-4 col-sm-6">
         <div class="card admin-card border-left-info">
             <div class="card-body text-center">
                 <h4 class="text-info mb-1"><?php echo $fileStats['processing'] ?? 0; ?></h4>
-                <small class="text-muted">İşlenen Dosya</small>
+                <small class="text-muted">İşleniyor</small>
             </div>
         </div>
     </div>
     
-    <div class="col-lg-3 col-md-6">
+    <div class="col-lg-2 col-md-4 col-sm-6">
         <div class="card admin-card border-left-success">
             <div class="card-body text-center">
                 <h4 class="text-success mb-1"><?php echo $fileStats['completed'] ?? 0; ?></h4>
-                <small class="text-muted">Tamamlanan</small>
+                <small class="text-muted">Tamamlandı</small>
             </div>
         </div>
     </div>
     
-    <div class="col-lg-3 col-md-6">
+    <div class="col-lg-2 col-md-4 col-sm-6">
         <div class="card admin-card border-left-danger">
             <div class="card-body text-center">
-                <h4 class="text-danger mb-1"><?php echo $fileStats['rejected'] ?? 0; ?></h4>
-                <small class="text-muted">Reddedilen</small>
+                <h4 class="text-dark mb-1"><?php echo $fileStats['cancelled'] ?? 0; ?></h4>
+                <small class="text-muted">İptal Edildi</small>
             </div>
         </div>
     </div>
@@ -236,15 +267,22 @@ include '../includes/admin_sidebar.php';
                         <h6 class="text-muted">Henüz dosya yüklenmemiş</h6>
                     </div>
                 <?php else: ?>
+                    <!-- Yatay Liste Formatında Dosya Bilgileri -->
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
+                        <table class="table table-striped table-hover file-details-table">
+                            <thead class="table-dark">
                                 <tr>
-                                    <th>Kullanıcı</th>
-                                    <th>Dosya Adı</th>
-                                    <th>Durum</th>
-                                    <th>Tarih</th>
-                                    <th>İşlemler</th>
+                                    <th><i class="bi bi-person me-1"></i>Kullanıcı</th>
+                                    <th><i class="bi bi-signpost me-1"></i>Plaka</th>
+                                    <th><i class="bi bi-car-front me-1"></i>Marka</th>
+                                    <th><i class="bi bi-car-front-fill me-1"></i>Model</th>
+                                    <th><i class="bi bi-gear me-1"></i>Motor</th>
+                                    <th><i class="bi bi-cpu me-1"></i>Ecu</th>
+                                    <th><i class="bi bi-hdd me-1"></i>Cihaz</th>
+                                    <th><i class="bi bi-info-circle me-1"></i>Durum</th>
+                                    <th><i class="bi bi-file-text me-1"></i>Dosya Adı</th>
+                                    <th><i class="bi bi-calendar me-1"></i>İşlem Tarihi</th>
+                                    <th><i class="bi bi-gear-wide me-1"></i>İşlemler</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -259,46 +297,123 @@ include '../includes/admin_sidebar.php';
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="text-truncate d-block" style="max-width: 200px;" title="<?php echo htmlspecialchars($upload['original_name'] ?? $upload['filename'] ?? 'Bilinmiyor'); ?>">
-                                                <?php echo htmlspecialchars($upload['original_name'] ?? $upload['filename'] ?? 'Bilinmiyor'); ?>
+                                            <?php if (!empty($upload['plate'])): ?>
+                                                <span class="badge text-white me-1" style="background: #0b5ed7 !important; font-size: 1rem;">
+                                                        <?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
                                             </span>
-                                            <small class="text-muted"><?php echo formatFileSize($upload['file_size'] ?? 0); ?></small>
+                                            <?php else: ?>
+                                                <span class="text-muted">-</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <strong class="text-primary">
+                                                <?php echo htmlspecialchars($upload['brand_name'] ?? 'Belirtilmemiş'); ?>
+                                            </strong>
+                                        </td>
+                                        <td>
+                                            <strong class="text-success">
+                                                <?php echo htmlspecialchars($upload['model_name'] ?? 'Belirtilmemiş'); ?>
+                                            </strong>
+                                        </td>
+                                        <td>
+                                            <span class="text-warning fw-bold">
+                                                <?php echo htmlspecialchars($upload['engine_name'] ?? '-'); ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary text-wrap">
+                                                <?php echo htmlspecialchars($upload['ecu_name'] ?? '-'); ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info text-wrap">
+                                                <?php echo htmlspecialchars($upload['device_name'] ?? 'Belirtilmemiş'); ?>
+                                            </span>
                                         </td>
                                         <td>
                                             <?php
-                                            $statusClass = [
-                                                'pending' => 'warning',
-                                                'processing' => 'info',
-                                                'completed' => 'success',
-                                                'rejected' => 'danger'
-                                            ];
-                                            $statusText = [
-                                                'pending' => 'Bekliyor',
-                                                'processing' => 'İşleniyor',
-                                                'completed' => 'Tamamlandı',
-                                                'rejected' => 'Reddedildi'
-                                            ];
+                                            // İptal edilmiş dosya kontrolü
+                                            if (!empty($upload['is_cancelled']) && $upload['is_cancelled'] == 1) {
+                                                echo '<span class="badge" style="background: #dc3545 !important;">İptal Edildi</span>';
+                                            } else {
+                                                $statusClass = [
+                                                    'pending' => 'warning',
+                                                    'processing' => 'info',
+                                                    'completed' => 'success',
+                                                    'rejected' => 'danger'
+                                                ];
+                                                $statusText = [
+                                                    'pending' => 'Bekliyor',
+                                                    'processing' => 'İşleniyor',
+                                                    'completed' => 'Tamamlandı',
+                                                    'rejected' => 'Reddedildi'
+                                                ];
+                                                echo '<span class="badge bg-' . ($statusClass[$upload['status']] ?? 'secondary') . '">';
+                                                echo ($statusText[$upload['status']] ?? 'Bilinmiyor');
+                                                echo '</span>';
+                                            }
                                             ?>
-                                            <span class="badge bg-<?php echo $statusClass[$upload['status']] ?? 'secondary'; ?>">
-                                                <?php echo $statusText[$upload['status']] ?? 'Bilinmiyor'; ?>
-                                            </span>
                                         </td>
                                         <td>
-                                            <small class="text-muted">
-                                                <?php echo date('d.m.Y H:i', strtotime($upload['upload_date'])); ?>
-                                            </small>
+                                            <div class="text-truncate" style="max-width: 150px;" title="<?php echo htmlspecialchars($upload['original_name'] ?? $upload['filename'] ?? 'Bilinmiyor'); ?>">
+                                                <i class="bi bi-file-earmark-text text-primary me-1"></i>
+                                                <?php echo htmlspecialchars($upload['original_name'] ?? $upload['filename'] ?? 'Bilinmiyor'); ?>
+                                            </div>
+                                            <!-- <div class="mt-1">
+                                                <a href="download-file.php?id=<?php echo $upload['id']; ?>&type=upload" class="btn btn-success btn-sm">
+                                                    <i class="bi bi-download me-1"></i>İndir
+                                                </a>
+                                            </div> -->
                                         </td>
                                         <td>
+                                            <div class="text-nowrap">
+                                                <small class="text-muted d-block">
+                                                    <?php echo date('d.m.Y', strtotime($upload['upload_date'])); ?>
+                                                </small>
+                                                <small class="text-primary">
+                                                    <?php echo date('H:i', strtotime($upload['upload_date'])); ?>
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            // Her upload için dosya varlık kontrolü
+                                            $originalFileCheck = checkFileByName($upload['filename'], 'user');
+                                            ?>
                                             <div class="btn-group btn-group-sm">
+                                                <!-- İndir Butonu -->
+                                                <?php if ($originalFileCheck['exists']): ?>
+                                                    <a href="download-file.php?id=<?php echo $upload['id']; ?>&type=upload" class="btn btn-success btn-sm" title="Dosyayı İndir">
+                                                        <i class="bi bi-download"></i>
+                                                    </a>
+                                                    <?php if (isImageFile($upload['original_name'])): ?>
+                                                        <a href="view-image.php?id=<?php echo $upload['id']; ?>&type=upload" class="btn btn-info btn-sm" title="Dosyayı Görüntüle">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
+                                                
+                                                <!-- Detay Butonu -->
                                                 <a href="file-detail.php?id=<?php echo $upload['id']; ?>" 
                                                    class="btn btn-outline-primary btn-sm" title="Detay">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
-                                                <?php if ($upload['status'] === 'pending'): ?>
-                                                    <a href="uploads.php?action=process&id=<?php echo $upload['id']; ?>" 
-                                                       class="btn btn-outline-success btn-sm" title="İşle">
-                                                        <i class="bi bi-play"></i>
-                                                    </a>
+                                                
+                                                <!-- İşle Butonu -->
+                                                <?php 
+                                                // İptal edilmiş dosya kontrolü - işle butonu sadece aktif dosyalar için
+                                                if (empty($upload['is_cancelled']) || $upload['is_cancelled'] != 1): 
+                                                ?>
+                                                    <?php if ($upload['status'] === 'pending'): ?>
+                                                        <a href="uploads.php?action=process&id=<?php echo $upload['id']; ?>" 
+                                                           class="btn btn-outline-success btn-sm" title="İşle">
+                                                            <i class="bi bi-play"></i>
+                                                        </a>
+                                                    <?php endif; ?>
+                                                <?php else: ?>
+                                                    <span class="btn btn-outline-secondary btn-sm disabled" title="İptal Edilmiş">
+                                                        <i class="bi bi-ban"></i>
+                                                    </span>
                                                 <?php endif; ?>
                                             </div>
                                         </td>

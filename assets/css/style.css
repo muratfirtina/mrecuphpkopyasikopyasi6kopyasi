@@ -1297,3 +1297,110 @@ a:focus {
     display: block;
     animation: fadeIn 0.3s ease-in;
 }
+
+/* Dosya Detay Tablosu Stilleri */
+.file-details-table {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+.file-details-table th {
+    background-color: #343a40 !important;
+    color: white !important;
+    font-weight: 600;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0.75rem 0.5rem;
+    border: none;
+    font-size: 0.85rem;
+}
+
+.file-details-table td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 0.75rem 0.5rem;
+    border-color: #dee2e6;
+}
+
+.file-details-table .badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+.file-details-table .text-truncate {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-details-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+    transition: background-color 0.3s ease;
+}
+
+.file-details-table .badge.fs-6 {
+    font-size: 0.85rem !important;
+    font-weight: 600;
+}
+
+.file-details-table .text-nowrap {
+    white-space: nowrap;
+}
+
+/* Kullanıcı Notları Stili */
+.user-notes-content {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+    border: 1px solid #dee2e6;
+    border-left: 4px solid #007bff;
+    font-style: italic;
+    line-height: 1.6;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.user-notes-content:hover {
+    border-left-color: #0056b3;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+}
+
+.user-notes-content .bi-quote {
+    font-size: 1.2rem;
+    opacity: 0.7;
+}
+
+/* Responsive tablo ayarları */
+@media (max-width: 768px) {
+    .file-details-table {
+        font-size: 0.8rem;
+    }
+    
+    .file-details-table th,
+    .file-details-table td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .file-details-table .text-truncate {
+        max-width: 100px;
+    }
+    
+    .user-notes-content {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .file-details-table {
+        font-size: 0.75rem;
+    }
+    
+    .file-details-table .badge {
+        font-size: 0.65rem;
+        padding: 0.25em 0.5em;
+    }
+    
+    .user-notes-content {
+        font-size: 0.85rem;
+        padding: 1rem !important;
+    }
+}

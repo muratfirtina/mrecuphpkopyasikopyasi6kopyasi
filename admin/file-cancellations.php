@@ -313,7 +313,7 @@ include '../includes/admin_header.php';
                                         <i class="bi bi-search me-1"></i>Filtrele
                                     </button>
                                     <a href="file-cancellations.php" class="btn btn-outline-secondary">
-                                        <i class="bi bi-times me-1"></i>Temizle
+                                        <i class="bi bi-trash3 me-1"></i>Temizle
                                     </a>
                                 </div>
                             </form>
@@ -565,7 +565,7 @@ include '../includes/admin_header.php';
                                                     </button>
                                                     <button type="button" class="btn btn-danger btn-sm mb-1" 
                                                             onclick="showActionModal('<?php echo $cancellation['id']; ?>', 'reject', '<?php echo htmlspecialchars($cancellation['reason']); ?>', <?php echo $cancellation['credits_to_refund']; ?>)">
-                                                        <i class="bi bi-times me-1"></i>Reddet
+                                                        <i class="bi bi-trash3 me-1"></i>Reddet
                                                     </button>
                                                 <?php else: ?>
                                                     <button type="button" class="btn btn-outline-info btn-sm mb-1" 
@@ -830,7 +830,7 @@ function showActionModal(cancellationId, action, reason, refundAmount) {
             refundInfo.style.display = 'none';
         }
     } else {
-        title.innerHTML = '<i class="bi bi-times me-2 text-danger"></i>İptal Talebini Reddet';
+        title.innerHTML = '<i class="bi bi-trash3 me-2 text-danger"></i>İptal Talebini Reddet';
         submitBtn.className = 'btn btn-danger';
         submitBtn.textContent = 'Reddet';
         adminNotesLabel.textContent = 'Red Sebebi:';

@@ -203,42 +203,7 @@ extract($GLOBALS['legacy_data']);
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="stat-card modern">
-                            <div class="stat-card-body">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <div class="stat-number text-info"><?php echo count($stats['file_types']); ?></div>
-                                        <div class="stat-label">Dosya Tipi</div>
-                                        <div class="stat-trend"><i class="bi bi-tags text-info"></i><span class="text-info">Farklı format</span></div>
-                                    </div>
-                                    <div class="stat-icon bg-info"><i class="bi bi-tags"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="stat-card modern">
-                            <div class="stat-card-body">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <div class="stat-number text-warning">
-                                            <?php 
-                                            if (function_exists('formatFileSize')) {
-                                                echo formatFileSize($stats['total_size']);
-                                            } else {
-                                                echo round($stats['total_size'] / 1024 / 1024, 1) . ' MB';
-                                            }
-                                            ?>
-                                        </div>
-                                        <div class="stat-label">Toplam Boyut</div>
-                                        <div class="stat-trend"><i class="bi bi-hdd text-warning"></i><span class="text-warning">Disk kullanımı</span></div>
-                                    </div>
-                                    <div class="stat-icon bg-warning"><i class="bi bi-hdd"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
             <?php endif; ?>
 
@@ -349,7 +314,6 @@ extract($GLOBALS['legacy_data']);
                                                     $files = $legacyManager->getPlateFiles($userId, $plate['plate_number']);
                                                     foreach ($files as $f) $size += $f['file_size'] ?? 0;
                                                     ?>
-                                                    <i class="bi bi-hdd text-warning"></i><br><small>Boyut</small><br><strong><?= formatFileSize($size) ?? '0 KB' ?></strong>
                                                 </div>
                                             </div>
                                         </div>

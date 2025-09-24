@@ -650,7 +650,7 @@ include '../includes/admin_sidebar.php';
                                                     <button type="button" class="btn btn-warning btn-sm"
                                                         onclick="showCancelModal('<?php echo $upload['id']; ?>', 'upload', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')"
                                                         title="Dosyayı İptal Et">
-                                                        <i class="bi bi-times"></i>
+                                                        <i class="bi bi-trash3"></i>
                                                     </button>
                                                 <?php else: ?>
                                                     <span class="btn btn-sm btn-secondary disabled">
@@ -731,7 +731,7 @@ include '../includes/admin_footer.php';
 
                     <div class="mb-4">
                         <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 50%;">
-                            <i class="bi bi-times text-white fa-2x"></i>
+                            <i class="bi bi-trash3 text-white fa-2x"></i>
                         </div>
                         <h6 class="mb-2 text-dark text-center">Bu dosyayı iptal etmek istediğinizden emin misiniz?</h6>
                         <p class="text-muted mb-3 text-center">
@@ -755,7 +755,7 @@ include '../includes/admin_footer.php';
                 </div>
                 <div class="modal-footer border-0 pt-3">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-                        <i class="bi bi-times me-1"></i>İptal
+                        <i class="bi bi-trash3 me-1"></i>İptal
                     </button>
                     <button type="submit" class="btn btn-danger px-4">
                         <i class="bi bi-check me-1"></i>Evet, İptal Et

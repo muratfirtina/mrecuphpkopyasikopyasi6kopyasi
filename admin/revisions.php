@@ -665,7 +665,7 @@ include '../includes/admin_sidebar.php';
                                             <!-- Reddet Butonu -->
                                             <button type="button" class="btn btn-danger btn-sm w-100 mb-1" 
                                                     onclick="showRejectModal('<?php echo $revision['id']; ?>')">
-                                                <i class="bi bi-times me-1"></i>Reddet
+                                                <i class="bi bi-trash3 me-1"></i>Reddet
                                             </button>
                                         <?php else: ?>
                                             <span class="text-muted small">İşlenmiş</span>
@@ -894,7 +894,7 @@ include '../includes/admin_sidebar.php';
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-times me-1"></i>Vazgeç
+                        <i class="bi bi-trash3 me-1"></i>Vazgeç
                     </button>
                     <button type="submit" class="btn btn-success" id="approve-submit-btn">
                         <i class="bi bi-check me-1"></i>Onayla ve İşleme Al
@@ -937,10 +937,10 @@ include '../includes/admin_sidebar.php';
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-times me-1"></i>Vazgeç
+                        <i class="bi bi-trash3 me-1"></i>Vazgeç
                     </button>
                     <button type="submit" class="btn btn-danger" id="reject-submit-btn">
-                        <i class="bi bi-times me-1"></i>Reddet
+                        <i class="bi bi-trash3 me-1"></i>Reddet
                     </button>
                 </div>
             </form>
@@ -967,7 +967,7 @@ include '../includes/admin_sidebar.php';
                     
                     <div class="mb-4">
                         <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 50%;">
-                            <i class="bi bi-times text-white fa-2x"></i>
+                            <i class="bi bi-trash3 text-white fa-2x"></i>
                         </div>
                         <h6 class="mb-2 text-dark text-center">Bu revize talebini iptal etmek istediğinizden emin misiniz?</h6>
                         <p class="text-muted mb-3 text-center">
@@ -991,7 +991,7 @@ include '../includes/admin_sidebar.php';
                 </div>
                 <div class="modal-footer border-0 pt-3">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" data-cancel-operation="true">
-                        <i class="bi bi-times me-1"></i>İptal
+                        <i class="bi bi-trash3 me-1"></i>İptal
                     </button>
                     <button type="submit" class="btn btn-danger px-4" data-cancel-operation="true">
                         <i class="bi bi-check me-1"></i>Evet, İptal Et

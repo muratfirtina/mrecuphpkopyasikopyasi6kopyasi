@@ -85,6 +85,16 @@ try {
         }
     }
 
+    if (!function_exists('isImageFile')) {
+        function isImageFile($filename)
+        {
+            if (empty($filename)) return false;
+            $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+            return in_array($extension, $imageExtensions);
+        }
+    }
+
     // Class includes
     require_once '../includes/FileManager.php';
     require_once '../includes/User.php';
@@ -799,6 +809,35 @@ try {
     redirect('uploads.php');
 }
 
+// Ek dosyaları getir
+$additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_id'], 'admin');
+
+// Toplam tutar hesaplama (iptal edilmemiş dosyalar için)
+$totalAmount = 0;
+
+// Response dosyaları tutarlarını topla (iptal edilmemişler)
+if ($fileType !== 'response' && !empty($responseFiles)) {
+    foreach ($responseFiles as $responseFile) {
+        if (!isset($responseFile['is_cancelled']) || !$responseFile['is_cancelled']) {
+            $totalAmount += floatval($responseFile['credits_charged'] ?? 0);
+        }
+    }
+} elseif ($fileType === 'response') {
+    // Response dosyası modundaysa, o dosyanın tutarını al (iptal edilmemişse)
+    if (!isset($upload['is_cancelled']) || !$upload['is_cancelled']) {
+        $totalAmount += floatval($upload['credits_charged'] ?? 0);
+    }
+}
+
+// Ek dosyalar tutarlarını topla (iptal edilmemişler)
+if (!empty($additionalFiles)) {
+    foreach ($additionalFiles as $file) {
+        if (!isset($file['is_cancelled']) || !$file['is_cancelled']) {
+            $totalAmount += floatval($file['credits'] ?? 0);
+        }
+    }
+}
+
 // Dosya path kontrolü
 function checkFilePath($filePath)
 {
@@ -806,11 +845,9 @@ function checkFilePath($filePath)
 
     $fullPath = $filePath;
 
-    // Path düzeltmeleri
-    if (strpos($fullPath, '../uploads/') === 0) {
-        $fullPath = str_replace('../uploads/', $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/', $fullPath);
-    } elseif (strpos($fullPath, $_SERVER['DOCUMENT_ROOT']) !== 0) {
-        $fullPath = $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/' . ltrim($fullPath, '/');
+    // Path düzeltmeleri - relative path kullan
+    if (strpos($fullPath, '../uploads/') !== 0) {
+        $fullPath = '../uploads/' . ltrim($fullPath, '/');
     }
 
     return [
@@ -829,7 +866,7 @@ function checkFileByName($filename, $type = 'user')
     }
 
     $subdir = $type === 'response' ? 'response_files' : 'user_files';
-    $fullPath = $_SERVER['DOCUMENT_ROOT'] . '<?php echo BASE_URL; ?>/uploads/' . $subdir . '/' . $filename;
+    $fullPath = '../uploads/' . $subdir . '/' . $filename;
 
     $exists = file_exists($fullPath);
 
@@ -965,7 +1002,7 @@ include '../includes/admin_sidebar.php';
                     <?php if (!isset($upload['is_cancelled']) || !$upload['is_cancelled']): ?>
                         <button type="button" class="btn btn-danger btn-sm" 
                                 onclick="showCancelModal('<?php echo $responseId; ?>', 'response', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')">
-                            <i class="bi bi-times me-1"></i>İptal Et
+                            <i class="bi bi-trash3 me-1"></i>İptal Et
                         </button>
                     <?php else: ?>
                         <span class="btn btn-secondary btn-sm disabled">
@@ -977,7 +1014,7 @@ include '../includes/admin_sidebar.php';
                     <?php if (!isset($upload['is_cancelled']) || !$upload['is_cancelled']): ?>
                         <button type="button" class="btn btn-danger btn-sm" 
                                 onclick="showCancelModal('<?php echo $uploadId; ?>', 'upload', '<?php echo htmlspecialchars($upload['original_name'], ENT_QUOTES); ?>')">
-                            <i class="bi bi-times me-1"></i>Dosyayı İptal Et
+                            <i class="bi bi-trash3 me-1"></i>Dosyayı İptal Et
                         </button>
                     <?php else: ?>
                         <span class="btn btn-secondary btn-sm disabled">
@@ -991,8 +1028,7 @@ include '../includes/admin_sidebar.php';
 
     <!-- revision-form-html.php dosyasının içeriğini buraya kopyala -->
     <!-- ==================== REVİZYON DOSYASI YÜKLEMESİ ==================== -->
-    <?php
-    // Bu dosya için işlemdeki revizyon taleplerini kontrol et
+    <!-- <?php
     try {
         $stmt = $pdo->prepare("
         SELECT r.*, fu.original_name, u.username, u.first_name, u.last_name
@@ -1043,7 +1079,6 @@ include '../includes/admin_sidebar.php';
                             </div>
                         </div>
 
-                        <!-- Revizyon Dosyası Yükleme Formu -->
                         <form method="POST" enctype="multipart/form-data" class="revision-upload-form">
                             <input type="hidden" name="revision_id" value="<?php echo $revision['id']; ?>">
 
@@ -1098,7 +1133,7 @@ include '../includes/admin_sidebar.php';
                                         <div class="revision-actions">
                                             <button type="button" class="btn btn-outline-danger btn-sm"
                                                 onclick="showRejectModal('<?php echo $revision['id']; ?>')">
-                                                <i class="bi bi-times me-1"></i>Revizyon Talebini Reddet
+                                                <i class="bi bi-trash3 me-1"></i>Revizyon Talebini Reddet
                                             </button>
                                         </div>
                                     </div>
@@ -1112,7 +1147,7 @@ include '../includes/admin_sidebar.php';
                         </form>
                     </div>
 
-                    <?php if (false): // Removed loop check 
+                    <?php if (false): 
                     ?>
                         <hr class="my-4">
                     <?php endif; ?>
@@ -1120,9 +1155,8 @@ include '../includes/admin_sidebar.php';
             </div>
         </div>
     <?php else: ?>
-        <!-- İşlemdeki revizyon talebi yok -->
+        
         <?php
-        // Bu dosya için herhangi bir revizyon talebi var mı kontrol et
         try {
             $stmt = $pdo->prepare("SELECT COUNT(*) FROM revisions WHERE upload_id = ?");
             $stmt->execute([$uploadId]);
@@ -1132,7 +1166,6 @@ include '../includes/admin_sidebar.php';
             $stmt->execute([$uploadId]);
             $pendingRevisions = $stmt->fetchColumn();
 
-            // Bekleyen revizyon taleplerinin detaylarını çek
             $stmt = $pdo->prepare("
             SELECT r.*, u.username, u.first_name, u.last_name, u.email,
                    fr.original_name as response_file_name
@@ -1173,7 +1206,6 @@ include '../includes/admin_sidebar.php';
                         <div class="pending-revision-item mb-4 p-4 border rounded bg-light">
                             <div class="row">
                                 <div class="col-md-8">
-                                    <!-- Kullanıcı Bilgileri -->
                                     <div class="d-flex align-items-center mb-3">
                                         <div class="avatar-circle me-3 bg-warning text-white">
                                             <?php echo strtoupper(substr($revision['first_name'], 0, 1) . substr($revision['last_name'], 0, 1)); ?>
@@ -1184,7 +1216,6 @@ include '../includes/admin_sidebar.php';
                                         </div>
                                     </div>
 
-                                    <!-- Hangi Dosyaya Revizyon Talep Edildi -->
                                     <div class="mb-3">
                                         <h6 class="text-primary mb-2">
                                             <i class="bi bi-folder2-open me-2"></i>Revizyon Talep Edilen Dosya:
@@ -1197,7 +1228,6 @@ include '../includes/admin_sidebar.php';
                                                 <small class="text-muted d-block mt-1">Kullanıcı yanıt dosyasında değişiklik istiyor</small>
                                             <?php else: ?>
                                                 <?php
-                                                // Son revizyon dosyasını bul
                                                 $targetFileName = '';
                                                 $targetFileType = 'Orijinal Yüklenen Dosya';
                                                 $targetFileColor = 'success';
@@ -1223,7 +1253,6 @@ include '../includes/admin_sidebar.php';
                                                         $targetFileColor = 'warning';
                                                         $targetFileIcon = 'edit';
                                                     } else {
-                                                        // Ana dosya adını al
                                                         $stmt = $pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
                                                         $stmt->execute([$uploadId]);
                                                         $targetFileName = $stmt->fetchColumn() ?: 'Bilinmeyen Dosya';
@@ -1231,7 +1260,6 @@ include '../includes/admin_sidebar.php';
                                                     }
                                                 } catch (Exception $e) {
                                                     error_log('Previous revision file query error: ' . $e->getMessage());
-                                                    // Hata durumunda ana dosya adını al
                                                     try {
                                                         $stmt = $pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
                                                         $stmt->execute([$uploadId]);
@@ -1255,7 +1283,6 @@ include '../includes/admin_sidebar.php';
                                         </div>
                                     </div>
 
-                                    <!-- Revizyon Talep Notu -->
                                     <div class="mb-3">
                                         <h6 class="text-info mb-2">
                                             <i class="bi bi-comment-dots me-2"></i>Kullanıcının Revizyon Talebi:
@@ -1265,7 +1292,6 @@ include '../includes/admin_sidebar.php';
                                         </div>
                                     </div>
 
-                                    <!-- Tarih Bilgisi -->
                                     <div class="mb-3">
                                         <small class="text-muted">
                                             <i class="bi bi-calendar me-1"></i>
@@ -1276,16 +1302,13 @@ include '../includes/admin_sidebar.php';
                                 </div>
 
                                 <div class="col-md-4">
-                                    <!-- İşlem Butonları -->
                                     <div class="action-buttons">
                                         <h6 class="mb-3 text-center">
                                             <i class="bi bi-gear-wide-connected me-2"></i>İşlemler
                                         </h6>
 
-                                        <!-- Dosyayı İndir -->
                                         <div class="mb-3">
                                             <?php if (!empty($revision['response_file_name'])): ?>
-                                                <!-- Yanıt dosyasını indir -->
                                                 <?php
                                                 try {
                                                     $stmt = $pdo->prepare("SELECT id FROM file_responses WHERE upload_id = ? AND original_name = ? ORDER BY upload_date DESC LIMIT 1");
@@ -1303,12 +1326,10 @@ include '../includes/admin_sidebar.php';
                                                     </a>
                                                 <?php endif; ?>
                                             <?php else: ?>
-                                                <!-- Ana dosya veya revizyon dosyasını indir -->
                                                 <?php
                                                 $downloadFileId = $uploadId;
                                                 $downloadType = 'upload';
 
-                                                // Son revizyon dosyası varsa onu indir
                                                 try {
                                                     $stmt = $pdo->prepare("
                                                     SELECT r.id as revision_id
@@ -1340,7 +1361,6 @@ include '../includes/admin_sidebar.php';
                                             <?php endif; ?>
                                         </div>
 
-                                        <!-- İşleme Al Butonu -->
                                         <form method="POST" class="mb-2" id="approve-form-<?php echo $revision['id']; ?>">
                                             <input type="hidden" name="revision_id" value="<?php echo $revision['id']; ?>">
                                             <input type="hidden" name="approve_revision_direct" value="1">
@@ -1351,15 +1371,13 @@ include '../includes/admin_sidebar.php';
                                             </button>
                                         </form>
 
-                                        <!-- Reddet Butonu -->
                                         <button type="button" class="btn btn-danger w-100"
                                             onclick="showRejectModal('<?php echo $revision['id']; ?>')">
-                                            <i class="bi bi-times me-1"></i>Reddet
+                                            <i class="bi bi-trash3 me-1"></i>Reddet
                                         </button>
 
                                         <hr class="my-3">
 
-                                        <!-- Detaylı Görünüm -->
                                         <a href="revisions.php?search=<?php echo urlencode($upload['original_name']); ?>"
                                             class="btn btn-outline-secondary btn-sm w-100">
                                             <i class="bi bi-list me-1"></i>Tüm Revizyon Geçmişi
@@ -1403,235 +1421,243 @@ include '../includes/admin_sidebar.php';
                 </div>
             </div>
         <?php endif; ?>
-    <?php endif; ?>
+    <?php endif; ?> -->
     <!-- ==================== REVİZYON DOSYASI YÜKLEMESİ SON ==================== -->
 
 
     <div class="card-body">
-        <div class="row">
-            <!-- Dosya Bilgileri -->
-            <div class="col-md-4">
-                <div class="file-meta card border p-3">
-                    <h6 class="mb-3 d-flex align-items-center">
-                        <i class="bi bi-info-circle me-2 text-primary"></i> Dosya Bilgileri
-                    </h6>
-                    <div class="meta-list">
-                        <div class="d-flex justify-content-between border-bottom py-2">
-                            <span class="text-muted">Dosya ID:</span>
-                            <span class="fw-medium">
-                                <?php echo substr($fileType === 'response' ? $responseId : $uploadId, 0, 8); ?>...
-                            </span>
-                        </div>
-                        <div class="d-flex justify-content-between border-bottom py-2">
-                            <span class="text-muted">Dosya Adı:</span>
-                            <span class="fw-medium">
-                                <?php echo safeHtml($upload['original_name']); ?>
-                            </span>
-                        </div>
-                        <div class="d-flex justify-content-between border-bottom py-2">
-                            <span class="text-muted">Cihaz Tipi:</span>
-                            <span class="fw-medium">
-                                <?php echo safeHtml($upload['device_name'] ?? 'Belirtilmemiş'); ?>
-                            </span>
-                        </div>
-                        <div class="d-flex justify-content-between border-bottom py-2">
-                            <span class="text-muted">Dosya Boyutu:</span>
-                            <span class="fw-medium">
-                                <?php echo formatFileSize($upload['file_size'] ?? 0); ?>
-                            </span>
-                        </div>
-                        <div class="d-flex justify-content-between border-bottom py-2">
-                            <span class="text-muted">Yükleme Tarihi:</span>
-                            <span class="fw-medium">
-                                <?php echo date('d.m.Y H:i', strtotime($upload['upload_date'])); ?>
-                            </span>
-                        </div>
-                        <?php if ($fileType === 'response'): ?>
-                            <div class="d-flex justify-content-between border-bottom py-2">
-                                <span class="text-muted">Oluşturan Admin:</span>
-                                <span class="fw-medium">
-                                    <?php echo safeHtml($upload['admin_first_name'] . ' ' . $upload['admin_last_name']); ?>
-                                </span>
-                            </div>
-                            <div class="d-flex justify-content-between py-2">
-                                <span class="text-muted">Orijinal Dosya:</span>
-                                <span class="fw-medium">
-                                    <a href="file-detail.php?id=<?php echo $uploadId; ?>" class="text-primary">
-                                        <?php echo safeHtml($upload['original_upload_name']); ?>
-                                    </a>
-                                </span>
-                            </div>
-                        <?php else: ?>
-                            <div class="d-flex justify-content-between py-2">
-                                <span class="text-muted">Durum:</span>
-                                <span class="fw-medium">
-                                    <?php
-                                    $statusClass = [
-                                        'pending' => 'warning',
-                                        'processing' => 'info',
-                                        'completed' => 'success',
-                                        'rejected' => 'danger'
-                                    ];
-                                    $statusText = [
-                                        'pending' => 'Bekliyor',
-                                        'processing' => 'İşleniyor',
-                                        'completed' => 'Tamamlandı',
-                                        'rejected' => 'Reddedildi'
-                                    ];
-                                    ?>
-                                    <span class="badge bg-<?php echo $statusClass[$upload['status']] ?? 'secondary'; ?>">
-                                        <?php echo $statusText[$upload['status']] ?? 'Bilinmiyor'; ?>
-                                    </span>
-                                </span>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-
-                    <!-- İndir Butonu -->
-                    <?php if ($originalFileCheck['exists']): ?>
-                        <div class="mt-3">
-                            <?php if ($fileType === 'response'): ?>
-                                <a href="download-file.php?id=<?php echo $responseId; ?>&type=response" class="btn btn-success btn-sm w-100">
-                                    <i class="bi bi-download me-1"></i>Dosyayı İndir
-                                </a>
-                                <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
-                                <?php if (isImageFile($upload['original_name'])): ?>
-                                    <a href="view-image.php?id=<?php echo $responseId; ?>&type=response" class="btn btn-info btn-sm w-100 mt-1">
-                                        <i class="bi bi-eye me-1"></i>Dosyayı Görüntüle
-                                    </a>
-                                <?php endif; ?>
+        <!-- Yatay Liste Formatında Dosya Bilgileri -->
+        <div class="table-responsive">
+            <table class="table table-striped table-hover file-details-table">
+                <thead class="table-dark">
+                    <tr>
+                        <th><i class="bi bi-signpost me-1"></i>Plaka</th>
+                        <th><i class="bi bi-car-front me-1"></i>Marka</th>
+                        <th><i class="bi bi-car-front-fill me-1"></i>Model</th>
+                        <th><i class="bi bi-gear me-1"></i>Motor</th>
+                        <th><i class="bi bi-cpu me-1"></i>Ecu</th>
+                        <th><i class="bi bi-hdd me-1"></i>Cihaz</th>
+                        <th><i class="bi bi-gear-wide me-1"></i>Şanzıman</th>
+                        <th><i class="bi bi-speedometer2 me-1"></i>Kilometre</th>
+                        <th><i class="bi bi-info-circle me-1"></i>Durum</th>
+                        <th><i class="bi bi-coin me-1"></i>Tutar</th>
+                        <th><i class="bi bi-file-text me-1"></i>Dosya Adı</th>
+                        <th><i class="bi bi-calendar me-1"></i>İşlem Tarihi</th>
+                        <th><i class="bi bi-person me-1"></i>Kullanıcı</th>
+                        <th><i class="bi bi-tools me-1"></i>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <?php if (!empty($upload['plate'])): ?>
+                                <span class="badge text-white me-1" style="background: #0b5ed7 !important; font-size: 1rem;">
+                                                        <?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
+                                            </span>
                             <?php else: ?>
-                                <a href="download-file.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-success btn-sm w-100">
-                                    <i class="bi bi-download me-1"></i>Dosyayı İndir
-                                </a>
-                                <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
-                                <?php if (isImageFile($upload['original_name'])): ?>
-                                    <a href="view-image.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-info btn-sm w-100 mt-1">
-                                        <i class="bi bi-eye me-1"></i>Dosyayı Görüntüle
-                                    </a>
-                                <?php endif; ?>
+                                <span class="text-muted">-</span>
                             <?php endif; ?>
-
-                            <!-- Dosyayı İşleme Al Butonu -->
-                            <?php if ($fileType !== 'response' && isset($upload['status']) && $upload['status'] === 'pending'): ?>
-                                <div class="mt-2">
-                                    <button type="button" class="btn btn-warning btn-sm w-100" onclick="showProcessingConfirmModal()">
-                                        <i class="bi bi-gear-wide-connected me-1"></i>Dosyayı İşleme Al
-                                    </button>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <!-- Araç Bilgileri -->
-            <div class="col-md-4">
-                <div class="file-meta card border p-3">
-                    <h6 class="mb-3 d-flex align-items-center">
-                        <i class="bi bi-car me-2 text-success"></i> Araç Bilgileri
-                    </h6>
-                    <div class="meta-list">
-                        <div class="d-flex justify-content-between border-bottom py-2">
-                            <span class="text-muted">Araç Markası:</span>
-                            <span class="fw-medium">
-                                <?php echo safeHtml($upload['brand_name'] ?? 'Belirtilmemiş'); ?>
-                            </span>
-                        </div>
-                        <div class="d-flex justify-content-between border-bottom py-2">
-                            <span class="text-muted">Araç Modeli:</span>
-                            <span class="fw-medium">
+                        </td>
+                        <td>
+                            <strong class="text-primary">
+                                <?php echo htmlspecialchars($upload['brand_name'] ?? 'Belirtilmemiş'); ?>
+                            </strong>
+                        </td>
+                        <td>
+                            <strong class="text-success">
                                 <?php
-                                $modelDisplay = safeHtml($upload['model_name'] ?? 'Belirtilmemiş');
+                                $modelDisplay = htmlspecialchars($upload['model_name'] ?? 'Belirtilmemiş');
                                 if (!empty($upload['year'])) {
-                                    $modelDisplay = safeHtml($upload['model_name'] . ' (' . $upload['year'] . ')');
+                                    $modelDisplay = htmlspecialchars($upload['model_name']);
                                 }
                                 echo $modelDisplay;
                                 ?>
+                            </strong>
+                        </td>
+                        <td>
+                            <span class="text-info fw-medium">
+                                <?php echo htmlspecialchars($upload['engine_name'] ?? 'Belirtilmemiş'); ?>
                             </span>
-                        </div>
-                        <div class="d-flex justify-content-between border-bottom py-2">
-                            <span class="text-muted">Motor Tipi:</span>
-                            <span class="fw-medium">
-                                <?php echo safeHtml($upload['engine_name'] ?? 'Belirtilmemiş'); ?>
+                        </td>
+                        <td>
+                            <span class="text-warning fw-medium">
+                                <?php echo htmlspecialchars($upload['ecu_name'] ?? 'Belirtilmemiş'); ?>
                             </span>
-                        </div>
-                        <div class="d-flex justify-content-between border-bottom py-2">
-                            <span class="text-muted">KM:</span>
-                            <span class="fw-medium">
-                                <?php echo safeHtml($upload['kilometer'] ?? 'Belirtilmemiş'); ?>
+                        </td>
+                        <td>
+                            <span class="text-secondary">
+                                <?php echo htmlspecialchars($upload['device_name'] ?? 'Belirtilmemiş'); ?>
                             </span>
-                        </div>
-                        <div class="d-flex justify-content-between py-2">
-                            <span class="text-muted">ECU Tipi:</span>
-                            <span class="fw-medium">
-                                <?php echo safeHtml($upload['ecu_name'] ?? 'Belirtilmemiş'); ?>
+                        </td>
+                        <td>
+                            <span class="text-muted">
+                                <?php echo htmlspecialchars($upload['gearbox_type'] ?? 'Belirtilmemiş'); ?>
                             </span>
-                        </div>
-                        <?php if (!empty($upload['plate'])): ?>
-                            <div class="d-flex justify-content-between border-top pt-2 mt-2">
-                                <span class="text-muted">Plaka:</span>
-                                <span class="fw-medium text-primary">
-                                    <i class="bi bi-id-card me-1"></i><?php echo strtoupper(htmlspecialchars($upload['plate'])); ?>
+                        </td>
+                        <td>
+                            <span class="text-muted">
+                                <?php echo htmlspecialchars($upload['kilometer'] ?? 'Belirtilmemiş'); ?>
+                            </span>
+                        </td>
+                        <td>
+    <?php
+    // Öncelikle is_cancelled kontrolü yap
+    if (isset($upload['is_cancelled']) && $upload['is_cancelled']) {
+        echo '<span class="badge bg-secondary"><i class="bi bi-ban me-1"></i>İptal Edildi</span>';
+    } else {
+        // İptal edilmemişse, mevcut status mantığını kullan
+        if ($fileType === 'response') {
+            echo '<span class="badge bg-success"><i class="bi bi-reply me-1"></i>Yanıt Dosyası</span>';
+        } else {
+            $statusClass = [
+                'pending' => 'warning',
+                'processing' => 'info',
+                'completed' => 'success',
+                'rejected' => 'danger'
+            ];
+            $statusText = [
+                'pending' => 'Bekliyor',
+                'processing' => 'İşleniyor',
+                'completed' => 'Tamamlandı',
+                'rejected' => 'Reddedildi'
+            ];
+            echo '<span class="badge bg-' . ($statusClass[$upload['status']] ?? 'secondary') . '">';
+            echo ($statusText[$upload['status']] ?? 'Bilinmiyor');
+            echo '</span>';
+        }
+    }
+    ?>
+</td>
+                        <td>
+                            <?php if ($totalAmount > 0): ?>
+                                <span class="text-success fw-bold">
+                                    <?php echo number_format($totalAmount); ?>
                                 </span>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Kullanıcı Bilgileri -->
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h6 class="mb-0">Kullanıcı Bilgileri</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="avatar-circle me-3">
-                                <?php
-                                $firstName = $upload['first_name'] ?? '';
-                                $lastName = $upload['last_name'] ?? '';
-                                echo strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1));
-                                ?>
-                            </div>
-                            <div>
-                                <h6 class="mb-0"><?php echo safeHtml(($upload['first_name'] ?? '') . ' ' . ($upload['last_name'] ?? '')); ?></h6>
-                                <small class="text-muted">@<?php echo safeHtml($upload['username'] ?? 'Bilinmiyor'); ?></small>
-                            </div>
-                        </div>
-
-                        <div class="mb-2">
-                            <small class="text-muted">E-posta:</small><br>
-                            <a href="mailto:<?php echo $upload['email'] ?? ''; ?>"><?php echo safeHtml($upload['email'] ?? 'Belirtilmemiş'); ?></a>
-                        </div>
-
-                        <!-- <div class="mb-2">
-                            <small class="text-muted">Dosya Durumu:</small><br>
-                            <?php if ($fileType === 'response'): ?>
-                                <span class="badge bg-success fs-6">
-                                    <i class="bi bi-reply me-1"></i>Yanıt Dosyası
-                                </span>
+                                <!-- <small class="text-muted d-block">
+                                    <?php
+                                    $breakdownItems = [];
+                                    
+                                    // Response dosyaları sayısı ve tutarı
+                                    if ($fileType !== 'response' && !empty($responseFiles)) {
+                                        $responseTotal = 0;
+                                        $responseCount = 0;
+                                        foreach ($responseFiles as $responseFile) {
+                                            if (!isset($responseFile['is_cancelled']) || !$responseFile['is_cancelled']) {
+                                                $responseTotal += floatval($responseFile['credits_charged'] ?? 0);
+                                                $responseCount++;
+                                            }
+                                        }
+                                        if ($responseCount > 0) {
+                                            $breakdownItems[] = "Yanıt: {$responseCount} dosya (" . number_format($responseTotal, 1) . " TL)";
+                                        }
+                                    } elseif ($fileType === 'response') {
+                                        if (!isset($upload['is_cancelled']) || !$upload['is_cancelled']) {
+                                            $breakdownItems[] = "Yanıt: " . number_format($upload['credits_charged'] ?? 0, 1) . " TL";
+                                        }
+                                    }
+                                    
+                                    // Ek dosyalar sayısı ve tutarı
+                                    if (!empty($additionalFiles)) {
+                                        $additionalTotal = 0;
+                                        $additionalCount = 0;
+                                        foreach ($additionalFiles as $file) {
+                                            if (!isset($file['is_cancelled']) || !$file['is_cancelled']) {
+                                                $additionalTotal += floatval($file['credits'] ?? 0);
+                                                $additionalCount++;
+                                            }
+                                        }
+                                        if ($additionalCount > 0) {
+                                            $breakdownItems[] = "Ek: {$additionalCount} dosya (" . number_format($additionalTotal, 1) . " TL)";
+                                        }
+                                    }
+                                    
+                                    echo implode(" + ", $breakdownItems);
+                                    ?>
+                                </small> -->
                             <?php else: ?>
-                                <span class="badge bg-<?php echo $statusClass[$upload['status']] ?? 'secondary'; ?> fs-6">
-                                    <?php echo $statusText[$upload['status']] ?? 'Bilinmiyor'; ?>
-                                </span>
+                                <span class="text-muted">-</span>
                             <?php endif; ?>
-                        </div> -->
-
-                        <hr>
-
-                        <div class="d-grid gap-2">
-                            <a href="user-details.php?id=<?php echo $upload['user_id']; ?>" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-person me-1"></i>Kullanıcı Profili
-                            </a>
-                            <a href="uploads.php?user_id=<?php echo $upload['user_id']; ?>" class="btn btn-outline-secondary btn-sm">
-                                <i class="bi bi-folder2-opens me-1"></i>Diğer Dosyalar
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        </td>
+                        <td>
+                            <div class="file-info">
+                                <div class="text-truncate">
+                                    <?php echo htmlspecialchars($upload['original_name']); ?>
+                                </div>
+                                <!-- <div class="mt-1">
+                                    <?php if ($originalFileCheck['exists']): ?>
+                                        <?php if ($fileType === 'response'): ?>
+                                            <a href="download-file.php?id=<?php echo $responseId; ?>&type=response" class="btn btn-success btn-sm">
+                                                <i class="bi bi-download me-1"></i>İndir
+                                            </a>
+                                        <?php else: ?>
+                                            <a href="download-file.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-success btn-sm">
+                                                <i class="bi bi-download me-1"></i>İndir
+                                            </a>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <span class="text-muted">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>Dosya bulunamadı
+                                        </span>
+                                    <?php endif; ?>
+                                </div> -->
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-muted">
+                                <?php echo date('d.m.Y H:i', strtotime($upload['upload_date'])); ?>
+                            </span>
+                        </td>
+                        <td>
+                            <div class="user-info">
+                                <div class="fw-medium">
+                                    <?php echo htmlspecialchars(($upload['first_name'] ?? '') . ' ' . ($upload['last_name'] ?? '')); ?>
+                                </div>
+                                <small class="text-muted">
+                                    @<?php echo htmlspecialchars($upload['username'] ?? 'Bilinmiyor'); ?>
+                                </small>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <!-- İndir Butonu -->
+                                <?php if ($originalFileCheck['exists']): ?>
+                                    <?php if ($fileType === 'response'): ?>
+                                        <a href="download-file.php?id=<?php echo $responseId; ?>&type=response" class="btn btn-success btn-sm" title="Dosyayı İndir">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                        <?php if (isImageFile($upload['original_name'])): ?>
+                                            <a href="view-image.php?id=<?php echo $responseId; ?>&type=response" class="btn btn-info btn-sm" title="Dosyayı Görüntüle">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <a href="download-file.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-success btn-sm" title="Dosyayı İndir">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                        <?php if (isImageFile($upload['original_name'])): ?>
+                                            <a href="view-image.php?id=<?php echo $uploadId; ?>&type=upload" class="btn btn-info btn-sm" title="Dosyayı Görüntüle">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                                
+                                <!-- Kullanıcı Profili -->
+                                <a href="user-details.php?id=<?php echo $upload['user_id']; ?>" class="btn btn-outline-primary btn-sm" title="Kullanıcı Profili">
+                                    <i class="bi bi-person"></i>
+                                </a>
+                                
+                                <!-- Dosyayı İşleme Al Butonu -->
+                                <?php if ($fileType !== 'response' && isset($upload['status']) && $upload['status'] === 'pending' && (!isset($upload['is_cancelled']) || !$upload['is_cancelled'])): ?>
+    <button type="button" class="btn btn-warning btn-sm" onclick="showProcessingConfirmModal()" title="Dosyayı İşleme Al">
+        <i class="bi bi-gear-wide-connected"></i>
+    </button>
+<?php endif; ?>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -1698,7 +1724,7 @@ include '../includes/admin_sidebar.php';
                                             <button type="button" class="btn btn-danger btn-sm" 
                                                     onclick="showCancelModal('<?php echo $responseFile['id']; ?>', 'response', '<?php echo htmlspecialchars($responseFile['original_name'], ENT_QUOTES); ?>')"
                                                     title="Dosyayı İptal Et">
-                                                <i class="bi bi-times"></i>
+                                                <i class="bi bi-trash3"></i>
                                             </button>
                                         <?php else: ?>
                                             <span class="btn btn-secondary btn-sm disabled" title="İptal Edilmiş">
@@ -1717,7 +1743,7 @@ include '../includes/admin_sidebar.php';
 <?php endif; ?>
 
 <!-- Revize Dosyaları Listesi -->
-<?php if ($fileType !== 'response' && !empty($revisionFiles)): ?>
+<!-- <?php if ($fileType !== 'response' && !empty($revisionFiles)): ?>
     <div class="card admin-card mb-4" id="revision-files">
         <div class="card-header">
             <h6 class="mb-0">
@@ -1769,19 +1795,17 @@ include '../includes/admin_sidebar.php';
                                             class="btn btn-success btn-sm" title="Dosyayı İndir">
                                             <i class="bi bi-download me-1"></i>İndir
                                         </a>
-                                        <!-- Görüntü dosyası kontrol ve görüntüleme butonu -->
                                         <?php if (isImageFile($revisionFile['original_name'])): ?>
                                             <a href="view-image.php?id=<?php echo $revisionFile['id']; ?>&type=revision"
                                                 class="btn btn-info btn-sm" title="Dosyayı Görüntüle">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                         <?php endif; ?>
-                                        <!-- Admin İptal Butonu (Revizyon Dosyası) -->
                                         <?php if (!isset($revisionFile['is_cancelled']) || !$revisionFile['is_cancelled']): ?>
                                             <button type="button" class="btn btn-danger btn-sm" 
                                                     onclick="showCancelModal('<?php echo $revisionFile['id']; ?>', 'revision', '<?php echo htmlspecialchars($revisionFile['original_name'], ENT_QUOTES); ?>')"
                                                     title="Dosyayı İptal Et">
-                                                <i class="bi bi-times"></i>
+                                                <i class="bi bi-trash3"></i>
                                             </button>
                                         <?php else: ?>
                                             <span class="btn btn-secondary btn-sm disabled" title="İptal Edilmiş">
@@ -1797,11 +1821,9 @@ include '../includes/admin_sidebar.php';
             </div>
         </div>
     </div>
-<?php endif; ?>
+<?php endif; ?> -->
 <!-- Ek Dosyalar Bölümü -->
 <?php
-// Ek dosyaları getir
-$additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_id'], 'admin');
 ?>
 <?php if (!empty($additionalFiles)): ?>
 <div class="card admin-card mb-4">
@@ -1889,7 +1911,7 @@ $additionalFiles = $fileManager->getAdditionalFiles($uploadId, $_SESSION['user_i
                                             <button type="button" class="btn btn-danger btn-sm" 
                                                     onclick="showCancelModal('<?php echo $file['id']; ?>', 'additional', '<?php echo htmlspecialchars($file['original_name'], ENT_QUOTES); ?>')"
                                                     title="Dosyayı İptal Et">
-                                                <i class="bi bi-times"></i>
+                                                <i class="bi bi-trash3"></i>
                                             </button>
                                         <?php else: ?>
                                             <span class="btn btn-secondary btn-sm disabled" title="İptal Edilmiş">
@@ -2024,7 +2046,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <?php endif; ?>
 
 <!-- İletişim Geçmişi (Tüm Kullanıcı Admin Etkileşimleri) -->
-<?php if (!empty($communicationHistory)): ?>
+<!-- <?php if (!empty($communicationHistory)): ?>
     <div class="card admin-card mb-4">
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
@@ -2108,7 +2130,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </div>
                             </div>
 
-                            <!-- Hangi dosya için revize talebi olduğunu belirt (sadece revize talepleri için) -->
+                            
                             <?php if ($comm['type'] === 'user_revision_request' || $comm['type'] === 'admin_revision_response'): ?>
                                 <?php if (!empty($comm['response_file_name'])): ?>
                                     <div class="mb-3">
@@ -2125,13 +2147,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                     </div>
                                 <?php else: ?>
                                     <?php
-                                    // Eğer bu revize talebinden önce başka revizyon dosyaları varsa, son revizyon dosyasını bul
                                     $targetFileName = '';
                                     $targetFileType = 'Orijinal Yüklenen Dosya';
 
                                     if (isset($comm['revision_id'])) {
                                         try {
-                                            // Bu revize talebinden önce tamamlanmış revize taleplerini bul
                                             $stmt = $pdo->prepare("
                                             SELECT rf.original_name 
                             FROM revisions r1
@@ -2153,7 +2173,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 $targetFileName = $previousRevisionFile['original_name'];
                                                 $targetFileType = 'Revizyon Dosyası';
                                             } else {
-                                                // Ana dosya adını al
                                                 $stmt = $pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
                                                 $stmt->execute([$uploadId]);
                                                 $targetFileName = $stmt->fetchColumn() ?: 'Bilinmeyen Dosya';
@@ -2161,7 +2180,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                             }
                                         } catch (Exception $e) {
                                             error_log('Previous revision file query error: ' . $e->getMessage());
-                                            // Hata durumunda ana dosya adını al
                                             try {
                                                 $stmt = $pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
                                                 $stmt->execute([$uploadId]);
@@ -2190,7 +2208,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <?php endif; ?>
                             <?php endif; ?>
 
-                            <!-- Kullanıcının Revizyon Talep Ettiği Dosya (sadece revizyon talepleri için) -->
                             <?php if ($comm['type'] === 'user_revision_request'): ?>
                                 <div class="revision-request-file-info mt-3 mb-3 p-3 bg-warning bg-opacity-10 border border-warning rounded">
                                     <div class="d-flex justify-content-between align-items-center">
@@ -2201,21 +2218,17 @@ document.addEventListener('DOMContentLoaded', function() {
                                             </h6>
                                             <div class="file-details">
                                                 <?php if (!empty($comm['response_file_name'])): ?>
-                                                    <!-- Yanıt dosyası için revizyon talebi -->
                                                     <strong><?php echo htmlspecialchars($comm['response_file_name']); ?></strong>
                                                     <br>
                                                     <small class="text-muted">
                                                         <i class="bi bi-reply me-1"></i>Yanıt Dosyası
                                                     </small>
                                                 <?php else: ?>
-                                                    <!-- Ana dosya veya önceki revizyon dosyası için talep -->
                                                     <?php
-                                                    // Gerçek dosya adlarını al
                                                     $targetFileInfo = ['name' => '', 'type' => 'Orijinal Yüklenen Dosya', 'icon' => 'file-alt'];
 
                                                     if (isset($comm['revision_id'])) {
                                                         try {
-                                                            // Önce bu revize talebinden önce tamamlanmış revize dosyası var mı kontrol et
                                                             $stmt = $pdo->prepare("
                                                             SELECT rf.original_name 
                                                             FROM revisions r1
@@ -2234,14 +2247,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                                             $previousRevisionFile = $stmt->fetch(PDO::FETCH_ASSOC);
 
                                                             if ($previousRevisionFile) {
-                                                                // Önceki revizyon dosyası var
                                                                 $targetFileInfo = [
                                                                     'name' => $previousRevisionFile['original_name'],
                                                                     'type' => 'Revizyon Dosyası',
                                                                     'icon' => 'edit'
                                                                 ];
                                                             } else {
-                                                                // Ana dosya için talep, ana dosya adını al
                                                                 $stmt = $pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
                                                                 $stmt->execute([$uploadId]);
                                                                 $originalFileName = $stmt->fetchColumn();
@@ -2254,7 +2265,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                                             }
                                                         } catch (Exception $e) {
                                                             error_log('Previous revision file query error: ' . $e->getMessage());
-                                                            // Hata durumunda ana dosya adını al
                                                             try {
                                                                 $stmt = $pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
                                                                 $stmt->execute([$uploadId]);
@@ -2277,7 +2287,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                         </div>
                                         <div>
                                             <?php if (!empty($comm['response_file_name'])): ?>
-                                                <!-- Yanıt dosyasını indir -->
                                                 <?php
                                                 try {
                                                     $stmt = $pdo->prepare("SELECT id FROM file_responses WHERE upload_id = ? AND original_name = ? ORDER BY upload_date DESC LIMIT 1");
@@ -2294,12 +2303,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     </a>
                                                 <?php endif; ?>
                                             <?php else: ?>
-                                                <!-- Ana dosya veya revizyon dosyasını indir -->
                                                 <?php
                                                 $downloadFileId = $uploadId;
                                                 $downloadType = 'upload';
 
-                                                // Son revizyon dosyası varsa onu indir
                                                 if (isset($comm['revision_id'])) {
                                                     try {
                                                         $stmt = $pdo->prepare("
@@ -2338,7 +2345,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </div>
                             <?php endif; ?>
 
-                            <!-- Kullanıcı Notları -->
                             <?php if (!empty($comm['user_notes'])): ?>
 
                                 <div class="revision-note user-note mb-3">
@@ -2364,10 +2370,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                     </div>
                                 </div>
                             <?php else: ?>
-                                <!-- DEBUG: No user notes for type: <?php echo $comm['type']; ?> -->
                             <?php endif; ?>
 
-                            <!-- Admin Cevabı -->
                             <?php if (!empty($comm['admin_notes'])): ?>
                                 <div class="revision-note admin-note mb-2">
                                     <div class="note-header">
@@ -2396,7 +2400,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <?php endif; ?>
                                     </div>
 
-                                    <!-- Admin'in Yüklediği Revizyon Dosyası -->
                                     <?php if (!empty($comm['revision_file_data']) && $comm['type'] === 'admin_revision_response'): ?>
                                         <div class="revision-file-info mt-3 p-3 bg-success bg-opacity-10 border border-success rounded">
                                             <div class="d-flex justify-content-between align-items-center">
@@ -2441,7 +2444,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <?php endif; ?>
                             <?php endif; ?>
 
-                            <!-- Ek Bilgiler -->
                             <div class="communication-meta">
                                 <?php if (isset($comm['credits_charged']) && $comm['credits_charged'] > 0): ?>
                                     <span class="meta-item text-warning">
@@ -2464,25 +2466,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                         Revize #<?php echo substr($comm['revision_id'], 0, 8); ?>
                                     </span>
                                 <?php endif; ?>
-
-                                <!-- <?php if (isset($comm['revision_id']) && $comm['type'] === 'user_revision_request'): ?>
-                                <?php if ($comm['revision_status'] === 'pending'): ?>
-                                    <div class="meta-item">
-                                        <div class="d-flex gap-1">
-                                            <form method="POST" style="display: inline;">
-                                                <input type="hidden" name="revision_id" value="<?php echo $comm['revision_id']; ?>">
-                                                <button type="submit" name="approve_revision_direct" class="btn btn-sm btn-warning">
-                                                    <i class="bi bi-check me-1"></i>İşleme Al
-                                                </button>
-                                            </form>
-                                            <button type="button" class="btn btn-sm btn-danger" 
-                                                    onclick="showRejectModal('<?php echo $comm['revision_id']; ?>')">
-                                                <i class="bi bi-times me-1"></i>Reddet
-                                            </button>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
-                            <?php endif; ?> -->
                             </div>
                         </div>
                     </div>
@@ -2493,7 +2476,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <?php endforeach; ?>
             </div>
 
-            <!-- İletişim Özeti -->
+            
             <div class="communication-summary mt-4 p-3 bg-light rounded">
                 <h6 class="mb-2">
                     <i class="bi bi-diagram-3 me-2 text-info"></i>İletişim Özeti
@@ -2522,10 +2505,10 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
     </div>
-<?php endif; ?>
+<?php endif; ?> -->
 
 <!-- Kullanıcının Tüm Revize Geçmişi -->
-<?php if (!empty($userAllRevisions) && count($userAllRevisions) > count($revisionRequests)): ?>
+<!-- <?php if (!empty($userAllRevisions) && count($userAllRevisions) > count($revisionRequests)): ?>
     <div class="card admin-card mb-4">
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
@@ -2597,7 +2580,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                     </div>
                                 </div>
 
-                                <!-- Hangi dosya için revize talebi -->
                                 <div class="mb-3">
                                     <div class="file-reference-extended">
                                         <?php if (!empty($revision['response_file_name'])): ?>
@@ -2622,7 +2604,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                     </div>
                                 </div>
 
-                                <!-- Kullanıcının Revize Talep Notu -->
                                 <div class="revision-note user-note mb-3">
                                     <div class="note-header">
                                         <i class="bi bi-comment-dots me-2 text-primary"></i>
@@ -2633,7 +2614,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                     </div>
                                 </div>
 
-                                <!-- Admin Cevabı -->
                                 <?php if (!empty($revision['admin_notes']) && filterAdminNotes($revision['admin_notes'])): ?>
                                     <div class="revision-note admin-note mb-2">
                                         <div class="note-header">
@@ -2661,7 +2641,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                     </div>
                                 <?php endif; ?>
 
-                                <!-- Kredi ve Tarih Bilgileri -->
                                 <div class="revision-meta">
                                     <?php if ($revision['credits_charged'] > 0): ?>
                                         <span class="meta-item text-warning">
@@ -2688,7 +2667,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
     </div>
-<?php endif; ?>
+<?php endif; ?> -->
 
 <!-- Ana İletişim Bölümü - Dosya Gönderme ve Chat Yan Yana -->
 <div class="row mb-4">
@@ -2800,7 +2779,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-times me-1"></i>İptal
+                        <i class="bi bi-trash3 me-1"></i>İptal
                     </button>
                     <button type="submit" name="reject_revision_direct" class="btn btn-danger">
                         <i class="bi bi-clock-history me-1"></i>Revize Talebini Reddet
@@ -3335,7 +3314,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary d-flex align-items-center" data-bs-dismiss="modal">
-                    <i class="bi bi-times me-2"></i>
+                    <i class="bi bi-trash3 me-2"></i>
                     İptal Et
                 </button>
                 <button type="button" class="btn btn-success d-flex align-items-center" id="confirm-approval-btn" onclick="confirmApproval()">
@@ -3399,7 +3378,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary d-flex align-items-center" data-bs-dismiss="modal">
-                    <i class="bi bi-times me-2"></i>
+                    <i class="bi bi-trash3 me-2"></i>
                     İptal Et
                 </button>
                 <button type="button" class="btn btn-warning d-flex align-items-center" id="confirm-processing-btn" onclick="confirmFileProcessing()">
@@ -3478,7 +3457,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary d-flex align-items-center" data-bs-dismiss="modal">
-                        <i class="bi bi-times me-2"></i>
+                        <i class="bi bi-trash3 me-2"></i>
                         Vazgeç
                     </button>
                     <button type="submit" name="admin_cancel_file" class="btn btn-danger d-flex align-items-center" id="confirmCancelBtn">
@@ -3520,10 +3499,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-times me-1"></i>Vazgeç
+                        <i class="bi bi-trash3 me-1"></i>Vazgeç
                     </button>
                     <button type="submit" name="reject_revision_direct" class="btn btn-danger">
-                        <i class="bi bi-times me-1"></i>Talebi Reddet
+                        <i class="bi bi-trash3 me-1"></i>Talebi Reddet
                     </button>
                 </div>
             </form>
