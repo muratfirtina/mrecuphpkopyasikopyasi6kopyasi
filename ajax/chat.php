@@ -59,14 +59,16 @@ switch ($action) {
         
         // Mesajı gönder
         $senderType = $isAdmin ? 'admin' : 'user';
-        error_log("Sending message - FileID: $fileId, UserID: $userId, SenderType: $senderType, Message: $message");
+        error_log("Sending message - FileID: $fileId, UserID: $userId, IsAdmin: " . ($isAdmin ? 'true' : 'false') . ", Message: " . substr($message, 0, 50));
         
+        // Mevcut ChatManager API kullan (5 parametre)
         $messageId = $chatManager->sendMessage($fileId, $fileType, $userId, $senderType, $message);
         
         if ($messageId) {
             error_log("Message sent successfully - MessageID: $messageId");
+            
             // Gönderilen mesajın detaylarını getir
-            $sql = "SELECT fc.*, u.first_name, u.last_name, u.username 
+            $sql = "SELECT fc.*, u.first_name, u.last_name 
                     FROM file_chats fc 
                     JOIN users u ON fc.sender_id = u.id 
                     WHERE fc.id = :message_id";
@@ -77,11 +79,15 @@ switch ($action) {
             echo json_encode([
                 'success' => true, 
                 'message' => 'Mesaj gönderildi',
+                'message_id' => $messageId,
                 'data' => $messageData
             ]);
         } else {
             error_log("Failed to send message - FileID: $fileId, UserID: $userId");
-            echo json_encode(['success' => false, 'message' => 'Mesaj gönderilemedi']);
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Mesaj gönderilemedi'
+            ]);
         }
         break;
         

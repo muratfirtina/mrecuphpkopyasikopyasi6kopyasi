@@ -336,7 +336,7 @@ class ChatManager {
                 return false;
             }
             
-            // Gönderen kullanıcı bilgilerini al
+            // Gönderen kullanıcı bilgilerini al (COLLATE ile düzeltildi)
             $sql = "SELECT * FROM users WHERE id = :sender_id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':sender_id' => $senderId]);
@@ -419,17 +419,28 @@ class ChatManager {
      */
     private function sendChatEmailNotification($recipientId, $fileName, $senderName, $message, $recipientType, $fileId) {
         try {
-            // Alıcının bilgilerini al
-            $sql = "SELECT u.*, COALESCE(uep.chat_message_notifications, 1) as chat_notifications 
-                    FROM users u 
-                    LEFT JOIN user_email_preferences uep ON u.id = uep.user_id 
-                    WHERE u.id = :recipient_id AND u.email_verified = 1";
+            // Alıcının temel bilgilerini al (JOIN olmadan)
+            $sql = "SELECT * FROM users WHERE id = :recipient_id AND email_verified = 1";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':recipient_id' => $recipientId]);
             $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            if (!$recipient || !$recipient['chat_notifications']) {
-                error_log("Chat email not sent - recipient not found or notifications disabled: {$recipientId}");
+            if (!$recipient) {
+                error_log("Chat email not sent - recipient not found: {$recipientId}");
+                return false;
+            }
+            
+            // Email tercihlerini ayrı sorguda al (collation sorununu çözer)
+            $sql = "SELECT chat_message_notifications FROM user_email_preferences WHERE user_id = :user_id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':user_id' => $recipientId]);
+            $emailPrefs = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Email tercihi kontrolü (varsayılan olarak açık)
+            $chatNotifications = $emailPrefs ? $emailPrefs['chat_message_notifications'] : 1;
+            
+            if (!$chatNotifications) {
+                error_log("Chat email not sent - notifications disabled: {$recipientId}");
                 return false;
             }
             

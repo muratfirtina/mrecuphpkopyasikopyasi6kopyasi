@@ -1457,6 +1457,7 @@ class FileManager {
                                     'user_name' => $user['full_name'],
                                     'user_email' => $user['email'],
                                     'file_name' => $upload['original_name'],
+                                    'plate' => $upload['plate'],
                                     'status' => $status,
                                     'status_message' => $statusMessages[$status],
                                     'admin_notes' => $adminNotes,

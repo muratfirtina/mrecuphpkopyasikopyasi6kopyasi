@@ -334,7 +334,6 @@ class EmailManager {
                     <p><strong>Model:</strong> {$emailData['vehicle_model']}</p>
                     <p><strong>Seri:</strong> {$emailData['vehicle_series']}</p>
                     <p><strong>Motor:</strong> {$emailData['vehicle_engine']}</p>
-                    <p><strong>Yıl:</strong> {$emailData['vehicle_year']}</p>
                     <p><strong>Yakıt Tipi:</strong> {$emailData['fuel_type']}</p>
                     <p><strong>Vites Tipi:</strong> {$emailData['gearbox_type']}</p>
                 </div>
@@ -516,7 +515,7 @@ class EmailManager {
                 
                 <div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>
                     <h3 style='color: #2c3e50; margin-top: 0;'>Merhaba {$emailData['user_name']},</h3>
-                    <p>Yüklemiş olduğunuz <strong>{$emailData['file_name']}</strong> dosyasının durumu güncellendi.</p>
+                    <p>Yüklemiş olduğunuz <strong>{$emailData['plate']}</strong> plakasına ait <strong>{$emailData['file_name']}</strong> dosyasının durumu güncellendi.</p>
                 </div>
                 
                 <div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>

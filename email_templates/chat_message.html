@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{site_name}} - Yeni Mesaj</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 30px;
+        }
+        .message-info {
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .file-info {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .message-content {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-style: italic;
+        }
+        .action-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+            transition: transform 0.2s;
+        }
+        .action-button:hover {
+            transform: translateY(-2px);
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            .content {
+                padding: 20px;
+            }
+            .action-button {
+                display: block;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💬 Yeni Mesaj</h1>
+            <p>{{site_name}} - Chat Sistemi</p>
+        </div>
+        
+        <div class="content">
+            <p><strong>Merhaba {{user_name}},</strong></p>
+            
+            <p><strong>{{sender_name}}</strong> size bir mesaj gönderdi:</p>
+            
+            <div class="message-info">
+                <strong>📅 Mesaj Zamanı:</strong> {{timestamp}}<br>
+                <strong>👤 Gönderen:</strong> {{sender_name}}
+            </div>
+            
+            <div class="file-info">
+                <h3 style="margin-top: 0; color: #495057;">📋 İlgili Dosya</h3>
+                <strong>Dosya Adı:</strong> {{file_name}} ({{plate}})<br>
+                <strong>Araç Plakası:</strong> <strong>{{plate}}</strong><br>
+                {{#if brand_name}}
+                <strong>Araç:</strong> {{brand_name}} {{model_name}}<br>
+                {{/if}}
+            </div>
+            
+            <div class="message-content">
+                <strong>💬 Mesaj İçeriği:</strong><br>
+                {{message}}
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{chat_url}}" class="action-button">
+                    💬 Mesajı Görüntüle ve Yanıtla
+                </a>
+            </div>
+            
+            <div style="background-color: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                <strong>📌 Önemli:</strong><br>
+                • Mesajlara mümkün olan en kısa sürede yanıt verin<br>
+                • Chat geçmişinizi panel üzerinden takip edebilirsiniz<br>
+                • Acil durumlar için destek hattımızı arayabilirsiniz
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            
+            <p style="font-size: 14px; color: #666;">
+                <strong>🔗 Direkt Chat Bağlantısı:</strong><br>
+                <span style="background-color: #f8f9fa; padding: 5px; border-radius: 3px; font-family: monospace; word-break: break-all;">{{chat_url}}</span>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>{{site_name}}</strong> - Chat Bildirim Sistemi</p>
+            <div style="margin: 15px 0;">
+                <a href="{{user_dashboard_url}}" style="color: #007bff; text-decoration: none; margin: 0 10px;">📊 Panelim</a>
+                <a href="{{contact_url}}" style="color: #007bff; text-decoration: none; margin: 0 10px;">📞 İletişim</a>
+                <a href="{{support_url}}" style="color: #007bff; text-decoration: none; margin: 0 10px;">🎧 Destek</a>
+            </div>
+            <p style="font-size: 12px;">
+                Bu email otomatik olarak gönderilmiştir.<br>
+                © 2024 {{site_name}} - Tüm hakları saklıdır.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
