@@ -199,6 +199,21 @@ if (empty($error)) {
     }
 }
 
+// Ofis bilgilerini al (çalışma saatleri için)
+try {
+    $officeQuery = "SELECT address, working_hours FROM contact_office ORDER BY id LIMIT 1";
+    $officeStmt = $pdo->prepare($officeQuery);
+    $officeStmt->execute();
+    $officeData = $officeStmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$officeData) {
+        $officeData = ['working_hours' => 'Teknik Destek'];
+    }
+} catch (Exception $e) {
+    error_log('Office data fetch error: ' . $e->getMessage());
+    $officeData = ['working_hours' => 'Teknik Destek'];
+}
+
 // TERS KREDİ SİSTEMİ: Dosya yükleme kredi kontrolü
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
     error_log('User file upload attempt started');
@@ -324,6 +339,24 @@ try {
                         <i class="bi bi-upload me-2 text-primary"></i>Dosya Yükle
                     </h1>
                     <p class="text-muted mb-0">ECU dosyanızı güvenli bir şekilde yükleyin ve işletmemize gönderin</p>
+                    
+                    <?php
+                    // Çalışma saati bilgisini footer'dan al
+                    $workingHours = isset($officeData['working_hours']) ? $officeData['working_hours'] : 'Teknik Destek';
+                    ?>
+                    
+                    <div class="alert-info alert-dismissible fade show mt-3" role="alert" style="border-left: 4px solid #0dcaf0; background-color: #e7f5ff; color: #084298; padding: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-info-circle-fill me-3 text-info" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <strong>Çalışma Saatleri:</strong> <?php echo htmlspecialchars($workingHours); ?><br>
+                                <small class="text-muted mt-1 d-block">
+                                    <i class="bi bi-clock me-1"></i>
+                                    Mesai saatleri dışında yüklediğiniz dosyaların işlenmesi ertesi güne kalacaktır.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">

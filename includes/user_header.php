@@ -1023,39 +1023,52 @@ if (isset($_SESSION['user_id']) && isset($pdo)) {
     <script>
         // Bildirim sistemi için JavaScript fonksiyonları
         function markAllNotificationsRead() {
+            console.log('Tümünü okundu işaretle fonksiyonu çağrıldı');
+            
             fetch('../ajax/notification-actions.php?action=mark_all_read', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
+                body: 'action=mark_all_read'
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Yanıt alındı:', response);
+                return response.json();
+            })
             .then(data => {
+                console.log('Yanıt verisi:', data);
                 if (data.success) {
+                    console.log('Başarılı:', data.updated_count, 'bildirim güncellendi');
+                    
                     // Badge'i güncelle
                     updateNotificationBadge();
                     
                     // Dropdown'daki bildirimleri güncelle  
                     const unreadItems = document.querySelectorAll('.bg-custom-warning');
+                    console.log('Okunmamış öğe sayısı:', unreadItems.length);
                     unreadItems.forEach(item => {
                         item.classList.remove('bg-custom-warning');
                     });
                     
                     // Başarı mesajı
-                    showNotification('Tüm bildirimler okundu olarak işaretlendi', 'success');
+                    showNotification('Tüm bildirimler okundu olarak işaretlendi (' + data.updated_count + ' bildirim)', 'success');
                 } else {
+                    console.error('Başarısız:', data.message);
                     showNotification('Hata: ' + data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Bildirim güncelleme hatası:', error);
-                showNotification('Bir hata oluştu', 'error');
+                showNotification('Bir hata oluştu: ' + error.message, 'error');
             });
         }
         
         function markNotificationAsRead(notificationId, element) {
             fetch('../ajax/notification-actions.php', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
@@ -1079,7 +1092,9 @@ if (isset($_SESSION['user_id']) && isset($pdo)) {
         }
         
         function updateNotificationBadge() {
-            fetch('../ajax/notification-actions.php?action=get_count')
+            fetch('../ajax/notification-actions.php?action=get_count', {
+                credentials: 'same-origin'
+            })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {

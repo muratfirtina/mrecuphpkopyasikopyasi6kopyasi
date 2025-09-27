@@ -6,6 +6,20 @@
 require_once '../config/config.php';
 require_once '../config/database.php';
 
+// Session yapılandırması
+ini_set('session.cookie_path', '/');
+ini_set('session.use_cookies', 1);
+ini_set('session.use_only_cookies', 1);
+
+// Session name'ini kontrol et - MRECU_SECURE_SESSION varsa onu kullan
+if (isset($_COOKIE['MRECU_SECURE_SESSION'])) {
+    session_name('MRECU_SECURE_SESSION');
+}
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Kullanıcı girişi kontrolü
 if (!isLoggedIn()) {
     echo json_encode(['success' => false, 'message' => 'Giriş gerekli']);
@@ -24,16 +38,17 @@ try {
             // Tüm bildirimleri okundu olarak işaretle
             $stmt = $pdo->prepare("
                 UPDATE notifications 
-                SET is_read = TRUE, read_at = NOW() 
-                WHERE user_id = ? AND is_read = FALSE
+                SET is_read = 1, read_at = NOW() 
+                WHERE user_id = ? AND is_read = 0
             ");
             $result = $stmt->execute([$userId]);
             
             if ($result) {
+                $updatedCount = $stmt->rowCount();
                 echo json_encode([
                     'success' => true,
                     'message' => 'Tüm bildirimler okundu olarak işaretlendi',
-                    'updated_count' => $stmt->rowCount()
+                    'updated_count' => $updatedCount
                 ]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Güncelleme başarısız']);
@@ -51,7 +66,7 @@ try {
             
             $stmt = $pdo->prepare("
                 UPDATE notifications 
-                SET is_read = TRUE, read_at = NOW() 
+                SET is_read = 1, read_at = NOW() 
                 WHERE id = ? AND user_id = ?
             ");
             $result = $stmt->execute([$notificationId, $userId]);
@@ -71,7 +86,7 @@ try {
             $stmt = $pdo->prepare("
                 SELECT COUNT(*) as unread_count
                 FROM notifications 
-                WHERE user_id = ? AND is_read = FALSE
+                WHERE user_id = ? AND is_read = 0
             ");
             $stmt->execute([$userId]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -91,7 +106,7 @@ try {
             $params = [$userId];
             
             if ($unreadOnly) {
-                $whereClause .= " AND is_read = FALSE";
+                $whereClause .= " AND is_read = 0";
             }
             
             $stmt = $pdo->prepare("
@@ -116,6 +131,6 @@ try {
     
 } catch (Exception $e) {
     error_log('Notification AJAX Error: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Sistem hatası oluştu']);
+    echo json_encode(['success' => false, 'message' => 'Sistem hatası oluştu: ' . $e->getMessage()]);
 }
 ?>

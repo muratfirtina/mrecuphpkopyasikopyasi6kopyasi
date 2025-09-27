@@ -3,25 +3,18 @@
 # NATRO HOSTİNG & mrecutuning.com İÇİN GÜVENLİK ODAKLI
 # ==========================================
 
-# Enable URL Rewriting
-RewriteEngine On
-
-# Production ortamı için base directory (domain root)
-# mrecutuning.com için root dizin
-# Mr ECU - Apache Configuration for Production
-
 # Default index file
 DirectoryIndex index.php index.html
 
 # Enable URL Rewriting
 RewriteEngine On
 
+# Set the base directory for Production (root)
+RewriteBase /
+
 # Force www to non-www (or vice versa)
 RewriteCond %{HTTP_HOST} ^www\.mrecutuning\.com$ [NC]
 RewriteRule ^(.*)$ https://mrecutuning.com/$1 [R=301,L]
-
-# Set the base directory for Production (root)
-RewriteBase /
 
 # ==========================================
 # 🔄 AJAX VE API İZİNLERİ
@@ -30,7 +23,7 @@ RewriteBase /
 # AJAX klasörüne tam erişim izni
 <Directory "ajax">
     Require all granted
-    Options +Indexes
+    Options -Indexes +FollowSymLinks
     AllowOverride All
     
     # AJAX dosyalarına özel izinler
@@ -52,7 +45,6 @@ RewriteBase /
 <Files "chip_tuning_calculator.php">
     Require all granted
 </Files>
-
 
 # ==========================================
 # 🛡️ GÜVENLİK KORUMASI
@@ -224,7 +216,7 @@ RewriteRule ^verify/?$ verify.php [L,QSA]
 # 🚫 AKILLI BOT VE SCRAPER KORUMALARI
 # ==========================================
 
-# AJAX isteklerini bot korumasından muaf tut (ÖNCE)
+# AJAX ve User isteklerini bot korumasından muaf tut (ÖNCE)
 RewriteCond %{REQUEST_URI} ^/ajax/ [OR]
 RewriteCond %{REQUEST_URI} ^/user/upload\.php [OR]  
 RewriteCond %{REQUEST_URI} ^/user/.*\.php$
@@ -234,8 +226,9 @@ RewriteRule .* - [S=12]
 RewriteCond %{HTTP_USER_AGENT} (libwww-perl|wget|curl|python-requests|scrapy|beautifulsoup|mechanize) [NC]
 RewriteRule .* - [F,L]
 
-# SQL Injection koruması (KRİTİK - Kaldırma!)
-RewriteCond %{QUERY_STRING} (union|select|insert|drop|delete|update|cast|create|char|convert|alter|declare) [NC]
+# SQL Injection koruması - AKILLI VERSİYON
+# Sadece tehlikeli SQL komut kombinasyonlarını engelle, normal sütun isimlerine izin ver
+RewriteCond %{QUERY_STRING} (union.*select|insert.*into|drop.*table|delete.*from|update.*set|alter.*table|create.*table) [NC]
 RewriteRule .* - [F,L]
 
 # XSS koruması (KRİTİK - Kaldırma!)
@@ -332,11 +325,9 @@ RewriteRule ^sitemap\.xml$ sitemap.php [L]
 RewriteRule ^robots\.txt$ robots.php [L]
 
 # ==========================================
-# NOTLAR:
-# 1. Bu dosya mrecutuning.com için özelleştirildi
-# 2. HTTPS zorlaması aktif
-# 3. www'dan www'suz yönlendirme var
-# 4. Güvenlik başlıkları production seviyede
-# 5. Bot koruması aktif
-# 6. Cache ayarları optimize edildi
+# ÖNEMLİ NOTLAR:
+# 1. Admin klasörü PHP authentication ile korunuyor (isLoggedIn && isAdmin)
+# 2. SQL Injection koruması akıllı hale getirildi - sadece tehlikeli komutları engelliyor
+# 3. created_at, updated_at gibi normal sütun isimleri artık çalışıyor
+# 4. Admin klasörüne Apache seviyesinde gereksiz izin verilmedi (güvenlik)
 # ==========================================

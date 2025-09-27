@@ -1708,6 +1708,21 @@ include '../includes/admin_sidebar.php';
                             </div>
                         </div>
                     <?php endif; ?>
+
+                    <!-- Admin Notları (Response dosyası durumunda) -->
+                    <?php if ($fileType === 'response' && !empty($upload['admin_notes']) && filterAdminNotes($upload['admin_notes'])): ?>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <h6 class="text-muted mb-2">
+                                    <i class="bi bi-person-badge me-2"></i>Admin Notu:
+                                </h6>
+                                <div class="admin-notes-content p-3 bg-light rounded border border-info" style="padding: 0.5rem !important;">
+                                    <i class="bi bi-chat-square-text text-info me-2"></i>
+                                    <span class="text-dark"><?php echo nl2br(htmlspecialchars($upload['admin_notes'])); ?></span>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endif; ?>
@@ -1789,6 +1804,17 @@ include '../includes/admin_sidebar.php';
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                <!-- Dosya Notu Burada Gösterilecek -->
+                <?php if (!empty($responseFile['admin_notes']) && filterAdminNotes($responseFile['admin_notes'])): ?>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="alert-info mb-0" style="padding: 0.5rem; border-radius: 0.25rem; margin-top: 0.5rem; font-size: 0.9rem;">
+                                <strong><i class="bi bi-sticky-note me-1"></i>Admin Notu:</strong>
+                                <?php echo nl2br(htmlspecialchars($responseFile['admin_notes'])); ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -1899,7 +1925,6 @@ include '../includes/admin_sidebar.php';
                                 <th>Gönderen</th>
                                 <th>Alıcı</th>
                                 <th>Tarih</th>
-                                <th>Notlar</th>
                                 <th>Ücret</th>
                                 <th>İşlemler</th>
                             </tr>
@@ -1934,13 +1959,6 @@ include '../includes/admin_sidebar.php';
                                     </td>
                                     <td><?php echo date('d.m.Y H:i', strtotime($file['upload_date'])); ?></td>
                                     <td>
-                                        <?php if (!empty($file['notes'])): ?>
-                                            <small class="text-muted"><?php echo htmlspecialchars(substr($file['notes'], 0, 50)); ?>...</small>
-                                        <?php else: ?>
-                                            <small class="text-muted">-</small>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
                                         <?php if ($file['credits'] > 0): ?>
                                             <span class="badge bg-danger"><?php echo $file['credits']; ?> kredi</span>
                                         <?php else: ?>
@@ -1973,6 +1991,20 @@ include '../includes/admin_sidebar.php';
                                         </div>
                                     </td>
                                 </tr>
+                                <!-- Dosya Notu - Her dosyanın altında tam olarak gösterilir -->
+                                <?php if (!empty($file['notes'])): ?>
+                                <tr class="<?php echo $file['is_read'] ? '' : 'table-warning'; ?>">
+                                    <td colspan="6" class="py-2 px-3" style="background-color: #f8f9fa; border-top: none;">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-sticky-note text-primary me-2 mt-1"></i>
+                                            <div class="flex-grow-1">
+                                                <strong class="text-primary">Not:</strong>
+                                                <span class="text-dark"><?php echo nl2br(htmlspecialchars($file['notes'])); ?></span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endif; ?>
                             <?php endforeach; ?>
                         </tbody>
                     </table>

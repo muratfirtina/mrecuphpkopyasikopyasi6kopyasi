@@ -354,10 +354,10 @@ class FileCancellationManager {
                 
                 switch ($fileType) {
                     case 'upload':
-                        // Ana dosyayı gizle
+                        // Ana dosyayı gizle ve status'u cancelled yap
                         $hideStmt = $this->pdo->prepare("
                             UPDATE file_uploads 
-                            SET is_cancelled = 1, cancelled_at = NOW(), cancelled_by = ?
+                            SET is_cancelled = 1, status = 'cancelled', cancelled_at = NOW(), cancelled_by = ?
                             WHERE id = ?
                         ");
                         $hideStmt->execute([$adminId, $fileId]);
@@ -914,9 +914,10 @@ class FileCancellationManager {
                 // 2. Dosya tipine göre dosyayı gizle
                 switch ($fileType) {
                     case 'upload':
+                        // Ana dosyayı gizle ve status'u cancelled yap
                         $hideStmt = $this->pdo->prepare("
                             UPDATE file_uploads 
-                            SET is_cancelled = 1, cancelled_at = NOW(), cancelled_by = ?
+                            SET is_cancelled = 1, status = 'cancelled', cancelled_at = NOW(), cancelled_by = ?
                             WHERE id = ?
                         ");
                         $hideStmt->execute([$adminId, $fileId]);

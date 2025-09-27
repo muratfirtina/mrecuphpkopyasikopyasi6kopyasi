@@ -856,7 +856,7 @@ include '../includes/user_header.php';
                                                         </i>
                                                         <?php
                                                         if (filterAdminNotes($response['admin_notes'])) {
-                                                            echo htmlspecialchars(substr($response['admin_notes'], 0, 100)) . (strlen($response['admin_notes']) > 100 ? '...' : '');
+                                                            echo nl2br(htmlspecialchars($response['admin_notes']));
                                                         } else {
                                                             echo 'Admin notu mevcut';
                                                         }
@@ -1043,7 +1043,7 @@ include '../includes/user_header.php';
                                                 <div class="file-notes mt-2">
                                                     <small class="text-muted">
                                                         <i class="bi bi-comment-dots me-1"></i>
-                                                        <strong>Not:</strong> <?php echo htmlspecialchars(substr($file['notes'], 0, 100)) . (strlen($file['notes']) > 100 ? '...' : ''); ?>
+                                                        <strong>Not:</strong> <?php echo nl2br(htmlspecialchars($file['notes'])); ?>
                                                     </small>
                                                 </div>
                                             <?php endif; ?>

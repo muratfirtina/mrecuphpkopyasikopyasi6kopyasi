@@ -99,7 +99,7 @@ class NotificationManager {
      */
     public function getUnreadCount($userId) {
         try {
-            $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = FALSE");
+            $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
             $stmt->execute([$userId]);
             return $stmt->fetchColumn();
         } catch(Exception $e) {
@@ -113,7 +113,7 @@ class NotificationManager {
      */
     public function markAsRead($notificationId, $userId = null) {
         try {
-            $query = "UPDATE notifications SET is_read = TRUE, read_at = NOW() WHERE id = ?";
+            $query = "UPDATE notifications SET is_read = 1, read_at = NOW() WHERE id = ?";
             $params = [$notificationId];
             
             if ($userId) {
@@ -134,7 +134,7 @@ class NotificationManager {
      */
     public function markAllAsRead($userId) {
         try {
-            $stmt = $this->pdo->prepare("UPDATE notifications SET is_read = TRUE, read_at = NOW() WHERE user_id = ? AND is_read = FALSE");
+            $stmt = $this->pdo->prepare("UPDATE notifications SET is_read = 1, read_at = NOW() WHERE user_id = ? AND is_read = 0");
             return $stmt->execute([$userId]);
         } catch(Exception $e) {
             error_log('NotificationManager markAllAsRead error: ' . $e->getMessage());
@@ -151,7 +151,7 @@ class NotificationManager {
             $params = [$userId];
             
             if ($unreadOnly) {
-                $whereClause .= " AND is_read = FALSE";
+                $whereClause .= " AND is_read = 0";
             }
             
             // LIMIT için integer kontrol

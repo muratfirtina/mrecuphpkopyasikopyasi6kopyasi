@@ -4,9 +4,9 @@
  * Mevcut dosya yükleme, revizyon, chat ve diğer işlemlere bildirim entegrasyonu
  */
 
-require_once '../config/config.php';
-require_once '../config/database.php';
-require_once '../includes/NotificationManager.php';
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/NotificationManager.php';
 
 /**
  * 1. DOSYA YÜKLEME BİLDİRİMİ

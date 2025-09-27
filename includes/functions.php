@@ -6,6 +6,15 @@
 
 // Session başlat (eğer daha önce başlatılmamışsa)
 if (session_status() === PHP_SESSION_NONE) {
+    // Session name'ini kontrol et - MRECU_SECURE_SESSION varsa onu kullan
+    if (isset($_COOKIE['MRECU_SECURE_SESSION'])) {
+        session_name('MRECU_SECURE_SESSION');
+    }
+    
+    // Session path'ini tüm uygulama için / olarak ayarla
+    ini_set('session.cookie_path', '/');
+    ini_set('session.use_cookies', 1);
+    ini_set('session.use_only_cookies', 1);
     session_start();
 }
 
