@@ -12,7 +12,7 @@ if (!function_exists('env')) {
 }
 
 // Site temel ayarları
-define('SITE_NAME', 'Mr ECU');
+define('SITE_NAME', 'Mr.ECU');
 define('SITE_URL', 'http://localhost:8888/mrecuphpkopyasikopyasi6kopyasi/');
 define('BASE_URL', 'http://localhost:8888/mrecuphpkopyasikopyasi6kopyasi');
 define('SITE_EMAIL', 'info@localhost.com');

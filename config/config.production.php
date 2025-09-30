@@ -45,7 +45,7 @@ function env($key, $default = null) {
 # 🌐 SİTE AYARLARI - PRODUCTION (mrecutuning.com)
 // ==========================================
 
-define('SITE_NAME', env('SITE_NAME', 'Mr ECU'));
+define('SITE_NAME', env('SITE_NAME', 'Mr.ECU | chiptuning dosya servisi'));
 define('SITE_URL', rtrim(env('SITE_URL', 'https://www.mrecutuning.com'), '/') . '/');
 define('BASE_URL', rtrim(env('BASE_URL', 'https://www.mrecutuning.com'), '/'));
 define('SITE_EMAIL', env('SITE_EMAIL', 'mr.ecu@outlook.com'));
@@ -55,9 +55,9 @@ define('ADMIN_EMAIL', env('SITE_EMAIL', 'mr.ecu@outlook.com'));
 # 📊 SEO VE META AYARLARI
 // ==========================================
 
-define('DEFAULT_META_TITLE', env('DEFAULT_META_TITLE', 'Mr ECU - Profesyonel ECU Programlama ve Chip Tuning'));
-define('DEFAULT_META_DESCRIPTION', env('DEFAULT_META_DESCRIPTION', 'ECU programlama, chip tuning ve otomotiv yazılım çözümleri. Profesyonel araçlar ve güvenilir hizmet.'));
-define('DEFAULT_META_KEYWORDS', env('DEFAULT_META_KEYWORDS', 'ecu programlama, chip tuning, autotuner, kess, otomotiv yazılım, mr ecu, mrecutuning'));
+define('DEFAULT_META_TITLE', env('DEFAULT_META_TITLE', 'Mr.ECU - Profesyonel ECU Programlama ve Chip Tuning'));
+define('DEFAULT_META_DESCRIPTION', env('DEFAULT_META_DESCRIPTION', 'Mr. ECU Teknoloji, chiptuning dosya servisi, ECU programlama ve arıza tespit cihazları ile servislerin performansını artırır.'));
+define('DEFAULT_META_KEYWORDS', env('DEFAULT_META_KEYWORDS', 'ecu programlama, chip tuning, chiptuning dosya servisi, autotuner, kess, otomotiv yazılım, arıza tespit cihazları, mr ecu, mrecutuning'));
 
 // ==========================================
 # 🛍️ ÜRÜN SİSTEMİ AYARLARI

@@ -8,8 +8,8 @@ require_once 'config/config.php';
 require_once 'config/database.php';
 
 $pageTitle = 'Ana Sayfa';
-$pageDescription = 'Profesyonel ECU hizmetleri - Güvenli, hızlı ve kaliteli ECU yazılım çözümleri';
-$pageKeywords = 'ECU, chip tuning, ECU yazılım, immobilizer, TCU, motor kontrol ünitesi';
+$pageDescription = 'Mr. ECU chiptuning dosya servisi, ECU programlama ve arıza tespit cihazları ile servislerin performansını artırır.';
+$pageKeywords = 'ECU programlama, chip tuning, chiptuning dosya servisi, ECU yazılım, immobilizer, TCU, motor kontrol ünitesi, arıza tespit cihazları, Mr ECU, mrecutuning';
 
 // Design ayarlarını al
 try {

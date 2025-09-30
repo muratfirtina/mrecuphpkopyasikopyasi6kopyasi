@@ -21,8 +21,70 @@ if (!isset($pageTitle)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="<?php echo isset($pageDescription) ? $pageDescription : 'Profesyonel ECU hizmetleri - Güvenli, hızlı ve kaliteli ECU yazılım çözümleri'; ?>">
-    <meta name="keywords" content="<?php echo isset($pageKeywords) ? $pageKeywords : 'ECU, chip tuning, ECU yazılım, immobilizer, TCU'; ?>">
+    <meta name="description" content="<?php echo isset($pageDescription) ? $pageDescription : DEFAULT_META_DESCRIPTION; ?>">
+    <meta name="keywords" content="<?php echo isset($pageKeywords) ? $pageKeywords : DEFAULT_META_KEYWORDS; ?>">
+    <meta name="author" content="<?php echo SITE_NAME; ?>">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="<?php echo BASE_URL; ?>/assets/images/favicon.svg">
+    <link rel="alternate icon" type="image/svg+xml" href="<?php echo BASE_URL; ?>/assets/images/favicon2.svg">
+    <link rel="apple-touch-icon" href="<?php echo BASE_URL; ?>/assets/images/favicon.svg">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?php echo (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>">
+    <meta property="og:title" content="<?php 
+        if (basename($_SERVER['PHP_SELF']) === 'index.php' || $_SERVER['REQUEST_URI'] === '/') {
+            echo SITE_NAME;
+        } else {
+            echo $pageTitle . ' - ' . SITE_NAME;
+        }
+    ?>">
+    <meta property="og:description" content="<?php echo isset($pageDescription) ? $pageDescription : DEFAULT_META_DESCRIPTION; ?>">
+    <meta property="og:image" content="<?php echo BASE_URL; ?>/assets/images/og-image.jpg">
+    <meta property="og:site_name" content="<?php echo SITE_NAME; ?>">
+    <meta property="og:locale" content="tr_TR">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="<?php echo (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>">
+    <meta name="twitter:title" content="<?php 
+        if (basename($_SERVER['PHP_SELF']) === 'index.php' || $_SERVER['REQUEST_URI'] === '/') {
+            echo SITE_NAME;
+        } else {
+            echo $pageTitle . ' - ' . SITE_NAME;
+        }
+    ?>">
+    <meta name="twitter:description" content="<?php echo isset($pageDescription) ? $pageDescription : DEFAULT_META_DESCRIPTION; ?>">
+    <meta name="twitter:image" content="<?php echo BASE_URL; ?>/assets/images/og-image.jpg">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="<?php echo (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>">
+    
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "<?php echo SITE_NAME; ?>",
+      "description": "<?php echo isset($pageDescription) ? $pageDescription : DEFAULT_META_DESCRIPTION; ?>",
+      "url": "<?php echo BASE_URL; ?>",
+      "telephone": "+90-533-924-2948",
+      "email": "<?php echo SITE_EMAIL; ?>",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "İstanbul",
+        "addressCountry": "TR"
+      },
+      "image": "<?php echo BASE_URL; ?>/assets/images/favicon.svg",
+      "priceRange": "$",
+      "sameAs": [
+        "https://www.facebook.com/yourpage",
+        "https://www.instagram.com/mr.ecuteknoloji"
+      ]
+    }
+    </script>
     
     <!-- Cache Control -->
     <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
@@ -33,7 +95,15 @@ if (!isset($pageTitle)) {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="format-detection" content="telephone=no">
     
-    <title><?php echo $pageTitle . ' - ' . SITE_NAME; ?></title>
+    <!-- SEO Başlıklar -->
+    <title><?php 
+        // Ana sayfada sadece site adı, diğer sayfalarda sayfa adı + site adı
+        if (basename($_SERVER['PHP_SELF']) === 'index.php' || $_SERVER['REQUEST_URI'] === '/') {
+            echo SITE_NAME;
+        } else {
+            echo $pageTitle . ' - ' . SITE_NAME;
+        }
+    ?></title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
