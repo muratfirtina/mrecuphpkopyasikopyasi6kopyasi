@@ -10,6 +10,12 @@ config/local_config.php
 # Upload directories
 uploads/additional_files/*
 uploads/user_files/*
+uploads/products/*
+uploads/legeacy_files/*
+uploads/icons/*
+uploads/categories/*
+uploads/brands/*
+uploads/about/*
 uploads/response_files/*
 !uploads/user_files/.gitkeep
 !uploads/response_files/.gitkeep

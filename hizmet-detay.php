@@ -44,7 +44,7 @@ try {
 }
 
 // Meta bilgileri
-$pageTitle = $service['name'] . ' - Hizmetlerimiz';
+$pageTitle = $service['name'] . ' - Hizmetlerimiz - ' . SITE_NAME;
 $pageDescription = substr($service['description'], 0, 160);
 $pageKeywords = $service['name'] . ', ECU, chip tuning, ' . str_replace(' ', ', ', strtolower($service['name']));
 
@@ -717,7 +717,7 @@ try {
     <div class="contact-cta">
         <h2 class="mb-4">Servisinizin Performansını Artırmaya Hazır mısınız?</h2>
         <p class="lead mb-4">
-            Profesyonel ekibimiz ile iletişime geçin ve aracınız için en uygun chip tuning çözümünü keşfedin.
+            Profesyonel ekibimiz ile iletişime geçin ve müşterileriniz için en uygun chip tuning çözümünü keşfedin.
         </p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
             <!-- Telefon Button - ID: 1 -->

@@ -41,7 +41,13 @@ try {
 }
 
 // Sayfa Bilgileri
-$pageTitle = $contact_settings['page_title'] ?? 'İletişim | Mr ECU';
+// Eğer database'den page_title varsa, içinde site adı yoksa ekle
+$dbPageTitle = $contact_settings['page_title'] ?? 'İletişim';
+if (!empty($dbPageTitle) && strpos($dbPageTitle, SITE_NAME) === false) {
+    $pageTitle = $dbPageTitle . ' - ' . SITE_NAME;
+} else {
+    $pageTitle = $dbPageTitle;
+}
 $pageDescription = $contact_settings['page_description'] ?? 'Mr ECU ekibiyle iletişime geçin. Uzman teknik destek, ECU & chip tuning çözümleri için buradayız.';
 $pageKeywords = 'ecu tuning, chip tuning, immobilizer, iletisim, mr ecu, teknik destek';
 

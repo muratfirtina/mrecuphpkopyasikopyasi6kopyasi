@@ -189,24 +189,6 @@ if (!function_exists('convertDateFormat')) {
     }
 }
 
-// Slug oluşturma
-if (!function_exists('createSlug')) {
-    function createSlug($text) {
-        // Türkçe karakter dönüştürme
-        $turkish = ['ç', 'ğ', 'ı', 'ö', 'ş', 'ü', 'Ç', 'Ğ', 'I', 'İ', 'Ö', 'Ş', 'Ü'];
-        $english = ['c', 'g', 'i', 'o', 's', 'u', 'c', 'g', 'i', 'i', 'o', 's', 'u'];
-        $text = str_replace($turkish, $english, $text);
-        
-        // Küçük harfe çevir ve temizle
-        $text = strtolower($text);
-        $text = preg_replace('/[^a-z0-9\s-]/', '', $text);
-        $text = preg_replace('/[\s-]+/', '-', $text);
-        $text = trim($text, '-');
-        
-        return $text;
-    }
-}
-
 // IP adresi alma
 if (!function_exists('getRealIP')) {
     function getRealIP() {
@@ -347,22 +329,41 @@ if (!function_exists('formatDate')) {
     }
 }
 
-// Türkçe karakter temizleme
+// Türkçe karakter temizleme - GELİŞMİŞ VERSİYON
 if (!function_exists('turkishToEnglish')) {
     function turkishToEnglish($text) {
-        $search = array('Ğ','Ü','Ş','İ','Ö','Ç','ğ','ü','ş','ı','ö','ç');
-        $replace = array('G','U','S','I','O','C','g','u','s','i','o','c');
-        return str_replace($search, $replace, $text);
+        // Türkçe karakterleri İngilizce karşılıklarına dönüştür
+        // Sıralama ÖNEMLİ: Önce büyük harfler, sonra küçük harfler
+        $turkishChars = [
+            'Ç', 'Ğ', 'İ', 'Ö', 'Ş', 'Ü',  // Büyük harfler
+            'ç', 'ğ', 'ı', 'ö', 'ş', 'ü'   // Küçük harfler
+        ];
+        $englishChars = [
+            'C', 'G', 'I', 'O', 'S', 'U',  // Büyük harfler
+            'c', 'g', 'i', 'o', 's', 'u'   // Küçük harfler
+        ];
+        return str_replace($turkishChars, $englishChars, $text);
     }
 }
 
-// URL dostu slug oluşturma
+// URL dostu slug oluşturma - GELİŞMİŞ VERSİYON
 if (!function_exists('createSlug')) {
     function createSlug($text) {
+        // 1. Türkçe karakterleri dönüştür
         $text = turkishToEnglish($text);
+        
+        // 2. Küçük harfe çevir (artık Türkçe karakter yok, strtolower güvenli)
         $text = strtolower($text);
-        $text = preg_replace('/[^a-z0-9]+/', '-', $text);
+        
+        // 3. Sadece harf (a-z), rakam (0-9) ve boşluk bırak, diğerlerini sil
+        $text = preg_replace('/[^a-z0-9\s-]/', '', $text);
+        
+        // 4. Boşlukları ve tireleri tek tire yap
+        $text = preg_replace('/[\s-]+/', '-', $text);
+        
+        // 5. Baş ve sondaki tireleri temizle
         $text = trim($text, '-');
+        
         return $text;
     }
 }

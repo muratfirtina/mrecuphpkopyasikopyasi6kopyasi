@@ -7,7 +7,7 @@
 require_once 'config/config.php';
 require_once 'config/database.php';
 
-$pageTitle = 'Hakkımızda';
+$pageTitle = 'Hakkımızda - ' . SITE_NAME;
 $pageDescription = 'Mr ECU Teknoloji ve Otomotiv Çözümleri - Online Chiptuning dosya hizmeti sunan deneyimli ekibimizi tanıyın. 10+ yıllık sektör deneyimi ile global ölçekte hizmet.';
 $pageKeywords = 'hakkımızda, ECU uzmanları, chiptuning, online dosya hizmeti, otomotiv teknoloji, 10 yıl deneyim, profesyonel ekip';
 
@@ -298,7 +298,7 @@ include 'includes/header.php';
     <div class="contact-cta">
         <h2 class="mb-4" style="color: #fff !important;">Servisinizin Performansını Artırmaya Hazır mısınız?</h2>
         <p class="lead mb-4" style="color: #fff !important;">
-            Profesyonel ekibimiz ile iletişime geçin ve aracınız için en uygun chip tuning çözümünü keşfedin.
+            Profesyonel ekibimiz ile iletişime geçin ve müşterileriniz için en uygun chip tuning çözümünü keşfedin.
         </p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
             <a href="tel:+905551234567" class="btn btn-light btn-lg">

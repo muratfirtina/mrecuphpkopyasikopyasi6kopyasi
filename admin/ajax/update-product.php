@@ -47,6 +47,7 @@ try {
     $sortOrder = intval($_POST['sort_order'] ?? 0);
     $metaTitle = sanitize($_POST['meta_title'] ?? '');
     $metaDescription = sanitize($_POST['meta_description'] ?? '');
+    $eticaretUrl = !empty($_POST['eticareturl']) ? sanitize($_POST['eticareturl']) : null;
     
     // Validasyon
     if (empty($name)) {
@@ -61,8 +62,8 @@ try {
     
     // Slug oluştur/kontrol et
     if (empty($slug)) {
-        // Basit slug oluşturma
-        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name)));
+        // createSlug() fonksiyonunu kullan (Türkçe karakter desteği ile)
+        $slug = createSlug($name);
     }
     
     // SKU kontrolü
@@ -78,7 +79,7 @@ try {
         short_description = ?, description = ?, sku = ?, 
         price = ?, sale_price = ?, currency = ?, stock_quantity = ?, 
         weight = ?, dimensions = ?, featured = ?, is_active = ?, 
-        sort_order = ?, meta_title = ?, meta_description = ?,
+        sort_order = ?, meta_title = ?, meta_description = ?, eticareturl = ?,
         updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
     ");
@@ -88,7 +89,7 @@ try {
         $shortDescription, $description, $sku, 
         $price, $salePrice, $currency, $stockQuantity, 
         $weight, $dimensions, $featured, $isActive, 
-        $sortOrder, $metaTitle, $metaDescription, $productId
+        $sortOrder, $metaTitle, $metaDescription, $eticaretUrl, $productId
     ]);
     
     if ($result) {

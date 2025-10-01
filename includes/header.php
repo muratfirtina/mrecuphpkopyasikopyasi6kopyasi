@@ -22,14 +22,15 @@ if (!isset($pageTitle)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="<?php echo isset($pageDescription) ? $pageDescription : DEFAULT_META_DESCRIPTION; ?>">
-    <meta name="keywords" content="<?php echo isset($pageKeywords) ? $pageKeywords : DEFAULT_META_KEYWORDS; ?>">
     <meta name="author" content="<?php echo SITE_NAME; ?>">
     <meta name="robots" content="index, follow">
     
-    <!-- Favicon -->
+    <!-- Favicon - Google Arama için Optimize Edildi -->
+    <link rel="icon" type="image/x-icon" href="<?php echo BASE_URL; ?>/assets/images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?php echo BASE_URL; ?>/assets/images/favicon.png">
     <link rel="icon" type="image/svg+xml" href="<?php echo BASE_URL; ?>/assets/images/favicon.svg">
-    <link rel="alternate icon" type="image/svg+xml" href="<?php echo BASE_URL; ?>/assets/images/favicon2.svg">
-    <link rel="apple-touch-icon" href="<?php echo BASE_URL; ?>/assets/images/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="<?php echo BASE_URL; ?>/assets/images/favicon.png">
+    <link rel="manifest" href="<?php echo BASE_URL; ?>/manifest.json">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -38,11 +39,12 @@ if (!isset($pageTitle)) {
         if (basename($_SERVER['PHP_SELF']) === 'index.php' || $_SERVER['REQUEST_URI'] === '/') {
             echo SITE_NAME;
         } else {
-            echo $pageTitle . ' - ' . SITE_NAME;
+            // Eğer pageTitle zaten site adını içeriyorsa, tekrar ekleme
+            echo (strpos($pageTitle, SITE_NAME) !== false) ? $pageTitle : $pageTitle . ' - ' . SITE_NAME;
         }
     ?>">
     <meta property="og:description" content="<?php echo isset($pageDescription) ? $pageDescription : DEFAULT_META_DESCRIPTION; ?>">
-    <meta property="og:image" content="<?php echo BASE_URL; ?>/assets/images/og-image.jpg">
+    <meta property="og:image" content="<?php echo isset($pageImage) && !empty($pageImage) ? $pageImage : BASE_URL . '/assets/images/og-image.jpg'; ?>">
     <meta property="og:site_name" content="<?php echo SITE_NAME; ?>">
     <meta property="og:locale" content="tr_TR">
     
@@ -53,11 +55,12 @@ if (!isset($pageTitle)) {
         if (basename($_SERVER['PHP_SELF']) === 'index.php' || $_SERVER['REQUEST_URI'] === '/') {
             echo SITE_NAME;
         } else {
-            echo $pageTitle . ' - ' . SITE_NAME;
+            // Eğer pageTitle zaten site adını içeriyorsa, tekrar ekleme
+            echo (strpos($pageTitle, SITE_NAME) !== false) ? $pageTitle : $pageTitle . ' - ' . SITE_NAME;
         }
     ?>">
     <meta name="twitter:description" content="<?php echo isset($pageDescription) ? $pageDescription : DEFAULT_META_DESCRIPTION; ?>">
-    <meta name="twitter:image" content="<?php echo BASE_URL; ?>/assets/images/og-image.jpg">
+    <meta name="twitter:image" content="<?php echo isset($pageImage) && !empty($pageImage) ? $pageImage : BASE_URL . '/assets/images/og-image.jpg'; ?>">
     
     <!-- Canonical URL -->
     <link rel="canonical" href="<?php echo (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>">
@@ -77,7 +80,7 @@ if (!isset($pageTitle)) {
         "addressLocality": "İstanbul",
         "addressCountry": "TR"
       },
-      "image": "<?php echo BASE_URL; ?>/assets/images/favicon.svg",
+      "image": "<?php echo BASE_URL; ?>/assets/images/favicon.ico",
       "priceRange": "$",
       "sameAs": [
         "https://www.facebook.com/yourpage",
@@ -85,11 +88,6 @@ if (!isset($pageTitle)) {
       ]
     }
     </script>
-    
-    <!-- Cache Control -->
-    <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     
     <!-- Better Browser Compatibility -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -101,7 +99,8 @@ if (!isset($pageTitle)) {
         if (basename($_SERVER['PHP_SELF']) === 'index.php' || $_SERVER['REQUEST_URI'] === '/') {
             echo SITE_NAME;
         } else {
-            echo $pageTitle . ' - ' . SITE_NAME;
+            // Eğer pageTitle zaten tam bir başlıksa (meta_title gibi), site adını ekleme
+            echo (strpos($pageTitle, SITE_NAME) !== false) ? $pageTitle : $pageTitle . ' - ' . SITE_NAME;
         }
     ?></title>
     
@@ -297,20 +296,20 @@ if (!isset($pageTitle)) {
         position: relative;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 0.5rem !important;
+        gap: 0.4rem;
+        padding: 0.6rem 0.4rem !important;
         color: rgba(255, 255, 255, 0.8) !important;
         text-decoration: none;
         border-radius: 8px;
         transition: all 0.3s ease;
-        font-size: 13px !important;
+        font-size: 12px !important;
         font-weight: 600 !important;
-        margin: 0 0.25rem;
+        margin: 0 0.15rem;
     }
     
     .modern-nav-link i {
-        font-size: 1rem;
-        width: 20px;
+        font-size: 0.95rem;
+        width: 18px;
         text-align: center;
     }
     
@@ -327,6 +326,46 @@ if (!isset($pageTitle)) {
     }
     
     .modern-nav-link.active::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 30px;
+        height: 2px;
+        background: #dc3545;
+        border-radius: 1px;
+    }
+    .modern-nav-link2{
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.6rem 0.4rem !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        margin: 0 0.15rem;
+    }
+    .modern-nav-link2 i {
+        font-size: 0.95rem;
+        width: 18px;
+        text-align: center;
+    }
+    .modern-nav-link2:hover {
+        color: white !important;
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-1px);
+    }
+    .modern-nav-link2.active {
+        color: #dc3545 !important;
+        background: rgba(220, 53, 69, 0.1);
+        box-shadow: 0 2px 10px rgba(220, 53, 69, 0.2);
+    }
+    .modern-nav-link2.active::before {
         content: '';
         position: absolute;
         bottom: 0;
@@ -376,20 +415,62 @@ if (!isset($pageTitle)) {
         box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
     }
     
+    /* E-Commerce Button */
+    .ecommerce-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2) !important;
+        color: white !important;
+        border: none;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        position: relative;
+        overflow: hidden;
+        font-weight: 700 !important;
+    }
+    
+    .ecommerce-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .ecommerce-btn:hover::before {
+        left: 100%;
+    }
+    
+    .ecommerce-btn:hover {
+        background: linear-gradient(135deg, #5568d3, #6a3f8f) !important;
+        color: #0cff43 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+    
+    .ecommerce-btn i {
+        animation: cartBounce 2s infinite;
+    }
+    
+    @keyframes cartBounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-3px); }
+    }
+    
     /* User Dropdown */
     .user-dropdown {
         display: flex !important;
         align-items: center;
-        gap: 0.75rem;
-        padding: 0.5rem 1rem !important;
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem !important;
         background: rgb(255 255 255 / 20%);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 25px;
     }
     
     .user-avatar {
-        width: 35px;
-        height: 35px;
+        width: 32px;
+        height: 32px;
         background: linear-gradient(135deg, #dc3545, #fd7e14);
         border-radius: 50%;
         display: flex;
@@ -412,7 +493,7 @@ if (!isset($pageTitle)) {
     .username {
         font-family: "Raleway", Sans-serif;
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         line-height: 1;
         margin-bottom: 2px;
     }
@@ -563,6 +644,14 @@ if (!isset($pageTitle)) {
         .user-info {
             display: flex;
         }
+        
+        /* E-Commerce button mobil görünüm */
+        .ecommerce-btn {
+            margin: 0.5rem 0;
+            width: 100%;
+            justify-content: center;
+            padding: 0.75rem 1rem !important;
+        }
     }
     
     /* Alternative Scroll Effect Class */
@@ -666,8 +755,8 @@ if (!isset($pageTitle)) {
     <?php endif; ?>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="<?php echo BASE_URL; ?>/assets/images/favicon.svg">
-    <link rel="shortcut icon" href="<?php echo BASE_URL; ?>/assets/images/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="<?php echo BASE_URL; ?>/assets/images/favicon.ico">
+    <link rel="shortcut icon" href="<?php echo BASE_URL; ?>/assets/images/favicon.ico">
     
     <!-- Dynamic BASE_URL Setup for JavaScript -->
     <script>
@@ -987,6 +1076,12 @@ if (!isset($pageTitle)) {
                         <a class="nav-link modern-nav-link" href="<?php echo BASE_URL; ?>/contact.php">
                             <i class="bi bi-envelope-fill"></i>
                             <span>İLETİŞİM</span>
+                        </a>
+                    </li>
+                     <li class="nav-item">
+                        <a class="modern-nav-link2 ecommerce-btn" href="https://www.mrecuteknoloji.com.tr" target="_blank" rel="noopener noreferrer">
+                            <i class="bi bi-cart-check-fill"></i>
+                            <span>E-TİCARET</span>
                         </a>
                     </li>
                     

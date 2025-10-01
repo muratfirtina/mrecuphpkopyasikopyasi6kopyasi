@@ -21,11 +21,13 @@ Disallow: /fixes/
 Disallow: *.env*
 Disallow: *.log
 Disallow: *.sql
-Disallow: *.json
 Disallow: *.md
 Disallow: *.backup
 Disallow: *.bak
 Disallow: *.old
+
+# Allow manifest.json
+Allow: /manifest.json
 
 # Block PHP files in uploads
 Disallow: /uploads/*.php

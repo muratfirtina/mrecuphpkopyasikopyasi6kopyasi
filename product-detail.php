@@ -76,10 +76,12 @@ try {
 }
 
 // Meta bilgileri ayarla
-$pageTitle = $product['meta_title'] ?: $product['name'] . ' - ' . SITE_NAME;
-$pageDescription = $product['meta_description'] ?: $product['short_description'] ?: mb_substr(strip_tags($product['description']), 0, 160);
+// Eğer meta_title varsa, onu olduğu gibi kullan (site adı ekleme)
+// Eğer meta_title yoksa, ürün adı + site adını kullan
+$pageTitle = $product['meta_title'] ?: ($product['name'] . ' - ' . SITE_NAME);
+$pageDescription = $product['meta_description'] ?: ($product['short_description'] ?: mb_substr(strip_tags($product['description']), 0, 160));
 $pageKeywords = $product['name'] . ', ' . $product['category_name'] . ', ' . $product['brand_name'];
-$pageImage = !empty($productImages) ? BASE_URL . '/' . $productImages[0]['image_path'] : '';
+$pageImage = !empty($productImages) ? BASE_URL . '/' . $productImages[0]['image_path'] : BASE_URL . '/assets/images/og-image.jpg';
 
 // Breadcrumb
 $breadcrumb = [
@@ -465,6 +467,115 @@ include 'includes/header.php';
         color: var(--white);
         font-size: 0.625rem;
         flex-shrink: 0;
+    }
+
+    /* E-Commerce Buy Button */
+    .ecommerce-buy-button {
+        display: block;
+        width: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: var(--border-radius);
+        padding: 1.25rem;
+        text-decoration: none;
+        color: var(--white);
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .ecommerce-buy-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .ecommerce-buy-button:hover::before {
+        left: 100%;
+    }
+
+    .ecommerce-buy-button:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+    }
+
+    .ecommerce-buy-button:active {
+        transform: translateY(-2px);
+    }
+
+    .ecommerce-btn-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .ecommerce-btn-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+        backdrop-filter: blur(10px);
+    }
+
+    .ecommerce-btn-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .ecommerce-btn-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--white);
+        line-height: 1.3;
+    }
+
+    .ecommerce-btn-subtitle {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+    }
+
+    .ecommerce-btn-arrow {
+        font-size: 1.25rem;
+        color: var(--white);
+        flex-shrink: 0;
+        transition: transform 0.3s ease;
+    }
+
+    .ecommerce-buy-button:hover .ecommerce-btn-arrow {
+        transform: translateX(5px);
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 576px) {
+        .ecommerce-btn-title {
+            font-size: 0.9rem;
+        }
+        
+        .ecommerce-btn-subtitle {
+            font-size: 0.7rem;
+        }
+        
+        .ecommerce-btn-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.25rem;
+        }
     }
 
     /* Fixed Bottom Section */
@@ -1045,6 +1156,27 @@ include 'includes/header.php';
                 <span>Teknik destek hizmeti</span>
             </div>
         </div>
+        
+        <?php if (!empty($product['eticareturl'])): ?>
+        <!-- E-Ticaret Satın Alma Butonu -->
+        <a href="<?php echo htmlspecialchars($product['eticareturl']); ?>" 
+           target="_blank" 
+           rel="noopener noreferrer"
+           class="ecommerce-buy-button">
+            <div class="ecommerce-btn-content">
+                <div class="ecommerce-btn-icon">
+                    <i class="bi bi-cart-check-fill"></i>
+                </div>
+                <div class="ecommerce-btn-text">
+                    <span class="ecommerce-btn-title">Satın Almak İçin E-Ticaret Sitemizi Ziyaret Edin</span>
+                    <span class="ecommerce-btn-subtitle">Güvenli ödeme ile hızlı teslimat</span>
+                </div>
+                <div class="ecommerce-btn-arrow">
+                    <i class="bi bi-arrow-right"></i>
+                </div>
+            </div>
+        </a>
+        <?php endif; ?>
     </div>
 
     <!-- Fixed Bottom Contact Section -->
@@ -1474,6 +1606,24 @@ if (!empty($productImages)) {
 }
 
 echo '<script type="application/ld+json">' . json_encode($jsonLD, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
+
+// BreadcrumbList Schema
+$breadcrumbSchema = [
+    "@context" => "https://schema.org",
+    "@type" => "BreadcrumbList",
+    "itemListElement" => []
+];
+
+foreach ($breadcrumb as $index => $crumb) {
+    $breadcrumbSchema["itemListElement"][] = [
+        "@type" => "ListItem",
+        "position" => $index + 1,
+        "name" => $crumb['text'],
+        "item" => isset($crumb['url']) && !empty($crumb['url']) ? $crumb['url'] : null
+    ];
+}
+
+echo '<script type="application/ld+json">' . json_encode($breadcrumbSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
 
 // Footer include
 include 'includes/footer.php';

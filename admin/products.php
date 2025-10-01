@@ -192,6 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
     $dimensions = sanitize($_POST['dimensions']);
     $metaTitle = sanitize($_POST['meta_title']);
     $metaDescription = sanitize($_POST['meta_description']);
+    $eticaretUrl = !empty($_POST['eticareturl']) ? sanitize($_POST['eticareturl']) : null;
     $isFeatured = isset($_POST['featured']) ? 1 : 0;
     $isActive = isset($_POST['is_active']) ? 1 : 0;
     $sortOrder = intval($_POST['sort_order']);
@@ -206,8 +207,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
             $slug = createUniqueSlug($pdo, $name);
             
             // Ürün ekle
-            $stmt = $pdo->prepare("INSERT INTO products (name, slug, description, short_description, sku, price, sale_price, currency, stock_quantity, category_id, brand_id, weight, dimensions, featured, is_active, sort_order, meta_title, meta_description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $result = $stmt->execute([$name, $slug, $description, $shortDescription, $sku, $price, $salePrice, $currency, $stockQuantity, $categoryId, $brandId, $weight, $dimensions, $isFeatured, $isActive, $sortOrder, $metaTitle, $metaDescription]);
+            $stmt = $pdo->prepare("INSERT INTO products (name, slug, description, short_description, sku, price, sale_price, currency, stock_quantity, category_id, brand_id, weight, dimensions, featured, is_active, sort_order, meta_title, meta_description, eticareturl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $result = $stmt->execute([$name, $slug, $description, $shortDescription, $sku, $price, $salePrice, $currency, $stockQuantity, $categoryId, $brandId, $weight, $dimensions, $isFeatured, $isActive, $sortOrder, $metaTitle, $metaDescription, $eticaretUrl]);
             
             if ($result) {
                 $productId = $pdo->lastInsertId();
@@ -263,6 +264,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_product'])) {
         $dimensions = sanitize($_POST['dimensions']);
         $metaTitle = sanitize($_POST['meta_title']);
         $metaDescription = sanitize($_POST['meta_description']);
+        $eticaretUrl = !empty($_POST['eticareturl']) ? sanitize($_POST['eticareturl']) : null;
         $isFeatured = isset($_POST['featured']) ? 1 : 0;
         $isActive = isset($_POST['is_active']) ? 1 : 0;
         $sortOrder = intval($_POST['sort_order']);
@@ -273,8 +275,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_product'])) {
         // Benzersiz slug oluştur (mevcut ürün ID'si hariç)
         $slug = createUniqueSlug($pdo, $name, $productId);
         
-        $stmt = $pdo->prepare("UPDATE products SET name = ?, slug = ?, description = ?, short_description = ?, sku = ?, price = ?, sale_price = ?, currency = ?, stock_quantity = ?, category_id = ?, brand_id = ?, weight = ?, dimensions = ?, featured = ?, is_active = ?, sort_order = ?, meta_title = ?, meta_description = ? WHERE id = ?");
-        $result = $stmt->execute([$name, $slug, $description, $shortDescription, $sku, $price, $salePrice, $currency, $stockQuantity, $categoryId, $brandId, $weight, $dimensions, $isFeatured, $isActive, $sortOrder, $metaTitle, $metaDescription, $productId]);
+        $stmt = $pdo->prepare("UPDATE products SET name = ?, slug = ?, description = ?, short_description = ?, sku = ?, price = ?, sale_price = ?, currency = ?, stock_quantity = ?, category_id = ?, brand_id = ?, weight = ?, dimensions = ?, featured = ?, is_active = ?, sort_order = ?, meta_title = ?, meta_description = ?, eticareturl = ? WHERE id = ?");
+        $result = $stmt->execute([$name, $slug, $description, $shortDescription, $sku, $price, $salePrice, $currency, $stockQuantity, $categoryId, $brandId, $weight, $dimensions, $isFeatured, $isActive, $sortOrder, $metaTitle, $metaDescription, $eticaretUrl, $productId]);
         
         // Yeni resimler eklendi mi kontrol et
         if (isset($_FILES['product_images']) && !empty($_FILES['product_images']['tmp_name'][0])) {
@@ -773,6 +775,18 @@ include '../includes/admin_sidebar.php';
                         </div>
                     </div>
                     
+                    <!-- E-Ticaret URL Bölümü -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6 class="mb-3"><i class="bi bi-cart me-2"></i>E-Ticaret Linki</h6>
+                            <div class="mb-3">
+                                <label for="edit_eticareturl" class="form-label">E-Ticaret Sitesi URL'si</label>
+                                <input type="url" class="form-control" id="edit_eticareturl" name="eticareturl" placeholder="https://">
+                                <div class="form-text">Ürünün satıldığı e-ticaret sitesinin tam URL'sini girin</div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- SEO Bölümü -->
                     <div class="row mt-4">
                         <div class="col-12">
@@ -1091,6 +1105,18 @@ include '../includes/admin_sidebar.php';
                         </div>
                     </div>
                     
+                    <!-- E-Ticaret URL Bölümü -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6 class="mb-3"><i class="bi bi-cart me-2"></i>E-Ticaret Linki</h6>
+                            <div class="mb-3">
+                                <label for="add_eticareturl" class="form-label">E-Ticaret Sitesi URL'si</label>
+                                <input type="url" class="form-control" name="eticareturl" id="add_eticareturl" placeholder="https://">
+                                <div class="form-text">Ürünün satıldığı e-ticaret sitesinin tam URL'sini girin</div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- SEO Bölümü -->
                     <div class="row mt-4">
                         <div class="col-12">
@@ -1223,6 +1249,7 @@ window.editProduct = function(productId) {
                 document.getElementById('edit_sort_order').value = product.sort_order || 0;
                 document.getElementById('edit_meta_title').value = product.meta_title || '';
                 document.getElementById('edit_meta_description').value = product.meta_description || '';
+                document.getElementById('edit_eticareturl').value = product.eticareturl || '';
                 
                 document.getElementById('edit_is_active').checked = product.is_active == 1;
                 document.getElementById('edit_featured').checked = product.featured == 1;

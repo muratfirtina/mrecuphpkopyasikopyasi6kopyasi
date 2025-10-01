@@ -7,7 +7,7 @@
 require_once 'config/config.php';
 require_once 'config/database.php';
 
-$pageTitle = 'Hizmetlerimiz';
+$pageTitle = 'Hizmetlerimiz - ' . SITE_NAME;
 $pageDescription = 'Profesyonel ECU hizmetlerimizi keşfedin. ECU tuning, chip tuning, immobilizer ve daha fazlası.';
 $pageKeywords = 'ECU tuning, chip tuning, immobilizer, TCU tuning, DPF off, EGR off, AdBlue off';
 

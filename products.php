@@ -17,7 +17,7 @@ $perPage = PRODUCTS_PER_PAGE;
 $offset = ($page - 1) * $perPage;
 
 // Sayfa bilgilerini başlat
-$pageTitle = 'Ürünler';
+$pageTitle = 'Ürünler - ' . SITE_NAME;
 $pageDescription = 'ECU programlama cihazları, chip tuning araçları ve otomotiv yazılım ürünleri';
 $selectedCategory = null;
 $selectedBrand = null;
