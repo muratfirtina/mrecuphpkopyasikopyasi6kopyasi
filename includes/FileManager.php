@@ -526,6 +526,7 @@ class FileManager {
                         'series_id' => $vehicleData['series_id'],
                         'engine_id' => $vehicleData['engine_id'],
                         'year' => $vehicleData['year'],
+                        'plate' => $vehicleData['plate'],
                         'fuel_type' => $vehicleData['fuel_type'],
                         'gearbox_type' => $vehicleData['gearbox_type'],
                         'upload_notes' => $notes
@@ -1444,7 +1445,7 @@ class FileManager {
                             
                             // Kullanıcı email bilgilerini al
                             $stmt = $this->pdo->prepare("
-                                SELECT u.email, CONCAT(u.first_name, ' ', u.last_name) as full_name
+                                SELECT u.email, CONCAT(u.first_name, ' ', u.last_name) as full_name, f.plate
                                 FROM users u
                                 JOIN file_uploads f ON f.user_id = u.id
                                 WHERE f.id = ?
@@ -1457,7 +1458,7 @@ class FileManager {
                                     'user_name' => $user['full_name'],
                                     'user_email' => $user['email'],
                                     'file_name' => $upload['original_name'],
-                                    'plate' => $upload['plate'],
+                                    'plate' => $user['plate'] ?? $upload['plate'] ?? '',
                                     'status' => $status,
                                     'status_message' => $statusMessages[$status],
                                     'admin_notes' => $adminNotes,
@@ -2042,6 +2043,7 @@ class FileManager {
                 'user_email' => $user['email'],
                 'user_phone' => $user['phone'] ?? '',
                 'file_name' => $uploadData['original_name'],
+                'plate' => $uploadData['plate'] ?? '',
                 'vehicle_brand' => $vehicleInfo['brand'],
                 'vehicle_model' => $vehicleInfo['model'],
                 'vehicle_series' => $vehicleInfo['series'],
@@ -2086,7 +2088,7 @@ class FileManager {
         try {
             // Orijinal dosya ve kullanıcı bilgilerini al
             $stmt = $this->pdo->prepare("
-                SELECT fu.original_name as original_file, fu.user_id,
+                SELECT fu.original_name as original_file, fu.plate, fu.user_id,
                        u.email, u.first_name, u.last_name
                 FROM file_uploads fu
                 INNER JOIN users u ON fu.user_id = u.id
@@ -2102,6 +2104,7 @@ class FileManager {
             
             $emailData = [
                 'user_name' => $uploadInfo['first_name'] . ' ' . $uploadInfo['last_name'],
+                'plate' => $uploadInfo['plate'] ?? '',
                 'original_file_name' => $uploadInfo['original_file'],
                 'response_file_name' => $responseData['original_name'],
                 'admin_notes' => $responseData['admin_notes'] ?? '',
@@ -2635,13 +2638,17 @@ class FileManager {
                 return false;
             }
             
-            // İlgili dosya adını al
+            // İlgili dosya adını ve plaka bilgisini al
             $relatedFileName = 'Bilinmiyor';
+            $plate = '';
             if ($fileData['related_file_type'] === 'upload') {
-                $stmt = $this->pdo->prepare("SELECT original_name FROM file_uploads WHERE id = ?");
+                $stmt = $this->pdo->prepare("SELECT original_name, plate FROM file_uploads WHERE id = ?");
                 $stmt->execute([$relatedFileId]);
                 $related = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($related) $relatedFileName = $related['original_name'];
+                if ($related) {
+                    $relatedFileName = $related['original_name'];
+                    $plate = $related['plate'] ?? '';
+                }
             }
             
             $emailData = [
@@ -2649,6 +2656,7 @@ class FileManager {
                 'sender_email' => $fileData['sender_email'],
                 'receiver_name' => $fileData['receiver_first_name'] . ' ' . $fileData['receiver_last_name'],
                 'receiver_email' => $fileData['receiver_email'],
+                'plate' => $plate,
                 'file_name' => $fileData['original_name'],
                 'notes' => $fileData['notes'] ?? '',
                 'related_file_name' => $relatedFileName,

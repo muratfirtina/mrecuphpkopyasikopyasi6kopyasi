@@ -58,22 +58,37 @@ function updateNotificationBadge() {
     fetch('../ajax/get_notification_count.php', {
         credentials: 'same-origin'
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const badge = document.getElementById('notification-badge');
-            if (badge) {
-                if (data.count > 0) {
-                    badge.textContent = data.count;
-                    badge.style.display = 'inline';
-                } else {
-                    badge.style.display = 'none';
+    .then(response => {
+        // Önce response'un text olarak okunabilir olup olmadığını kontrol et
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.text();
+    })
+    .then(text => {
+        // Text'i JSON'a parse et
+        try {
+            const data = JSON.parse(text);
+            if (data.success) {
+                const badge = document.getElementById('notification-badge');
+                if (badge) {
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.style.display = 'inline';
+                    } else {
+                        badge.style.display = 'none';
+                    }
                 }
+            } else {
+                console.warn('Badge güncelleme başarısız:', data.message);
             }
+        } catch (e) {
+            console.error('Badge güncelleme hatası:', e);
+            console.error('Gelen response:', text.substring(0, 200)); // İlk 200 karakteri göster
         }
     })
     .catch(error => {
-        console.error('Error updating notification badge:', error);
+        console.error('Badge güncelleme hatası:', error);
     });
 }
 
@@ -197,16 +212,26 @@ function startNotificationPolling() {
         fetch('../ajax/get_notification_count.php', {
             credentials: 'same-origin'
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.count > 0) {
-                updateNotificationBadge();
-                // Yeni bildirim varsa ses çal (isteğe bağlı)
-                // playNotificationSound();
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                if (data.success && data.count > 0) {
+                    updateNotificationBadge();
+                    // Yeni bildirim varsa ses çal (isteğe bağlı)
+                    // playNotificationSound();
+                }
+            } catch (e) {
+                // Sessizce hata yakala - polling olduğu için sürekli log yapmayız
             }
         })
         .catch(error => {
-            console.error('Error checking notifications:', error);
+            // Sessizce hata yakala - polling olduğu için sürekli log yapmayız
         });
     }, 60000); // Her dakika kontrol et
 }

@@ -4,21 +4,43 @@
  * Bildirim Sayısını Getir
  */
 
+// Output buffering başlat - PHP hatalarını yakalamak için
+ob_start();
+
+// Hata raporlamayı kapat (sadece JSON döndürmek için)
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
+error_reporting(E_ALL);
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once '../config/config.php';
-require_once '../config/database.php';
-require_once '../includes/functions.php';
+try {
+    require_once '../config/config.php';
+    require_once '../config/database.php';
+    require_once '../includes/functions.php';
+} catch (Exception $e) {
+    // Tüm output'u temizle
+    ob_end_clean();
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Sistem dosyaları yüklenemedi.', 'error' => $e->getMessage()]);
+    exit;
+}
 
 // NotificationManager'ı dahil et
 if (!class_exists('NotificationManager')) {
     require_once '../includes/NotificationManager.php';
 }
 
+// Output buffer'daki tüm gereksiz çıktıyı temizle
+ob_end_clean();
+
 // JSON response header
 header('Content-Type: application/json');
+
+// Yeni bir output buffer başlat
+ob_start();
 
 // Giriş kontrolü
 if (!isLoggedIn()) {
@@ -90,4 +112,7 @@ try {
         ]
     ]);
 }
+
+// Output buffer'ı flush et ve temizle
+ob_end_flush();
 ?>

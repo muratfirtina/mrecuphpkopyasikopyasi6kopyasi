@@ -732,7 +732,7 @@ try {
                                             <button type="button" class="btn btn-outline-secondary btn-modern prev-step me-2">
                                                 <i class="bi bi-arrow-left me-2"></i>Geri
                                             </button>
-                                            <button type="submit" class="btn btn-success btn-modern btn-lg">
+                                            <button type="submit" class="btn btn-success btn-modern btn-lg" id="submitButton">
                                                 <i class="bi bi-send me-2"></i>Dosyayı Yükle ve Gönder
                                             </button>
                                         </div>
@@ -1356,18 +1356,37 @@ function validateCurrentStep() {
 function showError(message) {
     // Geçici error mesajı göster
     const alert = document.createElement('div');
-    alert.className = 'alert alert-danger alert-dismissible fade show';
+    alert.className = 'alert alert-danger alert-dismissible fade show mt-3';
     alert.innerHTML = `
         <i class="bi bi-exclamation-triangle me-2"></i>${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
-    document.querySelector('main').insertBefore(alert, document.querySelector('.upload-wizard'));
     
+    // Güvenli bir şekilde mesajı ekle
+    const mainElement = document.querySelector('main');
+    const uploadWizard = document.querySelector('.upload-wizard');
+    
+    if (mainElement && uploadWizard && uploadWizard.parentNode === mainElement.querySelector('.col-lg-8')) {
+        uploadWizard.parentNode.insertBefore(alert, uploadWizard);
+    } else if (mainElement) {
+        // Alternatif: main elementinin başına ekle
+        const firstChild = mainElement.querySelector('.row.g-4') || mainElement.firstElementChild;
+        if (firstChild) {
+            mainElement.insertBefore(alert, firstChild);
+        } else {
+            mainElement.appendChild(alert);
+        }
+    }
+    
+    // Mesajı otomatik kaldır
     setTimeout(() => {
-        if (alert.parentNode) {
+        if (alert && alert.parentNode) {
             alert.remove();
         }
     }, 5000);
+    
+    // Mesaja scroll et
+    alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 // Validate Current Step - TAM YENİLENMİŞ VE GELİŞTİRİLMİŞ!
@@ -1830,6 +1849,9 @@ function formatFileSize(bytes) {
                 // Tüm validation hatalarını temizle
                 clearAllValidationErrors();
                 
+                const submitButton = document.getElementById('submitButton');
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                
                 let isValid = true;
                 
                 // Manuel validation kontrolleri
@@ -1896,6 +1918,17 @@ function formatFileSize(bytes) {
                     }
                     
                     showError('Lütfen tüm zorunlu alanları doldurun.');
+                } else {
+                    // Validation başarılı - Loading göster ve butonu devre dışı bırak
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Yükleniyor...';
+                    loadingOverlay.classList.add('active');
+                    
+                    // Tüm form elementlerini devre dışı bırak
+                    const formElements = form.querySelectorAll('input, select, textarea, button');
+                    formElements.forEach(element => {
+                        element.disabled = true;
+                    });
                 }
                 
                 form.classList.add('was-validated');

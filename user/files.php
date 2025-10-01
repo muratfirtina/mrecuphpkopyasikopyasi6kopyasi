@@ -89,7 +89,14 @@ if ($filterId && isValidUUID($filterId)) {
 
 // Sayfalama
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$limit = 15;
+$per_page = isset($_GET['per_page']) ? intval($_GET['per_page']) : 15;
+// Geçerli per_page değerleri
+$allowed_per_page = [10, 15, 25, 50];
+if (!in_array($per_page, $allowed_per_page)) {
+    $per_page = 15;
+}
+$limit = $per_page;
+$offset = ($page - 1) * $limit;
 
 // Sadece ana dosyaları getir (file_uploads tablosundan)
 if ($singleFileMode) {
@@ -858,49 +865,111 @@ include '../includes/user_header.php';
                 </div>
                 
                 <!-- Pagination -->
-                <?php if ($totalPages > 1): ?>
-                    <div class="pagination-wrapper">
-                        <nav aria-label="Dosya sayfalama">
-                            <ul class="pagination justify-content-center">
-                                <!-- Önceki sayfa -->
-                                <?php if ($page > 1): ?>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>">
-                                            <i class="bi bi-chevron-left"></i>
-                                        </a>
-                                    </li>
-                                <?php endif; ?>
-                                
-                                <!-- Sayfa numaraları -->
-                                <?php 
-                                $start = max(1, $page - 2);
-                                $end = min($totalPages, $page + 2);
-                                ?>
-                                
-                                <?php for ($i = $start; $i <= $end; $i++): ?>
-                                    <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                        <a class="page-link" href="?page=<?php echo $i; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>">
-                                            <?php echo $i; ?>
-                                        </a>
-                                    </li>
-                                <?php endfor; ?>
-                                
-                                <!-- Sonraki sayfa -->
-                                <?php if ($page < $totalPages): ?>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>">
-                                            <i class="bi bi-chevron-right"></i>
-                                        </a>
-                                    </li>
-                                <?php endif; ?>
-                            </ul>
-                        </nav>
-                        
-                        <div class="pagination-info">
-                            <small class="text-muted">
-                                Sayfa <?php echo $page; ?> / <?php echo $totalPages; ?> 
-                                (Toplam <?php echo $totalFiles; ?> dosya)
-                            </small>
+                <?php if ($totalPages > 1 || $totalFiles > 10): ?>
+                    <div class="pagination-wrapper mt-4">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <!-- Sayfa Başına Kayıt Sayısı -->
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="per_page" class="form-label mb-0 text-muted">Sayfa başına:</label>
+                                <select class="form-select form-select-sm" id="per_page" name="per_page" style="width: auto; min-width: 80px;" onchange="changePerPage(this.value)">
+                                    <option value="10" <?php echo $per_page === 10 ? 'selected' : ''; ?>>10</option>
+                                    <option value="15" <?php echo $per_page === 15 ? 'selected' : ''; ?>>15</option>
+                                    <option value="25" <?php echo $per_page === 25 ? 'selected' : ''; ?>>25</option>
+                                    <option value="50" <?php echo $per_page === 50 ? 'selected' : ''; ?>>50</option>
+                                </select>
+                            </div>
+
+                            <!-- Sayfa Navigasyonu -->
+                            <nav aria-label="Dosya sayfalama">
+                                <ul class="pagination pagination-modern mb-0">
+                                    <!-- İlk Sayfa -->
+                                    <?php if ($page > 1): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1<?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>&per_page=<?php echo $per_page; ?>" title="İlk sayfa">
+                                                <i class="bi bi-chevron-bar-left"></i>
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Önceki sayfa -->
+                                    <?php if ($page > 1): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>&per_page=<?php echo $per_page; ?>" title="Önceki sayfa">
+                                                <i class="bi bi-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Sayfa numaraları -->
+                                    <?php 
+                                    $start = max(1, $page - 2);
+                                    $end = min($totalPages, $page + 2);
+                                    
+                                    // Eğer başlangıç 1'den büyükse, ilk sayfayı göster
+                                    if ($start > 1): 
+                                    ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1<?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>&per_page=<?php echo $per_page; ?>">1</a>
+                                        </li>
+                                        <?php if ($start > 2): ?>
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                    
+                                    <?php for ($i = $start; $i <= $end; $i++): ?>
+                                        <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                                            <a class="page-link" href="?page=<?php echo $i; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>&per_page=<?php echo $per_page; ?>">
+                                                <?php echo $i; ?>
+                                            </a>
+                                        </li>
+                                    <?php endfor; ?>
+                                    
+                                    <!-- Eğer son sayfa gösterilmediyse, son sayfayı göster -->
+                                    <?php if ($end < $totalPages): ?>
+                                        <?php if ($end < $totalPages - 1): ?>
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        <?php endif; ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<?php echo $totalPages; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>&per_page=<?php echo $per_page; ?>"><?php echo $totalPages; ?></a>
+                                        </li>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Sonraki sayfa -->
+                                    <?php if ($page < $totalPages): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>&per_page=<?php echo $per_page; ?>" title="Sonraki sayfa">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Son Sayfa -->
+                                    <?php if ($page < $totalPages): ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<?php echo $totalPages; ?><?php echo $status ? '&status=' . $status : ''; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $filterId ? '&id=' . urlencode($filterId) : ''; ?>&per_page=<?php echo $per_page; ?>" title="Son sayfa">
+                                                <i class="bi bi-chevron-bar-right"></i>
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
+                                </ul>
+                            </nav>
+                            
+                            <!-- Sayfa Bilgisi -->
+                            <div class="pagination-info">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    <?php 
+                                    $showing_start = (($page - 1) * $per_page) + 1;
+                                    $showing_end = min($page * $per_page, $totalFiles);
+                                    ?>
+                                    <strong><?php echo $showing_start; ?>-<?php echo $showing_end; ?></strong> arası gösteriliyor
+                                    (Toplam <strong><?php echo $totalFiles; ?></strong> dosya)
+                                </small>
+                            </div>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -1244,31 +1313,52 @@ include '../includes/user_header.php';
 /* Pagination */
 .pagination-wrapper {
     margin-top: 2rem;
-    text-align: center;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 
-.pagination-info {
-    margin-top: 1rem;
-}
-
-.pagination .page-link {
+.pagination-modern .page-link {
     border-radius: 8px;
-    margin: 0 2px;
+    margin: 0 3px;
     border: 1px solid #e9ecef;
     color: #495057;
     font-weight: 500;
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.85rem;
+    transition: all 0.3s ease;
 }
 
-.pagination .page-item.active .page-link {
+.pagination-modern .page-item:not(.disabled):not(.active) .page-link:hover {
+    background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.pagination-modern .page-item.active .page-link {
     background: linear-gradient(135deg, #011b8f 0%, #ab0000 100%);
     border-color: transparent;
     color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-.pagination .page-link:hover {
+.pagination-modern .page-item.disabled .page-link {
     background-color: #f8f9fa;
-    border-color: #dee2e6;
+    border-color: #e9ecef;
+    color: #6c757d;
+}
+
+.pagination-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pagination-info strong {
+    color: #495057;
+    font-weight: 600;
 }
 
 /* Modern Form Controls */
@@ -1392,6 +1482,33 @@ include '../includes/user_header.php';
         font-size: 0.7rem;
         padding: 0.3rem 0.5rem;
     }
+    
+    /* Pagination Mobile */
+    .pagination-wrapper {
+        padding: 1rem;
+    }
+    
+    .pagination-wrapper > div {
+        flex-direction: column;
+        gap: 1rem !important;
+    }
+    
+    .pagination-wrapper .d-flex:first-child,
+    .pagination-wrapper .pagination-info {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .pagination-modern {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .pagination-modern .page-link {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.85rem;
+        margin: 0 1px;
+    }
 }
 
 /* File row click effect */
@@ -1405,6 +1522,14 @@ include '../includes/user_header.php';
 </style>
 
 <script>
+// Per Page değiştirme fonksiyonu
+function changePerPage(perPage) {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('per_page', perPage);
+    urlParams.set('page', '1'); // Sayfa başına kayıt değişince 1. sayfaya dön
+    window.location.search = urlParams.toString();
+}
+
 // Request Revision
 function requestRevision(fileId, fileType = 'upload') {
     document.getElementById('revisionFileId').value = fileId;

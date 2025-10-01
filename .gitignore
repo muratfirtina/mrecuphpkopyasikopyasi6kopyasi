@@ -8,6 +8,7 @@ config/database.php
 config/local_config.php
 
 # Upload directories
+uploads/additional_files/*
 uploads/user_files/*
 uploads/response_files/*
 !uploads/user_files/.gitkeep

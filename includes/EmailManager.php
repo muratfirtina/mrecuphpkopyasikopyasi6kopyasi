@@ -330,6 +330,7 @@ class EmailManager {
                 
                 <div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>
                     <h3 style='color: #2c3e50; margin-top: 0;'>Araç Bilgileri</h3>
+                    <p><strong>Plaka:</strong> {$emailData['plate']}</p>
                     <p><strong>Marka:</strong> {$emailData['vehicle_brand']}</p>
                     <p><strong>Model:</strong> {$emailData['vehicle_model']}</p>
                     <p><strong>Seri:</strong> {$emailData['vehicle_series']}</p>
@@ -383,11 +384,12 @@ class EmailManager {
                 
                 <div style='background: #d5f4e6; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #27ae60;'>
                     <h3 style='color: #2c3e50; margin-top: 0;'>Merhaba {$emailData['user_name']},</h3>
-                    <p>Yüklemiş olduğunuz <strong>{$emailData['original_file_name']}</strong> dosyası işleme alındı ve tamamlandı.</p>
+                    <p>Yüklemiş olduğunuz <strong>{$emailData['plate']}</strong> plakasına ait <strong>{$emailData['original_file_name']}</strong> dosyası işleme alındı ve tamamlandı.</p>
                 </div>
                 
                 <div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>
                     <h3 style='color: #2c3e50; margin-top: 0;'>Yanıt Dosyası</h3>
+                    <p><strong>Plaka:</strong> {$emailData['plate']}</p>
                     <p><strong>Dosya Adı:</strong> {$emailData['response_file_name']}</p>
                     <p><strong>Tamamlanma Tarihi:</strong> {$emailData['response_time']}</p>
                     " . (isset($emailData['admin_notes']) && $emailData['admin_notes'] ? "<p><strong>Admin Notları:</strong> {$emailData['admin_notes']}</p>" : "") . "
@@ -570,6 +572,7 @@ class EmailManager {
                 
                 <div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>
                     <h3 style='color: #2c3e50; margin-top: 0;'>Dosya Bilgileri</h3>
+                    <p><strong>Plaka:</strong> {$emailData['plate']}</p>
                     <p><strong>Dosya Adı:</strong> {$emailData['file_name']}</p>
                     <p><strong>Gönderim Tarihi:</strong> {$emailData['upload_time']}</p>
                     <p><strong>İlgili Dosya:</strong> {$emailData['related_file_name']}</p>
