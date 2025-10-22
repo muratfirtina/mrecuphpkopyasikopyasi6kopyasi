@@ -1,6 +1,6 @@
 <?php
 // PHP Syntax Check for update-product.php
-$file = '/Applications/MAMP/htdocs/mrecuphpkopyasikopyasi6kopyasi/admin/ajax/update-product.php';
+$file = '/Applications/MAMP/htdocs/mrecutuning/admin/ajax/update-product.php';
 
 error_log('=== PHP SYNTAX CHECK STARTED ===');
 

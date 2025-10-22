@@ -6,7 +6,7 @@
 
 class Database {
     private $host = '127.0.0.1';
-    private $port = '8889'; // MAMP default MySQL port
+    private $port = '8888'; // MAMP default MySQL port
     private $db_name = 'mrecu_db';
     private $username = 'root';
     private $password = ''; // MAMP default (boş şifre)

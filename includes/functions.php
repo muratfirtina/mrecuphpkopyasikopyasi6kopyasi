@@ -219,7 +219,7 @@ if (!defined('SITE_NAME')) {
 }
 
 if (!defined('SITE_URL')) {
-    define('SITE_URL', 'http://localhost:8889/mrecuphpkopyasikopyasi6/');
+    define('SITE_URL', 'http://localhost:8888/mrecuphpkopyasikopyasi6/');
 }
 
 if (!defined('UPLOAD_PATH')) {

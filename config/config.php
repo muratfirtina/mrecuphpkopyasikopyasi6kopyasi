@@ -108,7 +108,7 @@ function loadDevelopmentConfig() {
     
     // Basic development constants
     define('SITE_NAME', env('SITE_NAME', 'Mr ECU'));
-    define('BASE_URL', env('BASE_URL', 'http://localhost:8888/mrecuphpkopyasikopyasi6kopyasi'));
+    define('BASE_URL', env('BASE_URL', 'http://localhost:8888/mrecutuning'));
     define('SITE_URL', env('SITE_URL', BASE_URL . '/'));
     define('SITE_EMAIL', env('SITE_EMAIL', 'info@localhost.com'));
     define('DEBUG', true);
@@ -148,7 +148,7 @@ function loadDevelopmentConfig() {
 function loadEmergencyConfig() {
     // Minimum required constants
     if (!defined('SITE_NAME')) define('SITE_NAME', 'Mr ECU');
-    if (!defined('BASE_URL')) define('BASE_URL', 'http://localhost:8888/mrecuphpkopyasikopyasi6kopyasi');
+    if (!defined('BASE_URL')) define('BASE_URL', 'http://localhost:8888/mrecutuning');
     if (!defined('SITE_URL')) define('SITE_URL', BASE_URL . '/');
     if (!defined('SITE_EMAIL')) define('SITE_EMAIL', 'mr.ecu@outlook.com');
     if (!defined('DEBUG')) define('DEBUG', false);
