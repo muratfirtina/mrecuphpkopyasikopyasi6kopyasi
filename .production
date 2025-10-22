@@ -1,8 +1,4 @@
-# Mr ECU Production Environment Marker
-# Bu dosya production ortamını belirtir
-# Environment detection için kullanılır
-
+# Production Environment Marker
+# Bu dosya hostingde production ortamını işaretler
+PRODUCTION=true
 ENVIRONMENT=production
-DOMAIN=mrecutuning.com
-CREATED=$(date)
-VERSION=1.0.0

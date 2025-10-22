@@ -1,7 +1,7 @@
 {
   "name": "Mr.ECU Chip Tuning & Remapping",
   "short_name": "Mr.ECU",
-  "description": "Mr.ECU, Chiptuning dosya servisi, ECU programlama ve arıza tespit cihazları ile servislerin performansını artırır.",
+  "description": "Her araç için test edilmiş, yüksek performanslı ve güvenli chiptuning dosyaları. Mr. ECU Online Dosya Servisi ile profesyonel çözüme tek tıkla ulaşın.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#071e3d",
@@ -9,7 +9,7 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/assets/images/favicon.ico",
+      "src": "/favicon.ico",
       "sizes": "48x48",
       "type": "image/x-icon"
     },

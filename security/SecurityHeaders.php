@@ -53,26 +53,26 @@ class SecurityHeaders {
         $nonce = self::generateNonce();
         
         if ($strictMode) {
-            // Sıkı CSP politikası
+            // Sıkı CSP politikası - Google Analytics desteği ile
             $csp = "default-src 'self'; " .
-                   "script-src 'self' 'nonce-$nonce' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " .
+                   "script-src 'self' 'nonce-$nonce' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.googletagmanager.com; " .
                    "style-src 'self' 'nonce-$nonce' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; " .
-                   "img-src 'self' data: https:; " .
+                   "img-src 'self' data: https: https://www.google-analytics.com https://www.googletagmanager.com; " .
                    "font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com; " .
-                   "connect-src 'self'; " .
+                   "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://analytics.google.com https://region1.google-analytics.com https://region1.analytics.google.com; " .
                    "media-src 'self'; " .
                    "object-src 'none'; " .
                    "frame-src 'self' https://www.google.com https://maps.google.com; " .
                    "base-uri 'self'; " .
                    "form-action 'self'";
         } else {
-            // Gevşek CSP politikası (geliştirme için)
+            // Gevşek CSP politikası (geliştirme için) - Google Analytics desteği ile
             $csp = "default-src 'self'; " .
-                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://code.jquery.com; " .
+                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://code.jquery.com https://www.googletagmanager.com; " .
                    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://unpkg.com; " .
                    "img-src 'self' data: https: http:; " .
                    "font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com; " .
-                   "connect-src 'self' https:; " .
+                   "connect-src 'self' https: https://www.google-analytics.com https://www.googletagmanager.com https://analytics.google.com; " .
                    "media-src 'self'; " .
                    "object-src 'none'; " .
                    "frame-src 'self' https://www.google.com https://maps.google.com";

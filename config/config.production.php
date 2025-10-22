@@ -45,9 +45,16 @@ function env($key, $default = null) {
 # 🌐 SİTE AYARLARI - PRODUCTION (mrecutuning.com)
 // ==========================================
 
-define('SITE_NAME', env('SITE_NAME', 'Mr.ECU | chiptuning dosya servisi'));
-define('SITE_URL', rtrim(env('SITE_URL', 'https://www.mrecutuning.com'), '/') . '/');
-define('BASE_URL', rtrim(env('BASE_URL', 'https://www.mrecutuning.com'), '/'));
+// Dinamik BASE_URL - www'li veya www'siz otomatik algılama
+if (!defined('BASE_URL')) {
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'mrecutuning.com';
+    $dynamicBaseUrl = $protocol . '://' . $host;
+    define('BASE_URL', rtrim(env('BASE_URL', $dynamicBaseUrl), '/'));
+}
+
+define('SITE_NAME', env('SITE_NAME', 'Mr.ECU | Chiptuning Dosya Servisi'));
+define('SITE_URL', rtrim(env('SITE_URL', BASE_URL), '/') . '/');
 define('SITE_EMAIL', env('SITE_EMAIL', 'mr.ecu@outlook.com'));
 define('ADMIN_EMAIL', env('SITE_EMAIL', 'mr.ecu@outlook.com'));
 
@@ -100,7 +107,7 @@ define('SOCIAL_LINKEDIN', env('SOCIAL_LINKEDIN', ''));
 # 🐛 DEBUG VE ERROR AYARLARI - PRODUCTION
 // ==========================================
 
-// ⚠️ PRODUCTION'DA MUTLAKA FALSE!
+// ⚠️ PRODUCTION'DA MUTLAKA FALSE! (Geçici debug için true yapılabilir)
 define('DEBUG', filter_var(env('DEBUG', 'false'), FILTER_VALIDATE_BOOLEAN));
 define('ERROR_REPORTING', filter_var(env('ERROR_REPORTING', 'false'), FILTER_VALIDATE_BOOLEAN));
 define('LOG_ERRORS', filter_var(env('LOG_ERRORS', 'true'), FILTER_VALIDATE_BOOLEAN));
@@ -111,7 +118,7 @@ if (DEBUG && ERROR_REPORTING) {
     error_reporting(E_ALL);
     ini_set('display_errors', DISPLAY_ERRORS ? 1 : 0);
 } else {
-    error_reporting(0);
+    error_reporting(E_ALL); // Tüm hataları logla ama gösterme
     ini_set('display_errors', 0);
 }
 
@@ -125,7 +132,7 @@ ini_set('error_log', __DIR__ . '/../logs/error.log');
 
 define('UPLOAD_DIR', __DIR__ . '/../uploads/');
 define('UPLOAD_PATH', __DIR__ . '/../uploads/');
-define('MAX_FILE_SIZE', (int)env('MAX_FILE_SIZE', 100 * 1024 * 1024)); // 100MB
+define('MAX_FILE_SIZE', (int)env('MAX_FILE_SIZE', 200 * 1024 * 1024)); // 100MB
 define('ALLOWED_EXTENSIONS', ['bin', 'hex', 'ori', 'mod', 'edc', 'zip', 'rar', 'pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'webp']); // ECU dosyaları için
 
 // Görüntü dosyası formatları
@@ -158,7 +165,7 @@ define('SECURITY_ENABLED', filter_var(env('SECURITY_ENABLED', 'true'), FILTER_VA
 define('CSP_STRICT_MODE', filter_var(env('CSP_STRICT_MODE', 'true'), FILTER_VALIDATE_BOOLEAN)); // Production'da true
 
 // ==========================================
-# 🚦 RATE LIMİTİNG AYARLARI - PRODUCTION
+# 🚦 RATE LİMİTİNG AYARLARI - PRODUCTION
 // ==========================================
 
 define('MAX_LOGIN_ATTEMPTS', (int)env('MAX_LOGIN_ATTEMPTS', 5));
@@ -184,7 +191,7 @@ date_default_timezone_set($timezone);
 setlocale(LC_TIME, $locale);
 
 // ==========================================
-# 🔐 SESSION GÜVENLİK AYARLARI - PRODUCTION
+# 🔐 SESSION GÜVENLİK AYARLARI - PRODUCTION (DÜZELTİLMİŞ)
 // ==========================================
 
 if (session_status() == PHP_SESSION_NONE) {
@@ -198,7 +205,7 @@ if (session_status() == PHP_SESSION_NONE) {
     // Session başlat
     session_start();
     
-    // Session güvenlik kontrolü
+    // Session güvenlik kontrolü (YUMUŞATİLMİŞ)
     if (!isset($_SESSION['initialized'])) {
         // AJAX upload işlemlerinde session regeneration'ı skip et
         if (!defined('AJAX_SESSION_LOCK')) {
@@ -208,12 +215,13 @@ if (session_status() == PHP_SESSION_NONE) {
         $_SESSION['user_ip'] = $_SERVER['REMOTE_ADDR'] ?? '';
         $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
     } else {
-        // Session hijacking kontrolü (IP değişikliği için sıkı kontrol)
+        // Session hijacking kontrolü (SADECE LOGLAMA - SESSION YOK ETME)
+        // Bu kontrol production'da çok sıkı olabilir, sadece logluyoruz
         if (isset($_SESSION['user_agent']) && 
             $_SESSION['user_agent'] !== ($_SERVER['HTTP_USER_AGENT'] ?? '')) {
-            error_log('Potential session hijacking detected - User Agent changed from: ' . $_SESSION['user_agent'] . ' to: ' . ($_SERVER['HTTP_USER_AGENT'] ?? ''));
-            session_destroy();
-            session_start();
+            error_log('INFO: User agent changed - Old: ' . $_SESSION['user_agent'] . ' | New: ' . ($_SERVER['HTTP_USER_AGENT'] ?? ''));
+            // Güvenlik nedeniyle user agent'ı güncelle ama session'ı yok etme
+            $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
         }
     }
 }
@@ -499,15 +507,25 @@ if (!isset($_SESSION['csrf_token'])) {
 }
 
 // ==========================================
-# ⚠️ GLOBAL ERROR HANDLER (Production)
+# ⚠️ GLOBAL ERROR HANDLER (Production - DÜZELTİLMİŞ)
 // ==========================================
 
 if (SECURITY_ENABLED) {
     set_error_handler(function($severity, $message, $file, $line) {
         if (error_reporting() & $severity) {
+            // Detaylı error logging
+            $errorMsg = sprintf(
+                "PHP Error [%s]: %s in %s on line %d",
+                $severity,
+                $message,
+                basename($file),
+                $line
+            );
+            error_log($errorMsg);
+            
             logSecurityEvent('php_error', [
                 'message' => $message,
-                'file' => basename($file), // Güvenlik için sadece dosya adı
+                'file' => basename($file),
                 'line' => $line,
                 'severity' => $severity
             ]);
@@ -516,16 +534,55 @@ if (SECURITY_ENABLED) {
     });
     
     set_exception_handler(function($exception) {
+        // Detaylı exception logging
+        $exceptionMsg = sprintf(
+            "Uncaught Exception: %s in %s on line %d\nStack Trace:\n%s",
+            $exception->getMessage(),
+            basename($exception->getFile()),
+            $exception->getLine(),
+            $exception->getTraceAsString()
+        );
+        error_log($exceptionMsg);
+        
         logSecurityEvent('php_exception', [
             'message' => $exception->getMessage(),
             'file' => basename($exception->getFile()),
-            'line' => $exception->getLine()
+            'line' => $exception->getLine(),
+            'trace' => $exception->getTraceAsString()
         ]);
         
         // Production'da kullanıcıya hata gösterme
         if (!DEBUG) {
-            header('HTTP/1.1 500 Internal Server Error');
-            include __DIR__ . '/../500.php';
+            // 500 status code gönder
+            http_response_code(500);
+            
+            // Basit hata sayfası göster (500.php'yi require etme - sonsuz döngü riski)
+            echo '<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Sunucu Hatası</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .error-container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; max-width: 500px; }
+        h1 { color: #dc3545; font-size: 72px; margin: 0; }
+        h2 { color: #333; margin: 20px 0; }
+        p { color: #666; line-height: 1.6; }
+        .btn { display: inline-block; padding: 12px 24px; background: #0d6efd; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+        .btn:hover { background: #0b5ed7; }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1>500</h1>
+        <h2>Sunucu Hatası</h2>
+        <p>Üzgünüz, bir sunucu hatası oluştu. Teknik ekibimiz sorunu çözmek için çalışıyor.</p>
+        <p>Lütfen daha sonra tekrar deneyin veya bizimle iletişime geçin.</p>
+        <a href="' . SITE_URL . '" class="btn">Ana Sayfaya Dön</a>
+    </div>
+</body>
+</html>';
             exit;
         }
     });
@@ -571,7 +628,7 @@ if (!ob_get_level() && extension_loaded('zlib') && !headers_sent()) {
 // ==========================================
 
 if (DEBUG) {
-    error_log('Mr ECU Config Loaded - Environment: Production');
+    error_log('Mr ECU Config Loaded - Environment: Production (DEBUG MODE ACTIVE)');
     error_log('Site URL: ' . SITE_URL);
     error_log('Security Enabled: ' . (SECURITY_ENABLED ? 'Yes' : 'No'));
 } else {

@@ -51,13 +51,13 @@ class ProductionSecurityHeaders {
      */
     private static function setCSPHeaders($strict) {
         if ($strict) {
-            // Strict CSP for production
+            // Strict CSP for production + Google Analytics Support
             $csp = "default-src 'self'; " .
-                   "script-src 'self' 'nonce-" . self::$nonce . "' https://cdnjs.cloudflare.com https://unpkg.com; " .
+                   "script-src 'self' 'nonce-" . self::$nonce . "' https://cdnjs.cloudflare.com https://unpkg.com https://www.googletagmanager.com https://www.google-analytics.com; " .
                    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; " .
                    "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " .
-                   "img-src 'self' data: https: blob:; " .
-                   "connect-src 'self' https:; " .
+                   "img-src 'self' data: https: blob: https://www.google-analytics.com https://www.googletagmanager.com; " .
+                   "connect-src 'self' https: https://www.google-analytics.com https://www.googletagmanager.com https://analytics.google.com https://region1.google-analytics.com https://region1.analytics.google.com https://*.google-analytics.com https://*.analytics.google.com; " .
                    "media-src 'self' data: blob:; " .
                    "object-src 'none'; " .
                    "base-uri 'self'; " .
@@ -67,8 +67,10 @@ class ProductionSecurityHeaders {
                    "worker-src 'self'; " .
                    "upgrade-insecure-requests";
         } else {
-            // Relaxed CSP for development
+            // Relaxed CSP for development + Google Analytics Support
             $csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https: http: blob:; " .
+                   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: https://www.googletagmanager.com; " .
+                   "connect-src 'self' https: https://www.google-analytics.com https://www.googletagmanager.com; " .
                    "frame-ancestors 'none'";
         }
         

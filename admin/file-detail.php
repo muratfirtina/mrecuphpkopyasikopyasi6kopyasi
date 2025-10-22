@@ -133,14 +133,16 @@ $fileType = isset($_GET['type']) ? sanitize($_GET['type']) : 'upload'; // 'uploa
 $error = '';
 $success = '';
 
-// URL'den success mesajını al
-if (isset($_GET['success'])) {
-    $success = sanitize($_GET['success']);
+// Session'dan success mesajını al ve temizle
+if (isset($_SESSION['success'])) {
+    $success = $_SESSION['success'];
+    unset($_SESSION['success']);
 }
 
-// URL'den error mesajını al
-if (isset($_GET['error'])) {
-    $error = sanitize($_GET['error']);
+// Session'dan error mesajını al ve temizle
+if (isset($_SESSION['error'])) {
+    $error = $_SESSION['error'];
+    unset($_SESSION['error']);
 }
 
 // İşlem kontrolü
@@ -205,11 +207,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     error_log("Upload result: " . print_r($result, true));
 
                     if ($result['success']) {
-                        $success = $result['message'];
+                        $_SESSION['success'] = $result['message'];
                         $user->logAction($_SESSION['user_id'], 'response_upload', "Yanıt dosyası yüklendi: {$uploadId}");
 
                         // Başarılı yükleme sonrası redirect
-                        redirect("file-detail.php?id={$uploadId}&success=" . urlencode($success));
+                        redirect("file-detail.php?id={$uploadId}");
                     } else {
                         $error = $result['message'];
                         error_log("Upload failed: " . $error);
@@ -236,7 +238,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $result = $fileManager->uploadResponseFile($uploadId, $_FILES['revised_response_file'], $creditsCharged, $responseNotes);
 
                     if ($result['success']) {
-                        $success = 'Revize edilmiş yanıt dosyası başarıyla yüklendi.';
+                        $_SESSION['success'] = 'Revize edilmiş yanıt dosyası başarıyla yüklendi.';
 
                         // Revize durumunu completed yap
                         try {
@@ -255,7 +257,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $user->logAction($_SESSION['user_id'], 'response_revision_upload', "Revize yanıt dosyası yüklendi: {$uploadId}");
 
                         // Başarılı yükleme sonrası redirect
-                        redirect("file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
+                        redirect("file-detail.php?id={$uploadId}&type={$fileType}");
                     } else {
                         $error = $result['message'];
                     }
@@ -275,11 +277,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $result = $notificationManager->updateRevisionStatus($revisionId, 'in_progress', 'Revize talebi işleme alındı.');
 
                 if ($result === true) {
-                    $success = 'Revize talebi işleme alındı. Şimdi revize edilmiş dosyayı yükleyebilirsiniz.';
+                    $_SESSION['success'] = 'Revize talebi işleme alındı. Şimdi revize edilmiş dosyayı yükleyebilirsiniz.';
                     $user->logAction($_SESSION['user_id'], 'revision_approved', "Revize talebi işleme alındı: {$revisionId}");
 
                     // Başarılı işlem sonrası redirect
-                    redirect("file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
+                    redirect("file-detail.php?id={$uploadId}&type={$fileType}");
                 } else {
                     $error = 'Revize talebi işleme alınırken hata oluştu.';
                 }
@@ -299,11 +301,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $result = $notificationManager->updateRevisionStatus($revisionId, 'rejected', $adminNotes);
 
                 if ($result === true) {
-                    $success = 'Revize talebi reddedildi.';
+                    $_SESSION['success'] = 'Revize talebi reddedildi.';
                     $user->logAction($_SESSION['user_id'], 'revision_rejected', "Revize talebi reddedildi: {$revisionId}");
 
                     // Başarılı işlem sonrası redirect
-                    redirect("file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
+                    redirect("file-detail.php?id={$uploadId}&type={$fileType}");
                 } else {
                     $error = 'Revize talebi reddedilirken hata oluştu.';
                 }
@@ -315,11 +317,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log("File processing request started");
 
             if ($notificationManager->updateUploadStatus($uploadId, 'processing', 'Dosya işleme alındı.')) {
-                $success = 'Dosya başarıyla işleme alındı.';
+                $_SESSION['success'] = 'Dosya başarıyla işleme alındı.';
                 $user->logAction($_SESSION['user_id'], 'file_processing', "Dosya #{$uploadId} işleme alındı");
 
                 // Başarılı işlem sonrası redirect
-                redirect("file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
+                redirect("file-detail.php?id={$uploadId}&type={$fileType}");
             } else {
                 $error = 'Dosya işleme alınırken hata oluştu.';
             }
@@ -368,11 +370,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         error_log("Revision upload result: " . print_r($result, true));
 
                         if ($result['success']) {
-                            $success = $result['message'];
+                            $_SESSION['success'] = $result['message'];
                             $user->logAction($_SESSION['user_id'], 'revision_file_upload', "Revizyon dosyası yüklendi: {$revisionId}, Kredi: {$revisionCredits}");
 
                             // Başarılı yükleme sonrası redirect
-                            redirect("file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
+                            redirect("file-detail.php?id={$uploadId}&type={$fileType}");
                         } else {
                             $error = $result['message'];
                             error_log("Revision upload failed: " . $error);
@@ -401,11 +403,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $result = $cancellationManager->adminDirectCancellation($cancelFileId, $cancelFileType, $_SESSION['user_id'], $adminNotes);
 
                 if ($result['success']) {
-                    $success = $result['message'];
+                    $_SESSION['success'] = $result['message'];
                     $user->logAction($_SESSION['user_id'], 'admin_direct_cancel', "Dosya doğrudan iptal edildi: {$cancelFileId} ({$cancelFileType})");
 
                     // Başarılı işlem sonrası redirect
-                    redirect("file-detail.php?id={$uploadId}&type={$fileType}&success=" . urlencode($success));
+                    redirect("file-detail.php?id={$uploadId}&type={$fileType}");
                 } else {
                     $error = $result['message'];
                     error_log("Cancel failed: " . $error);

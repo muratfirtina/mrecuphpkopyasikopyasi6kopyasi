@@ -325,8 +325,12 @@ class ChatManager {
      */
     private function sendChatNotification($fileId, $senderId, $senderType, $message) {
         try {
-            // Dosya bilgilerini al
-            $sql = "SELECT * FROM file_uploads WHERE id = :file_id";
+            // Dosya bilgilerini al (JOIN ile marka model de eklenebilir ama şimdilik temel bilgiler yeterli)
+            $sql = "SELECT fu.*, b.name as brand_name, m.name as model_name 
+                    FROM file_uploads fu
+                    LEFT JOIN brands b ON fu.brand_id = b.id
+                    LEFT JOIN models m ON fu.model_id = m.id
+                    WHERE fu.id = :file_id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':file_id' => $fileId]);
             $fileInfo = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -336,7 +340,7 @@ class ChatManager {
                 return false;
             }
             
-            // Gönderen kullanıcı bilgilerini al (COLLATE ile düzeltildi)
+            // Gönderen kullanıcı bilgilerini al
             $sql = "SELECT * FROM users WHERE id = :sender_id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':sender_id' => $senderId]);
@@ -372,8 +376,8 @@ class ChatManager {
                     $actionUrl
                 );
                 
-                // Email bildirimini gönder (kullanıcının email tercihleri kontrol edilir)
-                $this->sendChatEmailNotification($recipientId, $fileName, $senderName, $message, 'user', $fileId);
+                // GÜNCELLENDİ: Email bildirimini gönderirken $fileInfo'yu da gönder
+                $this->sendChatEmailNotification($recipientId, $fileName, $senderName, $message, 'user', $fileId, $fileInfo);
                 
                 error_log("Chat notification sent: Admin {$senderName} -> User {$recipientId} for file {$fileName}");
                 
@@ -399,8 +403,8 @@ class ChatManager {
                         $actionUrl
                     );
                     
-                    // Email bildirimini gönder (adminin email tercihleri kontrol edilir)
-                    $this->sendChatEmailNotification($adminId, $fileName, $senderName, $message, 'admin', $fileId);
+                    // GÜNCELLENDİ: Email bildirimini gönderirken $fileInfo'yu da gönder
+                    $this->sendChatEmailNotification($adminId, $fileName, $senderName, $message, 'admin', $fileId, $fileInfo);
                 }
                 
                 error_log("Chat notification sent: User {$senderName} -> " . count($admins) . " admins for file {$fileName}");
@@ -417,9 +421,9 @@ class ChatManager {
     /**
      * Chat mesajı için email bildirimi gönder
      */
-    private function sendChatEmailNotification($recipientId, $fileName, $senderName, $message, $recipientType, $fileId) {
+    private function sendChatEmailNotification($recipientId, $fileName, $senderName, $message, $recipientType, $fileId, $fileInfo) {
         try {
-            // Alıcının temel bilgilerini al (JOIN olmadan)
+            // Alıcının temel bilgilerini al
             $sql = "SELECT * FROM users WHERE id = :recipient_id AND email_verified = 1";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':recipient_id' => $recipientId]);
@@ -430,13 +434,12 @@ class ChatManager {
                 return false;
             }
             
-            // Email tercihlerini ayrı sorguda al (collation sorununu çözer)
+            // Email tercihlerini ayrı sorguda al
             $sql = "SELECT chat_message_notifications FROM user_email_preferences WHERE user_id = :user_id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':user_id' => $recipientId]);
             $emailPrefs = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            // Email tercihi kontrolü (varsayılan olarak açık)
             $chatNotifications = $emailPrefs ? $emailPrefs['chat_message_notifications'] : 1;
             
             if (!$chatNotifications) {
@@ -447,17 +450,25 @@ class ChatManager {
             $recipientEmail = $recipient['email'];
             $recipientName = $recipient['first_name'] . ' ' . $recipient['last_name'];
             
+            // YENİ: Plaka ve araç bilgilerini al
+            $plate = htmlspecialchars($fileInfo['plate'] ?? 'N/A');
+            $brandName = htmlspecialchars($fileInfo['brand_name'] ?? 'Bilinmiyor');
+            $modelName = htmlspecialchars($fileInfo['model_name'] ?? '');
+            $vehicleInfo = "{$brandName} {$modelName} ({$plate})";
+
             // Site URL'i al
             $siteUrl = getenv('SITE_URL') ?: 'http://localhost';
             
-            // URL'leri oluştur
+            // URL'leri ve konu başlıklarını oluştur
             if ($recipientType === 'admin') {
                 $chatUrl = $siteUrl . '/admin/file-detail.php?id=' . $fileId;
-                $subject = 'Yeni Kullanıcı Mesajı - ' . $fileName;
+                // YENİ: Konu başlığına plaka eklendi
+                $subject = "Yeni Mesaj: {$plate} - {$fileName}";
                 $templateKey = 'chat_message_admin';
             } else {
                 $chatUrl = $siteUrl . '/user/file-detail.php?id=' . $fileId;
-                $subject = 'Yeni Admin Mesajı - ' . $fileName;
+                 // YENİ: Konu başlığına plaka eklendi
+                $subject = "Yeni Mesaj: {$plate} - {$fileName}";
                 $templateKey = 'chat_message_user';
             }
             
@@ -467,7 +478,7 @@ class ChatManager {
                 $safeMessage = substr($safeMessage, 0, 200) . '...';
             }
             
-            // Email template'ini al (mevcut yapıya uygun)
+            // Email template'ini al
             $sql = "SELECT subject, body FROM email_templates WHERE template_key = ? AND is_active = 1";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$templateKey]);
@@ -475,27 +486,30 @@ class ChatManager {
             
             if (!$template) {
                 error_log("Chat email template not found: {$templateKey}");
-                // Template yoksa basit email gönder
+                // Template yoksa basit email gönder (YENİ: $fileInfo parametresi eklendi)
                 $emailBody = $this->buildChatEmailTemplate(
                     $recipientName,
                     $senderName,
                     $fileName,
                     $safeMessage,
                     $chatUrl,
-                    $recipientType
+                    $recipientType,
+                    $fileInfo // YENİ
                 );
             } else {
                 // Template'i kullan ve değişkenleri değiştir
                 $emailSubject = $template['subject'];
                 $emailBody = $template['body'];
                 
-                // Değişkenleri değiştir
+                // Değişkenleri değiştir (YENİ: {{plate}} ve {{vehicle_info}} eklendi)
                 $variables = [
                     '{{file_name}}' => $fileName,
                     '{{sender_name}}' => $senderName,
                     '{{user_name}}' => $recipientName,
                     '{{message}}' => $safeMessage,
-                    '{{chat_url}}' => $chatUrl
+                    '{{chat_url}}' => $chatUrl,
+                    '{{plate}}' => $plate,
+                    '{{vehicle_info}}' => $vehicleInfo
                 ];
                 
                 foreach ($variables as $placeholder => $value) {
@@ -503,7 +517,7 @@ class ChatManager {
                     $emailBody = str_replace($placeholder, $value, $emailBody);
                 }
                 
-                $subject = $emailSubject;
+                $subject = $emailSubject; // Template'den gelen konuyu kullan
             }
             
             // Email gönder
@@ -526,21 +540,35 @@ class ChatManager {
     /**
      * Chat email template oluştur
      */
-    private function buildChatEmailTemplate($recipientName, $senderName, $fileName, $message, $chatUrl, $recipientType) {
+    private function buildChatEmailTemplate($recipientName, $senderName, $fileName, $message, $chatUrl, $recipientType, $fileInfo) {
         $color = ($recipientType === 'admin') ? '#3498db' : '#27ae60';
-        $icon = ($recipientType === 'admin') ? '💬' : '💬';
+        $icon = '💬';
         $title = ($recipientType === 'admin') ? 'Yeni Kullanıcı Mesajı' : 'Yeni Admin Mesajı';
-        
+
+        // YENİ: Araç bilgilerini güvenli bir şekilde al
+        $plate = htmlspecialchars($fileInfo['plate'] ?? 'N/A');
+        $brand = htmlspecialchars($fileInfo['brand_name'] ?? 'Bilinmiyor');
+        $model = htmlspecialchars($fileInfo['model_name'] ?? '');
+
         return "
-        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; padding: 20px; border-radius: 10px;'>
             <h2 style='color: {$color}; border-bottom: 2px solid {$color}; padding-bottom: 10px;'>
                 {$icon} {$title}
             </h2>
             
             <div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>
                 <h3 style='color: #2c3e50; margin-top: 0;'>Merhaba {$recipientName},</h3>
-                <p><strong>{$senderName}</strong> size <strong>{$fileName}</strong> dosyası için mesaj gönderdi:</p>
+                <p><strong>{$senderName}</strong> kullanıcısından yeni bir mesajınız var.</p>
+
+                <!-- YENİ: Dosya ve Araç Bilgileri Alanı -->
+                <div style='border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-bottom: 20px; background: #fff;'>
+                    <h4 style='margin-top:0; color:#555; border-bottom: 1px solid #eee; padding-bottom: 5px;'>İlgili Dosya Bilgileri</h4>
+                    <p style='margin: 5px 0;'><strong>Dosya Adı:</strong> {$fileName}</p>
+                    <p style='margin: 5px 0;'><strong>Araç:</strong> {$brand} {$model}</p>
+                    <p style='margin: 5px 0;'><strong>Plaka:</strong> {$plate}</p>
+                </div>
                 
+                <p><strong>Mesaj:</strong></p>
                 <div style='background: white; padding: 15px; border-radius: 5px; border-left: 4px solid {$color}; margin: 15px 0;'>
                     <p style='margin: 0; color: #2c3e50; font-style: italic;'>\"{$message}\"</p>
                 </div>
@@ -549,17 +577,11 @@ class ChatManager {
             <div style='text-align: center; margin: 30px 0;'>
                 <a href='{$chatUrl}' 
                    style='background: {$color}; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block;'>
-                    Mesajı Yanıtla
+                    Mesajı Görüntüle ve Yanıtla
                 </a>
             </div>
             
-            <div style='background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;'>
-                <p style='margin: 0; color: #856404; font-size: 14px;'>
-                    <strong>💡 İpucu:</strong> Bu email bildirimlerini kapatmak için hesap ayarlarınızdan email tercihlerinizi değiştirebilirsiniz.
-                </p>
-            </div>
-            
-            <p style='color: #7f8c8d; font-size: 12px; margin-top: 30px;'>
+            <p style='color: #7f8c8d; font-size: 12px; margin-top: 30px; text-align: center;'>
                 Bu email otomatik olarak gönderilmiştir. Lütfen yanıtlamayınız.<br>
                 <strong>Mr ECU</strong> - Profesyonel ECU Tuning Hizmetleri
             </p>

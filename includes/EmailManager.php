@@ -652,5 +652,245 @@ class EmailManager {
             'reason' => $sendResult ? 'sent' : 'send_failed'
         ];
     }
+    
+    /**
+     * Email kuyruğundan email gönder (cron job metodları için)
+     * Bu metod email_queue tablosundan gelen array formatındaki emaili gönderir
+     */
+    public function sendQueuedEmail($emailData) {
+        try {
+            // Email verilerini hazırla
+            $to = $emailData['to_email'] ?? null;
+            $subject = $emailData['subject'] ?? 'No Subject';
+            $body = $emailData['body'] ?? '';
+            $isHTML = ($emailData['is_html'] ?? 1) == 1;
+            
+            if (!$to) {
+                error_log('sendQueuedEmail: Email adresi bulunamadı');
+                return false;
+            }
+            
+            // Email'i gönder
+            $result = $this->sendEmail($to, $subject, $body, $isHTML);
+            
+            if ($result) {
+                error_log("Kuyruktaki email başarıyla gönderildi: {$to} - {$subject}");
+            } else {
+                error_log("Kuyruktaki email gönderilemedi: {$to} - {$subject}");
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            error_log('sendQueuedEmail hatası: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Email kuyruğunu işle (process_email_queue.php için)
+     * Belirtilen sayıda pending email'i işler
+     */
+    public function processEmailQueue($limit = 10) {
+        try {
+            $processedCount = 0;
+            
+            // Bekleyen email'leri getir
+            $stmt = $this->pdo->prepare("
+                SELECT * FROM email_queue 
+                WHERE status = 'pending' 
+                AND (processing_started_at IS NULL OR processing_started_at < DATE_SUB(NOW(), INTERVAL 10 MINUTE))
+                AND (next_attempt_at IS NULL OR next_attempt_at <= NOW())
+                ORDER BY 
+                    CASE priority 
+                        WHEN 'high' THEN 1 
+                        WHEN 'normal' THEN 2 
+                        WHEN 'low' THEN 3 
+                        ELSE 2 
+                    END, 
+                    created_at ASC
+                LIMIT ?
+            ");
+            $stmt->execute([$limit]);
+            $emails = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            if (empty($emails)) {
+                return 0;
+            }
+            
+            foreach ($emails as $email) {
+                try {
+                    // Email'i işleme alma
+                    $lockStmt = $this->pdo->prepare("
+                        UPDATE email_queue 
+                        SET processing_started_at = NOW() 
+                        WHERE id = ? AND status = 'pending'
+                    ");
+                    $lockStmt->execute([$email['id']]);
+                    
+                    if ($lockStmt->rowCount() == 0) {
+                        continue; // Başka bir process zaten işledi
+                    }
+                    
+                    // Email'i gönder
+                    $result = $this->sendQueuedEmail($email);
+                    
+                    if ($result) {
+                        // Başarılı - durumu güncelle
+                        $updateStmt = $this->pdo->prepare("
+                            UPDATE email_queue 
+                            SET status = 'sent', 
+                                sent_at = NOW(), 
+                                processing_started_at = NULL, 
+                                error_message = NULL 
+                            WHERE id = ?
+                        ");
+                        $updateStmt->execute([$email['id']]);
+                        $processedCount++;
+                    } else {
+                        // Başarısız - deneme sayısını artır
+                        $attempts = ($email['attempts'] ?? 0) + 1;
+                        $maxAttempts = $email['max_attempts'] ?? 3;
+                        
+                        if ($attempts >= $maxAttempts) {
+                            // Maksimum deneme aşıldı - failed olarak işaretle
+                            $updateStmt = $this->pdo->prepare("
+                                UPDATE email_queue 
+                                SET status = 'failed', 
+                                    attempts = ?, 
+                                    error_message = 'Maximum attempts reached', 
+                                    processing_started_at = NULL 
+                                WHERE id = ?
+                            ");
+                            $updateStmt->execute([$attempts, $email['id']]);
+                        } else {
+                            // Sonraki deneme için beklet
+                            $nextAttemptDelay = pow(2, $attempts) * 5; // Exponential backoff
+                            $updateStmt = $this->pdo->prepare("
+                                UPDATE email_queue 
+                                SET attempts = ?, 
+                                    processing_started_at = NULL, 
+                                    next_attempt_at = DATE_ADD(NOW(), INTERVAL ? MINUTE)
+                                WHERE id = ?
+                            ");
+                            $updateStmt->execute([$attempts, $nextAttemptDelay, $email['id']]);
+                        }
+                    }
+                    
+                    // Rate limiting
+                    usleep(500000); // 0.5 saniye bekleme
+                    
+                } catch (Exception $e) {
+                    error_log("Email queue processing error for ID {$email['id']}: " . $e->getMessage());
+                    
+                    // Hata durumunu kaydet
+                    $attempts = ($email['attempts'] ?? 0) + 1;
+                    $updateStmt = $this->pdo->prepare("
+                        UPDATE email_queue 
+                        SET attempts = ?, 
+                            error_message = ?, 
+                            processing_started_at = NULL 
+                        WHERE id = ?
+                    ");
+                    $updateStmt->execute([$attempts, $e->getMessage(), $email['id']]);
+                }
+            }
+            
+            return $processedCount;
+            
+        } catch (Exception $e) {
+            error_log('processEmailQueue error: ' . $e->getMessage());
+            return 0;
+        }
+    }
+    
+    /**
+     * Eski email'leri temizle (process_email_queue.php için)
+     */
+    public function cleanOldEmails($days = 30) {
+        try {
+            // Başarıyla gönderilmiş eski email'leri sil
+            $stmt = $this->pdo->prepare("
+                DELETE FROM email_queue 
+                WHERE status = 'sent' 
+                AND sent_at < DATE_SUB(NOW(), INTERVAL ? DAY)
+            ");
+            $stmt->execute([$days]);
+            $deletedSent = $stmt->rowCount();
+            
+            // Başarısız eski email'leri sil
+            $stmt = $this->pdo->prepare("
+                DELETE FROM email_queue 
+                WHERE status = 'failed' 
+                AND created_at < DATE_SUB(NOW(), INTERVAL ? DAY)
+            ");
+            $stmt->execute([$days]);
+            $deletedFailed = $stmt->rowCount();
+            
+            $totalDeleted = $deletedSent + $deletedFailed;
+            
+            if ($totalDeleted > 0) {
+                error_log("Email temizliği: {$deletedSent} başarılı, {$deletedFailed} başarısız email silindi (>{$days} gün)");
+            }
+            
+            return $totalDeleted;
+            
+        } catch (Exception $e) {
+            error_log('cleanOldEmails error: ' . $e->getMessage());
+            return 0;
+        }
+    }
+    
+    /**
+     * Email istatistiklerini getir (process_email_queue.php için)
+     */
+    public function getEmailStats() {
+        try {
+            $stats = [
+                'total' => 0,
+                'pending' => 0,
+                'sent' => 0,
+                'failed' => 0,
+                'processing' => 0
+            ];
+            
+            // Toplam email sayısı
+            $stmt = $this->pdo->query("SELECT COUNT(*) FROM email_queue");
+            $stats['total'] = (int) $stmt->fetchColumn();
+            
+            // Bekleyen email sayısı
+            $stmt = $this->pdo->query("SELECT COUNT(*) FROM email_queue WHERE status = 'pending'");
+            $stats['pending'] = (int) $stmt->fetchColumn();
+            
+            // Gönderilen email sayısı
+            $stmt = $this->pdo->query("SELECT COUNT(*) FROM email_queue WHERE status = 'sent'");
+            $stats['sent'] = (int) $stmt->fetchColumn();
+            
+            // Başarısız email sayısı
+            $stmt = $this->pdo->query("SELECT COUNT(*) FROM email_queue WHERE status = 'failed'");
+            $stats['failed'] = (int) $stmt->fetchColumn();
+            
+            // İşlemde olan email sayısı
+            $stmt = $this->pdo->query("
+                SELECT COUNT(*) FROM email_queue 
+                WHERE status = 'pending' 
+                AND processing_started_at IS NOT NULL 
+                AND processing_started_at > DATE_SUB(NOW(), INTERVAL 10 MINUTE)
+            ");
+            $stats['processing'] = (int) $stmt->fetchColumn();
+            
+            return $stats;
+            
+        } catch (Exception $e) {
+            error_log('getEmailStats error: ' . $e->getMessage());
+            return [
+                'total' => 0,
+                'pending' => 0,
+                'sent' => 0,
+                'failed' => 0,
+                'processing' => 0
+            ];
+        }
+    }
 }
 ?>

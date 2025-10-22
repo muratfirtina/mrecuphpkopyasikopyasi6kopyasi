@@ -1,4 +1,0 @@
-﻿new_id,legacy_id,username,email,password,first_name,last_name,phone,wallet,user_type,is_confirm,created_date,updated_date,deleted_date
-a3e2f683-a736-4c79-99f3-7f715f7890f5,user1-legacy-id,testuser1,user1@test.com,$2y$10$UdMN.0MuEiYlh8ojZWbL7uedHoO1/Rj.Cd/6uuhfxWcVnXMJRRY.a,Test,"User 1",05551234567,150,user,1,"2024-01-15 10:30:00","2024-01-15 10:30:00",
-0664189b-4e19-4f6d-94eb-ee3968682147,user2-legacy-id,testuser2,user2@test.com,$2y$10$tiI//j/chgr8KF6GqNtatO6HLzGdPrhgVrLnbnweofCA4m3SUduBq,Test,"User 2",05551234568,250,user,1,"2024-02-10 14:20:00","2024-02-10 14:20:00",
-efb6264a-cb47-476a-8fd6-76a6f4dc75cc,admin1-legacy-id,testadmin,admin@test.com,$2y$10$a0CmlFQTOHG/phO2k8gOGuqi0tV1W73GziPMIYuQF3RdwVgfUKNJG,Test,Admin,05551234569,0,admin,1,"2024-01-01 09:00:00","2024-01-01 09:00:00",

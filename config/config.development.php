@@ -13,8 +13,19 @@ if (!function_exists('env')) {
 
 // Site temel ayarları
 define('SITE_NAME', 'Mr ECU');
-define('SITE_URL', 'http://localhost:8888/mrecuphpkopyasikopyasi6kopyasi/');
-define('BASE_URL', 'http://localhost:8888/mrecuphpkopyasikopyasi6kopyasi');
+
+// Dinamik BASE_URL - Development için otomatik algılama
+if (!defined('BASE_URL')) {
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8888';
+    $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+    $basePath = str_replace('\\', '/', dirname($scriptName));
+    $basePath = rtrim($basePath, '/');
+    $dynamicBaseUrl = $protocol . '://' . $host . $basePath;
+    define('BASE_URL', rtrim(env('BASE_URL', $dynamicBaseUrl), '/'));
+}
+
+define('SITE_URL', BASE_URL . '/');
 define('SITE_EMAIL', 'info@localhost.com');
 
 // Debug ayarları

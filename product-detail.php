@@ -1566,7 +1566,7 @@ include 'includes/header.php';
 </script>
 
 <?php
-// JSON-LD structured data for SEO
+// JSON-LD structured data for SEO - Google Console Uyarısı Düzeltildi
 $jsonLD = [
     "@context" => "https://schema.org",
     "@type" => "Product",
@@ -1589,7 +1589,44 @@ $jsonLD = [
             "name" => COMPANY_NAME,
             "url" => BASE_URL
         ],
-        "url" => BASE_URL . '/urun/' . $product['slug']
+        "url" => BASE_URL . '/urun/' . $product['slug'],
+        // İADE POLİTİKASI - Google Console için gerekli alan
+        "hasMerchantReturnPolicy" => [
+            "@type" => "MerchantReturnPolicy",
+            "applicableCountry" => "TR",
+            "returnPolicyCategory" => "https://schema.org/MerchantReturnFiniteReturnWindow",
+            "merchantReturnDays" => 14,
+            "returnMethod" => "https://schema.org/ReturnByMail",
+            "returnFees" => "https://schema.org/FreeReturn"
+        ],
+        // KARGO BİLGİLERİ - Zengin snippet'ler için önerilen alan
+        "shippingDetails" => [
+            "@type" => "OfferShippingDetails",
+            "shippingRate" => [
+                "@type" => "MonetaryAmount",
+                "value" => "0",
+                "currency" => "TRY"
+            ],
+            "shippingDestination" => [
+                "@type" => "DefinedRegion",
+                "addressCountry" => "TR"
+            ],
+            "deliveryTime" => [
+                "@type" => "ShippingDeliveryTime",
+                "handlingTime" => [
+                    "@type" => "QuantitativeValue",
+                    "minValue" => 0,
+                    "maxValue" => 1,
+                    "unitCode" => "DAY"
+                ],
+                "transitTime" => [
+                    "@type" => "QuantitativeValue",
+                    "minValue" => 1,
+                    "maxValue" => 3,
+                    "unitCode" => "DAY"
+                ]
+            ]
+        ]
     ],
     "aggregateRating" => [
         "@type" => "AggregateRating",

@@ -590,30 +590,10 @@ try {
                                         
                                         <div class="mb-4">
                                             <label for="file" class="form-label fw-semibold">ECU Dosyası *</label>
-                                            <div class="file-upload-area modern" id="fileUploadArea">
-                                                <input type="file" class="form-control" id="file" name="file" 
-                                                       required style="display: none;">
-                                                <div class="upload-content">
-                                                    <div class="upload-icon">
-                                                        <i class="bi bi-cloud-upload-alt"></i>
-                                                    </div>
-                                                    <h5 class="upload-title">Dosyanızı buraya sürükleyin</h5>
-                                                    <p class="upload-subtitle">veya 
-                                                        <button type="button" class="btn btn-link p-0 upload-button" onclick="document.getElementById('file').click()">
-                                                            dosya seçmek için tıklayın
-                                                        </button>
-                                                    </p>
-                                                    <div class="upload-info">
-                                                        <div class="info-item">
-                                                            <i class="bi bi-folder2-open-code me-1"></i>
-                                                            <span>Desteklenen: Tüm dosya türleri</span>
-                                                        </div>
-                                                        <div class="info-item">
-                                                            <i class="bi bi-weight-hanging me-1"></i>
-                                                            <span>Maks. boyut: <?php echo (MAX_FILE_SIZE / 1024 / 1024); ?>MB</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                            <input type="file" class="form-control form-control-lg" id="file" name="file" required>
+                                            <div class="form-text mt-2">
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                Desteklenen: Tüm dosya türleri | Maksimum boyut: <?php echo (MAX_FILE_SIZE / 1024 / 1024); ?>MB
                                             </div>
                                             <div class="invalid-feedback">Dosya seçimi zorunludur.</div>
                                         </div>
@@ -892,75 +872,10 @@ try {
     margin-top: 0.25rem;
 }
 
-/* Modern File Upload */
-.file-upload-area.modern {
-    border: 2px dashed #e9ecef;
-    border-radius: 12px;
-    padding: 3rem 2rem;
-    text-align: center;
-    transition: all 0.3s ease;
-    background: #f8f9fa;
-    cursor: pointer;
-}
-
-.file-upload-area.modern:hover,
-.file-upload-area.modern.dragover {
-    border-color: #667eea;
-    background: rgba(102, 126, 234, 0.05);
-}
-
-.file-upload-area.modern.file-selected {
-    border-color: #28a745;
-    background: rgba(40, 167, 69, 0.05);
-}
-
-.file-upload-area.modern.file-selected .upload-icon {
-    color: #28a745;
-}
-
-.upload-icon {
-    font-size: 3rem;
-    color: #667eea;
-    margin-bottom: 1rem;
-}
-
-.upload-title {
-    color: #495057;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.upload-subtitle {
-    color: #6c757d;
-    margin-bottom: 1.5rem;
-}
-
-.upload-button {
-    color: #667eea !important;
-    font-weight: 600;
-    text-decoration: none !important;
-}
-
-.upload-button:hover {
-    color: #5a67d8 !important;
-}
-
-.upload-info {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    flex-wrap: wrap;
-}
-
-.info-item {
-    color: #6c757d;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-}
-
-.info-item i {
-    color: #667eea;
+/* Basit File Upload Stilleri */
+.form-control-lg {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
 }
 
 /* File Preview */
@@ -1734,60 +1649,11 @@ document.getElementById('engine_id').addEventListener('change', function() {
 
 // Dosya yükleme işlemleri
 const fileInput = document.getElementById('file');
-const fileUploadArea = document.getElementById('fileUploadArea');
 const fileInfo = document.getElementById('fileInfo');
 const fileName = document.getElementById('fileName');
 const fileSize = document.getElementById('fileSize');
 
-// Dosya seçim problemini çözmek için event listener'ları düzeltiyoruz
-let isDragOver = false;
-
-// Drag & Drop
-fileUploadArea.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    isDragOver = true;
-    this.classList.add('dragover');
-});
-
-fileUploadArea.addEventListener('dragleave', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Sadece gerçekten area'dan çıkıldığında class'ı kaldır
-    setTimeout(() => {
-        if (!isDragOver) {
-            this.classList.remove('dragover');
-        }
-    }, 10);
-    isDragOver = false;
-});
-
-fileUploadArea.addEventListener('drop', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    isDragOver = false;
-    this.classList.remove('dragover');
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(files[0]);
-        fileInput.files = dataTransfer.files;
-        showFileInfo(files[0]);
-    }
-});
-
-// Upload area click - tüm alana tıklandığında dosya seçimi aç
-fileUploadArea.addEventListener('click', function(e) {
-    // Remove file button'una tıklanmadığından emin ol
-    if (!e.target.classList.contains('remove-file') && !e.target.closest('.remove-file')) {
-        console.log('Upload area clicked, opening file dialog');
-        document.getElementById('file').click();
-    }
-});
-
-// File input change - dosya seçim problemini çözen iyileştirilmiş versiyon
+// File input change
 fileInput.addEventListener('change', function(e) {
     console.log('File input changed, files count:', this.files.length);
     

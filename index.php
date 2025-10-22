@@ -8,7 +8,7 @@ require_once 'config/config.php';
 require_once 'config/database.php';
 
 $pageTitle = 'Ana Sayfa - ' . SITE_NAME;
-$pageDescription = 'Mr. ECU chiptuning dosya servisi, ECU programlama ve arıza tespit cihazları ile servislerin performansını artırır.';
+$pageDescription = 'Her araç için test edilmiş, yüksek performanslı ve güvenli chiptuning dosyaları. Mr. ECU Online Dosya Servisi ile profesyonel çözüme tek tıkla ulaşın.';
 $pageKeywords = 'ECU programlama, chip tuning, chiptuning dosya servisi, ECU yazılım, immobilizer, TCU, motor kontrol ünitesi, arıza tespit cihazları, Mr ECU, mrecutuning';
 
 // Design ayarlarını al
@@ -705,10 +705,10 @@ include 'includes/header.php';
             <!-- Horizontal Scroll Container -->
             <div class="featured-products-container">
                 <!-- Scroll Buttons -->
-                <button class="scroll-btn scroll-btn-left" id="scrollLeft" style="display: none;">
+                <button class="scroll-btn scroll-btn-left" id="scrollLeft" name="scrollLeft" style="display: none;">
                     <i class="bi bi-chevron-left"></i>
                 </button>
-                <button class="scroll-btn scroll-btn-right" id="scrollRight">
+                <button class="scroll-btn scroll-btn-right" id="scrollRight" name="scrollRight">
                     <i class="bi bi-chevron-right"></i>
                 </button>
 

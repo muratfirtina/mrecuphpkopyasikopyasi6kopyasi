@@ -94,14 +94,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['response_file'])) {
 }
 
 // Filtreleme ve arama parametreleri
-$search = isset($_GET['search']) ? sanitize($_GET['search']) : '';
-$status = isset($_GET['status']) ? sanitize($_GET['status']) : '';
-$brand = isset($_GET['brand']) ? sanitize($_GET['brand']) : '';
-$dateFrom = isset($_GET['date_from']) ? sanitize($_GET['date_from']) : '';
-$dateTo = isset($_GET['date_to']) ? sanitize($_GET['date_to']) : '';
-$uploadId = isset($_GET['id']) ? sanitize($_GET['id']) : ''; // Belirli dosya ID'si için filtreleme
-$sortBy = isset($_GET['sort']) ? sanitize($_GET['sort']) : 'upload_date';
-$sortOrder = isset($_GET['order']) && $_GET['order'] === 'asc' ? 'ASC' : 'DESC';
+$search = isset($_POST['search']) ? sanitize($_POST['search']) : (isset($_GET['search']) ? sanitize($_GET['search']) : '');
+$status = isset($_POST['status']) ? sanitize($_POST['status']) : (isset($_GET['status']) ? sanitize($_GET['status']) : '');
+$brand = isset($_POST['brand']) ? sanitize($_POST['brand']) : (isset($_GET['brand']) ? sanitize($_GET['brand']) :  '');
+$dateFrom = isset($_POST['date_from']) ? sanitize($_POST['date_from']) : (isset($_GET['date_from']) ? sanitize($_GET['date_from']) : '');
+$dateTo = isset($_POST['date_to']) ? sanitize($_POST['date_to']) : (isset($_GET['date_to']) ? sanitize($_GET['date_to']) : '');
+$uploadId = isset($_POST['id']) ? sanitize($_POST['id']) : (isset($_GET['id']) ? sanitize($_GET['id']) : '');// Belirli dosya ID'si için filtreleme
+$sortBy = isset($_POST['sort']) ? sanitize($_POST['sort']) : 'upload_date';  (isset($_GET['sort']) ? sanitize($_GET['sort']) : 'upload_date');
+$sortOrder = isset($_POST['order']) && $_POST['order'] === 'asc' ? 'ASC' : 'DESC'; (isset($_GET['order']) && $_GET['order'] === 'asc' ? 'ASC' : 'DESC');
 
 // Sayfalama
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
@@ -120,9 +120,9 @@ try {
     $params = [];
     
     if ($search) {
-        $whereClause .= " AND (u.original_name LIKE ? OR users.username LIKE ? OR users.email LIKE ? OR u.plate LIKE ?)";
+        $whereClause .= " AND (u.original_name LIKE ? OR users.username LIKE ? OR users.email LIKE ? OR u.plate LIKE ? OR users.first_name LIKE ? OR users.last_name LIKE ?)";
         $searchParam = "%$search%";
-        $params = array_merge($params, [$searchParam, $searchParam, $searchParam, $searchParam]);
+        $params = array_merge($params, [$searchParam, $searchParam, $searchParam, $searchParam, $searchParam, $searchParam]);
     }
     
     if ($status) {
@@ -341,7 +341,7 @@ include '../includes/admin_sidebar.php';
             </div>
         <?php endif; ?>
         
-        <form method="GET" class="row g-3 align-items-end">
+        <form method="POST" action="uploads.php" class="row g-3 align-items-end">
             <?php if ($uploadId && isValidUUID($uploadId)): ?>
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($uploadId); ?>">
             <?php endif; ?>
@@ -1617,6 +1617,32 @@ function updateFileStatus(uploadId, status, notes, redirectToDetail) {
         }
     });
 }
+</script>
+<script>
+// Bu script'i sayfanın sonuna, </body> etiketinden önce ekleyin
+document.addEventListener('DOMContentLoaded', function() {
+    var searchForm = document.querySelector('form[method="GET"]'); // Formu seçer
+    var searchInput = document.getElementById('search');
+    
+    if(searchForm && searchInput) {
+        searchForm.addEventListener('submit', function(e) {
+            // Arama alanında değer varsa ve bu değeri biz kodlamadıysak
+            if(searchInput.value) {
+                // Formun normal gönderimini durdur
+                e.preventDefault();
+                
+                // Mevcut URL'deki tüm parametreleri al
+                const params = new URLSearchParams(window.location.search);
+                
+                // 'search' parametresini yeni kodlanmış değerle güncelle
+                params.set('search', searchInput.value);
+                
+                // Sayfayı yeni URL ile yeniden yönlendir
+                window.location.href = window.location.pathname + '?' + params.toString();
+            }
+        });
+    }
+});
 </script>
 
 <?php

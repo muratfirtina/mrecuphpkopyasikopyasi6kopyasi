@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 // Alıcı tipine göre email gönder
                 $isToAdmin = ($receiverType === 'admin');
-                $emailSent = $fileManager->sendAdditionalFileNotification($fileData, $isToAdmin);
+                $emailSent = $fileManager->sendAdditionalFileNotification($fileData, $isToAdmin, $notificationType, $actionUrl);
                 
                 // Email gönderim durumunu veritabanında işaretle
                 if ($emailSent) {
