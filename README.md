@@ -3,23 +3,23 @@
 ## 📸 Uygulama Görselleri
 
 ### Ana Sayfa
-![Ana Sayfa](screenshots/mrecutuning_com_.avif)
+![Ana Sayfa](screenshots/mrecutuning.avif)
 *Modern ve kullanıcı dostu ana sayfa tasarımı*
 
 ### Hakkımızda Sayfası
-![Hakkımızda](screenshots/mrecutuning_com_about_php.avif)
+![Hakkımızda](screenshots/mrecutuningabout.avif)
 *Şirket bilgileri ve tanıtım sayfası*
 
 ### Hizmetler Sayfası
-![Hizmetler](screenshots/mrecutuning_com_services_php.avif)
+![Hizmetler](screenshots/mrecutuningservices.avif)
 *Sunulan hizmetlerin detaylı açıklaması*
 
 ### Ürünler Sayfası
-![Ürünler](screenshots/mrecutuning_com_urunler.avif)
+![Ürünler](screenshots/mrecutuningurunler.avif)
 *Mevcut ürün katalogları ve detayları*
 
 ### Kategoriler - Arıza Tespit Cihazları
-![Kategoriler](screenshots/mrecutuning_com_kategori_ariza-tespit-cihazlari.avif)
+![Kategoriler](screenshots/mrecutuningkategori_ariza-tespit-cihazlari.avif)
 *Ürün kategorileri ve filtreleme özellikleri*
 
 ### Admin Panel
